@@ -34,6 +34,7 @@ import type {
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
+import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
 import FileSelect from "@/components/FileSelect";
 import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
@@ -74,11 +75,14 @@ export type RepositoryRecord = NonNullable<
 
 const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
   repository: { id: "", name: "" },
-  file: { id: "", name: "", digest: "", url: "", size: 0 },
+  file: { id: "", name: "" },
   destinationType: "STORAGE",
   destination: null,
   ttlSeconds: 0,
-  progress: false,
+  progressTracked: false,
+  fileMode: undefined,
+  userId: undefined,
+  groupId: undefined,
 };
 
 const destinationOptions = [
@@ -101,6 +105,8 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
   onFileSubmit,
 }: ManualFileDownloadRequestFromRepositoryFormProps) => {
   const intl = useIntl();
+  const { open: advancedOptionsOpen, toggle: toggleAdvancedOptions } =
+    useCollapseToggle();
 
   const {
     control,
@@ -290,7 +296,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="destinationType"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestForm.destinationLabel"
+            id="forms.ManualFileDownloadRequestFromRepositoryForm.destinationLabel"
             defaultMessage="Destination"
           />
         }
@@ -321,7 +327,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           id="destination"
           label={
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.destinationPathLabel"
+              id="forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathLabel"
               defaultMessage="Destination Path"
             />
           }
@@ -338,7 +344,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           ) : (
             <Form.Text muted>
               <FormattedMessage
-                id="components.ManualFileDownloadRequestForm.destinationPathHint"
+                id="forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathHint"
                 defaultMessage="Absolute path on the target device where the file should be written."
               />
             </Form.Text>
@@ -350,7 +356,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="ttlSeconds"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestFromRepositoryForm.ttlLabel"
+            id="forms.ManualFileDownloadRequestFromRepositoryForm.ttlLabel"
             defaultMessage="TTL (seconds)"
           />
         }
@@ -368,7 +374,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="components.ManualFileDownloadRequestFromRepositoryForm.ttlHint"
+              id="forms.ManualFileDownloadRequestFromRepositoryForm.ttlHint"
               defaultMessage="Set to 0 for no expiry."
             />
           </Form.Text>
@@ -379,25 +385,97 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="progress"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestFromRepositoryForm.progressLabel"
+            id="forms.ManualFileDownloadRequestFromRepositoryForm.progressLabel"
             defaultMessage="Report Progress"
           />
         }
       >
         <Form.Check
           type="checkbox"
-          {...register("progress")}
-          isInvalid={!!errors.progress}
+          {...register("progressTracked")}
+          isInvalid={!!errors.progressTracked}
         />
-        <FormFeedback feedback={errors.progress?.message} />
+        <FormFeedback feedback={errors.progressTracked?.message} />
       </FormRow>
+
+      <div className="mb-3">
+        <CollapseItem
+          type="flat"
+          open={advancedOptionsOpen}
+          onToggle={toggleAdvancedOptions}
+          isInsideTable={true}
+          title={
+            <FormattedMessage
+              id="forms.ManualFileDownloadRequestFromRepositoryForm.advancedOptionsTitle"
+              defaultMessage="Advanced Options"
+            />
+          }
+        >
+          <FormRow
+            id="userId"
+            label={
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel"
+                defaultMessage="User ID"
+              />
+            }
+          >
+            <Form.Control
+              type="text"
+              {...register(`userId` as const, {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+              isInvalid={!!errors.userId}
+            />
+            <FormFeedback feedback={errors.userId?.message} />
+          </FormRow>
+
+          <FormRow
+            id="groupId"
+            label={
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestFromRepositoryForm.groupIdLabel"
+                defaultMessage="Group ID"
+              />
+            }
+          >
+            <Form.Control
+              type="text"
+              {...register(`groupId` as const, {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+              isInvalid={!!errors.groupId}
+            />
+            <FormFeedback feedback={errors.groupId?.message} />
+          </FormRow>
+
+          <FormRow
+            id="fileMode"
+            label={
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestFromRepositoryForm.fileModeLabel"
+                defaultMessage="File Mode"
+              />
+            }
+          >
+            <Form.Control
+              type="text"
+              {...register(`fileMode` as const, {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+              isInvalid={!!errors.fileMode}
+            />
+            <FormFeedback feedback={errors.fileMode?.message} />
+          </FormRow>
+        </CollapseItem>
+      </div>
 
       <Row>
         <Col className="d-flex justify-content-end">
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.ManualFileDownloadRequestFromRepositoryForm.uploadButton"
+              id="forms.ManualFileDownloadRequestFromRepositoryForm.uploadButton"
               defaultMessage="Upload"
             />
           </Button>

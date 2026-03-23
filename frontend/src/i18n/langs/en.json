@@ -1033,7 +1033,7 @@
     "defaultMessage": "Infinite"
   },
   "components.FilesUploadTab.table.message": {
-    "defaultMessage": "Message"
+    "defaultMessage": "Response Message"
   },
   "components.FilesUploadTab.table.progress": {
     "defaultMessage": "Progress"
@@ -1101,44 +1101,11 @@
   "components.ManualFileDownloadRequestForm.archiveNameLabel": {
     "defaultMessage": "Archive Name"
   },
-  "components.ManualFileDownloadRequestForm.destinationLabel": {
-    "defaultMessage": "Destination"
-  },
-  "components.ManualFileDownloadRequestForm.destinationPathHint": {
-    "defaultMessage": "Absolute path on the target device where the file should be written."
-  },
-  "components.ManualFileDownloadRequestForm.destinationPathLabel": {
-    "defaultMessage": "Destination Path"
-  },
   "components.ManualFileDownloadRequestForm.fileHint": {
     "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
   },
   "components.ManualFileDownloadRequestForm.fileLabel": {
     "defaultMessage": "Files"
-  },
-  "components.ManualFileDownloadRequestForm.progressLabel": {
-    "defaultMessage": "Report Progress"
-  },
-  "components.ManualFileDownloadRequestForm.ttlHint": {
-    "defaultMessage": "Set to 0 for no expiry."
-  },
-  "components.ManualFileDownloadRequestForm.ttlLabel": {
-    "defaultMessage": "TTL (seconds)"
-  },
-  "components.ManualFileDownloadRequestForm.uploadButton": {
-    "defaultMessage": "Upload"
-  },
-  "components.ManualFileDownloadRequestFromRepositoryForm.progressLabel": {
-    "defaultMessage": "Report Progress"
-  },
-  "components.ManualFileDownloadRequestFromRepositoryForm.ttlHint": {
-    "defaultMessage": "Set to 0 for no expiry."
-  },
-  "components.ManualFileDownloadRequestFromRepositoryForm.ttlLabel": {
-    "defaultMessage": "TTL (seconds)"
-  },
-  "components.ManualFileDownloadRequestFromRepositoryForm.uploadButton": {
-    "defaultMessage": "Upload"
   },
   "components.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -2258,14 +2225,80 @@
   "forms.DeploymentCampaignForm.targetReleaseLabel": {
     "defaultMessage": "Target Release"
   },
+  "forms.ManualFileDownloadRequestForm.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "forms.ManualFileDownloadRequestForm.archiveNameHint": {
+    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+  },
+  "forms.ManualFileDownloadRequestForm.archiveNameLabel": {
+    "defaultMessage": "Archive Name"
+  },
+  "forms.ManualFileDownloadRequestForm.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "forms.ManualFileDownloadRequestForm.destinationPathHint": {
+    "defaultMessage": "Absolute path on the target device where the file should be written."
+  },
+  "forms.ManualFileDownloadRequestForm.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "forms.ManualFileDownloadRequestForm.fileHint": {
+    "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
+  },
+  "forms.ManualFileDownloadRequestForm.fileLabel": {
+    "defaultMessage": "Files"
+  },
+  "forms.ManualFileDownloadRequestForm.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "forms.ManualFileDownloadRequestForm.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "forms.ManualFileDownloadRequestForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "forms.ManualFileDownloadRequestForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "forms.ManualFileDownloadRequestForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "forms.ManualFileDownloadRequestForm.uploadButton": {
+    "defaultMessage": "Upload"
+  },
+  "forms.ManualFileDownloadRequestForm.userIdLabel": {
+    "defaultMessage": "User ID"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathHint": {
+    "defaultMessage": "Absolute path on the target device where the file should be written."
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
   "forms.ManualFileDownloadRequestFromRepositoryForm.fileLabel": {
     "defaultMessage": "File"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.groupIdLabel": {
+    "defaultMessage": "Group ID"
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesAvailable": {
     "defaultMessage": "No repositories available"
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesFoundMatching": {
     "defaultMessage": "No repositories found matching \"{inputValue}\""
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.progressLabel": {
+    "defaultMessage": "Report Progress"
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryLabel": {
     "defaultMessage": "Repository"
@@ -2275,6 +2308,18 @@
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.selectRepositoryHint": {
     "defaultMessage": "Select a repository before selecting a file..."
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.uploadButton": {
+    "defaultMessage": "Upload"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
+    "defaultMessage": "User ID"
   },
   "forms.ManualOtaFromFileCollection.baseImageCollectionOption": {
     "defaultMessage": "Search or select a base image collection..."

@@ -41,7 +41,8 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { FilesUploadTab_PaginationQuery } from "@/api/__generated__/FilesUploadTab_PaginationQuery.graphql";
 import type { FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation } from "@/api/__generated__/FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation.graphql";
-import type { FilesUploadTab_createFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createFileDownloadRequest_Mutation.graphql";
+import type { FilesUploadTab_createManualFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManualFileDownloadRequest_Mutation.graphql";
+import type { FilesUploadTab_createManagedFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManagedFileDownloadRequest_Mutation.graphql";
 import type { FilesUploadTab_fileDownloadRequests$key } from "@/api/__generated__/FilesUploadTab_fileDownloadRequests.graphql";
 import type { FilesUploadTab_getRepositories_Query } from "@/api/__generated__/FilesUploadTab_getRepositories_Query.graphql";
 
@@ -72,13 +73,13 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
           url
           fileName
           status
-          statusProgress
-          statusCode
-          message
+          progressPercentage
+          responseCode
+          responseMessage
           destinationType
           destination
           pathOnDevice
-          progress
+          progressTracked
           ttlSeconds
           digest
           fileMode
@@ -110,23 +111,51 @@ const DEVICE_GET_PRESIGNED_URL_MUTATION = graphql`
   }
 `;
 
-const DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
-  mutation FilesUploadTab_createFileDownloadRequest_Mutation(
-    $input: CreateFileDownloadRequestInput!
+const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
+  mutation FilesUploadTab_createManualFileDownloadRequest_Mutation(
+    $input: CreateManualFileDownloadRequestInput!
   ) {
-    createFileDownloadRequest(input: $input) {
+    createManualFileDownloadRequest(input: $input) {
       result {
         id
         url
         fileName
         status
-        statusProgress
-        statusCode
-        message
+        progressPercentage
+        responseCode
+        responseMessage
         destinationType
         destination
         pathOnDevice
-        progress
+        progressTracked
+        ttlSeconds
+        digest
+        fileMode
+        userId
+        groupId
+        uncompressedFileSizeBytes
+      }
+    }
+  }
+`;
+
+const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
+  mutation FilesUploadTab_createManagedFileDownloadRequest_Mutation(
+    $input: CreateManagedFileDownloadRequestInput!
+  ) {
+    createManagedFileDownloadRequest(input: $input) {
+      result {
+        id
+        url
+        fileName
+        status
+        progressPercentage
+        responseCode
+        responseMessage
+        destinationType
+        destination
+        pathOnDevice
+        progressTracked
         ttlSeconds
         digest
         fileMode
@@ -168,8 +197,8 @@ const ManualFileDownloadRequestFormWrapper = ({
     );
 
   const [createFileDownloadRequest] =
-    useMutation<FilesUploadTab_createFileDownloadRequest_Mutation>(
-      DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION,
+    useMutation<FilesUploadTab_createManualFileDownloadRequest_Mutation>(
+      DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION,
     );
 
   // Warn user before leaving page during upload
@@ -199,7 +228,10 @@ const ManualFileDownloadRequestFormWrapper = ({
           destinationType,
           destination,
           ttlSeconds,
-          progress,
+          progressTracked,
+          fileMode,
+          userId,
+          groupId,
         } = values;
 
         let uploadBlob: Blob;
@@ -235,13 +267,6 @@ const ManualFileDownloadRequestFormWrapper = ({
         const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
         const fileDownloadRequestId = uuidv7();
         const digest = await computeDigest(archiveData);
-
-        // Note: The browser File API does not expose Unix file permissions (fileMode),
-        // userId, or groupId. These are OS-level metadata not available in web browsers.
-        // We use sensible defaults: fileMode 0644 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0o644;
-        const userId = -1;
-        const groupId = -1;
 
         // Get presigned URL from the backend
         const presignedUrls = await new Promise<{
@@ -336,7 +361,7 @@ const ManualFileDownloadRequestFormWrapper = ({
                 groupId,
                 destinationType,
                 destination,
-                progress,
+                progressTracked,
                 ttlSeconds,
               },
             },
@@ -348,7 +373,8 @@ const ManualFileDownloadRequestFormWrapper = ({
               resolve();
             },
             updater(store, data) {
-              const newRequestId = data?.createFileDownloadRequest?.result?.id;
+              const newRequestId =
+                data?.createManualFileDownloadRequest?.result?.id;
               if (!newRequestId) return;
               const newRequest = store.get(newRequestId);
               const storedDevice = store.get(deviceId);
@@ -427,8 +453,8 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   );
 
   const [createFileDownloadRequest] =
-    useMutation<FilesUploadTab_createFileDownloadRequest_Mutation>(
-      DEVICE_CREATE_FILE_DOWNLOAD_REQUEST_MUTATION,
+    useMutation<FilesUploadTab_createManagedFileDownloadRequest_Mutation>(
+      DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION,
     );
 
   const handleFileUpload = useCallback(
@@ -437,8 +463,16 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
       setIsUploading(true);
 
       try {
-        const { file, destinationType, destination, ttlSeconds, progress } =
-          values;
+        const {
+          file,
+          destinationType,
+          destination,
+          ttlSeconds,
+          progressTracked,
+          fileMode,
+          userId,
+          groupId,
+        } = values;
 
         let compression: string | null = null;
 
@@ -448,12 +482,6 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
 
         const fileDownloadRequestId = uuidv7();
 
-        // Default Unix file permissions since the repository doesn't store this metadata.
-        // Defaults: fileMode 0644 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0o644;
-        const userId = -1;
-        const groupId = -1;
-
         // Create the file download request with all metadata
         await new Promise<void>((resolve, reject) => {
           createFileDownloadRequest({
@@ -461,17 +489,14 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
               input: {
                 deviceId,
                 fileDownloadRequestId,
-                url: file.url!,
-                fileName: file.name,
-                uncompressedFileSizeBytes: file.size,
-                digest: file.digest,
+                fileId: file.id,
                 compression,
                 fileMode,
                 userId,
                 groupId,
                 destinationType,
                 destination,
-                progress,
+                progressTracked,
                 ttlSeconds,
               },
             },
@@ -483,7 +508,8 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
               resolve();
             },
             updater(store, data) {
-              const newRequestId = data?.createFileDownloadRequest?.result?.id;
+              const newRequestId =
+                data?.createManagedFileDownloadRequest?.result?.id;
               if (!newRequestId) return;
               const newRequest = store.get(newRequestId);
               const storedDevice = store.get(deviceId);

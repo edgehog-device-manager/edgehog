@@ -24,6 +24,7 @@ defmodule Edgehog.Storage do
 
   Dispatches to S3 or Azure backend based on the configured `:storage_type`.
   """
+  @behaviour Edgehog.Storage.Behaviour
 
   alias Azurex.Blob.SharedAccessSignature
 
@@ -46,6 +47,7 @@ defmodule Edgehog.Storage do
 
   Returns `{:ok, %{get_url: url}}`.
   """
+  @impl Edgehog.Storage.Behaviour
   def read_presigned_url(file_path) do
     case storage_type() do
       :s3 -> s3_read_presigned_url(file_path)
@@ -58,6 +60,7 @@ defmodule Edgehog.Storage do
 
   Returns `:ok` on success or `{:error, reason}` on failure.
   """
+  @impl Edgehog.Storage.Behaviour
   def delete(file_path) do
     case storage_type() do
       :s3 -> s3_delete(file_path)

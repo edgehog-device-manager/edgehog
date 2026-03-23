@@ -191,6 +191,50 @@ defmodule Edgehog.StorageTest do
       assert {:ok, %{status_code: 404}} =
                HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
     end
+
+    test "repository deletion deletes uploaded files from storage" do
+      tenant = Edgehog.TenantsFixtures.tenant_fixture()
+      filename = "repository-delete-test.bin"
+      contents = "repository deletion integration test contents"
+
+      repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
+
+      %{put_url: put_url, get_url: get_url} =
+        File
+        |> Ash.ActionInput.for_action(:create_presigned_url, %{
+          filename: filename,
+          repository_id: repository.id
+        })
+        |> Ash.run_action!(tenant: tenant)
+
+      assert {:ok, %{status_code: upload_status}} =
+               HTTPoison.request(%HTTPoison.Request{
+                 method: :put,
+                 url: put_url,
+                 body: contents,
+                 headers: [
+                   {"x-ms-blob-type", "BlockBlob"},
+                   {"content-length", "#{byte_size(contents)}"}
+                 ]
+               })
+
+      assert upload_status in [200, 201]
+
+      assert {:ok, %{status_code: 200, body: ^contents}} =
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+
+      _file =
+        Edgehog.FilesFixtures.file_fixture(
+          repository_id: repository.id,
+          tenant: tenant,
+          name: filename
+        )
+
+      repository |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
+
+      assert {:ok, %{status_code: 404}} =
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+    end
   end
 
   describe "FileDownloadRequest presigned URL" do
@@ -220,30 +264,6 @@ defmodule Edgehog.StorageTest do
 
       assert result[:get_url] =~ expected_path
       assert result[:put_url] =~ expected_path
-    end
-
-    test "read_presigned_url returns get presigned url only", %{tenant: tenant} do
-      tenant_id = tenant.tenant_id
-      file_download_request_id = "36075cab-9c99-4659-ab47-f5cb993e18e3"
-      filename = "My File 1"
-
-      result =
-        FileDownloadRequest
-        |> Ash.ActionInput.for_action(:read_presigned_url, %{
-          filename: filename,
-          file_download_request_id: file_download_request_id
-        })
-        |> Ash.run_action!(tenant: tenant)
-
-      assert is_map(result)
-      assert Map.has_key?(result, :get_url)
-
-      encoded_filename = URI.encode(filename)
-
-      expected_path =
-        "uploads/tenants/#{tenant_id}/ephemeral_file_download_requests/#{file_download_request_id}/files/#{encoded_filename}"
-
-      assert result[:get_url] =~ expected_path
     end
 
     test "files can be uploaded" do
