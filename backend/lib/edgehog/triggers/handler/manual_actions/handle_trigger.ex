@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024-2026 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -411,16 +411,28 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     )
   end
 
-  # TODO: add implementation when file_upload_request resource is added
   defp handle_event(
          %IncomingData{interface: @file_transfer_response, path: "/request", value: %{"type" => "device_to_server"}} =
-           _event,
-         _tenant,
+           event,
+         tenant,
          _realm_id,
          _device_id,
          _timestamp
        ) do
-    nil
+    file_upload_request_id = event.value["id"]
+    progress_percentage = event.value["progress"]
+
+    file_upload_request = Files.fetch_file_upload_request!(file_upload_request_id, tenant: tenant)
+
+    if file_upload_request.status == :sent do
+      Files.set_status(file_upload_request, %{status: :in_progress}, tenant: tenant)
+    end
+
+    Files.set_progress(
+      file_upload_request,
+      [status_progress: progress_percentage],
+      tenant: tenant
+    )
   end
 
   defp handle_event(
@@ -447,16 +459,28 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     )
   end
 
-  # TODO: add implementation when file_upload_request resource is added
   defp handle_event(
          %IncomingData{interface: @file_transfer_progress, path: "/request", value: %{"type" => "device_to_server"}} =
-           _event,
-         _tenant,
+           event,
+         tenant,
          _realm_id,
          _device_id,
          _timestamp
        ) do
-    nil
+    file_upload_request_id = event.value["id"]
+    progress_percentage = event.value["progress"]
+
+    file_upload_request = Files.fetch_file_upload_request!(file_upload_request_id, tenant: tenant)
+
+    if file_upload_request.status == :sent do
+      Files.set_status(file_upload_request, %{status: :in_progress}, tenant: tenant)
+    end
+
+    Files.set_progress(
+      file_upload_request,
+      [status_progress: progress_percentage],
+      tenant: tenant
+    )
   end
 
   defp handle_event(_unhandled_event, tenant, realm_id, device_id, _timestamp) do
@@ -505,4 +529,37 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
 
     {:error, :unsupported_event_value}
   end
+
+  # defp update_upload_request_progress(nil, _progress_percentage, _tenant), do: :ok
+
+  # defp update_upload_request_progress(file_upload_request, progress_percentage, tenant) do
+  #   attrs = %{
+  #     status: :in_progress,
+  #     progress_percentage: progress_percentage
+  #   }
+
+  #   case file_upload_request
+  #        |> Ash.Changeset.for_update(:update_status, attrs, tenant: tenant)
+  #        |> Ash.update() do
+  #     {:ok, _file_upload_request} -> :ok
+  #     {:error, reason} -> {:error, reason}
+  #   end
+  # end
+
+  # defp update_upload_request_response(nil, _status, _response_code, _response_message, _tenant), do: :ok
+
+  # defp update_upload_request_response(file_upload_request, status, response_code, response_message, tenant) do
+  #   attrs = %{
+  #     status: status,
+  #     response_code: response_code,
+  #     response_message: response_message
+  #   }
+
+  #   case file_upload_request
+  #        |> Ash.Changeset.for_update(:update_status, attrs, tenant: tenant)
+  #        |> Ash.update() do
+  #     {:ok, _file_upload_request} -> :ok
+  #     {:error, reason} -> {:error, reason}
+  #   end
+  # end
 end
