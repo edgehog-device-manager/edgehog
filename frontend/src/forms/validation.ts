@@ -552,6 +552,9 @@ const fileDownloadRequestFormSchema = z
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
     progress: z.boolean(),
+    fileMode: z.number(messages.number.id).int().positive().optional(),
+    userId: z.number(messages.number.id).int().positive().optional(),
+    groupId: z.number(messages.number.id).int().positive().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.destinationType === "FILESYSTEM" && data.destination === null) {
@@ -605,6 +608,9 @@ const manualFileDownloadRequestFromRepositorySchema = z
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
     progressTracked: z.boolean(),
+    fileMode: z.number(messages.number.id).int().positive().optional(),
+    userId: z.number(messages.number.id).int().positive().optional(),
+    groupId: z.number(messages.number.id).int().positive().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.destinationType === "FILESYSTEM" && data.destination === null) {

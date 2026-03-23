@@ -26,6 +26,7 @@ import Select from "react-select";
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
+import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
 import FileDropzone from "@/components/FileDropzone";
 import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
@@ -43,12 +44,16 @@ type FileDownloadRequestFormValues = {
   destination: string | null;
   ttlSeconds: number;
   progressTracked: boolean;
+  fileMode?: number;
+  userId?: number;
+  groupId?: number;
 };
 
 type ManualFileDownloadRequestFormProps = {
   className?: string;
   isLoading: boolean;
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
+  showAdvancedOptions?: boolean;
 };
 
 const destinationTypeOptions = [
@@ -61,8 +66,11 @@ const ManualFileDownloadRequestForm = ({
   className,
   isLoading,
   onFileSubmit,
+  showAdvancedOptions = false,
 }: ManualFileDownloadRequestFormProps) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const { open: advancedOptionsOpen, toggle: toggleAdvancedOptions } =
+    useCollapseToggle();
 
   const {
     formState: { errors },
@@ -80,6 +88,9 @@ const ManualFileDownloadRequestForm = ({
       destination: null,
       ttlSeconds: 0,
       progress: false,
+      fileMode: undefined,
+      userId: undefined,
+      groupId: undefined,
     },
     resolver: zodResolver(fileDownloadRequestFormSchema),
   });
@@ -109,6 +120,9 @@ const ManualFileDownloadRequestForm = ({
         destination: data.destination,
         ttlSeconds: data.ttlSeconds,
         progressTracked: data.progress,
+        fileMode: data.fileMode,
+        userId: data.userId,
+        groupId: data.groupId,
       });
       setSelectedFiles([]);
       reset();
@@ -124,7 +138,7 @@ const ManualFileDownloadRequestForm = ({
         id="file"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestForm.fileLabel"
+            id="forms.ManualFileDownloadRequestForm.fileLabel"
             defaultMessage="Files"
           />
         }
@@ -139,7 +153,7 @@ const ManualFileDownloadRequestForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.fileHint"
+              id="forms.ManualFileDownloadRequestForm.fileHint"
               defaultMessage="Select files or a folder. Multiple items will be compressed into a tar.gz archive."
             />
           </Form.Text>
@@ -151,7 +165,7 @@ const ManualFileDownloadRequestForm = ({
           id="archiveName"
           label={
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.archiveNameLabel"
+              id="forms.ManualFileDownloadRequestForm.archiveNameLabel"
               defaultMessage="Archive Name"
             />
           }
@@ -163,7 +177,7 @@ const ManualFileDownloadRequestForm = ({
           />
           <Form.Text muted>
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.archiveNameHint"
+              id="forms.ManualFileDownloadRequestForm.archiveNameHint"
               defaultMessage="Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
             />
           </Form.Text>
@@ -174,7 +188,7 @@ const ManualFileDownloadRequestForm = ({
         id="destinationType"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestForm.destinationLabel"
+            id="forms.ManualFileDownloadRequestForm.destinationLabel"
             defaultMessage="Destination"
           />
         }
@@ -205,7 +219,7 @@ const ManualFileDownloadRequestForm = ({
           id="destination"
           label={
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.destinationPathLabel"
+              id="forms.ManualFileDownloadRequestForm.destinationPathLabel"
               defaultMessage="Destination Path"
             />
           }
@@ -222,7 +236,7 @@ const ManualFileDownloadRequestForm = ({
           ) : (
             <Form.Text muted>
               <FormattedMessage
-                id="components.ManualFileDownloadRequestForm.destinationPathHint"
+                id="forms.ManualFileDownloadRequestForm.destinationPathHint"
                 defaultMessage="Absolute path on the target device where the file should be written."
               />
             </Form.Text>
@@ -234,7 +248,7 @@ const ManualFileDownloadRequestForm = ({
         id="ttlSeconds"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestForm.ttlLabel"
+            id="forms.ManualFileDownloadRequestForm.ttlLabel"
             defaultMessage="TTL (seconds)"
           />
         }
@@ -252,7 +266,7 @@ const ManualFileDownloadRequestForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.ttlHint"
+              id="forms.ManualFileDownloadRequestForm.ttlHint"
               defaultMessage="Set to 0 for no expiry."
             />
           </Form.Text>
@@ -263,7 +277,7 @@ const ManualFileDownloadRequestForm = ({
         id="progress"
         label={
           <FormattedMessage
-            id="components.ManualFileDownloadRequestForm.progressLabel"
+            id="forms.ManualFileDownloadRequestForm.progressLabel"
             defaultMessage="Report Progress"
           />
         }
@@ -276,12 +290,86 @@ const ManualFileDownloadRequestForm = ({
         <FormFeedback feedback={errors.progress?.message} />
       </FormRow>
 
+      {showAdvancedOptions && (
+        <div className="mb-3">
+          <CollapseItem
+            type="flat"
+            open={advancedOptionsOpen}
+            onToggle={toggleAdvancedOptions}
+            isInsideTable={true}
+            title={
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestForm.advancedOptionsTitle"
+                defaultMessage="Advanced Options"
+              />
+            }
+          >
+            <FormRow
+              id="userId"
+              label={
+                <FormattedMessage
+                  id="forms.ManualFileDownloadRequestForm.userIdLabel"
+                  defaultMessage="User ID"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                {...register(`userId` as const, {
+                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
+                })}
+                isInvalid={!!errors.userId}
+              />
+              <FormFeedback feedback={errors.userId?.message} />
+            </FormRow>
+
+            <FormRow
+              id="groupId"
+              label={
+                <FormattedMessage
+                  id="forms.ManualFileDownloadRequestForm.groupIdLabel"
+                  defaultMessage="Group ID"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                {...register(`groupId` as const, {
+                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
+                })}
+                isInvalid={!!errors.groupId}
+              />
+              <FormFeedback feedback={errors.groupId?.message} />
+            </FormRow>
+
+            <FormRow
+              id="fileMode"
+              label={
+                <FormattedMessage
+                  id="forms.ManualFileDownloadRequestForm.fileModeLabel"
+                  defaultMessage="File Mode"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                {...register(`fileMode` as const, {
+                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
+                })}
+                isInvalid={!!errors.fileMode}
+              />
+              <FormFeedback feedback={errors.fileMode?.message} />
+            </FormRow>
+          </CollapseItem>
+        </div>
+      )}
+
       <Row>
         <Col className="d-flex justify-content-end">
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.uploadButton"
+              id="forms.ManualFileDownloadRequestForm.uploadButton"
               defaultMessage="Upload"
             />
           </Button>

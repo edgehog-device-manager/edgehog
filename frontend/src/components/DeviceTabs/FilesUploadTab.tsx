@@ -182,11 +182,13 @@ const formatRelayErrors = (
 type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
+  showAdvancedOptions: boolean;
 };
 
 const ManualFileDownloadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
+  showAdvancedOptions,
 }: ManualFileDownloadRequestFormWrapperProps) => {
   const intl = useIntl();
   const [isUploading, setIsUploading] = useState(false);
@@ -229,6 +231,9 @@ const ManualFileDownloadRequestFormWrapper = ({
           destination,
           ttlSeconds,
           progressTracked,
+          fileMode,
+          userId,
+          groupId,
         } = values;
 
         let uploadBlob: Blob;
@@ -264,13 +269,6 @@ const ManualFileDownloadRequestFormWrapper = ({
         const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
         const fileDownloadRequestId = uuidv7();
         const digest = await computeDigest(archiveData);
-
-        // Note: The browser File API does not expose Unix file permissions (fileMode),
-        // userId, or groupId. These are OS-level metadata not available in web browsers.
-        // We use sensible defaults: fileMode 0 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0;
-        const userId = -1;
-        const groupId = -1;
 
         // Get presigned URL from the backend
         const presignedUrls = await new Promise<{
@@ -433,6 +431,7 @@ const ManualFileDownloadRequestFormWrapper = ({
     <ManualFileDownloadRequestForm
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
+      showAdvancedOptions={showAdvancedOptions}
     />
   );
 };
@@ -441,12 +440,14 @@ type ManualFileDownloadRequestFromRepositoryFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   repositoriesQueryRef: PreloadedQuery<FilesUploadTab_getRepositories_Query>;
   deviceId: string;
+  showAdvancedOptions: boolean;
 };
 
 const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   setErrorFeedback,
   repositoriesQueryRef,
   deviceId,
+  showAdvancedOptions,
 }: ManualFileDownloadRequestFromRepositoryFormWrapperProps) => {
   const intl = useIntl();
   const [isUploading, setIsUploading] = useState(false);
@@ -473,6 +474,9 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
           destination,
           ttlSeconds,
           progressTracked,
+          fileMode,
+          userId,
+          groupId,
         } = values;
 
         let compression: string | null = null;
@@ -482,12 +486,6 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
         }
 
         const fileDownloadRequestId = uuidv7();
-
-        // Default Unix file permissions since the repository doesn't store this metadata.
-        // Defaults: fileMode 0 (rw-r--r--), userId -1, groupId -1.
-        const fileMode = 0;
-        const userId = -1;
-        const groupId = -1;
 
         // Create the file download request with all metadata
         await new Promise<void>((resolve, reject) => {
@@ -566,28 +564,9 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
       repositoriesData={repositoriesData}
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
+      showAdvancedOptions={showAdvancedOptions}
     />
   );
-};
-
-type FileDownloadRequestsContentProps = {
-  deviceRef: FilesUploadTab_fileDownloadRequests$key;
-};
-
-const FileDownloadRequestsContent = ({
-  deviceRef,
-}: FileDownloadRequestsContentProps) => {
-  const { data } = usePaginationFragment<
-    FilesUploadTab_PaginationQuery,
-    FilesUploadTab_fileDownloadRequests$key
-  >(DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
-
-  const fileDownloadRequests = useMemo(
-    () => data.fileDownloadRequests?.edges?.map((edge) => edge.node) ?? [],
-    [data.fileDownloadRequests],
-  );
-
-  return <FileDownloadRequestsTable requests={fileDownloadRequests} />;
 };
 
 type FilesUploadTabProps = {
@@ -601,6 +580,20 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
   const [updateMode, setUpdateMode] = useState<"repository" | "file">("file");
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const { data } = usePaginationFragment<
+    FilesUploadTab_PaginationQuery,
+    FilesUploadTab_fileDownloadRequests$key
+  >(DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
+
+  const fileDownloadRequests = useMemo(
+    () => data.fileDownloadRequests?.edges?.map((edge) => edge.node) ?? [],
+    [data.fileDownloadRequests],
+  );
+
+  const showAdvancedOptions =
+    data.capabilities.includes("POSIX_FILE_TRANSFER_STORAGE") ||
+    data.capabilities.includes("POSIX_FILE_TRANSFER_STREAM");
 
   const [getRepositoriesQuery, getRepositories] =
     useQueryLoader<FilesUploadTab_getRepositories_Query>(
@@ -687,6 +680,7 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
               <ManualFileDownloadRequestFormWrapper
                 setErrorFeedback={setErrorFeedback}
                 deviceId={deviceId || ""}
+                showAdvancedOptions={showAdvancedOptions}
               />
             ) : (
               getRepositoriesQuery && (
@@ -694,6 +688,7 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
                   repositoriesQueryRef={getRepositoriesQuery}
                   setErrorFeedback={setErrorFeedback}
                   deviceId={deviceId || ""}
+                  showAdvancedOptions={showAdvancedOptions}
                 />
               )
             )}
@@ -711,7 +706,7 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
           />
         </h5>
 
-        <FileDownloadRequestsContent deviceRef={deviceRef} />
+        <FileDownloadRequestsTable requests={fileDownloadRequests} />
       </div>
     </Tab>
   );
