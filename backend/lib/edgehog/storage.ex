@@ -35,6 +35,7 @@ defmodule Edgehog.Storage do
 
   Returns `{:ok, %{get_url: url, put_url: url}}`.
   """
+  @impl Edgehog.Storage.Behaviour
   def create_presigned_urls(file_path) do
     case storage_type() do
       :s3 -> s3_create_presigned_urls(file_path)

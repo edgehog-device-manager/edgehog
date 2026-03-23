@@ -5528,6 +5528,15 @@ type DeleteFileResult {
   errors: [MutationError!]!
 }
 
+"The result of the :set_file_uploaded mutation"
+type SetFileUploadedResult {
+  "The successful result of the mutation"
+  result: File
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 "The result of the :create_file mutation"
 type CreateFileResult {
   "The successful result of the mutation"
@@ -5551,16 +5560,12 @@ input CreateFileInput {
   repositoryId: ID!
 }
 
-input CreateFilePresignedUrlInput {
-  filename: String!
-  repositoryId: ID!
-}
-
 enum FileSortField {
   ID
   NAME
   SIZE
   DIGEST
+  FILE_UPLOADED
 }
 
 ":file connection"
@@ -5582,6 +5587,17 @@ type FileEdge {
 
   ":file node"
   node: File!
+}
+
+input FileFilterFileUploaded {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
 }
 
 input FileFilterDigest {
@@ -5650,6 +5666,9 @@ input FileFilterInput {
   "File digest in format algorithm:hash (e.g., sha256:abc123) for integrity checks."
   digest: FileFilterDigest
 
+  "Represents whether a file is uploaded using the put url"
+  fileUploaded: FileFilterFileUploaded
+
   "The repository this file belongs to."
   repository: RepositoryFilterInput
 }
@@ -5671,11 +5690,17 @@ type File {
   "File digest in format algorithm:hash (e.g., sha256:abc123) for integrity checks."
   digest: String!
 
+  "Represents whether a file is uploaded using the put url"
+  fileUploaded: Boolean
+
   "The repository this file belongs to."
   repository: Repository!
 
   "Get a presigned URL for downloading the file. The URL is valid for a limited time."
   getPresignedUrl: String
+
+  "Get a presigned URL for uploading the file. The URL is valid for a limited time."
+  putPresignedUrl: String
 }
 
 input RequestForwarderSessionInput {
@@ -7384,11 +7409,10 @@ type RootMutationType {
   """
   requestForwarderSession(input: RequestForwarderSessionInput!): String!
 
-  "Generates presigned URLs to upload and download a file via HTTP requests."
-  createFilePresignedUrl(input: CreateFilePresignedUrlInput!): JsonString!
-
   "Creates a new file"
   createFile(input: CreateFileInput!): CreateFileResult
+
+  setFileUploaded(id: ID!): SetFileUploadedResult
 
   "Deletes a file"
   deleteFile(id: ID!): DeleteFileResult

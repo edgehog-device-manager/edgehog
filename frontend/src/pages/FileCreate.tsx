@@ -31,11 +31,12 @@ import {
 import { useParams } from "react-router-dom";
 
 import type { FileCreate_createFile_Mutation } from "@/api/__generated__/FileCreate_createFile_Mutation.graphql";
-import type { FileCreate_createFilePresignedUrl_Mutation } from "@/api/__generated__/FileCreate_createFilePresignedUrl_Mutation.graphql";
+import type { FileCreate_deleteFile_Mutation } from "@/api/__generated__/FileCreate_deleteFile_Mutation.graphql";
 import type {
   FileCreate_getOptions_Query,
   FileCreate_getOptions_Query$data,
 } from "@/api/__generated__/FileCreate_getOptions_Query.graphql";
+import type { FileCreate_setFileUploaded_Mutation } from "@/api/__generated__/FileCreate_setFileUploaded_Mutation.graphql";
 
 import Alert from "@/components/Alert";
 import Center from "@/components/Center";
@@ -46,7 +47,6 @@ import CreateFileForm, { FileFormOutputData } from "@/forms/CreateFile";
 import { computeDigest, createTarGzArchive } from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";
 
-/* eslint-disable relay/unused-fields */
 const GET_REPOSITORY_QUERY = graphql`
   query FileCreate_getOptions_Query($repositoryId: ID!) {
     repository(id: $repositoryId) {
@@ -62,16 +62,30 @@ const CREATE_FILE_MUTATION = graphql`
       result {
         id
         name
+        putPresignedUrl
       }
     }
   }
 `;
 
-const FILE_GET_PRESIGNED_URL_MUTATION = graphql`
-  mutation FileCreate_createFilePresignedUrl_Mutation(
-    $input: CreateFilePresignedUrlInput!
-  ) {
-    createFilePresignedUrl(input: $input)
+const SET_FILE_UPLOADED_MUTATION = graphql`
+  mutation FileCreate_setFileUploaded_Mutation($fileId: ID!) {
+    setFileUploaded(id: $fileId) {
+      result {
+        id
+        fileUploaded
+      }
+    }
+  }
+`;
+
+const DELETE_FILE_MUTATION = graphql`
+  mutation FileCreate_deleteFile_Mutation($fileId: ID!) {
+    deleteFile(id: $fileId) {
+      result {
+        id
+      }
+    }
   }
 `;
 
@@ -86,19 +100,71 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
   const [isUploading, setIsUploading] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const [getPresignedUrl] =
-    useMutation<FileCreate_createFilePresignedUrl_Mutation>(
-      FILE_GET_PRESIGNED_URL_MUTATION,
-    );
-
   const [createFile, isCreatingFile] =
     useMutation<FileCreate_createFile_Mutation>(CREATE_FILE_MUTATION);
 
+  const [setFileUploaded] = useMutation<FileCreate_setFileUploaded_Mutation>(
+    SET_FILE_UPLOADED_MUTATION,
+  );
+
+  const [deleteFile] =
+    useMutation<FileCreate_deleteFile_Mutation>(DELETE_FILE_MUTATION);
+
+  const commitCreateFile = useCallback(
+    (input: FileCreate_createFile_Mutation["variables"]["input"]) =>
+      new Promise<
+        NonNullable<
+          FileCreate_createFile_Mutation["response"]["createFile"]
+        >["result"]
+      >((resolve, reject) => {
+        createFile({
+          variables: { input },
+          onCompleted: (data, errors) => {
+            if (errors?.length) return reject(errors);
+
+            const result = data.createFile?.result;
+            if (!result) return reject(new Error("Missing file result"));
+
+            resolve(result);
+          },
+          onError: reject,
+        });
+      }),
+    [createFile],
+  );
+
+  const commitSetFileUploaded = useCallback(
+    (variables: FileCreate_setFileUploaded_Mutation["variables"]) =>
+      new Promise<void>((resolve, reject) => {
+        setFileUploaded({
+          variables,
+          onCompleted: (_data, errors) => {
+            if (errors?.length) return reject(errors);
+            resolve();
+          },
+          onError: reject,
+        });
+      }),
+    [setFileUploaded],
+  );
+
+  const commitDeleteFile = useCallback(
+    (variables: FileCreate_deleteFile_Mutation["variables"]) =>
+      new Promise<void>((resolve, reject) => {
+        deleteFile({
+          variables,
+          onCompleted: (_data, errors) => {
+            if (errors?.length) return reject(errors);
+            resolve();
+          },
+          onError: reject,
+        });
+      }),
+    [deleteFile],
+  );
+
   const handleCreateFile = useCallback(
     async (values: FileFormOutputData) => {
-      setErrorFeedback(null);
-      setIsUploading(true);
-
       try {
         const { files, archiveName, repositoryId } = values;
 
@@ -106,19 +172,17 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         let fileName: string;
         let uncompressedSize: number;
 
-        // Files from folder selection have webkitRelativePath set.
-        // These need archiving even if there's only one file, to preserve
-        // the directory structure.
         const hasRelativePaths = files.some((f) => f.webkitRelativePath);
         const needsArchive = files.length > 1 || hasRelativePaths;
 
         if (needsArchive) {
-          // Multiple files or folder contents: create tar.gz archive
           uploadBlob = await createTarGzArchive(files);
+
           const baseName = archiveName?.trim() || "files-archive";
           fileName = baseName.endsWith(".tar.gz")
             ? baseName
             : `${baseName}.tar.gz`;
+
           uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
         } else {
           uploadBlob = files[0];
@@ -129,139 +193,83 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
         const digest = await computeDigest(archiveData);
 
-        // Get presigned URL from the backend
-        const presignedUrls = await new Promise<{
-          get_url: string;
-          put_url: string;
-        }>((resolve, reject) => {
-          getPresignedUrl({
-            variables: {
-              input: {
-                repositoryId,
-                filename: fileName,
-              },
-            },
-            onCompleted(responseData, errors) {
-              if (errors && errors.length > 0) {
-                const errorMessage = errors
-                  .map(({ fields, message }) =>
-                    fields && fields.length
-                      ? `${fields.join(" ")} ${message}`
-                      : message,
-                  )
-                  .join(". \n");
-                reject(new Error(errorMessage));
-                return;
-              }
-              try {
-                const raw = responseData.createFilePresignedUrl;
-                const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-                if (!parsed?.put_url || !parsed?.get_url) {
-                  reject(
-                    new Error(
-                      intl.formatMessage({
-                        id: "components.DeviceTabs.FilesUploadTab.error.presignedUrlMissingFields",
-                        defaultMessage:
-                          "Presigned URL response is missing put_url or get_url.",
-                      }),
-                    ),
-                  );
-                  return;
-                }
-                resolve(parsed);
-              } catch {
-                reject(
-                  new Error(
-                    intl.formatMessage({
-                      id: "components.DeviceTabs.FilesUploadTab.error.presignedUrlParseFailed",
-                      defaultMessage:
-                        "Failed to parse the presigned URL response.",
-                    }),
-                  ),
-                );
-              }
-            },
-            onError(error) {
-              reject(error);
-            },
-          });
+        const result = await commitCreateFile({
+          repositoryId,
+          name: fileName,
+          size: uncompressedSize,
+          digest,
         });
 
-        // Upload the file to the presigned PUT URL
-        const uploadResponse = await fetch(presignedUrls.put_url, {
-          method: "PUT",
-          headers: { "x-ms-blob-type": "BlockBlob" },
-          body: uploadBlob,
-        });
-
-        if (!uploadResponse.ok) {
-          const responseBody = await uploadResponse.text().catch(() => "");
-          throw new Error(
-            intl.formatMessage(
-              {
-                id: "components.DeviceTabs.FilesUploadTab.error.uploadFailed",
-                defaultMessage:
-                  "File upload failed with status {status}: {statusText}{body}.",
-              },
-              {
-                status: uploadResponse.status,
-                statusText: uploadResponse.statusText,
-                body: responseBody ? ` - ${responseBody}` : "",
-              },
-            ),
-          );
+        if (!result) {
+          throw new Error("File creation returned no result");
         }
 
-        await new Promise<void>((resolve, reject) => {
-          createFile({
-            variables: {
-              input: {
-                repositoryId,
-                name: fileName,
-                size: uncompressedSize,
-                digest,
-              },
-            },
-            onCompleted(data, errors) {
-              if (data.createFile?.result) {
-                return navigate({
-                  route: Route.repositoryEdit,
-                  params: { repositoryId },
-                });
-              }
+        const fileId = result.id;
 
-              if (errors && errors.length > 0) {
-                const errorMessage = errors
-                  .map(({ fields, message }) =>
-                    fields && fields.length
-                      ? `${fields.join(" ")} ${message}`
-                      : message,
-                  )
-                  .join(". \n");
-                reject(new Error(errorMessage));
-                return;
-              }
-              resolve();
+        if (!result.putPresignedUrl) {
+          throw new Error("Missing upload URL");
+        }
+
+        setIsUploading(true);
+
+        try {
+          const uploadResponse = await fetch(result.putPresignedUrl, {
+            method: "PUT",
+            headers: {
+              "x-ms-blob-type": "BlockBlob",
             },
-            onError(error) {
-              reject(error);
-            },
+            body: uploadBlob,
           });
+
+          if (!uploadResponse.ok) {
+            await commitDeleteFile({ fileId });
+
+            throw new Error(
+              intl.formatMessage(
+                {
+                  id: "pages.FileCreate.error.uploadFailed",
+                  defaultMessage:
+                    "File upload failed with status {status}: {statusText}.",
+                },
+                {
+                  status: uploadResponse.status,
+                  statusText: uploadResponse.statusText,
+                },
+              ),
+            );
+          }
+        } finally {
+          setIsUploading(false);
+        }
+
+        await commitSetFileUploaded({ fileId });
+
+        setErrorFeedback(null);
+
+        navigate({
+          route: Route.repositoryEdit,
+          params: { repositoryId },
         });
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : intl.formatMessage({
-                id: "components.DeviceTabs.FilesUploadTab.error.unknownError",
-                defaultMessage: "An unknown error occurred.",
-              });
-        setErrorFeedback(message);
-      } finally {
-        setIsUploading(false);
+      } catch (err: unknown) {
+        let message: React.ReactNode = null;
+
+        if (Array.isArray(err) && err.every((e) => e?.message)) {
+          message = err.map((e) => e.message).join(".\n");
+        } else if (err instanceof Error) {
+          message = err.message;
+        }
+
+        setErrorFeedback(
+          message || (
+            <FormattedMessage
+              id="pages.FileCreate.creationErrorFeedback"
+              defaultMessage="Could not create the File, please try again."
+            />
+          ),
+        );
       }
     },
-    [getPresignedUrl, createFile, intl, navigate],
+    [commitCreateFile, commitSetFileUploaded, commitDeleteFile, navigate, intl],
   );
 
   return (
@@ -283,6 +291,7 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         >
           {errorFeedback}
         </Alert>
+
         <CreateFileForm
           repositoryRef={repository}
           onSubmit={handleCreateFile}

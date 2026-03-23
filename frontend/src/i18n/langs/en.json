@@ -2944,6 +2944,12 @@
   "pages.Devices.title": {
     "defaultMessage": "Devices"
   },
+  "pages.FileCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the File, please try again."
+  },
+  "pages.FileCreate.error.uploadFailed": {
+    "defaultMessage": "File upload failed with status {status}: {statusText}."
+  },
   "pages.FileCreate.repositoryNotFound.message": {
     "defaultMessage": "Return to the Repository list."
   },

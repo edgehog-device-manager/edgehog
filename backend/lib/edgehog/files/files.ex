@@ -46,14 +46,11 @@ defmodule Edgehog.Files do
     end
 
     mutations do
-      action File, :create_file_presigned_url, :create_presigned_url do
-        description "Generates presigned URLs to upload and download a file via HTTP requests."
-        relay_id_translations input: [repository_id: :repository]
-      end
-
       create File, :create_file, :create do
         relay_id_translations input: [repository_id: :repository]
       end
+
+      update File, :set_file_uploaded, :set_file_uploaded
 
       destroy File, :delete_file, :destroy
 

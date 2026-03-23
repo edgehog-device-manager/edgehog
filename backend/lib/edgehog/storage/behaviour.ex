@@ -24,5 +24,8 @@ defmodule Edgehog.Storage.Behaviour do
   @callback read_presigned_url(file_path :: String.t()) ::
               {:ok, %{get_url: String.t()}} | {:error, term()}
 
+  @callback create_presigned_urls(file_path :: String.t()) ::
+              {:ok, %{put_url: String.t(), get_url: String.t()}} | {:error, term()}
+
   @callback delete(file_path :: String.t()) :: :ok | {:error, term()}
 end

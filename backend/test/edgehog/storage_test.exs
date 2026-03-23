@@ -23,7 +23,6 @@ defmodule Edgehog.StorageTest do
   use Edgehog.DataCase, async: true
 
   alias Edgehog.BaseImages.BaseImage
-  alias Edgehog.Files.File
   alias Edgehog.Files.FileDownloadRequest
 
   @moduletag :integration_storage
@@ -119,32 +118,10 @@ defmodule Edgehog.StorageTest do
   end
 
   describe "File presigned URL" do
-    test "create_presigned_url returns presigned URLs containing the correct file path", %{
-      tenant: tenant
-    } do
-      filename = "My File 1"
-
-      repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
-
-      result =
-        File
-        |> Ash.ActionInput.for_action(:create_presigned_url, %{
-          filename: filename,
-          repository_id: repository.id
-        })
-        |> Ash.run_action!(tenant: tenant)
-
-      assert is_map(result)
-      assert Map.has_key?(result, :get_url)
-      assert Map.has_key?(result, :put_url)
-
-      encoded_filename = URI.encode(filename)
-
-      expected_path =
-        "uploads/tenants/#{tenant.tenant_id}/repositories/#{repository.id}/files/#{encoded_filename}"
-
-      assert result[:get_url] =~ expected_path
-      assert result[:put_url] =~ expected_path
+    setup do
+      # Do not mock the storage for integration
+      Mox.stub_with(Edgehog.StorageMock, Edgehog.Storage)
+      :ok
     end
 
     test "presigned URL files can be uploaded and deleted" do
@@ -152,21 +129,16 @@ defmodule Edgehog.StorageTest do
       filename = "upload-test.bin"
       contents = "integration test contents"
 
-      repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
-
-      %{put_url: put_url, get_url: get_url} =
-        File
-        |> Ash.ActionInput.for_action(:create_presigned_url, %{
-          filename: filename,
-          repository_id: repository.id
-        })
-        |> Ash.run_action!(tenant: tenant)
+      file =
+        [tenant: tenant, name: filename]
+        |> Edgehog.FilesFixtures.file_fixture()
+        |> Ash.load!([:put_presigned_url, :get_presigned_url])
 
       # Azure requires x-ms-blob-type; S3 ignores unknown headers on presigned PUTs
       assert {:ok, %{status_code: upload_status}} =
                HTTPoison.request(%HTTPoison.Request{
                  method: :put,
-                 url: put_url,
+                 url: file.put_presigned_url,
                  body: contents,
                  headers: [
                    {"x-ms-blob-type", "BlockBlob"},
@@ -177,19 +149,12 @@ defmodule Edgehog.StorageTest do
       assert upload_status in [200, 201]
 
       assert {:ok, %{status_code: 200, body: ^contents}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
-
-      file =
-        Edgehog.FilesFixtures.file_fixture(
-          repository_id: repository.id,
-          tenant: tenant,
-          name: filename
-        )
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
 
       file |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
 
       assert {:ok, %{status_code: 404}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
     end
 
     test "repository deletion deletes uploaded files from storage" do
@@ -199,18 +164,15 @@ defmodule Edgehog.StorageTest do
 
       repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
 
-      %{put_url: put_url, get_url: get_url} =
-        File
-        |> Ash.ActionInput.for_action(:create_presigned_url, %{
-          filename: filename,
-          repository_id: repository.id
-        })
-        |> Ash.run_action!(tenant: tenant)
+      file =
+        [repository_id: repository.id, tenant: tenant, name: filename]
+        |> Edgehog.FilesFixtures.file_fixture()
+        |> Ash.load!([:put_presigned_url, :get_presigned_url])
 
       assert {:ok, %{status_code: upload_status}} =
                HTTPoison.request(%HTTPoison.Request{
                  method: :put,
-                 url: put_url,
+                 url: file.put_presigned_url,
                  body: contents,
                  headers: [
                    {"x-ms-blob-type", "BlockBlob"},
@@ -221,19 +183,12 @@ defmodule Edgehog.StorageTest do
       assert upload_status in [200, 201]
 
       assert {:ok, %{status_code: 200, body: ^contents}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
-
-      _file =
-        Edgehog.FilesFixtures.file_fixture(
-          repository_id: repository.id,
-          tenant: tenant,
-          name: filename
-        )
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
 
       repository |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
 
       assert {:ok, %{status_code: 404}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
     end
   end
 

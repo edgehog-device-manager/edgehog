@@ -26,8 +26,6 @@ defmodule Edgehog.Files.File do
 
   alias Edgehog.Files.File.Calculations
   alias Edgehog.Files.File.Changes
-  alias Edgehog.Files.File.ManualActions
-  alias Edgehog.Files.File.Validations
 
   graphql do
     type :file
@@ -60,6 +58,10 @@ defmodule Edgehog.Files.File do
       change manage_relationship(:repository_id, :repository, type: :append)
     end
 
+    update :set_file_uploaded do
+      change set_attribute(:file_uploaded, true)
+    end
+
     destroy :destroy do
       description "Deletes a file"
       primary? true
@@ -69,15 +71,6 @@ defmodule Edgehog.Files.File do
     end
 
     destroy :destroy_fixture
-
-    action :create_presigned_url, :map do
-      argument :filename, :string, allow_nil?: false
-      argument :repository_id, :uuid, allow_nil?: false
-
-      validate Validations.RepositoryExists, before_action?: true
-
-      run ManualActions.CreatePresignedUrl
-    end
   end
 
   attributes do
@@ -101,6 +94,12 @@ defmodule Edgehog.Files.File do
       public? true
     end
 
+    attribute :file_uploaded, :boolean do
+      description "Represents whether a file is uploaded using the put url"
+      public? true
+      default false
+    end
+
     timestamps()
   end
 
@@ -121,6 +120,14 @@ defmodule Edgehog.Files.File do
       description "Get a presigned URL for downloading the file. The URL is valid for a limited time."
 
       calculation Calculations.GetPresignedUrl
+    end
+
+    calculate :put_presigned_url, :string do
+      public? true
+
+      description "Get a presigned URL for uploading the file. The URL is valid for a limited time."
+
+      calculation Calculations.PutPresignedUrl
     end
   end
 
