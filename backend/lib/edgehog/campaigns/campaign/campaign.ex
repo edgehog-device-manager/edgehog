@@ -55,6 +55,11 @@ defmodule Edgehog.Campaigns.Campaign do
         read_action :update_campaigns
       end
 
+      subscribe :file_download_campaigns do
+        action_types [:create, :update]
+        read_action :file_download_campaigns
+      end
+
       subscribe :campaign do
         action_types [:update]
         read_action :get_by_id
@@ -79,16 +84,13 @@ defmodule Edgehog.Campaigns.Campaign do
       filter expr(status in [:idle, :in_progress, :pausing])
     end
 
-    # TODO: allow filtering per base_image_id
     read :update_campaigns do
-      argument :types, {:array, :atom}
       multitenancy :allow_global
       pagination keyset?: true
       filter expr(campaign_mechanism[:type] in [:firmware_upgrade])
     end
 
     read :deployment_campaigns do
-      argument :types, {:array, :atom}
       multitenancy :allow_global
       pagination keyset?: true
 
@@ -101,6 +103,12 @@ defmodule Edgehog.Campaigns.Campaign do
                  :deployment_upgrade
                ]
              )
+    end
+
+    read :file_download_campaigns do
+      multitenancy :allow_global
+      pagination keyset?: true
+      filter expr(campaign_mechanism[:type] in [:file_download])
     end
 
     create :create do

@@ -52,6 +52,12 @@ defmodule Edgehog.Campaigns do
         relay? true
       end
 
+      list Campaign, :file_download_campaigns, :file_download_campaigns do
+        description "Returns all file download campaigns."
+        paginate_with :keyset
+        relay? true
+      end
+
       list Campaign, :campaigns, :read do
         description "Returns all available campaigns."
         paginate_with :keyset
@@ -82,7 +88,8 @@ defmodule Edgehog.Campaigns do
                                     release_id: :release,
                                     target_release_id: :release
                                   ],
-                                  firmware_upgrade: [base_image_id: :base_image]
+                                  firmware_upgrade: [base_image_id: :base_image],
+                                  file_download: [file_id: :file]
                                 ]
                               ]
       end
@@ -135,6 +142,10 @@ defmodule Edgehog.Campaigns do
         action: :read_targets_with_pending_ota_operation,
         args: [:campaign_id]
 
+      define :list_targets_with_pending_file_download_request,
+        action: :read_targets_with_pending_file_download_request,
+        args: [:campaign_id]
+
       define :fetch_next_valid_target_with_application_deployed,
         action: :next_valid_target_with_application_deployed,
         args: [:campaign_id, :application_id]
@@ -161,6 +172,7 @@ defmodule Edgehog.Campaigns do
 
       define :link_deployment, action: :link_deployment, args: [:release]
       define :start_fw_upgrade, action: :start_fw_upgrade, args: [:base_image]
+      define :start_file_download, action: :start_file_download, args: [:file, :mechanism]
 
       define :set_target_deployment, action: :set_deployment, args: [:deployment_id]
     end

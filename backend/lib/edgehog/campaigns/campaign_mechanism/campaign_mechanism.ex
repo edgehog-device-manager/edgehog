@@ -60,6 +60,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism do
           tag_value: :firmware_upgrade,
           type: Edgehog.Campaigns.CampaignMechanism.FirmwareUpgrade,
           cast_tag?: true
+        ],
+        file_download: [
+          tag: :type,
+          tag_value: :file_download,
+          type: Edgehog.Campaigns.CampaignMechanism.FileDownload,
+          cast_tag?: true
         ]
       ]
     ]
@@ -77,6 +83,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism do
       :deployment_stop,
       :deployment_delete,
       :deployment_upgrade,
-      :firmware_upgrade
+      :firmware_upgrade,
+      :file_download
     ]
 end

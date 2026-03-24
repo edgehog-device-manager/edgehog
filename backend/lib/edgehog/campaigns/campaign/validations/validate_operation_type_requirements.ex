@@ -27,6 +27,7 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
   - `deployment_deploy`, `deployment_start`, `deployment_stop`, `deployment_delete`
   operations require only `release_id`
   - `deployment_upgrade` operation requires both `release_id` and `target_release_id`
+  - `file_download` operation requires `file_id`
   """
   use Ash.Resource.Validation
 
@@ -43,6 +44,9 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
 
       :firmware_upgrade ->
         validate_base_image_requirement(campaign_mechanism, context)
+
+      :file_download ->
+        validate_file_requirement(campaign_mechanism, context)
 
       action_type
       when action_type in [
@@ -116,6 +120,16 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
         {:error, field: :release_id, message: "is required for deployment operations"}
 
       _release_id ->
+        :ok
+    end
+  end
+
+  defp validate_file_requirement(campaign_mechanism, _context) do
+    case Map.get(campaign_mechanism, :file_id) do
+      nil ->
+        {:error, field: :file_id, message: "is required for file download operations"}
+
+      _file_id ->
         :ok
     end
   end

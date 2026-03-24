@@ -22,7 +22,8 @@ defmodule Edgehog.Files.FileDownloadRequest do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Files,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
   alias Edgehog.Files.FileDownloadRequest.Changes
   alias Edgehog.Files.FileDownloadRequest.FileDestination
@@ -349,6 +350,26 @@ defmodule Edgehog.Files.FileDownloadRequest do
       public? true
       attribute_public? false
     end
+
+    has_one :campaign_target, Edgehog.Campaigns.CampaignTarget do
+      description """
+      The campaign target that created the file download request, if any.
+      """
+
+      public? true
+    end
+  end
+
+  pub_sub do
+    prefix "file_download_requests"
+    module EdgehogWeb.Endpoint
+
+    publish :managed, [[:id, "*"]]
+    publish :manual, [[:id, "*"]]
+
+    publish :set_response, [[:id, "*"]]
+    publish :set_progress, [[:id, "*"]]
+    publish :set_status, [[:id, "*"]]
   end
 
   postgres do

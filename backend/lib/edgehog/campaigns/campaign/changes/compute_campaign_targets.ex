@@ -67,6 +67,17 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargets do
     end
   end
 
+  defp resolve_target_devices(changeset, :file_download, _mechanism, tenant) do
+    with {:ok, channel} <- fetch_channel(changeset, tenant) do
+      target_devices =
+        channel
+        |> Ash.load!(:download_capable_devices)
+        |> Map.fetch!(:download_capable_devices)
+
+      {:ok, target_devices}
+    end
+  end
+
   defp resolve_target_devices(changeset, action, mechanism, tenant) when action in @deployment_mechanisms do
     with {:ok, release} <- fetch_release(changeset, mechanism, tenant),
          {:ok, channel} <- fetch_channel(changeset, tenant) do

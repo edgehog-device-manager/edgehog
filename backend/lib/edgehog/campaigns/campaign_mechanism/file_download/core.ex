@@ -19,60 +19,67 @@
 #
 
 defimpl Edgehog.Campaigns.CampaignMechanism.Core,
-  for: Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy do
+  for: Edgehog.Campaigns.CampaignMechanism.FileDownload do
   @moduledoc """
-  Core implementation for Deploy Operation on deployment campaign execution.
+  Core implementation for File Download Operation on file download campaign execution.
 
-  This module implements the `Edgehog.Campaigns.CampaignMechanism.Core` behavior for deployment campaigns,
-  providing the business logic for managing container deployments across target devices.
+  This module implements the `Edgehog.Campaigns.CampaignMechanism.Core` behavior for file download campaigns,
+  providing the business logic for managing file downloads across target devices.
   """
 
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.CampaignMechanism.Core.Any
-  alias Edgehog.Campaigns.CampaignMechanism.Helpers
-  alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Files
 
-  require Ash.Query
   require Logger
 
   # Operation Tracking
 
   @doc """
-  Returns the deployment ID as the operation identifier for tracking.
+  Returns the file download request ID as the operation identifier for tracking.
 
   ## Parameters
     - mechanism: The campaign mechanism struct.
-    - target: The deployment target struct.
+    - target: The campaign target struct.
 
   ## Returns
-    - The deployment ID from the target.
+    - The file download request ID from the target.
   """
-  def get_operation_id(_mechanism, target), do: target.deployment_id
+  def get_operation_id(_mechanism, target), do: target.file_download_request_id
 
   @doc """
-  Marks a deployment operation as timed out.
+  Marks a file download request operation as timed out.
 
   ## Parameters
     - mechanism: The campaign mechanism struct.
-    - operation_id: The ID of the deployment operation.
+    - operation_id: The ID of the file download request operation.
     - tenant_id: The ID of the tenant.
 
   ## Returns
-    - The updated deployment struct marked as timed out.
+    - The updated file download request struct marked as timed out.
   """
   def mark_operation_as_timed_out!(_mechanism, operation_id, tenant_id) do
-    # TODO: add timeout information on the deployment and correctly handle this case
-    deployment = Containers.fetch_deployment!(operation_id, tenant: tenant_id)
-    Containers.mark_deployment_as_timed_out!(deployment, tenant: tenant_id)
+    file_download_request = Files.fetch_file_download_request!(operation_id, tenant: tenant_id)
+
+    case Files.set_response(
+           file_download_request,
+           %{status: :failed, response_code: -1, response_message: "Request timed out"},
+           tenant: tenant_id
+         ) do
+      {:ok, file_download_request} ->
+        file_download_request
+
+      {:error, reason} ->
+        raise "Could not mark file_download_request #{operation_id} as timed out: #{inspect(reason)}"
+    end
   end
 
   @doc """
-  Subscribes to deployment operation updates via PubSub.
+  Subscribes to file download request operation updates via PubSub.
 
   ## Parameters
     - mechanism: The campaign mechanism struct.
-    - operation_id: The ID of the deployment operation.
+    - operation_id: The ID of the file download request operation.
 
   ## Returns
     - `:ok` on success.
@@ -80,29 +87,29 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   """
   def subscribe_to_operation_updates!(_mechanism, operation_id) do
     with {:error, reason} <-
-           Phoenix.PubSub.subscribe(Edgehog.PubSub, "deployments:#{operation_id}") do
+           Phoenix.PubSub.subscribe(Edgehog.PubSub, "file_download_requests:#{operation_id}") do
       raise reason
     end
   end
 
   @doc """
-  Unsubscribes from deployment operation updates via PubSub.
+  Unsubscribes from file download request operation updates via PubSub.
 
   ## Parameters
     - mechanism: The campaign mechanism struct.
-    - operation_id: The ID of the deployment operation.
+    - operation_id: The ID of the file download request operation.
 
   ## Returns
     - `:ok`
   """
   def unsubscribe_to_operation_updates!(_mechanism, operation_id) do
-    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "deployments:#{operation_id}")
+    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "file_download_requests:#{operation_id}")
   end
 
   # Target Management
 
   @doc """
-  Fetches the next valid target for deployment.
+  Fetches the next valid target for file download.
 
   ## Parameters
     - mechanism: The campaign mechanism struct.
@@ -129,70 +136,65 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - A list of in-progress campaign targets.
   """
   def list_in_progress_targets(_mechanism, tenant_id, campaign_id) do
-    Campaigns.list_in_progress_targets!(campaign_id,
-      tenant: tenant_id
-    )
+    Campaigns.list_targets_with_pending_file_download_request!(campaign_id, tenant: tenant_id)
   end
 
   # Operation Execution
 
   @doc """
-  Deploys the release to the target using the specified deployment mechanism.
+  Performs the file download operation for a given mechanism and target device.
+
+  This function orchestrates the file download process by:
+  1. Creating a file download request for the target device
+  2. Sending the request to the device via Astarte
 
   ## Parameters
-    - mechanism: The campaign mechanism struct containing the release.
-    - target: The deployment target struct.
+
+    - `mechanism` - The campaign mechanism struct containing the file and download configuration
+    - `target` - The target device to perform the file download on
 
   ## Returns
-    - `{:ok, :already_in_desired_state}` if the release is already deployed to the target.
-    - `{:ok, target}` if the deployment operation is successful.
-    - `{:error, reason}` if the deployment operation fails.
+
+    - `{:ok, target}` - When the file download request is successfully created and sent
+    - `{:error, reason}` - When the operation fails
   """
   def do_operation(mechanism, target) do
-    deploy(target, mechanism.release)
-  end
-
-  defp deploy(target, release) do
-    # TODO: this crashes if called multiple times. The first time creates all
-    # the necessary resources, the next time, if not completely deployed, retries
-    # to send all the information but fails as the resources are already present.
-    if Helpers.application_deployed?(target, release) do
-      {:ok, :already_in_desired_state}
-    else
-      {:ok, target} = do_deploy(target, release)
-
-      deployment_result =
-        target
-        |> Ash.load!(:deployment, tenant: target.tenant_id)
-        |> Map.get(:deployment)
-        |> Ash.Changeset.for_update(:send_deployment, %{}, tenant: target.tenant_id)
-        |> Ash.update()
-
-      with {:ok, _deployment} <- deployment_result do
-        {:ok, target}
-      end
-    end
-  end
-
-  defp do_deploy(target, release) do
-    target
-    |> Campaigns.update_target_latest_attempt!(DateTime.utc_now())
-    |> Campaigns.link_deployment(release)
+    target = Campaigns.update_target_latest_attempt!(target, DateTime.utc_now())
+    start_file_download(target, mechanism)
   end
 
   @doc """
-  Retries the deploy operation for a target.
+  Starts the file download for a target, creating a FileDownloadRequest and associating it with the target.
+
+  ## Parameters
+    - target: The campaign target struct.
+    - mechanism: The campaign mechanism containing the file configuration.
+
+  ## Returns
+    - `{:ok, target}` if the file download is successfully started.
+    - `{:error, reason}` if the operation fails.
+  """
+  def start_file_download(target, mechanism) do
+    # The file is already loaded in mechanism via get_mechanism
+    Campaigns.start_file_download(target, mechanism.file, mechanism)
+  end
+
+  @doc """
+  Retries the file download operation for a target.
 
   ## Parameters
     - mechanism: The campaign mechanism struct.
-    - target: The deployment target struct.
+    - target: The campaign target struct.
 
   ## Returns
     - `:ok` if the retry is successful.
     - `{:error, reason}` if the retry fails.
   """
   def retry_operation(_mechanism, target) do
-    Helpers.do_retry_target_operation(target, :send_deployment)
+    target
+    |> Ash.load!(:file_download_request)
+    |> Map.fetch!(:file_download_request)
+    |> Files.send_file_download_request()
   end
 
   # Mechanism Configuration
@@ -205,51 +207,35 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - campaign: The campaign struct to load the mechanism from.
 
   ## Returns
-    - The fully loaded deployment deploy mechanism with release data.
+    - The fully loaded file download mechanism with file data.
   """
   def get_mechanism(_mechanism, campaign) do
     mechanism =
       campaign
-      |> Ash.load!(
-        campaign_mechanism: [
-          deployment_deploy: [release: [containers: [:networks, :volumes, :image]]]
-        ]
-      )
+      |> Ash.load!(campaign_mechanism: [file_download: [:file]])
       |> Map.get(:campaign_mechanism)
 
     mechanism.value
   end
 
   # Error Handling
+
   @doc """
   Formats and logs a failure message for an operation.
 
-  Fetches the latest error event and logs the device ID,
-  operation type, and error message.
+  Logs the device ID and response code.
 
   ## Parameters
     - mechanism: The campaign mechanism containing the type information.
-    - operation: The operation struct (Deployment).
+    - operation: The operation struct (FileDownloadRequest).
 
   ## Returns
     - `:ok` (this function is called for its side effect of logging).
   """
   def format_operation_failure_log(mechanism, operation) do
-    latest_error_message =
-      case get_latest_error_for_deployment!(operation.tenant_id, operation.id) do
-        %{message: message} -> message
-        nil -> "Could not find any error event."
-      end
-
-    Logger.notice("Device #{operation.device_id} #{mechanism.type} operation failed: #{latest_error_message}")
-  end
-
-  defp get_latest_error_for_deployment!(tenant_id, deployment_id) do
-    Deployment.Event
-    |> Ash.Query.filter(deployment_id == ^deployment_id)
-    |> Ash.Query.filter(type == :error)
-    |> Ash.Query.sort(inserted_at: :desc)
-    |> Ash.read_first!(tenant: tenant_id)
+    Logger.notice(
+      "Device #{operation.device_id} #{mechanism.type} operation failed: response code #{operation.response_code}, message: #{operation.response_message}"
+    )
   end
 
   # Delegate common functions to Any implementation

@@ -32,10 +32,12 @@ defmodule Edgehog.Campaigns.CampaignTarget do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.Campaigns.CampaignMechanism.FileDownload
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Campaigns.CampaignTarget.Changes
   alias Edgehog.Campaigns.CampaignTarget.Changes.TriggerCampaignSubscription
   alias Edgehog.Containers.Release
+  alias Edgehog.Files.File
 
   resource do
     description @moduledoc
@@ -101,6 +103,27 @@ defmodule Edgehog.Campaigns.CampaignTarget do
 
       filter expr(campaign_id == ^arg(:campaign_id))
       filter expr(not is_nil(ota_operation) and ota_operation.status == :pending)
+    end
+
+    read :read_targets_with_pending_file_download_request do
+      description """
+      Reads all the targets of a file download campaign that have a pending file
+      download request. This is useful when resuming a file download campaign to know which
+      targets need to setup a retry timeout.
+      """
+
+      argument :campaign_id, :uuid, allow_nil?: false
+
+      prepare build(load: [file_download_request: :status])
+
+      filter expr(campaign_id == ^arg(:campaign_id))
+
+      filter expr(status == :in_progress)
+
+      filter expr(
+               not is_nil(file_download_request) and
+                 file_download_request.status in [:pending, :sent]
+             )
     end
 
     read :next_valid_target_with_application_deployed do
@@ -250,6 +273,32 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       change set_attribute(:status, :in_progress)
       change Changes.CreateManagedOTAOperation
     end
+
+    # File download related updates
+
+    update :start_file_download do
+      description """
+      Starts the file download for a target.
+      It creates a File Download Request, associates it with the campaign target, and
+      sends the download request to the device.
+      The campaign target is transitioned to the :in_progress status.
+      """
+
+      argument :file, :struct do
+        constraints instance_of: File
+        allow_nil? false
+      end
+
+      argument :mechanism, :struct do
+        constraints instance_of: FileDownload
+        allow_nil? false
+      end
+
+      require_atomic? false
+
+      change set_attribute(:status, :in_progress)
+      change Changes.CreateManagedFileDownloadRequest
+    end
   end
 
   attributes do
@@ -319,6 +368,12 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       attribute_public? false
       attribute_type :uuid
     end
+
+    belongs_to :file_download_request, Edgehog.Files.FileDownloadRequest do
+      public? true
+      attribute_public? false
+      attribute_type :uuid
+    end
   end
 
   postgres do
@@ -329,6 +384,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       reference :campaign, on_delete: :delete
       reference :deployment, on_delete: :nilify
       reference :ota_operation, on_delete: :delete
+      reference :file_download_request, on_delete: :delete
     end
   end
 end

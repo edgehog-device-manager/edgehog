@@ -209,6 +209,17 @@ defmodule Edgehog.Campaigns.Channel do
 
       calculation Calculations.DeployableDevices
     end
+
+    calculate :download_capable_devices, {:array, :struct} do
+      description """
+      The devices targeted by the channel that can perform file downloads.
+      """
+
+      constraints items: [instance_of: Device]
+      allow_nil? false
+
+      calculation Calculations.DownloadCapableDevices
+    end
   end
 
   identities do

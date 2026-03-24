@@ -88,6 +88,7 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
       :deployment_delete -> {CampaignMechanism.DeploymentDelete.Executor, args}
       :deployment_upgrade -> {CampaignMechanism.DeploymentUpgrade.Executor, args}
       :firmware_upgrade -> {CampaignMechanism.FirmwareUpgrade.Executor, args}
+      :file_download -> {CampaignMechanism.FileDownload.Executor, args}
     end
   end
 

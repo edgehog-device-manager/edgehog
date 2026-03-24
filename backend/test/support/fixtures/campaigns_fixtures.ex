@@ -31,6 +31,7 @@ defmodule Edgehog.CampaignsFixtures do
   - `:deployment_stop` - Stop running deployments
   - `:deployment_upgrade` - Upgrade existing deployments to a new release
   - `:deployment_delete` - Delete deployments
+  - `:file_download` - File download campaigns
   """
 
   alias Edgehog.AstarteFixtures
@@ -43,6 +44,8 @@ defmodule Edgehog.CampaignsFixtures do
   alias Edgehog.Containers.Release
   alias Edgehog.ContainersFixtures
   alias Edgehog.DevicesFixtures
+  alias Edgehog.Files
+  alias Edgehog.FilesFixtures
   alias Edgehog.GroupsFixtures
   alias Edgehog.OSManagement
 
@@ -60,7 +63,11 @@ defmodule Edgehog.CampaignsFixtures do
 
   @firmware_mechanism_types [:firmware_upgrade]
 
-  @all_mechanism_types @deployment_mechanism_types ++ @firmware_mechanism_types
+  @file_download_mechanism_types [:file_download]
+
+  @all_mechanism_types @deployment_mechanism_types ++
+                         @firmware_mechanism_types ++
+                         @file_download_mechanism_types
 
   @doc """
   Returns all supported campaign mechanism types.
@@ -78,6 +85,11 @@ defmodule Edgehog.CampaignsFixtures do
   def firmware_mechanism_types, do: @firmware_mechanism_types
 
   @doc """
+  Returns all file download-related mechanism types.
+  """
+  def file_download_mechanism_types, do: @file_download_mechanism_types
+
+  @doc """
   Returns true if the mechanism type is deployment-related.
   """
   def deployment_mechanism?(type), do: type in @deployment_mechanism_types
@@ -86,6 +98,11 @@ defmodule Edgehog.CampaignsFixtures do
   Returns true if the mechanism type is firmware-related.
   """
   def firmware_mechanism?(type), do: type in @firmware_mechanism_types
+
+  @doc """
+  Returns true if the mechanism type is file download-related.
+  """
+  def file_download_mechanism?(type), do: type in @file_download_mechanism_types
 
   # Unique Value Generators
 
@@ -186,7 +203,7 @@ defmodule Edgehog.CampaignsFixtures do
       )
     end
 
-    opts = Keyword.drop(opts, [:release_id, :target_release_id, :base_image_id])
+    opts = Keyword.drop(opts, [:release_id, :target_release_id, :base_image_id, :file_id])
 
     params =
       Enum.into(opts, %{
@@ -398,6 +415,30 @@ defmodule Edgehog.CampaignsFixtures do
     Enum.into(mechanism_opts, base_opts)
   end
 
+  defp build_campaign_mechanism(:file_download, tenant, opts, mechanism_opts) do
+    {file_id, _opts} =
+      Keyword.pop_lazy(opts, :file_id, fn ->
+        [tenant: tenant] |> FilesFixtures.file_fixture() |> Map.fetch!(:id)
+      end)
+
+    base_opts = %{
+      type: "file_download",
+      file_id: file_id,
+      max_failure_percentage: 50.0,
+      max_in_progress_operations: 100,
+      compression: "",
+      ttl_seconds: 0,
+      file_mode: 0,
+      user_id: -1,
+      group_id: -1,
+      destination_type: :storage,
+      request_retries: 3,
+      request_timeout_seconds: 300
+    }
+
+    Enum.into(mechanism_opts, base_opts)
+  end
+
   defp get_release_id(_mechanism_type, tenant, opts) do
     # Always create at least 1 system model to ensure compatible devices can be created
     Keyword.get_lazy(opts, :release_id, fn ->
@@ -466,6 +507,15 @@ defmodule Edgehog.CampaignsFixtures do
       end)
 
     {[base_image_id: base_image_id], opts}
+  end
+
+  defp prepare_campaign_resource(:file_download, tenant, opts) do
+    {file_id, opts} =
+      Keyword.pop_lazy(opts, :file_id, fn ->
+        [tenant: tenant] |> FilesFixtures.file_fixture() |> Map.fetch!(:id)
+      end)
+
+    {[file_id: file_id], opts}
   end
 
   defp deploy_for_required_operations(mechanism_type, release_id, channel_id, tenant) do
@@ -549,6 +599,13 @@ defmodule Edgehog.CampaignsFixtures do
     |> DevicesFixtures.add_tags([tag])
   end
 
+  defp create_compatible_device(:file_download, _resource_opts, tag, tenant) do
+    # For file download campaigns, any online device can be a target
+    [online: true, tenant: tenant]
+    |> DevicesFixtures.device_fixture()
+    |> DevicesFixtures.add_tags([tag])
+  end
+
   defp fake_deployment_readiness(deployment, mechanism_type, tenant) do
     Enum.each(deployment.container_deployments, fn cd ->
       Ash.bulk_update!(
@@ -606,6 +663,14 @@ defmodule Edgehog.CampaignsFixtures do
     )
   end
 
+  defp setup_operation_mocks(:file_download) do
+    Mox.stub(
+      Edgehog.Astarte.Device.FileDownloadRequestMock,
+      :request_download,
+      fn _client, _device_id, _request_data, _device_type -> :ok end
+    )
+  end
+
   # Target Loading Helpers
 
   defp load_target_for_operation(target, mechanism_type) when mechanism_type in @deployment_mechanism_types do
@@ -614,6 +679,10 @@ defmodule Edgehog.CampaignsFixtures do
 
   defp load_target_for_operation(target, :firmware_upgrade) do
     Ash.load!(target, ota_operation: [:status], device: [realm: [:cluster]])
+  end
+
+  defp load_target_for_operation(target, :file_download) do
+    Ash.load!(target, file_download_request: [:status], device: [realm: [:cluster]])
   end
 
   # Operation Starting Helpers
@@ -643,6 +712,19 @@ defmodule Edgehog.CampaignsFixtures do
       |> Map.get(:base_image)
 
     {:ok, target} = Campaigns.start_fw_upgrade(target, base_image)
+    target
+  end
+
+  defp start_target_operation(target, :file_download, tenant) do
+    campaign =
+      target.campaign_id
+      |> Campaigns.fetch_campaign!(tenant: tenant)
+      |> Ash.load!(campaign_mechanism: [file_download: [:file]])
+
+    mechanism = campaign.campaign_mechanism.value
+    file = mechanism.file
+
+    {:ok, target} = Campaigns.start_file_download(target, file, mechanism)
     target
   end
 
@@ -707,11 +789,36 @@ defmodule Edgehog.CampaignsFixtures do
     |> OSManagement.update_ota_operation_status(status)
   end
 
+  defp update_operation_status(target, :file_download, status, tenant) do
+    file_status =
+      case status do
+        :success -> :completed
+        :failure -> :failed
+      end
+
+    file_download_request =
+      Files.fetch_file_download_request!(target.file_download_request_id, tenant: tenant)
+
+    Files.set_response(
+      file_download_request,
+      %{
+        status: file_status,
+        response_code: if(file_status == :completed, do: 0, else: 1),
+        response_message: if(file_status == :completed, do: "Success", else: "Failed")
+      },
+      tenant: tenant
+    )
+  end
+
   defp reload_target_with_operation(target, mechanism_type) when mechanism_type in @deployment_mechanism_types do
     Ash.load!(target, deployment: :state)
   end
 
   defp reload_target_with_operation(target, :firmware_upgrade) do
     Ash.load!(target, ota_operation: :status)
+  end
+
+  defp reload_target_with_operation(target, :file_download) do
+    Ash.load!(target, file_download_request: :status)
   end
 end

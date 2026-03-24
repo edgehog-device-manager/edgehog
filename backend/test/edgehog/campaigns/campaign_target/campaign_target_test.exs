@@ -30,8 +30,18 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
 
   alias Ash.Error.Invalid
   alias Edgehog.Campaigns
+  alias Edgehog.Files
+  alias Edgehog.StorageMock
 
   setup do
+    stub(Edgehog.Astarte.Device.DeviceStatusMock, :get, fn _client, _device_id ->
+      {:error, :not_found}
+    end)
+
+    stub(StorageMock, :read_presigned_url, fn path ->
+      {:ok, %{get_url: "http://example.test/#{path}"}}
+    end)
+
     tenant = tenant_fixture()
     application = application_fixture(tenant: tenant)
     release = release_fixture(application_id: application.id, tenant: tenant, system_models: 1)
@@ -242,6 +252,98 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
                )
 
       assert target.device_id == device.id
+    end
+  end
+
+  describe "read_targets_with_pending_file_download_request" do
+    test "returns target when request is :pending", %{tenant: tenant} do
+      target = in_progress_target_fixture(tenant: tenant, mechanism_type: :file_download)
+
+      assert {:ok, request} =
+               Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
+
+      assert {:ok, _request} = Files.set_status(request, %{status: :pending}, tenant: tenant)
+
+      assert {:ok, [pending_target]} =
+               Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
+                 tenant: tenant
+               )
+
+      assert pending_target.id == target.id
+    end
+
+    test "returns target when request is :sent", %{tenant: tenant} do
+      target = in_progress_target_fixture(tenant: tenant, mechanism_type: :file_download)
+
+      assert {:ok, [pending_target]} =
+               Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
+                 tenant: tenant
+               )
+
+      assert pending_target.id == target.id
+    end
+
+    test "does not return target when request is :in_progress", %{tenant: tenant} do
+      target = in_progress_target_fixture(tenant: tenant, mechanism_type: :file_download)
+
+      assert {:ok, request} =
+               Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
+
+      assert {:ok, _request} = Files.set_status(request, %{status: :in_progress}, tenant: tenant)
+
+      assert {:ok, []} =
+               Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
+                 tenant: tenant
+               )
+    end
+
+    test "does not return target when request is :completed", %{tenant: tenant} do
+      target = in_progress_target_fixture(tenant: tenant, mechanism_type: :file_download)
+
+      assert {:ok, request} =
+               Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
+
+      assert {:ok, _request} = Files.set_status(request, %{status: :completed}, tenant: tenant)
+
+      assert {:ok, []} =
+               Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
+                 tenant: tenant
+               )
+    end
+
+    test "does not return target when request is :failed", %{tenant: tenant} do
+      target = in_progress_target_fixture(tenant: tenant, mechanism_type: :file_download)
+
+      assert {:ok, request} =
+               Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
+
+      assert {:ok, _request} = Files.set_status(request, %{status: :failed}, tenant: tenant)
+
+      assert {:ok, []} =
+               Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
+                 tenant: tenant
+               )
+    end
+
+    test "does not return target when campaign target is not :in_progress", %{tenant: tenant} do
+      target = in_progress_target_fixture(tenant: tenant, mechanism_type: :file_download)
+
+      assert {:ok, request} =
+               Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
+
+      assert {:ok, _request} = Files.set_status(request, %{status: :sent}, tenant: tenant)
+
+      assert {:ok, _target} =
+               Campaigns.mark_target_as_successful(
+                 target,
+                 %{completion_timestamp: DateTime.utc_now()},
+                 tenant: tenant
+               )
+
+      assert {:ok, []} =
+               Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
+                 tenant: tenant
+               )
     end
   end
 end

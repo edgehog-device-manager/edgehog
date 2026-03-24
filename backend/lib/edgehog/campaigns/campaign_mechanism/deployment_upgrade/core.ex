@@ -293,22 +293,6 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     |> Ash.read_first!(tenant: tenant_id)
   end
 
-  @doc """
-  Renders a more descriptive error message based on the given reason and device id.
-
-  ## Parameters
-    - mechanism: The campaign mechanism struct.
-    - reason: The error reason.
-    - device_id: The device ID.
-
-  ## Returns
-    - A string describing the error.
-  """
-  def error_message(mechanism, reason, device_id) do
-    # Delegate to Any for generic error messages
-    Any.error_message(mechanism, reason, device_id)
-  end
-
   # Delegate common functions to Any implementation
   defdelegate get_campaign!(mechanism, tenant_id, campaign_id),
     to: Any
@@ -368,5 +352,8 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     to: Any
 
   defdelegate temporary_error?(mechanism, reason),
+    to: Any
+
+  defdelegate error_message(mechanism, reason, device_id),
     to: Any
 end

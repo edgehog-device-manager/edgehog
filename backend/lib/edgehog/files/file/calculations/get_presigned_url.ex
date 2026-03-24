@@ -37,8 +37,9 @@ defmodule Edgehog.Files.File.Calculations.GetPresignedUrl do
 
   @impl Calculation
   def calculate(records, _opts, context) do
+    tenant_id = extract_tenant_id(context)
+
     Enum.map(records, fn file ->
-      tenant_id = context.tenant.tenant_id
       repository_id = file.repository_id
       filename = file.name
 
@@ -50,4 +51,10 @@ defmodule Edgehog.Files.File.Calculations.GetPresignedUrl do
       end
     end)
   end
+
+  # Ash context can carry tenant as a struct in request flows or as a raw id in
+  # background executor flows, so we support both shapes to avoid crashes.
+  defp extract_tenant_id(%{tenant: %{tenant_id: tenant_id}}), do: tenant_id
+  defp extract_tenant_id(%{tenant: tenant_id}), do: tenant_id
+  defp extract_tenant_id(_), do: nil
 end
