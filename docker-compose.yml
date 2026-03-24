@@ -122,7 +122,7 @@ services:
     environment:
       RUSTFS_ACCESS_KEY: "rustfsadmin"
       RUSTFS_SECRET_KEY: "rustfsadmin"
-      RUSTFS_CONSOLE_ENABLE: true
+      RUSTFS_CONSOLE_ENABLE: "true"
     command: /data
     healthcheck:
       test: ["CMD-SHELL", "curl -so /dev/null http://localhost:9000/ || exit 1"]
