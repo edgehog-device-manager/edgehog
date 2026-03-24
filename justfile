@@ -165,10 +165,10 @@ _edgehog-dev-backend:
     (docker run --name edgehog-db -d -e "POSTGRES_HOST_AUTH_METHOD=trust" -p 5432:5432 --rm postgres && sleep 3) || true # skip if already up
     # `astarte` network gateway ip, a.k.a. edgehog's IP
     export DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN=edgehog.localhost
-    export DATABASE_USERNAME=edgehog
-    export DATABASE_PASSWORD=edgehog
+    export DATABASE_USERNAME=postgres
+    export DATABASE_PASSWORD=postgres
     export DATABASE_HOSTNAME=postgres.edgehog.localhost
-    export DATABASE_NAME=postgres
+    export DATABASE_NAME=edgehog_dev
     export SECRET_KEY_BASE=KKtB6BEPk1NVk6EmBfQCafphxLj7EW1M+BGPIFCT8X2LTywTFuGC6lM3yc8e3VKH
     export SEEDS_REALM_ORIGINAL_FILE=${SEEDS_REALM_PRIVATE_KEY_FILE}
     export SEEDS_TENANT_ORIGINAL_FILE=${SEEDS_TENANT_PRIVATE_KEY_FILE}
