@@ -1,41 +1,51 @@
-## Change Title
+#### What this PR does / why we need it:
+
+#### Additional documentation e.g. usage docs, diagrams, reviewer notes, etc.:
 
 <!--
-Describe the big picture of your changes here to communicate to the maintainers
-why we should accept this pull request.
-
-If it fixes a bug or resolves a feature request, be sure to link to the related issue.
-Example:
-    - Fixes #123
+This section can be blank if this pull request does not require additional resources.
 -->
 
-## Checklist
+---
 
-<!--
-Put an `x` in the boxes that apply. You can fill these out after creating the PR.
-If you're unsure about any of them, don't hesitate to ask.
-This is simply a reminder of what will be checked before merging.
--->
+<details>
+<summary><i>Thanks for sending a pull request! If this is your first time, here are some tips for you:</i></summary>
 
-- [ ] I have read the CONTRIBUTING.md
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] I have added or updated documentation (if appropriate)
+1. You can take a look at our [developer guide] for an introduction on Edgehog development!
+2. Make sure to read [CONTRIBUTING.md] and [CODE_OF_CONDUCT.md]
+3. If the PR is unfinished or you're actively working on it, mark it as draft
 
-## Further Comments (optional)
+When fixing existing issues, use [github's syntax to link your pull request] to it
 
-<!--
-If this is a relatively large or complex change, explain:
-    - Why you chose this solution
-    - What alternatives you considered
-    - Any trade-offs or follow-up work
--->
+> `fixes #<issue number>`
 
-## Screenshots / Demos (optional)
+We also have a syntax to signal dependencies to other open pull requests
 
-<!--
-If this PR introduces visual or UI changes, it is highly appreciated to include
-screenshots, GIFs, or a short video.
+> `depends on #<pr number>`
+> `depends on https://github.com/...`
 
-This helps reviewers more easily understand the changes and makes it simpler to
-track visual differences over time.
--->
+In case of stacked PRs, you may add the PR number in the last commit's title instead:
+
+> ```mermaid
+> gitGraph
+>     commit id: "Current master"
+>     branch feat1
+>     checkout feat1
+>     commit id: "feat: add something"
+>     commit id: "feat: add something else (#100)"
+>     branch feat2
+>     checkout feat2
+>     commit id: "refactor: do something"
+>     commit id: "fix: solve issue"
+>     commit id: "feat: add a feature (#101)"
+>     branch feat3
+>     checkout feat3
+>     commit id: "feat: feat without pr number"
+> ```
+
+</details>
+
+[github's syntax to link your pull request]: https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/linking-a-pull-request-to-an-issue#about-linked-issues-and-pull-requests
+[developer guide]: https://docs.edgehog.io/snapshot/edgehog_just_in_time.html
+[CONTRIBUTING.md]: ../CONTRIBUTING.md
+[CODE_OF_CONDUCT.md]: ../CODE_OF_CONDUCT.md
