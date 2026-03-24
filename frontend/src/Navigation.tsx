@@ -107,7 +107,15 @@ const matchingParametricRoute = (
     return null;
   }
 
-  const params = matchPath(route, path)?.params;
+  const rawParams = matchPath(route, path)?.params;
+  const params = rawParams
+    ? Object.fromEntries(
+        Object.entries(rawParams).map(([key, value]) => [
+          key,
+          typeof value === "string" ? decodeURIComponent(value) : value,
+        ]),
+      )
+    : undefined;
   switch (route) {
     case Route.devices:
     case Route.deviceGroups:
