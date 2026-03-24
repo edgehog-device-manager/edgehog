@@ -56,7 +56,7 @@ defmodule GenEdgehogJwt do
           Joken.Signer.create("ES256", %{"pem" => private_key_pem})
 
         _ ->
-          IO.puts("#{@red}❌ Unsupported or invalid private key format!#{@reset}")
+          IO.puts(:stderr, "#{@red}❌ Unsupported or invalid private key format!#{@reset}")
           System.halt(1)
       end
 
@@ -67,11 +67,11 @@ defmodule GenEdgehogJwt do
 
     case Joken.generate_and_sign(%{}, claims, signer) do
       {:ok, token, _claims} ->
-        IO.puts("#{@green}✅ Token generated successfully!#{@reset}\n")
+        IO.puts(:stderr, "#{@green}✅ Token generated successfully!#{@reset}\n")
         IO.puts(token)
 
       {:error, reason} ->
-        IO.puts("#{@red}❌ Error generating token: #{inspect(reason)}#{@reset}")
+        IO.puts(:stderr, "#{@red}❌ Error generating token: #{inspect(reason)}#{@reset}")
     end
   end
 
@@ -85,7 +85,7 @@ defmodule GenEdgehogJwt do
   rescue
     e in OptionParser.ParseError ->
       print_usage()
-      IO.puts("#{@red}gen-edgehog-jwt: error: #{e.message}#{@reset}")
+      IO.puts(:stderr,"#{@red}gen-edgehog-jwt: error: #{e.message}#{@reset}")
       System.halt(1)
   end
 
@@ -94,21 +94,21 @@ defmodule GenEdgehogJwt do
       !opts[:private_key] ->
         print_usage()
 
-        IO.puts("#{@red}gen-edgehog-jwt: error: the following arguments are required: -k/--private-key#{@reset}")
+        IO.puts(:stderr, "#{@red}gen-edgehog-jwt: error: the following arguments are required: -k/--private-key#{@reset}")
 
         System.halt(1)
 
       !opts[:token_type] ->
         print_usage()
 
-        IO.puts("#{@red}gen-edgehog-jwt: error: the following arguments are required: -t/--token-type#{@reset}")
+        IO.puts(:stderr, "#{@red}gen-edgehog-jwt: error: the following arguments are required: -t/--token-type#{@reset}")
 
         System.halt(1)
 
       opts[:token_type] not in ["tenant", "admin"] ->
         print_usage()
 
-        IO.puts(
+        IO.puts(:stderr,
           "#{@red}gen-edgehog-jwt: error: invalid token type '#{opts[:token_type]}'. Choose 'tenant' or 'admin'.#{@reset}"
         )
 
