@@ -982,6 +982,42 @@
   "components.FileDownloadCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
+  "components.FileDownloadRequestsTable.campaignName": {
+    "defaultMessage": "File Download Campaign"
+  },
+  "components.FileDownloadRequestsTable.destination": {
+    "defaultMessage": "Destination"
+  },
+  "components.FileDownloadRequestsTable.destination.filesystem": {
+    "defaultMessage": "FILESYSTEM: {destination}"
+  },
+  "components.FileDownloadRequestsTable.destination.storage": {
+    "defaultMessage": "STORAGE: {path}"
+  },
+  "components.FileDownloadRequestsTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.FileDownloadRequestsTable.fileSize": {
+    "defaultMessage": "Uncompressed File Size"
+  },
+  "components.FileDownloadRequestsTable.infinite": {
+    "defaultMessage": "Infinite"
+  },
+  "components.FileDownloadRequestsTable.message": {
+    "defaultMessage": "Response Message"
+  },
+  "components.FileDownloadRequestsTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.FileDownloadRequestsTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.FileDownloadRequestsTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.FileDownloadRequestsTable.ttl": {
+    "defaultMessage": "TTL (s)"
+  },
   "components.FileDownloadTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at"
   },
@@ -993,6 +1029,9 @@
   },
   "components.FileDownloadTargetsTable.latestAttemptTitle": {
     "defaultMessage": "Latest attempt at"
+  },
+  "components.FileDownloadTargetsTable.pathOnDeviceTitle": {
+    "defaultMessage": "Path on device"
   },
   "components.FileDownloadTargetsTable.requestProgressTitle": {
     "defaultMessage": "Progress"
@@ -1055,39 +1094,6 @@
   "components.FilesTable.sizeTitle": {
     "defaultMessage": "File Size",
     "description": "Title for the File Size column of the files table"
-  },
-  "components.FilesUploadTab.status.notTracked": {
-    "defaultMessage": "Not Tracked"
-  },
-  "components.FilesUploadTab.table.destination": {
-    "defaultMessage": "Destination"
-  },
-  "components.FilesUploadTab.table.destination.filesystem": {
-    "defaultMessage": "FILESYSTEM: {destination}"
-  },
-  "components.FilesUploadTab.table.destination.storage": {
-    "defaultMessage": "STORAGE: {path}"
-  },
-  "components.FilesUploadTab.table.fileName": {
-    "defaultMessage": "File Name"
-  },
-  "components.FilesUploadTab.table.fileSize": {
-    "defaultMessage": "Uncompressed File Size"
-  },
-  "components.FilesUploadTab.table.infinite": {
-    "defaultMessage": "Infinite"
-  },
-  "components.FilesUploadTab.table.message": {
-    "defaultMessage": "Response Message"
-  },
-  "components.FilesUploadTab.table.progress": {
-    "defaultMessage": "Progress"
-  },
-  "components.FilesUploadTab.table.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FilesUploadTab.table.ttl": {
-    "defaultMessage": "TTL (s)"
   },
   "components.Footer.edgehogHomeLinkLabel": {
     "defaultMessage": "Edgehog Homepage Link"

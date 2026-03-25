@@ -86,6 +86,12 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
           userId
           groupId
           uncompressedFileSizeBytes
+          campaignTarget {
+            campaign {
+              id
+              name
+            }
+          }
         }
       }
     }

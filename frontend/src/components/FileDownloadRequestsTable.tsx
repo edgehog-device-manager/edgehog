@@ -25,6 +25,7 @@ import type { FilesUploadTab_fileDownloadRequests$data } from "@/api/__generated
 import RequestStatus from "@/components/RequestStatus";
 import Table, { createColumnHelper } from "@/components/Table";
 import { formatFileSize } from "@/lib/files";
+import { Link, Route } from "@/Navigation";
 
 type FileDownloadRequestNode = NonNullable<
   NonNullable<
@@ -37,33 +38,40 @@ const columns = [
   columnHelper.accessor("fileName", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.fileName"
+        id="components.FileDownloadRequestsTable.fileName"
         defaultMessage="File Name"
       />
     ),
     cell: ({ getValue }) => getValue(),
   }),
+  columnHelper.accessor((row) => row.campaignTarget?.campaign?.name, {
+    id: "fileDownloadCampaignName",
+    header: () => (
+      <FormattedMessage
+        id="components.FileDownloadRequestsTable.campaignName"
+        defaultMessage="File Download Campaign"
+      />
+    ),
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.fileDownloadCampaignsEdit}
+        params={{
+          fileDownloadCampaignId:
+            row.original.campaignTarget?.campaign?.id ?? "",
+        }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.status"
+        id="components.FileDownloadRequestsTable.status"
         defaultMessage="Status"
       />
     ),
-    cell: ({ getValue, row }) => {
-      const progressTracked = row.original.progressTracked;
-
-      if (!progressTracked) {
-        return (
-          <span className="text-muted">
-            <FormattedMessage
-              id="components.FilesUploadTab.status.notTracked"
-              defaultMessage="Not Tracked"
-            />
-          </span>
-        );
-      }
-
+    cell: ({ getValue }) => {
       const status = getValue();
       return <RequestStatus status={status} />;
     },
@@ -71,7 +79,7 @@ const columns = [
   columnHelper.accessor("progressPercentage", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.progress"
+        id="components.FileDownloadRequestsTable.progress"
         defaultMessage="Progress"
       />
     ),
@@ -82,7 +90,7 @@ const columns = [
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FilesUploadTab.status.notTracked"
+              id="components.FileDownloadRequestsTable.status.notTracked"
               defaultMessage="Not Tracked"
             />
           </span>
@@ -96,7 +104,7 @@ const columns = [
   columnHelper.accessor("destinationType", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.destination"
+        id="components.FileDownloadRequestsTable.destination"
         defaultMessage="Destination"
       />
     ),
@@ -106,7 +114,7 @@ const columns = [
       if (destinationType == "FILESYSTEM") {
         return (
           <FormattedMessage
-            id="components.FilesUploadTab.table.destination.filesystem"
+            id="components.FileDownloadRequestsTable.destination.filesystem"
             defaultMessage="FILESYSTEM: {destination}"
             values={{ destination: row.original.destination ?? "" }}
           />
@@ -116,7 +124,7 @@ const columns = [
       if (destinationType == "STORAGE") {
         return (
           <FormattedMessage
-            id="components.FilesUploadTab.table.destination.storage"
+            id="components.FileDownloadRequestsTable.destination.storage"
             defaultMessage="STORAGE: {path}"
             values={{ path: row.original.pathOnDevice ?? "" }}
           />
@@ -129,7 +137,7 @@ const columns = [
   columnHelper.accessor("uncompressedFileSizeBytes", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.fileSize"
+        id="components.FileDownloadRequestsTable.fileSize"
         defaultMessage="Uncompressed File Size"
       />
     ),
@@ -141,7 +149,7 @@ const columns = [
   columnHelper.accessor("ttlSeconds", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.ttl"
+        id="components.FileDownloadRequestsTable.ttl"
         defaultMessage="TTL (s)"
       />
     ),
@@ -152,7 +160,7 @@ const columns = [
         return (
           <p>
             <FormattedMessage
-              id="components.FilesUploadTab.table.infinite"
+              id="components.FileDownloadRequestsTable.infinite"
               defaultMessage="Infinite"
             />
           </p>
@@ -165,7 +173,7 @@ const columns = [
   columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
-        id="components.FilesUploadTab.table.message"
+        id="components.FileDownloadRequestsTable.message"
         defaultMessage="Response Message"
       />
     ),
