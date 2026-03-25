@@ -19,6 +19,9 @@
   subdirectories: ["priv/*/migrations"],
   locals_without_parens: [
     assert_created: 3,
-    assert_updated: 3
+    assert_updated: 3,
+    triggers: 1,
+    trigger: 1,
+    handler: 1
   ]
 ]

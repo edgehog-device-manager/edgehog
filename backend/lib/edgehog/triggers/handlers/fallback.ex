@@ -1,6 +1,7 @@
+#
 # This file is part of Edgehog.
 #
-# Copyright 2024, 2026 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,21 +16,27 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
+#
 
-defmodule Edgehog.Triggers do
-  @moduledoc false
-  use Ash.Domain,
-    extensions: [Ash.Astarte.Triggers.Domain]
+defmodule Edgehog.Triggers.Handlers.Fallback do
+  @moduledoc """
+  Fallback handler.
+  """
 
-  triggers do
-    trigger Edgehog.Triggers.IncomingData
-    trigger Edgehog.Triggers.DeviceConnected
-    trigger Edgehog.Triggers.DeviceDisconnected
-    trigger Edgehog.Triggers.DeviceRegistered
-    trigger Edgehog.Triggers.DeviceDeletionFinished
-  end
+  @behaviour Ash.Astarte.Triggers.HandlerBehavior
 
-  fallback_handlers do
-    handler Edgehog.Triggers.Handlers.Fallback
+  alias Edgehog.Devices.Device
+
+  require Logger
+
+  @impl Ash.Astarte.Triggers.HandlerBehavior
+  def handle_event(event, _opts, context) do
+    %{tenant: tenant, realm_id: realm_id, device_id: device_id} = context
+
+    Logger.debug("Unhandled event.", event: event, context: context)
+
+    Device
+    |> Ash.Changeset.for_create(:from_unhandled_event, %{realm_id: realm_id, device_id: device_id})
+    |> Ash.create(tenant: tenant)
   end
 end

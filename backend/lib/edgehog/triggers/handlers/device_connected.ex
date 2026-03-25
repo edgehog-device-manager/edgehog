@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Triggers.Handler do
-  @moduledoc false
-  use Ash.Resource,
-    domain: Edgehog.Triggers
+defmodule Edgehog.Triggers.Handlers.DeviceConnected do
+  @moduledoc """
+  Device connected handler
+  """
 
-  alias Edgehog.Triggers.Handler.ManualActions
-  alias Edgehog.Triggers.TriggerPayload
+  @behaviour Ash.Astarte.Triggers.HandlerBehavior
 
-  actions do
-    action :handle_trigger do
-      argument :realm_name, :string, allow_nil?: false
-      argument :trigger_payload, TriggerPayload, allow_nil?: false
+  alias Edgehog.Devices.Device
 
-      run ManualActions.HandleTrigger
-    end
+  @impl Ash.Astarte.Triggers.HandlerBehavior
+  def handle_event(_event, _opts, context) do
+    %{realm_id: realm_id, device_id: device_id, timestamp: timestamp, tenant: tenant} = context
+
+    params = %{realm_id: realm_id, device_id: device_id, timestamp: timestamp}
+
+    Device
+    |> Ash.Changeset.for_create(:from_device_connected_event, params)
+    |> Ash.create(tenant: tenant)
   end
 end

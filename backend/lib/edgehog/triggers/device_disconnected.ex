@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,12 +15,20 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Triggers.DeviceDisconnected do
   @moduledoc false
   use Ash.Resource,
-    data_layer: :embedded
+    data_layer: :embedded,
+    extensions: [Ash.Astarte.Triggers.Resource]
 
-  # This does not have any attributes
+  alias Edgehog.Triggers.Handlers
+
+  handlers do
+    handler Handlers.DeviceDisconnected
+  end
+
+  astarte do
+    tag :device_disconnected
+  end
 end

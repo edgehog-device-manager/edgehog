@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +15,18 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Triggers.DeviceRegistered do
   @moduledoc false
   use Ash.Resource,
-    data_layer: :embedded
+    data_layer: :embedded,
+    extensions: [Ash.Astarte.Triggers.Resource]
+
+  handlers do
+    handler Edgehog.Triggers.Handlers.DeviceRegistered
+  end
+
+  astarte do
+    tag :device_registered
+  end
 end

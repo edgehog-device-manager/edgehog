@@ -116,6 +116,8 @@ config :edgehog, :edgehog_forwarder, %{
   enabled?: true
 }
 
+config :edgehog, :triggers, Edgehog.Triggers
+
 config :edgehog,
   ecto_repos: [Edgehog.Repo]
 

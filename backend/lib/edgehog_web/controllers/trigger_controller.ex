@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,21 +15,19 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.AstarteTriggerController do
   use EdgehogWeb, :controller
 
-  alias Edgehog.Triggers
+  alias Ash.Astarte.Triggers.Handler
 
   action_fallback EdgehogWeb.FallbackController
 
   def process_event(conn, _params) do
     tenant = Ash.PlugHelpers.get_tenant(conn)
+    realm = get_realm_name(conn)
 
-    realm_name = get_realm_name(conn)
-
-    with :ok <- Triggers.handle_trigger(realm_name, conn.body_params, tenant: tenant) do
+    with :ok <- Handler.handle_trigger(tenant, realm, conn.body_params) do
       send_resp(conn, :ok, "")
     end
   end

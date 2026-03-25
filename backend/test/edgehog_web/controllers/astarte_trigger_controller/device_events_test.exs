@@ -472,7 +472,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
         timestamp: DateTime.to_unix(DateTime.utc_now())
       }
 
-      assert conn |> post(path, unprocessable_event) |> response(422)
+      assert conn |> post(path, unprocessable_event) |> response(400)
     end
 
     test "with different tenant does not find realm and returns error", ctx do

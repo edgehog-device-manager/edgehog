@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.FallbackController do
   use EdgehogWeb, :controller
@@ -45,6 +43,29 @@ defmodule EdgehogWeb.FallbackController do
         |> put_view(EdgehogWeb.ErrorView)
         |> render(:"422")
     end
+  end
+
+  def call(conn, {:error, :invalid_realm_name}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(EdgehogWeb.ErrorView)
+    |> render(:"400")
+  end
+
+  def call(conn, {:error, :bad_request}) do
+    conn
+    |> put_status(:bad_request)
+    |> put_view(EdgehogWeb.ErrorView)
+    |> render(:"400")
+  end
+
+  def call(conn, {:error, other}) do
+    Logger.warning("Unexpected error encountered in the fallback controller: #{inspect(other)}")
+
+    conn
+    |> put_status(:unprocessable_entity)
+    |> put_view(EdgehogWeb.ErrorView)
+    |> render(:"422")
   end
 
   defp missing_realm?(error) do
