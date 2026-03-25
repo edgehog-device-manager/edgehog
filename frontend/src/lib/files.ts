@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { gzip } from "fflate";
+import { compress } from "lz4js";
 
 const BLOCK_SIZE = 512;
 
@@ -112,15 +112,6 @@ const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
     const nameBytes = encoder.encode(fileName);
     header.set(nameBytes.slice(0, 100), 0);
 
-    // File mode (offset 100, 8 bytes) - 0000644
-    header.set(encoder.encode("0000644\0"), 100);
-
-    // Owner ID (offset 108, 8 bytes) - 0000000
-    header.set(encoder.encode("0000000\0"), 108);
-
-    // Group ID (offset 116, 8 bytes) - 0000000
-    header.set(encoder.encode("0000000\0"), 116);
-
     // File size in octal (offset 124, 12 bytes)
     const sizeOctal = fileData.length.toString(8).padStart(11, "0");
     header.set(encoder.encode(sizeOctal + "\0"), 124);
@@ -176,18 +167,18 @@ const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
   return tarData;
 };
 
-// Creates a tar.gz archive from multiple files.
+// Creates an LZ4 compressed tar archive from multiple files.
 // Returns a Blob of the compressed archive.
 const createTarGzArchive = async (files: File[]): Promise<Blob> => {
   const tarData = await createTarArchive(files);
-  const gzippedData = await new Promise<Uint8Array>((resolve, reject) => {
-    gzip(tarData, (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
+
+  // Run compression on a later tick so callers can await it asynchronously.
+  const lz4Data = await new Promise<Uint8Array>((resolve) => {
+    setTimeout(() => resolve(compress(tarData)), 0);
   });
-  return new Blob([gzippedData.buffer as ArrayBuffer], {
-    type: "application/gzip",
+
+  return new Blob([lz4Data.buffer as ArrayBuffer], {
+    type: "application/x-lz4",
   });
 };
 
