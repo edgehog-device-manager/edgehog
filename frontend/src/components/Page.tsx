@@ -94,6 +94,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.deployments:
       case Route.deploymentCampaigns:
       case Route.repositories:
+      case Route.fileDownloadCampaigns:
       case Route.login:
       case Route.logout:
         return [currentRoute];
@@ -196,6 +197,10 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
           },
           currentRoute,
         ];
+
+      case Route.fileDownloadCampaignsEdit:
+      case Route.fileDownloadCampaignsNew:
+        return [{ route: Route.fileDownloadCampaigns }, currentRoute];
 
       default:
         return [];

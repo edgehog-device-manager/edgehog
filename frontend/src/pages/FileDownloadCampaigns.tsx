@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023 - 2026 SECO Mind Srl
+ * Copyright 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -32,48 +32,48 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 
-import type { UpdateCampaigns_getCampaigns_Query } from "@/api/__generated__/UpdateCampaigns_getCampaigns_Query.graphql";
-import { UpdateCampaigns_PaginationQuery } from "@/api/__generated__/UpdateCampaigns_PaginationQuery.graphql";
-import { UpdateCampaigns_UpdateCampaignsFragment$key } from "@/api/__generated__/UpdateCampaigns_UpdateCampaignsFragment.graphql";
+import type { FileDownloadCampaigns_FileDownloadCampaignsFragment$key } from "@/api/__generated__/FileDownloadCampaigns_FileDownloadCampaignsFragment.graphql";
+import type { FileDownloadCampaigns_getCampaigns_Query } from "@/api/__generated__/FileDownloadCampaigns_getCampaigns_Query.graphql";
+import type { FileDownloadCampaigns_PaginationQuery } from "@/api/__generated__/FileDownloadCampaigns_PaginationQuery.graphql";
 
 import Button from "@/components/Button";
 import Center from "@/components/Center";
+import FileDownloadCampaignsTable from "@/components/FileDownloadCampaignsTable";
 import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import { Link, Route } from "@/Navigation";
 
 const GET_CAMPAIGNS_QUERY = graphql`
-  query UpdateCampaigns_getCampaigns_Query(
+  query FileDownloadCampaigns_getCampaigns_Query(
     $first: Int
     $after: String
     $filter: CampaignFilterInput = {}
   ) {
-    ...UpdateCampaigns_UpdateCampaignsFragment
+    ...FileDownloadCampaigns_FileDownloadCampaignsFragment
   }
 `;
 
 /* eslint-disable relay/unused-fields */
 const CAMPAIGNS_FRAGMENT = graphql`
-  fragment UpdateCampaigns_UpdateCampaignsFragment on RootQueryType
-  @refetchable(queryName: "UpdateCampaigns_PaginationQuery") {
-    updateCampaigns(first: $first, after: $after, filter: $filter)
-      @connection(key: "UpdateCampaigns_updateCampaigns") {
+  fragment FileDownloadCampaigns_FileDownloadCampaignsFragment on RootQueryType
+  @refetchable(queryName: "FileDownloadCampaigns_PaginationQuery") {
+    fileDownloadCampaigns(first: $first, after: $after, filter: $filter)
+      @connection(key: "FileDownloadCampaigns_fileDownloadCampaigns") {
       edges {
         node {
           __typename
         }
       }
-      ...UpdateCampaignsTable_CampaignEdgeFragment
+      ...FileDownloadCampaignsTable_CampaignEdgeFragment
     }
   }
 `;
 
 const CAMPAIGN_UPDATED_SUBSCRIPTION = graphql`
-  subscription UpdateCampaigns_campaign_updated_Subscription {
-    updateCampaigns {
+  subscription FileDownloadCampaigns_campaign_updated_Subscription {
+    fileDownloadCampaigns {
       updated {
         id
         status
@@ -84,8 +84,8 @@ const CAMPAIGN_UPDATED_SUBSCRIPTION = graphql`
 `;
 
 const CAMPAIGN_CREATED_SUBSCRIPTION = graphql`
-  subscription UpdateCampaigns_campaign_created_Subscription {
-    updateCampaigns {
+  subscription FileDownloadCampaigns_campaign_created_Subscription {
+    fileDownloadCampaigns {
       created {
         id
         name
@@ -97,16 +97,12 @@ const CAMPAIGN_CREATED_SUBSCRIPTION = graphql`
         }
         campaignMechanism {
           __typename
-          ... on FirmwareUpgrade {
-            maxFailurePercentage
-            maxInProgressOperations
-            requestRetries
-            requestTimeoutSeconds
-            forceDowngrade
-            baseImage {
+          ... on FileDownload {
+            destinationType
+            file {
               id
               name
-              baseImageCollection {
+              repository {
                 id
                 name
               }
@@ -127,18 +123,19 @@ const enumStatuses = [
 ] as const;
 const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
 
-interface UpdateCampaignsLayoutContainerProps {
-  campaignsData: UpdateCampaigns_getCampaigns_Query["response"];
+interface FileDownloadCampaignsLayoutContainerProps {
+  campaignsData: FileDownloadCampaigns_getCampaigns_Query["response"];
   searchText: string | null;
 }
-const UpdateCampaignsLayoutContainer = ({
+
+const FileDownloadCampaignsLayoutContainer = ({
   campaignsData,
   searchText,
-}: UpdateCampaignsLayoutContainerProps) => {
+}: FileDownloadCampaignsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
-      UpdateCampaigns_PaginationQuery,
-      UpdateCampaigns_UpdateCampaignsFragment$key
+      FileDownloadCampaigns_PaginationQuery,
+      FileDownloadCampaigns_FileDownloadCampaignsFragment$key
     >(CAMPAIGNS_FRAGMENT, campaignsData);
 
   const findMatches = <T extends readonly string[]>(
@@ -181,7 +178,7 @@ const UpdateCampaignsLayoutContainer = ({
         subscription: CAMPAIGN_CREATED_SUBSCRIPTION,
         variables: {},
         updater: (store) => {
-          const campaignRoot = store.getRootField("updateCampaigns");
+          const campaignRoot = store.getRootField("fileDownloadCampaigns");
           const newCampaign = campaignRoot?.getLinkedRecord("created");
           if (!newCampaign) return;
 
@@ -218,7 +215,7 @@ const UpdateCampaignsLayoutContainer = ({
 
           const connection = ConnectionHandler.getConnection(
             store.getRoot(),
-            "UpdateCampaigns_updateCampaigns",
+            "FileDownloadCampaigns_fileDownloadCampaigns",
             { filter: connectionFilter },
           );
 
@@ -258,53 +255,65 @@ const UpdateCampaignsLayoutContainer = ({
     ),
   );
 
+  const debounceRefetch = useMemo(
+    () =>
+      _.debounce((text: string) => {
+        if (text === "") {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        } else {
+          refetch(
+            {
+              first: RECORDS_TO_LOAD_FIRST,
+              filter: connectionFilter,
+            },
+            { fetchPolicy: "network-only" },
+          );
+        }
+      }, 500),
+    [refetch, connectionFilter],
+  );
+
   useEffect(() => {
-    const handler = _.debounce(() => {
-      refetch(
-        {
-          first: RECORDS_TO_LOAD_FIRST,
-          filter: connectionFilter,
-        },
-        { fetchPolicy: "network-only" },
-      );
-    }, 500);
+    if (searchText !== null) {
+      debounceRefetch(searchText);
+    }
+  }, [debounceRefetch, searchText]);
 
-    handler();
-
-    return () => {
-      handler.cancel();
-    };
-  }, [connectionFilter, refetch]);
-
-  const loadNextUpdateCampaigns = useCallback(() => {
+  const loadNextFileDownloadCampaigns = useCallback(() => {
     if (hasNext && !isLoadingNext) {
       loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 
-  const updateCampaignsRef = data?.updateCampaigns || null;
+  const fileDownloadCampaignsRef = data?.fileDownloadCampaigns || null;
 
-  if (!updateCampaignsRef) {
+  if (!fileDownloadCampaignsRef) {
     return null;
   }
 
   return (
-    <UpdateCampaignsTable
-      updateCampaignsRef={updateCampaignsRef}
+    <FileDownloadCampaignsTable
+      fileDownloadCampaignsRef={fileDownloadCampaignsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextUpdateCampaigns : undefined}
+      onLoadMore={hasNext ? loadNextFileDownloadCampaigns : undefined}
     />
   );
 };
 
-type UpdateCampaignsContentProps = {
-  getCampaignsQuery: PreloadedQuery<UpdateCampaigns_getCampaigns_Query>;
-};
+interface FileDownloadCampaignsContentProps {
+  getCampaignsQuery: PreloadedQuery<FileDownloadCampaigns_getCampaigns_Query>;
+}
 
-const UpdateCampaignsContent = ({
+const FileDownloadCampaignsContent = ({
   getCampaignsQuery,
-}: UpdateCampaignsContentProps) => {
+}: FileDownloadCampaignsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
+
   const campaignsData = usePreloadedQuery(
     GET_CAMPAIGNS_QUERY,
     getCampaignsQuery,
@@ -315,15 +324,15 @@ const UpdateCampaignsContent = ({
       <Page.Header
         title={
           <FormattedMessage
-            id="pages.UpdateCampaigns.title"
-            defaultMessage="Update Campaigns"
+            id="pages.FileDownloadCampaigns.title"
+            defaultMessage="File Download Campaigns"
           />
         }
       >
-        <Button as={Link} route={Route.updateCampaignsNew}>
+        <Button as={Link} route={Route.fileDownloadCampaignsNew}>
           <FormattedMessage
-            id="pages.UpdateCampaigns.createButton"
-            defaultMessage="Create Update Campaign"
+            id="pages.FileDownloadCampaigns.createButton"
+            defaultMessage="Create Campaign"
           />
         </Button>
       </Page.Header>
@@ -333,18 +342,21 @@ const UpdateCampaignsContent = ({
           value={searchText || ""}
           onChange={setSearchText}
         />
-        <UpdateCampaignsLayoutContainer
+
+        <FileDownloadCampaignsLayoutContainer
           campaignsData={campaignsData}
           searchText={searchText}
-        />{" "}
+        />
       </Page.Main>
     </Page>
   );
 };
 
-const UpdateCampaignsPage = () => {
+const FileDownloadCampaignsPage = () => {
   const [getCampaignsQuery, getCampaigns] =
-    useQueryLoader<UpdateCampaigns_getCampaigns_Query>(GET_CAMPAIGNS_QUERY);
+    useQueryLoader<FileDownloadCampaigns_getCampaigns_Query>(
+      GET_CAMPAIGNS_QUERY,
+    );
 
   const fetchCampaigns = useCallback(
     () =>
@@ -374,11 +386,11 @@ const UpdateCampaignsPage = () => {
         onReset={fetchCampaigns}
       >
         {getCampaignsQuery && (
-          <UpdateCampaignsContent getCampaignsQuery={getCampaignsQuery} />
+          <FileDownloadCampaignsContent getCampaignsQuery={getCampaignsQuery} />
         )}
       </ErrorBoundary>
     </Suspense>
   );
 };
 
-export default UpdateCampaignsPage;
+export default FileDownloadCampaignsPage;

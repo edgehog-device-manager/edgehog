@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023 - 2026 SECO Mind Srl
+ * Copyright 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,28 +19,29 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import Nav from "react-bootstrap/Nav";
+import NavItem from "react-bootstrap/NavItem";
+import NavLink from "react-bootstrap/NavLink";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
-import { UpdateCampaign_getCampaign_Query$data } from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
-import { UpdateTargets_PaginationQuery } from "@/api/__generated__/UpdateTargets_PaginationQuery.graphql";
-import { UpdateTargetsTabs_UpdateTargetsFragment$key } from "@/api/__generated__/UpdateTargetsTabs_UpdateTargetsFragment.graphql";
+import type { FileDownloadCampaign_getCampaign_Query$data } from "@/api/__generated__/FileDownloadCampaign_getCampaign_Query.graphql";
+import type { FileDownloadTargetsTabs_FileDownloadTargetsFragment$key } from "@/api/__generated__/FileDownloadTargetsTabs_FileDownloadTargetsFragment.graphql";
+import type { FileDownloadTargets_PaginationQuery } from "@/api/__generated__/FileDownloadTargets_PaginationQuery.graphql";
 
 import CampaignTargetStatus, {
   CampaignTargetStatusType,
 } from "@/components/CampaignTargetStatus";
-import type { ColumnId } from "@/components/UpdateTargetsTable";
-import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
+import type { ColumnId } from "@/components/FileDownloadTargetsTable";
+import FileDownloadTargetsTable, {
+  columnIds,
+} from "@/components/FileDownloadTargetsTable";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import Nav from "react-bootstrap/Nav";
-import NavItem from "react-bootstrap/NavItem";
-import NavLink from "react-bootstrap/NavLink";
 import Spinner from "./Spinner";
 
-/* eslint-disable relay/unused-fields */
-const UPDATE_TARGETS_FRAGMENT = graphql`
-  fragment UpdateTargetsTabs_UpdateTargetsFragment on Campaign
-  @refetchable(queryName: "UpdateTargets_PaginationQuery")
+const FILE_DOWNLOAD_TARGETS_FRAGMENT = graphql`
+  fragment FileDownloadTargetsTabs_FileDownloadTargetsFragment on Campaign
+  @refetchable(queryName: "FileDownloadTargets_PaginationQuery")
   @argumentDefinitions(
     first: { type: "Int" }
     after: { type: "String" }
@@ -50,13 +51,16 @@ const UPDATE_TARGETS_FRAGMENT = graphql`
     }
   ) {
     campaignTargets(first: $first, after: $after, filter: $filter)
-      @connection(key: "UpdateTargetsTabs_campaignTargets") {
+      @connection(key: "FileDownloadTargetsTabs_campaignTargets") {
       edges {
         node {
           __typename
+          fileDownloadRequest {
+            destinationType
+          }
         }
       }
-      ...UpdateTargetsTable_CampaignTargetEdgeFragment
+      ...FileDownloadTargetsTable_CampaignTargetEdgeFragment
     }
   }
 `;
@@ -65,13 +69,13 @@ const columnMap: Record<CampaignTargetStatusType, ColumnId[]> = {
   IDLE: ["deviceName"],
   IN_PROGRESS: [
     "deviceName",
-    "otaOperationStatus",
-    "otaOperationStatusProgress",
+    "requestStatus",
+    "requestProgress",
     "retryCount",
     "latestAttempt",
   ],
-  SUCCESSFUL: ["deviceName", "completionTimestamp"],
-  FAILED: ["deviceName", "otaOperationStatusCode", "completionTimestamp"],
+  SUCCESSFUL: ["deviceName", "pathOnDevice", "completionTimestamp"],
+  FAILED: ["deviceName", "failureReason", "completionTimestamp"],
 };
 
 const campaignTargetTabs: CampaignTargetStatusType[] = [
@@ -81,25 +85,28 @@ const campaignTargetTabs: CampaignTargetStatusType[] = [
   "IDLE",
 ];
 
-type Props = {
-  campaignRef: NonNullable<UpdateCampaign_getCampaign_Query$data["campaign"]>;
+type FileDownloadTargetsTabsProps = {
+  campaignRef: NonNullable<
+    FileDownloadCampaign_getCampaign_Query$data["campaign"]
+  >;
 };
 
-const UpdateTargetsTabs = ({ campaignRef }: Props) => {
+const FileDownloadTargetsTabs = ({
+  campaignRef,
+}: FileDownloadTargetsTabsProps) => {
   const [activeTab, setActiveTab] =
     useState<CampaignTargetStatusType>("SUCCESSFUL");
   const [committedTab, setCommittedTab] = useState(activeTab);
 
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
-      UpdateTargets_PaginationQuery,
-      UpdateTargetsTabs_UpdateTargetsFragment$key
-    >(UPDATE_TARGETS_FRAGMENT, campaignRef);
+      FileDownloadTargets_PaginationQuery,
+      FileDownloadTargetsTabs_FileDownloadTargetsFragment$key
+    >(FILE_DOWNLOAD_TARGETS_FRAGMENT, campaignRef);
 
   const isTabDataLoading = activeTab !== committedTab;
 
   useEffect(() => {
-    // Only refetch if the tab has actually changed
     if (activeTab === committedTab) {
       return;
     }
@@ -118,30 +125,45 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
     );
   }, [activeTab, committedTab, refetch]);
 
-  const loadNextUpdateTargets = useCallback(() => {
+  const loadNextTargets = useCallback(() => {
     if (hasNext && !isLoadingNext) {
       loadNext(RECORDS_TO_LOAD_NEXT);
     }
   }, [hasNext, isLoadingNext, loadNext]);
 
-  const updateTargetsRef = data?.campaignTargets;
+  const targetsRef = data?.campaignTargets;
 
   const hiddenColumns = useMemo(() => {
     const visible = columnMap[committedTab];
-    return columnIds.filter((c) => !visible.includes(c));
-  }, [committedTab]);
+    const hasStorageDestination = Boolean(
+      data?.campaignTargets?.edges?.some(
+        (edge) =>
+          edge?.node?.fileDownloadRequest?.destinationType === "STORAGE",
+      ),
+    );
 
-  if (!updateTargetsRef) {
+    return columnIds.filter((columnId) => {
+      if (columnId === "pathOnDevice" && !hasStorageDestination) {
+        return true;
+      }
+
+      return !visible.includes(columnId);
+    });
+  }, [committedTab, data?.campaignTargets?.edges]);
+
+  if (!targetsRef) {
     return null;
   }
+
   return (
     <div>
       <h3>
         <FormattedMessage
-          id="components.UpdateTargetsTabs.updateTargetsLabel"
+          id="components.FileDownloadTargetsTabs.targetsLabel"
           defaultMessage="Devices"
         />
       </h3>
+
       <div>
         <Nav role="tablist" as="ul" className="nav-tabs">
           {campaignTargetTabs.map((tab) => (
@@ -162,12 +184,12 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
           {isTabDataLoading ? (
             <Spinner />
           ) : (
-            <UpdateTargetsTable
+            <FileDownloadTargetsTable
               key={committedTab}
-              campaignTargetsRef={updateTargetsRef}
+              campaignTargetsRef={targetsRef}
               hiddenColumns={hiddenColumns}
               loading={isLoadingNext}
-              onLoadMore={hasNext ? loadNextUpdateTargets : undefined}
+              onLoadMore={hasNext ? loadNextTargets : undefined}
             />
           )}
         </div>
@@ -176,4 +198,4 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
   );
 };
 
-export default UpdateTargetsTabs;
+export default FileDownloadTargetsTabs;

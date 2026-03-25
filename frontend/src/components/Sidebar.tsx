@@ -152,6 +152,21 @@ const Sidebar = () => (
           Route.filesNew,
         ]}
       />
+
+      <SidebarItem
+        label={
+          <FormattedMessage
+            id="components.Sidebar.fileDownloadCampaignsLabel"
+            defaultMessage="File Download Campaigns"
+          />
+        }
+        route={Route.fileDownloadCampaigns}
+        activeRoutes={[
+          Route.fileDownloadCampaigns,
+          Route.fileDownloadCampaignsNew,
+          Route.fileDownloadCampaignsEdit,
+        ]}
+      />
     </SidebarItemGroup>
 
     <SidebarItemGroup

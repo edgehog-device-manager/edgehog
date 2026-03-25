@@ -73,6 +73,9 @@ import Repositories from "@/pages/Repositories";
 import RepositoryCreatePage from "@/pages/RepositoryCreate";
 import Repository from "@/pages/Repository";
 import FileCreatePage from "@/pages/FileCreate";
+import FileDownloadCampaignsPage from "@/pages/FileDownloadCampaigns";
+import FileDownloadCampaignCreatePage from "@/pages/FileDownloadCampaignCreate";
+import FileDownloadCampaignPage from "@/pages/FileDownloadCampaign";
 
 import { hideNavigationElements } from "@/api";
 import { bugs, repository, version } from "../package.json";
@@ -137,6 +140,15 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.repositoryNew, element: <RepositoryCreatePage /> },
   { path: Route.repositoryEdit, element: <Repository /> },
   { path: Route.filesNew, element: <FileCreatePage /> },
+  { path: Route.fileDownloadCampaigns, element: <FileDownloadCampaignsPage /> },
+  {
+    path: Route.fileDownloadCampaignsNew,
+    element: <FileDownloadCampaignCreatePage />,
+  },
+  {
+    path: Route.fileDownloadCampaignsEdit,
+    element: <FileDownloadCampaignPage />,
+  },
   { path: Route.logout, element: <Logout /> },
   { path: "*", element: <Navigate to={Route.devices} replace /> },
 ];

@@ -76,6 +76,9 @@ enum Route {
   repositoryNew = "/repositories/new",
   repositoryEdit = "/repositories/:repositoryId/edit",
   filesNew = "/repositories/:repositoryId/files/new",
+  fileDownloadCampaigns = "/file-download-campaigns",
+  fileDownloadCampaignsNew = "/file-download-campaigns/new",
+  fileDownloadCampaignsEdit = "/file-download-campaigns/:fileDownloadCampaignId",
   login = "/login",
   logout = "/logout",
 }
@@ -143,6 +146,8 @@ const matchingParametricRoute = (
     case Route.deploymentCampaignsNew:
     case Route.repositories:
     case Route.repositoryNew:
+    case Route.fileDownloadCampaigns:
+    case Route.fileDownloadCampaignsNew:
     case Route.login:
     case Route.logout:
       return { route } as ParametricRoute;
@@ -309,6 +314,14 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { repositoryId: params.repositoryId },
+          }
+        : null;
+
+    case Route.fileDownloadCampaignsEdit:
+      return params && typeof params["fileDownloadCampaignId"] === "string"
+        ? {
+            route,
+            params: { fileDownloadCampaignId: params.fileDownloadCampaignId },
           }
         : null;
   }
@@ -540,6 +553,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.filesNew]: {
     id: "navigation.routeTitle.FileNew",
     defaultMessage: "Create File",
+  },
+  [Route.fileDownloadCampaigns]: {
+    id: "navigation.routeTitle.FileDownloadCampaigns",
+    defaultMessage: "File Download Campaigns",
+  },
+  [Route.fileDownloadCampaignsNew]: {
+    id: "navigation.routeTitle.FileDownloadCampaignsNew",
+    defaultMessage: "Create File Download Campaign",
+  },
+  [Route.fileDownloadCampaignsEdit]: {
+    id: "navigation.routeTitle.FileDownloadCampaignsEdit",
+    defaultMessage: "File Download Campaign Details",
   },
 });
 

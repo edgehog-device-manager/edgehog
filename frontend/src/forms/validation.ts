@@ -690,6 +690,49 @@ const updateCampaignSchema = z.object({
 
 type UpdateCampaignFormData = z.infer<typeof updateCampaignSchema>;
 
+const fileDownloadCampaignSchema = z
+  .object({
+    name: z.string().min(1),
+    channel: z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+    }),
+    repository: z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+    }),
+    file: z.object({
+      id: z.string().min(1),
+      name: z.string().min(1),
+    }),
+    maxInProgressOperations: requiredNumber.int().positive(),
+    maxFailurePercentage: requiredNumber.min(0).max(100),
+    requestTimeoutSeconds: requiredNumber.int().positive().min(30),
+    requestRetries: requiredNumber.int().min(0),
+    destinationType: fileDestinationTypeSchema,
+    destination: nullableDestinationSchema,
+    ttlSeconds: requiredNumber.int().min(0),
+    fileMode: z.number(messages.number.id).int().positive().optional(),
+    userId: z.number(messages.number.id).int().positive().optional(),
+    groupId: z.number(messages.number.id).int().positive().optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.destinationType === "FILESYSTEM" && data.destination === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: messages.required.id,
+        path: ["destination"],
+      });
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    destination:
+      data.destinationType === "FILESYSTEM" ? data.destination : null,
+  }));
+
+type FileDownloadCampaignFormData = z.infer<typeof fileDownloadCampaignSchema>;
+
 /* ----------------------------- Container Schemas ----------------------------- */
 
 const ipv4PortRegex =
@@ -1009,6 +1052,7 @@ export type {
   ImageCredentialUpdateFormData,
   DeploymentCampaignFormData,
   UpdateCampaignFormData,
+  FileDownloadCampaignFormData,
   ReleaseFormData,
   ContainerInputData,
   TargetGroup,
@@ -1043,6 +1087,7 @@ export {
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   updateCampaignSchema,
+  fileDownloadCampaignSchema,
   releaseSchema,
   CapAddList,
   CapDropList,

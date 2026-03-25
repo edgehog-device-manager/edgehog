@@ -961,6 +961,51 @@
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
   },
+  "components.FileDownloadCampaignsTable.channelNameTitle": {
+    "defaultMessage": "Channel"
+  },
+  "components.FileDownloadCampaignsTable.destinationTypeTitle": {
+    "defaultMessage": "Destination Type"
+  },
+  "components.FileDownloadCampaignsTable.fileNameTitle": {
+    "defaultMessage": "File"
+  },
+  "components.FileDownloadCampaignsTable.nameTitle": {
+    "defaultMessage": "File Download Campaign Name"
+  },
+  "components.FileDownloadCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.FileDownloadCampaignsTable.repositoryNameTitle": {
+    "defaultMessage": "Repository"
+  },
+  "components.FileDownloadCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.FileDownloadTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at"
+  },
+  "components.FileDownloadTargetsTable.deviceTitle": {
+    "defaultMessage": "Device"
+  },
+  "components.FileDownloadTargetsTable.failureReasonTitle": {
+    "defaultMessage": "Failure Reason"
+  },
+  "components.FileDownloadTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at"
+  },
+  "components.FileDownloadTargetsTable.requestProgressTitle": {
+    "defaultMessage": "Progress"
+  },
+  "components.FileDownloadTargetsTable.requestStatusTitle": {
+    "defaultMessage": "Request Status"
+  },
+  "components.FileDownloadTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count"
+  },
+  "components.FileDownloadTargetsTabs.targetsLabel": {
+    "defaultMessage": "Devices"
+  },
   "components.FileDropzone.addFolders": {
     "defaultMessage": "add folders"
   },
@@ -1282,6 +1327,9 @@
   },
   "components.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"
+  },
+  "components.Sidebar.fileDownloadCampaignsLabel": {
+    "defaultMessage": "File Download Campaigns"
   },
   "components.Sidebar.filesManagementGroupLabel": {
     "defaultMessage": "Files Management"
@@ -2051,6 +2099,72 @@
   "forms.CreateFile.submitButton": {
     "defaultMessage": "Create"
   },
+  "forms.CreateFileDownloadCampaign.channelLabel": {
+    "defaultMessage": "Channel"
+  },
+  "forms.CreateFileDownloadCampaign.channelOption": {
+    "defaultMessage": "Search or select a channel..."
+  },
+  "forms.CreateFileDownloadCampaign.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "forms.CreateFileDownloadCampaign.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "forms.CreateFileDownloadCampaign.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "forms.CreateFileDownloadCampaign.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "forms.CreateFileDownloadCampaign.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "forms.CreateFileDownloadCampaign.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.CreateFileDownloadCampaign.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.CreateFileDownloadCampaign.nameLabel": {
+    "defaultMessage": "Campaign Name"
+  },
+  "forms.CreateFileDownloadCampaign.noChannelsAvailable": {
+    "defaultMessage": "No channels available"
+  },
+  "forms.CreateFileDownloadCampaign.noChannelsFoundMatching": {
+    "defaultMessage": "No channels found matching \"{inputValue}\""
+  },
+  "forms.CreateFileDownloadCampaign.noRepositoriesAvailable": {
+    "defaultMessage": "No repositories available"
+  },
+  "forms.CreateFileDownloadCampaign.noRepositoriesFoundMatching": {
+    "defaultMessage": "No repositories found matching \"{inputValue}\""
+  },
+  "forms.CreateFileDownloadCampaign.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "forms.CreateFileDownloadCampaign.repositoryOption": {
+    "defaultMessage": "Search or select a repository..."
+  },
+  "forms.CreateFileDownloadCampaign.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.CreateFileDownloadCampaign.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.CreateFileDownloadCampaign.selectRepositoryHint": {
+    "defaultMessage": "Select a repository before selecting a file..."
+  },
+  "forms.CreateFileDownloadCampaign.submitButton": {
+    "defaultMessage": "Create Campaign"
+  },
+  "forms.CreateFileDownloadCampaign.ttlLabel": {
+    "defaultMessage": "TTL <muted>(seconds)</muted>"
+  },
+  "forms.CreateFileDownloadCampaign.userIdLabel": {
+    "defaultMessage": "User ID"
+  },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
@@ -2224,6 +2338,54 @@
   },
   "forms.DeploymentCampaignForm.targetReleaseLabel": {
     "defaultMessage": "Target Release"
+  },
+  "forms.FileDownloadCampaignForm.channelLabel": {
+    "defaultMessage": "Channel"
+  },
+  "forms.FileDownloadCampaignForm.destinationLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "forms.FileDownloadCampaignForm.destinationTypeLabel": {
+    "defaultMessage": "Destination"
+  },
+  "forms.FileDownloadCampaignForm.fileDeleted": {
+    "defaultMessage": "The file has been deleted"
+  },
+  "forms.FileDownloadCampaignForm.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "forms.FileDownloadCampaignForm.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "forms.FileDownloadCampaignForm.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "forms.FileDownloadCampaignForm.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "forms.FileDownloadCampaignForm.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "forms.FileDownloadCampaignForm.outcomeLabel": {
+    "defaultMessage": "Outcome"
+  },
+  "forms.FileDownloadCampaignForm.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "forms.FileDownloadCampaignForm.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "forms.FileDownloadCampaignForm.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "forms.FileDownloadCampaignForm.statusLabel": {
+    "defaultMessage": "Status"
+  },
+  "forms.FileDownloadCampaignForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "forms.FileDownloadCampaignForm.userIdLabel": {
+    "defaultMessage": "User ID"
   },
   "forms.ManualFileDownloadRequestForm.advancedOptionsTitle": {
     "defaultMessage": "Advanced Options"
@@ -2643,6 +2805,15 @@
   "navigation.routeTitle.DevicesEdit": {
     "defaultMessage": "Device Details"
   },
+  "navigation.routeTitle.FileDownloadCampaigns": {
+    "defaultMessage": "File Download Campaigns"
+  },
+  "navigation.routeTitle.FileDownloadCampaignsEdit": {
+    "defaultMessage": "File Download Campaign Details"
+  },
+  "navigation.routeTitle.FileDownloadCampaignsNew": {
+    "defaultMessage": "Create File Download Campaign"
+  },
   "navigation.routeTitle.FileNew": {
     "defaultMessage": "Create File"
   },
@@ -3003,6 +3174,54 @@
   },
   "pages.FileCreate.title": {
     "defaultMessage": "Create File"
+  },
+  "pages.FileDownloadCampaign.notFound.message": {
+    "defaultMessage": "Return to the File Download Campaign list."
+  },
+  "pages.FileDownloadCampaign.notFound.title": {
+    "defaultMessage": "File Download Campaign not found."
+  },
+  "pages.FileDownloadCampaign.pauseButton": {
+    "defaultMessage": "Pause"
+  },
+  "pages.FileDownloadCampaign.pauseErrorFeedback": {
+    "defaultMessage": "Could not pause the campaign, please try again."
+  },
+  "pages.FileDownloadCampaign.resumeButton": {
+    "defaultMessage": "Resume"
+  },
+  "pages.FileDownloadCampaign.resumeErrorFeedback": {
+    "defaultMessage": "Could not resume the campaign, please try again."
+  },
+  "pages.FileDownloadCampaignCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the File Download Campaign, please try again."
+  },
+  "pages.FileDownloadCampaignCreate.noChannel.createButton": {
+    "defaultMessage": "Create Channel"
+  },
+  "pages.FileDownloadCampaignCreate.noChannel.message": {
+    "defaultMessage": "You need at least one Channel to create a File Download Campaign"
+  },
+  "pages.FileDownloadCampaignCreate.noChannel.title": {
+    "defaultMessage": "You haven't created any Channel yet"
+  },
+  "pages.FileDownloadCampaignCreate.noRepository.createButton": {
+    "defaultMessage": "Create Repository"
+  },
+  "pages.FileDownloadCampaignCreate.noRepository.message": {
+    "defaultMessage": "You need at least one Repository with one File to create a File Download Campaign"
+  },
+  "pages.FileDownloadCampaignCreate.noRepository.title": {
+    "defaultMessage": "You haven't created any Repository yet"
+  },
+  "pages.FileDownloadCampaignCreate.title": {
+    "defaultMessage": "Create File Download Campaign"
+  },
+  "pages.FileDownloadCampaigns.createButton": {
+    "defaultMessage": "Create Campaign"
+  },
+  "pages.FileDownloadCampaigns.title": {
+    "defaultMessage": "File Download Campaigns"
   },
   "pages.HardwareType.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Hardware Type <bold>{hardwareType}</bold>.",

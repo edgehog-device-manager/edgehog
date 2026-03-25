@@ -162,7 +162,7 @@ const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
             </NavItem>
           ))}
         </Nav>
-        <div className="deployment-targets-container">
+        <div>
           {isTabDataLoading ? (
             <Spinner />
           ) : (
