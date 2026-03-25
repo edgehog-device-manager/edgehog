@@ -160,7 +160,7 @@ _edgehog-dev-backend:
     export SEEDS_TENANT_PRIVATE_KEY_FILE=./priv/repo/seeds/keys/tenant_private.pem
     # Init edgehog services
     docker compose down -v
-    docker compose up -d edgehog-device-forwarder minio minio-init registry registry-auth registry-init
+    docker compose up -d edgehog-device-forwarder rustfs rustfs-init registry registry-auth registry-init
     # Init postgres locally, edgehog has to be able to reach it seamlessly
     (docker run --name edgehog-db -d -e "POSTGRES_HOST_AUTH_METHOD=trust" -p 5432:5432 --rm postgres && sleep 3) || true # skip if already up
     # `astarte` network gateway ip, a.k.a. edgehog's IP
