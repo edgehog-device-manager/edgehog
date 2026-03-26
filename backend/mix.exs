@@ -124,7 +124,7 @@ defmodule Edgehog.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ash, "~> 3.0"},
       {:ash_postgres, "~> 2.0"},
-      {:ash_graphql, "~> 1.0"},
+      {:ash_graphql, "~> 1.9"},
       {:ash_json_api, "~> 1.3"},
       {:igniter, "~> 0.7", only: [:dev, :test]},
       {:picosat_elixir, "~> 0.2"},

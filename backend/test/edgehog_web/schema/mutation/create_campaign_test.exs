@@ -345,7 +345,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "baseImageId"],
                fields: [:base_image_id],
                message: "could not be found",
                code: "invalid_attribute"
@@ -361,7 +361,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "channelId"],
                fields: [:channel_id],
                message: "could not be found",
                code: "invalid_attribute"
@@ -385,7 +385,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "name"],
                fields: [:name],
                message: "is required",
                code: "required"
@@ -411,7 +411,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "campaignMechanism"],
                fields: [:campaign_mechanism],
                message: "Campaign mechanism cannot be an empty map",
                code: "invalid_attribute"
@@ -432,10 +432,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               # TODO: Ash doesn't report the full nested path
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "campaignMechanism", "maxFailurePercentage"],
                fields: [:max_failure_percentage],
-               message: "must be more than or equal to 0.0",
+               message: "must be greater than or equal to 0.0",
                code: "invalid_attribute"
              } = error
 
@@ -452,8 +451,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               # TODO: Ash doesn't report the full nested path
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "campaignMechanism", "maxFailurePercentage"],
                fields: [:max_failure_percentage],
                message: "must be less than or equal to 100.0",
                code: "invalid_attribute"
@@ -474,10 +472,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               # TODO: Ash doesn't report the full nested path
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "campaignMechanism", "maxInProgressOperations"],
                fields: [:max_in_progress_operations],
-               message: "must be more than or equal to 1",
+               message: "must be greater than or equal to 1",
                code: "invalid_attribute"
              } = error
     end
@@ -497,10 +494,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               # TODO: Ash doesn't report the full nested path
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "campaignMechanism", "requestRetries"],
                fields: [:request_retries],
-               message: "must be more than or equal to 0",
+               message: "must be greater than or equal to 0",
                code: "invalid_attribute"
              } = error
     end
@@ -520,10 +516,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
         |> extract_error!()
 
       assert %{
-               # TODO: Ash doesn't report the full nested path
-               path: ["createCampaign"],
+               path: ["createCampaign", "input", "campaignMechanism", "requestTimeoutSeconds"],
                fields: [:request_timeout_seconds],
-               message: "must be more than or equal to 30",
+               message: "must be greater than or equal to 30",
                code: "invalid_attribute"
              } = error
     end

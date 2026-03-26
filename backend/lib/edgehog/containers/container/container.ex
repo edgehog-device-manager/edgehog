@@ -48,7 +48,6 @@ defmodule Edgehog.Containers.Container do
 
     paginate_relationship_with networks: :relay,
                                devices: :relay,
-                               volumes: :relay,
                                releases: :relay,
                                container_volumes: :relay,
                                device_mappings: :relay

@@ -135,10 +135,8 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       filter expr(device.online == true)
 
       filter expr(
-               exists(
-                 device.application_deployments,
-                 release.application_id == ^arg(:application_id)
-               )
+               exists device.application_deployments,
+                      release.application_id == ^arg(:application_id)
              )
     end
 
