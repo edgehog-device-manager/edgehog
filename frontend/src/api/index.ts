@@ -194,6 +194,13 @@ const createSubscribeFunction = (session: Session): SubscribeFunction => {
     return Observable.create((sink) => {
       if (!session) return sink.error(new Error("No session"));
 
+      // Defer WebSocket creation so that if the subscription is immediately
+      // cancelled (e.g. React StrictMode double-invoking effects), no socket
+      // is ever opened and no browser warning is logged.
+      let ws: WebSocket | null = null;
+      let heartbeat: ReturnType<typeof setInterval> | undefined;
+      let disposed = false;
+
       const protocol = backendUrl.startsWith("https") ? "wss:" : "ws:";
       const url = new URL(
         "socket/websocket",
@@ -203,79 +210,82 @@ const createSubscribeFunction = (session: Session): SubscribeFunction => {
       url.searchParams.set("token", session.authToken);
       url.searchParams.set("tenant", session.tenantSlug);
 
-      const ws = new WebSocket(url.toString());
-
       let refCounter = 0;
       const topic = "__absinthe__:control";
-      let heartbeat: number | undefined;
       let joinRef: string | null = null;
 
-      interface SendParams {
-        ref: PhoenixRef;
-        topic: PhoenixTopic;
-        event: PhoenixEvent;
-        payload: PhoenixPayload;
-      }
-
       const send = (
-        ref: SendParams["ref"],
-        topic: SendParams["topic"],
-        event: SendParams["event"],
-        payload: SendParams["payload"],
+        ref: PhoenixRef,
+        sendTopic: PhoenixTopic,
+        event: PhoenixEvent,
+        payload: PhoenixPayload,
       ): void => {
-        if (ws.readyState === WebSocket.OPEN) {
-          ws.send(JSON.stringify([null, ref, topic, event, payload]));
+        if (ws?.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify([null, ref, sendTopic, event, payload]));
         }
       };
 
-      ws.onopen = () => {
-        joinRef = String(++refCounter);
-        send(joinRef, topic, "phx_join", {});
+      const connectTimeout = setTimeout(() => {
+        if (disposed) return;
 
-        heartbeat = setInterval(
-          () => send(null, "phoenix", "heartbeat", {}),
-          30000,
-        );
-      };
+        ws = new WebSocket(url.toString());
 
-      ws.onmessage = (e) => {
-        const [, msgRef, , event, payload]: PhoenixMessage = JSON.parse(e.data);
+        ws.onopen = () => {
+          joinRef = String(++refCounter);
+          send(joinRef, topic, "phx_join", {});
 
-        if (
-          event === "phx_reply" &&
-          msgRef === joinRef &&
-          payload.status === "ok"
-        ) {
-          const queryRef = String(++refCounter);
-          send(queryRef, topic, "doc", {
-            query: operation.text,
-            variables,
-          });
-        } else if (
-          event === "phx_reply" &&
-          msgRef === joinRef &&
-          payload.status === "error"
-        ) {
-          sink.error(
-            new Error(
-              `Channel join failed: ${JSON.stringify(payload.response)}`,
-            ),
+          heartbeat = setInterval(
+            () => send(null, "phoenix", "heartbeat", {}),
+            30000,
           );
-        } else if (event === "subscription:data" && payload.result) {
-          const result = payload.result;
-          if (result.errors) {
-            sink.error(new Error(JSON.stringify(result.errors)));
-          } else {
-            sink.next({ data: result.data as any, errors: [] });
-          }
-        }
-      };
+        };
 
-      ws.onerror = () => sink.error(new Error("WebSocket error"));
+        ws.onmessage = (e) => {
+          const [, msgRef, , event, payload]: PhoenixMessage = JSON.parse(
+            e.data,
+          );
+
+          if (
+            event === "phx_reply" &&
+            msgRef === joinRef &&
+            payload.status === "ok"
+          ) {
+            const queryRef = String(++refCounter);
+            send(queryRef, topic, "doc", {
+              query: operation.text,
+              variables,
+            });
+          } else if (
+            event === "phx_reply" &&
+            msgRef === joinRef &&
+            payload.status === "error"
+          ) {
+            sink.error(
+              new Error(
+                `Channel join failed: ${JSON.stringify(payload.response)}`,
+              ),
+            );
+          } else if (event === "subscription:data" && payload.result) {
+            const result = payload.result;
+            if (result.errors) {
+              sink.error(new Error(JSON.stringify(result.errors)));
+            } else {
+              sink.next({
+                data: result.data as Record<string, unknown>,
+                errors: [],
+              });
+            }
+          }
+        };
+
+        ws.onerror = () => sink.error(new Error("WebSocket error"));
+      }, 0);
 
       return () => {
+        disposed = true;
+        clearTimeout(connectTimeout);
         if (heartbeat) clearInterval(heartbeat);
-        if (ws.readyState < 2) ws.close();
+        if (ws && ws.readyState < 2) ws.close();
       };
     });
   };
