@@ -34,8 +34,6 @@ defmodule Edgehog.Devices.SystemModelPartNumber do
         action_types [:create, :update, :destroy]
       end
     end
-
-    paginate_relationship_with devices: :relay
   end
 
   actions do

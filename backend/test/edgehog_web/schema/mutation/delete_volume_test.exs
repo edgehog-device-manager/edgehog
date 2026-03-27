@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Mutation.DeleteVolumeTest do
   @moduledoc false
@@ -62,7 +60,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteVolumeTest do
       error = [tenant: tenant, id: id] |> delete_volume_mutation() |> extract_error!()
 
       assert %{
-               path: ["deleteVolume"],
+               path: ["deleteVolume", "input", "id"],
                fields: [:id],
                code: "not_found",
                message: "could not be found"

@@ -1,0 +1,173 @@
+// NOTE: config migration PRs might simply be removing whitespace and comments.
+// If that's the case, the PR can stay open, and it should be rebased by renovate
+// until there actual changes in renovate's config options. Alternatively, if it
+// also introduces proper changes, you should manually make the same changes and
+// let renovate rebase its branch: the result is that renovate will close the PR
+// on its own and not stop the config migration progress in the future.
+// For more information:
+// https://github.com/renovatebot/renovate/issues/16359#issuecomment-2888473403
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Renovate configuration for Edgehog Device Manager",
+  "extends": [
+    "config:recommended",
+    ":gitSignOff",
+    ":rebaseStalePrs",
+    ":semanticCommits",
+    "helpers:pinGitHubActionDigests"
+  ],
+
+  "configMigration": true,
+  "prCreation": "not-pending",
+  "rebaseWhen": "behind-base-branch",
+  "platformAutomerge": true,
+  "automergeType": "branch",
+  "rangeStrategy": "bump",
+  "internalChecksFilter": "strict",
+
+  "timezone": "UTC",
+  "labels": ["renovate"],
+  "separateMajorMinor": true,
+  "separateMinorPatch": false,
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 0,
+
+  "commitBodyTable": true,
+
+  "reviewers": ["team:cloud-devs"],
+  "reviewersFromCodeOwners": true,
+  "reviewersSampleSize": 2,
+
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "addLabels": ["security"]
+  },
+
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on the first day of the month"]
+  },
+
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "matchCurrentVersion": "!/^0/",
+      "automerge": true
+    },
+
+    // backend: chore(deps) is the default
+    {
+      "description": "Semantic commit prefix for frontend: chore(deps)",
+      "matchManagers": ["npm"],
+      "semanticCommitType": "chore"
+    },
+    {
+      "description": "Semantic commit prefix for GitHub Actions: ci(deps)",
+      "matchManagers": ["github-actions"],
+      "semanticCommitType": "ci"
+    },
+    {
+      "description": "Semantic commit prefix for Docker and tools: build(deps)",
+      "matchManagers": ["dockerfile", "docker-compose", "asdf"],
+      "semanticCommitType": "build"
+    },
+
+    {
+      "description": "Group all Elixir dependencies (non-major)",
+      "matchManagers": ["mix"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "backend dependencies (non-major)",
+      "minimumReleaseAge": "3 days",
+      "reviewers": ["cloud-backend-devs"],
+      "automerge": true,
+      "addLabels": ["dependencies", "elixir", "automerge"],
+      "schedule": ["before 9am on the first day of the month"]
+    },
+    {
+      "description": "Group all Elixir dependencies major updates",
+      "matchManagers": ["mix"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "backend dependencies",
+      "reviewers": ["cloud-backend-devs"],
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies", "elixir", "major"]
+    },
+
+    {
+      "description": "Group all npm dependencies (non-major)",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "frontend dependencies (non-major)",
+      "minimumReleaseAge": "3 days",
+      "reviewers": ["cloud-frontend-devs"],
+      "automerge": true,
+      "addLabels": ["dependencies", "javascript", "automerge"],
+      "schedule": ["before 9am on the first day of the month"]
+    },
+    {
+      "description": "Group all npm dependencies major updates",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "frontend dependencies",
+      "reviewers": ["cloud-frontend-devs"],
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies", "javascript", "major"]
+    },
+
+    {
+      "description": "Automerge GitHub Actions (non-major)",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
+      "groupName": "GitHub Actions (non-major)",
+      "automerge": true,
+      "addLabels": ["dependencies", "github-actions", "automerge"],
+      "schedule": ["before 9am on the first day of the month"]
+    },
+    {
+      "description": "GitHub Actions major updates require approval",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "GitHub Actions (major)",
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies", "github-actions", "major"]
+    },
+
+    {
+      "description": "Docker dependencies (non-major)",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "matchUpdateTypes": ["patch", "minor", "digest"],
+      "groupName": "Docker dependencies (non-major)",
+      "minimumReleaseAge": "3 days",
+      "automerge": true,
+      "addLabels": ["dependencies", "docker", "automerge"],
+      "schedule": ["before 9am on the first day of the month"]
+    },
+    {
+      "description": "Docker dependencies major updates require approval",
+      "matchManagers": ["dockerfile", "docker-compose"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "Docker dependencies",
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies", "docker", "major"]
+    },
+
+    {
+      "description": "Group all the tools releases (non-major)",
+      "matchManagers": ["asdf"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "tools releases (non-major)",
+      "minimumReleaseAge": "3 days",
+      "automerge": true,
+      "addLabels": ["dependencies", "tools", "automerge"],
+      "schedule": ["before 9am on the first day of the month"]
+    },
+    {
+      "description": "Group all the tools major releases",
+      "matchManagers": ["asdf"],
+      "groupName": "tools releases (major)",
+      "matchUpdateTypes": ["major"],
+      "dependencyDashboardApproval": true,
+      "addLabels": ["dependencies", "tools", "automerge"]
+    }
+  ]
+}

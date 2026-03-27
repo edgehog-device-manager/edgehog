@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022 - 2025 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Labeling.Tag do
   @moduledoc false
@@ -36,8 +34,6 @@ defmodule Edgehog.Labeling.Tag do
 
   graphql do
     type :tag
-
-    paginate_relationship_with device_tags: :relay
   end
 
   actions do
@@ -53,7 +49,7 @@ defmodule Edgehog.Labeling.Tag do
 
     read :read_assigned_to_devices do
       description "Returns Tags currently assigned to some device."
-      prepare build(filter: expr(exists(device_tags, true)))
+      prepare build(filter: expr(exists device_tags, true))
 
       pagination do
         required? false

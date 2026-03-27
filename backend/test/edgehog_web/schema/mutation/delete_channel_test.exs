@@ -60,7 +60,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteChannelTest do
       error = [tenant: tenant, id: id] |> delete_channel_mutation() |> extract_error!()
 
       assert %{
-               path: ["deleteChannel"],
+               path: ["deleteChannel", "input", "id"],
                fields: [:id],
                code: "not_found",
                message: "could not be found"

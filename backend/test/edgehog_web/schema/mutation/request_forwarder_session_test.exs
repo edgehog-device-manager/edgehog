@@ -116,11 +116,22 @@ defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
 
       result = run_query(device_id: AshGraphql.Resource.encode_relay_id(device), tenant: tenant)
 
-      assert %{
-               code: "invalid_argument",
-               fields: [:device_id],
-               message: "device is disconnected"
-             } = extract_error!(result)
+      # TODO: due to a bug in (probably) ash_graphql, the same error is returned twice
+      # this seems to have been introduced in 1.9.0, with ash-project/ash_graphql#399.
+      # Change this test once it has been fixed
+      assert [
+               %{
+                 code: "invalid_argument",
+                 fields: [:device_id],
+                 message: "device is disconnected"
+               },
+               %{
+                 code: "invalid_argument",
+                 fields: [:device_id],
+                 message: "device is disconnected",
+                 path: ["requestForwarderSession", "input", "deviceId"]
+               }
+             ] = extract_errors!(result, 2)
     end
   end
 
@@ -139,11 +150,19 @@ defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
   end
 
-  defp extract_error!(result) do
+  defp extract_errors!(result, amount) when is_integer(amount) and amount > 0 do
     assert is_nil(result[:data]["requestForwarderSession"])
-    assert %{errors: [error]} = result
 
-    error
+    case amount do
+      1 ->
+        assert %{errors: [error]} = result
+        error
+
+      _ ->
+        %{errors: error_list} = result
+        assert is_list(error_list) and length(error_list) == amount
+        error_list
+    end
   end
 
   defp extract_result!(result) do
