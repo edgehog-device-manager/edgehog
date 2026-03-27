@@ -2,7 +2,7 @@
 //
 // This file is part of Edgehog.
 //
-// Copyright 2025 SECO Mind Srl
+// Copyright 2025-2026 SECO Mind Srl
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,11 +20,12 @@
 //
 
 /**
- * This script implements two functionalities for translation files.
+ * This script implements multi-mode functionalities for translation files.
  *
  * Usage:
  *   node langs_updater.js --check [directory]
  *   node langs_updater.js --reorder [directory]
+ *   node langs_updater.js --check-paths [directory]
  *
  * If no directory is provided, the script will use the current working directory.
  *
@@ -43,6 +44,13 @@
  *       • If the key exists with a description but en.json does not have one, the description is removed.
  *   - Any keys present in the target file that are not in en.json are removed.
  *   - The script prints detailed messages on the changes made.
+ *
+ * --check-paths flag:
+ *  - Scans source files for `FormattedMessage` IDs.
+ *  - Ensures every ID follows the prefix derived from the file path:
+ *      • `frontend/src/forms/MyForm.tsx` -> `forms.MyForm.<...>`
+ *      • `frontend/src/components/MyCmp.tsx` -> `components.MyCmp.<...>`
+ *  - Ensures IDs used in source files exist in en.json.
  */
 
 const fs = require("fs");
@@ -70,36 +78,50 @@ const emoji = {
   gear: "⚙️ ",
   folder: "📁",
   pen: "✏️ ",
+  wrench: "🛠️ ",
 };
+
+const knownFlags = new Set(["--check", "--reorder", "--check-paths"]);
 
 // Get command-line flags and optional directory
 const args = process.argv.slice(2);
-const checkFlag = args.includes("--check");
-const reorderFlag = args.includes("--reorder");
+const modeFlags = new Set();
+const positionalArgs = [];
 
-if (!checkFlag && !reorderFlag) {
+for (let i = 0; i < args.length; i++) {
+  const arg = args[i];
+  if (knownFlags.has(arg)) {
+    modeFlags.add(arg);
+  } else {
+    positionalArgs.push(arg);
+  }
+}
+
+const checkFlag = modeFlags.has("--check");
+const reorderFlag = modeFlags.has("--reorder");
+const checkPathsFlag = modeFlags.has("--check-paths");
+const modeCount = modeFlags.size;
+
+if (modeCount === 0) {
   console.error(
-    `${ansi.red} ${emoji.error} Error: ${ansi.reset} Please provide either the --check or --reorder flag.`
+    `${ansi.red} ${emoji.error} Error: ${ansi.reset} Please provide one mode: --check, --reorder, or --check-paths.`,
   );
   process.exit(1);
 }
 
-if (checkFlag && reorderFlag) {
+if (modeCount > 1) {
   console.error(
-    `${ansi.red} ${emoji.error} Error: ${ansi.reset} Please provide only one flag at a time (--check or --reorder).`
+    `${ansi.red} ${emoji.error} Error: ${ansi.reset} Please provide only one mode at a time.`,
   );
   process.exit(1);
 }
 
 // Determine target directory; if provided as an argument (other than flags), use it.
-const potentialDirs = args.filter(
-  (arg) => arg !== "--check" && arg !== "--reorder"
-);
-const targetDir = potentialDirs.length > 0 ? potentialDirs[0] : ".";
+const targetDir = positionalArgs.length > 0 ? positionalArgs[0] : ".";
 const directory = path.resolve(process.cwd(), targetDir);
 
 console.log(
-  `${ansi.blue}${emoji.folder} Using directory: ${ansi.reset}${ansi.cyan}${directory}${ansi.reset}`
+  `${ansi.blue}${emoji.folder} Using directory: ${ansi.reset}${ansi.cyan}${directory}${ansi.reset}`,
 );
 
 // Define reference file name and path
@@ -108,7 +130,7 @@ const refFilePath = path.join(directory, refFileName);
 
 if (!fs.existsSync(refFilePath)) {
   console.error(
-    `${ansi.red}${emoji.error} Error: ${ansi.reset} Reference file ${ansi.yellow}${refFileName}${ansi.reset} not found in ${ansi.cyan}${directory}${ansi.reset}`
+    `${ansi.red}${emoji.error} Error: ${ansi.reset} Reference file ${ansi.yellow}${refFileName}${ansi.reset} not found in ${ansi.cyan}${directory}${ansi.reset}`,
   );
   process.exit(1);
 }
@@ -120,7 +142,7 @@ try {
   refJSON = JSON.parse(refContent);
 } catch (err) {
   console.error(
-    `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read or parse ${ansi.yellow}${refFileName}${ansi.reset}: ${err.message}`
+    `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read or parse ${ansi.yellow}${refFileName}${ansi.reset}: ${err.message}`,
   );
   process.exit(1);
 }
@@ -131,9 +153,186 @@ const refKeyCount = refKeys.length;
 // Get all .json files in the directory
 const allFiles = fs.readdirSync(directory).filter((f) => f.endsWith(".json"));
 
+// Helper: Resolve the source code directory
+const resolveSourceDirectory = () => {
+  const candidates = [
+    path.resolve(directory, "..", ".."),
+    path.resolve(process.cwd(), "frontend", "src"),
+    path.resolve(process.cwd(), "src"),
+  ];
+
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate) && fs.statSync(candidate).isDirectory()) {
+      return candidate;
+    }
+  }
+  return null;
+};
+
+// Helper: Find valid top-level directories within src
+const getPathScopes = (sourceDir) =>
+  fs
+    .readdirSync(sourceDir, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && !entry.name.startsWith("."))
+    .map((entry) => entry.name);
+
+// Helper: Walk the tree to find all React/JS/TS files
+const getSourceFiles = (rootDir) => {
+  const files = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      if (entry.name.startsWith(".")) continue;
+
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        walk(fullPath);
+      } else if (/\.(ts|tsx|js|jsx)$/.test(entry.name)) {
+        files.push(fullPath);
+      }
+    }
+  };
+  walk(rootDir);
+  return files;
+};
+
+// Helper: Improved Regex to handle single quotes and formatting variants
+const findFormattedMessageIds = (source) => {
+  const matches = [];
+  const regex = /<FormattedMessage\b[\s\S]*?\bid\s*=\s*(['"])(.*?)\1/g;
+  let match;
+
+  while ((match = regex.exec(source)) !== null) {
+    // match[0] is the full string from "<FormattedMessage" up to the end of the "id" prop.
+    // By adding match[0].length to match.index, we get the exact position of the id prop.
+    const idPositionIndex = match.index + match[0].length;
+    const line = source.slice(0, idPositionIndex).split("\n").length;
+
+    matches.push({ id: match[2], line }); // match[2] is the actual ID content
+  }
+  return matches;
+};
+
+// Helper: Get expected prefix, gracefully handling `index.tsx` patterns
+const getExpectedPrefix = (sourceFilePath, sourceRoot, pathScopes) => {
+  const rel = path.relative(sourceRoot, sourceFilePath);
+  const segments = rel.split(path.sep);
+
+  if (segments.length < 2) return null;
+
+  const scope = segments[0];
+  if (!pathScopes.includes(scope)) return null;
+
+  const directoryParts = segments.slice(0, -1);
+  const fileName = path.basename(sourceFilePath, path.extname(sourceFilePath));
+
+  // If the file is 'index.tsx', the prefix shouldn't end in '.index'
+  const expectedParts =
+    fileName === "index" && directoryParts.length > 0
+      ? [...directoryParts]
+      : [...directoryParts, fileName];
+
+  return {
+    scope,
+    fileName,
+    expectedParts,
+    expectedPrefix: `${expectedParts.join(".")}.`,
+  };
+};
+
+// CORE FUNCTION: Validates Path mismatches in Source Code
+const runPathValidation = () => {
+  const sourceDir = resolveSourceDirectory();
+  if (!sourceDir || !fs.existsSync(sourceDir)) {
+    console.error(
+      `${ansi.red}${emoji.error} Error: ${ansi.reset} Could not resolve source directory automatically. Run the command from the repository root or from the frontend directory.`,
+    );
+    process.exit(1);
+  }
+
+  console.log(
+    `${ansi.blue}${emoji.folder} Source directory: ${ansi.reset}${ansi.cyan}${sourceDir}${ansi.reset}`,
+  );
+  const pathScopes = getPathScopes(sourceDir);
+
+  const sourceFiles = getSourceFiles(sourceDir);
+  const mismatches = [];
+
+  // 1. Scan Source Files
+  for (const sourceFilePath of sourceFiles) {
+    const prefixInfo = getExpectedPrefix(sourceFilePath, sourceDir, pathScopes);
+    if (!prefixInfo) continue;
+
+    let sourceContent;
+    try {
+      sourceContent = fs.readFileSync(sourceFilePath, "utf8");
+    } catch (err) {
+      console.error(
+        `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read ${ansi.yellow}${sourceFilePath}${ansi.reset}: ${err.message}`,
+      );
+      process.exit(1);
+    }
+
+    const ids = findFormattedMessageIds(sourceContent);
+    for (const item of ids) {
+      const { id, line } = item;
+
+      if (id.startsWith(prefixInfo.expectedPrefix)) continue;
+
+      const parts = id.split(".");
+      let suggested = null;
+
+      // Guess correct structure if they share the tail
+      if (
+        parts.length > prefixInfo.expectedParts.length &&
+        parts.slice(1, prefixInfo.expectedParts.length).join(".") ===
+          prefixInfo.expectedParts.slice(1).join(".")
+      ) {
+        suggested = `${prefixInfo.expectedParts[0]}.${parts.slice(1).join(".")}`;
+      }
+
+      // Handle common legacy pattern in forms
+      if (!suggested && prefixInfo.scope === "forms" && parts.length > 2) {
+        suggested = `${prefixInfo.expectedParts.join(".")}.${parts.slice(2).join(".")}`;
+      }
+
+      mismatches.push({
+        file: sourceFilePath,
+        line,
+        id,
+        expectedPrefix: prefixInfo.expectedPrefix,
+        suggested,
+      });
+    }
+  }
+
+  // 2. Report & Resolve
+  if (mismatches.length > 0) {
+    console.error(
+      `\n${ansi.red}${emoji.error} Found ${mismatches.length} translation ID path mismatches:${ansi.reset}`,
+    );
+    for (const mismatch of mismatches) {
+      console.error(
+        `  ${ansi.yellow}${mismatch.file}:${mismatch.line}${ansi.reset} -> ${ansi.red}${mismatch.id}${ansi.reset} (expected prefix ${ansi.green}${mismatch.expectedPrefix}${ansi.reset})`,
+      );
+      if (mismatch.suggested) {
+        console.error(
+          `    ${emoji.arrow} Suggested fix: ${ansi.green}${mismatch.suggested}${ansi.reset}`,
+        );
+      }
+    }
+    process.exit(1);
+  }
+
+  console.log(
+    `\n${ansi.green}${emoji.sparkles} Success: ${ansi.reset} All path-based translation IDs are valid.`,
+  );
+};
+
+// --- Execution Blocks ---
+
 if (checkFlag) {
   console.log(
-    `${ansi.blue}${emoji.gear} Starting check ${ansi.reset}using ${ansi.yellow}${refFileName}${ansi.reset} as the reference...\n`
+    `${ansi.blue}${emoji.gear} Starting check ${ansi.reset}using ${ansi.yellow}${refFileName}${ansi.reset} as the reference...\n`,
   );
 
   for (const file of allFiles) {
@@ -146,7 +345,7 @@ if (checkFlag) {
       fileJSON = JSON.parse(fileContent);
     } catch (err) {
       console.error(
-        `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read or parse ${ansi.yellow}${file}${ansi.reset}: ${err.message}`
+        `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read or parse ${ansi.yellow}${file}${ansi.reset}: ${err.message}`,
       );
       process.exit(1);
     }
@@ -159,18 +358,18 @@ if (checkFlag) {
         // Attempt to compute the actual line number for the key in the file
         const fileLines = fileContent.split("\n");
         let errorLine = fileLines.findIndex((line) =>
-          line.includes(`"${fileKeys[i]}"`)
+          line.includes(`"${fileKeys[i]}"`),
         );
         errorLine = errorLine !== -1 ? errorLine + 1 : "unknown";
         console.error(
-          `\n${ansi.red}${emoji.error} Key ordering mismatch in ${ansi.yellow}${file}${ansi.reset}:`
+          `\n${ansi.red}${emoji.error} Key ordering mismatch in ${ansi.yellow}${file}${ansi.reset}:`,
         );
         console.error(
           `  At line ${ansi.bold}${errorLine}${ansi.reset}: expected ${
             ansi.green
           }"${refKeys[i]}"${ansi.reset} but found ${ansi.red}"${
             fileKeys[i] || "undefined"
-          }"${ansi.reset}\n`
+          }"${ansi.reset}\n`,
         );
         process.exit(1);
       }
@@ -180,27 +379,27 @@ if (checkFlag) {
     const fileKeyCount = fileKeys.length;
     if (refKeyCount !== fileKeyCount) {
       console.error(
-        `\n${ansi.red}${emoji.error} Key count mismatch in ${ansi.yellow}${file}${ansi.reset}:`
+        `\n${ansi.red}${emoji.error} Key count mismatch in ${ansi.yellow}${file}${ansi.reset}:`,
       );
 
       console.error(
-        `  Expected ${ansi.green}${refKeyCount}${ansi.reset} keys, got ${ansi.red}${fileKeyCount}${ansi.reset} keys\n`
+        `  Expected ${ansi.green}${refKeyCount}${ansi.reset} keys, got ${ansi.red}${fileKeyCount}${ansi.reset} keys\n`,
       );
       process.exit(1);
     }
     console.log(
-      `${ansi.green}${emoji.check} OK: ${ansi.reset}${ansi.yellow}${file}${ansi.reset} matches the reference ${ansi.yellow}${refFileName}${ansi.reset}`
+      `${ansi.green}${emoji.check} OK: ${ansi.reset}${ansi.yellow}${file}${ansi.reset} matches the reference ${ansi.yellow}${refFileName}${ansi.reset}`,
     );
   }
 
   console.log(
-    `\n${ansi.green}${emoji.sparkles} Success: ${ansi.reset} All language files in ${ansi.cyan}${directory}${ansi.reset} have identical key ordering and count as ${ansi.yellow}${refFileName}${ansi.reset}!`
+    `\n${ansi.green}${emoji.sparkles} Success: ${ansi.reset} All language files in ${ansi.cyan}${directory}${ansi.reset} have identical key ordering and count as ${ansi.yellow}${refFileName}${ansi.reset}!`,
   );
 }
 
 if (reorderFlag) {
   console.log(
-    `${ansi.blue}${emoji.gear} Starting reordering process ${ansi.reset}based on ${ansi.yellow}${refFileName}${ansi.reset}...\n`
+    `${ansi.blue}${emoji.gear} Starting reordering process ${ansi.reset}based on ${ansi.yellow}${refFileName}${ansi.reset}...\n`,
   );
 
   for (const file of allFiles) {
@@ -213,7 +412,7 @@ if (reorderFlag) {
       fileJSON = JSON.parse(fileContent);
     } catch (err) {
       console.error(
-        `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read or parse ${ansi.yellow}${file}${ansi.reset}: ${err.message}`
+        `${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to read or parse ${ansi.yellow}${file}${ansi.reset}: ${err.message}`,
       );
       process.exit(1);
     }
@@ -227,7 +426,7 @@ if (reorderFlag) {
         // Key is missing: copy entire structure from reference.
         newJSON[key] = { ...refJSON[key] };
         logMessages.push(
-          `${emoji.arrow} ${ansi.green}Added${ansi.reset} missing key ${ansi.yellow}"${key}"${ansi.reset}`
+          `${emoji.arrow} ${ansi.green}Added${ansi.reset} missing key ${ansi.yellow}"${key}"${ansi.reset}`,
         );
       } else {
         // Key exists: copy current value and adjust if needed.
@@ -241,7 +440,7 @@ if (reorderFlag) {
         ) {
           newJSON[key]["description"] = refJSON[key]["description"];
           logMessages.push(
-            `${emoji.pen} ${ansi.green}Added${ansi.reset} missing description for ${ansi.yellow}"${key}"${ansi.reset}`
+            `${emoji.pen} ${ansi.green}Added${ansi.reset} missing description for ${ansi.yellow}"${key}"${ansi.reset}`,
           );
         }
 
@@ -254,7 +453,7 @@ if (reorderFlag) {
         ) {
           delete newJSON[key]["description"];
           logMessages.push(
-            `${emoji.warn} ${ansi.yellow}Removed${ansi.reset} unnecessary description for ${ansi.yellow}"${key}"${ansi.reset}`
+            `${emoji.warn} ${ansi.yellow}Removed${ansi.reset} unnecessary description for ${ansi.yellow}"${key}"${ansi.reset}`,
           );
         }
       }
@@ -262,7 +461,7 @@ if (reorderFlag) {
 
     // Check for extra keys that are not in the reference file.
     const extraKeys = Object.keys(fileJSON).filter(
-      (key) => !refKeys.includes(key)
+      (key) => !refKeys.includes(key),
     );
     if (extraKeys.length > 0) {
       logMessages.push(
@@ -270,7 +469,7 @@ if (reorderFlag) {
           ansi.reset
         } extra keys: ${extraKeys
           .map((k) => ansi.red + k + ansi.reset)
-          .join(", ")}`
+          .join(", ")}`,
       );
     }
 
@@ -279,21 +478,27 @@ if (reorderFlag) {
       fs.writeFileSync(
         filePath,
         JSON.stringify(newJSON, null, 2) + "\n",
-        "utf8"
+        "utf8",
       );
       console.log(
-        `\n${ansi.cyan}${emoji.sparkles} Reordered file: ${ansi.reset}${ansi.yellow}${file}${ansi.reset}`
+        `\n${ansi.cyan}${emoji.sparkles} Reordered file: ${ansi.reset}${ansi.yellow}${file}${ansi.reset}`,
       );
       logMessages.forEach((msg) => console.log("  " + msg));
     } catch (err) {
       console.error(
-        `\n${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to write ${ansi.yellow}${file}${ansi.reset}: ${err.message}`
+        `\n${ansi.red}${emoji.error} Error: ${ansi.reset} Failed to write ${ansi.yellow}${file}${ansi.reset}: ${err.message}`,
       );
       process.exit(1);
     }
   }
-
   console.log(
-    `\n${ansi.green}${emoji.check} Done: ${ansi.reset} All files reordered and cleaned successfully.`
+    `\n${ansi.green}${emoji.check} Done: ${ansi.reset} All files reordered and cleaned successfully.`,
   );
+}
+
+if (checkPathsFlag) {
+  console.log(
+    `${ansi.blue}${emoji.gear} Starting path-based translation check${ansi.reset}...\n`,
+  );
+  runPathValidation();
 }

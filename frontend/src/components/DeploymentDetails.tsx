@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2025-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -425,7 +423,7 @@ const ContainerDeploymentItem = ({
           <span className="d-flex gap-2 small">
             <strong>
               <FormattedMessage
-                id={"components.deploymentDetails.imageStatus"}
+                id={"components.DeploymentDetails.imageStatus"}
                 defaultMessage={" Image Status: "}
               />
             </strong>
@@ -446,7 +444,7 @@ const ContainerDeploymentItem = ({
           style={{ fontSize: "0.85rem", opacity: 0.7 }}
         >
           <FormattedMessage
-            id={"components.deploymentDetails.noNetworksMessage"}
+            id={"components.DeploymentDetails.noNetworksMessage"}
             defaultMessage={"No Networks"}
           />
         </p>
@@ -465,7 +463,7 @@ const ContainerDeploymentItem = ({
           style={{ fontSize: "0.85rem", opacity: 0.7 }}
         >
           <FormattedMessage
-            id={"components.deploymentDetails.noVolumesMessage"}
+            id={"components.DeploymentDetails.noVolumesMessage"}
             defaultMessage={"No Volumes"}
           />
         </p>
@@ -544,7 +542,7 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
               <DetailItem
                 label={
                   <FormattedMessage
-                    id="components.deploymentDetails.applicationName"
+                    id="components.DeploymentDetails.applicationName"
                     defaultMessage="Application Name: "
                   />
                 }
@@ -559,7 +557,7 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
               <DetailItem
                 label={
                   <FormattedMessage
-                    id="components.deploymentDetails.releaseVersion"
+                    id="components.DeploymentDetails.releaseVersion"
                     defaultMessage="Release Version: "
                   />
                 }
@@ -577,7 +575,7 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
               <DetailItem
                 label={
                   <FormattedMessage
-                    id="components.deploymentDetails.Status"
+                    id="components.DeploymentDetails.status"
                     defaultMessage="Status: "
                   />
                 }
@@ -593,7 +591,7 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
               <DetailItem
                 label={
                   <FormattedMessage
-                    id="components.deploymentDetails.readiness"
+                    id="components.DeploymentDetails.readiness"
                     defaultMessage="Readiness: "
                   />
                 }

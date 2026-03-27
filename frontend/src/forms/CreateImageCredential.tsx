@@ -72,7 +72,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
           id="image-credential-form-label"
           label={
             <FormattedMessage
-              id="components.CreateImageCredentialForm.labelLabel"
+              id="forms.CreateImageCredential.labelLabel"
               defaultMessage="Label"
             />
           }
@@ -85,7 +85,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
           id="image-credential-form-username"
           label={
             <FormattedMessage
-              id="components.CreateImageCredentialForm.usernameLabel"
+              id="forms.CreateImageCredential.usernameLabel"
               defaultMessage="Username"
             />
           }
@@ -102,7 +102,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
           id="image-credential-form-password"
           label={
             <FormattedMessage
-              id="components.CreateImageCredentialForm.passwordLabel"
+              id="forms.CreateImageCredential.passwordLabel"
               defaultMessage="Password"
             />
           }
@@ -140,7 +140,7 @@ const CreateImageCredential = ({ isLoading = false, onSubmit }: Props) => {
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateImageCredentialForm.submitButton"
+              id="forms.CreateImageCredential.submitButton"
               defaultMessage="Create"
             />
           </Button>

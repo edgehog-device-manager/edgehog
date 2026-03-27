@@ -61,7 +61,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="networkLabel"
         label={
           <FormattedMessage
-            id="components.CreateNetworkForm.labelLabel"
+            id="forms.CreateNetwork.labelLabel"
             defaultMessage="Label"
           />
         }
@@ -74,7 +74,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="networkDriver"
         label={
           <FormattedMessage
-            id="components.CreateNetworkForm.driverLabel"
+            id="forms.CreateNetwork.driverLabel"
             defaultMessage="Driver"
           />
         }
@@ -87,7 +87,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="networkOptions"
         label={
           <FormattedMessage
-            id="components.CreateNetworkForm.optionsLabel"
+            id="forms.CreateNetwork.optionsLabel"
             defaultMessage="Options"
           />
         }
@@ -112,7 +112,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="networkInternal"
         label={
           <FormattedMessage
-            id="components.CreateNetworkForm.internalLabel"
+            id="forms.CreateNetwork.internalLabel"
             defaultMessage="Internal"
           />
         }
@@ -129,7 +129,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="networkEnableIpv6"
         label={
           <FormattedMessage
-            id="components.CreateNetworkForm.enableIpv6Label"
+            id="forms.CreateNetwork.enableIpv6Label"
             defaultMessage="Enable IPv6"
           />
         }
@@ -150,7 +150,7 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateNetworkForm.submitButton"
+              id="forms.CreateNetwork.submitButton"
               defaultMessage="Create"
             />
           </Button>

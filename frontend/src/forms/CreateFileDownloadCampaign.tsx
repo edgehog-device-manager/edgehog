@@ -709,7 +709,7 @@ const CreateFileDownloadCampaignForm = ({
           isInsideTable={true}
           title={
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestFromRepositoryForm.advancedOptionsTitle"
+              id="forms.CreateFileDownloadCampaign.advancedOptionsTitle"
               defaultMessage="Advanced Options"
             />
           }

@@ -102,7 +102,7 @@ const ApplicationDevicesTable = ({
     columnHelper.accessor("device.online", {
       header: () => (
         <FormattedMessage
-          id="components.DevicesTable.statusTitle"
+          id="components.ApplicationDevicesTable.statusTitle"
           defaultMessage="Status"
           description="Title for the Status column of the devices table"
         />

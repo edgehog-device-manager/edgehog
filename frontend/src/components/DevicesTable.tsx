@@ -109,14 +109,17 @@ const columns = [
   columnHelper.accessor((device) => device.systemModel?.name, {
     id: "systemModel",
     header: () => (
-      <FormattedMessage id="Device.systemModel" defaultMessage="System Model" />
+      <FormattedMessage
+        id="components.DevicesTable.systemModel"
+        defaultMessage="System Model"
+      />
     ),
   }),
   columnHelper.accessor((device) => device.systemModel?.hardwareType?.name, {
     id: "hardwareType",
     header: () => (
       <FormattedMessage
-        id="Device.hardwareType"
+        id="components.DevicesTable.hardwareType"
         defaultMessage="Hardware Type"
       />
     ),

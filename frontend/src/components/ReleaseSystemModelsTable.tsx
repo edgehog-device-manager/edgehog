@@ -68,7 +68,7 @@ const ReleaseSystemModelsTable = ({
     columnHelper.accessor("name", {
       header: () => (
         <FormattedMessage
-          id="components.ReleasesSystemModelsTable.nameTitle"
+          id="components.ReleaseSystemModelsTable.nameTitle"
           defaultMessage="System Model Name"
         />
       ),

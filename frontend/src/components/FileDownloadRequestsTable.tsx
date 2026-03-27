@@ -160,7 +160,7 @@ const columns = [
         return (
           <p>
             <FormattedMessage
-              id="components.FileDownloadRequestsTable.infinite"
+              id="components.FileDownloadRequestsTable.ttl.infinite"
               defaultMessage="Infinite"
             />
           </p>
@@ -173,7 +173,7 @@ const columns = [
   columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.message"
+        id="components.FileDownloadRequestsTable.responseMessage"
         defaultMessage="Response Message"
       />
     ),
@@ -202,7 +202,7 @@ const FileDownloadRequestsTable = ({
     return (
       <p className="text-muted">
         <FormattedMessage
-          id="components.DeviceTabs.FilesUploadTab.noRequests"
+          id="components.FileDownloadRequestsTable.noRequests"
           defaultMessage="No file download requests have been sent yet."
         />
       </p>

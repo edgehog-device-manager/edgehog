@@ -96,7 +96,7 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
           id="hardware-type-form-name"
           label={
             <FormattedMessage
-              id="components.CreateHardwareTypeForm.nameLabel"
+              id="forms.CreateHardwareType.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -108,7 +108,7 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
           id="hardware-type-form-handle"
           label={
             <FormattedMessage
-              id="components.CreateHardwareTypeForm.handleLabel"
+              id="forms.CreateHardwareType.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -120,7 +120,7 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
           id="hardware-type-form-part-numbers"
           label={
             <FormattedMessage
-              id="components.CreateHardwareTypeForm.partNumbersLabel"
+              id="forms.CreateHardwareType.partNumbersLabel"
               defaultMessage="Part Numbers"
             />
           }
@@ -152,7 +152,7 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
               onClick={handleAddPartNumber}
             >
               <FormattedMessage
-                id="components.CreateHardwareTypeForm.addPartNumberButton"
+                id="forms.CreateHardwareType.addPartNumberButton"
                 defaultMessage="Add Part Number"
               />
             </Button>
@@ -162,7 +162,7 @@ const CreateHardwareTypeForm = ({ isLoading = false, onSubmit }: Props) => {
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateHardwareTypeForm.submitButton"
+              id="forms.CreateHardwareType.submitButton"
               defaultMessage="Create"
             />
           </Button>

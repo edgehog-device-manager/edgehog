@@ -61,7 +61,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="volumeLabel"
         label={
           <FormattedMessage
-            id="components.CreateVolumeForm.labelLabel"
+            id="forms.CreateVolume.labelLabel"
             defaultMessage="Label"
           />
         }
@@ -79,7 +79,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="volumeDriver"
         label={
           <FormattedMessage
-            id="components.CreateVolumeForm.driverLabel"
+            id="forms.CreateVolume.driverLabel"
             defaultMessage="Driver"
           />
         }
@@ -97,7 +97,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
         id="volumeOptions"
         label={
           <FormattedMessage
-            id="components.CreateVolumeForm.optionsLabel"
+            id="forms.CreateVolume.optionsLabel"
             defaultMessage="Options"
           />
         }
@@ -126,7 +126,7 @@ const CreateVolume = React.memo(({ isLoading = false, onSubmit }: Props) => {
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateVolumeForm.submitButton"
+              id="forms.CreateVolume.submitButton"
               defaultMessage="Create"
             />
           </Button>

@@ -125,13 +125,13 @@ const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
       <Result.EmptyList
         title={
           <FormattedMessage
-            id="pages.Device.wifiScanResultsTab.noResults.title"
+            id="components.WiFiScanResultsTable.noResults.title"
             defaultMessage="No results"
           />
         }
       >
         <FormattedMessage
-          id="pages.Device.wifiScanResultsTab.noResults.message"
+          id="components.WiFiScanResultsTable.noResults.message"
           defaultMessage="The device has not detected any WiFi AP yet."
         />
       </Result.EmptyList>

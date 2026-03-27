@@ -83,7 +83,7 @@ const getColumnsDefinition = (
     id: "action",
     header: () => (
       <FormattedMessage
-        id="components.ApplicationsTable.action"
+        id="components.FilesTable.action"
         defaultMessage="Action"
       />
     ),

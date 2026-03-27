@@ -598,7 +598,7 @@ const CreateRelease = ({
                 title={
                   <span className="d-flex align-items-center gap-2">
                     <FormattedMessage
-                      id="forms.ContainerForm.containerTitle"
+                      id="forms.CreateRelease.containerTitle"
                       defaultMessage="Container {containerNumber}"
                       values={{
                         containerNumber: index + 1,
@@ -607,7 +607,7 @@ const CreateRelease = ({
                     {isContainerImported(index) && (
                       <Tag className="bg-secondary">
                         <FormattedMessage
-                          id="forms.ContainerForm.importedLabel"
+                          id="forms.CreateRelease.importedLabel"
                           defaultMessage="Imported"
                         />
                       </Tag>
@@ -615,7 +615,7 @@ const CreateRelease = ({
                     {isContainerModified(index) && (
                       <Tag className="bg-secondary">
                         <FormattedMessage
-                          id="forms.ContainerForm.modifiedLabel"
+                          id="forms.CreateRelease.modifiedLabel"
                           defaultMessage="Modified"
                         />
                       </Tag>

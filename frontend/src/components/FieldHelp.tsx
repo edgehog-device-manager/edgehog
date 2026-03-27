@@ -139,7 +139,7 @@ const FieldHelp = ({
               <p className="m-0 text-secondary fw-semibold  small fst-italic">
                 <span className="fw-bold me-1 text-dark">
                   <FormattedMessage
-                    id="fieldExplanation.exampleTitle"
+                    id="components.FieldHelp.exampleTitle"
                     defaultMessage="Example:"
                   />
                 </span>

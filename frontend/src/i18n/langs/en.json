@@ -1,43 +1,4 @@
 {
-  "Device.checkMyDevice": {
-    "defaultMessage": "Check my Device"
-  },
-  "Device.connectionStatus": {
-    "defaultMessage": "Connection"
-  },
-  "Device.deviceId": {
-    "defaultMessage": "Device ID"
-  },
-  "Device.groups": {
-    "defaultMessage": "Groups"
-  },
-  "Device.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "Device.lastSeen": {
-    "defaultMessage": "Last seen"
-  },
-  "Device.name": {
-    "defaultMessage": "Name"
-  },
-  "Device.partNumber": {
-    "defaultMessage": "Part Number"
-  },
-  "Device.remoteTerminal.label": {
-    "defaultMessage": "Remote Terminal"
-  },
-  "Device.remoteTerminal.openTerminalButton": {
-    "defaultMessage": "Open"
-  },
-  "Device.serialNumber": {
-    "defaultMessage": "Serial Number"
-  },
-  "Device.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "Device.tags": {
-    "defaultMessage": "Tags"
-  },
   "components.AddAvailableApplications.deployButton": {
     "defaultMessage": "Deploy"
   },
@@ -85,6 +46,10 @@
   "components.ApplicationDevicesTable.releaseVersionTitle": {
     "defaultMessage": "Release Version",
     "description": "Title for the Release Version column of the application devices table"
+  },
+  "components.ApplicationDevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
   },
   "components.ApplicationsTable.action": {
     "defaultMessage": "Action"
@@ -222,6 +187,12 @@
   "components.CellularConnectionTabs.Modem.technology": {
     "defaultMessage": "Technology"
   },
+  "components.CellularConnectionTabs.noModems.message": {
+    "defaultMessage": "The device has not detected any modems yet."
+  },
+  "components.CellularConnectionTabs.noModems.title": {
+    "defaultMessage": "No modem"
+  },
   "components.ChannelsTable.handleTitle": {
     "defaultMessage": "Handle",
     "description": "Title for the Handle column of the channels table"
@@ -325,6 +296,9 @@
   "components.ContainersTable.hostnameLabel": {
     "defaultMessage": "Hostname"
   },
+  "components.ContainersTable.imageConfigSection": {
+    "defaultMessage": "Image Configuration"
+  },
   "components.ContainersTable.imageCredentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
@@ -342,6 +316,9 @@
   },
   "components.ContainersTable.memorySwappinessLabel": {
     "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "components.ContainersTable.networkConfigSection": {
+    "defaultMessage": "Network Configuration"
   },
   "components.ContainersTable.networkDriverLabel": {
     "defaultMessage": "Driver"
@@ -376,6 +353,9 @@
   "components.ContainersTable.noVolumes": {
     "defaultMessage": "No volumes assigned."
   },
+  "components.ContainersTable.options": {
+    "defaultMessage": "Options"
+  },
   "components.ContainersTable.portBindingsLabel": {
     "defaultMessage": "Port Bindings"
   },
@@ -385,8 +365,20 @@
   "components.ContainersTable.readOnlyRootfsLabel": {
     "defaultMessage": "Read-Only Root Filesystem"
   },
+  "components.ContainersTable.resourceLimitsSection": {
+    "defaultMessage": "Resource Limits"
+  },
   "components.ContainersTable.restartPolicyLabel": {
     "defaultMessage": "Restart Policy"
+  },
+  "components.ContainersTable.runtimeSection": {
+    "defaultMessage": "Runtime & Environment"
+  },
+  "components.ContainersTable.securitySection": {
+    "defaultMessage": "Security & Capabilities"
+  },
+  "components.ContainersTable.storageConfigSection": {
+    "defaultMessage": "Storage Configuration"
   },
   "components.ContainersTable.storageOptLabel": {
     "defaultMessage": "Storage Options"
@@ -409,84 +401,6 @@
   "components.ContainersTable.volumesLabel": {
     "defaultMessage": "Volumes"
   },
-  "components.CreateApplication.descriptionLabel": {
-    "defaultMessage": "Description"
-  },
-  "components.CreateApplication.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateApplication.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateDeviceGroup.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateDeviceGroup.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateDeviceGroup.selectorLabel": {
-    "defaultMessage": "Selector"
-  },
-  "components.CreateDeviceGroup.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateHardwareTypeForm.addPartNumberButton": {
-    "defaultMessage": "Add Part Number"
-  },
-  "components.CreateHardwareTypeForm.handleLabel": {
-    "defaultMessage": "Handle"
-  },
-  "components.CreateHardwareTypeForm.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.CreateHardwareTypeForm.partNumbersLabel": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.CreateHardwareTypeForm.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateImageCredentialForm.labelLabel": {
-    "defaultMessage": "Label"
-  },
-  "components.CreateImageCredentialForm.passwordLabel": {
-    "defaultMessage": "Password"
-  },
-  "components.CreateImageCredentialForm.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateImageCredentialForm.usernameLabel": {
-    "defaultMessage": "Username"
-  },
-  "components.CreateNetworkForm.driverLabel": {
-    "defaultMessage": "Driver"
-  },
-  "components.CreateNetworkForm.enableIpv6Label": {
-    "defaultMessage": "Enable IPv6"
-  },
-  "components.CreateNetworkForm.internalLabel": {
-    "defaultMessage": "Internal"
-  },
-  "components.CreateNetworkForm.labelLabel": {
-    "defaultMessage": "Label"
-  },
-  "components.CreateNetworkForm.optionsLabel": {
-    "defaultMessage": "Options"
-  },
-  "components.CreateNetworkForm.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "components.CreateVolumeForm.driverLabel": {
-    "defaultMessage": "Driver"
-  },
-  "components.CreateVolumeForm.labelLabel": {
-    "defaultMessage": "Label"
-  },
-  "components.CreateVolumeForm.optionsLabel": {
-    "defaultMessage": "Options"
-  },
-  "components.CreateVolumeForm.submitButton": {
-    "defaultMessage": "Create"
-  },
   "components.DeleteApplicationModal.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the application."
   },
@@ -504,11 +418,14 @@
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
   },
-  "components.DeleteReleaseModal.deleteModal.title": {
-    "defaultMessage": "Delete Release"
-  },
   "components.DeleteReleaseModal.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the release, please try again."
+  },
+  "components.DeleteReleaseModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the release."
+  },
+  "components.DeleteReleaseModal.title": {
+    "defaultMessage": "Delete Release"
   },
   "components.DeployedApplicationsTable.actions": {
     "defaultMessage": "Actions"
@@ -606,12 +523,6 @@
   "components.DeployedApplicationsTable.upgradeErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
-  "components.DeploymentCampaign.pauseErrorFeedback": {
-    "defaultMessage": "Could not pause the campaign, please try again."
-  },
-  "components.DeploymentCampaign.resumeErrorFeedback": {
-    "defaultMessage": "Could not resume the campaign, please try again."
-  },
   "components.DeploymentCampaignsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",
     "description": "Title for the Application Name column of the Deployment Campaigns table"
@@ -640,6 +551,9 @@
   "components.DeploymentDetails.PathMappings": {
     "defaultMessage": "Path On Host → Path In Container"
   },
+  "components.DeploymentDetails.applicationName": {
+    "defaultMessage": "Application Name:"
+  },
   "components.DeploymentDetails.deviceMappingState": {
     "defaultMessage": "State"
   },
@@ -652,11 +566,29 @@
   "components.DeploymentDetails.eventType": {
     "defaultMessage": "Type"
   },
+  "components.DeploymentDetails.imageStatus": {
+    "defaultMessage": "Image Status:"
+  },
   "components.DeploymentDetails.networkLabel": {
     "defaultMessage": "Label"
   },
   "components.DeploymentDetails.networkState": {
     "defaultMessage": "State"
+  },
+  "components.DeploymentDetails.noNetworksMessage": {
+    "defaultMessage": "No Networks"
+  },
+  "components.DeploymentDetails.noVolumesMessage": {
+    "defaultMessage": "No Volumes"
+  },
+  "components.DeploymentDetails.readiness": {
+    "defaultMessage": "Readiness:"
+  },
+  "components.DeploymentDetails.releaseVersion": {
+    "defaultMessage": "Release Version:"
+  },
+  "components.DeploymentDetails.status": {
+    "defaultMessage": "Status:"
   },
   "components.DeploymentDetails.volumeLabel": {
     "defaultMessage": "Label"
@@ -825,9 +757,6 @@
   "components.DeviceTabs.FilesUploadTab.modeRepository": {
     "defaultMessage": "Repository"
   },
-  "components.DeviceTabs.FilesUploadTab.noRequests": {
-    "defaultMessage": "No file download requests have been sent yet."
-  },
   "components.DeviceTabs.FilesUploadTab.requestHistory": {
     "defaultMessage": "Request History"
   },
@@ -925,6 +854,9 @@
     "defaultMessage": "Device ID",
     "description": "Title for the Device ID column of the devices table"
   },
+  "components.DevicesGroupsTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
   "components.DevicesGroupsTable.lastSeenTitle": {
     "defaultMessage": "Last Seen",
     "description": "Title for the Last Seen column of the devices table"
@@ -937,6 +869,9 @@
     "defaultMessage": "Status",
     "description": "Title for the Status column of the devices table"
   },
+  "components.DevicesGroupsTable.systemModel": {
+    "defaultMessage": "System Model"
+  },
   "components.DevicesGroupsTable.tagsTitle": {
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
@@ -944,6 +879,9 @@
   "components.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
     "description": "Title for the Device ID column of the devices table"
+  },
+  "components.DevicesTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
   },
   "components.DevicesTable.lastSeenTitle": {
     "defaultMessage": "Last Seen",
@@ -957,9 +895,15 @@
     "defaultMessage": "Status",
     "description": "Title for the Status column of the devices table"
   },
+  "components.DevicesTable.systemModel": {
+    "defaultMessage": "System Model"
+  },
   "components.DevicesTable.tagsTitle": {
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
+  },
+  "components.FieldHelp.exampleTitle": {
+    "defaultMessage": "Example:"
   },
   "components.FileDownloadCampaignsTable.channelNameTitle": {
     "defaultMessage": "Channel"
@@ -1000,14 +944,14 @@
   "components.FileDownloadRequestsTable.fileSize": {
     "defaultMessage": "Uncompressed File Size"
   },
-  "components.FileDownloadRequestsTable.infinite": {
-    "defaultMessage": "Infinite"
-  },
-  "components.FileDownloadRequestsTable.message": {
-    "defaultMessage": "Response Message"
+  "components.FileDownloadRequestsTable.noRequests": {
+    "defaultMessage": "No file download requests have been sent yet."
   },
   "components.FileDownloadRequestsTable.progress": {
     "defaultMessage": "Progress"
+  },
+  "components.FileDownloadRequestsTable.responseMessage": {
+    "defaultMessage": "Response Message"
   },
   "components.FileDownloadRequestsTable.status": {
     "defaultMessage": "Status"
@@ -1017,6 +961,9 @@
   },
   "components.FileDownloadRequestsTable.ttl": {
     "defaultMessage": "TTL (s)"
+  },
+  "components.FileDownloadRequestsTable.ttl.infinite": {
+    "defaultMessage": "Infinite"
   },
   "components.FileDownloadTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at"
@@ -1084,6 +1031,9 @@
   "components.FileSelect.noFilesFoundMatching": {
     "defaultMessage": "No files found matching \"{inputValue}\""
   },
+  "components.FilesTable.action": {
+    "defaultMessage": "Action"
+  },
   "components.FilesTable.downloadError": {
     "defaultMessage": "Failed to download file"
   },
@@ -1146,30 +1096,6 @@
   "components.LedBehaviorDropdown.tooltip": {
     "defaultMessage": "The device LED will blink for 60s."
   },
-  "components.ManualFileDownloadRequestForm.archiveNameHint": {
-    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
-  },
-  "components.ManualFileDownloadRequestForm.archiveNameLabel": {
-    "defaultMessage": "Archive Name"
-  },
-  "components.ManualFileDownloadRequestForm.fileHint": {
-    "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
-  },
-  "components.ManualFileDownloadRequestForm.fileLabel": {
-    "defaultMessage": "Files"
-  },
-  "components.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
-    "defaultMessage": "Base Image Collection"
-  },
-  "components.ManualOtaFromFileCollection.update": {
-    "defaultMessage": "Update"
-  },
-  "components.ManualOtaFromFileForm.baseImageLabel": {
-    "defaultMessage": "Base image file"
-  },
-  "components.ManualOtaFromFileForm.update": {
-    "defaultMessage": "Update"
-  },
   "components.NetworkInterfacesTable.macAddressTitle": {
     "defaultMessage": "MAC Address"
   },
@@ -1215,6 +1141,9 @@
   },
   "components.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
+  },
+  "components.OperationTable.noPreviousUpdates": {
+    "defaultMessage": "No previous updates"
   },
   "components.OperationTable.operationStatus": {
     "defaultMessage": "Status"
@@ -1264,21 +1193,18 @@
   "components.ReleaseSelect.releaseOption": {
     "defaultMessage": "Search or select a release..."
   },
+  "components.ReleaseSystemModelsTable.nameTitle": {
+    "defaultMessage": "System Model Name"
+  },
   "components.ReleaseSystemModelsTable.noSystemModels": {
     "defaultMessage": "No supported system model specified. This release can be applied to any device."
-  },
-  "components.ReleaseTable.versionTitle": {
-    "defaultMessage": "Release Version",
-    "description": "Title for the Release Version column of the releases table"
-  },
-  "components.ReleasesSystemModelsTable.nameTitle": {
-    "defaultMessage": "System Model Name"
   },
   "components.ReleasesTable.action": {
     "defaultMessage": "Action"
   },
-  "components.ReleasesTable.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the release."
+  "components.ReleasesTable.versionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the releases table"
   },
   "components.RepositoriesTable.handleTitle": {
     "defaultMessage": "Handle",
@@ -1393,12 +1319,6 @@
   },
   "components.Topbar.userMenu.logoutLabel": {
     "defaultMessage": "Logout"
-  },
-  "components.UpdateCampaign.pauseErrorFeedback": {
-    "defaultMessage": "Could not pause the campaign, please try again."
-  },
-  "components.UpdateCampaign.resumeErrorFeedback": {
-    "defaultMessage": "Could not resume the campaign, please try again."
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -1527,6 +1447,12 @@
   "components.WiFiScanResultsTable.apRssiTitle": {
     "defaultMessage": "RSSI"
   },
+  "components.WiFiScanResultsTable.noResults.message": {
+    "defaultMessage": "The device has not detected any WiFi AP yet."
+  },
+  "components.WiFiScanResultsTable.noResults.title": {
+    "defaultMessage": "No results"
+  },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
   },
@@ -1542,35 +1468,14 @@
   "components.campaignTargetStatus.Successful": {
     "defaultMessage": "Successful"
   },
-  "components.deploymentDetails.Status": {
-    "defaultMessage": "Status:"
-  },
-  "components.deploymentDetails.applicationName": {
-    "defaultMessage": "Application Name:"
-  },
   "components.deploymentDetails.containersTab": {
     "defaultMessage": "Containers"
   },
   "components.deploymentDetails.eventsTab": {
     "defaultMessage": "Events"
   },
-  "components.deploymentDetails.imageStatus": {
-    "defaultMessage": "Image Status:"
-  },
   "components.deploymentDetails.noDeviceMappingsMessage": {
     "defaultMessage": "No Device Mappings"
-  },
-  "components.deploymentDetails.noNetworksMessage": {
-    "defaultMessage": "No Networks"
-  },
-  "components.deploymentDetails.noVolumesMessage": {
-    "defaultMessage": "No Volumes"
-  },
-  "components.deploymentDetails.readiness": {
-    "defaultMessage": "Readiness:"
-  },
-  "components.deploymentDetails.releaseVersion": {
-    "defaultMessage": "Release Version:"
   },
   "device.otaOperationStatus.Failure": {
     "defaultMessage": "Failure"
@@ -1658,9 +1563,6 @@
   },
   "fieldExplanation.env.title": {
     "defaultMessage": "Environment Variables (JSON String)"
-  },
-  "fieldExplanation.exampleTitle": {
-    "defaultMessage": "Example:"
   },
   "fieldExplanation.extraHosts.description": {
     "defaultMessage": "List of hostname/IP mappings added to the container's /etc/hosts for custom DNS resolution. 'host-gateway' resolves to the host IP."
@@ -1812,9 +1714,6 @@
   "fieldExplanation.volumes.title": {
     "defaultMessage": "Volume Mounts"
   },
-  "forms.ContainerForm.containerTitle": {
-    "defaultMessage": "Container {containerNumber}"
-  },
   "forms.ContainerForm.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
   },
@@ -1829,12 +1728,6 @@
   },
   "forms.ContainerForm.imageSection": {
     "defaultMessage": "Image Configuration"
-  },
-  "forms.ContainerForm.importedLabel": {
-    "defaultMessage": "Imported"
-  },
-  "forms.ContainerForm.modifiedLabel": {
-    "defaultMessage": "Modified"
   },
   "forms.ContainerForm.networkAddExtraHostButton": {
     "defaultMessage": "Add Extra Host"
@@ -1953,23 +1846,14 @@
   "forms.ContainerForm.storageVolumesLabel": {
     "defaultMessage": "Volumes"
   },
-  "forms.ContainersTable.imageConfigSection": {
-    "defaultMessage": "Image Configuration"
+  "forms.CreateApplication.descriptionLabel": {
+    "defaultMessage": "Description"
   },
-  "forms.ContainersTable.networkConfigSection": {
-    "defaultMessage": "Network Configuration"
+  "forms.CreateApplication.nameLabel": {
+    "defaultMessage": "Name"
   },
-  "forms.ContainersTable.resourceLimitsSection": {
-    "defaultMessage": "Resource Limits"
-  },
-  "forms.ContainersTable.runtimeSection": {
-    "defaultMessage": "Runtime & Environment"
-  },
-  "forms.ContainersTable.securitySection": {
-    "defaultMessage": "Security & Capabilities"
-  },
-  "forms.ContainersTable.storageConfigSection": {
-    "defaultMessage": "Storage Configuration"
+  "forms.CreateApplication.submitButton": {
+    "defaultMessage": "Create"
   },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -2099,11 +1983,38 @@
   "forms.CreateDeploymentCampaign.targetReleaseLabel": {
     "defaultMessage": "Target Release"
   },
+  "forms.CreateDeviceGroup.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateDeviceGroup.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateDeviceGroup.selectorLabel": {
+    "defaultMessage": "Selector"
+  },
+  "forms.CreateDeviceGroup.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateFile.archiveNameHint": {
+    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+  },
+  "forms.CreateFile.archiveNameLabel": {
+    "defaultMessage": "Archive Name"
+  },
+  "forms.CreateFile.fileHint": {
+    "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
+  },
+  "forms.CreateFile.fileLabel": {
+    "defaultMessage": "Files"
+  },
   "forms.CreateFile.repositoryLabel": {
     "defaultMessage": "Repository"
   },
   "forms.CreateFile.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateFileDownloadCampaign.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
   },
   "forms.CreateFileDownloadCampaign.channelLabel": {
     "defaultMessage": "Channel"
@@ -2171,6 +2082,51 @@
   "forms.CreateFileDownloadCampaign.userIdLabel": {
     "defaultMessage": "User ID"
   },
+  "forms.CreateHardwareType.addPartNumberButton": {
+    "defaultMessage": "Add Part Number"
+  },
+  "forms.CreateHardwareType.handleLabel": {
+    "defaultMessage": "Handle"
+  },
+  "forms.CreateHardwareType.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateHardwareType.partNumbersLabel": {
+    "defaultMessage": "Part Numbers"
+  },
+  "forms.CreateHardwareType.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateImageCredential.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "forms.CreateImageCredential.passwordLabel": {
+    "defaultMessage": "Password"
+  },
+  "forms.CreateImageCredential.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateImageCredential.usernameLabel": {
+    "defaultMessage": "Username"
+  },
+  "forms.CreateNetwork.driverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "forms.CreateNetwork.enableIpv6Label": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "forms.CreateNetwork.internalLabel": {
+    "defaultMessage": "Internal"
+  },
+  "forms.CreateNetwork.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "forms.CreateNetwork.optionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "forms.CreateNetwork.submitButton": {
+    "defaultMessage": "Create"
+  },
   "forms.CreateRelease.addContainerButton": {
     "defaultMessage": "Add Container"
   },
@@ -2189,11 +2145,20 @@
   "forms.CreateRelease.confirmRemoveTitle": {
     "defaultMessage": "Remove Container"
   },
+  "forms.CreateRelease.containerTitle": {
+    "defaultMessage": "Container {containerNumber}"
+  },
   "forms.CreateRelease.containersTitle": {
     "defaultMessage": "Containers"
   },
   "forms.CreateRelease.importSuccessMessage": {
     "defaultMessage": "Release configuration has been successfully imported!"
+  },
+  "forms.CreateRelease.importedLabel": {
+    "defaultMessage": "Imported"
+  },
+  "forms.CreateRelease.modifiedLabel": {
+    "defaultMessage": "Modified"
   },
   "forms.CreateRelease.noContainersFeedback": {
     "defaultMessage": "The release does not include any container."
@@ -2310,6 +2275,18 @@
     "defaultMessage": "Select a base image collection..."
   },
   "forms.CreateUpdateCampaign.submitButton": {
+    "defaultMessage": "Create"
+  },
+  "forms.CreateVolume.driverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "forms.CreateVolume.labelLabel": {
+    "defaultMessage": "Label"
+  },
+  "forms.CreateVolume.optionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "forms.CreateVolume.submitButton": {
     "defaultMessage": "Create"
   },
   "forms.DeploymentCampaignForm.applicationLabel": {
@@ -2489,11 +2466,20 @@
   "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
     "defaultMessage": "User ID"
   },
+  "forms.ManualOtaFromCollectionForm.baseImageFromCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "forms.ManualOtaFromCollectionForm.baseImageFromLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "forms.ManualOtaFromCollectionForm.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection before selecting an image..."
+  },
+  "forms.ManualOtaFromCollectionForm.update": {
+    "defaultMessage": "Update"
+  },
   "forms.ManualOtaFromFileCollection.baseImageCollectionOption": {
     "defaultMessage": "Search or select a base image collection..."
-  },
-  "forms.ManualOtaFromFileCollection.baseImageFromCollectionLabel": {
-    "defaultMessage": "Base Image"
   },
   "forms.ManualOtaFromFileCollection.noBaseImageCollsAvailable": {
     "defaultMessage": "No base image collections available"
@@ -2501,11 +2487,11 @@
   "forms.ManualOtaFromFileCollection.noBaseImageCollsFoundMatching": {
     "defaultMessage": "No base image collections found matching \"{inputValue}\""
   },
-  "forms.ManualOtaFromFileCollection.selectBaseImageCollection": {
-    "defaultMessage": "Select a base image collection before selecting an image..."
+  "forms.ManualOtaFromFileForm.baseImageLabel": {
+    "defaultMessage": "Base image file"
   },
-  "forms.ReleaseCreate.reuseReleaseButton": {
-    "defaultMessage": "Reuse Release"
+  "forms.ManualOtaFromFileForm.update": {
+    "defaultMessage": "Update"
   },
   "forms.ReleaseCreate.reuseReleaseTitleButton": {
     "defaultMessage": "Copy configuration from an existing release"
@@ -3010,9 +2996,6 @@
   "pages.BaseImageCreate.title": {
     "defaultMessage": "Create Base Image"
   },
-  "pages.Campaigns.title": {
-    "defaultMessage": "Campaigns"
-  },
   "pages.Channel.channelNotFound.message": {
     "defaultMessage": "Return to the Channel list."
   },
@@ -3060,9 +3043,6 @@
   "pages.Deployment.deploymentNotFound.title": {
     "defaultMessage": "Deployment not found."
   },
-  "pages.DeploymentApplication.noApplication.createButton": {
-    "defaultMessage": "Create Application"
-  },
   "pages.DeploymentCampaign.deploymentCampaignNotFound.message": {
     "defaultMessage": "Return to the Deployment Campaign list."
   },
@@ -3072,11 +3052,20 @@
   "pages.DeploymentCampaign.pauseButton": {
     "defaultMessage": "Pause"
   },
+  "pages.DeploymentCampaign.pauseErrorFeedback": {
+    "defaultMessage": "Could not pause the campaign, please try again."
+  },
   "pages.DeploymentCampaign.resumeButton": {
     "defaultMessage": "Resume"
   },
+  "pages.DeploymentCampaign.resumeErrorFeedback": {
+    "defaultMessage": "Could not resume the campaign, please try again."
+  },
   "pages.DeploymentCampaignCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Deployment Campaign, please try again."
+  },
+  "pages.DeploymentCampaignCreate.noApplication.createButton": {
+    "defaultMessage": "Create Application"
   },
   "pages.DeploymentCampaignCreate.noApplication.message": {
     "defaultMessage": "You need at least one Application with Release to create a Deployment Campaign"
@@ -3099,17 +3088,20 @@
   "pages.DeploymentCampaigns.createButton": {
     "defaultMessage": "Create Campaign"
   },
+  "pages.DeploymentCampaigns.title": {
+    "defaultMessage": "Campaigns"
+  },
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"
   },
-  "pages.Device.DeviceCellularConnectionTab.noModems.message": {
-    "defaultMessage": "The device has not detected any modems yet."
+  "pages.Device.checkMyDevice": {
+    "defaultMessage": "Check my Device"
   },
-  "pages.Device.DeviceCellularConnectionTab.noModems.title": {
-    "defaultMessage": "No modem"
+  "pages.Device.connectionStatus": {
+    "defaultMessage": "Connection"
   },
-  "pages.Device.SoftwareUpdateTab.noPreviousUpdates": {
-    "defaultMessage": "No previous updates"
+  "pages.Device.deviceId": {
+    "defaultMessage": "Device ID"
   },
   "pages.Device.deviceNotFound.message": {
     "defaultMessage": "Return to the device list."
@@ -3117,19 +3109,43 @@
   "pages.Device.deviceNotFound.title": {
     "defaultMessage": "Device not found."
   },
+  "pages.Device.groups": {
+    "defaultMessage": "Groups"
+  },
+  "pages.Device.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "pages.Device.lastSeen": {
+    "defaultMessage": "Last seen"
+  },
+  "pages.Device.name": {
+    "defaultMessage": "Name"
+  },
   "pages.Device.openRemoteTerminalErrorFeedback": {
     "defaultMessage": "Could not access the remote terminal, please try again.",
     "description": "Feedback for unknown error while opening a remote terminal session"
   },
+  "pages.Device.partNumber": {
+    "defaultMessage": "Part Number"
+  },
+  "pages.Device.remoteTerminal.label": {
+    "defaultMessage": "Remote Terminal"
+  },
+  "pages.Device.remoteTerminal.openTerminalButton": {
+    "defaultMessage": "Open"
+  },
+  "pages.Device.serialNumber": {
+    "defaultMessage": "Serial Number"
+  },
+  "pages.Device.systemModel": {
+    "defaultMessage": "System Model"
+  },
+  "pages.Device.tags": {
+    "defaultMessage": "Tags"
+  },
   "pages.Device.updateDeviceErrorFeedback": {
     "defaultMessage": "Could not update the device, please try again.",
     "description": "Feedback for unknown error while updating a device"
-  },
-  "pages.Device.wifiScanResultsTab.noResults.message": {
-    "defaultMessage": "The device has not detected any WiFi AP yet."
-  },
-  "pages.Device.wifiScanResultsTab.noResults.title": {
-    "defaultMessage": "No results"
   },
   "pages.DeviceGroup.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Group <bold>{deviceGroup}</bold>.",
@@ -3229,6 +3245,9 @@
   "pages.FileDownloadCampaigns.title": {
     "defaultMessage": "File Download Campaigns"
   },
+  "pages.HardwareType.creationErrorFeedback": {
+    "defaultMessage": "Could not update the hardware type, please try again."
+  },
   "pages.HardwareType.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Hardware Type <bold>{hardwareType}</bold>.",
     "description": "Description for the confirmation modal to delete a Hardware Type"
@@ -3236,6 +3255,9 @@
   "pages.HardwareType.deleteModal.title": {
     "defaultMessage": "Delete Hardware Type",
     "description": "Title for the confirmation modal to delete a Hardware Type"
+  },
+  "pages.HardwareType.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the hardware type, please try again."
   },
   "pages.HardwareType.hardwareTypeNotFound.message": {
     "defaultMessage": "Return to the hardware type list."
@@ -3248,12 +3270,6 @@
   },
   "pages.HardwareTypeCreate.title": {
     "defaultMessage": "Create Hardware Type"
-  },
-  "pages.HardwareTypeUpdate.creationErrorFeedback": {
-    "defaultMessage": "Could not update the hardware type, please try again."
-  },
-  "pages.HardwareTypeUpdate.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the hardware type, please try again."
   },
   "pages.HardwareTypes.createButton": {
     "defaultMessage": "Create Hardware Type"
@@ -3330,11 +3346,26 @@
   "pages.Network.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Network, please try again."
   },
+  "pages.Network.driver": {
+    "defaultMessage": "Driver"
+  },
+  "pages.Network.enableIpv6": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "pages.Network.internal": {
+    "defaultMessage": "Internal"
+  },
+  "pages.Network.label": {
+    "defaultMessage": "Label"
+  },
   "pages.Network.networkNotFound.message": {
     "defaultMessage": "Return to the networks list."
   },
   "pages.Network.networkNotFound.title": {
     "defaultMessage": "Network not found."
+  },
+  "pages.Network.options": {
+    "defaultMessage": "Options"
   },
   "pages.NetworkCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Network, please try again."
@@ -3366,6 +3397,9 @@
   "pages.ReleaseCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the release, please try again."
   },
+  "pages.ReleaseCreate.reuseReleaseButton": {
+    "defaultMessage": "Reuse Release"
+  },
   "pages.ReleaseCreate.title": {
     "defaultMessage": "Create Release for {applicationName}"
   },
@@ -3378,6 +3412,9 @@
   "pages.Repository.createFileButton": {
     "defaultMessage": "Create File"
   },
+  "pages.Repository.creationErrorFeedback": {
+    "defaultMessage": "Could not update the repository, please try again."
+  },
   "pages.Repository.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Repository <bold>{repository}</bold>.",
     "description": "Description for the confirmation modal to delete a Repository"
@@ -3385,6 +3422,9 @@
   "pages.Repository.deleteModal.title": {
     "defaultMessage": "Delete repository",
     "description": "Title for the confirmation modal to delete a Repository"
+  },
+  "pages.Repository.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the repository, please try again."
   },
   "pages.Repository.filesLabel": {
     "defaultMessage": "Files"
@@ -3401,11 +3441,8 @@
   "pages.RepositoryCreate.title": {
     "defaultMessage": "Create Repository"
   },
-  "pages.RepositoryUpdate.creationErrorFeedback": {
-    "defaultMessage": "Could not update the repository, please try again."
-  },
-  "pages.RepositoryUpdate.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the repository, please try again."
+  "pages.SystemModel.creationErrorFeedback": {
+    "defaultMessage": "Could not update the system model, please try again."
   },
   "pages.SystemModel.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the System Model <bold>{systemModel}</bold>.",
@@ -3439,9 +3476,6 @@
   "pages.SystemModelCreate.title": {
     "defaultMessage": "Create System Model"
   },
-  "pages.SystemModelUpdate.creationErrorFeedback": {
-    "defaultMessage": "Could not update the system model, please try again."
-  },
   "pages.SystemModels.createButton": {
     "defaultMessage": "Create System Model"
   },
@@ -3457,8 +3491,14 @@
   "pages.UpdateCampaign.pauseButton": {
     "defaultMessage": "Pause"
   },
+  "pages.UpdateCampaign.pauseErrorFeedback": {
+    "defaultMessage": "Could not pause the campaign, please try again."
+  },
   "pages.UpdateCampaign.resumeButton": {
     "defaultMessage": "Resume"
+  },
+  "pages.UpdateCampaign.resumeErrorFeedback": {
+    "defaultMessage": "Could not resume the campaign, please try again."
   },
   "pages.UpdateCampaign.updateCampaignNotFound.message": {
     "defaultMessage": "Return to the Update Campaign list."
@@ -3508,6 +3548,15 @@
   "pages.Volume.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Volume, please try again."
   },
+  "pages.Volume.driver": {
+    "defaultMessage": "Driver"
+  },
+  "pages.Volume.label": {
+    "defaultMessage": "Label"
+  },
+  "pages.Volume.options": {
+    "defaultMessage": "Options"
+  },
   "pages.Volume.volumeNotFound.message": {
     "defaultMessage": "Return to the volumes list."
   },
@@ -3525,30 +3574,6 @@
   },
   "pages.Volumes.title": {
     "defaultMessage": "Volumes"
-  },
-  "pages.network.driver": {
-    "defaultMessage": "Driver"
-  },
-  "pages.network.enableIpv6": {
-    "defaultMessage": "Enable IPv6"
-  },
-  "pages.network.internal": {
-    "defaultMessage": "Internal"
-  },
-  "pages.network.label": {
-    "defaultMessage": "Label"
-  },
-  "pages.network.options": {
-    "defaultMessage": "Options"
-  },
-  "pages.volume.driver": {
-    "defaultMessage": "Driver"
-  },
-  "pages.volume.label": {
-    "defaultMessage": "Label"
-  },
-  "pages.volume.options": {
-    "defaultMessage": "Options"
   },
   "validation.baseImageFile.required": {
     "defaultMessage": "Required."

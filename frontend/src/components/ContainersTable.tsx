@@ -236,7 +236,7 @@ const VolumeDetails = ({
                   id="volumeOptions"
                   label={
                     <FormattedMessage
-                      id="pages.volume.options"
+                      id="components.ContainersTable.options"
                       defaultMessage="Options"
                     />
                   }
@@ -473,7 +473,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         onToggle={() => toggleSection("image")}
         title={
           <FormattedMessage
-            id="forms.ContainersTable.imageConfigSection"
+            id="components.ContainersTable.imageConfigSection"
             defaultMessage="Image Configuration"
           />
         }
@@ -519,7 +519,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         onToggle={() => toggleSection("network")}
         title={
           <FormattedMessage
-            id="forms.ContainersTable.networkConfigSection"
+            id="components.ContainersTable.networkConfigSection"
             defaultMessage="Network Configuration"
           />
         }
@@ -589,7 +589,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         onToggle={() => toggleSection("storage")}
         title={
           <FormattedMessage
-            id="forms.ContainersTable.storageConfigSection"
+            id="components.ContainersTable.storageConfigSection"
             defaultMessage="Storage Configuration"
           />
         }
@@ -677,7 +677,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         onToggle={() => toggleSection("resourceLimits")}
         title={
           <FormattedMessage
-            id="forms.ContainersTable.resourceLimitsSection"
+            id="components.ContainersTable.resourceLimitsSection"
             defaultMessage="Resource Limits"
           />
         }
@@ -788,7 +788,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         onToggle={() => toggleSection("security")}
         title={
           <FormattedMessage
-            id="forms.ContainersTable.securitySection"
+            id="components.ContainersTable.securitySection"
             defaultMessage="Security & Capabilities"
           />
         }
@@ -872,7 +872,7 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
         onToggle={() => toggleSection("runtime")}
         title={
           <FormattedMessage
-            id="forms.ContainersTable.runtimeSection"
+            id="components.ContainersTable.runtimeSection"
             defaultMessage="Runtime & Environment"
           />
         }

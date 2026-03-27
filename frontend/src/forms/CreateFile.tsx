@@ -122,7 +122,7 @@ const CreateFileForm = ({
           id="file"
           label={
             <FormattedMessage
-              id="components.ManualFileDownloadRequestForm.fileLabel"
+              id="forms.CreateFile.fileLabel"
               defaultMessage="Files"
             />
           }
@@ -137,7 +137,7 @@ const CreateFileForm = ({
           ) : (
             <Form.Text muted>
               <FormattedMessage
-                id="components.ManualFileDownloadRequestForm.fileHint"
+                id="forms.CreateFile.fileHint"
                 defaultMessage="Select files or a folder. Multiple items will be compressed into a tar.gz archive."
               />
             </Form.Text>
@@ -149,7 +149,7 @@ const CreateFileForm = ({
             id="archiveName"
             label={
               <FormattedMessage
-                id="components.ManualFileDownloadRequestForm.archiveNameLabel"
+                id="forms.CreateFile.archiveNameLabel"
                 defaultMessage="Archive Name"
               />
             }
@@ -161,7 +161,7 @@ const CreateFileForm = ({
             />
             <Form.Text muted>
               <FormattedMessage
-                id="components.ManualFileDownloadRequestForm.archiveNameHint"
+                id="forms.CreateFile.archiveNameHint"
                 defaultMessage="Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
               />
             </Form.Text>

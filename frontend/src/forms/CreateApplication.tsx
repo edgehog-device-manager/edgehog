@@ -57,7 +57,7 @@ const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
           id="application-form-name"
           label={
             <FormattedMessage
-              id="components.CreateApplication.nameLabel"
+              id="forms.CreateApplication.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -70,7 +70,7 @@ const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
           id="application-form-description"
           label={
             <FormattedMessage
-              id="components.CreateApplication.descriptionLabel"
+              id="forms.CreateApplication.descriptionLabel"
               defaultMessage="Description"
             />
           }
@@ -87,7 +87,7 @@ const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateApplication.submitButton"
+              id="forms.CreateApplication.submitButton"
               defaultMessage="Create"
             />
           </Button>

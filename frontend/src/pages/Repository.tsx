@@ -240,7 +240,7 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
       onError() {
         setErrorFeedback(
           <FormattedMessage
-            id="pages.RepositoryUpdate.deletionErrorFeedback"
+            id="pages.Repository.deletionErrorFeedback"
             defaultMessage="Could not delete the repository, please try again."
           />,
         );
@@ -291,7 +291,7 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
         onError() {
           setErrorFeedback(
             <FormattedMessage
-              id="pages.RepositoryUpdate.creationErrorFeedback"
+              id="pages.Repository.creationErrorFeedback"
               defaultMessage="Could not update the repository, please try again."
             />,
           );

@@ -55,3 +55,6 @@ jobs:
       - name: Compare keys ordering and line count for all language files
         working-directory: frontend
         run: npm run i18n:check
+      - name: Check translation IDs against source file paths
+        working-directory: frontend
+        run: npm run i18n:check-paths

@@ -210,7 +210,7 @@ const ReleaseWrapper = ({
           onClick={() => onToggleModal(true)}
         >
           <FormattedMessage
-            id="forms.ReleaseCreate.reuseReleaseButton"
+            id="pages.ReleaseCreate.reuseReleaseButton"
             defaultMessage="Reuse Release"
           />
         </Button>

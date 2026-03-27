@@ -141,7 +141,7 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
         <FormRow
           id="volumeLabel"
           label={
-            <FormattedMessage id="pages.volume.label" defaultMessage="Label" />
+            <FormattedMessage id="pages.Volume.label" defaultMessage="Label" />
           }
         >
           <Form.Control value={volume.label ?? ""} readOnly />
@@ -151,7 +151,7 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
           id="volumeDriver"
           label={
             <FormattedMessage
-              id="pages.volume.driver"
+              id="pages.Volume.driver"
               defaultMessage="Driver"
             />
           }
@@ -163,7 +163,7 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
           id="volumeOptions"
           label={
             <FormattedMessage
-              id="pages.volume.options"
+              id="pages.Volume.options"
               defaultMessage="Options"
             />
           }

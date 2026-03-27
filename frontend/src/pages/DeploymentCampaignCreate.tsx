@@ -180,7 +180,7 @@ const NoApplications = () => (
     </p>
     <Button as={Link} route={Route.applicationNew}>
       <FormattedMessage
-        id="pages.DeploymentApplication.noApplication.createButton"
+        id="pages.DeploymentCampaignCreate.noApplication.createButton"
         defaultMessage="Create Application"
       />
     </Button>

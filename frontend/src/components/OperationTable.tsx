@@ -202,7 +202,7 @@ const OperationTable = ({ className, deviceRef }: OperationTableProps) => {
     return (
       <div>
         <FormattedMessage
-          id="pages.Device.SoftwareUpdateTab.noPreviousUpdates"
+          id="components.OperationTable.noPreviousUpdates"
           defaultMessage="No previous updates"
         />
       </div>

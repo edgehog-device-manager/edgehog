@@ -292,7 +292,7 @@ const DeviceConnectionFormRows = ({
         id="form-device-connection-status"
         label={
           <FormattedMessage
-            id="Device.connectionStatus"
+            id="pages.Device.connectionStatus"
             defaultMessage="Connection"
           />
         }
@@ -304,7 +304,10 @@ const DeviceConnectionFormRows = ({
       <FormRow
         id="form-device-last-seen"
         label={
-          <FormattedMessage id="Device.lastSeen" defaultMessage="Last seen" />
+          <FormattedMessage
+            id="pages.Device.lastSeen"
+            defaultMessage="Last seen"
+          />
         }
       >
         <FormValue>
@@ -737,7 +740,7 @@ const DeviceContent = ({
                     id="form-device-name"
                     label={
                       <FormattedMessage
-                        id="Device.name"
+                        id="pages.Device.name"
                         defaultMessage="Name"
                       />
                     }
@@ -752,7 +755,7 @@ const DeviceContent = ({
                     id="form-device-tags"
                     label={
                       <FormattedMessage
-                        id="Device.tags"
+                        id="pages.Device.tags"
                         defaultMessage="Tags"
                       />
                     }
@@ -775,7 +778,7 @@ const DeviceContent = ({
                     id="form-device-deviceId"
                     label={
                       <FormattedMessage
-                        id="Device.deviceId"
+                        id="pages.Device.deviceId"
                         defaultMessage="Device ID"
                       />
                     }
@@ -791,7 +794,7 @@ const DeviceContent = ({
                       id="form-device-serialNumber"
                       label={
                         <FormattedMessage
-                          id="Device.serialNumber"
+                          id="pages.Device.serialNumber"
                           defaultMessage="Serial Number"
                         />
                       }
@@ -808,7 +811,7 @@ const DeviceContent = ({
                       id="device-hardware-info-part-number"
                       label={
                         <FormattedMessage
-                          id="Device.partNumber"
+                          id="pages.Device.partNumber"
                           defaultMessage="Part Number"
                         />
                       }
@@ -826,7 +829,7 @@ const DeviceContent = ({
                         id="form-device-system-model"
                         label={
                           <FormattedMessage
-                            id="Device.systemModel"
+                            id="pages.Device.systemModel"
                             defaultMessage="System Model"
                           />
                         }
@@ -841,7 +844,7 @@ const DeviceContent = ({
                         id="form-device-hardware-type"
                         label={
                           <FormattedMessage
-                            id="Device.hardwareType"
+                            id="pages.Device.hardwareType"
                             defaultMessage="Hardware Type"
                           />
                         }
@@ -858,7 +861,7 @@ const DeviceContent = ({
                     id="form-device-deviceGroups"
                     label={
                       <FormattedMessage
-                        id="Device.groups"
+                        id="pages.Device.groups"
                         defaultMessage="Groups"
                       />
                     }
@@ -881,7 +884,7 @@ const DeviceContent = ({
                       id="form-device-check-my-device"
                       label={
                         <FormattedMessage
-                          id="Device.checkMyDevice"
+                          id="pages.Device.checkMyDevice"
                           defaultMessage="Check my Device"
                         />
                       }
@@ -898,7 +901,7 @@ const DeviceContent = ({
                       id="form-device-open-remote-terminal"
                       label={
                         <FormattedMessage
-                          id="Device.remoteTerminal.label"
+                          id="pages.Device.remoteTerminal.label"
                           defaultMessage="Remote Terminal"
                         />
                       }
@@ -918,7 +921,7 @@ const DeviceContent = ({
                             <Spinner size="sm" className="me-2" />
                           )}
                           <FormattedMessage
-                            id="Device.remoteTerminal.openTerminalButton"
+                            id="pages.Device.remoteTerminal.openTerminalButton"
                             defaultMessage="Open"
                           />
                         </Button>

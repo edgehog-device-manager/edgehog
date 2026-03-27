@@ -374,7 +374,7 @@ const DeploymentCampaignsContent = ({
       <Page.Header
         title={
           <FormattedMessage
-            id="pages.Campaigns.title"
+            id="pages.DeploymentCampaigns.title"
             defaultMessage="Campaigns"
           />
         }

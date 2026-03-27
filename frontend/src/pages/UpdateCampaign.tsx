@@ -189,7 +189,7 @@ const CampaignActions = ({
       onError() {
         setErrorFeedback(
           <FormattedMessage
-            id="components.UpdateCampaign.pauseErrorFeedback"
+            id="pages.UpdateCampaign.pauseErrorFeedback"
             defaultMessage="Could not pause the campaign, please try again."
           />,
         );
@@ -216,7 +216,7 @@ const CampaignActions = ({
       onError() {
         setErrorFeedback(
           <FormattedMessage
-            id="components.UpdateCampaign.resumeErrorFeedback"
+            id="pages.UpdateCampaign.resumeErrorFeedback"
             defaultMessage="Could not resume the campaign, please try again."
           />,
         );

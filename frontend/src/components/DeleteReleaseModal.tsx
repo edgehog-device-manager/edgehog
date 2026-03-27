@@ -94,14 +94,14 @@ const DeleteReleaseModal = <R extends Release>({
       isDeleting={isDeletingRelease}
       title={
         <FormattedMessage
-          id="components.DeleteReleaseModal.deleteModal.title"
+          id="components.DeleteReleaseModal.title"
           defaultMessage="Delete Release"
         />
       }
     >
       <p>
         <FormattedMessage
-          id="components.ReleasesTable.deleteModal.description"
+          id="components.DeleteReleaseModal.description"
           defaultMessage="This action cannot be undone. This will permanently delete the release."
         />
       </p>

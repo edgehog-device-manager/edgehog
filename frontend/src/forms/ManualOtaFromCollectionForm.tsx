@@ -208,7 +208,7 @@ const ManualOtaFromCollectionForm = ({
         <Form.Group as={Col} controlId="baseImageCollection" className="w-100">
           <Form.Label column sm={3} className="text-nowrap">
             <FormattedMessage
-              id="components.ManualOtaFromFileCollection.baseImageFromCollectionLabel"
+              id="forms.ManualOtaFromCollectionForm.baseImageFromCollectionLabel"
               defaultMessage="Base Image Collection"
             />
           </Form.Label>
@@ -252,7 +252,7 @@ const ManualOtaFromCollectionForm = ({
         <Form.Group as={Col} controlId="baseImage" className="w-100">
           <Form.Label column sm={3} className="text-nowrap">
             <FormattedMessage
-              id="forms.ManualOtaFromFileCollection.baseImageFromCollectionLabel"
+              id="forms.ManualOtaFromCollectionForm.baseImageFromLabel"
               defaultMessage="Base Image"
             />
           </Form.Label>
@@ -283,7 +283,7 @@ const ManualOtaFromCollectionForm = ({
           ) : (
             <div className="d-flex align-content-center fst-italic text-muted">
               <FormattedMessage
-                id="forms.ManualOtaFromFileCollection.selectBaseImageCollection"
+                id="forms.ManualOtaFromCollectionForm.selectBaseImageCollection"
                 defaultMessage="Select a base image collection before selecting an image..."
               />
             </div>
@@ -292,7 +292,7 @@ const ManualOtaFromCollectionForm = ({
         <Button variant="primary" type="submit" disabled={isLoading}>
           {isLoading && <Spinner size="sm" className="me-2" />}
           <FormattedMessage
-            id="components.ManualOtaFromFileCollection.update"
+            id="forms.ManualOtaFromCollectionForm.update"
             defaultMessage="Update"
           />
         </Button>

@@ -143,7 +143,7 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
         <FormRow
           id="networkLabel"
           label={
-            <FormattedMessage id="pages.network.label" defaultMessage="Label" />
+            <FormattedMessage id="pages.Network.label" defaultMessage="Label" />
           }
         >
           <Form.Control value={network.label ?? ""} readOnly />
@@ -153,7 +153,7 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
           id="networkDriver"
           label={
             <FormattedMessage
-              id="pages.network.driver"
+              id="pages.Network.driver"
               defaultMessage="Driver"
             />
           }
@@ -165,7 +165,7 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
           id="networkOptions"
           label={
             <FormattedMessage
-              id="pages.network.options"
+              id="pages.Network.options"
               defaultMessage="Options"
             />
           }
@@ -183,7 +183,7 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
           id="networkInternal"
           label={
             <FormattedMessage
-              id="pages.network.internal"
+              id="pages.Network.internal"
               defaultMessage="Internal"
             />
           }
@@ -195,7 +195,7 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
           id="networkLabelEnableIpv6"
           label={
             <FormattedMessage
-              id="pages.network.enableIpv6"
+              id="pages.Network.enableIpv6"
               defaultMessage="Enable IPv6"
             />
           }

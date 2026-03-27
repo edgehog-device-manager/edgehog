@@ -83,7 +83,7 @@ const ReleasesTable = ({
     columnHelper.accessor("version", {
       header: () => (
         <FormattedMessage
-          id="components.ReleaseTable.versionTitle"
+          id="components.ReleasesTable.versionTitle"
           defaultMessage="Release Version"
           description="Title for the Release Version column of the releases table"
         />

@@ -57,7 +57,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
           id="device-group-form-name"
           label={
             <FormattedMessage
-              id="components.CreateDeviceGroup.nameLabel"
+              id="forms.CreateDeviceGroup.nameLabel"
               defaultMessage="Name"
             />
           }
@@ -69,7 +69,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
           id="device-group-form-handle"
           label={
             <FormattedMessage
-              id="components.CreateDeviceGroup.handleLabel"
+              id="forms.CreateDeviceGroup.handleLabel"
               defaultMessage="Handle"
             />
           }
@@ -81,7 +81,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
           id="device-group-form-selector"
           label={
             <FormattedMessage
-              id="components.CreateDeviceGroup.selectorLabel"
+              id="forms.CreateDeviceGroup.selectorLabel"
               defaultMessage="Selector"
             />
           }
@@ -98,7 +98,7 @@ const CreateDeviceGroup = ({ isLoading = false, onSubmit }: Props) => {
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.CreateDeviceGroup.submitButton"
+              id="forms.CreateDeviceGroup.submitButton"
               defaultMessage="Create"
             />
           </Button>

@@ -1,22 +1,20 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2025-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -104,14 +102,17 @@ const columns = [
   columnHelper.accessor((device) => device.systemModel?.name, {
     id: "systemModel",
     header: () => (
-      <FormattedMessage id="Device.systemModel" defaultMessage="System Model" />
+      <FormattedMessage
+        id="components.DevicesGroupsTable.systemModel"
+        defaultMessage="System Model"
+      />
     ),
   }),
   columnHelper.accessor((device) => device.systemModel?.hardwareType?.name, {
     id: "hardwareType",
     header: () => (
       <FormattedMessage
-        id="Device.hardwareType"
+        id="components.DevicesGroupsTable.hardwareType"
         defaultMessage="Hardware Type"
       />
     ),

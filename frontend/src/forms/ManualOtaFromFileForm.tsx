@@ -64,7 +64,7 @@ const ManualOtaFromFileForm = ({
         <Stack direction="vertical" gap={2} className="align-items-start">
           <Form.Label column sm={3} className="text-nowrap">
             <FormattedMessage
-              id="components.ManualOtaFromFileForm.baseImageLabel"
+              id="forms.ManualOtaFromFileForm.baseImageLabel"
               defaultMessage="Base image file"
             />
           </Form.Label>
@@ -73,7 +73,7 @@ const ManualOtaFromFileForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="components.ManualOtaFromFileForm.update"
+              id="forms.ManualOtaFromFileForm.update"
               defaultMessage="Update"
             />
           </Button>
