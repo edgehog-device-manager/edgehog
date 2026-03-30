@@ -35,6 +35,7 @@ import {
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 import { v7 as uuidv7 } from "uuid";
@@ -168,6 +169,22 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         userId
         groupId
         uncompressedFileSizeBytes
+      }
+    }
+  }
+`;
+
+const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
+  subscription FilesUploadTab_fileDownloadRequest_updated_Subscription(
+    $deviceId: ID!
+  ) {
+    fileDownloadRequestsByDevice(deviceId: $deviceId) {
+      updated {
+        id
+        status
+        progressPercentage
+        responseCode
+        responseMessage
       }
     }
   }
@@ -591,6 +608,16 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
     FilesUploadTab_PaginationQuery,
     FilesUploadTab_fileDownloadRequests$key
   >(DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION,
+        variables: { deviceId },
+      }),
+      [deviceId],
+    ),
+  );
 
   const fileDownloadRequests = useMemo(
     () => data.fileDownloadRequests?.edges?.map((edge) => edge.node) ?? [],
