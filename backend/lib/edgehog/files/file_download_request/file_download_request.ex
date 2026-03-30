@@ -41,10 +41,30 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
   graphql do
     type :file_download_request
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :file_download_requests do
+        action_types [:create, :update]
+      end
+
+      subscribe :file_download_requests_by_device do
+        action_types [:create, :update]
+        read_action :read_by_device
+        relay_id_translations device_id: :device
+      end
+    end
   end
 
   actions do
     defaults [:read]
+
+    read :read_by_device do
+      argument :device_id, :id, allow_nil?: false
+
+      get_by :device_id
+    end
 
     create :managed do
       accept [

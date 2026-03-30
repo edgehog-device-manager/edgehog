@@ -6,8 +6,8 @@ schema {
 
 input ContainerCreateWithNestedImageInput {
   id: ID
-  reference: String
   imageCredentialsId: ID
+  reference: String
 }
 
 input ContainerCreateWithNestedNetworksInput {
@@ -1199,6 +1199,9 @@ input BaseImageCollectionFilterHandle {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1212,6 +1215,9 @@ input BaseImageCollectionFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1225,6 +1231,8 @@ input BaseImageCollectionFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input BaseImageCollectionFilterInput {
@@ -1402,6 +1410,9 @@ input BaseImageFilterUrl {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1415,6 +1426,9 @@ input BaseImageFilterStartingVersionRequirement {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1428,6 +1442,9 @@ input BaseImageFilterVersion {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1441,6 +1458,8 @@ input BaseImageFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input BaseImageFilterInput {
@@ -1548,22 +1567,18 @@ type MutationError {
 
   "The field or fields that produced the error"
   fields: [String!]
+
+  "The path to the field that produced the error"
+  path: [String!]
 }
 
 input ApplicationCreateInitialReleaseInput {
-  version: String!
   containers: [ReleaseCreateContainersInput!]
   requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
+  version: String!
 }
 
 input ReleaseCreateContainersInput {
-  env: [ContainerEnvVarInput!]
-  id: ID
-  memory: Int
-  image: ContainerCreateWithNestedImageInput
-  hostname: String
-  networks: [ContainerCreateWithNestedNetworksInput!]
-  volumes: [ContainerCreateWithNestedVolumesInput!]
   binds: [String!]
   capAdd: [String!]
   capDrop: [String!]
@@ -1571,11 +1586,18 @@ input ReleaseCreateContainersInput {
   cpuQuota: Int
   cpuRealtimePeriod: Int
   cpuRealtimeRuntime: Int
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  env: [ContainerEnvVarInput!]
   extraHosts: [String!]
+  hostname: String
+  id: ID
+  image: ContainerCreateWithNestedImageInput
+  memory: Int
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
   networkMode: String
+  networks: [ContainerCreateWithNestedNetworksInput!]
   portBindings: [String!]
   privileged: Boolean
   readOnlyRootfs: Boolean
@@ -1583,7 +1605,7 @@ input ReleaseCreateContainersInput {
   storageOpt: [String!]
   tmpfs: [String!]
   volumeDriver: String
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -1625,6 +1647,8 @@ input ContainerVolumeFilterVolumeId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerVolumeFilterTarget {
@@ -1636,6 +1660,9 @@ input ContainerVolumeFilterTarget {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1701,6 +1728,8 @@ input DeviceMappingDeploymentFilterDeviceMappingId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceMappingDeploymentFilterState {
@@ -1712,6 +1741,8 @@ input DeviceMappingDeploymentFilterState {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceMappingDeploymentFilterId {
@@ -1723,6 +1754,8 @@ input DeviceMappingDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceMappingDeploymentFilterInput {
@@ -1799,6 +1832,8 @@ input DeviceMappingFilterContainerId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceMappingFilterCgroupPermissions {
@@ -1810,6 +1845,9 @@ input DeviceMappingFilterCgroupPermissions {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1823,6 +1861,9 @@ input DeviceMappingFilterPathInContainer {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1836,6 +1877,9 @@ input DeviceMappingFilterPathOnHost {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -1849,6 +1893,8 @@ input DeviceMappingFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceMappingFilterInput {
@@ -1913,6 +1959,8 @@ input VolumeDeploymentFilterVolumeId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input VolumeDeploymentFilterState {
@@ -1924,6 +1972,8 @@ input VolumeDeploymentFilterState {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input VolumeDeploymentFilterId {
@@ -1935,6 +1985,8 @@ input VolumeDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input VolumeDeploymentFilterInput {
@@ -2039,6 +2091,8 @@ input VolumeFilterOptions {
   greaterThan: JsonString
   lessThanOrEqual: JsonString
   greaterThanOrEqual: JsonString
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input VolumeFilterDriver {
@@ -2050,6 +2104,9 @@ input VolumeFilterDriver {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2063,6 +2120,9 @@ input VolumeFilterLabel {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2076,6 +2136,8 @@ input VolumeFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input VolumeFilterInput {
@@ -2156,6 +2218,8 @@ input NetworkDeploymentFilterNetworkId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkDeploymentFilterState {
@@ -2167,6 +2231,8 @@ input NetworkDeploymentFilterState {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkDeploymentFilterId {
@@ -2178,6 +2244,8 @@ input NetworkDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkDeploymentFilterInput {
@@ -2287,6 +2355,8 @@ input NetworkFilterOptions {
   greaterThan: JsonString
   lessThanOrEqual: JsonString
   greaterThanOrEqual: JsonString
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkFilterEnableIpv6 {
@@ -2298,6 +2368,8 @@ input NetworkFilterEnableIpv6 {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkFilterInternal {
@@ -2309,6 +2381,8 @@ input NetworkFilterInternal {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkFilterDriver {
@@ -2320,6 +2394,9 @@ input NetworkFilterDriver {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2333,6 +2410,9 @@ input NetworkFilterLabel {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2346,6 +2426,8 @@ input NetworkFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input NetworkFilterInput {
@@ -2480,6 +2562,8 @@ input ReleaseFilterApplicationId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ReleaseFilterVersion {
@@ -2491,6 +2575,9 @@ input ReleaseFilterVersion {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2504,6 +2591,8 @@ input ReleaseFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ReleaseFilterInput {
@@ -2647,6 +2736,9 @@ input ImageCredentialsFilterUsername {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2660,6 +2752,9 @@ input ImageCredentialsFilterLabel {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2673,6 +2768,8 @@ input ImageCredentialsFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageCredentialsFilterInput {
@@ -2711,6 +2808,8 @@ input ImageDeploymentFilterImageId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageDeploymentFilterState {
@@ -2722,6 +2821,8 @@ input ImageDeploymentFilterState {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageDeploymentFilterId {
@@ -2733,6 +2834,8 @@ input ImageDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageDeploymentFilterInput {
@@ -2766,6 +2869,8 @@ input ImageFilterImageCredentialsId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageFilterReference {
@@ -2777,6 +2882,9 @@ input ImageFilterReference {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2790,6 +2898,8 @@ input ImageFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageFilterInput {
@@ -2885,6 +2995,8 @@ input DeploymentEventFilterUpdatedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentEventFilterInsertedAt {
@@ -2896,6 +3008,8 @@ input DeploymentEventFilterInsertedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentEventFilterMessage {
@@ -2907,6 +3021,9 @@ input DeploymentEventFilterMessage {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -2920,6 +3037,8 @@ input DeploymentEventFilterType {
   greaterThan: DeploymentEventType
   lessThanOrEqual: DeploymentEventType
   greaterThanOrEqual: DeploymentEventType
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentEventFilterId {
@@ -2931,6 +3050,8 @@ input DeploymentEventFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentEventFilterInput {
@@ -3059,6 +3180,8 @@ input DeploymentFilterReleaseId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentFilterDeviceId {
@@ -3070,6 +3193,8 @@ input DeploymentFilterDeviceId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentFilterTimedOut {
@@ -3081,6 +3206,8 @@ input DeploymentFilterTimedOut {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentFilterState {
@@ -3092,6 +3219,8 @@ input DeploymentFilterState {
   greaterThan: ApplicationDeploymentState
   lessThanOrEqual: ApplicationDeploymentState
   greaterThanOrEqual: ApplicationDeploymentState
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentFilterId {
@@ -3103,6 +3232,8 @@ input DeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeploymentFilterInput {
@@ -3246,6 +3377,8 @@ input ContainerDeploymentFilterImageDeploymentId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerDeploymentFilterDeviceId {
@@ -3257,6 +3390,8 @@ input ContainerDeploymentFilterDeviceId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerDeploymentFilterContainerId {
@@ -3268,6 +3403,8 @@ input ContainerDeploymentFilterContainerId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerDeploymentFilterState {
@@ -3279,6 +3416,8 @@ input ContainerDeploymentFilterState {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerDeploymentFilterId {
@@ -3290,6 +3429,8 @@ input ContainerDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerDeploymentFilterInput {
@@ -3437,6 +3578,8 @@ input ContainerFilterImageId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterReadOnlyRootfs {
@@ -3448,6 +3591,8 @@ input ContainerFilterReadOnlyRootfs {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterVolumeDriver {
@@ -3459,6 +3604,9 @@ input ContainerFilterVolumeDriver {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -3472,6 +3620,8 @@ input ContainerFilterMemorySwappiness {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterMemorySwap {
@@ -3483,6 +3633,8 @@ input ContainerFilterMemorySwap {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterMemoryReservation {
@@ -3494,6 +3646,8 @@ input ContainerFilterMemoryReservation {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterMemory {
@@ -3505,6 +3659,8 @@ input ContainerFilterMemory {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterCpuRealtimeRuntime {
@@ -3516,6 +3672,8 @@ input ContainerFilterCpuRealtimeRuntime {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterCpuRealtimePeriod {
@@ -3527,6 +3685,8 @@ input ContainerFilterCpuRealtimePeriod {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterCpuQuota {
@@ -3538,6 +3698,8 @@ input ContainerFilterCpuQuota {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterCpuPeriod {
@@ -3549,6 +3711,8 @@ input ContainerFilterCpuPeriod {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterNetworkMode {
@@ -3560,6 +3724,9 @@ input ContainerFilterNetworkMode {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -3573,6 +3740,8 @@ input ContainerFilterPrivileged {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterHostname {
@@ -3584,6 +3753,9 @@ input ContainerFilterHostname {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -3597,6 +3769,8 @@ input ContainerFilterRestartPolicy {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterId {
@@ -3608,6 +3782,8 @@ input ContainerFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ContainerFilterInput {
@@ -3833,6 +4009,9 @@ input ApplicationFilterDescription {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -3846,6 +4025,9 @@ input ApplicationFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -3859,6 +4041,8 @@ input ApplicationFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ApplicationFilterInput {
@@ -3942,6 +4126,9 @@ input SystemModelPartNumberFilterPartNumber {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -3955,6 +4142,8 @@ input SystemModelPartNumberFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input SystemModelPartNumberFilterInput {
@@ -4106,6 +4295,9 @@ input SystemModelFilterPictureUrl {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4119,6 +4311,9 @@ input SystemModelFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4132,6 +4327,9 @@ input SystemModelFilterHandle {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4145,6 +4343,8 @@ input SystemModelFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input SystemModelFilterInput {
@@ -4290,6 +4490,9 @@ input HardwareTypePartNumberFilterPartNumber {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4303,6 +4506,8 @@ input HardwareTypePartNumberFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input HardwareTypePartNumberFilterInput {
@@ -4432,6 +4637,9 @@ input HardwareTypeFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4445,6 +4653,9 @@ input HardwareTypeFilterHandle {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4458,6 +4669,8 @@ input HardwareTypeFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input HardwareTypeFilterInput {
@@ -4632,6 +4845,9 @@ input DeviceFilterPartNumber {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4645,6 +4861,9 @@ input DeviceFilterSerialNumber {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4658,6 +4877,9 @@ input DeviceFilterLastSeenIp {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4671,6 +4893,8 @@ input DeviceFilterLastDisconnection {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceFilterLastConnection {
@@ -4682,6 +4906,8 @@ input DeviceFilterLastConnection {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceFilterOnline {
@@ -4693,6 +4919,8 @@ input DeviceFilterOnline {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceFilterName {
@@ -4704,6 +4932,9 @@ input DeviceFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4717,6 +4948,9 @@ input DeviceFilterDeviceId {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -4730,6 +4964,8 @@ input DeviceFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceFilterInput {
@@ -4975,6 +5211,16 @@ type Device implements Node {
   wifiScanResults: [WifiScanResult!]
 }
 
+type file_download_requests_by_device_result {
+  created: FileDownloadRequest
+  updated: FileDownloadRequest
+}
+
+type file_download_requests_result {
+  created: FileDownloadRequest
+  updated: FileDownloadRequest
+}
+
 "The result of the :create_managed_file_download_request mutation"
 type CreateManagedFileDownloadRequestResult {
   "The successful result of the mutation"
@@ -5128,6 +5374,9 @@ input FileDownloadRequestFilterResponseMessage {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5141,6 +5390,8 @@ input FileDownloadRequestFilterResponseCode {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterProgressPercentage {
@@ -5152,6 +5403,8 @@ input FileDownloadRequestFilterProgressPercentage {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterStatus {
@@ -5163,6 +5416,8 @@ input FileDownloadRequestFilterStatus {
   greaterThan: FileDownloadRequestStatus
   lessThanOrEqual: FileDownloadRequestStatus
   greaterThanOrEqual: FileDownloadRequestStatus
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterProgressTracked {
@@ -5174,6 +5429,8 @@ input FileDownloadRequestFilterProgressTracked {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterPathOnDevice {
@@ -5185,6 +5442,9 @@ input FileDownloadRequestFilterPathOnDevice {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5198,6 +5458,9 @@ input FileDownloadRequestFilterDestination {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5211,6 +5474,8 @@ input FileDownloadRequestFilterDestinationType {
   greaterThan: FileDestination
   lessThanOrEqual: FileDestination
   greaterThanOrEqual: FileDestination
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterGroupId {
@@ -5222,6 +5487,8 @@ input FileDownloadRequestFilterGroupId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterUserId {
@@ -5233,6 +5500,8 @@ input FileDownloadRequestFilterUserId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterFileMode {
@@ -5244,6 +5513,8 @@ input FileDownloadRequestFilterFileMode {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterTtlSeconds {
@@ -5255,6 +5526,8 @@ input FileDownloadRequestFilterTtlSeconds {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterCompression {
@@ -5266,6 +5539,9 @@ input FileDownloadRequestFilterCompression {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5279,6 +5555,9 @@ input FileDownloadRequestFilterDigest {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5292,6 +5571,8 @@ input FileDownloadRequestFilterUncompressedFileSizeBytes {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterFileName {
@@ -5303,6 +5584,9 @@ input FileDownloadRequestFilterFileName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5316,6 +5600,9 @@ input FileDownloadRequestFilterUrl {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5329,6 +5616,8 @@ input FileDownloadRequestFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileDownloadRequestFilterInput {
@@ -5563,6 +5852,9 @@ input RepositoryFilterDescription {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5576,6 +5868,9 @@ input RepositoryFilterHandle {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5589,6 +5884,9 @@ input RepositoryFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5602,6 +5900,8 @@ input RepositoryFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input RepositoryFilterInput {
@@ -5758,6 +6058,8 @@ input FileFilterFileUploaded {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileFilterDigest {
@@ -5769,6 +6071,9 @@ input FileFilterDigest {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5782,6 +6087,8 @@ input FileFilterSize {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileFilterName {
@@ -5793,6 +6100,9 @@ input FileFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -5806,6 +6116,8 @@ input FileFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input FileFilterInput {
@@ -6011,6 +6323,9 @@ input DeviceGroupFilterSelector {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6024,6 +6339,9 @@ input DeviceGroupFilterHandle {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6037,6 +6355,9 @@ input DeviceGroupFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6050,6 +6371,8 @@ input DeviceGroupFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input DeviceGroupFilterInput {
@@ -6164,6 +6487,9 @@ input TagFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6177,6 +6503,8 @@ input TagFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input TagFilterInput {
@@ -6274,6 +6602,8 @@ input OtaOperationFilterUpdatedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input OtaOperationFilterCreatedAt {
@@ -6285,6 +6615,8 @@ input OtaOperationFilterCreatedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input OtaOperationFilterMessage {
@@ -6296,6 +6628,9 @@ input OtaOperationFilterMessage {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6309,6 +6644,8 @@ input OtaOperationFilterStatusCode {
   greaterThan: OtaOperationStatusCode
   lessThanOrEqual: OtaOperationStatusCode
   greaterThanOrEqual: OtaOperationStatusCode
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input OtaOperationFilterStatusProgress {
@@ -6320,6 +6657,8 @@ input OtaOperationFilterStatusProgress {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input OtaOperationFilterStatus {
@@ -6331,6 +6670,8 @@ input OtaOperationFilterStatus {
   greaterThan: OtaOperationStatus
   lessThanOrEqual: OtaOperationStatus
   greaterThanOrEqual: OtaOperationStatus
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input OtaOperationFilterBaseImageUrl {
@@ -6342,6 +6683,9 @@ input OtaOperationFilterBaseImageUrl {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6355,6 +6699,8 @@ input OtaOperationFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input OtaOperationFilterInput {
@@ -6549,6 +6895,9 @@ input ChannelFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6562,6 +6911,9 @@ input ChannelFilterHandle {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -6575,6 +6927,8 @@ input ChannelFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ChannelFilterInput {
@@ -6705,6 +7059,8 @@ input CampaignTargetFilterCompletionTimestamp {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignTargetFilterLatestAttempt {
@@ -6716,6 +7072,8 @@ input CampaignTargetFilterLatestAttempt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignTargetFilterRetryCount {
@@ -6727,6 +7085,8 @@ input CampaignTargetFilterRetryCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignTargetFilterStatus {
@@ -6738,6 +7098,8 @@ input CampaignTargetFilterStatus {
   greaterThan: CampaignTargetStatus
   lessThanOrEqual: CampaignTargetStatus
   greaterThanOrEqual: CampaignTargetStatus
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignTargetFilterId {
@@ -6749,6 +7111,8 @@ input CampaignTargetFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignTargetFilterInput {
@@ -6938,6 +7302,8 @@ input CampaignFilterSuccessfulTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterFailedTargetCount {
@@ -6949,6 +7315,8 @@ input CampaignFilterFailedTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterInProgressTargetCount {
@@ -6960,6 +7328,8 @@ input CampaignFilterInProgressTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterIdleTargetCount {
@@ -6971,6 +7341,8 @@ input CampaignFilterIdleTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterTotalTargetCount {
@@ -6982,6 +7354,8 @@ input CampaignFilterTotalTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterOutcome {
@@ -6993,6 +7367,8 @@ input CampaignFilterOutcome {
   greaterThan: CampaignOutcome
   lessThanOrEqual: CampaignOutcome
   greaterThanOrEqual: CampaignOutcome
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterStatus {
@@ -7004,6 +7380,8 @@ input CampaignFilterStatus {
   greaterThan: CampaignStatus
   lessThanOrEqual: CampaignStatus
   greaterThanOrEqual: CampaignStatus
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterName {
@@ -7015,6 +7393,9 @@ input CampaignFilterName {
   greaterThan: String
   lessThanOrEqual: String
   greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
   like: String
   ilike: String
 }
@@ -7028,6 +7409,8 @@ input CampaignFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input CampaignFilterInput {
@@ -7783,6 +8166,16 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
   ): device_group_result
+  fileDownloadRequests(
+    "A filter to limit the results"
+    filter: FileDownloadRequestFilterInput
+  ): file_download_requests_result
+  fileDownloadRequestsByDevice(
+    "A filter to limit the results"
+    filter: FileDownloadRequestFilterInput
+
+    deviceId: ID!
+  ): file_download_requests_by_device_result
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput
