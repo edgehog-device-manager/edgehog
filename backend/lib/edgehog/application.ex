@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2025 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Application do
   # See https://hexdocs.pm/elixir/Application.html
@@ -70,7 +68,8 @@ defmodule Edgehog.Application do
       {Task.Supervisor, name: Edgehog.Devices.Reconciler.Supervisor},
       {Edgehog.Devices.Reconciler, enabled: @device_reconciliation_enabled},
       # Start Absinthe Subscriptions AFTER Endpoint is up
-      {Absinthe.Subscription, Endpoint}
+      {Absinthe.Subscription, Endpoint},
+      Edgehog.Auth.Supervisor
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

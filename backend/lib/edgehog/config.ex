@@ -24,6 +24,7 @@ defmodule Edgehog.Config do
   """
   use Skogsra
 
+  alias Edgehog.Config.AuthzProvider
   alias Edgehog.Config.GeocodingProviders
   alias Edgehog.Config.GeolocationProviders
   alias Edgehog.Config.JWTPublicKeyPEMType
@@ -95,6 +96,15 @@ defmodule Edgehog.Config do
     os_env: "PREFERRED_GEOCODING_PROVIDERS",
     type: GeocodingProviders,
     default: [GoogleGeocoding]
+
+  @envdoc """
+  The preferred fine grained authorization provider.
+  Possible values are: none
+  """
+  app_env :authz_provider, :edgehog, :authz_provider,
+    os_env: "AUTHZ_PROVIDER",
+    type: AuthzProvider,
+    default: Edgehog.Auth.Providers.None
 
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
@@ -189,5 +199,16 @@ defmodule Edgehog.Config do
   def validate_admin_authentication! do
     admin_jwk!()
     :ok
+  end
+
+  @doc """
+  Returns the FGA provider configuration.
+  """
+  @spec authz_config!() :: Keyword.t()
+  def authz_config! do
+    provider = authz_provider!()
+
+    # Generate the argument that will be passed down to the providers
+    Keyword.put(Keyword.new(), :provider, provider)
   end
 end
