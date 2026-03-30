@@ -35,6 +35,7 @@ import type {
 import Button from "@/components/Button";
 import Col from "@/components/Col";
 import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
+import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesUploadTab";
 import FileSelect from "@/components/FileSelect";
 import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
@@ -85,18 +86,13 @@ const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
   groupId: undefined,
 };
 
-const destinationOptions = [
-  { value: "STORAGE", label: "Storage" },
-  { value: "STREAMING", label: "Streaming" },
-  { value: "FILESYSTEM", label: "File System" },
-];
-
 type ManualFileDownloadRequestFromRepositoryFormProps = {
   className?: string;
   repositoriesData?: ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$key;
   isLoading: boolean;
   onFileSubmit: (values: ManualFileDownloadRequestFromRepositoryData) => void;
   showAdvancedOptions: boolean;
+  destinationTypeOptions: DestinationTypeOption[];
 };
 
 const ManualFileDownloadRequestFromRepositoryForm = ({
@@ -105,6 +101,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
   isLoading,
   onFileSubmit,
   showAdvancedOptions,
+  destinationTypeOptions,
 }: ManualFileDownloadRequestFromRepositoryFormProps) => {
   const intl = useIntl();
   const { open: advancedOptionsOpen, toggle: toggleAdvancedOptions } =
@@ -308,7 +305,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           name="destinationType"
           render={({ field }) => {
             const selectedOption =
-              destinationOptions.find((opt) => opt.value === field.value) ||
+              destinationTypeOptions.find((opt) => opt.value === field.value) ||
               null;
 
             return (
@@ -317,7 +314,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
                 onChange={(option) => {
                   field.onChange(option ? option.value : null);
                 }}
-                options={destinationOptions}
+                options={destinationTypeOptions}
               />
             );
           }}

@@ -257,6 +257,8 @@ const fileDestinationTypeSchema = z.enum([
   "FILESYSTEM",
 ]);
 
+type FileDestinationType = z.infer<typeof fileDestinationTypeSchema>;
+
 const nullableDestinationSchema = z.preprocess((value) => {
   if (typeof value !== "string") {
     return value ?? null;
@@ -1062,6 +1064,7 @@ export type {
   RepositoryUpdateFormData,
   FileFormData,
   ManualFileDownloadRequestFromRepositoryData,
+  FileDestinationType,
 };
 
 export {

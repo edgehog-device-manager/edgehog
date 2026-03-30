@@ -27,20 +27,22 @@ import Select from "react-select";
 import Button from "@/components/Button";
 import Col from "@/components/Col";
 import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
+import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesUploadTab";
 import FileDropzone from "@/components/FileDropzone";
 import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
-import { fileDownloadRequestFormSchema } from "@/forms/validation";
-
-type FileDestination = "STORAGE" | "STREAMING" | "FILESYSTEM";
+import {
+  fileDownloadRequestFormSchema,
+  type FileDestinationType,
+} from "@/forms/validation";
 
 type FileDownloadRequestFormValues = {
   files: File[];
   archiveName?: string;
-  destinationType: FileDestination;
+  destinationType: FileDestinationType;
   destination: string | null;
   ttlSeconds: number;
   progressTracked: boolean;
@@ -54,19 +56,15 @@ type ManualFileDownloadRequestFormProps = {
   isLoading: boolean;
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
   showAdvancedOptions?: boolean;
+  destinationTypeOptions: DestinationTypeOption[];
 };
-
-const destinationTypeOptions = [
-  { value: "STORAGE", label: "Storage" },
-  { value: "STREAMING", label: "Streaming" },
-  { value: "FILESYSTEM", label: "File System" },
-];
 
 const ManualFileDownloadRequestForm = ({
   className,
   isLoading,
   onFileSubmit,
   showAdvancedOptions = false,
+  destinationTypeOptions,
 }: ManualFileDownloadRequestFormProps) => {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { open: advancedOptionsOpen, toggle: toggleAdvancedOptions } =
@@ -84,7 +82,7 @@ const ManualFileDownloadRequestForm = ({
     defaultValues: {
       file: undefined,
       archiveName: "",
-      destinationType: "STORAGE" as FileDestination,
+      destinationType: "STORAGE",
       destination: null,
       ttlSeconds: 0,
       progress: false,
@@ -116,7 +114,7 @@ const ManualFileDownloadRequestForm = ({
           selectedFiles.length > 1 && data.archiveName
             ? data.archiveName
             : undefined,
-        destinationType: data.destinationType as FileDestination,
+        destinationType: data.destinationType,
         destination: data.destination,
         ttlSeconds: data.ttlSeconds,
         progressTracked: data.progress,
