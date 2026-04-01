@@ -18,33 +18,33 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage } from "react-intl";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { FormattedMessage } from "react-intl";
 
-import Form from "@/components/Form";
 import Button from "@/components/Button";
+import Col from "@/components/Col";
+import Form from "@/components/Form";
+import { FormRowWithMargin as FormRow } from "@/components/FormRow";
+import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { manualOtaFromFileSchema } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
+import { manualOtaFromFileSchema } from "@/forms/validation";
 
-type ManualOtaOperation = (input: {
-  imageFile?: File;
-  imageUrl?: string;
-}) => void;
-
-type FromFileFormProps = {
+type ManualOtaFromFileFormProps = {
   className?: string;
   isLoading: boolean;
-  onManualOTAImageSubmit: ManualOtaOperation;
+  onManualOTAImageSubmit: (input: {
+    imageFile?: File;
+    imageUrl?: string;
+  }) => void;
 };
 
 const ManualOtaFromFileForm = ({
   className,
   isLoading,
   onManualOTAImageSubmit,
-}: FromFileFormProps) => {
+}: ManualOtaFromFileFormProps) => {
   const {
     formState: { errors },
     handleSubmit,
@@ -60,16 +60,21 @@ const ManualOtaFromFileForm = ({
 
   return (
     <form className={className} onSubmit={onSubmit}>
-      <Form.Group controlId="baseImageFile">
-        <Stack direction="vertical" gap={2} className="align-items-start">
-          <Form.Label column sm={3} className="text-nowrap">
-            <FormattedMessage
-              id="forms.ManualOtaFromFileForm.baseImageLabel"
-              defaultMessage="Base image file"
-            />
-          </Form.Label>
-          <Form.Control {...register("baseImageFile")} type="file" />
-          <FormFeedback feedback={errors.baseImageFile?.message} />
+      <FormRow
+        id="baseImageFile"
+        label={
+          <FormattedMessage
+            id="forms.ManualOtaFromFileForm.baseImageLabel"
+            defaultMessage="Base image file"
+          />
+        }
+      >
+        <Form.Control {...register("baseImageFile")} type="file" />
+        <FormFeedback feedback={errors.baseImageFile?.message} />
+      </FormRow>
+
+      <Row>
+        <Col className="d-flex justify-content-end">
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
@@ -77,8 +82,8 @@ const ManualOtaFromFileForm = ({
               defaultMessage="Update"
             />
           </Button>
-        </Stack>
-      </Form.Group>
+        </Col>
+      </Row>
     </form>
   );
 };

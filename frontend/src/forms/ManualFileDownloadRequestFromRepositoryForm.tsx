@@ -143,25 +143,22 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
   const debounceRepositoryRefetch = useMemo(
     () =>
       _.debounce((text: string) => {
-        if (text === "") {
-          refetchRepositories(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchRepositories(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
+        refetchRepositories(
+          {
+            first: RECORDS_TO_LOAD_FIRST,
+            ...(text && { filter: { name: { ilike: `%${text}%` } } }),
+          },
+          { fetchPolicy: "network-only" },
+        );
       }, 500),
     [refetchRepositories],
   );
+
+  useEffect(() => {
+    return () => {
+      debounceRepositoryRefetch.cancel();
+    };
+  }, [debounceRepositoryRefetch]);
 
   useEffect(() => {
     if (searchRepositoryText !== null) {

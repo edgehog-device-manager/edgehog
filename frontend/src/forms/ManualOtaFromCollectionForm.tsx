@@ -18,13 +18,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
-import { Controller, useForm, useWatch } from "react-hook-form";
-import { graphql, usePaginationFragment } from "react-relay";
-import _ from "lodash";
-import Select from "react-select";
 import { zodResolver } from "@hookform/resolvers/zod";
+import _ from "lodash";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, usePaginationFragment } from "react-relay";
+import Select from "react-select";
 
 import type { ManualOtaFromCollectionForm_BaseImageCollectionsPagination_Query } from "@/api/__generated__/ManualOtaFromCollectionForm_BaseImageCollectionsPagination_Query.graphql";
 import type {
@@ -33,15 +33,17 @@ import type {
 } from "@/api/__generated__/ManualOtaFromCollectionForm_baseImageCollections_Fragment.graphql";
 
 import BaseImageSelect from "@/components/BaseImageSelect";
-import Col from "@/components/Col";
-import Form from "@/components/Form";
 import Button from "@/components/Button";
+import Col from "@/components/Col";
+import { FormRowWithMargin as FormRow } from "@/components/FormRow";
+import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
-import { manualOtaFromCollectionSchema } from "@/forms/validation";
-import { ManualOtaFromCollectionData } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
+import {
+  ManualOtaFromCollectionData,
+  manualOtaFromCollectionSchema,
+} from "@/forms/validation";
 
 const BASE_IMAGE_COLLECTIONS_FRAGMENT = graphql`
   fragment ManualOtaFromCollectionForm_baseImageCollections_Fragment on RootQueryType
@@ -67,28 +69,19 @@ type BaseImageCollectionRecord = NonNullable<
   >["edges"]
 >[number]["node"];
 
-type FromCollectionFormProps = {
-  className?: string;
-  baseImageCollectionsData?: ManualOtaFromCollectionForm_baseImageCollections_Fragment$key;
-  isLoading: boolean;
-  onManualOTAImageSubmit: ManualOtaOperation;
-};
-
-type ManualOtaOperation = (input: {
-  imageFile?: File;
-  imageUrl?: string;
-}) => void;
-
-const getBaseImageCollLabel = (
-  baseImageCollection: BaseImageCollectionRecord,
-) => baseImageCollection.name;
-const getBaseImageCollValue = (
-  baseImageCollection: BaseImageCollectionRecord,
-) => baseImageCollection.id;
-
 const fromCollectionInitialData: ManualOtaFromCollectionData = {
   baseImageCollection: { id: "", name: "" },
   baseImage: { id: "", name: "", version: "", url: "" },
+};
+
+type ManualOtaFromCollectionFormProps = {
+  className?: string;
+  baseImageCollectionsData?: ManualOtaFromCollectionForm_baseImageCollections_Fragment$key;
+  isLoading: boolean;
+  onManualOTAImageSubmit: (input: {
+    imageFile?: File;
+    imageUrl?: string;
+  }) => void;
 };
 
 const ManualOtaFromCollectionForm = ({
@@ -96,7 +89,7 @@ const ManualOtaFromCollectionForm = ({
   className,
   isLoading,
   onManualOTAImageSubmit,
-}: FromCollectionFormProps) => {
+}: ManualOtaFromCollectionFormProps) => {
   const intl = useIntl();
 
   const {
@@ -129,30 +122,27 @@ const ManualOtaFromCollectionForm = ({
 
   const [searchBaseImageCollText, setSearchBaseImageCollText] = useState<
     string | null
-  >("");
+  >(null);
 
   const debounceBaseImageCollRefetch = useMemo(
     () =>
       _.debounce((text: string) => {
-        if (text === "") {
-          refetchBaseImageColls(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchBaseImageColls(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
+        refetchBaseImageColls(
+          {
+            first: RECORDS_TO_LOAD_FIRST,
+            ...(text && { filter: { name: { ilike: `%${text}%` } } }),
+          },
+          { fetchPolicy: "network-only" },
+        );
       }, 500),
     [refetchBaseImageColls],
   );
+
+  useEffect(() => {
+    return () => {
+      debounceBaseImageCollRefetch.cancel();
+    };
+  }, [debounceBaseImageCollRefetch]);
 
   useEffect(() => {
     if (searchBaseImageCollText !== null) {
@@ -170,26 +160,26 @@ const ManualOtaFromCollectionForm = ({
     loadNextBaseImageColls,
   ]);
 
-  const baseImageCollections = useMemo(() => {
-    return (
-      (
-        baseImageCollPaginationData as ManualOtaFromCollectionForm_baseImageCollections_Fragment$data
-      ).baseImageCollections?.edges?.map((edge) => edge?.node) ?? []
-    );
-  }, [baseImageCollPaginationData]);
+  const baseImageCollections = useMemo(
+    () =>
+      baseImageCollPaginationData?.baseImageCollections?.edges?.map(
+        (edge) => edge?.node,
+      ) ?? [],
+    [baseImageCollPaginationData],
+  );
 
   const noBaseImageCollOptionsMessage = (inputValue: string) =>
     inputValue
       ? intl.formatMessage(
           {
-            id: "forms.ManualOtaFromFileCollection.noBaseImageCollsFoundMatching",
+            id: "forms.ManualOtaFromCollectionForm.noBaseImageCollsFoundMatching",
             defaultMessage:
               'No base image collections found matching "{inputValue}"',
           },
           { inputValue },
         )
       : intl.formatMessage({
-          id: "forms.ManualOtaFromFileCollection.noBaseImageCollsAvailable",
+          id: "forms.ManualOtaFromCollectionForm.noBaseImageCollsAvailable",
           defaultMessage: "No base image collections available",
         });
 
@@ -204,101 +194,106 @@ const ManualOtaFromCollectionForm = ({
 
   return (
     <form className={className} onSubmit={onSubmit}>
-      <Stack direction="vertical" gap={2} className="align-items-start">
-        <Form.Group as={Col} controlId="baseImageCollection" className="w-100">
-          <Form.Label column sm={3} className="text-nowrap">
-            <FormattedMessage
-              id="forms.ManualOtaFromCollectionForm.baseImageFromCollectionLabel"
-              defaultMessage="Base Image Collection"
-            />
-          </Form.Label>
-          <Controller
-            name="baseImageCollection"
-            control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                  onBaseImageCollectionChange({ target: e });
-                  resetField("baseImage");
-                }}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.ManualOtaFromFileCollection.baseImageCollectionOption",
-                  defaultMessage: "Search or select a base image collection...",
-                })}
-                options={baseImageCollections}
-                getOptionLabel={getBaseImageCollLabel}
-                getOptionValue={getBaseImageCollValue}
-                noOptionsMessage={({ inputValue }) =>
-                  noBaseImageCollOptionsMessage(inputValue)
-                }
-                isLoading={isLoadingNextBaseImageColl}
-                onMenuScrollToBottom={
-                  hasNextBaseImageColl
-                    ? loadNextBaseImageCollOptions
-                    : undefined
-                }
-                onInputChange={(text) => setSearchBaseImageCollText(text)}
-              />
-            )}
-          />
-          <FormFeedback feedback={errors.baseImageCollection?.id?.message} />
-        </Form.Group>
-        <Form.Group as={Col} controlId="baseImage" className="w-100">
-          <Form.Label column sm={3} className="text-nowrap">
-            <FormattedMessage
-              id="forms.ManualOtaFromCollectionForm.baseImageFromLabel"
-              defaultMessage="Base Image"
-            />
-          </Form.Label>
-          {selectedBaseImageCollection?.id ? (
-            <>
-              <Controller
-                name="baseImage"
-                control={control}
-                render={({
-                  field: { value, onChange },
-                  fieldState: { invalid },
-                }) => (
-                  <BaseImageSelect
-                    selectedBaseImageCollection={selectedBaseImageCollection}
-                    controllerProps={{
-                      value: value,
-                      invalid: invalid,
-                      onChange: (e) => {
-                        onChange(e);
-                        onBaseImageChange(e);
-                      },
-                    }}
-                  />
-                )}
-              />
-              <FormFeedback feedback={errors.baseImage?.id?.message} />
-            </>
-          ) : (
-            <div className="d-flex align-content-center fst-italic text-muted">
-              <FormattedMessage
-                id="forms.ManualOtaFromCollectionForm.selectBaseImageCollection"
-                defaultMessage="Select a base image collection before selecting an image..."
-              />
-            </div>
-          )}
-        </Form.Group>
-        <Button variant="primary" type="submit" disabled={isLoading}>
-          {isLoading && <Spinner size="sm" className="me-2" />}
+      <FormRow
+        id="baseImageCollection"
+        label={
           <FormattedMessage
-            id="forms.ManualOtaFromCollectionForm.update"
-            defaultMessage="Update"
+            id="forms.ManualOtaFromCollectionForm.baseImageFromCollectionLabel"
+            defaultMessage="Base Image Collection"
           />
-        </Button>
-      </Stack>
+        }
+      >
+        <Controller
+          name="baseImageCollection"
+          control={control}
+          render={({ field: { value, onChange }, fieldState: { invalid } }) => (
+            <Select
+              value={value}
+              onChange={(e) => {
+                onChange(e);
+                onBaseImageCollectionChange({ target: e });
+                resetField("baseImage");
+              }}
+              className={invalid ? "is-invalid" : ""}
+              placeholder={intl.formatMessage({
+                id: "forms.ManualOtaFromCollectionForm.baseImageCollectionOption",
+                defaultMessage: "Search or select a base image collection...",
+              })}
+              options={baseImageCollections}
+              getOptionLabel={(opt) => opt.name}
+              getOptionValue={(opt) => opt.id}
+              noOptionsMessage={({ inputValue }) =>
+                noBaseImageCollOptionsMessage(inputValue)
+              }
+              isLoading={isLoadingNextBaseImageColl}
+              onMenuScrollToBottom={
+                hasNextBaseImageColl ? loadNextBaseImageCollOptions : undefined
+              }
+              onInputChange={(text) => setSearchBaseImageCollText(text)}
+            />
+          )}
+        />
+        <FormFeedback feedback={errors.baseImageCollection?.id?.message} />
+      </FormRow>
+
+      <FormRow
+        id="baseImage"
+        label={
+          <FormattedMessage
+            id="forms.ManualOtaFromCollectionForm.baseImageLabel"
+            defaultMessage="Base Image"
+          />
+        }
+      >
+        {selectedBaseImageCollection?.id ? (
+          <>
+            <Controller
+              name="baseImage"
+              control={control}
+              render={({
+                field: { value, onChange },
+                fieldState: { invalid },
+              }) => (
+                <BaseImageSelect
+                  selectedBaseImageCollection={selectedBaseImageCollection}
+                  controllerProps={{
+                    value: value,
+                    invalid: invalid,
+                    onChange: (e) => {
+                      onChange(e);
+                      onBaseImageChange(e);
+                    },
+                  }}
+                />
+              )}
+            />
+            <FormFeedback feedback={errors.baseImage?.id?.message} />
+          </>
+        ) : (
+          <div className="d-flex align-content-center fst-italic text-muted">
+            <FormattedMessage
+              id="forms.ManualOtaFromCollectionForm.selectBaseImageCollection"
+              defaultMessage="Select a base image collection before selecting an image..."
+            />
+          </div>
+        )}
+      </FormRow>
+
+      <Row>
+        <Col className="d-flex justify-content-end">
+          <Button variant="primary" type="submit" disabled={isLoading}>
+            {isLoading && <Spinner size="sm" className="me-2" />}
+            <FormattedMessage
+              id="forms.ManualOtaFromCollectionForm.update"
+              defaultMessage="Update"
+            />
+          </Button>
+        </Col>
+      </Row>
     </form>
   );
 };
+
+export type { BaseImageCollectionRecord };
 
 export default ManualOtaFromCollectionForm;

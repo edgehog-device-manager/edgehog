@@ -18,7 +18,14 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect, useState, useRef, Suspense } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  Suspense,
+} from "react";
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import type { Subscription } from "relay-runtime";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -28,22 +35,23 @@ import {
   useRelayEnvironment,
   usePaginationFragment,
   usePreloadedQuery,
-  PreloadedQuery,
+  useQueryLoader,
 } from "react-relay/hooks";
-import { Form, Stack } from "react-bootstrap";
+import type { PreloadedQuery } from "react-relay/hooks";
 
-import type { Device_getBaseImageCollections_Query } from "@/api/__generated__/Device_getBaseImageCollections_Query.graphql";
-import { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
+import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
+import type { SoftwareUpdateTab_getBaseImageCollections_Query } from "@/api/__generated__/SoftwareUpdateTab_getBaseImageCollections_Query.graphql";
 import type { SoftwareUpdateTab_PaginationQuery } from "@/api/__generated__/SoftwareUpdateTab_PaginationQuery.graphql";
 import type { SoftwareUpdateTab_otaOperations$key } from "@/api/__generated__/SoftwareUpdateTab_otaOperations.graphql";
 
 import Alert from "@/components/Alert";
 import OperationTable from "@/components/OperationTable";
 import Spinner from "@/components/Spinner";
+import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import ManualOtaFromCollectionForm from "@/forms/ManualOtaFromCollectionForm";
 import ManualOtaFromFileForm from "@/forms/ManualOtaFromFileForm";
-import { GET_BASE_IMAGE_COLL_QUERY } from "@/pages/Device";
 
 const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
   fragment SoftwareUpdateTab_otaOperations on Device
@@ -96,37 +104,60 @@ const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
   }
 `;
 
-export type GetBaseImageCollsQueryType = PreloadedQuery<
-  Device_getBaseImageCollections_Query,
-  Record<string, unknown>
->;
+const GET_BASE_IMAGE_COLL_QUERY = graphql`
+  query SoftwareUpdateTab_getBaseImageCollections_Query(
+    $first: Int
+    $after: String
+    $filterBaseImageCollections: BaseImageCollectionFilterInput = {}
+  ) {
+    ...ManualOtaFromCollectionForm_baseImageCollections_Fragment
+      @arguments(filter: $filterBaseImageCollections)
+  }
+`;
 
 type OtaOperationInput = {
   imageFile?: File;
   imageUrl?: string;
 };
 
+type ManualOtaFromCollectionFormWrapperProps = {
+  baseImageCollsQueryRef: PreloadedQuery<SoftwareUpdateTab_getBaseImageCollections_Query>;
+  isCreatingOtaOperation: boolean;
+  launchManualOTAUpdate: (input: OtaOperationInput) => void;
+};
+
+const ManualOtaFromCollectionFormWrapper = ({
+  baseImageCollsQueryRef,
+  isCreatingOtaOperation,
+  launchManualOTAUpdate,
+}: ManualOtaFromCollectionFormWrapperProps) => {
+  const baseImageCollections = usePreloadedQuery(
+    GET_BASE_IMAGE_COLL_QUERY,
+    baseImageCollsQueryRef,
+  );
+
+  return (
+    <ManualOtaFromCollectionForm
+      baseImageCollectionsData={baseImageCollections}
+      isLoading={isCreatingOtaOperation}
+      onManualOTAImageSubmit={launchManualOTAUpdate}
+    />
+  );
+};
+
 type DeviceSoftwareUpdateTabProps = {
   deviceRef: SoftwareUpdateTab_otaOperations$key;
-  getBaseImageCollsQuery: GetBaseImageCollsQueryType;
 };
 
 const DeviceSoftwareUpdateTab = ({
   deviceRef,
-  getBaseImageCollsQuery,
 }: DeviceSoftwareUpdateTabProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
   const relayEnvironment = useRelayEnvironment();
 
-  const [updateMode, setUpdateMode] = useState<"collection" | "file">(
-    "collection",
-  );
-  const modeOnChange =
-    (mode: "collection" | "file") =>
-    (_event: React.ChangeEvent<HTMLInputElement>) =>
-      setUpdateMode(mode);
+  const [updateMode, setUpdateMode] = useState<"file" | "collection">("file");
 
   const { data } = usePaginationFragment<
     SoftwareUpdateTab_PaginationQuery,
@@ -208,10 +239,21 @@ const DeviceSoftwareUpdateTab = ({
     deviceId,
   ]);
 
-  const baseImageCollections = usePreloadedQuery(
-    GET_BASE_IMAGE_COLL_QUERY,
-    getBaseImageCollsQuery,
+  const [getBaseImageCollsQuery, getBaseImageColls] =
+    useQueryLoader<SoftwareUpdateTab_getBaseImageCollections_Query>(
+      GET_BASE_IMAGE_COLL_QUERY,
+    );
+
+  const fetchBaseImageColls = useCallback(
+    () =>
+      getBaseImageColls(
+        { first: RECORDS_TO_LOAD_FIRST },
+        { fetchPolicy: "store-and-network" },
+      ),
+    [getBaseImageColls],
   );
+
+  useEffect(fetchBaseImageColls, [fetchBaseImageColls]);
 
   if (!data.capabilities.includes("SOFTWARE_UPDATES")) {
     return null;
@@ -288,37 +330,56 @@ const DeviceSoftwareUpdateTab = ({
           {errorFeedback}
         </Alert>
         <Suspense fallback={<Spinner />}>
-          <Stack direction="vertical" className="mt-3">
-            <Form.Group key="updateMode">
-              <Form.Check
-                name="updateMode"
-                inline
+          <Stack direction="vertical" gap={3} className="mt-3">
+            <div>
+              <ToggleButtonGroup
                 type="radio"
-                label="Collection"
-                id="Collection"
-                onChange={modeOnChange("collection")}
-                checked={updateMode === "collection"}
-              />
-              <Form.Check
                 name="updateMode"
-                inline
-                type="radio"
-                label="File"
-                id="File"
-                onChange={modeOnChange("file")}
-                checked={updateMode === "file"}
-              />
-            </Form.Group>
+                value={updateMode}
+                onChange={setUpdateMode}
+                size="sm"
+              >
+                <ToggleButton
+                  id="mode-file"
+                  value="file"
+                  variant={
+                    updateMode === "file" ? "primary" : "outline-secondary"
+                  }
+                  className="fw-medium px-3"
+                >
+                  <FormattedMessage
+                    id="components.DeviceTabs.SoftwareUpdateTab.modeFile"
+                    defaultMessage="File"
+                  />
+                </ToggleButton>
+
+                <ToggleButton
+                  id="mode-collection"
+                  value="collection"
+                  variant={
+                    updateMode === "collection"
+                      ? "primary"
+                      : "outline-secondary"
+                  }
+                  className="fw-medium px-3"
+                >
+                  <FormattedMessage
+                    id="components.DeviceTabs.SoftwareUpdateTab.modeCollection"
+                    defaultMessage="Collection"
+                  />
+                </ToggleButton>
+              </ToggleButtonGroup>
+            </div>
             {updateMode === "collection" ? (
-              <ManualOtaFromCollectionForm
-                baseImageCollectionsData={baseImageCollections}
-                className="mt-3 w-75"
-                isLoading={isCreatingOtaOperation}
-                onManualOTAImageSubmit={launchManualOTAUpdate}
-              />
+              getBaseImageCollsQuery && (
+                <ManualOtaFromCollectionFormWrapper
+                  baseImageCollsQueryRef={getBaseImageCollsQuery}
+                  isCreatingOtaOperation={isCreatingOtaOperation}
+                  launchManualOTAUpdate={launchManualOTAUpdate}
+                />
+              )
             ) : (
               <ManualOtaFromFileForm
-                className="mt-3 w-75"
                 isLoading={isCreatingOtaOperation}
                 onManualOTAImageSubmit={launchManualOTAUpdate}
               />

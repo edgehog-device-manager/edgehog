@@ -82,8 +82,6 @@ import DeviceWiFiScanResultsTab from "@/components/DeviceTabs/WiFiScanResultsTab
 import DeviceSoftwareUpdateTab from "@/components/DeviceTabs/SoftwareUpdateTab";
 import DeviceFilesUploadTab from "@/components/DeviceTabs/FilesUploadTab";
 import DeviceApplicationsTab from "@/components/DeviceTabs/ApplicationsTab";
-import { Device_getBaseImageCollections_Query } from "@/api/__generated__/Device_getBaseImageCollections_Query.graphql";
-import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 
 const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
   fragment Device_connectionStatus on Device {
@@ -239,17 +237,6 @@ const GET_FORWARDER_SESSION_QUERY = graphql`
       forwarderHostname
       forwarderPort
     }
-  }
-`;
-
-export const GET_BASE_IMAGE_COLL_QUERY = graphql`
-  query Device_getBaseImageCollections_Query(
-    $first: Int
-    $after: String
-    $filterBaseImageCollections: BaseImageCollectionFilterInput = {}
-  ) {
-    ...ManualOtaFromCollectionForm_baseImageCollections_Fragment
-      @arguments(filter: $filterBaseImageCollections)
   }
 `;
 
@@ -672,22 +659,6 @@ const DeviceContent = ({
     [deviceTags, handleAddDeviceTags, handleRemoveDeviceTags],
   );
 
-  const [getBaseImageCollsQuery, getBaseImageColls] =
-    useQueryLoader<Device_getBaseImageCollections_Query>(
-      GET_BASE_IMAGE_COLL_QUERY,
-    );
-
-  const fetchBaseImageCollsQuery = useCallback(
-    () =>
-      getBaseImageColls(
-        { first: RECORDS_TO_LOAD_FIRST },
-        { fetchPolicy: "network-only" },
-      ),
-    [getBaseImageColls],
-  );
-
-  useEffect(fetchBaseImageCollsQuery, [fetchBaseImageCollsQuery]);
-
   if (!device) {
     return (
       <Result.NotFound
@@ -970,12 +941,7 @@ const DeviceContent = ({
             <DeviceNetworkInterfacesTab deviceRef={device} />
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
-            {getBaseImageCollsQuery && (
-              <DeviceSoftwareUpdateTab
-                deviceRef={device}
-                getBaseImageCollsQuery={getBaseImageCollsQuery}
-              />
-            )}
+            <DeviceSoftwareUpdateTab deviceRef={device} />
             <DeviceFilesUploadTab deviceRef={device} />
             <DeviceApplicationsTab deviceRef={deviceData} />
           </Tabs>

@@ -820,6 +820,12 @@
   "components.DeviceTabs.SoftwareUpdateTab.manualOTAUpdate": {
     "defaultMessage": "Manual OTA Update"
   },
+  "components.DeviceTabs.SoftwareUpdateTab.modeCollection": {
+    "defaultMessage": "Collection"
+  },
+  "components.DeviceTabs.SoftwareUpdateTab.modeFile": {
+    "defaultMessage": "File"
+  },
   "components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
     "defaultMessage": "Could not start the OTA update, please try again."
   },
@@ -2466,26 +2472,26 @@
   "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
     "defaultMessage": "User ID"
   },
+  "forms.ManualOtaFromCollectionForm.baseImageCollectionOption": {
+    "defaultMessage": "Search or select a base image collection..."
+  },
   "forms.ManualOtaFromCollectionForm.baseImageFromCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
-  "forms.ManualOtaFromCollectionForm.baseImageFromLabel": {
+  "forms.ManualOtaFromCollectionForm.baseImageLabel": {
     "defaultMessage": "Base Image"
+  },
+  "forms.ManualOtaFromCollectionForm.noBaseImageCollsAvailable": {
+    "defaultMessage": "No base image collections available"
+  },
+  "forms.ManualOtaFromCollectionForm.noBaseImageCollsFoundMatching": {
+    "defaultMessage": "No base image collections found matching \"{inputValue}\""
   },
   "forms.ManualOtaFromCollectionForm.selectBaseImageCollection": {
     "defaultMessage": "Select a base image collection before selecting an image..."
   },
   "forms.ManualOtaFromCollectionForm.update": {
     "defaultMessage": "Update"
-  },
-  "forms.ManualOtaFromFileCollection.baseImageCollectionOption": {
-    "defaultMessage": "Search or select a base image collection..."
-  },
-  "forms.ManualOtaFromFileCollection.noBaseImageCollsAvailable": {
-    "defaultMessage": "No base image collections available"
-  },
-  "forms.ManualOtaFromFileCollection.noBaseImageCollsFoundMatching": {
-    "defaultMessage": "No base image collections found matching \"{inputValue}\""
   },
   "forms.ManualOtaFromFileForm.baseImageLabel": {
     "defaultMessage": "Base image file"
