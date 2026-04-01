@@ -1,25 +1,23 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2021-2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2021 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -48,6 +46,7 @@ import {
   SystemModelUpdateFormData,
   systemModelUpdateSchema,
 } from "@/forms/validation";
+import FormFeedback from "@/forms/FormFeedback";
 
 const UPDATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment UpdateSystemModel_SystemModelFragment on SystemModel {
@@ -129,6 +128,7 @@ const transformInputData = (
 const transformOutputData = (
   systemModel: UpdateSystemModel_SystemModelFragment$data,
   locale: Locale,
+  pictureMarkedForRemoval: boolean,
   data: SystemModelUpdateFormData,
 ): SystemModelOutputData => {
   const diff: SystemModelOutputData = {};
@@ -140,7 +140,7 @@ const transformOutputData = (
   }
   if (data.pictureFile) {
     diff.pictureFile = data.pictureFile[0];
-  } else if (systemModel.pictureUrl !== null && data.pictureFile === null) {
+  } else if (systemModel.pictureUrl !== null && pictureMarkedForRemoval) {
     diff.pictureUrl = null;
   }
   const oldDescription = getDescriptionByLocale(
@@ -197,8 +197,7 @@ const UpdateSystemModelForm = ({
     reset,
     setValue,
     handleSubmit,
-    formState: { isDirty, errors },
-    watch,
+    formState: { isDirty, errors, dirtyFields },
   } = useForm<SystemModelUpdateFormData>({
     mode: "onTouched",
     defaultValues: transformInputData(systemModel, locale),
@@ -210,10 +209,16 @@ const UpdateSystemModelForm = ({
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: SystemModelUpdateFormData) =>
-    onSubmit(transformOutputData(systemModel, locale, data));
-  const canSubmit = !isLoading && isDirty;
-  const canReset = isDirty && !isLoading;
+  const onFormSubmit = (data: SystemModelUpdateFormData) => {
+    const pictureMarkedForRemoval =
+      systemModel.pictureUrl !== null &&
+      !!dirtyFields.pictureFile &&
+      data.pictureFile === null;
+
+    onSubmit(
+      transformOutputData(systemModel, locale, pictureMarkedForRemoval, data),
+    );
+  };
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -234,11 +239,25 @@ const UpdateSystemModelForm = ({
     reset(transformInputData(systemModel, locale));
   }, [reset, systemModel, locale]);
 
-  const pictureFile = watch("pictureFile");
+  const pictureFileField = register("pictureFile");
+
+  const pictureFile = useWatch({
+    control,
+    name: "pictureFile",
+  });
+
+  const pictureMarkedForRemoval =
+    systemModel.pictureUrl !== null &&
+    !!dirtyFields.pictureFile &&
+    pictureFile === null;
+
+  const canSubmit = !isLoading && (isDirty || pictureMarkedForRemoval);
+  const canReset = !isLoading && (isDirty || pictureMarkedForRemoval);
+
   const picture =
     pictureFile instanceof FileList && pictureFile.length > 0
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file
-      : pictureFile === null
+      : pictureMarkedForRemoval
         ? null // picture is removed
         : systemModel.pictureUrl; // picture is unchanged
 
@@ -252,7 +271,9 @@ const UpdateSystemModelForm = ({
                 {picture && (
                   <CloseButton
                     className="position-absolute bg-white border"
-                    onClick={() => setValue("pictureFile", null)}
+                    onClick={() => {
+                      setValue("pictureFile", null, { shouldDirty: true });
+                    }}
                   />
                 )}
                 <Figure
@@ -264,7 +285,7 @@ const UpdateSystemModelForm = ({
                 <Form.Control
                   type="file"
                   accept=".jpg,.jpeg,.gif,.png,.svg"
-                  {...register("pictureFile")}
+                  {...pictureFileField}
                 />
               </Form.Group>
             </Stack>
@@ -281,11 +302,7 @@ const UpdateSystemModelForm = ({
                 }
               >
                 <Form.Control {...register("name")} isInvalid={!!errors.name} />
-                <Form.Control.Feedback type="invalid">
-                  {errors.name?.message && (
-                    <FormattedMessage id={errors.name?.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={errors.name?.message} />
               </FormRow>
               <FormRow
                 id="system-model-form-handle"
@@ -300,11 +317,7 @@ const UpdateSystemModelForm = ({
                   {...register("handle")}
                   isInvalid={!!errors.handle}
                 />
-                <Form.Control.Feedback type="invalid">
-                  {errors.handle?.message && (
-                    <FormattedMessage id={errors.handle?.message} />
-                  )}
-                </Form.Control.Feedback>
+                <FormFeedback feedback={errors.handle?.message} />
               </FormRow>
               <FormRow
                 id="system-model-form-description"
@@ -352,13 +365,9 @@ const UpdateSystemModelForm = ({
                           {...register(`partNumbers.${index}.value`)}
                           isInvalid={!!errors.partNumbers?.[index]}
                         />
-                        <Form.Control.Feedback type="invalid">
-                          {errors.partNumbers?.[index]?.value?.message && (
-                            <FormattedMessage
-                              id={errors.partNumbers?.[index]?.value?.message}
-                            />
-                          )}
-                        </Form.Control.Feedback>
+                        <FormFeedback
+                          feedback={errors.partNumbers?.[index]?.value?.message}
+                        />
                       </Stack>
                       <Button
                         className="mb-auto"
