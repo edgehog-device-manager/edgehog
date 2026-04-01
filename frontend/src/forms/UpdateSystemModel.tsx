@@ -128,6 +128,7 @@ const transformInputData = (
 const transformOutputData = (
   systemModel: UpdateSystemModel_SystemModelFragment$data,
   locale: Locale,
+  pictureMarkedForRemoval: boolean,
   data: SystemModelUpdateFormData,
 ): SystemModelOutputData => {
   const diff: SystemModelOutputData = {};
@@ -139,7 +140,7 @@ const transformOutputData = (
   }
   if (data.pictureFile) {
     diff.pictureFile = data.pictureFile[0];
-  } else if (systemModel.pictureUrl !== null && data.pictureFile === null) {
+  } else if (systemModel.pictureUrl !== null && pictureMarkedForRemoval) {
     diff.pictureUrl = null;
   }
   const oldDescription = getDescriptionByLocale(
@@ -196,7 +197,7 @@ const UpdateSystemModelForm = ({
     reset,
     setValue,
     handleSubmit,
-    formState: { isDirty, errors },
+    formState: { isDirty, errors, dirtyFields },
   } = useForm<SystemModelUpdateFormData>({
     mode: "onTouched",
     defaultValues: transformInputData(systemModel, locale),
@@ -208,10 +209,16 @@ const UpdateSystemModelForm = ({
     name: "partNumbers",
   });
 
-  const onFormSubmit = (data: SystemModelUpdateFormData) =>
-    onSubmit(transformOutputData(systemModel, locale, data));
-  const canSubmit = !isLoading && isDirty;
-  const canReset = isDirty && !isLoading;
+  const onFormSubmit = (data: SystemModelUpdateFormData) => {
+    const pictureMarkedForRemoval =
+      systemModel.pictureUrl !== null &&
+      !!dirtyFields.pictureFile &&
+      data.pictureFile === null;
+
+    onSubmit(
+      transformOutputData(systemModel, locale, pictureMarkedForRemoval, data),
+    );
+  };
 
   const handleAddPartNumber = useCallback(() => {
     partNumbers.append({ value: "" });
@@ -232,15 +239,25 @@ const UpdateSystemModelForm = ({
     reset(transformInputData(systemModel, locale));
   }, [reset, systemModel, locale]);
 
+  const pictureFileField = register("pictureFile");
+
   const pictureFile = useWatch({
     control,
     name: "pictureFile",
   });
 
+  const pictureMarkedForRemoval =
+    systemModel.pictureUrl !== null &&
+    !!dirtyFields.pictureFile &&
+    pictureFile === null;
+
+  const canSubmit = !isLoading && (isDirty || pictureMarkedForRemoval);
+  const canReset = !isLoading && (isDirty || pictureMarkedForRemoval);
+
   const picture =
     pictureFile instanceof FileList && pictureFile.length > 0
       ? URL.createObjectURL(pictureFile[0]) // picture is the new file
-      : pictureFile === null
+      : pictureMarkedForRemoval
         ? null // picture is removed
         : systemModel.pictureUrl; // picture is unchanged
 
@@ -254,7 +271,9 @@ const UpdateSystemModelForm = ({
                 {picture && (
                   <CloseButton
                     className="position-absolute bg-white border"
-                    onClick={() => setValue("pictureFile", null)}
+                    onClick={() => {
+                      setValue("pictureFile", null, { shouldDirty: true });
+                    }}
                   />
                 )}
                 <Figure
@@ -266,7 +285,7 @@ const UpdateSystemModelForm = ({
                 <Form.Control
                   type="file"
                   accept=".jpg,.jpeg,.gif,.png,.svg"
-                  {...register("pictureFile")}
+                  {...pictureFileField}
                 />
               </Form.Group>
             </Stack>
