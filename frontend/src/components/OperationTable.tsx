@@ -18,38 +18,39 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { FormattedDate, FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
-import type { OperationTable_PaginationQuery } from "@/api/__generated__/OperationTable_PaginationQuery.graphql";
 import type {
-  OtaOperationStatus,
-  OperationTable_otaOperations$data,
-  OperationTable_otaOperations$key,
-} from "@/api/__generated__/OperationTable_otaOperations.graphql";
+  OperationTable_otaOperationEdgeFragment$data,
+  OperationTable_otaOperationEdgeFragment$key,
+} from "@/api/__generated__/OperationTable_otaOperationEdgeFragment.graphql";
 
-import Icon from "@/components/Icon";
 import Table, { createColumnHelper } from "@/components/Table";
 import { Link, Route } from "@/Navigation";
+import _ from "lodash";
+import { useMemo } from "react";
+import {
+  OperationStatus,
+  operationStatusCodeMessages,
+} from "./UpdateTargetsTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const OPERATION_TABLE_FRAGMENT = graphql`
-  fragment OperationTable_otaOperations on Device
-  @refetchable(queryName: "OperationTable_PaginationQuery") {
-    otaOperations(first: $first, after: $after)
-      @connection(key: "Device_otaOperations") {
-      edges {
-        node {
-          baseImageUrl
-          createdAt
-          status
-          updatedAt
-          campaignTarget {
-            campaign {
-              id
-              name
-            }
+  fragment OperationTable_otaOperationEdgeFragment on OtaOperationConnection {
+    edges {
+      node {
+        baseImageUrl
+        createdAt
+        status
+        statusProgress
+        statusCode
+        updatedAt
+        campaignTarget {
+          campaign {
+            id
+            name
           }
         }
       }
@@ -57,52 +58,11 @@ const OPERATION_TABLE_FRAGMENT = graphql`
   }
 `;
 
-const otaOperationFinalStatuses = ["SUCCESS", "FAILURE"] as const;
-type OtaOperationFinalStatus = (typeof otaOperationFinalStatuses)[number];
-
-const isOtaOperationFinalStatus = (
-  status: OtaOperationStatus,
-): status is OtaOperationFinalStatus =>
-  (otaOperationFinalStatuses as readonly string[]).includes(status);
-
-type OtaOperation = NonNullable<
-  NonNullable<OperationTable_otaOperations$data["otaOperations"]>["edges"]
+type TableRecord = NonNullable<
+  NonNullable<OperationTable_otaOperationEdgeFragment$data>["edges"]
 >[number]["node"];
-type OtaOperationWithFinalStatus = Omit<OtaOperation, "status"> & {
-  readonly status: OtaOperationFinalStatus;
-};
 
-const isOtaOperationWithFinalStatus = (
-  operation: OtaOperation,
-): operation is OtaOperationWithFinalStatus =>
-  isOtaOperationFinalStatus(operation.status);
-
-const statusColors: Record<OtaOperationFinalStatus, string> = {
-  SUCCESS: "text-success",
-  FAILURE: "text-danger",
-};
-
-const statusMessages = defineMessages<OtaOperationFinalStatus>({
-  SUCCESS: {
-    id: "device.otaOperationStatus.Success",
-    defaultMessage: "Success",
-  },
-  FAILURE: {
-    id: "device.otaOperationStatus.Failure",
-    defaultMessage: "Failure",
-  },
-});
-
-const OperationStatus = ({ status }: { status: OtaOperationFinalStatus }) => (
-  <div className="d-flex align-items-center">
-    <Icon icon="circle" className={`me-2 ${statusColors[status]}`} />
-    <span>
-      <FormattedMessage {...statusMessages[status]} />
-    </span>
-  </div>
-);
-
-const columnHelper = createColumnHelper<OtaOperationWithFinalStatus>();
+const columnHelper = createColumnHelper<TableRecord>();
 const columns = [
   columnHelper.accessor("status", {
     header: () => (
@@ -111,7 +71,41 @@ const columns = [
         defaultMessage="Status"
       />
     ),
-    cell: ({ getValue }) => <OperationStatus status={getValue()} />,
+    cell: ({ getValue }) => {
+      const status = getValue();
+      return status && <OperationStatus status={status} />;
+    },
+  }),
+  columnHelper.accessor("statusProgress", {
+    header: () => (
+      <FormattedMessage
+        id="components.OperationTable.operationStatusProgressTitle"
+        defaultMessage="Operation progress"
+      />
+    ),
+    cell: ({ getValue, row }) => {
+      const status = row.original.status;
+      if (status == "FAILURE") return null;
+
+      const progress = getValue();
+      return typeof progress === "number" ? `${progress}%` : "";
+    },
+  }),
+  columnHelper.accessor("statusCode", {
+    header: () => (
+      <FormattedMessage
+        id="components.OperationTable.operationsStatusCodeTitle"
+        defaultMessage="Failure Reason"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const statusCode = getValue();
+      return (
+        statusCode && (
+          <FormattedMessage {...operationStatusCodeMessages[statusCode]} />
+        )
+      );
+    },
   }),
   columnHelper.accessor("campaignTarget.campaign.name", {
     header: () => (
@@ -182,21 +176,23 @@ const columns = [
 
 type OperationTableProps = {
   className?: string;
-  deviceRef: OperationTable_otaOperations$key;
+  otaOperationsRef: OperationTable_otaOperationEdgeFragment$key;
 };
 
 const initialSortedColumns = [{ id: "updatedAt", desc: true }];
 
-const OperationTable = ({ className, deviceRef }: OperationTableProps) => {
-  const { data } = usePaginationFragment<
-    OperationTable_PaginationQuery,
-    OperationTable_otaOperations$key
-  >(OPERATION_TABLE_FRAGMENT, deviceRef);
+const OperationTable = ({
+  className,
+  otaOperationsRef,
+}: OperationTableProps) => {
+  const otaOperationsFragment = useFragment(
+    OPERATION_TABLE_FRAGMENT,
+    otaOperationsRef || null,
+  );
 
-  const otaOperations =
-    data.otaOperations?.edges
-      ?.map((edge) => edge.node)
-      .filter(isOtaOperationWithFinalStatus) ?? [];
+  const otaOperations = useMemo<TableRecord[]>(() => {
+    return _.compact(otaOperationsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [otaOperationsFragment]);
 
   if (!otaOperations) {
     return (

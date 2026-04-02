@@ -355,5 +355,5 @@ const UpdateTargetsTable = ({
 };
 
 export default UpdateTargetsTable;
-export { columnIds };
+export { columnIds, OperationStatus, operationStatusCodeMessages };
 export type { ColumnId };

@@ -19,30 +19,27 @@
  */
 
 import React, {
+  Suspense,
   useCallback,
   useEffect,
-  useRef,
+  useMemo,
   useState,
-  Suspense,
 } from "react";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
-import type { Subscription } from "relay-runtime";
 import { FormattedMessage, useIntl } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
-  fetchQuery,
-  useRelayEnvironment,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
 import type { SoftwareUpdateTab_getBaseImageCollections_Query } from "@/api/__generated__/SoftwareUpdateTab_getBaseImageCollections_Query.graphql";
-import type { SoftwareUpdateTab_PaginationQuery } from "@/api/__generated__/SoftwareUpdateTab_PaginationQuery.graphql";
-import type { SoftwareUpdateTab_otaOperations$key } from "@/api/__generated__/SoftwareUpdateTab_otaOperations.graphql";
 
 import Alert from "@/components/Alert";
 import OperationTable from "@/components/OperationTable";
@@ -52,37 +49,23 @@ import { Tab } from "@/components/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import ManualOtaFromCollectionForm from "@/forms/ManualOtaFromCollectionForm";
 import ManualOtaFromFileForm from "@/forms/ManualOtaFromFileForm";
+import { SoftwareUpdateTab_otaOperations$key } from "@/api/__generated__/SoftwareUpdateTab_otaOperations.graphql";
+import { OtaOperations_PaginationQuery } from "@/api/__generated__/OtaOperations_PaginationQuery.graphql";
 
+/* eslint-disable relay/unused-fields */
 const DEVICE_OTA_OPERATIONS_FRAGMENT = graphql`
   fragment SoftwareUpdateTab_otaOperations on Device
-  @refetchable(queryName: "SoftwareUpdateTab_PaginationQuery") {
+  @refetchable(queryName: "OtaOperations_PaginationQuery") {
     id
     capabilities
     otaOperations(first: $first, after: $after)
       @connection(key: "SoftwareUpdateTab_otaOperations") {
       edges {
         node {
-          id
-          baseImageUrl
-          status
-          createdAt
+          __typename
         }
       }
-    }
-    ...OperationTable_otaOperations
-  }
-`;
-
-const GET_DEVICE_OTA_OPERATIONS_QUERY = graphql`
-  query SoftwareUpdateTab_getDeviceOtaOperations_Query(
-    $id: ID!
-    $first: Int
-    $after: String
-  ) {
-    device(id: $id) {
-      id
-      ...Device_connectionStatus
-      ...SoftwareUpdateTab_otaOperations
+      ...OperationTable_otaOperationEdgeFragment
     }
   }
 `;
@@ -97,6 +80,29 @@ const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
         baseImageUrl
         createdAt
         status
+        statusProgress
+        statusCode
+        updatedAt
+        campaignTarget {
+          campaign {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+const OTA_OPERATION_UPDATED_SUBSCRIPTION = graphql`
+  subscription SoftwareUpdateTab_otaOperation_updated_Subscription {
+    otaOperation {
+      updated {
+        id
+        baseImageUrl
+        createdAt
+        status
+        statusProgress
         statusCode
         updatedAt
       }
@@ -152,15 +158,13 @@ type DeviceSoftwareUpdateTabProps = {
 const DeviceSoftwareUpdateTab = ({
   deviceRef,
 }: DeviceSoftwareUpdateTabProps) => {
-  const [isRefreshing, setIsRefreshing] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
-  const relayEnvironment = useRelayEnvironment();
 
   const [updateMode, setUpdateMode] = useState<"file" | "collection">("file");
 
   const { data } = usePaginationFragment<
-    SoftwareUpdateTab_PaginationQuery,
+    OtaOperations_PaginationQuery,
     SoftwareUpdateTab_otaOperations$key
   >(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
 
@@ -171,73 +175,15 @@ const DeviceSoftwareUpdateTab = ({
       DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION,
     );
 
-  const otaOperations = (
-    data.otaOperations?.edges?.map(({ node }) => node) || []
-  ).sort((a, b) => {
-    if (a.createdAt > b.createdAt) {
-      return -1;
-    }
-    if (a.createdAt < b.createdAt) {
-      return 1;
-    }
-    return 0;
-  });
-
-  const lastFinishedOperationIndex = otaOperations.findIndex(
-    ({ status }) => status === "SUCCESS" || status === "FAILURE",
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: OTA_OPERATION_UPDATED_SUBSCRIPTION,
+        variables: { deviceId },
+      }),
+      [deviceId],
+    ),
   );
-
-  const currentOperations =
-    lastFinishedOperationIndex === -1
-      ? otaOperations
-      : otaOperations.slice(0, lastFinishedOperationIndex);
-
-  // For now devices only support 1 update operation at a time
-  const currentOperation = currentOperations[0] || null;
-
-  // TODO: use GraphQL subscription (when available) to get updates about OTA operation
-  const subscriptionRef = useRef<Subscription | null>(null);
-  useEffect(() => {
-    return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!currentOperation || isRefreshing) {
-      return;
-    }
-    const refreshTimerId = setTimeout(() => {
-      setIsRefreshing(true);
-      subscriptionRef.current = fetchQuery(
-        relayEnvironment,
-        GET_DEVICE_OTA_OPERATIONS_QUERY,
-        {
-          id: deviceId,
-          first: 10_000,
-        },
-      ).subscribe({
-        complete: () => {
-          setIsRefreshing(false);
-        },
-        error: () => {
-          setIsRefreshing(false);
-        },
-      });
-    }, 10000);
-
-    return () => {
-      clearTimeout(refreshTimerId);
-    };
-  }, [
-    currentOperation,
-    isRefreshing,
-    setIsRefreshing,
-    relayEnvironment,
-    deviceId,
-  ]);
 
   const [getBaseImageCollsQuery, getBaseImageColls] =
     useQueryLoader<SoftwareUpdateTab_getBaseImageCollections_Query>(
@@ -290,21 +236,42 @@ const DeviceSoftwareUpdateTab = ({
         );
       },
       updater(store, data) {
-        const otaOperationId = data?.createManualOtaOperation?.result?.id;
-        if (otaOperationId) {
-          const otaOperation = store.get(otaOperationId);
-          const storedDevice = store.get(deviceId);
-          const otaOperations = storedDevice?.getLinkedRecords("otaOperations");
-          if (storedDevice && otaOperation && otaOperations) {
-            storedDevice.setLinkedRecords(
-              [otaOperation, ...otaOperations],
-              "otaOperations",
-            );
-          }
-        }
+        const newOperationId = data?.createManualOtaOperation?.result?.id;
+        if (!newOperationId) return;
+
+        const newOperation = store.get(newOperationId);
+
+        const storedDevice = store.get(deviceId);
+        if (!storedDevice || !newOperation) return;
+
+        const connection = ConnectionHandler.getConnection(
+          storedDevice,
+          "SoftwareUpdateTab_otaOperations",
+        );
+        if (!connection) return;
+
+        const edges = connection.getLinkedRecords("edges") ?? [];
+        const alreadyPresent = edges.some(
+          (edge) =>
+            edge.getLinkedRecord("node")?.getDataID() === newOperationId,
+        );
+        if (alreadyPresent) return;
+        const edge = ConnectionHandler.createEdge(
+          store,
+          connection,
+          newOperation,
+          "FileDownloadRequestEdge",
+        );
+        ConnectionHandler.insertEdgeBefore(connection, edge);
       },
     });
   };
+
+  const otaOperationsRef = data?.otaOperations;
+
+  if (!otaOperationsRef) {
+    return null;
+  }
 
   return (
     <Tab
@@ -386,34 +353,13 @@ const DeviceSoftwareUpdateTab = ({
             )}
           </Stack>
         </Suspense>
-        {currentOperation && (
-          <div className="mt-3">
-            <FormattedMessage
-              id="components.DeviceTabs.SoftwareUpdateTab.updatingTo"
-              defaultMessage="Updating to image <a>{baseImageName}</a>"
-              values={{
-                a: (chunks: React.ReactNode) => (
-                  <a
-                    target="_blank"
-                    rel="noreferrer"
-                    href={currentOperation.baseImageUrl}
-                  >
-                    {chunks}
-                  </a>
-                ),
-                baseImageName: currentOperation.baseImageUrl.split("/").pop(),
-              }}
-            />
-            {isRefreshing && <Spinner size="sm" className="ms-2" />}
-          </div>
-        )}
         <h5 className="mt-4">
           <FormattedMessage
             id="components.DeviceTabs.SoftwareUpdateTab.updatesHistory"
             defaultMessage="History"
           />
         </h5>
-        <OperationTable deviceRef={data} />
+        <OperationTable otaOperationsRef={otaOperationsRef} />
       </div>
     </Tab>
   );

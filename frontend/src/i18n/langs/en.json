@@ -832,9 +832,6 @@
   "components.DeviceTabs.SoftwareUpdateTab.updatesHistory": {
     "defaultMessage": "History"
   },
-  "components.DeviceTabs.SoftwareUpdateTab.updatingTo": {
-    "defaultMessage": "Updating to image <a>{baseImageName}</a>"
-  },
   "components.DeviceTabs.StorageUsageTab": {
     "defaultMessage": "Storage"
   },
@@ -1153,6 +1150,12 @@
   },
   "components.OperationTable.operationStatus": {
     "defaultMessage": "Status"
+  },
+  "components.OperationTable.operationStatusProgressTitle": {
+    "defaultMessage": "Operation progress"
+  },
+  "components.OperationTable.operationsStatusCodeTitle": {
+    "defaultMessage": "Failure Reason"
   },
   "components.OperationTable.startedAt": {
     "defaultMessage": "Started At"
@@ -1482,12 +1485,6 @@
   },
   "components.deploymentDetails.noDeviceMappingsMessage": {
     "defaultMessage": "No Device Mappings"
-  },
-  "device.otaOperationStatus.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "device.otaOperationStatus.Success": {
-    "defaultMessage": "Success"
   },
   "fieldExplanation.binds.description": {
     "defaultMessage": "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]"
