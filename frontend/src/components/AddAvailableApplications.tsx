@@ -26,6 +26,7 @@ import Select, { SingleValue } from "react-select";
 
 import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "@/api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
 import type { AddAvailableApplications_DeployRelease_Mutation } from "@/api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
+import { useNavigate, Route } from "@/Navigation";
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query AddAvailableApplications_GetApplicationsWithReleases_Query(
@@ -91,6 +92,7 @@ const AddAvailableApplications = ({
   onDeployComplete,
 }: AddAvailableApplicationsProps) => {
   const intl = useIntl();
+  const navigate = useNavigate();
 
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
@@ -204,7 +206,7 @@ const AddAvailableApplications = ({
             releaseId: selectedRelease,
           },
         },
-        onCompleted: (_data, errors) => {
+        onCompleted: (data, errors) => {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>
@@ -217,6 +219,15 @@ const AddAvailableApplications = ({
           setSelectedApp(null); // Reset selected app
           setSelectedRelease(null); // Reset selected release
           setErrorFeedback(null);
+
+          const deploymentId = data?.deployRelease?.result?.id;
+
+          if (deploymentId) {
+            return navigate({
+              route: Route.deploymentEdit,
+              params: { deviceId, deploymentId },
+            });
+          }
         },
         onError: () => {
           setErrorFeedback(
@@ -234,6 +245,7 @@ const AddAvailableApplications = ({
     deployRelease,
     setErrorFeedback,
     onDeployComplete,
+    navigate,
   ]);
 
   return (
