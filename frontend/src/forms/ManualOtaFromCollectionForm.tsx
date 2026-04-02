@@ -78,17 +78,14 @@ type ManualOtaFromCollectionFormProps = {
   className?: string;
   baseImageCollectionsData?: ManualOtaFromCollectionForm_baseImageCollections_Fragment$key;
   isLoading: boolean;
-  onManualOTAImageSubmit: (input: {
-    imageFile?: File;
-    imageUrl?: string;
-  }) => void;
+  onManagedOTAImageSubmit: (imageUrl: string) => void;
 };
 
 const ManualOtaFromCollectionForm = ({
   baseImageCollectionsData,
   className,
   isLoading,
-  onManualOTAImageSubmit,
+  onManagedOTAImageSubmit,
 }: ManualOtaFromCollectionFormProps) => {
   const intl = useIntl();
 
@@ -189,7 +186,7 @@ const ManualOtaFromCollectionForm = ({
   const { onChange: onBaseImageChange } = register("baseImage");
 
   const onSubmit = handleSubmit((data) => {
-    onManualOTAImageSubmit({ imageUrl: data.baseImage.url });
+    onManagedOTAImageSubmit(data.baseImage.url);
   });
 
   return (

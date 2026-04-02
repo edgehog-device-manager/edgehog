@@ -34,10 +34,7 @@ import { manualOtaFromFileSchema } from "@/forms/validation";
 type ManualOtaFromFileFormProps = {
   className?: string;
   isLoading: boolean;
-  onManualOTAImageSubmit: (input: {
-    imageFile?: File;
-    imageUrl?: string;
-  }) => void;
+  onManualOTAImageSubmit: (imageFile: File) => void;
 };
 
 const ManualOtaFromFileForm = ({
@@ -55,7 +52,7 @@ const ManualOtaFromFileForm = ({
   });
 
   const onSubmit = handleSubmit((data) => {
-    onManualOTAImageSubmit({ imageFile: data.baseImageFile[0] });
+    onManualOTAImageSubmit(data.baseImageFile[0]);
   });
 
   return (

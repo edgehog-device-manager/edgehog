@@ -38,19 +38,47 @@ input CampaignCampaignMechanismFileDownloadInput {
   """
   userId: Int
 
-  fileId: ID
-
   """
   Optional compression type for the file (e.g., "tar.gz").
   Other values are: ['tar.gz']. Defaults to empty string (no compression).
   """
   compression: String
 
+  fileId: ID
+
   """
-  Device-specific field indicating where the file should be stored.
-  Supported values are: storage, streaming, filesystem.
+  The maximum number of in progress file downloads. The File Download Campaign will
+  have at most this number of File Download Requests that are started but not yet
+  finished (either successfully or not).
   """
-  destinationType: FileDestination
+  maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  File Download Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  file download of a specific target (and considering it an error). Note that the
+  file download is retried only if the request doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the File Download Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
+  Optional ttl for how long to keep the file for on the device, if 0 is forever.
+  Defaults to 0.
+  """
+  ttlSeconds: Int
 
   """
   Optional unix mode for the file (e.g., 0o644 for readable by all, writable by owner).
@@ -65,38 +93,10 @@ input CampaignCampaignMechanismFileDownloadInput {
   groupId: Int
 
   """
-  Optional ttl for how long to keep the file for on the device, if 0 is forever.
-  Defaults to 0.
+  Device-specific field indicating where the file should be stored.
+  Supported values are: storage, streaming, filesystem.
   """
-  ttlSeconds: Int
-
-  """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the File Download Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
-  The maximum number of in progress file downloads. The File Download Campaign will
-  have at most this number of File Download Requests that are started but not yet
-  finished (either successfully or not).
-  """
-  maxInProgressOperations: Int
-
-  """
-  The number of attempts that have to be tried before giving up on the
-  file download of a specific target (and considering it an error). Note that the
-  file download is retried only if the request doesn't get acknowledged from the
-  device.
-  """
-  requestRetries: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  File Download Request lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
+  destinationType: FileDestination
 }
 
 "An object representing the properties of a File Download campaign mechanism."
@@ -181,18 +181,17 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   baseImageId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Update Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   The maximum number of in progress updates. The Update Campaign will have
   at most this number of OTA Operations that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -203,10 +202,11 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   requestRetries: Int
 
   """
-  The timeout (in seconds) Edgehog has to wait before considering an OTA
-  Request lost (and possibly retry). It must be at least 30 seconds.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
   """
-  requestTimeoutSeconds: Int
+  maxFailurePercentage: Float
 
   """
   This boolean flag determines if the Base Image will be pushed to the
@@ -263,18 +263,17 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   targetReleaseId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -285,10 +284,11 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   requestRetries: Int
 
   """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
   """
-  requestTimeoutSeconds: Int
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Upgrade deployment campaign mechanism."
@@ -336,18 +336,17 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   releaseId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -358,10 +357,11 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   requestRetries: Int
 
   """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
   """
-  requestTimeoutSeconds: Int
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Delete deployment campaign mechanism."
@@ -404,18 +404,17 @@ input CampaignCampaignMechanismDeploymentStopInput {
   releaseId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -426,10 +425,11 @@ input CampaignCampaignMechanismDeploymentStopInput {
   requestRetries: Int
 
   """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
   """
-  requestTimeoutSeconds: Int
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Stop deployment campaign mechanism."
@@ -472,18 +472,17 @@ input CampaignCampaignMechanismDeploymentStartInput {
   releaseId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -494,10 +493,11 @@ input CampaignCampaignMechanismDeploymentStartInput {
   requestRetries: Int
 
   """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
   """
-  requestTimeoutSeconds: Int
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Start deployment campaign mechanism."
@@ -540,18 +540,17 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   releaseId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   The maximum number of in progress deployments. The Update Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -562,10 +561,11 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   requestRetries: Int
 
   """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
   """
-  requestTimeoutSeconds: Int
+  maxFailurePercentage: Float
 }
 
 "An object representing the properties of a Deploy deployment campaign mechanism."
@@ -846,6 +846,34 @@ enum ForwarderSessionStatus {
 
   "The device is connecting to the forwarder."
   CONNECTING
+}
+
+enum FileUploadRequestStatus {
+  "Transfer completed successfully (response_code = 0)"
+  COMPLETED
+
+  "Transfer failed (response_code != 0 or timeout)"
+  FAILED
+
+  "Device is actively downloading/uploading (progress updates received)"
+  IN_PROGRESS
+
+  "Request created in database, not yet sent to device"
+  PENDING
+
+  "Request sent to device via Astarte, awaiting response"
+  SENT
+}
+
+enum FileSource {
+  "File source from filesystem"
+  FILESYSTEM
+
+  "File source from storage"
+  STORAGE
+
+  "File source from streaming"
+  STREAMING
 }
 
 enum FileDownloadRequestStatus {
@@ -5211,6 +5239,39 @@ type Device implements Node {
   wifiScanResults: [WifiScanResult!]
 }
 
+"The result of the :create_file_upload_request mutation"
+type CreateFileUploadRequestResult {
+  "The successful result of the mutation"
+  result: FileUploadRequest
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateFileUploadRequestInput {
+  source: String
+  sourceType: FileSource!
+  compression: String
+  progressTracked: Boolean
+  httpHeaders: JsonString
+  deviceId: ID!
+}
+
+type FileUploadRequest {
+  id: ID!
+  url: String!
+  source: String
+  sourceType: FileSource!
+  compression: String
+  progressTracked: Boolean
+  status: FileUploadRequestStatus
+  progressPercentage: Int
+  responseCode: Int
+  responseMessage: String
+  httpHeaders: JsonString
+  device: Device!
+}
+
 type file_download_requests_by_device_result {
   created: FileDownloadRequest
   updated: FileDownloadRequest
@@ -6541,6 +6602,23 @@ type CancelOtaOperationResult {
   errors: [MutationError!]!
 }
 
+"The result of the :create_managed_ota_operation mutation"
+type CreateManagedOtaOperationResult {
+  "The successful result of the mutation"
+  result: OtaOperation
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateManagedOtaOperationInput {
+  "The URL of the base image being installed on the device"
+  baseImageUrl: String!
+
+  "The ID identifying the Device the OTA Operation will be sent to"
+  deviceId: ID!
+}
+
 "The result of the :create_manual_ota_operation mutation"
 type CreateManualOtaOperationResult {
   "The successful result of the mutation"
@@ -6556,9 +6634,6 @@ input CreateManualOtaOperationInput {
 
   "The base image file, which will be uploaded to the storage."
   baseImageFile: Upload
-
-  "The base image url, from which it will be retrieved and used."
-  baseImageUrl: String
 }
 
 enum OtaOperationSortField {
@@ -7957,6 +8032,11 @@ type RootMutationType {
     input: CreateManualOtaOperationInput!
   ): CreateManualOtaOperationResult
 
+  "Initiates an OTA update with base image's URL"
+  createManagedOtaOperation(
+    input: CreateManagedOtaOperationInput!
+  ): CreateManagedOtaOperationResult
+
   "Cancels an OTA update operation"
   cancelOtaOperation(id: ID!): CancelOtaOperationResult
 
@@ -8011,6 +8091,10 @@ type RootMutationType {
   createManagedFileDownloadRequest(
     input: CreateManagedFileDownloadRequestInput!
   ): CreateManagedFileDownloadRequestResult
+
+  createFileUploadRequest(
+    input: CreateFileUploadRequestInput!
+  ): CreateFileUploadRequestResult
 
   "Updates a device."
   updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult

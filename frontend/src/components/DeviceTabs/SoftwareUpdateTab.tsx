@@ -40,6 +40,7 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 
 import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
+import type { SoftwareUpdateTab_createManagedOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManagedOtaOperation_Mutation.graphql";
 import type { SoftwareUpdateTab_getBaseImageCollections_Query } from "@/api/__generated__/SoftwareUpdateTab_getBaseImageCollections_Query.graphql";
 import type { SoftwareUpdateTab_PaginationQuery } from "@/api/__generated__/SoftwareUpdateTab_PaginationQuery.graphql";
 import type { SoftwareUpdateTab_otaOperations$key } from "@/api/__generated__/SoftwareUpdateTab_otaOperations.graphql";
@@ -104,6 +105,23 @@ const DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION = graphql`
   }
 `;
 
+const DEVICE_CREATE_MANAGED_OTA_OPERATION_MUTATION = graphql`
+  mutation SoftwareUpdateTab_createManagedOtaOperation_Mutation(
+    $input: CreateManagedOtaOperationInput!
+  ) {
+    createManagedOtaOperation(input: $input) {
+      result {
+        id
+        baseImageUrl
+        createdAt
+        status
+        statusCode
+        updatedAt
+      }
+    }
+  }
+`;
+
 const GET_BASE_IMAGE_COLL_QUERY = graphql`
   query SoftwareUpdateTab_getBaseImageCollections_Query(
     $first: Int
@@ -115,30 +133,138 @@ const GET_BASE_IMAGE_COLL_QUERY = graphql`
   }
 `;
 
-type OtaOperationInput = {
-  imageFile?: File;
-  imageUrl?: string;
-};
-
 type ManualOtaFromCollectionFormWrapperProps = {
   baseImageCollsQueryRef: PreloadedQuery<SoftwareUpdateTab_getBaseImageCollections_Query>;
-  isCreatingOtaOperation: boolean;
-  launchManualOTAUpdate: (input: OtaOperationInput) => void;
+  setErrorFeedback: (errorMessages: React.ReactNode) => void;
+  deviceId: string;
 };
 
 const ManualOtaFromCollectionFormWrapper = ({
   baseImageCollsQueryRef,
-  isCreatingOtaOperation,
-  launchManualOTAUpdate,
+  setErrorFeedback,
+  deviceId,
 }: ManualOtaFromCollectionFormWrapperProps) => {
   const baseImageCollections = usePreloadedQuery(
     GET_BASE_IMAGE_COLL_QUERY,
     baseImageCollsQueryRef,
   );
 
+  const [createOtaOperation, isCreatingOtaOperation] =
+    useMutation<SoftwareUpdateTab_createManagedOtaOperation_Mutation>(
+      DEVICE_CREATE_MANAGED_OTA_OPERATION_MUTATION,
+    );
+
+  const launchManagedOTAUpdate = (imageUrl: string) => {
+    createOtaOperation({
+      variables: {
+        input: {
+          deviceId,
+          baseImageUrl: imageUrl,
+        },
+      },
+      onCompleted(_data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          return setErrorFeedback(errorFeedback);
+        }
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback"
+            defaultMessage="Could not start the OTA update, please try again."
+          />,
+        );
+      },
+      updater(store, data) {
+        const otaOperationId = data?.createManagedOtaOperation?.result?.id;
+        if (otaOperationId) {
+          const otaOperation = store.get(otaOperationId);
+          const storedDevice = store.get(deviceId);
+          const otaOperations = storedDevice?.getLinkedRecords("otaOperations");
+          if (storedDevice && otaOperation && otaOperations) {
+            storedDevice.setLinkedRecords(
+              [otaOperation, ...otaOperations],
+              "otaOperations",
+            );
+          }
+        }
+      },
+    });
+  };
+
   return (
     <ManualOtaFromCollectionForm
       baseImageCollectionsData={baseImageCollections}
+      isLoading={isCreatingOtaOperation}
+      onManagedOTAImageSubmit={launchManagedOTAUpdate}
+    />
+  );
+};
+
+type ManualOtaFromFileFormWrapperProps = {
+  setErrorFeedback: (errorMessages: React.ReactNode) => void;
+  deviceId: string;
+};
+
+const ManualOtaFromFileFormWrapper = ({
+  setErrorFeedback,
+  deviceId,
+}: ManualOtaFromFileFormWrapperProps) => {
+  const [createOtaOperation, isCreatingOtaOperation] =
+    useMutation<SoftwareUpdateTab_createManualOtaOperation_Mutation>(
+      DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION,
+    );
+
+  const launchManualOTAUpdate = (imageFile: File) => {
+    createOtaOperation({
+      variables: {
+        input: {
+          deviceId,
+          baseImageFile: imageFile,
+        },
+      },
+      onCompleted(_data, errors) {
+        if (errors) {
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          return setErrorFeedback(errorFeedback);
+        }
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback"
+            defaultMessage="Could not start the OTA update, please try again."
+          />,
+        );
+      },
+      updater(store, data) {
+        const otaOperationId = data?.createManualOtaOperation?.result?.id;
+        if (otaOperationId) {
+          const otaOperation = store.get(otaOperationId);
+          const storedDevice = store.get(deviceId);
+          const otaOperations = storedDevice?.getLinkedRecords("otaOperations");
+          if (storedDevice && otaOperation && otaOperations) {
+            storedDevice.setLinkedRecords(
+              [otaOperation, ...otaOperations],
+              "otaOperations",
+            );
+          }
+        }
+      },
+    });
+  };
+
+  return (
+    <ManualOtaFromFileForm
       isLoading={isCreatingOtaOperation}
       onManualOTAImageSubmit={launchManualOTAUpdate}
     />
@@ -165,11 +291,6 @@ const DeviceSoftwareUpdateTab = ({
   >(DEVICE_OTA_OPERATIONS_FRAGMENT, deviceRef);
 
   const deviceId = data.id;
-
-  const [createOtaOperation, isCreatingOtaOperation] =
-    useMutation<SoftwareUpdateTab_createManualOtaOperation_Mutation>(
-      DEVICE_CREATE_MANUAL_OTA_OPERATION_MUTATION,
-    );
 
   const otaOperations = (
     data.otaOperations?.edges?.map(({ node }) => node) || []
@@ -259,53 +380,6 @@ const DeviceSoftwareUpdateTab = ({
     return null;
   }
 
-  const launchManualOTAUpdate = ({
-    imageFile,
-    imageUrl,
-  }: OtaOperationInput) => {
-    createOtaOperation({
-      variables: {
-        input: {
-          deviceId,
-          baseImageFile: imageFile,
-          baseImageUrl: imageUrl,
-        },
-      },
-      onCompleted(_data, errors) {
-        if (errors) {
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          return setErrorFeedback(errorFeedback);
-        }
-      },
-      onError() {
-        setErrorFeedback(
-          <FormattedMessage
-            id="components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback"
-            defaultMessage="Could not start the OTA update, please try again."
-          />,
-        );
-      },
-      updater(store, data) {
-        const otaOperationId = data?.createManualOtaOperation?.result?.id;
-        if (otaOperationId) {
-          const otaOperation = store.get(otaOperationId);
-          const storedDevice = store.get(deviceId);
-          const otaOperations = storedDevice?.getLinkedRecords("otaOperations");
-          if (storedDevice && otaOperation && otaOperations) {
-            storedDevice.setLinkedRecords(
-              [otaOperation, ...otaOperations],
-              "otaOperations",
-            );
-          }
-        }
-      },
-    });
-  };
-
   return (
     <Tab
       eventKey="device-software-update-tab"
@@ -374,14 +448,14 @@ const DeviceSoftwareUpdateTab = ({
               getBaseImageCollsQuery && (
                 <ManualOtaFromCollectionFormWrapper
                   baseImageCollsQueryRef={getBaseImageCollsQuery}
-                  isCreatingOtaOperation={isCreatingOtaOperation}
-                  launchManualOTAUpdate={launchManualOTAUpdate}
+                  setErrorFeedback={setErrorFeedback}
+                  deviceId={deviceId}
                 />
               )
             ) : (
-              <ManualOtaFromFileForm
-                isLoading={isCreatingOtaOperation}
-                onManualOTAImageSubmit={launchManualOTAUpdate}
+              <ManualOtaFromFileFormWrapper
+                setErrorFeedback={setErrorFeedback}
+                deviceId={deviceId}
               />
             )}
           </Stack>

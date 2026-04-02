@@ -84,7 +84,7 @@ defmodule Edgehog.OSManagementTest do
                )
 
       assert_receive %Phoenix.Socket.Broadcast{
-        event: "create_managed",
+        event: "managed",
         payload: %Ash.Notifier.Notification{
           data: ^ota_operation
         }

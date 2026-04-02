@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,9 +32,6 @@ defmodule Edgehog.OSManagement.OTAOperation.Changes.HandleEphemeralImageUpload d
 
   @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
-
-  def change(%Ash.Changeset{arguments: %{base_image_url: url}} = changeset, _opts, _context),
-    do: Ash.Changeset.change_attribute(changeset, :base_image_url, url)
 
   def change(changeset, _opts, _context) do
     case Ash.Changeset.fetch_argument(changeset, :base_image_file) do

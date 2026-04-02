@@ -31,7 +31,6 @@ defmodule Edgehog.OSManagement.OTAOperation do
   alias Edgehog.OSManagement.OTAOperation.ManualActions
   alias Edgehog.OSManagement.OTAOperation.Status
   alias Edgehog.OSManagement.OTAOperation.StatusCode
-  alias Edgehog.OSManagement.OTAOperation.Validations
 
   @terminal_statuses [:success, :failure]
 
@@ -70,10 +69,20 @@ defmodule Edgehog.OSManagement.OTAOperation do
       ]
     end
 
-    create :create_managed do
+    create :managed do
       description "Initiates an OTA update with base image's URL"
 
-      accept [:base_image_url, :device_id]
+      accept [:base_image_url]
+
+      argument :device_id, :id do
+        description "The ID identifying the Device the OTA Operation will be sent to"
+        allow_nil? false
+      end
+
+      change manage_relationship(:device_id, :device,
+               type: :append,
+               eager_validate_with: Edgehog.Devices
+             )
 
       change Changes.SendUpdateRequest
     end
@@ -92,12 +101,6 @@ defmodule Edgehog.OSManagement.OTAOperation do
       argument :base_image_file, Edgehog.Types.Upload do
         description "The base image file, which will be uploaded to the storage."
       end
-
-      argument :base_image_url, :string do
-        description "The base image url, from which it will be retrieved and used."
-      end
-
-      validate Validations.BaseImageSource
 
       # Manually generate the ID since it's needed by HandleFileUpload before we hit the DB
       change set_attribute(:id, &Ash.UUID.generate/0)
@@ -255,7 +258,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
     prefix "ota_operations"
     module EdgehogWeb.Endpoint
 
-    publish :create_managed, [[:id, "*"]]
+    publish :managed, [[:id, "*"]]
     publish :manual, [[:id, "*"]]
 
     publish :mark_as_timed_out, [[:id, "*"]]
