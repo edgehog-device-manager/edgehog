@@ -39,6 +39,20 @@ defmodule Edgehog.Containers.Deployment do
   graphql do
     type :deployment
 
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :deployment do
+        action_types [:create, :update, :destroy]
+      end
+
+      subscribe :deployment_by_id do
+        action_types [:create, :update, :destroy]
+        read_action :read_by_deployment_id
+        relay_id_translations deployment_id: :deployment
+      end
+    end
+
     paginate_relationship_with container_deployments: :relay, events: :relay
   end
 
@@ -219,6 +233,13 @@ defmodule Edgehog.Containers.Deployment do
       argument :release_id, :uuid
 
       filter expr(release_id == ^arg(:release_id))
+    end
+
+    read :read_by_deployment_id do
+      argument :deployment_id, :uuid, allow_nil?: false
+      get? true
+
+      filter expr(id == ^arg(:deployment_id))
     end
 
     destroy :destroy_and_gc do

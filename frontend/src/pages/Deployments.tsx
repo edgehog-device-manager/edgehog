@@ -22,13 +22,18 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
+  useSubscription,
 } from "react-relay/hooks";
 
 import { Deployments_DeploymentsFragment$key } from "@/api/__generated__/Deployments_DeploymentsFragment.graphql";
+import type { Deployments_deployment_created_Subscription } from "@/api/__generated__/Deployments_deployment_created_Subscription.graphql";
+import type { Deployments_deployment_destroyed_Subscription } from "@/api/__generated__/Deployments_deployment_destroyed_Subscription.graphql";
+import type { Deployments_deployment_updated_Subscription } from "@/api/__generated__/Deployments_deployment_updated_Subscription.graphql";
 import type { Deployments_getDeployments_Query } from "@/api/__generated__/Deployments_getDeployments_Query.graphql";
 import { Deployments_PaginationQuery } from "@/api/__generated__/Deployments_PaginationQuery.graphql";
 
@@ -65,6 +70,64 @@ const DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
+const DEPLOYMENTS_CREATED_SUBSCRIPTION = graphql`
+  subscription Deployments_deployment_created_Subscription {
+    deployment {
+      created {
+        id
+        state
+        isReady
+        device {
+          id
+          name
+          online
+        }
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+const DEPLOYMENTS_UPDATED_SUBSCRIPTION = graphql`
+  subscription Deployments_deployment_updated_Subscription {
+    deployment {
+      updated {
+        id
+        state
+        isReady
+        device {
+          id
+          name
+          online
+        }
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+const DEPLOYMENTS_DESTROYED_SUBSCRIPTION = graphql`
+  subscription Deployments_deployment_destroyed_Subscription {
+    deployment {
+      destroyed
+    }
+  }
+`;
+
 interface DeploymentsLayoutContainerProps {
   deploymentsData: Deployments_getDeployments_Query["response"];
   searchText: string | null;
@@ -78,6 +141,35 @@ const DeploymentsLayoutContainer = ({
       Deployments_PaginationQuery,
       Deployments_DeploymentsFragment$key
     >(DEPLOYMENTS_FRAGMENT, deploymentsData);
+
+  const normalizedSearchText = useMemo(
+    () => (searchText ?? "").trim(),
+    [searchText],
+  );
+
+  const connectionFilter = useMemo(() => {
+    if (normalizedSearchText === "") return {};
+
+    return {
+      or: [
+        {
+          release: {
+            version: { ilike: `%${normalizedSearchText}%` },
+          },
+        },
+        {
+          release: {
+            application: { name: { ilike: `%${normalizedSearchText}%` } },
+          },
+        },
+        {
+          device: {
+            name: { ilike: `%${normalizedSearchText}%` },
+          },
+        },
+      ],
+    };
+  }, [normalizedSearchText]);
 
   const debounceRefetch = useMemo(
     () =>
@@ -93,37 +185,120 @@ const DeploymentsLayoutContainer = ({
           refetch(
             {
               first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  {
-                    release: {
-                      version: { ilike: `%${text}%` },
-                    },
-                  },
-                  {
-                    release: {
-                      application: { name: { ilike: `%${text}%` } },
-                    },
-                  },
-                  {
-                    device: {
-                      name: { ilike: `%${text}%` },
-                    },
-                  },
-                ],
-              },
+              filter: connectionFilter,
             },
             { fetchPolicy: "network-only" },
           );
         }
       }, 500),
-    [refetch],
+    [connectionFilter, refetch],
+  );
+
+  useSubscription<Deployments_deployment_created_Subscription>(
+    useMemo(
+      () => ({
+        subscription: DEPLOYMENTS_CREATED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const deploymentRoot = store.getRootField("deployment");
+          const newDeployment = deploymentRoot?.getLinkedRecord("created");
+          if (!newDeployment) return;
+
+          if (normalizedSearchText !== "") {
+            const search = normalizedSearchText.toLowerCase();
+            const device = newDeployment.getLinkedRecord("device");
+            const release = newDeployment.getLinkedRecord("release");
+            const application = release?.getLinkedRecord("application");
+
+            const deviceName = String(
+              device?.getValue("name") ?? "",
+            ).toLowerCase();
+            const releaseVersion = String(
+              release?.getValue("version") ?? "",
+            ).toLowerCase();
+            const applicationName = String(
+              application?.getValue("name") ?? "",
+            ).toLowerCase();
+
+            const matchesSearch =
+              deviceName.includes(search) ||
+              releaseVersion.includes(search) ||
+              applicationName.includes(search);
+
+            if (!matchesSearch) return;
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "Deployments_deployments",
+            { filter: connectionFilter },
+          );
+          if (!connection) return;
+
+          const newDeploymentId = newDeployment.getDataID();
+          const edges = connection.getLinkedRecords("edges") ?? [];
+          const alreadyPresent = edges.some(
+            (edge) =>
+              edge.getLinkedRecord("node")?.getDataID() === newDeploymentId,
+          );
+          if (alreadyPresent) return;
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newDeployment,
+            "DeploymentEdge",
+          );
+
+          ConnectionHandler.insertEdgeBefore(connection, edge);
+        },
+      }),
+      [connectionFilter, normalizedSearchText],
+    ),
+  );
+
+  useSubscription<Deployments_deployment_destroyed_Subscription>(
+    useMemo(
+      () => ({
+        subscription: DEPLOYMENTS_DESTROYED_SUBSCRIPTION,
+        variables: {},
+        updater: (store) => {
+          const deploymentRoot = store.getRootField("deployment");
+          const destroyedId = deploymentRoot?.getValue("destroyed");
+          if (!destroyedId || typeof destroyedId !== "string") return;
+
+          const connection = ConnectionHandler.getConnection(
+            store.getRoot(),
+            "Deployments_deployments",
+            { filter: connectionFilter },
+          );
+          if (!connection) return;
+
+          ConnectionHandler.deleteNode(connection, destroyedId);
+        },
+      }),
+      [connectionFilter],
+    ),
+  );
+
+  useSubscription<Deployments_deployment_updated_Subscription>(
+    useMemo(
+      () => ({
+        subscription: DEPLOYMENTS_UPDATED_SUBSCRIPTION,
+        variables: {},
+      }),
+      [],
+    ),
   );
 
   useEffect(() => {
     if (searchText !== null) {
       debounceRefetch(searchText);
     }
+
+    return () => {
+      debounceRefetch.cancel();
+    };
   }, [debounceRefetch, searchText]);
 
   const loadNextDeployments = useCallback(() => {

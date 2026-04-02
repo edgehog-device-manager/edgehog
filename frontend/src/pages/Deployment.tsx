@@ -20,17 +20,23 @@
 
 /* eslint-disable relay/unused-fields */
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
-import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
+import {
+  graphql,
+  usePreloadedQuery,
+  useQueryLoader,
+  useSubscription,
+} from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
 import type {
   Deployment_getDeployment_Query,
   Deployment_getDeployment_Query$data,
 } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
+import type { Deployment_deployment_updated_Subscription } from "@/api/__generated__/Deployment_deployment_updated_Subscription.graphql";
 
 import { Link, Route } from "@/Navigation";
 import Alert from "@/components/Alert";
@@ -74,6 +80,46 @@ const GET_DEPLOYMENT_QUERY = graphql`
       }
       ...DeploymentDetails_events
       ...DeploymentDetails_containerDeployments
+    }
+  }
+`;
+
+const DEPLOYMENT_UPDATED_SUBSCRIPTION = graphql`
+  subscription Deployment_deployment_updated_Subscription(
+    $deploymentId: ID!
+    $first: Int
+    $after: String
+  ) {
+    deploymentById(deploymentId: $deploymentId) {
+      updated {
+        id
+        state
+        isReady
+        device {
+          name
+        }
+        release {
+          id
+          version
+          application {
+            id
+            name
+            releases {
+              edges {
+                node {
+                  id
+                  version
+                  systemModels {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+        ...DeploymentDetails_events
+        ...DeploymentDetails_containerDeployments
+      }
     }
   }
 `;
@@ -152,6 +198,16 @@ const DeploymentPage = () => {
   const fetchDeployment = useCallback(
     () => getDeployment({ deploymentId }, { fetchPolicy: "network-only" }),
     [getDeployment, deploymentId],
+  );
+
+  useSubscription<Deployment_deployment_updated_Subscription>(
+    useMemo(
+      () => ({
+        subscription: DEPLOYMENT_UPDATED_SUBSCRIPTION,
+        variables: { deploymentId },
+      }),
+      [deploymentId],
+    ),
   );
 
   useEffect(fetchDeployment, [fetchDeployment]);

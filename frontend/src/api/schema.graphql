@@ -41,6 +41,13 @@ input CampaignCampaignMechanismFileDownloadInput {
   fileId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the File Download Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   Optional compression type for the file (e.g., "tar.gz").
   Other values are: ['tar.gz']. Defaults to empty string (no compression).
   """
@@ -69,13 +76,6 @@ input CampaignCampaignMechanismFileDownloadInput {
   Defaults to 0.
   """
   ttlSeconds: Int
-
-  """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the File Download Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
 
   """
   The maximum number of in progress file downloads. The File Download Campaign will
@@ -846,6 +846,34 @@ enum ForwarderSessionStatus {
 
   "The device is connecting to the forwarder."
   CONNECTING
+}
+
+enum FileUploadRequestStatus {
+  "Transfer completed successfully (response_code = 0)"
+  COMPLETED
+
+  "Transfer failed (response_code != 0 or timeout)"
+  FAILED
+
+  "Device is actively downloading/uploading (progress updates received)"
+  IN_PROGRESS
+
+  "Request created in database, not yet sent to device"
+  PENDING
+
+  "Request sent to device via Astarte, awaiting response"
+  SENT
+}
+
+enum FileSource {
+  "File source from filesystem"
+  FILESYSTEM
+
+  "File source from storage"
+  STORAGE
+
+  "File source from streaming"
+  STREAMING
 }
 
 enum FileDownloadRequestStatus {
@@ -3079,6 +3107,18 @@ type DeploymentEvent {
   updatedAt: DateTime!
 }
 
+type deployment_by_id_result {
+  created: Deployment
+  updated: Deployment
+  destroyed: ID
+}
+
+type deployment_result {
+  created: Deployment
+  updated: Deployment
+  destroyed: ID
+}
+
 "The result of the :upgrade_deployment mutation"
 type UpgradeDeploymentResult {
   "The successful result of the mutation"
@@ -5209,6 +5249,39 @@ type Device implements Node {
   systemStatus: SystemStatus
 
   wifiScanResults: [WifiScanResult!]
+}
+
+"The result of the :create_file_upload_request mutation"
+type CreateFileUploadRequestResult {
+  "The successful result of the mutation"
+  result: FileUploadRequest
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateFileUploadRequestInput {
+  source: String
+  sourceType: FileSource!
+  compression: String
+  progressTracked: Boolean
+  httpHeaders: JsonString
+  deviceId: ID!
+}
+
+type FileUploadRequest {
+  id: ID!
+  url: String!
+  source: String
+  sourceType: FileSource!
+  compression: String
+  progressTracked: Boolean
+  status: FileUploadRequestStatus
+  progressPercentage: Int
+  responseCode: Int
+  responseMessage: String
+  httpHeaders: JsonString
+  device: Device!
 }
 
 type file_download_requests_by_device_result {
@@ -8012,6 +8085,10 @@ type RootMutationType {
     input: CreateManagedFileDownloadRequestInput!
   ): CreateManagedFileDownloadRequestResult
 
+  createFileUploadRequest(
+    input: CreateFileUploadRequestInput!
+  ): CreateFileUploadRequestResult
+
   "Updates a device."
   updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult
 
@@ -8200,6 +8277,16 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: ContainerFilterInput
   ): container_result
+  deployment(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+  ): deployment_result
+  deploymentById(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    deploymentId: ID!
+  ): deployment_by_id_result
   deploymentEvent(
     "A filter to limit the results"
     filter: DeploymentEventFilterInput
