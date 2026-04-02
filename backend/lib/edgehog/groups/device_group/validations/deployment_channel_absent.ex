@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Groups.DeviceGroup.Validations.DeploymentChannelAbsent do
   @moduledoc false
@@ -29,7 +27,8 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.DeploymentChannelAbsent do
     if device_group.deployment_channel_id do
       {:error,
        field: :deployment_channel_id,
-       message: "The deployment channel is already set for the device group \"#{device_group.name}\"",
+       message:
+         "The deployment channel is already set for the device group \"#{device_group.name}\"",
        short_message: "Deployment channel already set"}
     else
       :ok

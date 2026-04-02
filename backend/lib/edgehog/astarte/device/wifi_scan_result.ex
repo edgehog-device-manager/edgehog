@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021,2022 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Astarte.Device.WiFiScanResult do
   @moduledoc false
@@ -48,7 +46,9 @@ defmodule Edgehog.Astarte.Device.WiFiScanResult do
 
   def get(%AppEngine{} = client, device_id) do
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @interface, query: [limit: 1000]) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @interface,
+             query: [limit: 1000]
+           ) do
       wifi_scan_results =
         data
         |> Map.get("ap", [])

@@ -140,7 +140,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     |> Ash.create(tenant: tenant)
   end
 
-  defp handle_event(%IncomingData{interface: @available_images} = event, tenant, realm_id, device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @available_images} = event,
+         tenant,
+         realm_id,
+         device_id,
+         _timestamp
+       ) do
     device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
 
     case String.split(event.path, "/") do
@@ -165,7 +171,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_networks} = event, tenant, realm_id, device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @available_networks} = event,
+         tenant,
+         realm_id,
+         device_id,
+         _timestamp
+       ) do
     device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
 
     case String.split(event.path, "/") do
@@ -190,7 +202,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_volumes} = event, tenant, realm_id, device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @available_volumes} = event,
+         tenant,
+         realm_id,
+         device_id,
+         _timestamp
+       ) do
     device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
 
     case String.split(event.path, "/") do
@@ -216,13 +234,21 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_device_mappings} = event, tenant, realm_id, device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @available_device_mappings} = event,
+         tenant,
+         realm_id,
+         device_id,
+         _timestamp
+       ) do
     device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
 
     case String.split(event.path, "/") do
       ["", device_mapping_id, "present"] ->
         device_mapping_deployment =
-          Containers.fetch_device_mapping_deployment!(device_mapping_id, device.id, tenant: tenant)
+          Containers.fetch_device_mapping_deployment!(device_mapping_id, device.id,
+            tenant: tenant
+          )
 
         case event.value do
           true ->
@@ -249,7 +275,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_containers} = event, tenant, realm_id, device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @available_containers} = event,
+         tenant,
+         realm_id,
+         device_id,
+         _timestamp
+       ) do
     device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
 
     case String.split(event.path, "/") do
@@ -284,7 +316,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @deployment_event} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @deployment_event} = event,
+         tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
     "/" <> deployment_id = event.path
 
     %{
@@ -305,7 +343,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @available_deployments} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @available_deployments} = event,
+         tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
     case String.split(event.path, "/") do
       ["", deployment_id, "status"] ->
         state = event.value
@@ -367,7 +411,13 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
     end
   end
 
-  defp handle_event(%IncomingData{interface: @file_storage} = event, tenant, _realm_id, _device_id, _timestamp) do
+  defp handle_event(
+         %IncomingData{interface: @file_storage} = event,
+         tenant,
+         _realm_id,
+         _device_id,
+         _timestamp
+       ) do
     case String.split(event.path, "/") do
       ["", request_id, "pathOnDevice"] ->
         file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
@@ -385,7 +435,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   end
 
   defp handle_event(
-         %IncomingData{interface: @file_transfer_response, path: "/request", value: %{"type" => "server_to_device"}} =
+         %IncomingData{
+           interface: @file_transfer_response,
+           path: "/request",
+           value: %{"type" => "server_to_device"}
+         } =
            event,
          tenant,
          _realm_id,
@@ -412,7 +466,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   end
 
   defp handle_event(
-         %IncomingData{interface: @file_transfer_response, path: "/request", value: %{"type" => "device_to_server"}} =
+         %IncomingData{
+           interface: @file_transfer_response,
+           path: "/request",
+           value: %{"type" => "device_to_server"}
+         } =
            event,
          tenant,
          _realm_id,
@@ -439,7 +497,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   end
 
   defp handle_event(
-         %IncomingData{interface: @file_transfer_progress, path: "/request", value: %{"type" => "server_to_device"}} =
+         %IncomingData{
+           interface: @file_transfer_progress,
+           path: "/request",
+           value: %{"type" => "server_to_device"}
+         } =
            event,
          tenant,
          _realm_id,
@@ -463,7 +525,11 @@ defmodule Edgehog.Triggers.Handler.ManualActions.HandleTrigger do
   end
 
   defp handle_event(
-         %IncomingData{interface: @file_transfer_progress, path: "/request", value: %{"type" => "device_to_server"}} =
+         %IncomingData{
+           interface: @file_transfer_progress,
+           path: "/request",
+           value: %{"type" => "device_to_server"}
+         } =
            event,
          tenant,
          _realm_id,

@@ -512,7 +512,8 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
 
     test "Storage Usage", %{tenant: tenant, id: id, device_id: device_id} do
       expect(Edgehog.Astarte.Device.StorageUsageMock, :get, fn _client, ^device_id ->
-        {:ok, storage_usage_fixture(label: "Flash", free_bytes: 345_678, total_bytes: 348_360_704)}
+        {:ok,
+         storage_usage_fixture(label: "Flash", free_bytes: 345_678, total_bytes: 348_360_704)}
       end)
 
       document = """

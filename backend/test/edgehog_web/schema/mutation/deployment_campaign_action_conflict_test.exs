@@ -64,7 +64,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
 
       # Create a campaign with upgrade operation type and target_release_id
       _campaign =
-        create_in_progress_campaign(tenant, :deployment_upgrade, deployment, target_release_id: target_release.id)
+        create_in_progress_campaign(tenant, :deployment_upgrade, deployment,
+          target_release_id: target_release.id
+        )
 
       expect(DeploymentCommandMock, :send_deployment_command, 1, fn _, _, _ -> :ok end)
 
@@ -303,7 +305,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
     # Find and link the deployment target to the deployment
     target =
       Edgehog.Campaigns.CampaignTarget
-      |> Ash.Query.filter(expr(campaign_id == ^campaign.id and device_id == ^deployment.device_id))
+      |> Ash.Query.filter(
+        expr(campaign_id == ^campaign.id and device_id == ^deployment.device_id)
+      )
       |> Ash.read_one!(tenant: tenant)
 
     # Link the deployment to the target

@@ -177,7 +177,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -223,7 +225,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
       # First do the operation to link the deployment to the target
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 2, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 2, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -272,7 +276,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
       # First do the operation to link the deployment to the target
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -351,7 +357,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 

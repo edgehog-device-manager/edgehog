@@ -40,8 +40,12 @@ defmodule Edgehog.Campaigns.ExecutorSupervisor do
   type of campaign.
   """
 
-  def start_executor!(%Campaign{id: campaign_id, campaign_mechanism: %{type: mechanism_type}, tenant_id: tenant_id}),
-    do: do_start_executor!(tenant_id, campaign_id, mechanism_type)
+  def start_executor!(%Campaign{
+        id: campaign_id,
+        campaign_mechanism: %{type: mechanism_type},
+        tenant_id: tenant_id
+      }),
+      do: do_start_executor!(tenant_id, campaign_id, mechanism_type)
 
   defp do_start_executor!(tenant_id, campaign_id, mechanism_type) do
     executor_id = {tenant_id, campaign_id, mechanism_type}

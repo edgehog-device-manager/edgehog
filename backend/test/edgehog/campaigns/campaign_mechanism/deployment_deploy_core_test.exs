@@ -149,7 +149,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -180,7 +182,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -226,7 +230,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       assert {:ok, target} =
                MechanismCore.fetch_next_valid_target(mechanism, campaign.id, tenant.tenant_id)
 
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 

@@ -46,7 +46,8 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateStatus do
         {:error,
          Changes.InvalidAttribute.exception(
            field: :status,
-           message: "Cannot pause campaign. Campaign must be in progress (current status: #{status})"
+           message:
+             "Cannot pause campaign. Campaign must be in progress (current status: #{status})"
          )}
     end
   end

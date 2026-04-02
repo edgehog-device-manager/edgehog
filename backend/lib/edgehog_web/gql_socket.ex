@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.GqlSocket do
   use Phoenix.Socket
@@ -56,9 +54,11 @@ defmodule EdgehogWeb.GqlSocket do
     end
   end
 
-  defp signer_from_jwk_map(%{"kty" => "RSA"} = jwk_map), do: {:ok, Joken.Signer.create("RS256", jwk_map)}
+  defp signer_from_jwk_map(%{"kty" => "RSA"} = jwk_map),
+    do: {:ok, Joken.Signer.create("RS256", jwk_map)}
 
-  defp signer_from_jwk_map(%{"kty" => "EC"} = jwk_map), do: {:ok, Joken.Signer.create("ES256", jwk_map)}
+  defp signer_from_jwk_map(%{"kty" => "EC"} = jwk_map),
+    do: {:ok, Joken.Signer.create("ES256", jwk_map)}
 
   defp signer_from_jwk_map(_), do: {:error, :unsupported_key_type}
 

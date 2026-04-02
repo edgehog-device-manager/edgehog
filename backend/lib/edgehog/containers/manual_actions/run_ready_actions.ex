@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.ManualActions.RunReadyActions do
   @moduledoc false
@@ -36,7 +34,9 @@ defmodule Edgehog.Containers.ManualActions.RunReadyActions do
       ready_actions_results = Enum.map(deployment.ready_actions, &Containers.run_ready_action/1)
 
       for {status, result} <- ready_actions_results, status == :error do
-        Logger.error("Error running ready action for deployment #{deployment.id}: #{inspect(result)}")
+        Logger.error(
+          "Error running ready action for deployment #{deployment.id}: #{inspect(result)}"
+        )
       end
 
       {:ok, deployment}

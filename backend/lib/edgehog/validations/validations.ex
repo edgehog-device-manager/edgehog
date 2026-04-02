@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Validations do
   @moduledoc false
@@ -26,11 +24,13 @@ defmodule Edgehog.Validations do
     {Validation.Match,
      attribute: attribute,
      match: ~r/^[a-z][a-z\d\-]*$/,
-     message: "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"}
+     message:
+       "should start with a lower case ASCII letter and only contain lower case ASCII letters, digits and -"}
   end
 
   def locale(attribute) do
-    {Validation.Match, attribute: attribute, match: ~r/^[a-z]{2,3}-[A-Z]{2}$/, message: "is not a valid locale"}
+    {Validation.Match,
+     attribute: attribute, match: ~r/^[a-z]{2,3}-[A-Z]{2}$/, message: "is not a valid locale"}
   end
 
   def slug(attribute) do

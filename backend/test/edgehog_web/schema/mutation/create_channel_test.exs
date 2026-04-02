@@ -151,7 +151,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateChannelTest do
       assert %{
                path: ["createChannel", "input", "handle"],
                fields: [:handle],
-               message: "should only contain lower case ASCII letters (from a to z), digits and -",
+               message:
+                 "should only contain lower case ASCII letters (from a to z), digits and -",
                code: "invalid_attribute"
              } = error
     end

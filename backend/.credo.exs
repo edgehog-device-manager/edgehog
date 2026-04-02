@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 SECO Mind Srl
+# SPDX-FileCopyrightText: 2022-2026 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
 # This file contains the configuration for Credo and you are probably reading
@@ -86,7 +86,8 @@
           # You can customize the priority of any check
           # Priority values are: `low, normal, high, higher`
           #
-          {Credo.Check.Design.AliasUsage, [priority: :low, if_nested_deeper_than: 2, if_called_more_often_than: 0]},
+          {Credo.Check.Design.AliasUsage,
+           [priority: :low, if_nested_deeper_than: 2, if_called_more_often_than: 0]},
           # You can also customize the exit_status of each check.
           # If you don't want TODO comments to cause `mix credo` to fail, just
           # set this value to 0 (zero).

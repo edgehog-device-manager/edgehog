@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.BaseImages.BaseImage do
   @moduledoc false
@@ -82,10 +80,12 @@ defmodule Edgehog.BaseImages.BaseImage do
       change Changes.HandleFileUpload
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
 
-      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
 
       change {UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
+              input_argument: :localized_release_display_names,
+              target_attribute: :release_display_name}
     end
 
     create :create_fixture do
@@ -106,10 +106,12 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
 
-      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
 
       change {UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
+              input_argument: :localized_release_display_names,
+              target_attribute: :release_display_name}
     end
 
     update :update do
@@ -130,10 +132,12 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       accept [:starting_version_requirement]
 
-      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
 
       change {UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
+              input_argument: :localized_release_display_names,
+              target_attribute: :release_display_name}
     end
 
     destroy :destroy do

@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.AstarteFixtures do
   @moduledoc """
@@ -36,7 +34,8 @@ defmodule Edgehog.AstarteFixtures do
   @doc """
   Generate a unique cluster API URL.
   """
-  def unique_cluster_base_api_url, do: "https://api-#{System.unique_integer([:positive])}.astarte.example.com"
+  def unique_cluster_base_api_url,
+    do: "https://api-#{System.unique_integer([:positive])}.astarte.example.com"
 
   @doc """
   Generate a unique realm name.

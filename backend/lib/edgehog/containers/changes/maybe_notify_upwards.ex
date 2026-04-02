@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.Changes.MaybeNotifyUpwards do
   @moduledoc """
@@ -40,7 +38,8 @@ defmodule Edgehog.Containers.Changes.MaybeNotifyUpwards do
   defp maybe_notify_upwards(resource_deployment) do
     resource_deployment
     |> Map.get(:container_deployments, [])
-    |> Enum.reduce_while({:ok, resource_deployment}, fn container_deployment, {:ok, resource_deployment} ->
+    |> Enum.reduce_while({:ok, resource_deployment}, fn container_deployment,
+                                                        {:ok, resource_deployment} ->
       case notify_upwards(container_deployment) do
         {:ok, _} -> {:cont, {:ok, resource_deployment}}
         error -> {:halt, error}

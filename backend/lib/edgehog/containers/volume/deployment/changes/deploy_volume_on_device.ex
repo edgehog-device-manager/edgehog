@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.Volume.Deployment.Changes.DeployVolumeOnDevice do
   @moduledoc false
@@ -42,7 +40,8 @@ defmodule Edgehog.Containers.Volume.Deployment.Changes.DeployVolumeOnDevice do
     end
   end
 
-  defp maybe_update_state(changeset, :created), do: Ash.Changeset.change_attribute(changeset, :state, :sent)
+  defp maybe_update_state(changeset, :created),
+    do: Ash.Changeset.change_attribute(changeset, :state, :sent)
 
   defp maybe_update_state(changeset, _), do: changeset
 end

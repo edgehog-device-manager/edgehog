@@ -348,7 +348,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
         # Expect no calls to the mock
 
-        expect(DeploymentCommandMock, :send_deployment_command, 0, fn _client, _device_id, _data ->
+        expect(DeploymentCommandMock, :send_deployment_command, 0, fn _client,
+                                                                      _device_id,
+                                                                      _data ->
           :ok
         end)
 
@@ -749,7 +751,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     loop_until_state!(executor_pid, state, start_time, timeout)
   end
 
-  defp loop_until_state!(executor_pid, state, _start_time, remaining_time) when remaining_time <= 0 do
+  defp loop_until_state!(executor_pid, state, _start_time, remaining_time)
+       when remaining_time <= 0 do
     {actual_state, _data} = :sys.get_state(executor_pid)
     flunk("State #{state} not reached, last state: #{actual_state}")
   end
@@ -832,7 +835,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     parent = self()
     ref = make_ref()
 
-    expect(DeploymentCommandMock, :send_deployment_command, count, fn _client, _device_id, _data ->
+    expect(DeploymentCommandMock, :send_deployment_command, count, fn _client,
+                                                                      _device_id,
+                                                                      _data ->
       # Send the sync
       send_sync(parent, ref)
       :ok

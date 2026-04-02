@@ -149,7 +149,9 @@ defmodule Mix.Tasks.Edgehog.Docs do
         File.rm("schema.graphql")
 
       {:error, code} ->
-        Logger.warning("Error while running #{command} (unixcode #{code}), `schema.graphql` file possibly left behind.")
+        Logger.warning(
+          "Error while running #{command} (unixcode #{code}), `schema.graphql` file possibly left behind."
+        )
     end
   end
 

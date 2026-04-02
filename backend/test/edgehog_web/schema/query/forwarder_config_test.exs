@@ -52,7 +52,11 @@ defmodule EdgehogWeb.Schema.Query.ForwarderConfigTest do
     end
   end
 
-  defp mock_configured_forwarder(hostname: hostname, port: port, secure_sessions?: secure_sessions?) do
+  defp mock_configured_forwarder(
+         hostname: hostname,
+         port: port,
+         secure_sessions?: secure_sessions?
+       ) do
     original_config = Application.fetch_env!(:edgehog, :edgehog_forwarder)
 
     Application.put_env(:edgehog, :edgehog_forwarder, %{

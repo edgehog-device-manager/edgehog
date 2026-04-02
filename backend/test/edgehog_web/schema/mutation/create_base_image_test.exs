@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -41,7 +39,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
       file_url = "https://example.com/ota.bin"
 
-      expect(StorageMock, :store, fn tenant_id, base_image_collection_id, ^base_image_version, _upload ->
+      expect(StorageMock, :store, fn tenant_id,
+                                     base_image_collection_id,
+                                     ^base_image_version,
+                                     _upload ->
         assert tenant_id == tenant.tenant_id
         # This is the DB id
         assert base_image_collection_id == base_image_collection.id

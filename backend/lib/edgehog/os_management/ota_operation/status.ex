@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.OSManagement.OTAOperation.Status do
   @moduledoc false
@@ -29,7 +27,8 @@ defmodule Edgehog.OSManagement.OTAOperation.Status do
       deployed: "The device deployed the update",
       rebooting: "The device is in the process of rebooting",
       error: "A recoverable error happened during the OTA operation",
-      failure: "The OTA operation ended with a failure. This is a final state of the OTA Operation",
+      failure:
+        "The OTA operation ended with a failure. This is a final state of the OTA Operation",
       success: "The OTA operation ended successfully. This is a final state of the OTA Operation"
     ]
 

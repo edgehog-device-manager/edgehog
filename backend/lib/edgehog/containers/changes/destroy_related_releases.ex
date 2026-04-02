@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 defmodule Edgehog.Containers.Changes.DestroyRelatedReleases do
   @moduledoc false
   use Ash.Resource.Change
@@ -37,7 +35,8 @@ defmodule Edgehog.Containers.Changes.DestroyRelatedReleases do
 
         Ash.Changeset.add_error(
           changeset,
-          message: "Cannot delete application: the following releases cannot be destroyed: #{versions}"
+          message:
+            "Cannot delete application: the following releases cannot be destroyed: #{versions}"
         )
     end
   end

@@ -77,10 +77,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FileDownload.Executor do
 
     case file_download_request.status do
       :completed ->
-        {:keep_state_and_data, actions ++ [internal_event({:operation_success, file_download_request})]}
+        {:keep_state_and_data,
+         actions ++ [internal_event({:operation_success, file_download_request})]}
 
       :failed ->
-        {:keep_state_and_data, actions ++ [internal_event({:operation_failure_event, file_download_request})]}
+        {:keep_state_and_data,
+         actions ++ [internal_event({:operation_failure_event, file_download_request})]}
 
       _ ->
         # For other statuses (sent, in_progress), just cancel the timeout

@@ -127,7 +127,10 @@ defmodule Edgehog.OSManagementTest do
       device_id = device.device_id
       ota_operation_id = ota_operation.id
 
-      expect(OTARequestV1Mock, :update, fn _client, ^device_id, ^ota_operation_id, ^base_image_url ->
+      expect(OTARequestV1Mock, :update, fn _client,
+                                           ^device_id,
+                                           ^ota_operation_id,
+                                           ^base_image_url ->
         :ok
       end)
 

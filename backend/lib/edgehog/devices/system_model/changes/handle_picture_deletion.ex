@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureDeletion do
   @moduledoc false
@@ -63,7 +61,11 @@ defmodule Edgehog.Devices.SystemModel.Changes.HandlePictureDeletion do
 
   # Otherwise, we explicitly delete the old picture only if it had a different URL. If the URL
   # is the same, the old picture just gets overwritten by the new one
-  defp maybe_delete_old_picture({:ok, %SystemModel{picture_url: new_picture_url}} = result, old_picture_url, _force?)
+  defp maybe_delete_old_picture(
+         {:ok, %SystemModel{picture_url: new_picture_url}} = result,
+         old_picture_url,
+         _force?
+       )
        when old_picture_url != new_picture_url do
     {:ok, system_model} = result
     _ = Assets.delete_system_model_picture(system_model, old_picture_url)

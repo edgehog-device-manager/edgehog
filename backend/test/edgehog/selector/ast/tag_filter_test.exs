@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022 - 2025 SECO Mind Srl
+# Copyright 2022-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Selector.AST.TagFilterTest do
   use Edgehog.DataCase, async: true
@@ -50,7 +48,11 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
       device_no_tags =
         device_fixture(realm_id: realm.id, tenant: tenant)
 
-      {:ok, tenant: tenant, device_foo: device_foo, device_bar: device_bar, device_no_tags: device_no_tags}
+      {:ok,
+       tenant: tenant,
+       device_foo: device_foo,
+       device_bar: device_bar,
+       device_no_tags: device_no_tags}
     end
 
     test "returns expression that matches devices with the tag", ctx do

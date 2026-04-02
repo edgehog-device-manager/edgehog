@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2023 - 2025 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Tenants.Reconciler.Core do
   @moduledoc false
@@ -119,7 +117,9 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     check_on_device_registered_and_deletion(astarte_version, required_trigger)
   end
 
-  defp check_on_device_registered_and_deletion(astarte_version, %{"simple_triggers" => simple_triggers}) do
+  defp check_on_device_registered_and_deletion(astarte_version, %{
+         "simple_triggers" => simple_triggers
+       }) do
     features_1_3? =
       Enum.any?(simple_triggers, fn simple_trigger ->
         on = simple_trigger["on"]

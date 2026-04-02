@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.Validations.IsUpgrade do
   @moduledoc false
@@ -38,7 +36,8 @@ defmodule Edgehog.Containers.Validations.IsUpgrade do
       if Version.compare(target_version, current_version) == :gt do
         :ok
       else
-        {:error, field: :target, message: "must be a newer release than the currently installed version"}
+        {:error,
+         field: :target, message: "must be a newer release than the currently installed version"}
       end
     end
   end

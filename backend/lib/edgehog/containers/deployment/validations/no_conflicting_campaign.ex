@@ -65,7 +65,9 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
 
       {:error, error} ->
         # If we can't load the deployment target, log and allow (safer than blocking)
-        Logger.warning("Failed to load deployment_target for conflict validation: #{inspect(error)}")
+        Logger.warning(
+          "Failed to load deployment_target for conflict validation: #{inspect(error)}"
+        )
 
         :ok
     end

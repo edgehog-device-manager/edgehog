@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   use EdgehogWeb.GraphqlCase, async: true
@@ -68,7 +66,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
       :ok
     end)
 
-    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
+    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _,
+                                                                                      _,
+                                                                                      data ->
       assert Enum.count(data.volumeIds) == volumes_per_container
 
       binds_by_source =

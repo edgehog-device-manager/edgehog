@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.Reconciler.Core do
   @moduledoc """
@@ -99,7 +97,9 @@ defmodule Edgehog.Containers.Reconciler.Core do
     available_device_mappings
     |> Enum.map(&reconcile_device_mapping(&1, device, tenant))
     |> Enum.reject(&(&1 == :ok))
-    |> Enum.each(&Logger.warning("Error while fetching device_mapping deployment: #{inspect(&1)}"))
+    |> Enum.each(
+      &Logger.warning("Error while fetching device_mapping deployment: #{inspect(&1)}")
+    )
   end
 
   def reconcile_containers(device, tenant) do
@@ -203,7 +203,8 @@ defmodule Edgehog.Containers.Reconciler.Core do
       marking =
         if device_mapping_desc.present,
           do: Containers.mark_device_mapping_deployment_as_present(device_mapping_deployment),
-          else: Containers.mark_device_mapping_deployment_as_not_present(device_mapping_deployment)
+          else:
+            Containers.mark_device_mapping_deployment_as_not_present(device_mapping_deployment)
 
       with {:ok, _} <- marking, do: :ok
     end

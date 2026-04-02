@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,14 +15,14 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.Deployment.Types.DeploymentState do
   @moduledoc false
 
   use Ash.Type.Enum,
     values: [
-      pending: "The deployment has been created in the database layer, the device yet has to receive it.",
+      pending:
+        "The deployment has been created in the database layer, the device yet has to receive it.",
       sent: "The deployment description has been sent to the device.",
       started: "The deployment is started on the device.",
       stopped: "The deployment is stopped on the device."

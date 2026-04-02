@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Forwarder.Session.ManualActions.GetSession do
   @moduledoc false
@@ -43,7 +41,8 @@ defmodule Edgehog.Forwarder.Session.ManualActions.GetSession do
     end
   end
 
-  defp get_session_by_token(sessions, session_token) when is_list(sessions) and is_binary(session_token) do
+  defp get_session_by_token(sessions, session_token)
+       when is_list(sessions) and is_binary(session_token) do
     case Enum.find(sessions, &(&1.token == session_token)) do
       nil ->
         nil

@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 defmodule Edgehog.Containers.Deployment.Validations.IsReady do
   @moduledoc false
   use Ash.Resource.Validation
@@ -28,6 +26,8 @@ defmodule Edgehog.Containers.Deployment.Validations.IsReady do
 
     if deployment.is_ready == readiness,
       do: :ok,
-      else: {:error, "This action cannot be performed because the deployment has not the desired readiness."}
+      else:
+        {:error,
+         "This action cannot be performed because the deployment has not the desired readiness."}
   end
 end

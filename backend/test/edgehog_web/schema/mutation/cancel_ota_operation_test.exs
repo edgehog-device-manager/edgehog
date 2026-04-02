@@ -242,7 +242,9 @@ defmodule EdgehogWeb.Schema.Mutation.CancelOtaOperationTest do
     id = AshGraphql.Resource.encode_relay_id(fixture)
 
     # Expect the ephemeral image deletion since we're destroying a manual OTA operation
-    expect(Edgehog.OSManagement.EphemeralImageMock, :delete, fn _tenant_id, _ota_operation_id, _url ->
+    expect(Edgehog.OSManagement.EphemeralImageMock, :delete, fn _tenant_id,
+                                                                _ota_operation_id,
+                                                                _url ->
       :ok
     end)
 

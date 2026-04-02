@@ -39,7 +39,9 @@ defmodule Edgehog.Campaigns.CampaignTarget.Changes.CreateManagedOTAOperation do
         # already sent to Astarte by create_managed_ota_operation!/2.
         # So we leave this like this for now and we'll revisit this when we add
         # support for canceling OTA Operations.
-        Ash.Changeset.manage_relationship(changeset, :ota_operation, ota, on_no_match: {:create, :create_managed})
+        Ash.Changeset.manage_relationship(changeset, :ota_operation, ota,
+          on_no_match: {:create, :create_managed}
+        )
 
       :error ->
         Ash.Changeset.add_error(changeset, "base_image argument is required")

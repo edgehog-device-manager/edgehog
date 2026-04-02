@@ -83,7 +83,8 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
     if current_release.application_id == target_release.application_id do
       :ok
     else
-      {:error, field: :target_release_id, message: "must belong to the same application as the release"}
+      {:error,
+       field: :target_release_id, message: "must belong to the same application as the release"}
     end
   end
 
@@ -93,7 +94,9 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
       if Version.compare(target_version, current_version) == :gt do
         :ok
       else
-        {:error, field: :target_release_id, message: "must be a newer release than the currently installed version"}
+        {:error,
+         field: :target_release_id,
+         message: "must be a newer release than the currently installed version"}
       end
     end
   end

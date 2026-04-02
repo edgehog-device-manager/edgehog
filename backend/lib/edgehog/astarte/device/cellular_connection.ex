@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Astarte.Device.CellularConnection do
   @moduledoc false
@@ -57,7 +55,9 @@ defmodule Edgehog.Astarte.Device.CellularConnection do
     # type Object Aggregate.
     # For details, see https://github.com/astarte-platform/astarte/issues/630
     with {:ok, %{"data" => data}} <-
-           AppEngine.Devices.get_datastream_data(client, device_id, @status_interface, query: [limit: 1]) do
+           AppEngine.Devices.get_datastream_data(client, device_id, @status_interface,
+             query: [limit: 1]
+           ) do
       modems = parse_status_data(data)
 
       {:ok, modems}

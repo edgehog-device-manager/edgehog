@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022 - 2025 SECO Mind Srl
+# Copyright 2022-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Selector.Parser do
   @moduledoc false
@@ -351,7 +349,13 @@ defmodule Edgehog.Selector.Parser do
     {rest, [node], context}
   end
 
-  defp finalize_attribute_filter(rest, [{type, value}, operator, key, namespace], context, _line, _column) do
+  defp finalize_attribute_filter(
+         rest,
+         [{type, value}, operator, key, namespace],
+         context,
+         _line,
+         _column
+       ) do
     # This function just passes the parsed value as-is without performing any other checks (e.g. if
     # the operator is valid for that value, if the datetime is a valid ISO8601 etc.).
     # All these semantic checks will be performed when traversing the tree (see

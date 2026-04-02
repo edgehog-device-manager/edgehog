@@ -52,7 +52,9 @@ defmodule Edgehog.BaseImages.BaseImage.Validations.BaseImageNotInUse do
         campaign_names = Enum.map_join(campaigns, ", ", & &1.name)
 
         {:error,
-         field: :id, message: "Base image is currently in use by the following running campaigns: #{campaign_names}"}
+         field: :id,
+         message:
+           "Base image is currently in use by the following running campaigns: #{campaign_names}"}
     end
   end
 end

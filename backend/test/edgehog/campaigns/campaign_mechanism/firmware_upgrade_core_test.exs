@@ -992,7 +992,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FirmwareUpgradeCoreTest do
       assert {:ok, target} =
                campaign.campaign_targets
                |> hd()
-               |> FirmwareUpgradeCore.start_target_update(campaign.campaign_mechanism.value.base_image)
+               |> FirmwareUpgradeCore.start_target_update(
+                 campaign.campaign_mechanism.value.base_image
+               )
 
       assert [pending_ota_operation_target] =
                MechanismCore.list_in_progress_targets(
@@ -1014,7 +1016,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FirmwareUpgradeCoreTest do
                campaign.campaign_targets
                |> hd()
                |> Ash.load!(default_preloads_for_target())
-               |> FirmwareUpgradeCore.start_target_update(campaign.campaign_mechanism.value.base_image)
+               |> FirmwareUpgradeCore.start_target_update(
+                 campaign.campaign_mechanism.value.base_image
+               )
 
       assert {:ok, _ota_operation} =
                target.ota_operation_id

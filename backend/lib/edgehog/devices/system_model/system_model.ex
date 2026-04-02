@@ -1,6 +1,6 @@
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -86,7 +86,8 @@ defmodule Edgehog.Devices.SystemModel do
       change manage_relationship(:hardware_type_id, :hardware_type, type: :append)
       change Changes.HandlePictureUpload
 
-      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     update :update do
@@ -129,7 +130,8 @@ defmodule Edgehog.Devices.SystemModel do
       change Changes.HandlePictureUpload
       change Changes.HandlePictureDeletion
 
-      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute,
+              input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     destroy :destroy do

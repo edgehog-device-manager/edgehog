@@ -198,7 +198,8 @@ defmodule Edgehog.FilesFixtures do
 
     params =
       Enum.into(opts, %{
-        url: "https://example.com/uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}",
+        url:
+          "https://example.com/uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}",
         file_name: filename,
         uncompressed_file_size_bytes: file.size,
         digest: file.digest,

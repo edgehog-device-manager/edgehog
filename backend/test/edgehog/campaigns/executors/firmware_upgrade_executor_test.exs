@@ -185,7 +185,10 @@ defmodule Edgehog.Campaigns.Executors.FirmwareUpgradeExecutorTest do
       target_device_ids = Enum.map(campaign.campaign_targets, & &1.device.device_id)
 
       # Expect target_count update calls and send back a message for each device
-      expect(OTARequestV1Mock, :update, target_count, fn _client, device_id, _uuid, ^base_image_url ->
+      expect(OTARequestV1Mock, :update, target_count, fn _client,
+                                                         device_id,
+                                                         _uuid,
+                                                         ^base_image_url ->
         send_sync(parent, {ref, device_id})
         :ok
       end)
@@ -274,7 +277,10 @@ defmodule Edgehog.Campaigns.Executors.FirmwareUpgradeExecutorTest do
 
       parent = self()
 
-      expect(OTARequestV1Mock, :update, max_updates, fn _client, _device_id, ota_operation_id, _url ->
+      expect(OTARequestV1Mock, :update, max_updates, fn _client,
+                                                        _device_id,
+                                                        ota_operation_id,
+                                                        _url ->
         # Since we don't know _which_ target will receive the request, we send it back from here
         send(parent, {:updated_target, ota_operation_id})
         :ok
@@ -602,7 +608,10 @@ defmodule Edgehog.Campaigns.Executors.FirmwareUpgradeExecutorTest do
       } = ctx
 
       # Expect failing_target_count calls to the mock and return a non-temporary error
-      expect(OTARequestV1Mock, :update, failing_target_count, fn _client, _device_id, _uuid, _base_image_url ->
+      expect(OTARequestV1Mock, :update, failing_target_count, fn _client,
+                                                                 _device_id,
+                                                                 _uuid,
+                                                                 _base_image_url ->
         status = Enum.random(400..499)
         {:error, %Astarte.Client.APIError{status: status, response: "F"}}
       end)
@@ -878,7 +887,8 @@ defmodule Edgehog.Campaigns.Executors.FirmwareUpgradeExecutorTest do
     loop_until_state!(executor_pid, state, start_time, timeout)
   end
 
-  defp loop_until_state!(executor_pid, state, _start_time, remaining_time) when remaining_time <= 0 do
+  defp loop_until_state!(executor_pid, state, _start_time, remaining_time)
+       when remaining_time <= 0 do
     {actual_state, _data} = :sys.get_state(executor_pid)
     flunk("State #{state} not reached, last state: #{actual_state}")
   end

@@ -41,7 +41,9 @@ defmodule Edgehog.OSManagement.OTAOperation.Validations.BaseImageSource do
         :ok
 
       {_, _} ->
-        {:error, fields: [:base_image_file, :base_image_url], message: "only one between image file or url is supported"}
+        {:error,
+         fields: [:base_image_file, :base_image_url],
+         message: "only one between image file or url is supported"}
     end
   end
 end

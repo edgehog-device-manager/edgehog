@@ -39,7 +39,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
   setup do
     # Stub the deployment request mock (for upgrade/deploy operation)
-    stub(CreateDeploymentRequestMock, :send_create_deployment_request, fn _client, _device_id, _data ->
+    stub(CreateDeploymentRequestMock, :send_create_deployment_request, fn _client,
+                                                                          _device_id,
+                                                                          _data ->
       :ok
     end)
 
@@ -336,7 +338,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
       # For upgrade, :stopped means deployed but not started yet - still in progress
       # Expect no calls to the mock
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -373,7 +377,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
         } = ctx
 
         # Expect no calls to the mock
-        expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+        expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client,
+                                                                                   _device_id,
+                                                                                   _data ->
           :ok
         end)
 
@@ -631,7 +637,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
       wait_for_state(pid, :wait_for_available_slot)
 
       # While paused, no further upgrade requests should be sent
-      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client, _device_id, _data ->
+      expect(CreateDeploymentRequestMock, :send_create_deployment_request, 0, fn _client,
+                                                                                 _device_id,
+                                                                                 _data ->
         :ok
       end)
 
@@ -774,7 +782,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
     loop_until_state!(executor_pid, state, start_time, timeout)
   end
 
-  defp loop_until_state!(executor_pid, state, _start_time, remaining_time) when remaining_time <= 0 do
+  defp loop_until_state!(executor_pid, state, _start_time, remaining_time)
+       when remaining_time <= 0 do
     {actual_state, _data} = :sys.get_state(executor_pid)
     flunk("State #{state} not reached, last state: #{actual_state}")
   end
@@ -859,7 +868,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
     ref = make_ref()
 
     # Expect count calls to the mock
-    expect(CreateDeploymentRequestMock, :send_create_deployment_request, count, fn _client, _device_id, _data ->
+    expect(CreateDeploymentRequestMock, :send_create_deployment_request, count, fn _client,
+                                                                                   _device_id,
+                                                                                   _data ->
       # Send the sync
       send_sync(parent, ref)
       :ok

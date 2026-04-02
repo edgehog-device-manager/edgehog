@@ -87,9 +87,13 @@ defmodule Edgehog.Storage do
     config = s3_presign_config()
 
     with {:ok, get_url} <-
-           ExAws.S3.presigned_url(config, :get, bucket, file_path, expires_in: @presign_expiration_seconds),
+           ExAws.S3.presigned_url(config, :get, bucket, file_path,
+             expires_in: @presign_expiration_seconds
+           ),
          {:ok, put_url} <-
-           ExAws.S3.presigned_url(config, :put, bucket, file_path, expires_in: @presign_expiration_seconds) do
+           ExAws.S3.presigned_url(config, :put, bucket, file_path,
+             expires_in: @presign_expiration_seconds
+           ) do
       {:ok, %{get_url: get_url, put_url: put_url}}
     end
   end
@@ -99,7 +103,9 @@ defmodule Edgehog.Storage do
     config = s3_presign_config()
 
     with {:ok, get_url} <-
-           ExAws.S3.presigned_url(config, :get, bucket, file_path, expires_in: @presign_expiration_seconds) do
+           ExAws.S3.presigned_url(config, :get, bucket, file_path,
+             expires_in: @presign_expiration_seconds
+           ) do
       {:ok, %{get_url: get_url}}
     end
   end

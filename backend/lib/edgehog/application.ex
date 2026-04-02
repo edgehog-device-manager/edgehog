@@ -59,7 +59,8 @@ defmodule Edgehog.Application do
       # Start the Campaigns supervisor
       Edgehog.Campaigns.Supervisor,
       # Start the Tenant Reconciler Supervisor
-      {Edgehog.Tenants.Reconciler.Supervisor, tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
+      {Edgehog.Tenants.Reconciler.Supervisor,
+       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
       # Start Containers reconciler
       {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
       # Start the Endpoint (http/https)

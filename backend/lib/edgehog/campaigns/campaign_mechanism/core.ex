@@ -446,12 +446,14 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core, for: Any do
     "Failed to contact Astarte API for device #{device_id}"
   end
 
-  def error_message(_mechanism, %APIError{status: status} = error, device_id) when status in 400..499 do
+  def error_message(_mechanism, %APIError{status: status} = error, device_id)
+      when status in 400..499 do
     # Client error, assume it's always going to fail
     "Device #{device_id} failed Astarte API call: received status #{status} (#{error.response})"
   end
 
-  def error_message(_mechanism, %APIError{status: status} = error, device_id) when status in 500..599 do
+  def error_message(_mechanism, %APIError{status: status} = error, device_id)
+      when status in 500..599 do
     # Server error, assume temporary error
     "Device #{device_id} failed Astarte API call: received status #{status} (#{error.response})"
   end

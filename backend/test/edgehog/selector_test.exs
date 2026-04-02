@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022-2023 SECO Mind Srl
+# Copyright 2022-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.SelectorTest do
   use Edgehog.DataCase, async: true
@@ -91,7 +89,9 @@ defmodule Edgehog.SelectorTest do
                 type: :datetime,
                 value: "2022-06-29T16:46:15.00Z"
               }} ==
-               Selector.parse(~s/attributes["baz:production_date"] >= datetime("2022-06-29T16:46:15.00Z")/)
+               Selector.parse(
+                 ~s/attributes["baz:production_date"] >= datetime("2022-06-29T16:46:15.00Z")/
+               )
 
       assert {:ok,
               %AttributeFilter{
@@ -110,7 +110,9 @@ defmodule Edgehog.SelectorTest do
                 type: :binaryblob,
                 value: "ZmlybXdhcmU="
               }} ==
-               Selector.parse(~s/attributes["custom:firmware_blob"] == binaryblob("ZmlybXdhcmU=")/)
+               Selector.parse(
+                 ~s/attributes["custom:firmware_blob"] == binaryblob("ZmlybXdhcmU=")/
+               )
     end
 
     test "correctly parses binary operations" do
@@ -186,7 +188,9 @@ defmodule Edgehog.SelectorTest do
                   rhs: %TagFilter{operator: :in, tag: "fuu"}
                 }
               }} ==
-               Selector.parse(~s/"foo" in tags or "bar" not in tags and "baz" in tags or "fuu" in tags/)
+               Selector.parse(
+                 ~s/"foo" in tags or "bar" not in tags and "baz" in tags or "fuu" in tags/
+               )
 
       assert {:ok,
               %BinaryOp{
@@ -202,7 +206,9 @@ defmodule Edgehog.SelectorTest do
                   rhs: %TagFilter{operator: :in, tag: "fuu"}
                 }
               }} ==
-               Selector.parse(~s/("foo" in tags or "bar" not in tags) and ("baz" in tags or "fuu" in tags)/)
+               Selector.parse(
+                 ~s/("foo" in tags or "bar" not in tags) and ("baz" in tags or "fuu" in tags)/
+               )
     end
 
     test "returns error with syntax errors" do

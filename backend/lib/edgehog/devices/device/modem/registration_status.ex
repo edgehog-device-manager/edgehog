@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024, 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +15,16 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Devices.Device.Modem.RegistrationStatus do
   @moduledoc false
   use Ash.Type.Enum,
     values: [
-      not_registered: "Not registered, modem is not currently searching a new operator to register to.",
+      not_registered:
+        "Not registered, modem is not currently searching a new operator to register to.",
       registered: "Registered, home network.",
-      searching_operator: "Not registered, but modem is currently searching a new operator to register to.",
+      searching_operator:
+        "Not registered, but modem is currently searching a new operator to register to.",
       registration_denied: "Registration denied.",
       unknown: "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage).",
       registered_roaming: "Registered, roaming."
