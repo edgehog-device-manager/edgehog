@@ -107,7 +107,7 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
   const handleDeleteHardwareType = useCallback(() => {
     deleteHardwareType({
       variables: { hardwareTypeId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.hardwareTypes });
         }
@@ -160,7 +160,7 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
     (hardwareType: HardwareTypeOutputData) => {
       updateHardwareType({
         variables: { hardwareTypeId, input: hardwareType },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>

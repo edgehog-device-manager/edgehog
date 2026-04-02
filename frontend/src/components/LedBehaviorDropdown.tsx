@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2022-2025 SECO Mind Srl
+ * Copyright 2022-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -121,7 +121,7 @@ const LedBehaviorDropdown = ({ deviceId, disabled, onError }: Props) => {
             behavior: ledBehavior,
           },
         },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>

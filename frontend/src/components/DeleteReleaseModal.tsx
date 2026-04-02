@@ -59,7 +59,7 @@ const DeleteReleaseModal = <R extends Release>({
   const handleDeleteRelease = useCallback(() => {
     deleteRelease({
       variables: { id: releaseToDelete.id },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)

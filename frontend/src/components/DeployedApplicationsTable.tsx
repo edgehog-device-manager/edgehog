@@ -400,7 +400,7 @@ const DeployedApplicationsTable = ({
       if (isOnline) {
         sendDeployment({
           variables: { id: deploymentId },
-          onCompleted: (data, errors) => {
+          onCompleted: (_data, errors) => {
             if (errors) {
               const errorFeedback = errors
                 .map(({ fields, message }) =>
@@ -438,7 +438,7 @@ const DeployedApplicationsTable = ({
       if (isOnline) {
         startDeployment({
           variables: { id: deploymentId },
-          onCompleted: (data, errors) => {
+          onCompleted: (_data, errors) => {
             if (errors) {
               const errorFeedback = errors
                 .map(({ fields, message }) =>
@@ -476,7 +476,7 @@ const DeployedApplicationsTable = ({
       if (isOnline) {
         stopDeployment({
           variables: { id: deploymentId },
-          onCompleted: (data, errors) => {
+          onCompleted: (_data, errors) => {
             if (errors) {
               const errorFeedback = errors
                 .map(({ fields, message }) =>
@@ -513,7 +513,7 @@ const DeployedApplicationsTable = ({
     (deploymentId: string) => {
       deleteDeployment({
         variables: { id: deploymentId },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (
             !errors ||
             errors.length === 0 ||
@@ -562,7 +562,7 @@ const DeployedApplicationsTable = ({
           id: deploymentId,
           input: { target: upgradeTargetReleaseId },
         },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (
             !errors ||
             errors.length === 0 ||

@@ -59,7 +59,7 @@ const DeleteApplicationModal = <A extends Application>({
   const handleDeleteApplication = useCallback(() => {
     deleteApplication({
       variables: { id: applicationToDelete.id },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (errors) {
           const errorFeedback = errors
             .map((error) => error.message)

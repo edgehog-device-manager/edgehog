@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2022-2025 SECO Mind Srl
+ * Copyright 2022-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
   const handleDeleteDeviceGroup = useCallback(() => {
     deleteDeviceGroup({
       variables: { deviceGroupId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.deviceGroups });
         }
@@ -223,7 +223,7 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
       const newDeviceGroup = { ...deviceGroup };
       updateDeviceGroup({
         variables: { deviceGroupId, input: newDeviceGroup },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>

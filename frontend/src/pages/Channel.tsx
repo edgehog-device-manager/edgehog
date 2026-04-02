@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -138,7 +138,7 @@ const ChannelContent = ({ queryRef, channel }: ChannelContentProps) => {
   const handleDeleteChannel = useCallback(() => {
     deleteChannel({
       variables: { channelId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.channels });
         }

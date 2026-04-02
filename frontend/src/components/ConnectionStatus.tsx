@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
 import { useIntl } from "react-intl";
 
 import Icon from "@/components/Icon";

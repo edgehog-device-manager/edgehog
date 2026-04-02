@@ -164,7 +164,7 @@ const CampaignActions = ({
   const handlePauseCampaign = useCallback(() => {
     pauseCampaign({
       variables: { id: fileDownloadCampaignId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           setErrorFeedback(null);
           return;
@@ -191,7 +191,7 @@ const CampaignActions = ({
   const handleResumeCampaign = useCallback(() => {
     resumeCampaign({
       variables: { id: fileDownloadCampaignId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           setErrorFeedback(null);
           return;

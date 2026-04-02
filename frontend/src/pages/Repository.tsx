@@ -200,7 +200,7 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
   const handleDeleteRepository = useCallback(() => {
     deleteRepository({
       variables: { repositoryId },
-      onCompleted(data, errors) {
+      onCompleted(_data, errors) {
         if (!errors || errors.length === 0 || errors[0].code === "not_found") {
           return navigate({ route: Route.repositories });
         }
@@ -253,7 +253,7 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
     (repository: RepositoryOutputData) => {
       updateRepository({
         variables: { repositoryId, input: repository },
-        onCompleted(data, errors) {
+        onCompleted(_data, errors) {
           if (errors) {
             const errorFeedback = errors
               .map(({ fields, message }) =>
