@@ -83,6 +83,47 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       assert event.type == :error
     end
 
+    test "deployment events get queued (event with add_info field)", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant
+      } = context
+
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> deployment.id,
+          value: %{
+            "status" => "Error",
+            "message" => "error message",
+            "addInfo" => ["additional info about the event"]
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      # Deployment must be reloaded from the db
+      deployment =
+        Ash.get!(Deployment, deployment.id, tenant: tenant, load: :events)
+
+      assert [event] = deployment.events
+      assert event.type == :error
+      assert event.add_info == ["additional info about the event"]
+    end
+
     test "Starting status does not update a Started deployment", context do
       %{
         conn: conn,

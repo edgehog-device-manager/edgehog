@@ -602,6 +602,27 @@
   "components.DeploymentEventMessage.noShortMessage": {
     "defaultMessage": "No short message. Click to show extended info."
   },
+  "components.DeploymentLogs.EventType.Deleting": {
+    "defaultMessage": "Deleting"
+  },
+  "components.DeploymentLogs.EventType.Error": {
+    "defaultMessage": "Error"
+  },
+  "components.DeploymentLogs.EventType.Started": {
+    "defaultMessage": "Started"
+  },
+  "components.DeploymentLogs.EventType.Starting": {
+    "defaultMessage": "Starting"
+  },
+  "components.DeploymentLogs.EventType.Stopped": {
+    "defaultMessage": "Stopped"
+  },
+  "components.DeploymentLogs.EventType.Stopping": {
+    "defaultMessage": "Stopping"
+  },
+  "components.DeploymentLogs.EventType.Updating": {
+    "defaultMessage": "Updating"
+  },
   "components.DeploymentReadiness.notReady": {
     "defaultMessage": "Deploying"
   },

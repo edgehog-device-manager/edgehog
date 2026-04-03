@@ -44,13 +44,14 @@ import type {
 } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
+import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
 import Table, { createColumnHelper } from "@/components/Table";
 import { Link, Route } from "@/Navigation";
+import DeploymentEventsCard from "./DeploymentEventsCard";
 import DeploymentReadiness from "./DeploymentReadiness";
 import DeploymentStateComponent, {
   parseDeploymentState,
 } from "./DeploymentState";
-import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
 import ResourceStateIcon from "@/components/ResourceStateIcon";
 
 const DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT = graphql`
@@ -66,6 +67,7 @@ const DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT = graphql`
         node {
           type
           message
+          addInfo
           insertedAt
         }
       }
@@ -164,7 +166,7 @@ const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
 
 type Deployment = Deployment_getDeployment_Query$data["deployment"];
 
-type Event = NonNullable<
+export type Event = NonNullable<
   NonNullable<DeploymentDetails_events$data["events"]["edges"]>[number]["node"]
 >;
 
@@ -661,11 +663,7 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
             defaultMessage: "Events",
           })}
         >
-          <Table
-            columns={eventColumns}
-            data={events}
-            headerStyle={{ fontSize: "0.9rem", width: "33.3%" }}
-          />
+          <DeploymentEventsCard events={events} />
         </Tab>
       </Tabs>
     </div>

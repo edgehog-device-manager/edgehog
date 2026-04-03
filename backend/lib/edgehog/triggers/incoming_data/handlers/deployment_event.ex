@@ -35,15 +35,10 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.DeploymentEvent do
       "message" => message
     } = event.value
 
-    add_info = Map.get(event.value, "addInfo")
+    add_info = Map.get(event.value, "addInfo", [])
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      event =
-        case add_info do
-          nil -> %{type: state, message: message}
-          _ -> %{type: state, message: message, addInfo: add_info}
-        end
-
+      event = %{type: state, message: message, add_info: add_info}
       Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
     end
   end
