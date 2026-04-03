@@ -128,7 +128,6 @@ defmodule Edgehog.MixProject do
       {:ash_json_api, "~> 1.3"},
       {:igniter, "~> 0.7", only: [:dev, :test]},
       {:picosat_elixir, "~> 0.2"},
-      {:styler, "~> 1.9", only: [:dev, :test], runtime: false},
       {:open_api_spex, "~> 3.16"},
       {:ymlr, "~> 5.1"},
       {:sourceror, "~> 1.10", only: [:dev, :test]},

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021-2024 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2026 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
 [
@@ -14,7 +14,7 @@
     :skogsra,
     :nimble_parsec
   ],
-  plugins: [Spark.Formatter, Styler],
+  plugins: [Spark.Formatter],
   inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
   subdirectories: ["priv/*/migrations"],
   locals_without_parens: [
