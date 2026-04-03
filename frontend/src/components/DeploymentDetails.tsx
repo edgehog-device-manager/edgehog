@@ -16,45 +16,35 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import { useMemo } from "react";
 import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
+import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, usePaginationFragment } from "react-relay";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
-import type {
-  DeploymentDetails_containerDeployments$data,
-  DeploymentDetails_containerDeployments$key,
-} from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
-import type {
-  DeploymentDetails_deviceMappingDeployments$data,
-  DeploymentDetails_deviceMappingDeployments$key,
-} from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
+import type { DeploymentDetails_containerDeployments$key } from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
+import type { DeploymentDetails_deviceMappingDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
 import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
 } from "@/api/__generated__/DeploymentDetails_events.graphql";
-import type {
-  DeploymentDetails_networkDeployments$data,
-  DeploymentDetails_networkDeployments$key,
-} from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
-import type {
-  DeploymentDetails_volumeDeployments$data,
-  DeploymentDetails_volumeDeployments$key,
-} from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
+import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
+import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
-import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
-import Table, { createColumnHelper } from "@/components/Table";
 import { Link, Route } from "@/Navigation";
 import DeploymentEventsCard from "./DeploymentEventsCard";
 import DeploymentReadiness from "./DeploymentReadiness";
 import DeploymentStateComponent, {
   parseDeploymentState,
 } from "./DeploymentState";
-import ResourceStateIcon from "@/components/ResourceStateIcon";
+import Icon from "./Icon";
+import ResourceStateIcon from "./ResourceStateIcon";
 
-const DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT = graphql`
+/* eslint-disable relay/unused-fields */
+const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_events on Deployment
   @refetchable(queryName: "DeploymentEventsPaginationQuery") {
     id
@@ -75,6 +65,7 @@ const DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT = graphql`
   }
 `;
 
+/* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_containerDeployments on Deployment
   @refetchable(queryName: "DeploymentContainerDeploymentsPaginationQuery") {
@@ -84,6 +75,7 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
         node {
           id
           state
+          isReady
           container {
             image {
               reference
@@ -105,6 +97,7 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
     }
   }
 `;
+
 const DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_networkDeployments on ContainerDeployment {
     id
@@ -143,6 +136,7 @@ const DEPLOYMENT_DETAILS_VOLUME_DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
+/* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_deviceMappingDeployments on ContainerDeployment {
     id
@@ -165,399 +159,277 @@ const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
 `;
 
 type Deployment = Deployment_getDeployment_Query$data["deployment"];
-
 export type Event = NonNullable<
   NonNullable<DeploymentDetails_events$data["events"]["edges"]>[number]["node"]
 >;
 
-type ImageDeployment = NonNullable<
-  NonNullable<
-    DeploymentDetails_containerDeployments$data["containerDeployments"]["edges"]
-  >[number]["node"]["imageDeployment"]
->;
+type TreeNode = {
+  id: string;
+  name: string;
+  type?: "node" | "leaf";
+  state?: string | null;
+  isReady?: boolean | null;
+  children?: TreeNode[];
+};
 
-type ContainerNetworkNode = NonNullable<
-  NonNullable<
-    DeploymentDetails_networkDeployments$data["networkDeployments"]["edges"]
-  >[number]["node"]
->;
+const buildSubTree = (
+  prefix: string,
+  category: string,
+  nodes: any[],
+  labelExtractor: (node: any) => string,
+  intlLabels: { title: string; empty: string; unnamed: string },
+): TreeNode => {
+  const children: TreeNode[] =
+    nodes.length > 0
+      ? nodes.map((n) => ({
+          id: `${prefix}-${category}-${n.id}`,
+          name: labelExtractor(n) || intlLabels.unnamed,
+          type: "leaf",
+          state: n.state,
+          isReady: n.isReady,
+          children: [],
+        }))
+      : [
+          {
+            id: `${prefix}-${category}-none`,
+            name: intlLabels.empty,
+            type: "leaf",
+            state: undefined,
+            isReady: null,
+            children: [],
+          },
+        ];
 
-type ContainerVolumeNode = NonNullable<
-  NonNullable<
-    DeploymentDetails_volumeDeployments$data["volumeDeployments"]["edges"]
-  >[number]["node"]
->;
-
-type ContainerDeviceMappingNode = NonNullable<
-  NonNullable<
-    DeploymentDetails_deviceMappingDeployments$data["deviceMappingDeployments"]["edges"]
-  >[number]["node"]
->;
-
-const eventColumnHelper = createColumnHelper<Event>();
-
-const eventColumns = [
-  eventColumnHelper.accessor("type", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.eventType"
-        defaultMessage="Type"
-      />
-    ),
-    cell: ({ row }) => row.original.type ?? "",
-  }),
-
-  eventColumnHelper.accessor("insertedAt", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.eventTimestamp"
-        defaultMessage="Timestamp"
-      />
-    ),
-    cell: ({ row }) => {
-      const date = new Date(row.original.insertedAt);
-
-      return (
-        <>
-          {new Intl.DateTimeFormat("en-US", {
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "numeric",
-            minute: "numeric",
-            second: "numeric",
-            fractionalSecondDigits: 3,
-          }).format(date)}
-        </>
-      );
-    },
-  }),
-
-  eventColumnHelper.accessor("message", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.eventMessage"
-        defaultMessage="Message"
-      />
-    ),
-    cell: ({ row }) => {
-      const msg = row.original.message ?? "";
-      return (
-        <span
-          title={msg}
-          className="d-inline-block text-truncate"
-          style={{
-            maxWidth: "300px",
-            verticalAlign: "bottom",
-          }}
-        >
-          {msg}
-        </span>
-      );
-    },
-  }),
-];
-
-const networkColumnHelper = createColumnHelper<ContainerNetworkNode>();
-
-const networkColumns = [
-  networkColumnHelper.accessor("network.label", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.networkLabel"
-        defaultMessage="Label"
-      />
-    ),
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.networksEdit}
-        params={{ networkId: row.original.network?.id || "" }}
-      >
-        {getValue()}
-      </Link>
-    ),
-  }),
-  networkColumnHelper.accessor("state", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.networkState"
-        defaultMessage="State"
-      />
-    ),
-    cell: ({ row }) => (
-      <ResourceStateIcon
-        state={row.original.state}
-        isReady={row.original.isReady}
-      />
-    ),
-  }),
-];
-
-const volumeColumnHelper = createColumnHelper<ContainerVolumeNode>();
-
-const volumeColumns = [
-  volumeColumnHelper.accessor("volume.label", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.volumeLabel"
-        defaultMessage="Label"
-      />
-    ),
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.volumeEdit}
-        params={{ volumeId: row.original.volume?.id || "" }}
-      >
-        {getValue()}
-      </Link>
-    ),
-  }),
-  volumeColumnHelper.accessor("state", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.volumeState"
-        defaultMessage="State"
-      />
-    ),
-    cell: ({ row }) => (
-      <ResourceStateIcon
-        state={row.original.state}
-        isReady={row.original.isReady}
-      />
-    ),
-  }),
-];
-
-const deviceMappingColumnHelper =
-  createColumnHelper<ContainerDeviceMappingNode>();
-
-const deviceMappingColumns = [
-  deviceMappingColumnHelper.accessor((row) => row.deviceMapping, {
-    id: "deviceMapping",
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.PathMappings"
-        defaultMessage="Path On Host → Path In Container"
-      />
-    ),
-    cell: ({ row }) => {
-      const mapping = row.original.deviceMapping;
-      if (!mapping) return null;
-      return (
-        <span className="font-mono text-sm text-gray-700">
-          {mapping.pathOnHost} → {mapping.pathInContainer}
-        </span>
-      );
-    },
-  }),
-  deviceMappingColumnHelper.accessor("state", {
-    header: () => (
-      <FormattedMessage
-        id="components.DeploymentDetails.deviceMappingState"
-        defaultMessage="State"
-      />
-    ),
-    cell: ({ row }) => (
-      <ResourceStateIcon
-        state={row.original.state}
-        isReady={row.original.isReady}
-      />
-    ),
-  }),
-];
-
-interface CollapsibleTableProps {
-  title: string;
-  columns: any;
-  data: any[];
-  headerStyle?: React.CSSProperties;
-}
-const CollapsibleTable = ({
-  title,
-  columns,
-  data,
-  headerStyle,
-}: CollapsibleTableProps) => {
-  const { open, toggle } = useCollapseToggle(true);
-
-  return (
-    <CollapseItem title={title} open={open} onToggle={toggle}>
-      <Table
-        columns={columns}
-        data={data}
-        hideSearch
-        headerStyle={headerStyle}
-      />
-    </CollapseItem>
-  );
+  return {
+    id: `${prefix}-${category}-root`,
+    name: intlLabels.title,
+    type: "node",
+    children,
+  };
 };
 
 interface ContainerDeploymentItemProps {
-  containerRef: DeploymentDetails_networkDeployments$key &
+  index: number;
+  containerFragmentKey: DeploymentDetails_networkDeployments$key &
     DeploymentDetails_volumeDeployments$key &
     DeploymentDetails_deviceMappingDeployments$key;
-  imageDeployment: ImageDeployment | null;
-  containerState: string | null;
+  imageDeployment: any;
+  containerState: string;
+  isReady: boolean | null;
 }
+
 const ContainerDeploymentItem = ({
-  containerRef,
+  index,
+  containerFragmentKey,
   imageDeployment,
   containerState,
+  isReady,
 }: ContainerDeploymentItemProps) => {
-  const { open, toggle } = useCollapseToggle(true);
+  const intl = useIntl();
+  const prefix = `container-${index}`;
 
   const networkData = useFragment<DeploymentDetails_networkDeployments$key>(
     DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT,
-    containerRef,
+    containerFragmentKey,
   );
 
   const volumeData = useFragment<DeploymentDetails_volumeDeployments$key>(
     DEPLOYMENT_DETAILS_VOLUME_DEPLOYMENTS_FRAGMENT,
-    containerRef,
+    containerFragmentKey,
   );
 
   const deviceMappingData =
     useFragment<DeploymentDetails_deviceMappingDeployments$key>(
       DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT,
-      containerRef,
+      containerFragmentKey,
     );
 
-  const networkNodes: ContainerNetworkNode[] =
-    networkData?.networkDeployments?.edges?.map((e) => e.node) ?? [];
+  const treeData: TreeNode[] = useMemo(() => {
+    const unnamed = intl.formatMessage({
+      id: "components.DeploymentDetails.unnamed",
+      defaultMessage: "Unnamed",
+    });
+    const empty = intl.formatMessage({
+      id: "components.DeploymentDetails.none",
+      defaultMessage: "None",
+    });
 
-  const volumeNodes: ContainerVolumeNode[] =
-    volumeData?.volumeDeployments?.edges?.map((e) => e.node) ?? [];
+    const networkSubTree = buildSubTree(
+      prefix,
+      "network",
+      networkData?.networkDeployments?.edges?.map((e) => e.node) ?? [],
+      (n) => n.network?.label,
+      {
+        title: intl.formatMessage({
+          id: "components.DeploymentDetails.networks",
+          defaultMessage: "Networks",
+        }),
+        empty,
+        unnamed,
+      },
+    );
 
-  const deviceMapNodes: ContainerDeviceMappingNode[] =
-    deviceMappingData?.deviceMappingDeployments?.edges?.map((e) => e.node) ??
-    [];
+    const volumeSubTree = buildSubTree(
+      prefix,
+      "volume",
+      volumeData?.volumeDeployments?.edges?.map((e) => e.node) ?? [],
+      (v) => v.volume?.label,
+      {
+        title: intl.formatMessage({
+          id: "components.DeploymentDetails.volumes",
+          defaultMessage: "Volumes",
+        }),
+        empty,
+        unnamed,
+      },
+    );
+
+    const deviceMappingsSubTree = buildSubTree(
+      prefix,
+      "device-mapping",
+      deviceMappingData?.deviceMappingDeployments?.edges?.map((e) => e.node) ??
+        [],
+      (d) =>
+        `${d.deviceMapping?.pathOnHost}->${d.deviceMapping.pathInContainer}`,
+      {
+        title: intl.formatMessage({
+          id: "components.DeploymentDetails.deviceMappings",
+          defaultMessage: "Device Mappings",
+        }),
+        empty,
+        unnamed,
+      },
+    );
+
+    const imageTreeNode: TreeNode = {
+      id: `${prefix}-image-${imageDeployment?.image?.id}`,
+      name:
+        imageDeployment?.image?.reference ||
+        intl.formatMessage({
+          id: "components.DeploymentDetails.unnamedImage",
+          defaultMessage: "Unnamed image",
+        }),
+      type: "leaf",
+      state: imageDeployment?.state,
+      isReady: imageDeployment?.isReady ?? null,
+      children: [],
+    };
+
+    return [
+      {
+        id: `${prefix}-root`,
+        name: intl.formatMessage(
+          {
+            id: "components.DeploymentDetails.containerWithIndex",
+            defaultMessage: "Container {index}",
+          },
+          { index: index + 1 },
+        ),
+        type: "node",
+        state: containerState,
+        isReady,
+        children: [
+          imageTreeNode,
+          deviceMappingsSubTree,
+          volumeSubTree,
+          networkSubTree,
+        ],
+      },
+    ];
+  }, [
+    networkData,
+    volumeData,
+    deviceMappingData,
+    imageDeployment,
+    containerState,
+    isReady,
+    index,
+    prefix,
+    intl,
+  ]);
+
+  const { required, handlers } = useTreeState({
+    data: treeData,
+    defaultOpened: true,
+    id: prefix,
+  });
 
   return (
-    <CollapseItem
-      title={imageDeployment?.image?.reference}
-      type="card-parent"
-      open={open}
-      onToggle={toggle}
-      containerStatus={containerState}
-    >
-      {imageDeployment && (
-        <Row className="mb-3 ">
-          <span className="d-flex gap-2 small">
-            <strong>
-              <FormattedMessage
-                id={"components.DeploymentDetails.imageStatus"}
-                defaultMessage={" Image Status: "}
-              />
-            </strong>
-            <ResourceStateIcon
-              state={imageDeployment.state}
-              isReady={imageDeployment.isReady}
-            />
-          </span>
-        </Row>
-      )}
-      {networkNodes.length > 0 ? (
-        <CollapsibleTable
-          title={`Networks`}
-          columns={networkColumns}
-          data={networkNodes}
-          headerStyle={{ fontSize: "0.8rem", width: "50%" }}
-        />
-      ) : (
-        <p
-          className="fst-italic ms-1"
-          style={{ fontSize: "0.85rem", opacity: 0.7 }}
-        >
-          <FormattedMessage
-            id={"components.DeploymentDetails.noNetworksMessage"}
-            defaultMessage={"No Networks"}
-          />
-        </p>
-      )}
+    <Tree
+      {...required}
+      {...handlers}
+      renderNode={({ node, onToggle }) => {
+        const { state, isReady, name, type } = node.data ?? {};
+        const isNode = type === "node";
 
-      {volumeNodes.length > 0 ? (
-        <CollapsibleTable
-          title={`Volumes`}
-          columns={volumeColumns}
-          data={volumeNodes}
-          headerStyle={{ fontSize: "0.8rem", width: "50%" }}
-        />
-      ) : (
-        <p
-          className="fst-italic ms-1"
-          style={{ fontSize: "0.85rem", opacity: 0.7 }}
-        >
-          <FormattedMessage
-            id={"components.DeploymentDetails.noVolumesMessage"}
-            defaultMessage={"No Volumes"}
-          />
-        </p>
-      )}
+        return (
+          <div
+            className="d-flex align-items-center gap-2 py-1 px-1"
+            style={{ cursor: isNode ? "pointer" : "default" }}
+            onClick={(e) => isNode && onToggle(e)}
+          >
+            {isNode && (
+              <span
+                style={{
+                  display: "inline-flex",
+                  transition: "transform 0.2s ease-in-out",
+                  transform: node.isOpened()
+                    ? "rotate(0deg)"
+                    : "rotate(-90deg)",
+                }}
+              >
+                <Icon icon="caretDown" />
+              </span>
+            )}
+            <span className={`node-name ${isNode ? "fw-bold" : ""}`}>
+              {name}
+            </span>
 
-      {deviceMapNodes.length > 0 ? (
-        <CollapsibleTable
-          title={`Device Mappings`}
-          columns={deviceMappingColumns}
-          data={deviceMapNodes}
-          headerStyle={{ fontSize: "0.8rem", width: "50%" }}
-        />
-      ) : (
-        <p
-          className="fst-italic ms-1"
-          style={{ fontSize: "0.85rem", opacity: 0.7 }}
-        >
-          <FormattedMessage
-            id={"components.deploymentDetails.noDeviceMappingsMessage"}
-            defaultMessage={"No Device Mappings"}
-          />
-        </p>
-      )}
-    </CollapseItem>
+            <ResourceStateIcon state={state} isReady={isReady} />
+          </div>
+        );
+      }}
+    />
   );
 };
 
-interface DetailItemProps {
+const DetailItem = ({
+  label,
+  children,
+}: {
   label: React.ReactNode;
   children: React.ReactNode;
-}
-const DetailItem = ({ label, children }: DetailItemProps) => (
+}) => (
   <div className="d-flex flex-sm-column flex-md-row flex-wrap mb-3 gap-2">
-    <div className="fw-semibold">{label}</div>
+    <div className="fw-semibold text-muted">{label}</div>
     <div>{children}</div>
   </div>
 );
 
-type DeploymentDetailsProps = {
+const DeploymentDetails = ({
+  deploymentRef,
+}: {
   deploymentRef: Deployment;
-};
+}) => {
+  const intl = useIntl();
 
-const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
   const { data: eventsData } = usePaginationFragment<
     DeploymentEventsPaginationQuery,
     DeploymentDetails_events$key
-  >(DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT, deploymentRef);
+  >(DEPLOYMENT_DETAILS_EVENTS_FRAGMENT, deploymentRef);
 
-  const { data: containerDeploymentsData } = usePaginationFragment<
+  const { data: containersData } = usePaginationFragment<
     DeploymentContainerDeploymentsPaginationQuery,
     DeploymentDetails_containerDeployments$key
   >(DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT, deploymentRef);
 
-  const events: Event[] = eventsData?.events?.edges?.map((e) => e.node) ?? [];
+  const events = eventsData?.events?.edges?.map((e) => e.node) ?? [];
+  const containerNodes =
+    containersData?.containerDeployments?.edges?.map((e) => e.node) ?? [];
 
-  const containerRefs =
-    containerDeploymentsData?.containerDeployments?.edges?.map((e) => e.node) ??
-    [];
-  const applicationName =
-    deploymentRef?.release?.application?.name || "Unknown";
-  const applicationId = deploymentRef?.release?.application?.id || "Unknown";
-  const releaseVersion = deploymentRef?.release?.version || "Unknown";
-  const releaseId = deploymentRef?.release?.id || "Unknown";
-  const deploymentState = parseDeploymentState(
-    deploymentRef?.state || undefined,
-  );
-  const isReady = deploymentRef?.isReady;
+  const { release, state, isReady } = deploymentRef || {};
+  const { application, version: releaseVersion, id: releaseId } = release || {};
 
-  const intl = useIntl();
   return (
     <div>
       <Card className="mb-4">
@@ -572,12 +444,14 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
                   />
                 }
               >
-                <Link route={Route.application} params={{ applicationId }}>
-                  {applicationName}
+                <Link
+                  route={Route.application}
+                  params={{ applicationId: application?.id || "unknown" }}
+                >
+                  {application?.name || "Unknown"}
                 </Link>
               </DetailItem>
             </Col>
-
             <Col sm={12} lg={3}>
               <DetailItem
                 label={
@@ -589,13 +463,15 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
               >
                 <Link
                   route={Route.release}
-                  params={{ applicationId, releaseId }}
+                  params={{
+                    applicationId: application?.id || "unknown",
+                    releaseId: releaseId || "unknown",
+                  }}
                 >
-                  {releaseVersion}
+                  {releaseVersion || "Unknown"}
                 </Link>
               </DetailItem>
             </Col>
-
             <Col sm={12} lg={3}>
               <DetailItem
                 label={
@@ -606,12 +482,11 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
                 }
               >
                 <DeploymentStateComponent
-                  state={deploymentState}
+                  state={parseDeploymentState(state || undefined)}
                   isReady={isReady}
                 />
               </DetailItem>
             </Col>
-
             <Col sm={12} lg={3}>
               <DetailItem
                 label={
@@ -636,20 +511,27 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
         <Tab
           eventKey="containers"
           title={intl.formatMessage({
-            id: "components.deploymentDetails.containersTab",
+            id: "components.DeploymentDetails.containersTab",
             defaultMessage: "Containers",
           })}
         >
-          <div>
-            {containerRefs.length === 0 ? (
-              <div className="p-2">No containers</div>
+          <div className="px-3 d-flex flex-column gap-3">
+            {containerNodes.length === 0 ? (
+              <div className="p-3 text-muted italic">
+                <FormattedMessage
+                  id="components.DeploymentDetails.noContainers"
+                  defaultMessage="No containers"
+                />
+              </div>
             ) : (
-              containerRefs.map((ref, idx) => (
+              containerNodes.map((node, idx) => (
                 <ContainerDeploymentItem
-                  key={idx}
-                  containerRef={ref}
-                  imageDeployment={ref.imageDeployment}
-                  containerState={ref.state}
+                  key={node.id || idx}
+                  index={idx}
+                  containerFragmentKey={node}
+                  imageDeployment={node.imageDeployment}
+                  containerState={node.state || ""}
+                  isReady={node.isReady}
                 />
               ))
             )}
@@ -659,7 +541,7 @@ const DeploymentDetails = ({ deploymentRef }: DeploymentDetailsProps) => {
         <Tab
           eventKey="events"
           title={intl.formatMessage({
-            id: "components.deploymentDetails.eventsTab",
+            id: "components.DeploymentDetails.eventsTab",
             defaultMessage: "Events",
           })}
         >

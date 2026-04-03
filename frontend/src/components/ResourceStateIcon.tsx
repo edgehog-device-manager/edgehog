@@ -18,7 +18,7 @@
 
 import Icon from "@/components/Icon";
 
-const AVAILABLE_STATES = new Set(["available", "pulled", "present"]);
+const AVAILABLE_STATES = new Set(["available", "pulled", "present", "running"]);
 
 type ResourceStateIconProps = {
   state: string | null | undefined;
@@ -26,6 +26,8 @@ type ResourceStateIconProps = {
 };
 
 const ResourceStateIcon = ({ state, isReady }: ResourceStateIconProps) => {
+  if (state == undefined) return null;
+
   if (!isReady) {
     return (
       <Icon

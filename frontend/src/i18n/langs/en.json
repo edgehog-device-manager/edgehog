@@ -548,38 +548,29 @@
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.DeploymentDetails.PathMappings": {
-    "defaultMessage": "Path On Host → Path In Container"
-  },
   "components.DeploymentDetails.applicationName": {
     "defaultMessage": "Application Name:"
   },
-  "components.DeploymentDetails.deviceMappingState": {
-    "defaultMessage": "State"
+  "components.DeploymentDetails.containerWithIndex": {
+    "defaultMessage": "Container {index}"
   },
-  "components.DeploymentDetails.eventMessage": {
-    "defaultMessage": "Message"
+  "components.DeploymentDetails.containersTab": {
+    "defaultMessage": "Containers"
   },
-  "components.DeploymentDetails.eventTimestamp": {
-    "defaultMessage": "Timestamp"
+  "components.DeploymentDetails.deviceMappings": {
+    "defaultMessage": "Device Mappings"
   },
-  "components.DeploymentDetails.eventType": {
-    "defaultMessage": "Type"
+  "components.DeploymentDetails.eventsTab": {
+    "defaultMessage": "Events"
   },
-  "components.DeploymentDetails.imageStatus": {
-    "defaultMessage": "Image Status:"
+  "components.DeploymentDetails.networks": {
+    "defaultMessage": "Networks"
   },
-  "components.DeploymentDetails.networkLabel": {
-    "defaultMessage": "Label"
+  "components.DeploymentDetails.noContainers": {
+    "defaultMessage": "No containers"
   },
-  "components.DeploymentDetails.networkState": {
-    "defaultMessage": "State"
-  },
-  "components.DeploymentDetails.noNetworksMessage": {
-    "defaultMessage": "No Networks"
-  },
-  "components.DeploymentDetails.noVolumesMessage": {
-    "defaultMessage": "No Volumes"
+  "components.DeploymentDetails.none": {
+    "defaultMessage": "None"
   },
   "components.DeploymentDetails.readiness": {
     "defaultMessage": "Readiness:"
@@ -590,11 +581,14 @@
   "components.DeploymentDetails.status": {
     "defaultMessage": "Status:"
   },
-  "components.DeploymentDetails.volumeLabel": {
-    "defaultMessage": "Label"
+  "components.DeploymentDetails.unnamed": {
+    "defaultMessage": "Unnamed"
   },
-  "components.DeploymentDetails.volumeState": {
-    "defaultMessage": "State"
+  "components.DeploymentDetails.unnamedImage": {
+    "defaultMessage": "Unnamed image"
+  },
+  "components.DeploymentDetails.volumes": {
+    "defaultMessage": "Volumes"
   },
   "components.DeploymentEventMessage.noMessage": {
     "defaultMessage": "No message in event."
@@ -1497,15 +1491,6 @@
   },
   "components.campaignTargetStatus.Successful": {
     "defaultMessage": "Successful"
-  },
-  "components.deploymentDetails.containersTab": {
-    "defaultMessage": "Containers"
-  },
-  "components.deploymentDetails.eventsTab": {
-    "defaultMessage": "Events"
-  },
-  "components.deploymentDetails.noDeviceMappingsMessage": {
-    "defaultMessage": "No Device Mappings"
   },
   "fieldExplanation.binds.description": {
     "defaultMessage": "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]"
