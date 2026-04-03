@@ -32,8 +32,8 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
-      MASTER_PASSWORD_REQUIRED: 'False'
-      PGADMIN_CONFIG_SERVER_MODE: 'False'
+      MASTER_PASSWORD_REQUIRED: "False"
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     volumes:
       - pgadmin-data:/var/lib/pgadmin
     configs:
@@ -49,7 +49,7 @@ services:
       - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
 
   edgehog-backend:
-    image: edgehogdevicemanager/edgehog-backend:0.10.0
+    image: edgehogdevicemanager/edgehog-backend:0.10.1
     build:
       context: backend
     env_file: .env
@@ -87,7 +87,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:0.10.0
+    image: edgehogdevicemanager/edgehog-frontend:0.10.1
     build:
       context: frontend
     environment:
@@ -106,7 +106,7 @@ services:
       RELEASE_NAME: edgehog-device-forwarder
       SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
       PORT: 4001
-      PHX_HOST:  device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
+      PHX_HOST: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
     restart: on-failure
     labels:
       - "traefik.enable=true"
@@ -159,11 +159,11 @@ services:
       - registry-auth:/auth
       - registry-data:/var/lib/registry
     labels:
-    - "traefik.enable=true"
-    - "traefik.http.routers.edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
-    - "traefik.http.routers.edgehog-registry.entrypoints=web"
-    - "traefik.http.routers.edgehog-registry.service=edgehog-registry"
-    - "traefik.http.services.edgehog-registry.loadbalancer.server.port=5000"
+      - "traefik.enable=true"
+      - "traefik.http.routers.edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.edgehog-registry.entrypoints=web"
+      - "traefik.http.routers.edgehog-registry.service=edgehog-registry"
+      - "traefik.http.services.edgehog-registry.loadbalancer.server.port=5000"
 
   registry-auth:
     image: httpd:2.4
@@ -181,19 +181,21 @@ services:
       - registry
     privileged: true
     entrypoint: ["/bin/sh", "-c"]
-    command: ["
-      dockerd --insecure-registry registry:5000 &
-      echo 'Waiting for Docker daemon to be ready...' &&
-      until docker info >/dev/null 2>&1; do sleep 1; done &&
-      echo 'Docker daemon ready, signing in with registry...' &&
-      echo 'admin' | docker login registry:5000 -u admin --password-stdin &&
-      echo 'Signed in with registry, pulling sample images...' &&
-      docker pull hashicorp/http-echo &&
-      echo 'Tagging sample images...' &&
-      docker tag hashicorp/http-echo registry:5000/test/http-echo &&
-      echo 'Pushing sample images...' &&
-      docker push registry:5000/test/http-echo &&
-      echo 'Images preloaded.'"]
+    command: [
+        "
+        dockerd --insecure-registry registry:5000 &
+        echo 'Waiting for Docker daemon to be ready...' &&
+        until docker info >/dev/null 2>&1; do sleep 1; done &&
+        echo 'Docker daemon ready, signing in with registry...' &&
+        echo 'admin' | docker login registry:5000 -u admin --password-stdin &&
+        echo 'Signed in with registry, pulling sample images...' &&
+        docker pull hashicorp/http-echo &&
+        echo 'Tagging sample images...' &&
+        docker tag hashicorp/http-echo registry:5000/test/http-echo &&
+        echo 'Pushing sample images...' &&
+        docker push registry:5000/test/http-echo &&
+        echo 'Images preloaded.'",
+      ]
 
 configs:
   pgadmin_servers.json:
