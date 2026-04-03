@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -83,11 +83,13 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
                 state
                 imageDeployment {
                   state
+                  isReady
                 }
                 networkDeployments {
                   edges {
                     node {
                       state
+                      isReady
                     }
                   }
                 }
@@ -95,6 +97,15 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
                   edges {
                     node {
                       state
+                      isReady
+                    }
+                  }
+                }
+                deviceMappingDeployments {
+                  edges {
+                    node {
+                      state
+                      isReady
                     }
                   }
                 }
@@ -118,16 +129,27 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
     container_deployment = container_deployment["node"]
 
     assert container_deployment["imageDeployment"]["state"] == "created"
+    refute container_deployment["imageDeployment"]["isReady"]
 
     assert [network_deployment] = container_deployment["networkDeployments"]["edges"]
     network_deployment = network_deployment["node"]
 
     assert network_deployment["state"] == "created"
+    refute network_deployment["isReady"]
 
     assert [volume_deployment] = container_deployment["volumeDeployments"]["edges"]
     volume_deployment = volume_deployment["node"]
 
     assert volume_deployment["state"] == "created"
+    refute volume_deployment["isReady"]
+
+    assert [device_mapping_deployment] =
+             container_deployment["deviceMappingDeployments"]["edges"]
+
+    device_mapping_deployment = device_mapping_deployment["node"]
+
+    assert device_mapping_deployment["state"] == "created"
+    refute device_mapping_deployment["isReady"]
   end
 
   defp get_deployment(opts) do

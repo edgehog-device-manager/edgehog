@@ -41,13 +41,6 @@ input CampaignCampaignMechanismFileDownloadInput {
   fileId: ID
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the File Download Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   Optional compression type for the file (e.g., "tar.gz").
   Other values are: ['tar.gz']. Defaults to empty string (no compression).
   """
@@ -76,6 +69,13 @@ input CampaignCampaignMechanismFileDownloadInput {
   Defaults to 0.
   """
   ttlSeconds: Int
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the File Download Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress file downloads. The File Download Campaign will
@@ -1259,8 +1259,8 @@ input BaseImageCollectionFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input BaseImageCollectionFilterInput {
@@ -1486,8 +1486,8 @@ input BaseImageFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input BaseImageFilterInput {
@@ -1675,8 +1675,8 @@ input ContainerVolumeFilterVolumeId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ContainerVolumeFilterTarget {
@@ -1724,6 +1724,7 @@ enum DeviceMappingDeploymentSortField {
   ID
   STATE
   DEVICE_MAPPING_ID
+  IS_READY
 }
 
 ":device_mapping_deployment connection"
@@ -1747,6 +1748,19 @@ type DeviceMappingDeploymentEdge {
   node: DeviceMappingDeployment!
 }
 
+input DeviceMappingDeploymentFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
 input DeviceMappingDeploymentFilterDeviceMappingId {
   isNil: Boolean
   eq: ID
@@ -1756,8 +1770,8 @@ input DeviceMappingDeploymentFilterDeviceMappingId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeviceMappingDeploymentFilterState {
@@ -1782,8 +1796,8 @@ input DeviceMappingDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeviceMappingDeploymentFilterInput {
@@ -1795,6 +1809,7 @@ input DeviceMappingDeploymentFilterInput {
   deviceMappingId: DeviceMappingDeploymentFilterDeviceMappingId
   deviceMapping: DeviceMappingFilterInput
   containerDeployments: ContainerDeploymentFilterInput
+  isReady: DeviceMappingDeploymentFilterIsReady
 }
 
 input DeviceMappingDeploymentSortInput {
@@ -1820,6 +1835,7 @@ type DeviceMappingDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+  isReady: Boolean
 }
 
 enum DeviceMappingSortField {
@@ -1860,8 +1876,8 @@ input DeviceMappingFilterContainerId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeviceMappingFilterCgroupPermissions {
@@ -1921,8 +1937,8 @@ input DeviceMappingFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeviceMappingFilterInput {
@@ -1955,6 +1971,7 @@ enum VolumeDeploymentSortField {
   ID
   STATE
   VOLUME_ID
+  IS_READY
 }
 
 ":volume_deployment connection"
@@ -1978,6 +1995,19 @@ type VolumeDeploymentEdge {
   node: VolumeDeployment!
 }
 
+input VolumeDeploymentFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
 input VolumeDeploymentFilterVolumeId {
   isNil: Boolean
   eq: ID
@@ -1987,8 +2017,8 @@ input VolumeDeploymentFilterVolumeId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input VolumeDeploymentFilterState {
@@ -2013,8 +2043,8 @@ input VolumeDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input VolumeDeploymentFilterInput {
@@ -2026,6 +2056,7 @@ input VolumeDeploymentFilterInput {
   volumeId: VolumeDeploymentFilterVolumeId
   volume: VolumeFilterInput
   containerDeployments: ContainerDeploymentFilterInput
+  isReady: VolumeDeploymentFilterIsReady
 }
 
 input VolumeDeploymentSortInput {
@@ -2051,6 +2082,7 @@ type VolumeDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+  isReady: Boolean
 }
 
 type volume_result {
@@ -2119,8 +2151,8 @@ input VolumeFilterOptions {
   greaterThan: JsonString
   lessThanOrEqual: JsonString
   greaterThanOrEqual: JsonString
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: JsonString
+  isNotDistinctFrom: JsonString
 }
 
 input VolumeFilterDriver {
@@ -2164,8 +2196,8 @@ input VolumeFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input VolumeFilterInput {
@@ -2214,6 +2246,7 @@ enum NetworkDeploymentSortField {
   ID
   STATE
   NETWORK_ID
+  IS_READY
 }
 
 ":network_deployment connection"
@@ -2237,6 +2270,19 @@ type NetworkDeploymentEdge {
   node: NetworkDeployment!
 }
 
+input NetworkDeploymentFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
 input NetworkDeploymentFilterNetworkId {
   isNil: Boolean
   eq: ID
@@ -2246,8 +2292,8 @@ input NetworkDeploymentFilterNetworkId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input NetworkDeploymentFilterState {
@@ -2272,8 +2318,8 @@ input NetworkDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input NetworkDeploymentFilterInput {
@@ -2285,6 +2331,7 @@ input NetworkDeploymentFilterInput {
   networkId: NetworkDeploymentFilterNetworkId
   network: NetworkFilterInput
   containerDeployments: ContainerDeploymentFilterInput
+  isReady: NetworkDeploymentFilterIsReady
 }
 
 input NetworkDeploymentSortInput {
@@ -2310,6 +2357,7 @@ type NetworkDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+  isReady: Boolean
 }
 
 type network_result {
@@ -2383,8 +2431,8 @@ input NetworkFilterOptions {
   greaterThan: JsonString
   lessThanOrEqual: JsonString
   greaterThanOrEqual: JsonString
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: JsonString
+  isNotDistinctFrom: JsonString
 }
 
 input NetworkFilterEnableIpv6 {
@@ -2396,8 +2444,8 @@ input NetworkFilterEnableIpv6 {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input NetworkFilterInternal {
@@ -2409,8 +2457,8 @@ input NetworkFilterInternal {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input NetworkFilterDriver {
@@ -2454,8 +2502,8 @@ input NetworkFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input NetworkFilterInput {
@@ -2590,8 +2638,8 @@ input ReleaseFilterApplicationId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ReleaseFilterVersion {
@@ -2619,8 +2667,8 @@ input ReleaseFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ReleaseFilterInput {
@@ -2796,8 +2844,8 @@ input ImageCredentialsFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ImageCredentialsFilterInput {
@@ -2827,6 +2875,19 @@ type ImageCredentials implements Node {
   username: String!
 }
 
+input ImageDeploymentFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
 input ImageDeploymentFilterImageId {
   isNil: Boolean
   eq: ID
@@ -2836,8 +2897,8 @@ input ImageDeploymentFilterImageId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ImageDeploymentFilterState {
@@ -2862,8 +2923,8 @@ input ImageDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ImageDeploymentFilterInput {
@@ -2874,6 +2935,7 @@ input ImageDeploymentFilterInput {
   state: ImageDeploymentFilterState
   imageId: ImageDeploymentFilterImageId
   image: ImageFilterInput
+  isReady: ImageDeploymentFilterIsReady
 }
 
 type ImageDeployment {
@@ -2881,6 +2943,7 @@ type ImageDeployment {
   state: String
   imageId: ID
   image: Image
+  isReady: Boolean
 }
 
 type image_result {
@@ -2897,8 +2960,8 @@ input ImageFilterImageCredentialsId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ImageFilterReference {
@@ -2926,8 +2989,8 @@ input ImageFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ImageFilterInput {
@@ -3023,8 +3086,8 @@ input DeploymentEventFilterUpdatedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input DeploymentEventFilterInsertedAt {
@@ -3036,8 +3099,8 @@ input DeploymentEventFilterInsertedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input DeploymentEventFilterMessage {
@@ -3065,8 +3128,8 @@ input DeploymentEventFilterType {
   greaterThan: DeploymentEventType
   lessThanOrEqual: DeploymentEventType
   greaterThanOrEqual: DeploymentEventType
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DeploymentEventType
+  isNotDistinctFrom: DeploymentEventType
 }
 
 input DeploymentEventFilterId {
@@ -3078,8 +3141,8 @@ input DeploymentEventFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeploymentEventFilterInput {
@@ -3220,8 +3283,8 @@ input DeploymentFilterReleaseId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeploymentFilterDeviceId {
@@ -3233,8 +3296,8 @@ input DeploymentFilterDeviceId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input DeploymentFilterTimedOut {
@@ -3246,8 +3309,8 @@ input DeploymentFilterTimedOut {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input DeploymentFilterState {
@@ -3259,8 +3322,8 @@ input DeploymentFilterState {
   greaterThan: ApplicationDeploymentState
   lessThanOrEqual: ApplicationDeploymentState
   greaterThanOrEqual: ApplicationDeploymentState
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ApplicationDeploymentState
+  isNotDistinctFrom: ApplicationDeploymentState
 }
 
 input DeploymentFilterId {
@@ -3272,8 +3335,8 @@ input DeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input DeploymentFilterInput {
@@ -3417,8 +3480,8 @@ input ContainerDeploymentFilterImageDeploymentId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ContainerDeploymentFilterDeviceId {
@@ -3430,8 +3493,8 @@ input ContainerDeploymentFilterDeviceId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerDeploymentFilterContainerId {
@@ -3443,8 +3506,8 @@ input ContainerDeploymentFilterContainerId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ContainerDeploymentFilterState {
@@ -3469,8 +3532,8 @@ input ContainerDeploymentFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ContainerDeploymentFilterInput {
@@ -3561,6 +3624,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceMappingDeploymentConnection!
+  isReady: Boolean
 }
 
 type container_result {
@@ -3618,8 +3682,8 @@ input ContainerFilterImageId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ContainerFilterReadOnlyRootfs {
@@ -3631,8 +3695,8 @@ input ContainerFilterReadOnlyRootfs {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input ContainerFilterVolumeDriver {
@@ -3660,8 +3724,8 @@ input ContainerFilterMemorySwappiness {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterMemorySwap {
@@ -3673,8 +3737,8 @@ input ContainerFilterMemorySwap {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterMemoryReservation {
@@ -3686,8 +3750,8 @@ input ContainerFilterMemoryReservation {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterMemory {
@@ -3699,8 +3763,8 @@ input ContainerFilterMemory {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterCpuRealtimeRuntime {
@@ -3712,8 +3776,8 @@ input ContainerFilterCpuRealtimeRuntime {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterCpuRealtimePeriod {
@@ -3725,8 +3789,8 @@ input ContainerFilterCpuRealtimePeriod {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterCpuQuota {
@@ -3738,8 +3802,8 @@ input ContainerFilterCpuQuota {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterCpuPeriod {
@@ -3751,8 +3815,8 @@ input ContainerFilterCpuPeriod {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ContainerFilterNetworkMode {
@@ -3780,8 +3844,8 @@ input ContainerFilterPrivileged {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input ContainerFilterHostname {
@@ -3822,8 +3886,8 @@ input ContainerFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ContainerFilterInput {
@@ -4081,8 +4145,8 @@ input ApplicationFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ApplicationFilterInput {
@@ -4182,8 +4246,8 @@ input SystemModelPartNumberFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input SystemModelPartNumberFilterInput {
@@ -4383,8 +4447,8 @@ input SystemModelFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input SystemModelFilterInput {
@@ -4546,8 +4610,8 @@ input HardwareTypePartNumberFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input HardwareTypePartNumberFilterInput {
@@ -4709,8 +4773,8 @@ input HardwareTypeFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input HardwareTypeFilterInput {
@@ -4933,8 +4997,8 @@ input DeviceFilterLastDisconnection {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input DeviceFilterLastConnection {
@@ -4946,8 +5010,8 @@ input DeviceFilterLastConnection {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input DeviceFilterOnline {
@@ -4959,8 +5023,8 @@ input DeviceFilterOnline {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input DeviceFilterName {
@@ -5004,8 +5068,8 @@ input DeviceFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input DeviceFilterInput {
@@ -5463,8 +5527,8 @@ input FileDownloadRequestFilterResponseCode {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterProgressPercentage {
@@ -5476,8 +5540,8 @@ input FileDownloadRequestFilterProgressPercentage {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterStatus {
@@ -5489,8 +5553,8 @@ input FileDownloadRequestFilterStatus {
   greaterThan: FileDownloadRequestStatus
   lessThanOrEqual: FileDownloadRequestStatus
   greaterThanOrEqual: FileDownloadRequestStatus
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: FileDownloadRequestStatus
+  isNotDistinctFrom: FileDownloadRequestStatus
 }
 
 input FileDownloadRequestFilterProgressTracked {
@@ -5502,8 +5566,8 @@ input FileDownloadRequestFilterProgressTracked {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input FileDownloadRequestFilterPathOnDevice {
@@ -5547,8 +5611,8 @@ input FileDownloadRequestFilterDestinationType {
   greaterThan: FileDestination
   lessThanOrEqual: FileDestination
   greaterThanOrEqual: FileDestination
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: FileDestination
+  isNotDistinctFrom: FileDestination
 }
 
 input FileDownloadRequestFilterGroupId {
@@ -5560,8 +5624,8 @@ input FileDownloadRequestFilterGroupId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterUserId {
@@ -5573,8 +5637,8 @@ input FileDownloadRequestFilterUserId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterFileMode {
@@ -5586,8 +5650,8 @@ input FileDownloadRequestFilterFileMode {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterTtlSeconds {
@@ -5599,8 +5663,8 @@ input FileDownloadRequestFilterTtlSeconds {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterCompression {
@@ -5644,8 +5708,8 @@ input FileDownloadRequestFilterUncompressedFileSizeBytes {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileDownloadRequestFilterFileName {
@@ -5689,8 +5753,8 @@ input FileDownloadRequestFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input FileDownloadRequestFilterInput {
@@ -5973,8 +6037,8 @@ input RepositoryFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input RepositoryFilterInput {
@@ -6131,8 +6195,8 @@ input FileFilterFileUploaded {
   greaterThan: Boolean
   lessThanOrEqual: Boolean
   greaterThanOrEqual: Boolean
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input FileFilterDigest {
@@ -6160,8 +6224,8 @@ input FileFilterSize {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileFilterName {
@@ -6189,8 +6253,8 @@ input FileFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input FileFilterInput {
@@ -6444,8 +6508,8 @@ input DeviceGroupFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input DeviceGroupFilterInput {
@@ -6576,8 +6640,8 @@ input TagFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input TagFilterInput {
@@ -6675,8 +6739,8 @@ input OtaOperationFilterUpdatedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input OtaOperationFilterCreatedAt {
@@ -6688,8 +6752,8 @@ input OtaOperationFilterCreatedAt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input OtaOperationFilterMessage {
@@ -6717,8 +6781,8 @@ input OtaOperationFilterStatusCode {
   greaterThan: OtaOperationStatusCode
   lessThanOrEqual: OtaOperationStatusCode
   greaterThanOrEqual: OtaOperationStatusCode
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: OtaOperationStatusCode
+  isNotDistinctFrom: OtaOperationStatusCode
 }
 
 input OtaOperationFilterStatusProgress {
@@ -6730,8 +6794,8 @@ input OtaOperationFilterStatusProgress {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input OtaOperationFilterStatus {
@@ -6743,8 +6807,8 @@ input OtaOperationFilterStatus {
   greaterThan: OtaOperationStatus
   lessThanOrEqual: OtaOperationStatus
   greaterThanOrEqual: OtaOperationStatus
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: OtaOperationStatus
+  isNotDistinctFrom: OtaOperationStatus
 }
 
 input OtaOperationFilterBaseImageUrl {
@@ -6772,8 +6836,8 @@ input OtaOperationFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input OtaOperationFilterInput {
@@ -7000,8 +7064,8 @@ input ChannelFilterId {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input ChannelFilterInput {
@@ -7132,8 +7196,8 @@ input CampaignTargetFilterCompletionTimestamp {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input CampaignTargetFilterLatestAttempt {
@@ -7145,8 +7209,8 @@ input CampaignTargetFilterLatestAttempt {
   greaterThan: DateTime
   lessThanOrEqual: DateTime
   greaterThanOrEqual: DateTime
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input CampaignTargetFilterRetryCount {
@@ -7158,8 +7222,8 @@ input CampaignTargetFilterRetryCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input CampaignTargetFilterStatus {
@@ -7171,8 +7235,8 @@ input CampaignTargetFilterStatus {
   greaterThan: CampaignTargetStatus
   lessThanOrEqual: CampaignTargetStatus
   greaterThanOrEqual: CampaignTargetStatus
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: CampaignTargetStatus
+  isNotDistinctFrom: CampaignTargetStatus
 }
 
 input CampaignTargetFilterId {
@@ -7184,8 +7248,8 @@ input CampaignTargetFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input CampaignTargetFilterInput {
@@ -7375,8 +7439,8 @@ input CampaignFilterSuccessfulTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input CampaignFilterFailedTargetCount {
@@ -7388,8 +7452,8 @@ input CampaignFilterFailedTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input CampaignFilterInProgressTargetCount {
@@ -7401,8 +7465,8 @@ input CampaignFilterInProgressTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input CampaignFilterIdleTargetCount {
@@ -7414,8 +7478,8 @@ input CampaignFilterIdleTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input CampaignFilterTotalTargetCount {
@@ -7427,8 +7491,8 @@ input CampaignFilterTotalTargetCount {
   greaterThan: Int
   lessThanOrEqual: Int
   greaterThanOrEqual: Int
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input CampaignFilterOutcome {
@@ -7440,8 +7504,8 @@ input CampaignFilterOutcome {
   greaterThan: CampaignOutcome
   lessThanOrEqual: CampaignOutcome
   greaterThanOrEqual: CampaignOutcome
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: CampaignOutcome
+  isNotDistinctFrom: CampaignOutcome
 }
 
 input CampaignFilterStatus {
@@ -7453,8 +7517,8 @@ input CampaignFilterStatus {
   greaterThan: CampaignStatus
   lessThanOrEqual: CampaignStatus
   greaterThanOrEqual: CampaignStatus
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: CampaignStatus
+  isNotDistinctFrom: CampaignStatus
 }
 
 input CampaignFilterName {
@@ -7482,8 +7546,8 @@ input CampaignFilterId {
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
-  isDistinctFrom: String
-  isNotDistinctFrom: String
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input CampaignFilterInput {

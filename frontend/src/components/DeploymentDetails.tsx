@@ -51,6 +51,7 @@ import DeploymentStateComponent, {
   parseDeploymentState,
 } from "./DeploymentState";
 import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
+import ResourceStateIcon from "@/components/ResourceStateIcon";
 
 const DEPLOYMENT_DETAILS_EVENTS_PAGINATION_FRAGMENT = graphql`
   fragment DeploymentDetails_events on Deployment
@@ -88,6 +89,7 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
           }
           imageDeployment {
             state
+            isReady
             image {
               id
               reference
@@ -109,6 +111,7 @@ const DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT = graphql`
         node {
           id
           state
+          isReady
           network {
             id
             label
@@ -127,6 +130,7 @@ const DEPLOYMENT_DETAILS_VOLUME_DEPLOYMENTS_FRAGMENT = graphql`
         node {
           id
           state
+          isReady
           volume {
             id
             label
@@ -145,6 +149,7 @@ const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
         node {
           id
           state
+          isReady
           deviceMapping {
             id
             pathOnHost
@@ -277,7 +282,12 @@ const networkColumns = [
         defaultMessage="State"
       />
     ),
-    cell: ({ row }) => row.original.state ?? "",
+    cell: ({ row }) => (
+      <ResourceStateIcon
+        state={row.original.state}
+        isReady={row.original.isReady}
+      />
+    ),
   }),
 ];
 
@@ -307,7 +317,12 @@ const volumeColumns = [
         defaultMessage="State"
       />
     ),
-    cell: ({ row }) => row.original.state ?? "",
+    cell: ({ row }) => (
+      <ResourceStateIcon
+        state={row.original.state}
+        isReady={row.original.isReady}
+      />
+    ),
   }),
 ];
 
@@ -340,7 +355,12 @@ const deviceMappingColumns = [
         defaultMessage="State"
       />
     ),
-    cell: ({ row }) => row.original.state ?? "",
+    cell: ({ row }) => (
+      <ResourceStateIcon
+        state={row.original.state}
+        isReady={row.original.isReady}
+      />
+    ),
   }),
 ];
 
@@ -427,7 +447,10 @@ const ContainerDeploymentItem = ({
                 defaultMessage={" Image Status: "}
               />
             </strong>
-            {imageDeployment.state}
+            <ResourceStateIcon
+              state={imageDeployment.state}
+              isReady={imageDeployment.isReady}
+            />
           </span>
         </Row>
       )}
