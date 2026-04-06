@@ -16,7 +16,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
@@ -40,7 +39,8 @@ import DeviceGroupsTable from "@/components/DeviceGroupsTable";
 import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 
 const GET_DEVICE_GROUPS_QUERY = graphql`
@@ -225,26 +225,20 @@ const DeviceGroupsLayoutContainer = ({
     ),
   );
 
-  useEffect(() => {
-    const handler = _.debounce(() => {
-      refetch(
-        { first: RECORDS_TO_LOAD_FIRST, filter: connectionFilter },
-        { fetchPolicy: "network-only" },
-      );
-    }, 500);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText: searchText ?? "",
+    buildFilter: () => {
+      if (normalizedSearchText === "") {
+        return undefined;
+      }
 
-    handler();
-
-    return () => {
-      handler.cancel();
-    };
-  }, [connectionFilter, refetch]);
-
-  const loadNextDeviceGroups = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return connectionFilter;
+    },
+  });
 
   const deviceGroupsRef = data?.deviceGroups;
 
@@ -256,7 +250,7 @@ const DeviceGroupsLayoutContainer = ({
     <DeviceGroupsTable
       deviceGroupsRef={deviceGroupsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextDeviceGroups : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

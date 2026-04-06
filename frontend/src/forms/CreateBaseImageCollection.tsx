@@ -16,8 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
@@ -29,7 +28,7 @@ import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { BaseImageCollectionRecord } from "@/pages/BaseImageCollectionCreate";
 
 import type {
@@ -116,40 +115,24 @@ const CreateBaseImageCollectionForm = ({
 
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextBaseImageCollectionOptions = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        name: {
+          ilike: `%${text}%`,
+        },
+      };
+    },
+  });
 
   const systemModels = useMemo(() => {
     return (
@@ -293,9 +276,7 @@ const CreateBaseImageCollectionForm = ({
                 }
                 isOptionDisabled={isSystemModelUsedByOtherBaseImageCollection}
                 isLoading={isLoadingNext}
-                onMenuScrollToBottom={
-                  hasNext ? loadNextBaseImageCollectionOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMore}
                 onInputChange={(text) => setSearchText(text)}
               />
             )}

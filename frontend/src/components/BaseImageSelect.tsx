@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import type { FallbackProps } from "react-error-boundary";
@@ -42,8 +41,9 @@ import { BaseImageSelect_getBaseImageCollection_Query } from "@/api/__generated_
 import Button from "@/components/Button";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import { BaseImageCollectionRecord } from "@/forms/CreateUpdateCampaign";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageSelect_getBaseImageCollection_Query(
@@ -111,40 +111,24 @@ const BaseImageSelect = ({
 
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { version: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextOptions = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        version: {
+          ilike: `%${text}%`,
+        },
+      };
+    },
+  });
 
   const baseImages = useMemo(() => {
     return (
@@ -187,7 +171,7 @@ const BaseImageSelect = ({
         noBaseImageOptionsMessage(inputValue)
       }
       isLoading={isLoadingNext}
-      onMenuScrollToBottom={hasNext ? loadNextOptions : undefined}
+      onMenuScrollToBottom={onLoadMore}
       onInputChange={(text) => setSearchText(text)}
     />
   );

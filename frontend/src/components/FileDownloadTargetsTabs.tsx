@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
@@ -36,7 +36,8 @@ import type { ColumnId } from "@/components/FileDownloadTargetsTable";
 import FileDownloadTargetsTable, {
   columnIds,
 } from "@/components/FileDownloadTargetsTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Spinner from "./Spinner";
 
 const FILE_DOWNLOAD_TARGETS_FRAGMENT = graphql`
@@ -125,11 +126,11 @@ const FileDownloadTargetsTabs = ({
     );
   }, [activeTab, committedTab, refetch]);
 
-  const loadNextTargets = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+  });
 
   const targetsRef = data?.campaignTargets;
 
@@ -189,7 +190,7 @@ const FileDownloadTargetsTabs = ({
               campaignTargetsRef={targetsRef}
               hiddenColumns={hiddenColumns}
               loading={isLoadingNext}
-              onLoadMore={hasNext ? loadNextTargets : undefined}
+              onLoadMore={onLoadMore}
             />
           )}
         </div>

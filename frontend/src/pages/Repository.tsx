@@ -18,8 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -52,10 +51,10 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import UpdateRepositoryForm, {
   RepositoryOutputData,
 } from "@/forms/UpdateRepository";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 /* eslint-disable relay/unused-fields */
 const GET_REPOSITORY_QUERY = graphql`
@@ -143,45 +142,22 @@ const FilesLayoutContainer = ({
       repositoryRef,
     );
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [{ name: { ilike: `%${text}%` } }],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-    return () => {
-      debounceRefetch.cancel();
-    };
-  }, [debounceRefetch, searchText]);
-
-  const loadNextFiles = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        or: [{ name: { ilike: `%${text}%` } }],
+      };
+    },
+  });
 
   const filesRef = data?.files;
 
@@ -194,7 +170,7 @@ const FilesLayoutContainer = ({
       setErrorFeedback={setErrorFeedback}
       filesRef={filesRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextFiles : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

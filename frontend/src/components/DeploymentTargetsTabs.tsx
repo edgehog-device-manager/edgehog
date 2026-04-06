@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
@@ -36,7 +36,8 @@ import type { ColumnId } from "@/components/DeploymentTargetsTable";
 import DeploymentTargetsTable, {
   columnIds,
 } from "@/components/DeploymentTargetsTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Spinner from "./Spinner";
 
 /* eslint-disable relay/unused-fields */
@@ -122,11 +123,11 @@ const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
     );
   }, [activeTab, committedTab, refetch]);
 
-  const loadNextDeploymentTargets = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+  });
 
   const deploymentTargetsRef = data?.campaignTargets;
 
@@ -171,7 +172,7 @@ const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
               campaignTargetsRef={deploymentTargetsRef}
               hiddenColumns={hiddenColumns}
               loading={isLoadingNext}
-              onLoadMore={hasNext ? loadNextDeploymentTargets : undefined}
+              onLoadMore={onLoadMore}
             />
           )}
         </div>

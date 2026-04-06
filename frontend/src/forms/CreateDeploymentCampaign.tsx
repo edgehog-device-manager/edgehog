@@ -18,8 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -44,8 +43,8 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
 import ReleaseSelectWrapper from "@/components/ReleaseSelect";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import FormFeedback from "@/forms/FormFeedback";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   deploymentCampaignSchema,
   DeploymentCampaignFormData,
@@ -228,40 +227,25 @@ const CreateDeploymentCampaignForm = ({
     string | null
   >(null);
 
-  const debounceApplicationRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
+  const { onLoadMore: onLoadMoreApplicationOptions } =
+    useRelayConnectionPagination({
+      hasNext: hasNextApplication,
+      isLoadingNext: isLoadingNextApplication,
+      loadNext: loadNextApplications,
+      refetch: refetchApplications,
+      searchText: searchApplicationText,
+      buildFilter: (text) => {
         if (text === "") {
-          refetchApplications(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchApplications(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
+          return undefined;
         }
-      }, 500),
-    [refetchApplications],
-  );
 
-  useEffect(() => {
-    if (searchApplicationText !== null) {
-      debounceApplicationRefetch(searchApplicationText);
-    }
-  }, [debounceApplicationRefetch, searchApplicationText]);
-
-  const loadNextApplicationOptions = useCallback(() => {
-    if (hasNextApplication && !isLoadingNextApplication) {
-      loadNextApplications(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNextApplication, isLoadingNextApplication, loadNextApplications]);
+        return {
+          name: {
+            ilike: `%${text}%`,
+          },
+        };
+      },
+    });
 
   const applicationOptions = useMemo(() => {
     return (
@@ -306,40 +290,26 @@ const CreateDeploymentCampaignForm = ({
     null,
   );
 
-  const debounceChannelRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
+  const { onLoadMore: onLoadMoreChannelOptions } = useRelayConnectionPagination(
+    {
+      hasNext: hasNextChannel,
+      isLoadingNext: isLoadingNextChannel,
+      loadNext: loadNextChannels,
+      refetch: refetchChannels,
+      searchText: searchChannelText,
+      buildFilter: (text) => {
         if (text === "") {
-          refetchChannels(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchChannels(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
+          return undefined;
         }
-      }, 500),
-    [refetchChannels],
+
+        return {
+          name: {
+            ilike: `%${text}%`,
+          },
+        };
+      },
+    },
   );
-
-  useEffect(() => {
-    if (searchChannelText !== null) {
-      debounceChannelRefetch(searchChannelText);
-    }
-  }, [debounceChannelRefetch, searchChannelText]);
-
-  const loadNextChannelOptions = useCallback(() => {
-    if (hasNextChannel && !isLoadingNextChannel) {
-      loadNextChannels(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNextChannel, isLoadingNextChannel, loadNextChannels]);
 
   const channels = useMemo(() => {
     return (
@@ -467,9 +437,7 @@ const CreateDeploymentCampaignForm = ({
                   noApplicationOptionsMessage(inputValue)
                 }
                 isLoading={isLoadingNextApplication}
-                onMenuScrollToBottom={
-                  hasNextApplication ? loadNextApplicationOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMoreApplicationOptions}
                 onInputChange={(text) => setSearchApplicationText(text)}
               />
             )}
@@ -592,9 +560,7 @@ const CreateDeploymentCampaignForm = ({
                   noChannelOptionsMessage(inputValue)
                 }
                 isLoading={isLoadingNextChannel}
-                onMenuScrollToBottom={
-                  hasNextChannel ? loadNextChannelOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMoreChannelOptions}
                 onInputChange={(text) => setSearchChannelText(text)}
               />
             )}

@@ -16,8 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -41,8 +40,8 @@ import Form from "@/components/Form";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import FormFeedback from "@/forms/FormFeedback";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   UpdateCampaignFormData,
   updateCampaignSchema,
@@ -196,44 +195,25 @@ const CreateUpdateCampaignForm = ({
     string | null
   >(null);
 
-  const debounceBaseImageCollRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
+  const { onLoadMore: onLoadMoreBaseImageCollOptions } =
+    useRelayConnectionPagination({
+      hasNext: hasNextBaseImageColl,
+      isLoadingNext: isLoadingNextBaseImageColl,
+      loadNext: loadNextBaseImageColls,
+      refetch: refetchBaseImageColls,
+      searchText: searchBaseImageCollText,
+      buildFilter: (text) => {
         if (text === "") {
-          refetchBaseImageColls(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchBaseImageColls(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
+          return undefined;
         }
-      }, 500),
-    [refetchBaseImageColls],
-  );
 
-  useEffect(() => {
-    if (searchBaseImageCollText !== null) {
-      debounceBaseImageCollRefetch(searchBaseImageCollText);
-    }
-  }, [debounceBaseImageCollRefetch, searchBaseImageCollText]);
-
-  const loadNextBaseImageCollOptions = useCallback(() => {
-    if (hasNextBaseImageColl && !isLoadingNextBaseImageColl) {
-      loadNextBaseImageColls(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [
-    hasNextBaseImageColl,
-    isLoadingNextBaseImageColl,
-    loadNextBaseImageColls,
-  ]);
+        return {
+          name: {
+            ilike: `%${text}%`,
+          },
+        };
+      },
+    });
 
   const baseImageCollections = useMemo(() => {
     return (
@@ -279,40 +259,26 @@ const CreateUpdateCampaignForm = ({
     null,
   );
 
-  const debounceChannelRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
+  const { onLoadMore: onLoadMoreChannelOptions } = useRelayConnectionPagination(
+    {
+      hasNext: hasNextChannel,
+      isLoadingNext: isLoadingNextChannel,
+      loadNext: loadNextChannels,
+      refetch: refetchChannels,
+      searchText: searchChannelText,
+      buildFilter: (text) => {
         if (text === "") {
-          refetchChannels(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchChannels(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
+          return undefined;
         }
-      }, 500),
-    [refetchChannels],
+
+        return {
+          name: {
+            ilike: `%${text}%`,
+          },
+        };
+      },
+    },
   );
-
-  useEffect(() => {
-    if (searchChannelText !== null) {
-      debounceChannelRefetch(searchChannelText);
-    }
-  }, [debounceChannelRefetch, searchChannelText]);
-
-  const loadNextChannelOptions = useCallback(() => {
-    if (hasNextChannel && !isLoadingNextChannel) {
-      loadNextChannels(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNextChannel, isLoadingNextChannel, loadNextChannels]);
 
   const channels = useMemo(() => {
     return (
@@ -395,11 +361,7 @@ const CreateUpdateCampaignForm = ({
                   noBaseImageCollOptionsMessage(inputValue)
                 }
                 isLoading={isLoadingNextBaseImageColl}
-                onMenuScrollToBottom={
-                  hasNextBaseImageColl
-                    ? loadNextBaseImageCollOptions
-                    : undefined
-                }
+                onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
                 onInputChange={(text) => setSearchBaseImageCollText(text)}
               />
             )}
@@ -477,9 +439,7 @@ const CreateUpdateCampaignForm = ({
                   noChannelOptionsMessage(inputValue)
                 }
                 isLoading={isLoadingNextChannel}
-                onMenuScrollToBottom={
-                  hasNextChannel ? loadNextChannelOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMoreChannelOptions}
                 onInputChange={(text) => setSearchChannelText(text)}
               />
             )}

@@ -16,7 +16,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
@@ -40,7 +39,8 @@ import ChannelsTable from "@/components/ChannelsTable";
 import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 
 const GET_CHANNELS_QUERY = graphql`
@@ -230,26 +230,20 @@ const ChannelsLayoutContainer = ({
     ),
   );
 
-  useEffect(() => {
-    const handler = _.debounce(() => {
-      refetch(
-        { first: RECORDS_TO_LOAD_FIRST, filter: connectionFilter },
-        { fetchPolicy: "network-only" },
-      );
-    }, 500);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText: searchText ?? "",
+    buildFilter: () => {
+      if (normalizedSearchText === "") {
+        return undefined;
+      }
 
-    handler();
-
-    return () => {
-      handler.cancel();
-    };
-  }, [connectionFilter, refetch]);
-
-  const loadNextChannels = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return connectionFilter;
+    },
+  });
 
   const channelsRef = data?.channels;
 
@@ -261,7 +255,7 @@ const ChannelsLayoutContainer = ({
     <ChannelsTable
       channelsRef={channelsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextChannels : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

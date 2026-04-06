@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Col, Form, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
@@ -54,7 +53,7 @@ import Result from "@/components/Result";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_APPLICATION_QUERY = graphql`
   query Application_getApplication_Query(
@@ -210,44 +209,24 @@ const ReleasesLayoutContainer = ({
     ),
   );
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { version: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-
-    return () => {
-      debounceRefetch.cancel();
-    };
-  }, [debounceRefetch, searchText]);
-
-  const loadNextReleases = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        version: {
+          ilike: `%${text}%`,
+        },
+      };
+    },
+  });
 
   const releasesRef = data?.releases;
 
@@ -261,7 +240,7 @@ const ReleasesLayoutContainer = ({
         onDelete={onDelete}
         releasesRef={releasesRef}
         loading={isLoadingNext}
-        onLoadMore={hasNext ? loadNextReleases : undefined}
+        onLoadMore={onLoadMore}
       />
     </div>
   );
@@ -281,11 +260,11 @@ const DevicesLayoutContainer = ({
     Application_ReleasesFragment$key
   >(RELEASES_FRAGMENT, applicationRef);
 
-  const loadNextApplicationDevices = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+  });
 
   const applicationDevicesRef = data?.releases;
 
@@ -298,7 +277,7 @@ const DevicesLayoutContainer = ({
       <ApplicationDevicesTable
         applicationDevicesRef={applicationDevicesRef}
         loading={isLoadingNext}
-        onLoadMore={hasNext ? loadNextApplicationDevices : undefined}
+        onLoadMore={onLoadMore}
       />
     </div>
   );

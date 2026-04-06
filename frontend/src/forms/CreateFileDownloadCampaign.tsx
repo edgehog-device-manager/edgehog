@@ -19,9 +19,8 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import _ from "lodash";
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
@@ -46,8 +45,8 @@ import Form from "@/components/Form";
 import { FormRow } from "@/components/FormRow";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import FormFeedback from "@/forms/FormFeedback";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   FileDownloadCampaignFormData,
   fileDownloadCampaignSchema,
@@ -257,40 +256,25 @@ const CreateFileDownloadCampaignForm = ({
     string | null
   >(null);
 
-  const debounceRepositoryRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
+  const { onLoadMore: onLoadMoreRepositoryOptions } =
+    useRelayConnectionPagination({
+      hasNext: hasNextRepository,
+      isLoadingNext: isLoadingNextRepository,
+      loadNext: loadNextRepositories,
+      refetch: refetchRepositories,
+      searchText: searchRepositoryText,
+      buildFilter: (text) => {
         if (text === "") {
-          refetchRepositories(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchRepositories(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
+          return undefined;
         }
-      }, 500),
-    [refetchRepositories],
-  );
 
-  useEffect(() => {
-    if (searchRepositoryText !== null) {
-      debounceRepositoryRefetch(searchRepositoryText);
-    }
-  }, [debounceRepositoryRefetch, searchRepositoryText]);
-
-  const loadNextRepositoryOptions = useCallback(() => {
-    if (hasNextRepository && !isLoadingNextRepository) {
-      loadNextRepositories(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNextRepository, isLoadingNextRepository, loadNextRepositories]);
+        return {
+          name: {
+            ilike: `%${text}%`,
+          },
+        };
+      },
+    });
 
   const repositories = useMemo(() => {
     return (
@@ -332,40 +316,26 @@ const CreateFileDownloadCampaignForm = ({
     null,
   );
 
-  const debounceChannelRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
+  const { onLoadMore: onLoadMoreChannelOptions } = useRelayConnectionPagination(
+    {
+      hasNext: hasNextChannel,
+      isLoadingNext: isLoadingNextChannel,
+      loadNext: loadNextChannels,
+      refetch: refetchChannels,
+      searchText: searchChannelText,
+      buildFilter: (text) => {
         if (text === "") {
-          refetchChannels(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetchChannels(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
+          return undefined;
         }
-      }, 500),
-    [refetchChannels],
+
+        return {
+          name: {
+            ilike: `%${text}%`,
+          },
+        };
+      },
+    },
   );
-
-  useEffect(() => {
-    if (searchChannelText !== null) {
-      debounceChannelRefetch(searchChannelText);
-    }
-  }, [debounceChannelRefetch, searchChannelText]);
-
-  const loadNextChannelOptions = useCallback(() => {
-    if (hasNextChannel && !isLoadingNextChannel) {
-      loadNextChannels(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNextChannel, isLoadingNextChannel, loadNextChannels]);
 
   const channels = useMemo(() => {
     return (
@@ -446,9 +416,7 @@ const CreateFileDownloadCampaignForm = ({
                   noRepositoryOptionsMessage(inputValue)
                 }
                 isLoading={isLoadingNextRepository}
-                onMenuScrollToBottom={
-                  hasNextRepository ? loadNextRepositoryOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMoreRepositoryOptions}
                 onInputChange={(text) => setSearchRepositoryText(text)}
               />
             )}
@@ -533,9 +501,7 @@ const CreateFileDownloadCampaignForm = ({
                   noChannelOptionsMessage(inputValue)
                 }
                 isLoading={isLoadingNextChannel}
-                onMenuScrollToBottom={
-                  hasNextChannel ? loadNextChannelOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMoreChannelOptions}
                 onInputChange={(text) => setSearchChannelText(text)}
               />
             )}

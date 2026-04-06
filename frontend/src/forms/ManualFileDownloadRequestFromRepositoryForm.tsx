@@ -19,8 +19,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay";
@@ -41,8 +40,8 @@ import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import FormFeedback from "@/forms/FormFeedback";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   ManualFileDownloadRequestFromRepositoryData,
   manualFileDownloadRequestFromRepositorySchema,
@@ -140,37 +139,25 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
     string | null
   >(null);
 
-  const debounceRepositoryRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        refetchRepositories(
-          {
-            first: RECORDS_TO_LOAD_FIRST,
-            ...(text && { filter: { name: { ilike: `%${text}%` } } }),
+  const { onLoadMore: onLoadMoreRepositoryOptions } =
+    useRelayConnectionPagination({
+      hasNext: hasNextRepository,
+      isLoadingNext: isLoadingNextRepository,
+      loadNext: loadNextRepositories,
+      refetch: refetchRepositories,
+      searchText: searchRepositoryText,
+      buildFilter: (text) => {
+        if (text === "") {
+          return undefined;
+        }
+
+        return {
+          name: {
+            ilike: `%${text}%`,
           },
-          { fetchPolicy: "network-only" },
-        );
-      }, 500),
-    [refetchRepositories],
-  );
-
-  useEffect(() => {
-    return () => {
-      debounceRepositoryRefetch.cancel();
-    };
-  }, [debounceRepositoryRefetch]);
-
-  useEffect(() => {
-    if (searchRepositoryText !== null) {
-      debounceRepositoryRefetch(searchRepositoryText);
-    }
-  }, [debounceRepositoryRefetch, searchRepositoryText]);
-
-  const loadNextRepositoryOptions = useCallback(() => {
-    if (hasNextRepository && !isLoadingNextRepository) {
-      loadNextRepositories(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNextRepository, isLoadingNextRepository, loadNextRepositories]);
+        };
+      },
+    });
 
   const repositories = useMemo(
     () =>
@@ -235,9 +222,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
                 noRepositoryOptionsMessage(inputValue)
               }
               isLoading={isLoadingNextRepository}
-              onMenuScrollToBottom={
-                hasNextRepository ? loadNextRepositoryOptions : undefined
-              }
+              onMenuScrollToBottom={onLoadMoreRepositoryOptions}
               onInputChange={(text) => setSearchRepositoryText(text)}
             />
           )}

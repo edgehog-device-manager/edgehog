@@ -1,24 +1,21 @@
-/*
- * This file is part of Edgehog.
- *
- * Copyright 2025 SECO Mind Srl
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * SPDX-License-Identifier: Apache-2.0
- */
+// This file is part of Edgehog.
+//
+// Copyright 2025-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import type { FallbackProps } from "react-error-boundary";
 import { ErrorBoundary } from "react-error-boundary";
@@ -43,8 +40,9 @@ import {
 import Button from "@/components/Button";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import { ApplicationRecord } from "@/forms/CreateDeploymentCampaign";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_APPLICATION_QUERY = graphql`
   query ReleaseSelect_getApplication_Query(
@@ -109,40 +107,24 @@ const ReleaseSelect = ({
 
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { version: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextOptions = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        version: {
+          ilike: `%${text}%`,
+        },
+      };
+    },
+  });
 
   const releaseOptions = useMemo(() => {
     const releases =
@@ -192,7 +174,7 @@ const ReleaseSelect = ({
       getOptionValue={getReleaseValue}
       noOptionsMessage={({ inputValue }) => noReleaseOptionsMessage(inputValue)}
       isLoading={isLoadingNext}
-      onMenuScrollToBottom={hasNext ? loadNextOptions : undefined}
+      onMenuScrollToBottom={onLoadMore}
       onInputChange={(text) => setSearchText(text)}
     />
   );
