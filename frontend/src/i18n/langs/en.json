@@ -548,14 +548,35 @@
   "components.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.DeploymentDetails.applicationName": {
-    "defaultMessage": "Application Name:"
+  "components.DeploymentDetails.confirmLabel": {
+    "defaultMessage": "Confirm"
+  },
+  "components.DeploymentDetails.confirmModal.description": {
+    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+  },
+  "components.DeploymentDetails.confirmModal.title": {
+    "defaultMessage": "Upgrade Deployment"
   },
   "components.DeploymentDetails.containerWithIndex": {
     "defaultMessage": "Container {index}"
   },
   "components.DeploymentDetails.containersTab": {
     "defaultMessage": "Containers"
+  },
+  "components.DeploymentDetails.deleteErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot delete an application while it is offline."
+  },
+  "components.DeploymentDetails.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
+  },
+  "components.DeploymentDetails.deleteModal.note": {
+    "defaultMessage": "Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
+  },
+  "components.DeploymentDetails.deleteModal.title": {
+    "defaultMessage": "Delete Deployment"
+  },
+  "components.DeploymentDetails.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the deployment, please try again."
   },
   "components.DeploymentDetails.deviceMappings": {
     "defaultMessage": "Device Mappings"
@@ -569,23 +590,50 @@
   "components.DeploymentDetails.noContainers": {
     "defaultMessage": "No containers"
   },
+  "components.DeploymentDetails.noReleasesAvailable": {
+    "defaultMessage": "No Release Versions Available"
+  },
+  "components.DeploymentDetails.noReleasesFoundMatching": {
+    "defaultMessage": "No release versions found matching \"{inputValue}\""
+  },
   "components.DeploymentDetails.none": {
     "defaultMessage": "None"
   },
-  "components.DeploymentDetails.readiness": {
-    "defaultMessage": "Readiness:"
-  },
   "components.DeploymentDetails.releaseVersion": {
-    "defaultMessage": "Release Version:"
+    "defaultMessage": "v.{version}"
   },
-  "components.DeploymentDetails.status": {
-    "defaultMessage": "Status:"
+  "components.DeploymentDetails.selectOption": {
+    "defaultMessage": "Select a Release Version"
+  },
+  "components.DeploymentDetails.sendErrorFeedback": {
+    "defaultMessage": "Could not send the Application to the device, please try again."
+  },
+  "components.DeploymentDetails.sendErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
+  "components.DeploymentDetails.startErrorFeedback": {
+    "defaultMessage": "Could not Start the Deployed Application, please try again."
+  },
+  "components.DeploymentDetails.startErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot start an application while it is offline."
+  },
+  "components.DeploymentDetails.stopErrorFeedback": {
+    "defaultMessage": "Could not Stop the Deployed Application, please try again."
+  },
+  "components.DeploymentDetails.stopErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
   },
   "components.DeploymentDetails.unnamed": {
     "defaultMessage": "Unnamed"
   },
   "components.DeploymentDetails.unnamedImage": {
     "defaultMessage": "Unnamed image"
+  },
+  "components.DeploymentDetails.upgradeErrorFeedback": {
+    "defaultMessage": "Could not upgrade the deployment, please try again."
+  },
+  "components.DeploymentDetails.upgradeErrorOffline": {
+    "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
   "components.DeploymentDetails.volumes": {
     "defaultMessage": "Volumes"

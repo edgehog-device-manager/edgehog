@@ -16,32 +16,45 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment, usePaginationFragment } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  useMutation,
+  usePaginationFragment,
+} from "react-relay";
+import { useParams } from "react-router-dom";
+import Select, { SingleValue } from "react-select";
+import semver from "semver";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
 import type { DeploymentDetails_containerDeployments$key } from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
+import type { DeploymentDetails_deleteDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_deleteDeployment_Mutation.graphql";
 import type { DeploymentDetails_deviceMappingDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
 import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
 } from "@/api/__generated__/DeploymentDetails_events.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
+import type { DeploymentDetails_sendDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_sendDeployment_Mutation.graphql";
+import type { DeploymentDetails_startDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_startDeployment_Mutation.graphql";
+import type { DeploymentDetails_stopDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_stopDeployment_Mutation.graphql";
+import type { DeploymentDetails_upgradeDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_upgradeDeployment_Mutation.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
-import { Link, Route } from "@/Navigation";
-import DeploymentEventsCard from "./DeploymentEventsCard";
-import DeploymentReadiness from "./DeploymentReadiness";
-import DeploymentStateComponent, {
-  parseDeploymentState,
-} from "./DeploymentState";
-import Icon from "./Icon";
-import ResourceStateIcon from "./ResourceStateIcon";
+import ConfirmModal from "@/components/ConfirmModal";
+import DeleteModal from "@/components/DeleteModal";
+import DeploymentActionButtons from "@/components/DeploymentActionButtons";
+import DeploymentEventsCard from "@/components/DeploymentEventsCard";
+import { parseDeploymentState } from "@/components/DeploymentState";
+import Icon from "@/components/Icon";
+import ResourceStateIcon from "@/components/ResourceStateIcon";
+import { Link, Route, useNavigate } from "@/Navigation";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
@@ -158,7 +171,82 @@ const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
+const SEND_DEPLOYMENT_MUTATION = graphql`
+  mutation DeploymentDetails_sendDeployment_Mutation($id: ID!) {
+    sendDeployment(id: $id) {
+      result {
+        id
+        state
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
+const START_DEPLOYMENT_MUTATION = graphql`
+  mutation DeploymentDetails_startDeployment_Mutation($id: ID!) {
+    startDeployment(id: $id) {
+      result {
+        id
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
+const STOP_DEPLOYMENT_MUTATION = graphql`
+  mutation DeploymentDetails_stopDeployment_Mutation($id: ID!) {
+    stopDeployment(id: $id) {
+      result {
+        id
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
+const DELETE_DEPLOYMENT_MUTATION = graphql`
+  mutation DeploymentDetails_deleteDeployment_Mutation($id: ID!) {
+    deleteDeployment(id: $id) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
+const UPGRADE_DEPLOYMENT_MUTATION = graphql`
+  mutation DeploymentDetails_upgradeDeployment_Mutation(
+    $id: ID!
+    $input: UpgradeDeploymentInput!
+  ) {
+    upgradeDeployment(id: $id, input: $input) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
+type UpgradeTargetRelease = {
+  id: string;
+  version: string;
+};
+
+type SelectOption = {
+  value: string;
+  label: string;
+  disabled: boolean;
+};
+
 type Deployment = Deployment_getDeployment_Query$data["deployment"];
+
 export type Event = NonNullable<
   NonNullable<DeploymentDetails_events$data["events"]["edges"]>[number]["node"]
 >;
@@ -207,7 +295,6 @@ const buildSubTree = (
     children,
   };
 };
-
 interface ContainerDeploymentItemProps {
   index: number;
   containerFragmentKey: DeploymentDetails_networkDeployments$key &
@@ -393,26 +480,17 @@ const ContainerDeploymentItem = ({
   );
 };
 
-const DetailItem = ({
-  label,
-  children,
-}: {
-  label: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <div className="d-flex flex-sm-column flex-md-row flex-wrap mb-3 gap-2">
-    <div className="fw-semibold text-muted">{label}</div>
-    <div>{children}</div>
-  </div>
-);
+type DeploymentDetailsProps = {
+  deploymentRef: Deployment;
+  isOnline: boolean;
+  setErrorFeedback: (errorMessages: React.ReactNode) => void;
+};
 
 const DeploymentDetails = ({
   deploymentRef,
-}: {
-  deploymentRef: Deployment;
-}) => {
-  const intl = useIntl();
-
+  isOnline,
+  setErrorFeedback,
+}: DeploymentDetailsProps) => {
   const { data: eventsData } = usePaginationFragment<
     DeploymentEventsPaginationQuery,
     DeploymentDetails_events$key
@@ -427,81 +505,509 @@ const DeploymentDetails = ({
   const containerNodes =
     containersData?.containerDeployments?.edges?.map((e) => e.node) ?? [];
 
-  const { release, state, isReady } = deploymentRef || {};
-  const { application, version: releaseVersion, id: releaseId } = release || {};
+  const {
+    release,
+    state,
+    isReady = false,
+    id: deploymentId,
+  } = deploymentRef || {};
+
+  const {
+    application,
+    version: releaseVersion,
+    id: releaseId = "Unknown",
+  } = release || {};
+
+  const { name: applicationName = "Unknown", id: applicationId = "Unknown" } =
+    application || {};
+
+  const deploymentState = parseDeploymentState(state ?? undefined);
+
+  const intl = useIntl();
+  const navigate = useNavigate();
+  const { deviceId } = useParams();
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+
+  const [upgradeTargetRelease, setUpgradeTargetRelease] =
+    useState<UpgradeTargetRelease | null>(null);
+
+  const handleUpgradeReleaseChange = useCallback(
+    (option: SingleValue<SelectOption>) => {
+      if (option) {
+        setUpgradeTargetRelease({
+          id: option.value,
+          version: option.label,
+        });
+      } else {
+        setUpgradeTargetRelease(null);
+      }
+    },
+    [],
+  );
+
+  const upgradeReleaseOptions: SelectOption[] = useMemo(() => {
+    const releaseEdges = deploymentRef?.release?.application?.releases?.edges;
+    const currentVersion = deploymentRef?.release?.version;
+
+    if (!releaseEdges || !currentVersion) {
+      return [];
+    }
+
+    return releaseEdges
+      .flatMap((edge) => (edge?.node ? [edge.node] : []))
+      .filter((release) => {
+        if (release.version === currentVersion) {
+          return false;
+        }
+
+        const parsedCurrentVersion = semver.valid(currentVersion);
+        const parsedTargetVersion = semver.valid(release.version);
+
+        if (!parsedCurrentVersion || !parsedTargetVersion) {
+          return true;
+        }
+
+        return semver.gt(parsedTargetVersion, parsedCurrentVersion);
+      })
+      .map((release) => ({
+        value: release.id,
+        label: release.version,
+        disabled: false,
+      }));
+  }, [
+    deploymentRef?.release?.application?.releases?.edges,
+    deploymentRef?.release?.version,
+  ]);
+
+  const selectedUpgradeReleaseOption = useMemo(() => {
+    return (
+      upgradeReleaseOptions.find(
+        (option) => option.value === upgradeTargetRelease?.id,
+      ) || null
+    );
+  }, [upgradeReleaseOptions, upgradeTargetRelease?.id]);
+
+  const [sendDeployment] =
+    useMutation<DeploymentDetails_sendDeployment_Mutation>(
+      SEND_DEPLOYMENT_MUTATION,
+    );
+  const [startDeployment] =
+    useMutation<DeploymentDetails_startDeployment_Mutation>(
+      START_DEPLOYMENT_MUTATION,
+    );
+  const [stopDeployment] =
+    useMutation<DeploymentDetails_stopDeployment_Mutation>(
+      STOP_DEPLOYMENT_MUTATION,
+    );
+
+  const [deleteDeployment, isDeletingDeployment] =
+    useMutation<DeploymentDetails_deleteDeployment_Mutation>(
+      DELETE_DEPLOYMENT_MUTATION,
+    );
+
+  const [upgradeDeployment] =
+    useMutation<DeploymentDetails_upgradeDeployment_Mutation>(
+      UPGRADE_DEPLOYMENT_MUTATION,
+    );
+
+  const handleSendDeployedApplication = useCallback(
+    (deploymentId: string) => {
+      if (!isOnline) {
+        return setErrorFeedback(
+          <FormattedMessage
+            id="components.DeploymentDetails.sendErrorOffline"
+            defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
+          />,
+        );
+      }
+
+      sendDeployment({
+        variables: { id: deploymentId },
+        onCompleted: (_data, errors) => {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError: () => {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeploymentDetails.sendErrorFeedback"
+              defaultMessage="Could not send the Application to the device, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [isOnline, sendDeployment, setErrorFeedback],
+  );
+
+  const handleStartDeployedApplication = useCallback(
+    (deploymentId: string) => {
+      if (!isOnline) {
+        return setErrorFeedback(
+          <FormattedMessage
+            id="components.DeploymentDetails.startErrorOffline"
+            defaultMessage="The device is disconnected. You cannot start an application while it is offline."
+          />,
+        );
+      }
+
+      startDeployment({
+        variables: { id: deploymentId },
+        onCompleted: (_data, errors) => {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError: () => {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeploymentDetails.startErrorFeedback"
+              defaultMessage="Could not Start the Deployed Application, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [isOnline, startDeployment, setErrorFeedback],
+  );
+
+  const handleStopDeployedApplication = useCallback(
+    (deploymentId: string) => {
+      if (!isOnline) {
+        return setErrorFeedback(
+          <FormattedMessage
+            id="components.DeploymentDetails.stopErrorOffline"
+            defaultMessage="The device is disconnected. You cannot stop an application while it is offline."
+          />,
+        );
+      }
+
+      stopDeployment({
+        variables: { id: deploymentId },
+        onCompleted: (_data, errors) => {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError: () => {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeploymentDetails.stopErrorFeedback"
+              defaultMessage="Could not Stop the Deployed Application, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [isOnline, stopDeployment, setErrorFeedback],
+  );
+
+  const handleDeleteDeployedApplication = useCallback(
+    (deploymentId: string) => {
+      if (!isOnline) {
+        return setErrorFeedback(
+          <FormattedMessage
+            id="components.DeploymentDetails.deleteErrorOffline"
+            defaultMessage="The device is disconnected. You cannot delete an application while it is offline."
+          />,
+        );
+      }
+
+      deleteDeployment({
+        variables: { id: deploymentId },
+
+        onCompleted(_data, errors) {
+          if (
+            !errors ||
+            errors.length === 0 ||
+            errors[0].code === "not_found"
+          ) {
+            setErrorFeedback(null);
+            setShowDeleteModal(false);
+            if (deviceId) {
+              navigate({
+                route: Route.devicesEdit,
+                params: { deviceId },
+              });
+            }
+            return;
+          }
+
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+
+          setErrorFeedback(errorFeedback);
+          setShowDeleteModal(false);
+        },
+
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeploymentDetails.deletionErrorFeedback"
+              defaultMessage="Could not delete the deployment, please try again."
+            />,
+          );
+          setShowDeleteModal(false);
+        },
+      });
+    },
+    [deleteDeployment, setErrorFeedback, navigate, deviceId, isOnline],
+  );
+
+  const handleUpgradeDeployedRelease = useCallback(
+    (deploymentId: string, upgradeTargetReleaseId: string) => {
+      if (!isOnline) {
+        return setErrorFeedback(
+          <FormattedMessage
+            id="components.DeploymentDetails.upgradeErrorOffline"
+            defaultMessage="The device is disconnected. You cannot upgrade an application while it is offline."
+          />,
+        );
+      }
+
+      upgradeDeployment({
+        variables: {
+          id: deploymentId,
+          input: { target: upgradeTargetReleaseId },
+        },
+        onCompleted(data, errors) {
+          if (
+            !errors ||
+            errors.length === 0 ||
+            errors[0].code === "not_found"
+          ) {
+            setErrorFeedback(null);
+            setShowUpgradeModal(false);
+            if (deviceId && data.upgradeDeployment?.result?.id) {
+              navigate({
+                route: Route.deploymentEdit,
+                params: {
+                  deviceId,
+                  deploymentId: data.upgradeDeployment?.result?.id,
+                },
+              });
+            }
+            return;
+          }
+
+          const errorFeedback = errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(" ")} ${message}` : message,
+            )
+            .join(". \n");
+          setErrorFeedback(errorFeedback);
+          setShowUpgradeModal(false);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeploymentDetails.upgradeErrorFeedback"
+              defaultMessage="Could not upgrade the deployment, please try again."
+            />,
+          );
+          setShowUpgradeModal(false);
+        },
+      });
+    },
+    [upgradeDeployment, setErrorFeedback, isOnline, deviceId, navigate],
+  );
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, [setShowDeleteModal]);
+
+  const handleShowUpgradeModal = useCallback(() => {
+    setShowUpgradeModal(true);
+  }, [setShowUpgradeModal]);
 
   return (
     <div>
       <Card className="mb-4">
         <Card.Body>
-          <Row className="d-flex flex-column flex-md-row flex-wrap">
-            <Col sm={12} lg={3}>
-              <DetailItem
-                label={
-                  <FormattedMessage
-                    id="components.DeploymentDetails.applicationName"
-                    defaultMessage="Application Name: "
-                  />
-                }
-              >
-                <Link
-                  route={Route.application}
-                  params={{ applicationId: application?.id || "unknown" }}
-                >
-                  {application?.name || "Unknown"}
-                </Link>
-              </DetailItem>
-            </Col>
-            <Col sm={12} lg={3}>
-              <DetailItem
-                label={
-                  <FormattedMessage
-                    id="components.DeploymentDetails.releaseVersion"
-                    defaultMessage="Release Version: "
-                  />
-                }
-              >
-                <Link
-                  route={Route.release}
-                  params={{
-                    applicationId: application?.id || "unknown",
-                    releaseId: releaseId || "unknown",
-                  }}
-                >
-                  {releaseVersion || "Unknown"}
-                </Link>
-              </DetailItem>
-            </Col>
-            <Col sm={12} lg={3}>
-              <DetailItem
-                label={
-                  <FormattedMessage
-                    id="components.DeploymentDetails.status"
-                    defaultMessage="Status: "
-                  />
-                }
-              >
-                <DeploymentStateComponent
-                  state={parseDeploymentState(state || undefined)}
-                  isReady={isReady}
+          <Row className="d-flex align-items-center justify-content-between flex-wrap">
+            <Col
+              className="d-flex flex-column flex-md-row align-items-md-center gap-4 ms-2"
+              xs="auto"
+            >
+              <Link route={Route.application} params={{ applicationId }}>
+                {applicationName}
+              </Link>
+
+              <Link route={Route.release} params={{ applicationId, releaseId }}>
+                <FormattedMessage
+                  id="components.DeploymentDetails.releaseVersion"
+                  defaultMessage="v.{version}"
+                  values={{ version: releaseVersion }}
                 />
-              </DetailItem>
+              </Link>
             </Col>
-            <Col sm={12} lg={3}>
-              <DetailItem
-                label={
-                  <FormattedMessage
-                    id="components.DeploymentDetails.readiness"
-                    defaultMessage="Readiness: "
-                  />
+
+            <Col
+              xs="auto"
+              className="d-flex justify-content-end me-2 mt-2 mt-md-0"
+            >
+              <DeploymentActionButtons
+                state={deploymentState}
+                isReady={isReady}
+                isDeleting={deploymentState === "DELETING"}
+                onStart={() =>
+                  deploymentId && handleStartDeployedApplication(deploymentId)
                 }
-              >
-                <DeploymentReadiness isReady={isReady} />
-              </DetailItem>
+                onStop={() =>
+                  deploymentId && handleStopDeployedApplication(deploymentId)
+                }
+                onRedeploy={() =>
+                  deploymentId && handleSendDeployedApplication(deploymentId)
+                }
+                onUpgrade={() => {
+                  setUpgradeTargetRelease(null);
+                  handleShowUpgradeModal();
+                }}
+                onDelete={() => {
+                  handleShowDeleteModal();
+                }}
+              />
             </Col>
           </Row>
         </Card.Body>
       </Card>
+      {showDeleteModal && (
+        <DeleteModal
+          confirmText={applicationName || ""}
+          onCancel={() => setShowDeleteModal(false)}
+          onConfirm={() => {
+            if (deploymentRef?.id) {
+              handleDeleteDeployedApplication(deploymentRef.id);
+            }
+            setShowDeleteModal(false);
+          }}
+          isDeleting={isDeletingDeployment}
+          title={
+            <FormattedMessage
+              id="components.DeploymentDetails.deleteModal.title"
+              defaultMessage="Delete Deployment"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.DeploymentDetails.deleteModal.description"
+              defaultMessage="This action cannot be undone. This will permanently delete the deployment."
+            />
+          </p>
+          <p className="text-muted small">
+            <FormattedMessage
+              id="components.DeploymentDetails.deleteModal.note"
+              defaultMessage="Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
+            />
+          </p>
+        </DeleteModal>
+      )}
+      {showUpgradeModal && (
+        <ConfirmModal
+          confirmLabel={
+            <FormattedMessage
+              id="components.DeploymentDetails.confirmLabel"
+              defaultMessage="Confirm"
+            />
+          }
+          disabled={!deploymentRef || !upgradeTargetRelease}
+          onCancel={() => {
+            setShowUpgradeModal(false);
+            setUpgradeTargetRelease(null);
+          }}
+          onConfirm={() => {
+            if (deploymentRef && upgradeTargetRelease) {
+              handleUpgradeDeployedRelease(
+                deploymentRef.id,
+                upgradeTargetRelease.id,
+              );
+            }
+            setShowUpgradeModal(false);
+            setUpgradeTargetRelease(null);
+          }}
+          title={
+            <FormattedMessage
+              id="components.DeploymentDetails.confirmModal.title"
+              defaultMessage="Upgrade Deployment"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.DeploymentDetails.confirmModal.description"
+              defaultMessage="Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+              values={{
+                application: applicationName,
+                currentVersion: releaseVersion,
+                bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+              }}
+            />
+          </p>
+
+          <Select
+            value={selectedUpgradeReleaseOption}
+            onChange={handleUpgradeReleaseChange}
+            options={upgradeReleaseOptions}
+            isOptionDisabled={(option) => option.disabled}
+            isClearable
+            placeholder={intl.formatMessage({
+              id: "components.DeploymentDetails.selectOption",
+              defaultMessage: "Select a Release Version",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              inputValue
+                ? intl.formatMessage(
+                    {
+                      id: "components.DeploymentDetails.noReleasesFoundMatching",
+                      defaultMessage:
+                        'No release versions found matching "{inputValue}"',
+                    },
+                    { inputValue },
+                  )
+                : upgradeReleaseOptions.length === 0
+                  ? intl.formatMessage({
+                      id: "components.DeploymentDetails.noReleasesAvailable",
+                      defaultMessage: "No Release Versions Available",
+                    })
+                  : intl.formatMessage({
+                      id: "components.DeploymentDetails.selectOption",
+                      defaultMessage: "Select a Release Version",
+                    })
+            }
+            filterOption={(option, inputValue) => {
+              // Search by release version label only.
+              return option.label
+                .toLowerCase()
+                .includes(inputValue.toLowerCase());
+            }}
+          />
+        </ConfirmModal>
+      )}
 
       <Tabs
         defaultActiveKey="containers"
@@ -515,9 +1021,9 @@ const DeploymentDetails = ({
             defaultMessage: "Containers",
           })}
         >
-          <div className="px-3 d-flex flex-column gap-3">
+          <div>
             {containerNodes.length === 0 ? (
-              <div className="p-3 text-muted italic">
+              <div className="p-2">
                 <FormattedMessage
                   id="components.DeploymentDetails.noContainers"
                   defaultMessage="No containers"

@@ -45,7 +45,7 @@ import DeploymentStateComponent, {
 } from "@/components/DeploymentState";
 import DeploymentReadiness from "@/components/DeploymentReadiness";
 import ContainerStatusList from "@/components/ContainerStatusList";
-import "@/components/DeployedApplicationsTable.scss";
+import "@/components/DeploymentActionButtons.scss";
 
 // We use graphql fields below in columns configuration
 

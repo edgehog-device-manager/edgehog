@@ -58,6 +58,7 @@ const GET_DEPLOYMENT_QUERY = graphql`
       isReady
       device {
         name
+        online
       }
       release {
         id
@@ -126,9 +127,13 @@ const DEPLOYMENT_UPDATED_SUBSCRIPTION = graphql`
 
 interface DeploymentContentProps {
   deployment: NonNullable<Deployment_getDeployment_Query$data["deployment"]>;
+  isOnline: boolean;
 }
 
-const DeploymentContent = ({ deployment }: DeploymentContentProps) => {
+const DeploymentContent = ({
+  deployment,
+  isOnline,
+}: DeploymentContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   return (
@@ -145,7 +150,12 @@ const DeploymentContent = ({ deployment }: DeploymentContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <DeploymentDetails deploymentRef={deployment} />
+
+        <DeploymentDetails
+          deploymentRef={deployment}
+          isOnline={isOnline}
+          setErrorFeedback={setErrorFeedback}
+        />
       </Page.Main>
     </Page>
   );
@@ -164,6 +174,7 @@ const DeploymentWrapper = ({
     GET_DEPLOYMENT_QUERY,
     getDeploymentQuery,
   );
+  const isOnline = deployment?.device?.online ?? false;
 
   if (!deployment) {
     return (
@@ -175,7 +186,7 @@ const DeploymentWrapper = ({
           />
         }
       >
-        <Link route={Route.devicesEdit} params={{ deviceId: deviceId }}>
+        <Link route={Route.devicesEdit} params={{ deviceId }}>
           <FormattedMessage
             id="pages.Deployment.deploymentNotFound.message"
             defaultMessage="Return to the device page."
@@ -185,12 +196,11 @@ const DeploymentWrapper = ({
     );
   }
 
-  return <DeploymentContent deployment={deployment} />;
+  return <DeploymentContent deployment={deployment} isOnline={isOnline} />;
 };
 
 const DeploymentPage = () => {
-  const { deploymentId = "" } = useParams();
-  const { deviceId = "" } = useParams();
+  const { deploymentId = "", deviceId = "" } = useParams();
 
   const [getDeploymentQuery, getDeployment] =
     useQueryLoader<Deployment_getDeployment_Query>(GET_DEPLOYMENT_QUERY);
