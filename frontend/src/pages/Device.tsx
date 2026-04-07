@@ -80,7 +80,7 @@ import DeviceNetworkInterfacesTab from "@/components/DeviceTabs/NetworkInterface
 import DeviceLocationTab from "@/components/DeviceTabs/LocationTab";
 import DeviceWiFiScanResultsTab from "@/components/DeviceTabs/WiFiScanResultsTab";
 import DeviceSoftwareUpdateTab from "@/components/DeviceTabs/SoftwareUpdateTab";
-import DeviceFilesUploadTab from "@/components/DeviceTabs/FilesUploadTab";
+import DeviceFileManagementTab from "@/components/DeviceTabs/FileManagementTab";
 import DeviceApplicationsTab from "@/components/DeviceTabs/ApplicationsTab";
 
 const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
@@ -135,7 +135,7 @@ const GET_DEVICE_QUERY = graphql`
       ...SoftwareUpdateTab_otaOperations
       ...CellularConnectionTab_cellularConnection
       ...NetworkInterfacesTab_networkInterfaces
-      ...FilesUploadTab_fileDownloadRequests
+      ...FileManagementTab_fileManagement
       ...Device_connectionStatus
     }
     ...ApplicationsTab_deployedApplications
@@ -926,7 +926,7 @@ const DeviceContent = ({
               "device-network-interfaces-tab",
               "device-wifi-scan-results-tab",
               "device-software-update-tab",
-              "device-files-upload-tab",
+              "device-file-management-tab",
               "applications-tab",
             ]}
           >
@@ -942,7 +942,7 @@ const DeviceContent = ({
             <DeviceLocationTab deviceRef={device} />
             <DeviceWiFiScanResultsTab deviceRef={device} />
             <DeviceSoftwareUpdateTab deviceRef={device} />
-            <DeviceFilesUploadTab deviceRef={device} />
+            <DeviceFileManagementTab deviceRef={device} />
             <DeviceApplicationsTab deviceRef={deviceData} />
           </Tabs>
         </Stack>

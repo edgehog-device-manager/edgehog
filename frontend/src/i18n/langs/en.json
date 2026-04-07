@@ -751,6 +751,30 @@
   "components.DeviceTabs.CellularConnectionTab": {
     "defaultMessage": "Cellular Connection"
   },
+  "components.DeviceTabs.FileManagementTab.fileManagementLabel": {
+    "defaultMessage": "File Management Mode"
+  },
+  "components.DeviceTabs.FileManagementTab.fromDevice": {
+    "defaultMessage": "From Device"
+  },
+  "components.DeviceTabs.FileManagementTab.toDeviceDirect": {
+    "defaultMessage": "To Device - Direct File"
+  },
+  "components.DeviceTabs.FileManagementTab.toDeviceRepository": {
+    "defaultMessage": "To Device - Repository"
+  },
+  "components.DeviceTabs.FilesDownloadTab": {
+    "defaultMessage": "Files Download"
+  },
+  "components.DeviceTabs.FilesDownloadTab.error.unknownError": {
+    "defaultMessage": "An unknown error occurred."
+  },
+  "components.DeviceTabs.FilesDownloadTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.DeviceTabs.FilesDownloadTab.uploadSource": {
+    "defaultMessage": "Upload Source"
+  },
   "components.DeviceTabs.FilesUploadTab": {
     "defaultMessage": "Files Upload"
   },
@@ -1048,6 +1072,45 @@
   },
   "components.FileSelect.noFilesFoundMatching": {
     "defaultMessage": "No files found matching \"{inputValue}\""
+  },
+  "components.FileUploadRequestsTable.actions": {
+    "defaultMessage": "Actions"
+  },
+  "components.FileUploadRequestsTable.actions.notAvailableYet": {
+    "defaultMessage": "Not available yet"
+  },
+  "components.FileUploadRequestsTable.compression": {
+    "defaultMessage": "Compression"
+  },
+  "components.FileUploadRequestsTable.compression.none": {
+    "defaultMessage": "None"
+  },
+  "components.FileUploadRequestsTable.downloadError": {
+    "defaultMessage": "Failed to download file"
+  },
+  "components.FileUploadRequestsTable.noRequests": {
+    "defaultMessage": "No file upload requests have been sent yet."
+  },
+  "components.FileUploadRequestsTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.FileUploadRequestsTable.responseMessage": {
+    "defaultMessage": "Response Message"
+  },
+  "components.FileUploadRequestsTable.source": {
+    "defaultMessage": "Source"
+  },
+  "components.FileUploadRequestsTable.source.filesystem": {
+    "defaultMessage": "FILESYSTEM: {source}"
+  },
+  "components.FileUploadRequestsTable.source.storage": {
+    "defaultMessage": "STORAGE: {source}"
+  },
+  "components.FileUploadRequestsTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.FileUploadRequestsTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
   },
   "components.FilesTable.action": {
     "defaultMessage": "Action"
@@ -2474,6 +2537,45 @@
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
     "defaultMessage": "User ID"
+  },
+  "forms.ManualFileUploadRequestForm.compressionHint": {
+    "defaultMessage": "Optional compression format. Leave empty for no compression."
+  },
+  "forms.ManualFileUploadRequestForm.compressionLabel": {
+    "defaultMessage": "Compression"
+  },
+  "forms.ManualFileUploadRequestForm.compressionNone": {
+    "defaultMessage": "None"
+  },
+  "forms.ManualFileUploadRequestForm.compressionTarGz": {
+    "defaultMessage": "tar.gz"
+  },
+  "forms.ManualFileUploadRequestForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "forms.ManualFileUploadRequestForm.sourceLabel": {
+    "defaultMessage": "Source"
+  },
+  "forms.ManualFileUploadRequestForm.sourcePathHint": {
+    "defaultMessage": "Absolute path to the file on the device that should be uploaded."
+  },
+  "forms.ManualFileUploadRequestForm.sourceStorageCreateOption": {
+    "defaultMessage": "Use \"{value}\""
+  },
+  "forms.ManualFileUploadRequestForm.sourceStorageHint": {
+    "defaultMessage": "Select a known storage file ID from previous storage downloads, or type one manually."
+  },
+  "forms.ManualFileUploadRequestForm.sourceStorageNoOptions": {
+    "defaultMessage": "No known storage file IDs for this device yet."
+  },
+  "forms.ManualFileUploadRequestForm.sourceStoragePlaceholder": {
+    "defaultMessage": "Select or enter a storage file ID"
+  },
+  "forms.ManualFileUploadRequestForm.sourceTypeLabel": {
+    "defaultMessage": "Source Type"
+  },
+  "forms.ManualFileUploadRequestForm.uploadButton": {
+    "defaultMessage": "Request Upload"
   },
   "forms.ManualOtaFromCollectionForm.baseImageCollectionOption": {
     "defaultMessage": "Search or select a base image collection..."

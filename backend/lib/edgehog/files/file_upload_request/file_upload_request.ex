@@ -22,8 +22,10 @@ defmodule Edgehog.Files.FileUploadRequest do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Files,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Files.FileUploadRequest.Calculations
   alias Edgehog.Files.FileUploadRequest.Changes
   alias Edgehog.Files.FileUploadRequest.FileSource
   alias Edgehog.Files.FileUploadRequest.ManualActions
@@ -31,10 +33,30 @@ defmodule Edgehog.Files.FileUploadRequest do
 
   graphql do
     type :file_upload_request
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :file_upload_requests do
+        action_types [:create, :update]
+      end
+
+      subscribe :file_upload_requests_by_device do
+        action_types [:create, :update]
+        read_action :read_by_device
+        relay_id_translations device_id: :device
+      end
+    end
   end
 
   actions do
     defaults [:read, :destroy]
+
+    read :read_by_device do
+      argument :device_id, :id, allow_nil?: false
+
+      get_by :device_id
+    end
 
     create :send_request do
       accept [:source, :source_type, :compression, :progress_tracked, :http_headers]
@@ -157,6 +179,16 @@ defmodule Edgehog.Files.FileUploadRequest do
       allow_nil? false
       public? true
       attribute_public? false
+    end
+  end
+
+  calculations do
+    calculate :get_presigned_url, :string do
+      public? true
+
+      description "Get a presigned URL for downloading the uploaded file. The URL is valid for a limited time."
+
+      calculation Calculations.GetPresignedUrl
     end
   end
 

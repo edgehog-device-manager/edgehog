@@ -5119,6 +5119,9 @@ input DeviceFilterInput {
   "The existing file download requests for this device"
   fileDownloadRequests: FileDownloadRequestFilterInput
 
+  "The existing file upload requests for this device"
+  fileUploadRequests: FileUploadRequestFilterInput
+
   applicationDeployments: DeploymentFilterInput
 }
 
@@ -5241,6 +5244,27 @@ type Device implements Node {
     last: Int
   ): FileDownloadRequestConnection!
 
+  "The existing file upload requests for this device"
+  fileUploadRequests(
+    "How to sort the records in the response"
+    sort: [FileUploadRequestSortInput]
+
+    "A filter to limit the results"
+    filter: FileUploadRequestFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): FileUploadRequestConnection!
+
   applicationDeployments(
     "How to sort the records in the response"
     sort: [DeploymentSortInput]
@@ -5315,6 +5339,16 @@ type Device implements Node {
   wifiScanResults: [WifiScanResult!]
 }
 
+type file_upload_requests_by_device_result {
+  created: FileUploadRequest
+  updated: FileUploadRequest
+}
+
+type file_upload_requests_result {
+  created: FileUploadRequest
+  updated: FileUploadRequest
+}
+
 "The result of the :create_file_upload_request mutation"
 type CreateFileUploadRequestResult {
   "The successful result of the mutation"
@@ -5333,19 +5367,246 @@ input CreateFileUploadRequestInput {
   deviceId: ID!
 }
 
+enum FileUploadRequestSortField {
+  ID
+  URL
+  SOURCE
+  SOURCE_TYPE
+  COMPRESSION
+  PROGRESS_TRACKED
+  STATUS
+  PROGRESS_PERCENTAGE
+  RESPONSE_CODE
+  RESPONSE_MESSAGE
+  HTTP_HEADERS
+}
+
+":file_upload_request connection"
+type FileUploadRequestConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":file_upload_request edges"
+  edges: [FileUploadRequestEdge!]
+}
+
+":file_upload_request edge"
+type FileUploadRequestEdge {
+  "Cursor"
+  cursor: String!
+
+  ":file_upload_request node"
+  node: FileUploadRequest!
+}
+
+input FileUploadRequestFilterHttpHeaders {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
+  isDistinctFrom: JsonString
+  isNotDistinctFrom: JsonString
+}
+
+input FileUploadRequestFilterResponseMessage {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  like: String
+  ilike: String
+}
+
+input FileUploadRequestFilterResponseCode {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input FileUploadRequestFilterProgressPercentage {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input FileUploadRequestFilterStatus {
+  isNil: Boolean
+  eq: FileUploadRequestStatus
+  notEq: FileUploadRequestStatus
+  in: [FileUploadRequestStatus]
+  lessThan: FileUploadRequestStatus
+  greaterThan: FileUploadRequestStatus
+  lessThanOrEqual: FileUploadRequestStatus
+  greaterThanOrEqual: FileUploadRequestStatus
+  isDistinctFrom: FileUploadRequestStatus
+  isNotDistinctFrom: FileUploadRequestStatus
+}
+
+input FileUploadRequestFilterProgressTracked {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input FileUploadRequestFilterCompression {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  like: String
+  ilike: String
+}
+
+input FileUploadRequestFilterSourceType {
+  isNil: Boolean
+  eq: FileSource
+  notEq: FileSource
+  in: [FileSource!]
+  lessThan: FileSource
+  greaterThan: FileSource
+  lessThanOrEqual: FileSource
+  greaterThanOrEqual: FileSource
+  isDistinctFrom: FileSource
+  isNotDistinctFrom: FileSource
+}
+
+input FileUploadRequestFilterSource {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  like: String
+  ilike: String
+}
+
+input FileUploadRequestFilterUrl {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  like: String
+  ilike: String
+}
+
+input FileUploadRequestFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input FileUploadRequestFilterInput {
+  and: [FileUploadRequestFilterInput!]
+  or: [FileUploadRequestFilterInput!]
+  not: [FileUploadRequestFilterInput!]
+  id: FileUploadRequestFilterId
+  url: FileUploadRequestFilterUrl
+  source: FileUploadRequestFilterSource
+  sourceType: FileUploadRequestFilterSourceType
+  compression: FileUploadRequestFilterCompression
+  progressTracked: FileUploadRequestFilterProgressTracked
+  status: FileUploadRequestFilterStatus
+  progressPercentage: FileUploadRequestFilterProgressPercentage
+  responseCode: FileUploadRequestFilterResponseCode
+  responseMessage: FileUploadRequestFilterResponseMessage
+  httpHeaders: FileUploadRequestFilterHttpHeaders
+  device: DeviceFilterInput
+}
+
+input FileUploadRequestSortInput {
+  order: SortOrder
+  field: FileUploadRequestSortField!
+}
+
 type FileUploadRequest {
   id: ID!
+
   url: String!
+
   source: String
+
   sourceType: FileSource!
+
   compression: String
+
   progressTracked: Boolean
+
   status: FileUploadRequestStatus
+
   progressPercentage: Int
+
   responseCode: Int
+
   responseMessage: String
+
   httpHeaders: JsonString
+
   device: Device!
+
+  "Get a presigned URL for downloading the uploaded file. The URL is valid for a limited time."
+  getPresignedUrl: String
 }
 
 type file_download_requests_by_device_result {
@@ -8317,6 +8578,16 @@ type RootSubscriptionType {
 
     deviceId: ID!
   ): file_download_requests_by_device_result
+  fileUploadRequests(
+    "A filter to limit the results"
+    filter: FileUploadRequestFilterInput
+  ): file_upload_requests_result
+  fileUploadRequestsByDevice(
+    "A filter to limit the results"
+    filter: FileUploadRequestFilterInput
+
+    deviceId: ID!
+  ): file_upload_requests_by_device_result
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput

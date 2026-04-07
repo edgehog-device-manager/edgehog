@@ -608,13 +608,20 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
 
 type FilesUploadTabProps = {
   deviceRef: FilesUploadTab_fileDownloadRequests$key;
+  embedded?: boolean;
+  embeddedMode?: "file" | "repository";
 };
 
-const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
+const FilesUploadTab = ({
+  deviceRef,
+  embedded = false,
+  embeddedMode,
+}: FilesUploadTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
 
   const [updateMode, setUpdateMode] = useState<"repository" | "file">("file");
+  const effectiveUpdateMode = embeddedMode ?? updateMode;
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
@@ -689,21 +696,9 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
     return null;
   }
 
-  return (
-    <Tab
-      eventKey="device-files-upload-tab"
-      title={intl.formatMessage({
-        id: "components.DeviceTabs.FilesUploadTab",
-        defaultMessage: "Files Upload",
-      })}
-    >
+  const content = (
+    <>
       <div className="mt-3">
-        <h6>
-          <FormattedMessage
-            id="components.DeviceTabs.FilesUploadTab.uploadLocation"
-            defaultMessage="Upload Location"
-          />
-        </h6>
         <Alert
           show={!!errorFeedback}
           variant="danger"
@@ -715,47 +710,49 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
 
         <Suspense fallback={<Spinner />}>
           <Stack direction="vertical" gap={3} className="mt-3">
-            <div>
-              <ToggleButtonGroup
-                type="radio"
-                name="updateMode"
-                value={updateMode}
-                onChange={setUpdateMode}
-                size="sm"
-              >
-                <ToggleButton
-                  id="mode-file"
-                  value="file"
-                  variant={
-                    updateMode === "file" ? "primary" : "outline-secondary"
-                  }
-                  className="fw-medium px-3"
+            {embeddedMode == null && (
+              <div>
+                <ToggleButtonGroup
+                  type="radio"
+                  name="updateMode"
+                  value={updateMode}
+                  onChange={setUpdateMode}
+                  size="sm"
                 >
-                  <FormattedMessage
-                    id="components.DeviceTabs.FilesUploadTab.modeFile"
-                    defaultMessage="Direct File"
-                  />
-                </ToggleButton>
+                  <ToggleButton
+                    id="mode-file"
+                    value="file"
+                    variant={
+                      updateMode === "file" ? "primary" : "outline-secondary"
+                    }
+                    className="fw-medium px-3"
+                  >
+                    <FormattedMessage
+                      id="components.DeviceTabs.FilesUploadTab.modeFile"
+                      defaultMessage="Direct File"
+                    />
+                  </ToggleButton>
 
-                <ToggleButton
-                  id="mode-collection"
-                  value="repository"
-                  variant={
-                    updateMode === "repository"
-                      ? "primary"
-                      : "outline-secondary"
-                  }
-                  className="fw-medium px-3"
-                >
-                  <FormattedMessage
-                    id="components.DeviceTabs.FilesUploadTab.modeRepository"
-                    defaultMessage="Repository"
-                  />
-                </ToggleButton>
-              </ToggleButtonGroup>
-            </div>
+                  <ToggleButton
+                    id="mode-collection"
+                    value="repository"
+                    variant={
+                      updateMode === "repository"
+                        ? "primary"
+                        : "outline-secondary"
+                    }
+                    className="fw-medium px-3"
+                  >
+                    <FormattedMessage
+                      id="components.DeviceTabs.FilesUploadTab.modeRepository"
+                      defaultMessage="Repository"
+                    />
+                  </ToggleButton>
+                </ToggleButtonGroup>
+              </div>
+            )}
 
-            {updateMode === "file" ? (
+            {effectiveUpdateMode === "file" ? (
               <ManualFileDownloadRequestFormWrapper
                 setErrorFeedback={setErrorFeedback}
                 deviceId={deviceId}
@@ -788,6 +785,30 @@ const FilesUploadTab = ({ deviceRef }: FilesUploadTabProps) => {
         </h5>
 
         <FileDownloadRequestsTable requests={fileDownloadRequests} />
+      </div>
+    </>
+  );
+
+  if (embedded) {
+    return content;
+  }
+
+  return (
+    <Tab
+      eventKey="device-files-upload-tab"
+      title={intl.formatMessage({
+        id: "components.DeviceTabs.FilesUploadTab",
+        defaultMessage: "Files Upload",
+      })}
+    >
+      <div className="mt-3">
+        <h5>
+          <FormattedMessage
+            id="components.DeviceTabs.FilesUploadTab.uploadLocation"
+            defaultMessage="Upload Location"
+          />
+        </h5>
+        {content}
       </div>
     </Tab>
   );

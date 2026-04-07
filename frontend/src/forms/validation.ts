@@ -259,7 +259,21 @@ const fileDestinationTypeSchema = z.enum([
 
 type FileDestinationType = z.infer<typeof fileDestinationTypeSchema>;
 
+const fileSourceTypeSchema = z.enum(["STORAGE", "FILESYSTEM"]);
+
+type FileSourceType = z.infer<typeof fileSourceTypeSchema>;
+
 const nullableDestinationSchema = z.preprocess((value) => {
+  if (typeof value !== "string") {
+    return value ?? null;
+  }
+
+  const trimmed = value.trim();
+
+  return trimmed === "" ? null : trimmed;
+}, z.string().nullable());
+
+const nullableSourceSchema = z.preprocess((value) => {
   if (typeof value !== "string") {
     return value ?? null;
   }
@@ -632,6 +646,29 @@ const manualFileDownloadRequestFromRepositorySchema = z
 type ManualFileDownloadRequestFromRepositoryData = z.infer<
   typeof manualFileDownloadRequestFromRepositorySchema
 >;
+
+const fileUploadRequestFormSchema = z
+  .object({
+    sourceType: fileSourceTypeSchema,
+    source: nullableSourceSchema,
+    compression: z.string().optional(),
+    progressTracked: z.boolean(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.source === null) {
+      ctx.addIssue({
+        code: "custom",
+        message: messages.required.id,
+        path: ["source"],
+      });
+    }
+  })
+  .transform((data) => ({
+    ...data,
+    compression: data.compression?.trim() ? data.compression.trim() : undefined,
+  }));
+
+type ManualFileUploadRequestData = z.infer<typeof fileUploadRequestFormSchema>;
 
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
@@ -1065,6 +1102,8 @@ export type {
   FileFormData,
   ManualFileDownloadRequestFromRepositoryData,
   FileDestinationType,
+  FileSourceType,
+  ManualFileUploadRequestData,
 };
 
 export {
@@ -1098,4 +1137,5 @@ export {
   repositoryUpdateSchema,
   fileSchema,
   manualFileDownloadRequestFromRepositorySchema,
+  fileUploadRequestFormSchema,
 };
