@@ -245,24 +245,6 @@
   "components.ContainerStatus.unknown": {
     "defaultMessage": "Unknown"
   },
-  "components.ContainerStatusList.containerReference": {
-    "defaultMessage": "{reference}"
-  },
-  "components.ContainerStatusList.deadCount": {
-    "defaultMessage": "{count} dead"
-  },
-  "components.ContainerStatusList.exitedCount": {
-    "defaultMessage": "{count} exited"
-  },
-  "components.ContainerStatusList.noContainers": {
-    "defaultMessage": "No containers"
-  },
-  "components.ContainerStatusList.processingCount": {
-    "defaultMessage": "{count} processing"
-  },
-  "components.ContainerStatusList.runningCount": {
-    "defaultMessage": "{count} running"
-  },
   "components.ContainersTable.bindsLabel": {
     "defaultMessage": "Binds"
   },
@@ -427,38 +409,11 @@
   "components.DeleteReleaseModal.title": {
     "defaultMessage": "Delete Release"
   },
-  "components.DeployedApplicationsTable.actions": {
-    "defaultMessage": "Actions"
-  },
   "components.DeployedApplicationsTable.applicationName": {
     "defaultMessage": "Application Name"
   },
-  "components.DeployedApplicationsTable.confirmLabel": {
-    "defaultMessage": "Confirm"
-  },
-  "components.DeployedApplicationsTable.confirmModal.description": {
-    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
-  },
-  "components.DeployedApplicationsTable.confirmModal.title": {
-    "defaultMessage": "Upgrade Deployment"
-  },
-  "components.DeployedApplicationsTable.containerStatus": {
-    "defaultMessage": "Container Status"
-  },
   "components.DeployedApplicationsTable.deleteButtonTitle": {
     "defaultMessage": "Delete Deployment"
-  },
-  "components.DeployedApplicationsTable.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
-  },
-  "components.DeployedApplicationsTable.deleteModal.note": {
-    "defaultMessage": "Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
-  },
-  "components.DeployedApplicationsTable.deleteModal.title": {
-    "defaultMessage": "Delete Deployment"
-  },
-  "components.DeployedApplicationsTable.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the deployment, please try again."
   },
   "components.DeployedApplicationsTable.deploymentCampaignNameTitle": {
     "defaultMessage": "Deployment Campaign"
@@ -466,14 +421,11 @@
   "components.DeployedApplicationsTable.deploymentDetailsButtonTitle": {
     "defaultMessage": "Deployment Details"
   },
+  "components.DeployedApplicationsTable.details": {
+    "defaultMessage": "Details"
+  },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
-  },
-  "components.DeployedApplicationsTable.noReleasesAvailable": {
-    "defaultMessage": "No Release Versions Available"
-  },
-  "components.DeployedApplicationsTable.noReleasesFoundMatching": {
-    "defaultMessage": "No release versions found matching \"{inputValue}\""
   },
   "components.DeployedApplicationsTable.readiness": {
     "defaultMessage": "Readiness"
@@ -481,26 +433,11 @@
   "components.DeployedApplicationsTable.releaseVersion": {
     "defaultMessage": "Release Version"
   },
-  "components.DeployedApplicationsTable.selectOption": {
-    "defaultMessage": "Select a Release Version"
-  },
   "components.DeployedApplicationsTable.sendButtonTitle": {
     "defaultMessage": "Redeploy Application"
   },
-  "components.DeployedApplicationsTable.sendErrorFeedback": {
-    "defaultMessage": "Could not send the Application to the device, please try again."
-  },
-  "components.DeployedApplicationsTable.sendErrorOffline": {
-    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
-  },
   "components.DeployedApplicationsTable.startButtonTitle": {
     "defaultMessage": "Start Deployment"
-  },
-  "components.DeployedApplicationsTable.startErrorFeedback": {
-    "defaultMessage": "Could not Start the Deployed Application, please try again."
-  },
-  "components.DeployedApplicationsTable.startErrorOffline": {
-    "defaultMessage": "The device is disconnected. You cannot start an application while it is offline."
   },
   "components.DeployedApplicationsTable.state": {
     "defaultMessage": "State"
@@ -508,20 +445,8 @@
   "components.DeployedApplicationsTable.stopButtonTitle": {
     "defaultMessage": "Stop Deployment"
   },
-  "components.DeployedApplicationsTable.stopErrorFeedback": {
-    "defaultMessage": "Could not Stop the Deployed Application, please try again."
-  },
-  "components.DeployedApplicationsTable.stopErrorOffline": {
-    "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
-  },
   "components.DeployedApplicationsTable.upgradeButtonTitle": {
     "defaultMessage": "Upgrade Deployment"
-  },
-  "components.DeployedApplicationsTable.upgradeErrorFeedback": {
-    "defaultMessage": "Could not upgrade the deployment, please try again."
-  },
-  "components.DeployedApplicationsTable.upgradeErrorOffline": {
-    "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
   "components.DeploymentCampaignsTable.applicationNameTitle": {
     "defaultMessage": "Application Name",

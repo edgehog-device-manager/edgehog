@@ -118,13 +118,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
             defaultMessage="Deployed Applications"
           />
         </h5>
-        <DeployedApplicationsTable
-          deviceRef={device}
-          isOnline={isOnline}
-          systemModelName={device.systemModel?.name}
-          setErrorFeedback={setErrorFeedback}
-          onDeploymentChange={handleRefetch}
-        />
+        <DeployedApplicationsTable deviceRef={device} />
       </div>
     </Tab>
   );
