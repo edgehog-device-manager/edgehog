@@ -42,6 +42,12 @@ defmodule Edgehog.Containers.Validations.IsUpgrade do
     end
   end
 
+  @impl Ash.Resource.Validation
+  def batch_callbacks?(_changeset, _opts, _context), do: false
+
+  @impl Ash.Resource.Validation
+  def has_batch_validate?, do: false
+
   defp parse_version(release) do
     with :error <- release.version |> get_in() |> to_string() |> Version.parse() do
       {:error, :invalid_release}

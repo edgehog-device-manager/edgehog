@@ -59,6 +59,12 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
     end
   end
 
+  @impl Ash.Resource.Validation
+  def batch_callbacks?(_changeset, _opts, _context), do: false
+
+  @impl Ash.Resource.Validation
+  def has_batch_validate?, do: false
+
   defp validate_upgrade_requirements(campaign_mechanism, %{tenant: tenant}) do
     release_id = Map.get(campaign_mechanism, :release_id)
     target_release_id = Map.get(campaign_mechanism, :target_release_id)

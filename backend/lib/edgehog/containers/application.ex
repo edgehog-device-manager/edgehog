@@ -73,13 +73,13 @@ defmodule Edgehog.Containers.Application do
     timestamps()
   end
 
+  postgres do
+    table "applications"
+  end
+
   relationships do
     has_many :releases, Edgehog.Containers.Release do
       public? true
     end
-  end
-
-  postgres do
-    table "applications"
   end
 end
