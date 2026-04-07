@@ -30,4 +30,10 @@ defmodule Edgehog.Containers.Deployment.Validations.IsReady do
         {:error,
          "This action cannot be performed because the deployment has not the desired readiness."}
   end
+
+  @impl Ash.Resource.Validation
+  def batch_callbacks?(_changeset, _opts, _context), do: false
+
+  @impl Ash.Resource.Validation
+  def has_batch_validate?, do: false
 end

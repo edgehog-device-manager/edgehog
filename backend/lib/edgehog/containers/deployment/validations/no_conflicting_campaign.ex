@@ -106,4 +106,10 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
   defp format_operation_type(operation_type) do
     Atom.to_string(operation_type)
   end
+
+  @impl Ash.Resource.Validation
+  def batch_callbacks?(_changeset, _opts, _context), do: false
+
+  @impl Ash.Resource.Validation
+  def has_batch_validate?, do: false
 end

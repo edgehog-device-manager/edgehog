@@ -37,6 +37,12 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateStatus do
     validate_transition(status, operation)
   end
 
+  @impl Ash.Resource.Validation
+  def batch_callbacks?(_changeset, _opts, _context), do: false
+
+  @impl Ash.Resource.Validation
+  def has_batch_validate?, do: false
+
   defp validate_transition(status, :pause) do
     case status do
       :in_progress ->

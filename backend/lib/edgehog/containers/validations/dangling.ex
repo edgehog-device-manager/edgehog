@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.Validations.Dangling do
   @moduledoc """
@@ -39,4 +37,10 @@ defmodule Edgehog.Containers.Validations.Dangling do
         else: {:error, :resource_in_use}
     end
   end
+
+  @impl Ash.Resource.Validation
+  def batch_callbacks?(_changeset, _opts, _context), do: false
+
+  @impl Ash.Resource.Validation
+  def has_batch_validate?, do: false
 end
