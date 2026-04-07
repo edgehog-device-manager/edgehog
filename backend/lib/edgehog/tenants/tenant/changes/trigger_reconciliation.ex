@@ -24,13 +24,23 @@ defmodule Edgehog.Tenants.Tenant.Changes.TriggerReconciliation do
 
   alias Edgehog.Tenants
 
+  require Logger
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, _ctx) do
-    Ash.Changeset.after_action(changeset, fn _changeset, tenant ->
-      # TODO: this can probably be done with Ash notifiers, investigate that
-      Tenants.reconcile_tenant(tenant)
+    Ash.Changeset.after_transaction(changeset, &maybe_trigger_reconciliation/2)
+  end
 
-      {:ok, tenant}
-    end)
+  defp maybe_trigger_reconciliation(_changeset, {:ok, tenant} = result) do
+    # TODO: this can probably be done with Ash notifiers, investigate that
+    Tenants.reconcile_tenant(tenant)
+
+    result
+  end
+
+  defp maybe_trigger_reconciliation(_changeset, {:error, error} = result) do
+    Logger.debug("Tenant creation did not complete.", error: error)
+
+    result
   end
 end
