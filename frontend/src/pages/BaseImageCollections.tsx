@@ -16,8 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -38,7 +37,8 @@ import Center from "@/components/Center";
 import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 
 const GET_BASE_IMAGE_COLLECTIONS_QUERY = graphql`
@@ -81,52 +81,32 @@ const BaseImageCollectionsLayoutContainer = ({
       BaseImageCollections_BaseImageCollectionsFragment$key
     >(BASE_IMAGE_COLLECTIONS_FRAGMENT, baseImageCollectionsData);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { handle: { ilike: `%${text}%` } },
-                  {
-                    systemModel: {
-                      name: {
-                        ilike: `%${text}%`,
-                      },
-                    },
-                  },
-                ],
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
+
+      return {
+        or: [
+          { name: { ilike: `%${text}%` } },
+          { handle: { ilike: `%${text}%` } },
+          {
+            systemModel: {
+              name: {
+                ilike: `%${text}%`,
               },
             },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
-
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextBaseImageCollections = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+          },
+        ],
+      };
+    },
+  });
 
   const BaseImageCollectionsRef = data?.baseImageCollections || null;
 
@@ -138,7 +118,7 @@ const BaseImageCollectionsLayoutContainer = ({
     <BaseImageCollectionsTable
       baseImageCollectionsRef={BaseImageCollectionsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextBaseImageCollections : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

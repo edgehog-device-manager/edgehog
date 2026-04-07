@@ -16,8 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -39,7 +38,8 @@ import Result from "@/components/Result";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import SystemModelsTable from "@/components/SystemModelsTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 
 const GET_SYSTEM_MODELS_QUERY = graphql`
@@ -85,59 +85,39 @@ const SystemModelsLayoutContainer = ({
       SystemModels_SystemModelsFragment$key
     >(SYSTEM_MODELS_FRAGMENT, systemModelsData);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { name: { ilike: `%${text}%` } },
-                  { handle: { ilike: `%${text}%` } },
-                  {
-                    partNumbers: {
-                      partNumber: {
-                        ilike: `%${text}%`,
-                      },
-                    },
-                  },
-                  {
-                    hardwareType: {
-                      name: {
-                        ilike: `%${text}%`,
-                      },
-                    },
-                  },
-                ],
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
+
+      return {
+        or: [
+          { name: { ilike: `%${text}%` } },
+          { handle: { ilike: `%${text}%` } },
+          {
+            partNumbers: {
+              partNumber: {
+                ilike: `%${text}%`,
               },
             },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
-
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextSystemModels = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+          },
+          {
+            hardwareType: {
+              name: {
+                ilike: `%${text}%`,
+              },
+            },
+          },
+        ],
+      };
+    },
+  });
 
   const systemModelsRef = data?.systemModels;
 
@@ -149,7 +129,7 @@ const SystemModelsLayoutContainer = ({
     <SystemModelsTable
       systemModelsRef={systemModelsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextSystemModels : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

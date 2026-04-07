@@ -16,8 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
-import { useMemo, useCallback, useState, useEffect } from "react";
+import { useMemo, useCallback, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { useIntl, FormattedMessage } from "react-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -32,7 +31,7 @@ import MultiSelect from "@/components/MultiSelect";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { FormRow } from "@/components/FormRow";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   ChannelFormData,
   channelSchema,
@@ -117,40 +116,24 @@ const CreateChannelForm = ({
 
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextChannelOptions = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        name: {
+          ilike: `%${text}%`,
+        },
+      };
+    },
+  });
 
   const targetGroups = useMemo(() => {
     return (
@@ -273,9 +256,7 @@ const CreateChannelForm = ({
                 getOptionValue={getTargetGroupValue}
                 isOptionDisabled={isTargetGroupUsedByOtherChannel}
                 loading={isLoadingNext}
-                onMenuScrollToBottom={
-                  hasNext ? loadNextChannelOptions : undefined
-                }
+                onMenuScrollToBottom={onLoadMore}
                 onInputChange={(text) => setSearchText(text)}
               />
             )}

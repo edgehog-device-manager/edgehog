@@ -16,7 +16,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
@@ -39,7 +38,8 @@ import DevicesTable from "@/components/DevicesTable";
 import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_DEVICES_QUERY = graphql`
   query Devices_getDevices_Query(
@@ -214,26 +214,20 @@ const DevicesLayoutContainer = ({
     ),
   );
 
-  useEffect(() => {
-    const handler = _.debounce(() => {
-      refetch(
-        { first: RECORDS_TO_LOAD_FIRST, filter: connectionFilter },
-        { fetchPolicy: "network-only" },
-      );
-    }, 500);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText: searchText ?? "",
+    buildFilter: () => {
+      if (normalizedSearchText === "") {
+        return undefined;
+      }
 
-    handler();
-
-    return () => {
-      handler.cancel();
-    };
-  }, [connectionFilter, refetch]);
-
-  const loadNextDevices = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return connectionFilter;
+    },
+  });
 
   const devicesRef = data?.devices;
 
@@ -245,7 +239,7 @@ const DevicesLayoutContainer = ({
     <DevicesTable
       devicesRef={devicesRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextDevices : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

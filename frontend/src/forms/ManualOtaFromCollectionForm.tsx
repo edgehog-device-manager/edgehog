@@ -19,8 +19,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import _ from "lodash";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay";
@@ -38,8 +37,8 @@ import Col from "@/components/Col";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 import FormFeedback from "@/forms/FormFeedback";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   ManualOtaFromCollectionData,
   manualOtaFromCollectionSchema,
@@ -124,41 +123,25 @@ const ManualOtaFromCollectionForm = ({
     string | null
   >(null);
 
-  const debounceBaseImageCollRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        refetchBaseImageColls(
-          {
-            first: RECORDS_TO_LOAD_FIRST,
-            ...(text && { filter: { name: { ilike: `%${text}%` } } }),
+  const { onLoadMore: onLoadMoreBaseImageCollOptions } =
+    useRelayConnectionPagination({
+      hasNext: hasNextBaseImageColl,
+      isLoadingNext: isLoadingNextBaseImageColl,
+      loadNext: loadNextBaseImageColls,
+      refetch: refetchBaseImageColls,
+      searchText: searchBaseImageCollText,
+      buildFilter: (text) => {
+        if (text === "") {
+          return undefined;
+        }
+
+        return {
+          name: {
+            ilike: `%${text}%`,
           },
-          { fetchPolicy: "network-only" },
-        );
-      }, 500),
-    [refetchBaseImageColls],
-  );
-
-  useEffect(() => {
-    return () => {
-      debounceBaseImageCollRefetch.cancel();
-    };
-  }, [debounceBaseImageCollRefetch]);
-
-  useEffect(() => {
-    if (searchBaseImageCollText !== null) {
-      debounceBaseImageCollRefetch(searchBaseImageCollText);
-    }
-  }, [debounceBaseImageCollRefetch, searchBaseImageCollText]);
-
-  const loadNextBaseImageCollOptions = useCallback(() => {
-    if (hasNextBaseImageColl && !isLoadingNextBaseImageColl) {
-      loadNextBaseImageColls(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [
-    hasNextBaseImageColl,
-    isLoadingNextBaseImageColl,
-    loadNextBaseImageColls,
-  ]);
+        };
+      },
+    });
 
   const baseImageCollections = useMemo(
     () =>
@@ -226,9 +209,7 @@ const ManualOtaFromCollectionForm = ({
                 noBaseImageCollOptionsMessage(inputValue)
               }
               isLoading={isLoadingNextBaseImageColl}
-              onMenuScrollToBottom={
-                hasNextBaseImageColl ? loadNextBaseImageCollOptions : undefined
-              }
+              onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
               onInputChange={(text) => setSearchBaseImageCollText(text)}
             />
           )}

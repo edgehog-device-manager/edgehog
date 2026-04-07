@@ -46,7 +46,8 @@ import ReleaseSystemModelsTable from "@/components/ReleaseSystemModelsTable";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
 import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
@@ -111,11 +112,11 @@ const ContainersLayoutContainer = ({
     Release_ContainersFragment$key
   >(CONTAINERS_FRAGMENT, releaseRef);
 
-  const loadNextContainers = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+  });
 
   const containersRef = data?.containers;
 
@@ -128,7 +129,7 @@ const ContainersLayoutContainer = ({
       <ContainersTable
         containersRef={containersRef}
         loading={isLoadingNext}
-        onLoadMore={hasNext ? loadNextContainers : undefined}
+        onLoadMore={onLoadMore}
       />
     </div>
   );
@@ -168,11 +169,11 @@ const ReleaseDevicesLayoutContainer = ({
     Release_DeploymentsFragment$key
   >(DEPLOYMENTS_FRAGMENT, releaseRef);
 
-  const loadNextDeployments = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+  });
 
   const deploymentsRef = data?.deployments;
 
@@ -185,7 +186,7 @@ const ReleaseDevicesLayoutContainer = ({
       <ReleaseDevicesTable
         deploymentsRef={deploymentsRef}
         loading={isLoadingNext}
-        onLoadMore={hasNext ? loadNextDeployments : undefined}
+        onLoadMore={onLoadMore}
       />
     </div>
   );

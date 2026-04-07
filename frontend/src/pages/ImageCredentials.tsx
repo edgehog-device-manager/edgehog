@@ -18,8 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
-import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import {
@@ -40,7 +39,8 @@ import ImageCredentialsTable from "@/components/ImageCredentialsTable";
 import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 
 const GET_IMAGE_CREDENTIALS_QUERY = graphql`
@@ -83,45 +83,25 @@ const ImageCredentialsLayoutContainer = ({
       ImageCredentials_ImageCredentialsFragment$key
     >(IMAGE_CREDENTIALS_FRAGMENT, imageCredentialsData);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: {
-                or: [
-                  { label: { ilike: `%${text}%` } },
-                  { username: { ilike: `%${text}%` } },
-                ],
-              },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextImageCredentials = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        or: [
+          { label: { ilike: `%${text}%` } },
+          { username: { ilike: `%${text}%` } },
+        ],
+      };
+    },
+  });
 
   const imageCredentialsRef = data?.listImageCredentials;
 
@@ -133,7 +113,7 @@ const ImageCredentialsLayoutContainer = ({
     <ImageCredentialsTable
       imageCredentialsRef={imageCredentialsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextImageCredentials : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };

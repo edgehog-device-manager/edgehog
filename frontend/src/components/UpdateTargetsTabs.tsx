@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 
@@ -31,7 +31,8 @@ import CampaignTargetStatus, {
 } from "@/components/CampaignTargetStatus";
 import type { ColumnId } from "@/components/UpdateTargetsTable";
 import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
@@ -118,11 +119,11 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
     );
   }, [activeTab, committedTab, refetch]);
 
-  const loadNextUpdateTargets = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+  });
 
   const updateTargetsRef = data?.campaignTargets;
 
@@ -167,7 +168,7 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
               campaignTargetsRef={updateTargetsRef}
               hiddenColumns={hiddenColumns}
               loading={isLoadingNext}
-              onLoadMore={hasNext ? loadNextUpdateTargets : undefined}
+              onLoadMore={onLoadMore}
             />
           )}
         </div>

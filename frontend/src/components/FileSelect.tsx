@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import type { FallbackProps } from "react-error-boundary";
 import { ErrorBoundary } from "react-error-boundary";
@@ -42,7 +41,8 @@ import type { FileSelect_getRepository_Query } from "@/api/__generated__/FileSel
 import Button from "@/components/Button";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_REPOSITORY_QUERY = graphql`
   query FileSelect_getRepository_Query(
@@ -112,40 +112,24 @@ const FileSelect = ({ filesFragmentRef, controllerProps }: FileSelectProps) => {
 
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const debounceRefetch = useMemo(
-    () =>
-      _.debounce((text: string) => {
-        if (text === "") {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-            },
-            { fetchPolicy: "network-only" },
-          );
-        } else {
-          refetch(
-            {
-              first: RECORDS_TO_LOAD_FIRST,
-              filter: { name: { ilike: `%${text}%` } },
-            },
-            { fetchPolicy: "network-only" },
-          );
-        }
-      }, 500),
-    [refetch],
-  );
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText,
+    buildFilter: (text) => {
+      if (text === "") {
+        return undefined;
+      }
 
-  useEffect(() => {
-    if (searchText !== null) {
-      debounceRefetch(searchText);
-    }
-  }, [debounceRefetch, searchText]);
-
-  const loadNextOptions = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return {
+        name: {
+          ilike: `%${text}%`,
+        },
+      };
+    },
+  });
 
   const files = useMemo(() => {
     return (
@@ -185,7 +169,7 @@ const FileSelect = ({ filesFragmentRef, controllerProps }: FileSelectProps) => {
       getOptionValue={getFileValue}
       noOptionsMessage={({ inputValue }) => noFileOptionsMessage(inputValue)}
       isLoading={isLoadingNext}
-      onMenuScrollToBottom={hasNext ? loadNextOptions : undefined}
+      onMenuScrollToBottom={onLoadMore}
       onInputChange={(text) => setSearchText(text)}
     />
   );

@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
@@ -42,7 +41,8 @@ import Page from "@/components/Page";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
-import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
+import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
 
 const GET_CAMPAIGNS_QUERY = graphql`
@@ -258,29 +258,20 @@ const UpdateCampaignsLayoutContainer = ({
     ),
   );
 
-  useEffect(() => {
-    const handler = _.debounce(() => {
-      refetch(
-        {
-          first: RECORDS_TO_LOAD_FIRST,
-          filter: connectionFilter,
-        },
-        { fetchPolicy: "network-only" },
-      );
-    }, 500);
+  const { onLoadMore } = useRelayConnectionPagination({
+    hasNext,
+    isLoadingNext,
+    loadNext,
+    refetch,
+    searchText: searchText ?? "",
+    buildFilter: () => {
+      if (normalizedSearchText === "") {
+        return undefined;
+      }
 
-    handler();
-
-    return () => {
-      handler.cancel();
-    };
-  }, [connectionFilter, refetch]);
-
-  const loadNextUpdateCampaigns = useCallback(() => {
-    if (hasNext && !isLoadingNext) {
-      loadNext(RECORDS_TO_LOAD_NEXT);
-    }
-  }, [hasNext, isLoadingNext, loadNext]);
+      return connectionFilter;
+    },
+  });
 
   const updateCampaignsRef = data?.updateCampaigns || null;
 
@@ -292,7 +283,7 @@ const UpdateCampaignsLayoutContainer = ({
     <UpdateCampaignsTable
       updateCampaignsRef={updateCampaignsRef}
       loading={isLoadingNext}
-      onLoadMore={hasNext ? loadNextUpdateCampaigns : undefined}
+      onLoadMore={onLoadMore}
     />
   );
 };
