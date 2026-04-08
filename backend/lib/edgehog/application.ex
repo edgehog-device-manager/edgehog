@@ -69,8 +69,7 @@ defmodule Edgehog.Application do
       {Task.Supervisor, name: Edgehog.Devices.Reconciler.Supervisor},
       {Edgehog.Devices.Reconciler, enabled: @device_reconciliation_enabled},
       # Start Absinthe Subscriptions AFTER Endpoint is up
-      {Absinthe.Subscription, Endpoint},
-      Edgehog.Auth.Supervisor
+      {Absinthe.Subscription, Endpoint}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

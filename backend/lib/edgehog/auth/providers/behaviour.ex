@@ -48,6 +48,5 @@ defmodule Edgehog.Auth.Providers.Behaviour do
 
   For successful returns the new `context` should be provided.
   """
-  @callback check(tuple :: fga_tuple(), context :: context()) ::
-              {:ok, context()} | {:notok, context()} | {:error, term()}
+  @callback check(tuple :: fga_tuple(), context :: context()) :: :ok | :notok | {:error, term()}
 end

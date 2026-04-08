@@ -34,9 +34,9 @@ defmodule Edgehog.Auth.Providers.None do
   end
 
   @impl Edgehog.Auth.Providers.Behaviour
-  def check({subj, rel, obj}, context) do
+  def check({subj, rel, obj}, _context) do
     Logger.debug("Authorizing tuple {#{subj}, #{rel}, #{obj}}.")
 
-    {:ok, context}
+    :ok
   end
 end

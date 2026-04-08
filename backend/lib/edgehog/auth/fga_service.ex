@@ -25,44 +25,13 @@ defmodule Edgehog.Auth.FGAService do
   This module uses openfga's gRPC api to create all necessary resources based on the application's introspection.
   """
 
-  use GenServer, restart: :transient
-
-  ## API
-
-  def start_link(args) do
-    GenServer.start_link(__MODULE__, args, name: __MODULE__)
-  end
+  alias Edgehog.Config
 
   def check(subj, rel, obj) do
     tuple = {subj, rel, obj}
-    GenServer.call(__MODULE__, {:check, tuple})
-  end
 
-  ## CALLBACKS
+    provider = Keyword.fetch!(Config.authz_config!(), :provider)
 
-  @impl GenServer
-  def init(args) do
-    # Crash if no provider was specified
-    {provider, args} = Keyword.pop!(args, :provider)
-
-    case provider.init_context(args) do
-      {:ok, context} -> {:ok, {provider, context}, {:continue, :create_resources}}
-      {:error, error} -> {:stop, error}
-    end
-  end
-
-  @impl GenServer
-  def handle_continue(:create_resources, state) do
-    {:noreply, state}
-  end
-
-  @impl GenServer
-  def handle_call({:check, tuple}, _from, {provider, context} = state) do
-    check = provider.check(tuple, context)
-
-    case check do
-      {:error, error} -> {:reply, error, state}
-      {response, new_context} -> {:reply, response, {provider, new_context}}
-    end
+    provider.check(tuple, provider.init_context())
   end
 end
