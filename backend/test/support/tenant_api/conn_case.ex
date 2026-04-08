@@ -91,8 +91,23 @@ defmodule EdgehogWeb.ConnCase do
       |> X509.PrivateKey.to_pem()
       |> JOSE.JWK.from_pem()
 
+    now = DateTime.utc_now()
+
+    base_claims = %{
+      iss: "https://example.issuer.com/current",
+      sub: Ash.UUIDv7.generate(),
+      aud: "edgehog-test",
+      exp: now |> DateTime.shift(hour: 2, day: 1) |> DateTime.to_unix(),
+      iat: DateTime.to_unix(now),
+      auth_time: now |> DateTime.shift(hour: 1) |> DateTime.to_unix(),
+      preferred_username: "username",
+      email: "example@email.com",
+      given_name: "John",
+      family_name: "Doe"
+    }
+
     # The value of e_tga claims is ignored for now
-    claims = claims || %{e_tga: true}
+    claims = Map.merge(base_claims, claims || %{e_tga: true})
 
     # Generate the JWT
     {:ok, jwt, _claims} =

@@ -64,6 +64,7 @@ defmodule GenEdgehogJwt do
       %{}
       |> add_type_claim(opts[:token_type])
       |> add_expiry_claim(opts[:expiry])
+      |> add_auth_claims(opts)
 
     case Joken.generate_and_sign(%{}, claims, signer) do
       {:ok, token, _claims} ->
@@ -78,14 +79,34 @@ defmodule GenEdgehogJwt do
   defp parse_args(args) do
     args
     |> OptionParser.parse!(
-      switches: [private_key: :string, expiry: :integer, token_type: :string],
-      aliases: [k: :private_key, e: :expiry, t: :token_type]
+      switches: [
+        private_key: :string,
+        expiry: :integer,
+        token_type: :string,
+        subject: :string,
+        audience: :string,
+        preferred_username: :string,
+        email: :string,
+        given_name: :string,
+        family_name: :string
+      ],
+      aliases: [
+        k: :private_key,
+        e: :expiry,
+        t: :token_type,
+        s: :subject,
+        a: :audience,
+        u: :preferred_username,
+        m: :email,
+        n: :given_name,
+        N: :family_name
+      ]
     )
     |> validate_args()
   rescue
     e in OptionParser.ParseError ->
       print_usage()
-      IO.puts(:stderr,"#{@red}gen-edgehog-jwt: error: #{e.message}#{@reset}")
+      IO.puts(:stderr, "#{@red}gen-edgehog-jwt: error: #{e.message}#{@reset}")
       System.halt(1)
   end
 
@@ -94,28 +115,39 @@ defmodule GenEdgehogJwt do
       !opts[:private_key] ->
         print_usage()
 
-        IO.puts(:stderr, "#{@red}gen-edgehog-jwt: error: the following arguments are required: -k/--private-key#{@reset}")
+        IO.puts(
+          :stderr,
+          "#{@red}gen-edgehog-jwt: error: the following arguments are required: -k/--private-key#{@reset}"
+        )
 
         System.halt(1)
 
       !opts[:token_type] ->
         print_usage()
 
-        IO.puts(:stderr, "#{@red}gen-edgehog-jwt: error: the following arguments are required: -t/--token-type#{@reset}")
+        IO.puts(
+          :stderr,
+          "#{@red}gen-edgehog-jwt: error: the following arguments are required: -t/--token-type#{@reset}"
+        )
 
         System.halt(1)
 
       opts[:token_type] not in ["tenant", "admin"] ->
         print_usage()
 
-        IO.puts(:stderr,
+        IO.puts(
+          :stderr,
           "#{@red}gen-edgehog-jwt: error: invalid token type '#{opts[:token_type]}'. Choose 'tenant' or 'admin'.#{@reset}"
         )
 
         System.halt(1)
 
       true ->
-        opts = Keyword.put_new(opts, :expiry, 86_400)
+        opts =
+          opts
+          |> Keyword.put_new(:expiry, 86_400)
+          |> Keyword.put(:issued_at, DateTime.to_unix(DateTime.utc_now()))
+
         {opts, rest}
     end
   end
@@ -138,8 +170,35 @@ defmodule GenEdgehogJwt do
     Map.put(claims, "exp", exp)
   end
 
+  defp add_auth_claims(claims, opts) do
+    subject_claim = opts[:subject]
+    audience_claim = opts[:audience]
+    username_claim = opts[:preferred_username]
+    email_claim = opts[:email]
+    given_name_claim = opts[:given_name]
+    family_name_claim = opts[:family_name]
+
+    auth_time_claim =
+      opts[:issued_at]
+      |> DateTime.from_unix()
+      |> elem(1)
+      |> DateTime.add(1, :second)
+      |> DateTime.to_unix()
+
+    claims
+    |> Map.put("sub", subject_claim)
+    |> Map.put("aud", audience_claim)
+    |> Map.put("preferred_username", username_claim)
+    |> Map.put("email", email_claim)
+    |> Map.put("given_name", given_name_claim)
+    |> Map.put("family_name", family_name_claim)
+    |> Map.put("auth_time", auth_time_claim)
+  end
+
   defp print_usage do
-    IO.puts("usage: gen-edgehog-jwt [-h] -k PRIVATE_KEY [-e EXPIRY] -t {tenant,admin}")
+    IO.puts(
+      "usage: gen-edgehog-jwt [-h] -k PRIVATE_KEY [-e EXPIRY] -t {tenant,admin} -s SUBJECT -a AUDIENCE -u PREFERRED_USERNAME -m EMAIL_ADDRESS -n GIVEN_NAME -N FAMILY_NAME"
+    )
   end
 
   defp print_help do
@@ -152,22 +211,32 @@ defmodule GenEdgehogJwt do
       Supports both #{@green}tenant#{@reset} and #{@green}admin#{@reset} tokens.
 
     #{@yellow}Required Options:#{@reset}
-      #{@green}-k, --private-key PATH#{@reset}   Path to your private key file (RSA or EC)
-      #{@green}-t, --token-type TYPE#{@reset}   Token type: #{@green}tenant#{@reset} or #{@green}admin#{@reset}
+      #{@green}-k, --private-key PATH#{@reset}              Path to your private key file (RSA or EC)
+      #{@green}-t, --token-type TYPE#{@reset}               Token type: #{@green}tenant#{@reset} or #{@green}admin#{@reset}
 
     #{@yellow}Optional Options:#{@reset}
       #{@green}-e, --expiry SECONDS#{@reset}    Token expiration time in seconds (default: 86400); set to #{@green}0#{@reset} for no expiration
       #{@green}-h, --help#{@reset}              Display this help message
+      #{@green}-s, --subject SUBJECT#{@reset}               Subject Identifier, a unique and never reassigned identifier. Max 255 ASCII characters
+      #{@green}-a, --audience AUDIENCE#{@reset}             The OAuth2 client_id of the of the Client requesting auth on behalf of the user
+      #{@green}-u, --preferred-username USERNAME#{@reset}   Username of the user
+      #{@green}-m, --email EMAIL#{@reset}                   Email address of the user
+      #{@green}-n, --given-name GIVEN_NAME#{@reset}         Given name of the user
+      #{@green}-N, --family-name FAMILY_NAME#{@reset}       Family name of the user
+
+      #{@blue}AUTH_OPTIONS#{@reset}
+        Options used for authentication and authorization of the user's client:
+        #{@green}--subject#{@reset}, #{@green}--audience#{@reset}, #{@green}--preferred-username#{@reset}, #{@green}--email#{@reset}, #{@green}--given-name#{@reset}, #{@green}--family-name#{@reset}
 
     #{@yellow}Examples:#{@reset}
       #{@blue}# Generate a tenant token with default expiry (24 hours)#{@reset}
-      ./gen-edgehog-jwt -k private_key.pem -t tenant
+      ./gen-edgehog-jwt -k private_key.pem -t tenant [AUTH_OPTIONS]
 
       #{@blue}# Generate an admin token with 1 hour expiry#{@reset}
-      ./gen-edgehog-jwt -k private_key.pem -t admin -e 3600
+      ./gen-edgehog-jwt -k private_key.pem -t admin -e 3600 [AUTH_OPTIONS]
 
       #{@blue}# Generate a token with no expiration#{@reset}
-      ./gen-edgehog-jwt -k private_key.pem -t tenant -e 0
+      ./gen-edgehog-jwt -k private_key.pem -t tenant -e 0 [AUTH_OPTIONS]
     """)
   end
 end

@@ -38,14 +38,51 @@ defmodule EdgehogWeb.Auth.Token do
     # TODO: for now we just check that some e_tga claims are encoded in the token,
     # and we don't care about their value
     # e_tga = Edgehog Tenant GraphQL API
+    # The same is true for the OpenID connect claims required by Edgehog
+    # but only e_tga is used for validating auth for now
     case Map.fetch(claims, "e_tga") do
-      {:ok, claims} ->
+      {:ok, e_tga_value} ->
+        claims = oidc_claims(claims)
+
         Edgehog.Actors.Actor
-        |> Ash.Changeset.for_create(:from_claims, %{claims: %{e_tga: claims}})
+        |> Ash.Changeset.for_create(
+          :from_claims,
+          Map.put(claims, :claims, %{e_tga: e_tga_value})
+        )
         |> Ash.create()
 
       :error ->
         {:error, :no_valid_claims}
     end
   end
+
+  defp oidc_claims(submitted_claims) when is_map(submitted_claims) do
+    required_claims = [
+      :sub,
+      :aud,
+      :exp,
+      :iat,
+      :auth_time,
+      :preferred_username,
+      :email,
+      :given_name,
+      :family_name
+    ]
+
+    Enum.reduce(required_claims, %{}, fn claim_name, acc ->
+      case Map.fetch(submitted_claims, Atom.to_string(claim_name)) do
+        {:ok, value} -> Map.put(acc, claim_name, timestamp_to_datetime(value))
+        _ -> acc
+      end
+    end)
+  end
+
+  defp timestamp_to_datetime(timestamp_or_else) when is_integer(timestamp_or_else) do
+    case DateTime.from_unix(timestamp_or_else) do
+      {:ok, dt} -> dt
+      {:error, _} -> nil
+    end
+  end
+
+  defp timestamp_to_datetime(timestamp_or_else), do: timestamp_or_else
 end
