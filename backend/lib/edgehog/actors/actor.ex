@@ -25,7 +25,8 @@ defmodule Edgehog.Actors.Actor do
   """
 
   use Ash.Resource,
-    domain: Edgehog.Actors
+    domain: Edgehog.Actors,
+    data_layer: :embedded
 
   resource do
     require_primary_key? false

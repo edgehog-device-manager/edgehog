@@ -25,9 +25,6 @@ defmodule Edgehog.Actors do
 
   use Ash.Domain
 
-  alias Edgehog.Actors.Actor
-
   resources do
-    resource Actor
   end
 end
