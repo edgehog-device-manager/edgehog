@@ -23,7 +23,7 @@ url_port = System.get_env("URL_PORT", "4000")
 url_scheme = System.get_env("URL_SCHEME", "http")
 
 check_origin =
-  case System.get_env("CHECK_ORIGIN_ALLOWED_ORIGINS") do
+  case System.get_env("GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS") do
     nil ->
       ["//localhost", "//127.0.0.1"]
 

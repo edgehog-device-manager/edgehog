@@ -303,8 +303,8 @@ spec:
               value: "4000"
             - name: URL_HOST
               value: <BACKEND-HOST>
-            - name: CHECK_ORIGIN_ALLOWED_ORIGINS
-              value: <CHECK-ORIGIN-ALLOWED-ORIGINS>
+            - name: GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS
+              value: <GQL-SUBSCRIPTIONS-ALLOWED-ORIGINS>
             - name: DATABASE_HOSTNAME
               value: <DATABASE-HOSTNAME>
             - name: DATABASE_NAME
@@ -441,7 +441,7 @@ spec:
 Values to be replaced
 
 - `BACKEND-HOST`: the host of the Edgehog backend (see the [Creating DNS entries](#creating-dns-entries) section).
-- `CHECK-ORIGIN-ALLOWED-ORIGINS`: a comma-separated list of allowed origins for websocket origin checks (for example `https://edgehog.example.com,https://ops.edgehog.example.com`). If omitted, it falls back to the backend URL.
+- `GQL-SUBSCRIPTIONS-ALLOWED-ORIGINS`: a comma-separated list of allowed origins for websocket origin checks (for example `https://edgehog.example.com,https://ops.edgehog.example.com`). If omitted, it falls back to the backend URL.
 - `DATABASE-HOSTNAME`: the hostname of the PostgreSQL database.
 - `MAX-UPLOAD-SIZE-BYTES`: the maximum dimension for uploads, particularly relevant for OTA updates.
   If omitted, it defaults to 4 Gigabytes.

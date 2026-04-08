@@ -48,17 +48,17 @@ defmodule EdgehogWeb.Schema.Subscriptions.CheckOriginConfigTest do
 
   describe "config/dev.exs check_origin" do
     test "defaults to localhost origins when env var is not set" do
-      with_env([{"CHECK_ORIGIN_ALLOWED_ORIGINS", nil}], fn ->
+      with_env([{"GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS", nil}], fn ->
         endpoint = read_endpoint_config!("config/dev.exs", :dev)
 
         assert Keyword.fetch!(endpoint, :check_origin) == ["//localhost", "//127.0.0.1"]
       end)
     end
 
-    test "uses comma-separated CHECK_ORIGIN_ALLOWED_ORIGINS" do
+    test "uses comma-separated GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS" do
       with_env(
         [
-          {"CHECK_ORIGIN_ALLOWED_ORIGINS", "http://localhost:5173, http://edgehog.localhost"}
+          {"GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS", "http://localhost:5173, http://edgehog.localhost"}
         ],
         fn ->
           endpoint = read_endpoint_config!("config/dev.exs", :dev)
@@ -84,7 +84,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.CheckOriginConfigTest do
           {"URL_HOST", "api.edgehog.localhost"},
           {"URL_SCHEME", "https"},
           {"URL_PORT", "443"},
-          {"CHECK_ORIGIN_ALLOWED_ORIGINS", nil}
+          {"GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS", nil}
         ],
         fn ->
           endpoint = read_endpoint_config!("config/runtime.exs", :prod)
@@ -94,7 +94,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.CheckOriginConfigTest do
       )
     end
 
-    test "uses CHECK_ORIGIN_ALLOWED_ORIGINS in prod when provided" do
+    test "uses GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS in prod when provided" do
       with_env(
         [
           {"DATABASE_USERNAME", "postgres"},
@@ -105,7 +105,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.CheckOriginConfigTest do
           {"URL_HOST", "api.edgehog.localhost"},
           {"URL_SCHEME", "https"},
           {"URL_PORT", "443"},
-          {"CHECK_ORIGIN_ALLOWED_ORIGINS",
+          {"GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS",
            "https://ui.edgehog.localhost, https://ops.edgehog.localhost"}
         ],
         fn ->

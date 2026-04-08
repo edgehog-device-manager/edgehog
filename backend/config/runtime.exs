@@ -237,7 +237,7 @@ if config_env() == :prod do
   check_origin_default = ["#{url_scheme}://#{url_host}:#{url_port}"]
 
   check_origin =
-    case System.get_env("CHECK_ORIGIN_ALLOWED_ORIGINS") do
+    case System.get_env("GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS") do
       nil ->
         check_origin_default
 
