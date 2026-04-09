@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.3](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.2...v0.12.3) (2026-04-09)
+
+
+### Bug Fixes
+
+* run reconciliation after provisioning is complete ([a61dff8](https://github.com/edgehog-device-manager/edgehog/commit/a61dff80819b83f7f2e56411c7d8b0522ae7f655))
+
 ## [0.12.2](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.1...v0.12.2) (2026-03-12)
 
 
