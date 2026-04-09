@@ -34,10 +34,10 @@ jobs:
   coverage-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           show-progress: false
-      - uses: actions/setup-node@v6
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
         id: cache-npm
         with:
           node-version-file: .tool-versions
@@ -50,7 +50,7 @@ jobs:
         working-directory: frontend
         run: npm run coverage
       - name: Upload to Coveralls
-        uses: coverallsapp/github-action@v2
+        uses: coverallsapp/github-action@5cbfd81b66ca5d10c19b062c04de0199c215fb6e # v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           path-to-lcov: frontend/coverage/lcov.info

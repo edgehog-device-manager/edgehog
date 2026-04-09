@@ -36,7 +36,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-node@v6
+    - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
       with:
         node-version-file: ${{ inputs.edgehog }}/.tool-versions
     - name: Install astarte-docs-cli
@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         ln -s ${{ inputs.edgehog }}/.tool-versions .tool-versions
-    - uses: team-alembic/staple-actions/actions/mix-task@main
+    - uses: team-alembic/staple-actions/actions/mix-task@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
       with:
         working-directory: ${{ inputs.edgehog }}/backend
         mix-env: dev
@@ -70,7 +70,7 @@ runs:
       working-directory: ${{ inputs.docs }}
       run: |
         ln -s versions.js ${{ inputs.version }}/docs_config.js
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
       with:
         name: edgehog-docs-bundle
         path: ${{ inputs.docs }}
