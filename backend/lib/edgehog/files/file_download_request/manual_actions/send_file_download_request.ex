@@ -30,6 +30,8 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
   alias Edgehog.Error.AstarteAPIError
   alias Edgehog.Files
 
+  @interface "io.edgehog.devicemanager.fileTransfer.ServerToDevice"
+
   @file_download_request_module Application.compile_env(
                                   :edgehog,
                                   :astarte_file_download_request_module,
@@ -41,7 +43,7 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
     file_download_request =
       Ash.load!(
         input.arguments.file_download_request,
-        [:url, device: [:device_id, :appengine_client, :capabilities]],
+        [:url, device: [:device_id, :appengine_client]],
         reuse_values?: true
       )
 
@@ -50,55 +52,46 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
       url: url,
       device: %{
         device_id: device_id,
-        appengine_client: client,
-        capabilities: capabilities
+        appengine_client: client
       }
     } = file_download_request
 
-    # TODO: HTTP headers (key/value) reserved for future bucket auth support.
-    # Currently unused (set to ""), flow/config (env vs request) TBD.
+    # TODO: HTTP headers reserved for future bucket auth support.
+    # Currently unused (set to empty arrays), flow/config (env vs request) TBD.
     request_data = %RequestData{
       id: file_download_request_id,
       url: url,
-      httpHeaderKey: "",
-      httpHeaderValue: "",
-      compression: file_download_request.compression || "",
+      httpHeaderKeys: [],
+      httpHeaderValues: [],
+      encoding: file_download_request.encoding || "",
       fileSizeBytes: file_download_request.uncompressed_file_size_bytes,
       progress: file_download_request.progress_tracked,
       digest: file_download_request.digest,
-      fileName: file_download_request.file_name,
       ttlSeconds: file_download_request.ttl_seconds,
+      fileMode: file_download_request.file_mode || 0,
+      userId: file_download_request.user_id || -1,
+      groupId: file_download_request.group_id || -1,
       destinationType: file_download_request.destination_type,
       destination: file_download_request.destination || ""
     }
 
-    {device_type, request_data} =
-      if :posix_file_transfer_storage in capabilities do
-        request_data = %{
-          request_data
-          | fileMode: file_download_request.file_mode,
-            userId: file_download_request.user_id,
-            groupId: file_download_request.group_id
-        }
-
-        {:posix, request_data}
-      else
-        {:windows, request_data}
-      end
-
     case @file_download_request_module.request_download(
            client,
            device_id,
-           request_data,
-           device_type
+           request_data
          ) do
       {:error, %Astarte.Client.APIError{} = api_error} ->
         reason =
           AstarteAPIError.exception(
             status: api_error.status,
-            response: api_error.response
+            response: api_error.response,
+            device_id: device_id,
+            interface: @interface
           )
 
+        {:error, reason}
+
+      {:error, reason} ->
         {:error, reason}
 
       result ->

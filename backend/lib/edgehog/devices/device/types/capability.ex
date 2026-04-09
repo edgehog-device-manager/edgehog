@@ -27,12 +27,9 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       cellular_connection: "The device provides information about its cellular connection.",
       commands: "The device supports commands, for example the rebooting command.",
       container_management: "The device supports running applications using containers.",
-      posix_file_transfer_stream: "The device supports streaming files to and from it.",
-      posix_file_transfer_storage:
+      file_transfer_stream: "The device supports streaming files to and from it.",
+      file_transfer_storage:
         "The device supports transferring files to and from its storage units.",
-      windows_file_transfer_storage:
-        "The device supports transferring files to and from its storage units.",
-      windows_file_transfer_stream: "The device supports streaming files to and from it.",
       file_transfer_read: "The device supports reading files from it.",
       geolocation: "The device can be geolocated.",
       hardware_info: "The device provides information about its hardware.",

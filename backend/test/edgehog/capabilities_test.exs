@@ -58,11 +58,7 @@ defmodule Edgehog.CapabilitiesTest do
         "io.edgehog.devicemanager.SystemStatus" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.config.Telemetry" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.WiFiScanResults" => %InterfaceVersion{major: 0, minor: 1},
-        "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        },
-        "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice" => %InterfaceVersion{
+        "io.edgehog.devicemanager.fileTransfer.ServerToDevice" => %InterfaceVersion{
           major: 0,
           minor: 1
         },
@@ -72,6 +68,10 @@ defmodule Edgehog.CapabilitiesTest do
         },
         "io.edgehog.devicemanager.fileTransfer.Progress" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.fileTransfer.Response" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.fileTransfer.Capabilities" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
         "io.edgehog.devicemanager.storage.File" => %InterfaceVersion{
           major: 0,
           minor: 1
@@ -118,10 +118,8 @@ defmodule Edgehog.CapabilitiesTest do
         :cellular_connection,
         :commands,
         :container_management,
-        :posix_file_transfer_stream,
-        :posix_file_transfer_storage,
-        :windows_file_transfer_stream,
-        :windows_file_transfer_storage,
+        :file_transfer_stream,
+        :file_transfer_storage,
         :file_transfer_read,
         :geolocation,
         :hardware_info,
@@ -232,9 +230,9 @@ defmodule Edgehog.CapabilitiesTest do
       assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
-    test "returns posix_file_transfer_stream capability when all required interfaces are present" do
+    test "returns file_transfer_stream capability when all required interfaces are present" do
       device_introspection = %{
-        "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice" => %InterfaceVersion{
+        "io.edgehog.devicemanager.fileTransfer.ServerToDevice" => %InterfaceVersion{
           major: 0,
           minor: 1
         },
@@ -249,7 +247,7 @@ defmodule Edgehog.CapabilitiesTest do
       }
 
       expected_capabilities = [
-        :posix_file_transfer_stream,
+        :file_transfer_stream,
         :geolocation
       ]
 
@@ -258,9 +256,9 @@ defmodule Edgehog.CapabilitiesTest do
       assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
     end
 
-    test "returns posix_file_transfer_storage capability when all required interfaces are present" do
+    test "returns file_transfer_storage capability when all required interfaces are present" do
       device_introspection = %{
-        "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice" => %InterfaceVersion{
+        "io.edgehog.devicemanager.fileTransfer.ServerToDevice" => %InterfaceVersion{
           major: 0,
           minor: 1
         },
@@ -279,65 +277,8 @@ defmodule Edgehog.CapabilitiesTest do
       }
 
       expected_capabilities = [
-        :posix_file_transfer_storage,
-        :posix_file_transfer_stream,
-        :geolocation
-      ]
-
-      device_capabilities = Capabilities.from_introspection(device_introspection)
-
-      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
-    end
-
-    test "returns windows_file_transfer_stream capability when all required interfaces are present" do
-      device_introspection = %{
-        "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        },
-        "io.edgehog.devicemanager.fileTransfer.Progress" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        },
-        "io.edgehog.devicemanager.fileTransfer.Response" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        }
-      }
-
-      expected_capabilities = [
-        :windows_file_transfer_stream,
-        :geolocation
-      ]
-
-      device_capabilities = Capabilities.from_introspection(device_introspection)
-
-      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
-    end
-
-    test "returns windows_file_transfer_storage capability when all required interfaces are present" do
-      device_introspection = %{
-        "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        },
-        "io.edgehog.devicemanager.fileTransfer.Progress" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        },
-        "io.edgehog.devicemanager.fileTransfer.Response" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        },
-        "io.edgehog.devicemanager.storage.File" => %InterfaceVersion{
-          major: 0,
-          minor: 1
-        }
-      }
-
-      expected_capabilities = [
-        :windows_file_transfer_storage,
-        :windows_file_transfer_stream,
+        :file_transfer_storage,
+        :file_transfer_stream,
         :geolocation
       ]
 

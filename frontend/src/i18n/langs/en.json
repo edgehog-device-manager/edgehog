@@ -739,11 +739,26 @@
   "components.DeviceTabs.FilesDownloadTab.requestHistory": {
     "defaultMessage": "Request History"
   },
+  "components.DeviceTabs.FilesDownloadTab.sourceType.filesystem": {
+    "defaultMessage": "File System"
+  },
+  "components.DeviceTabs.FilesDownloadTab.sourceType.storage": {
+    "defaultMessage": "Storage"
+  },
   "components.DeviceTabs.FilesDownloadTab.uploadSource": {
     "defaultMessage": "Upload Source"
   },
   "components.DeviceTabs.FilesUploadTab": {
     "defaultMessage": "Files Upload"
+  },
+  "components.DeviceTabs.FilesUploadTab.destinationType.filesystem": {
+    "defaultMessage": "File System"
+  },
+  "components.DeviceTabs.FilesUploadTab.destinationType.storage": {
+    "defaultMessage": "Storage"
+  },
+  "components.DeviceTabs.FilesUploadTab.destinationType.streaming": {
+    "defaultMessage": "Streaming"
   },
   "components.DeviceTabs.FilesUploadTab.error.presignedUrlMissingFields": {
     "defaultMessage": "Presigned URL response is missing put_url or get_url."
@@ -1046,14 +1061,14 @@
   "components.FileUploadRequestsTable.actions.notAvailableYet": {
     "defaultMessage": "Not available yet"
   },
-  "components.FileUploadRequestsTable.compression": {
-    "defaultMessage": "Compression"
-  },
-  "components.FileUploadRequestsTable.compression.none": {
-    "defaultMessage": "None"
-  },
   "components.FileUploadRequestsTable.downloadError": {
     "defaultMessage": "Failed to download file"
+  },
+  "components.FileUploadRequestsTable.encoding": {
+    "defaultMessage": "Encoding"
+  },
+  "components.FileUploadRequestsTable.encoding.none": {
+    "defaultMessage": "None"
   },
   "components.FileUploadRequestsTable.noRequests": {
     "defaultMessage": "No file upload requests have been sent yet."
@@ -2505,17 +2520,14 @@
   "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
     "defaultMessage": "User ID"
   },
-  "forms.ManualFileUploadRequestForm.compressionHint": {
-    "defaultMessage": "Optional compression format. Leave empty for no compression."
+  "forms.ManualFileUploadRequestForm.encodingHint": {
+    "defaultMessage": "Optional encoding format. Leave empty for no encoding."
   },
-  "forms.ManualFileUploadRequestForm.compressionLabel": {
-    "defaultMessage": "Compression"
+  "forms.ManualFileUploadRequestForm.encodingLabel": {
+    "defaultMessage": "Encoding"
   },
-  "forms.ManualFileUploadRequestForm.compressionNone": {
+  "forms.ManualFileUploadRequestForm.encodingNone": {
     "defaultMessage": "None"
-  },
-  "forms.ManualFileUploadRequestForm.compressionTarGz": {
-    "defaultMessage": "tar.gz"
   },
   "forms.ManualFileUploadRequestForm.progressLabel": {
     "defaultMessage": "Report Progress"

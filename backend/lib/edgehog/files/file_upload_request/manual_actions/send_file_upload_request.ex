@@ -30,6 +30,8 @@ defmodule Edgehog.Files.FileUploadRequest.ManualActions.SendFileUploadRequest do
   alias Edgehog.Error.AstarteAPIError
   alias Edgehog.Files
 
+  @interface "io.edgehog.devicemanager.fileTransfer.DeviceToServer"
+
   @file_upload_request_module Application.compile_env(
                                 :edgehog,
                                 :astarte_file_upload_request_module,
@@ -57,9 +59,9 @@ defmodule Edgehog.Files.FileUploadRequest.ManualActions.SendFileUploadRequest do
     request_data = %RequestData{
       id: file_upload_request_id,
       url: url,
-      httpHeaderKey: "x-ms-blob-type",
-      httpHeaderValue: "BlockBlob",
-      compression: file_upload_request.compression || "",
+      httpHeaderKeys: ["x-ms-blob-type"],
+      httpHeaderValues: ["BlockBlob"],
+      encoding: file_upload_request.encoding || "",
       progress: file_upload_request.progress_tracked,
       source: file_upload_request.source || "",
       sourceType: file_upload_request.source_type
@@ -74,9 +76,14 @@ defmodule Edgehog.Files.FileUploadRequest.ManualActions.SendFileUploadRequest do
         reason =
           AstarteAPIError.exception(
             status: api_error.status,
-            response: api_error.response
+            response: api_error.response,
+            device_id: device_id,
+            interface: @interface
           )
 
+        {:error, reason}
+
+      {:error, reason} ->
         {:error, reason}
 
       result ->

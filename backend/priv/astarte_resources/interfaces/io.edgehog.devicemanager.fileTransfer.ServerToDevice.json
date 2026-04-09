@@ -1,5 +1,5 @@
 {
-  "interface_name": "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice",
+  "interface_name": "io.edgehog.devicemanager.fileTransfer.ServerToDevice",
   "version_major": 0,
   "version_minor": 1,
   "type": "datastream",
@@ -26,29 +26,29 @@
       "description": "The URL to get the file from"
     },
     {
-      "endpoint": "/request/httpHeaderKey",
-      "type": "string",
+      "endpoint": "/request/httpHeaderKeys",
+      "type": "stringarray",
       "reliability": "guaranteed",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 3600,
       "description": "Keys for the HTTP headers, must be in the order of the values"
     },
     {
-      "endpoint": "/request/httpHeaderValue",
-      "type": "string",
+      "endpoint": "/request/httpHeaderValues",
+      "type": "stringarray",
       "reliability": "guaranteed",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 3600,
       "description": "Values for the HTTP headers, must be in the order of the keys"
     },
     {
-      "endpoint": "/request/compression",
+      "endpoint": "/request/encoding",
       "type": "string",
       "reliability": "guaranteed",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 3600,
-      "description": "Compression to upload multiple files",
-      "doc": "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
+      "description": "Encoding of the file or directory to download",
+      "doc": "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
     },
     {
       "endpoint": "/request/fileSizeBytes",
@@ -75,15 +75,6 @@
       "database_retention_ttl": 3600,
       "description": "Digest of the file contents",
       "doc": "Must be in the form sha256:deadbeaf, and should be used only if supported by the device."
-    },
-    {
-      "endpoint": "/request/fileName",
-      "type": "string",
-      "reliability": "guaranteed",
-      "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 3600,
-      "description": "Name of the file to download",
-      "doc": "Optional file name of the file to download, default is empty"
     },
     {
       "endpoint": "/request/ttlSeconds",

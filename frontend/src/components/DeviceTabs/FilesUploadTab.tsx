@@ -68,7 +68,11 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
   fragment FilesUploadTab_fileDownloadRequests on Device
   @refetchable(queryName: "FilesUploadTab_PaginationQuery") {
     id
-    capabilities
+    fileTransferCapabilities {
+      encodings
+      unixPermissions
+      targets
+    }
     fileDownloadRequests(first: $first, after: $after)
       @connection(key: "FilesUploadTab_fileDownloadRequests") {
       edges {
@@ -272,7 +276,7 @@ const ManualFileDownloadRequestFormWrapper = ({
         let uploadBlob: Blob;
         let fileName: string;
         let uncompressedSize: number;
-        let compression: string | null = null;
+        let encoding: string | null = null;
 
         // Files from folder selection have webkitRelativePath set.
         // These need archiving even if there's only one file, to preserve
@@ -288,7 +292,7 @@ const ManualFileDownloadRequestFormWrapper = ({
             ? baseName
             : `${baseName}.tar.gz`;
           uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
-          compression = "tar.gz";
+          encoding = "tar.gz";
         } else {
           uploadBlob = files[0];
           fileName = files[0].name;
@@ -296,7 +300,7 @@ const ManualFileDownloadRequestFormWrapper = ({
         }
 
         if (files.length === 1 && /\.(tar\.gz|tgz)$/i.test(files[0].name)) {
-          compression = "tar.gz";
+          encoding = "tar.gz";
         }
 
         const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
@@ -390,7 +394,7 @@ const ManualFileDownloadRequestFormWrapper = ({
                 fileName,
                 uncompressedFileSizeBytes: uncompressedSize,
                 digest,
-                compression,
+                encoding,
                 fileMode,
                 userId,
                 groupId,
@@ -515,10 +519,10 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
           groupId,
         } = values;
 
-        let compression: string | null = null;
+        let encoding: string | null = null;
 
         if (/\.(tar\.gz|tgz)$/i.test(file.name)) {
-          compression = "tar.gz";
+          encoding = "tar.gz";
         }
 
         const fileDownloadRequestId = uuidv7();
@@ -531,7 +535,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
                 deviceId,
                 fileDownloadRequestId,
                 fileId: file.id,
-                compression,
+                encoding,
                 fileMode,
                 userId,
                 groupId,
@@ -661,38 +665,44 @@ const FilesUploadTab = ({
 
   useEffect(fetchRepositories, [fetchRepositories]);
 
-  const { capabilities } = data;
+  const showAdvancedOptions = !!data.fileTransferCapabilities?.unixPermissions;
 
-  const hasStorage =
-    capabilities.includes("POSIX_FILE_TRANSFER_STORAGE") ||
-    capabilities.includes("WINDOWS_FILE_TRANSFER_STORAGE");
+  const destinationTypeOptions = useMemo<DestinationTypeOption[]>(
+    () =>
+      (data.fileTransferCapabilities?.targets ?? [])
+        .filter((target): target is FileDestinationType => target != null)
+        .map((target) => {
+          switch (target) {
+            case "STORAGE":
+              return {
+                value: target,
+                label: intl.formatMessage({
+                  id: "components.DeviceTabs.FilesUploadTab.destinationType.storage",
+                  defaultMessage: "Storage",
+                }),
+              };
+            case "STREAMING":
+              return {
+                value: target,
+                label: intl.formatMessage({
+                  id: "components.DeviceTabs.FilesUploadTab.destinationType.streaming",
+                  defaultMessage: "Streaming",
+                }),
+              };
+            case "FILESYSTEM":
+              return {
+                value: target,
+                label: intl.formatMessage({
+                  id: "components.DeviceTabs.FilesUploadTab.destinationType.filesystem",
+                  defaultMessage: "File System",
+                }),
+              };
+          }
+        }),
+    [data.fileTransferCapabilities?.targets, intl],
+  );
 
-  const hasStream =
-    capabilities.includes("POSIX_FILE_TRANSFER_STREAM") ||
-    capabilities.includes("WINDOWS_FILE_TRANSFER_STREAM");
-
-  const showAdvancedOptions =
-    capabilities.includes("POSIX_FILE_TRANSFER_STORAGE") ||
-    capabilities.includes("POSIX_FILE_TRANSFER_STREAM");
-
-  const destinationTypeOptions = useMemo<DestinationTypeOption[]>(() => {
-    const options: DestinationTypeOption[] = [];
-
-    if (hasStorage) {
-      options.push({ value: "STORAGE", label: "Storage" });
-    }
-
-    if (hasStream) {
-      options.push(
-        { value: "STREAMING", label: "Streaming" },
-        { value: "FILESYSTEM", label: "File System" },
-      );
-    }
-
-    return options;
-  }, [hasStorage, hasStream]);
-
-  if (!hasStorage && !hasStream) {
+  if (destinationTypeOptions?.length === 0) {
     return null;
   }
 

@@ -33,17 +33,22 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.FileTransfer.Response do
     response_code = event.value["code"]
     response_message = event.value["message"]
 
-    status =
+    {status, progress_percentage} =
       case response_code do
-        0 -> :completed
-        _ -> :failed
+        0 -> {:completed, 100}
+        _ -> {:failed, 0}
       end
 
     file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
 
     Files.set_response(
       file_download_request,
-      [status: status, response_code: response_code, response_message: response_message],
+      [
+        status: status,
+        response_code: response_code,
+        response_message: response_message,
+        progress_percentage: progress_percentage
+      ],
       tenant: tenant
     )
   end

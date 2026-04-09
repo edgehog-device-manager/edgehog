@@ -108,28 +108,28 @@ const getColumnsDefinition = (
       return sourceType;
     },
   }),
-  columnHelper.accessor("compression", {
+  columnHelper.accessor("encoding", {
     header: () => (
       <FormattedMessage
-        id="components.FileUploadRequestsTable.compression"
-        defaultMessage="Compression"
+        id="components.FileUploadRequestsTable.encoding"
+        defaultMessage="Encoding"
       />
     ),
     cell: ({ getValue }) => {
-      const compression = getValue();
+      const encoding = getValue();
 
-      if (!compression) {
+      if (!encoding) {
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FileUploadRequestsTable.compression.none"
+              id="components.FileUploadRequestsTable.encoding.none"
               defaultMessage="None"
             />
           </span>
         );
       }
 
-      return compression;
+      return encoding;
     },
   }),
   columnHelper.accessor("responseMessage", {

@@ -28,26 +28,17 @@ defmodule Edgehog.Astarte.Device.FileDownloadRequest do
   alias Astarte.Client.AppEngine
   alias Edgehog.Error
 
-  @posix_interface "io.edgehog.devicemanager.fileTransfer.posix.ServerToDevice"
-  @windows_interface "io.edgehog.devicemanager.fileTransfer.windows.ServerToDevice"
+  @interface "io.edgehog.devicemanager.fileTransfer.ServerToDevice"
 
   @impl Edgehog.Astarte.Device.FileDownloadRequest.Behaviour
-  def request_download(%AppEngine{} = client, device_id, request_data, :posix) do
-    do_request_download(client, device_id, request_data, @posix_interface)
-  end
-
-  def request_download(%AppEngine{} = client, device_id, request_data, :windows) do
-    do_request_download(client, device_id, request_data, @windows_interface)
-  end
-
-  defp do_request_download(client, device_id, request_data, interface) do
+  def request_download(%AppEngine{} = client, device_id, request_data) do
     client
     |> AppEngine.Devices.send_datastream(
       device_id,
-      interface,
+      @interface,
       "/request",
       Map.from_struct(request_data)
     )
-    |> Error.maybe_match_error(device_id, interface)
+    |> Error.maybe_match_error(device_id, @interface)
   end
 end

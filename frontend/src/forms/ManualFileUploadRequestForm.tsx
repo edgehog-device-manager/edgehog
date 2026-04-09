@@ -56,6 +56,7 @@ type ManualFileUploadRequestFormProps = {
   className?: string;
   isLoading: boolean;
   onSubmit: (values: ManualFileUploadRequestData) => void;
+  supportedEncodings: string[];
   sourceTypeOptions: SourceTypeOption[];
   storageSourceOptions: StorageSourceOption[];
 };
@@ -64,6 +65,7 @@ const ManualFileUploadRequestForm = ({
   className,
   isLoading,
   onSubmit,
+  supportedEncodings,
   sourceTypeOptions,
   storageSourceOptions,
 }: ManualFileUploadRequestFormProps) => {
@@ -80,7 +82,7 @@ const ManualFileUploadRequestForm = ({
     defaultValues: {
       sourceType: "STORAGE",
       source: null,
-      compression: "",
+      encoding: "",
       progressTracked: false,
     },
     resolver: zodResolver(fileUploadRequestFormSchema),
@@ -101,21 +103,18 @@ const ManualFileUploadRequestForm = ({
     FILESYSTEM: "/tmp/file.bin",
   };
 
-  const compressionOptions: CompressionOption[] = [
+  const encodingOptions: CompressionOption[] = [
     {
       value: "",
       label: intl.formatMessage({
-        id: "forms.ManualFileUploadRequestForm.compressionNone",
+        id: "forms.ManualFileUploadRequestForm.encodingNone",
         defaultMessage: "None",
       }),
     },
-    {
-      value: "tar.gz",
-      label: intl.formatMessage({
-        id: "forms.ManualFileUploadRequestForm.compressionTarGz",
-        defaultMessage: "tar.gz",
-      }),
-    },
+    ...supportedEncodings.map((encoding) => ({
+      value: encoding,
+      label: encoding,
+    })),
   ];
 
   const onFormSubmit = handleSubmit((data) => {
@@ -123,7 +122,7 @@ const ManualFileUploadRequestForm = ({
     reset({
       sourceType: data.sourceType,
       source: data.source,
-      compression: data.compression ?? "",
+      encoding: data.encoding ?? "",
       progressTracked: data.progressTracked,
     });
   });
@@ -246,21 +245,21 @@ const ManualFileUploadRequestForm = ({
       </FormRow>
 
       <FormRow
-        id="compression"
+        id="encoding"
         label={
           <FormattedMessage
-            id="forms.ManualFileUploadRequestForm.compressionLabel"
-            defaultMessage="Compression"
+            id="forms.ManualFileUploadRequestForm.encodingLabel"
+            defaultMessage="Encoding"
           />
         }
       >
         <Controller
           control={control}
-          name="compression"
+          name="encoding"
           render={({ field }) => {
             const selectedOption =
-              compressionOptions.find((opt) => opt.value === field.value) ??
-              compressionOptions[0] ??
+              encodingOptions.find((opt) => opt.value === field.value) ??
+              encodingOptions[0] ??
               null;
 
             return (
@@ -269,19 +268,19 @@ const ManualFileUploadRequestForm = ({
                 onChange={(option) => {
                   field.onChange(option?.value ?? "");
                 }}
-                options={compressionOptions}
+                options={encodingOptions}
               />
             );
           }}
         />
 
-        {errors.compression ? (
-          <FormFeedback feedback={errors.compression.message} />
+        {errors.encoding ? (
+          <FormFeedback feedback={errors.encoding.message} />
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileUploadRequestForm.compressionHint"
-              defaultMessage="Optional compression format. Leave empty for no compression."
+              id="forms.ManualFileUploadRequestForm.encodingHint"
+              defaultMessage="Optional encoding format. Leave empty for no encoding."
             />
           </Form.Text>
         )}

@@ -1,0 +1,30 @@
+{
+  "interface_name": "io.edgehog.devicemanager.fileTransfer.Capabilities",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "properties",
+  "ownership": "device",
+  "aggregation": "individual",
+  "description": "File transfer capabilities the Device supports",
+  "doc": "Features and capabilities the Device implementation or plafrom supports and is able to receive from Astarte.",
+  "mappings": [
+    {
+      "endpoint": "/encodings",
+      "type": "stringarray",
+      "description": "Supported compressions and archive algorithms.",
+      "doc": "List of encoding formats supported by the device, possible values are: [gz, lz4, tar, tar.gz, tar.lz4]."
+    },
+    {
+      "endpoint": "/unixPermissions",
+      "type": "boolean",
+      "description": "Support unix file mode, user id and group id.",
+      "doc": "Flag to support setting the file mode, user and group ownership of a transferred file in a unix system."
+    },
+    {
+      "endpoint": "/targets",
+      "type": "stringarray",
+      "description": "Supported destination and sources for the transfers.",
+      "doc": "List of sources and destinations that the device can handle, possible values are: [storage, streaming, filesystem]"
+    }
+  ]
+}

@@ -93,7 +93,7 @@ defmodule Edgehog.Files do
       define :set_path_on_device, args: [:path_on_device]
       define :set_size_bytes, args: [:decompressed_file_size_bytes]
       define :set_response
-      define :set_progress
+      define :set_file_download_progress, action: :set_progress
       define :set_status
     end
 

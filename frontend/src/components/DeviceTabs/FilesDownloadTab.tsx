@@ -51,6 +51,11 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
   @refetchable(queryName: "FilesDownloadTab_PaginationQuery") {
     id
     capabilities
+    fileTransferCapabilities {
+      encodings
+      unixPermissions
+      targets
+    }
     fileUploadRequests(first: $first, after: $after)
       @connection(key: "FilesDownloadTab_fileUploadRequests") {
       edges {
@@ -60,7 +65,7 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
           getPresignedUrl
           source
           sourceType
-          compression
+          encoding
           progressTracked
           status
           progressPercentage
@@ -96,7 +101,7 @@ const DEVICE_CREATE_FILE_UPLOAD_REQUEST_MUTATION = graphql`
         getPresignedUrl
         source
         sourceType
-        compression
+        encoding
         progressTracked
         status
         progressPercentage
@@ -127,6 +132,7 @@ const FILE_UPLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
 type ManualFileUploadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
+  supportedEncodings: string[];
   sourceTypeOptions: SourceTypeOption[];
   storageSourceOptions: StorageSourceOption[];
 };
@@ -134,6 +140,7 @@ type ManualFileUploadRequestFormWrapperProps = {
 const ManualFileUploadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
+  supportedEncodings,
   sourceTypeOptions,
   storageSourceOptions,
 }: ManualFileUploadRequestFormWrapperProps) => {
@@ -148,7 +155,7 @@ const ManualFileUploadRequestFormWrapper = ({
       setErrorFeedback(null);
 
       try {
-        const { sourceType, source, compression, progressTracked } = values;
+        const { sourceType, source, encoding, progressTracked } = values;
 
         await new Promise<void>((resolve, reject) => {
           createFileUploadRequest({
@@ -157,7 +164,7 @@ const ManualFileUploadRequestFormWrapper = ({
                 deviceId,
                 sourceType,
                 source,
-                compression,
+                encoding,
                 progressTracked,
               },
             },
@@ -231,6 +238,7 @@ const ManualFileUploadRequestFormWrapper = ({
     <ManualFileUploadRequestForm
       isLoading={isCreating}
       onSubmit={handleSubmit}
+      supportedEncodings={supportedEncodings}
       sourceTypeOptions={sourceTypeOptions}
       storageSourceOptions={storageSourceOptions}
     />
@@ -271,10 +279,33 @@ const FilesDownloadTab = ({
     [data.fileUploadRequests],
   );
 
-  const sourceTypeOptions: SourceTypeOption[] = [
-    { value: "STORAGE", label: "Storage" },
-    { value: "FILESYSTEM", label: "File System" },
-  ];
+  const sourceTypeOptions = useMemo<SourceTypeOption[]>(() => {
+    const targets = data.fileTransferCapabilities?.targets ?? [];
+
+    const options: SourceTypeOption[] = [];
+
+    if (targets.includes("STORAGE")) {
+      options.push({
+        value: "STORAGE",
+        label: intl.formatMessage({
+          id: "components.DeviceTabs.FilesDownloadTab.sourceType.storage",
+          defaultMessage: "Storage",
+        }),
+      });
+    }
+
+    if (targets.includes("FILESYSTEM")) {
+      options.push({
+        value: "FILESYSTEM",
+        label: intl.formatMessage({
+          id: "components.DeviceTabs.FilesDownloadTab.sourceType.filesystem",
+          defaultMessage: "File System",
+        }),
+      });
+    }
+
+    return options;
+  }, [data.fileTransferCapabilities?.targets, intl]);
 
   const storageSourceOptions: StorageSourceOption[] = useMemo(() => {
     const uniqueStorageIds = new Map<string, string>();
@@ -305,7 +336,24 @@ const FilesDownloadTab = ({
     }));
   }, [data.storageFileDownloadRequests]);
 
-  if (!data.capabilities.includes("FILE_TRANSFER_READ")) {
+  const supportedEncodings = useMemo(() => {
+    const uniqueEncodings = new Set<string>();
+
+    data.fileTransferCapabilities?.encodings?.forEach((encoding) => {
+      const value = encoding?.trim();
+
+      if (value) {
+        uniqueEncodings.add(value);
+      }
+    });
+
+    return Array.from(uniqueEncodings);
+  }, [data.fileTransferCapabilities?.encodings]);
+
+  if (
+    !data.capabilities.includes("FILE_TRANSFER_READ") ||
+    sourceTypeOptions.length === 0
+  ) {
     return null;
   }
 
@@ -325,6 +373,7 @@ const FilesDownloadTab = ({
           <ManualFileUploadRequestFormWrapper
             setErrorFeedback={setErrorFeedback}
             deviceId={deviceId}
+            supportedEncodings={supportedEncodings}
             sourceTypeOptions={sourceTypeOptions}
             storageSourceOptions={storageSourceOptions}
           />

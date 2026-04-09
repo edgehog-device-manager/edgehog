@@ -18,18 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.FileDownloadRequest.Behaviour do
-  @moduledoc """
-  Behaviour for requesting file downloads on Astarte devices.
-  """
-
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Astarte.Device.FileDownloadRequest.RequestData
-
-  @callback request_download(
-              client :: AppEngine.t(),
-              device_id :: String.t(),
-              request_data :: RequestData.t()
-            ) ::
-              :ok | {:error, term()}
+defmodule Edgehog.Devices.Device.Types.FileTransferCapabilities do
+  @moduledoc false
+  use Edgehog.Devices.Device.Types.AstarteInterfaceValue,
+    value_id: :file_transfer_capabilities,
+    value_struct: Edgehog.Astarte.Device.FileTransferCapabilities
 end

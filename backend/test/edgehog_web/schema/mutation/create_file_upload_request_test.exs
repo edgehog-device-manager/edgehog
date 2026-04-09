@@ -46,9 +46,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
         assert %RequestData{
                  id: request_id,
                  url: "http://example.test/upload",
-                 httpHeaderKey: "x-ms-blob-type",
-                 httpHeaderValue: "BlockBlob",
-                 compression: "gzip",
+                 httpHeaderKeys: ["x-ms-blob-type"],
+                 httpHeaderValues: ["BlockBlob"],
+                 encoding: "gzip",
                  progress: true,
                  source: "/var/log/messages",
                  sourceType: :filesystem
@@ -66,7 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
       assert file_upload_request["url"] == "http://example.test/upload"
       assert file_upload_request["source"] == "/var/log/messages"
       assert file_upload_request["sourceType"] == "FILESYSTEM"
-      assert file_upload_request["compression"] == "gzip"
+      assert file_upload_request["encoding"] == "gzip"
       assert file_upload_request["progressTracked"] == true
       assert file_upload_request["status"] == "PENDING"
       assert file_upload_request["progressPercentage"] == nil
@@ -120,7 +120,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
           url
           source
           sourceType
-          compression
+          encoding
           progressTracked
           status
           progressPercentage
@@ -145,7 +145,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
       "deviceId" => device_id,
       "source" => "/var/log/messages",
       "sourceType" => "FILESYSTEM",
-      "compression" => "gzip",
+      "encoding" => "gzip",
       "progressTracked" => true,
       "httpHeaders" => Jason.encode!(%{"X-Test" => "1"})
     }

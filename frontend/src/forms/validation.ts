@@ -651,7 +651,7 @@ const fileUploadRequestFormSchema = z
   .object({
     sourceType: fileSourceTypeSchema,
     source: nullableSourceSchema,
-    compression: z.string().optional(),
+    encoding: z.string().optional(),
     progressTracked: z.boolean(),
   })
   .superRefine((data, ctx) => {
@@ -665,7 +665,7 @@ const fileUploadRequestFormSchema = z
   })
   .transform((data) => ({
     ...data,
-    compression: data.compression?.trim() ? data.compression.trim() : undefined,
+    encoding: data.encoding?.trim() ? data.encoding.trim() : undefined,
   }));
 
 type ManualFileUploadRequestData = z.infer<typeof fileUploadRequestFormSchema>;

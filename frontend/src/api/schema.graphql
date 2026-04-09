@@ -41,12 +41,6 @@ input CampaignCampaignMechanismFileDownloadInput {
   fileId: ID
 
   """
-  Optional compression type for the file (e.g., "tar.gz").
-  Other values are: ['tar.gz']. Defaults to empty string (no compression).
-  """
-  compression: String
-
-  """
   Device-specific field indicating where the file should be stored.
   Supported values are: storage, streaming, filesystem.
   """
@@ -97,6 +91,12 @@ input CampaignCampaignMechanismFileDownloadInput {
   File Download Request lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int
+
+  """
+  Optional compression type for the file (e.g., "tar.gz").
+  Other values are: ['tar.gz']. Defaults to empty string (no compression).
+  """
+  compression: String
 }
 
 "An object representing the properties of a File Download campaign mechanism."
@@ -1006,6 +1006,12 @@ enum DeviceCapability {
   "The device supports reading files from it."
   FILE_TRANSFER_READ
 
+  "The device supports transferring files to and from its storage units."
+  FILE_TRANSFER_STORAGE
+
+  "The device supports streaming files to and from it."
+  FILE_TRANSFER_STREAM
+
   "The device can be geolocated."
   GEOLOCATION
 
@@ -1020,12 +1026,6 @@ enum DeviceCapability {
 
   "The device provides information about its operating system."
   OPERATING_SYSTEM
-
-  "The device supports transferring files to and from its storage units."
-  POSIX_FILE_TRANSFER_STORAGE
-
-  "The device supports streaming files to and from it."
-  POSIX_FILE_TRANSFER_STREAM
 
   "The device supports remote terminal sessions."
   REMOTE_TERMINAL
@@ -1050,12 +1050,6 @@ enum DeviceCapability {
 
   "The device provides information about surrounding WiFi APs."
   WIFI
-
-  "The device supports transferring files to and from its storage units."
-  WINDOWS_FILE_TRANSFER_STORAGE
-
-  "The device supports streaming files to and from it."
-  WINDOWS_FILE_TRANSFER_STREAM
 }
 
 enum DeviceLedBehavior {
@@ -5308,6 +5302,8 @@ type Device implements Node {
 
   hardwareInfo: HardwareInfo
 
+  fileTransferCapabilities: FileTransferCapabilities
+
   """
   Describes the place where the device is located.
 
@@ -5361,7 +5357,7 @@ type CreateFileUploadRequestResult {
 input CreateFileUploadRequestInput {
   source: String
   sourceType: FileSource!
-  compression: String
+  encoding: String
   progressTracked: Boolean
   httpHeaders: JsonString
   deviceId: ID!
@@ -5372,7 +5368,7 @@ enum FileUploadRequestSortField {
   URL
   SOURCE
   SOURCE_TYPE
-  COMPRESSION
+  ENCODING
   PROGRESS_TRACKED
   STATUS
   PROGRESS_PERCENTAGE
@@ -5483,7 +5479,7 @@ input FileUploadRequestFilterProgressTracked {
   isNotDistinctFrom: Boolean
 }
 
-input FileUploadRequestFilterCompression {
+input FileUploadRequestFilterEncoding {
   isNil: Boolean
   eq: String
   notEq: String
@@ -5565,7 +5561,7 @@ input FileUploadRequestFilterInput {
   url: FileUploadRequestFilterUrl
   source: FileUploadRequestFilterSource
   sourceType: FileUploadRequestFilterSourceType
-  compression: FileUploadRequestFilterCompression
+  encoding: FileUploadRequestFilterEncoding
   progressTracked: FileUploadRequestFilterProgressTracked
   status: FileUploadRequestFilterStatus
   progressPercentage: FileUploadRequestFilterProgressPercentage
@@ -5589,7 +5585,7 @@ type FileUploadRequest {
 
   sourceType: FileSource!
 
-  compression: String
+  encoding: String
 
   progressTracked: Boolean
 
@@ -5629,8 +5625,8 @@ type CreateManagedFileDownloadRequestResult {
 }
 
 input CreateManagedFileDownloadRequestInput {
-  "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
-  compression: String
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
 
   "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
   ttlSeconds: Int
@@ -5685,8 +5681,8 @@ input CreateManualFileDownloadRequestInput {
   "The digest of the file being downloaded, used for integrity verification."
   digest: String!
 
-  "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
-  compression: String
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
 
   "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
   ttlSeconds: Int
@@ -5727,7 +5723,7 @@ enum FileDownloadRequestSortField {
   FILE_NAME
   UNCOMPRESSED_FILE_SIZE_BYTES
   DIGEST
-  COMPRESSION
+  ENCODING
   TTL_SECONDS
   FILE_MODE
   USER_ID
@@ -5928,7 +5924,7 @@ input FileDownloadRequestFilterTtlSeconds {
   isNotDistinctFrom: Int
 }
 
-input FileDownloadRequestFilterCompression {
+input FileDownloadRequestFilterEncoding {
   isNil: Boolean
   eq: String
   notEq: String
@@ -6039,8 +6035,8 @@ input FileDownloadRequestFilterInput {
   "The digest of the file being downloaded, used for integrity verification."
   digest: FileDownloadRequestFilterDigest
 
-  "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
-  compression: FileDownloadRequestFilterCompression
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: FileDownloadRequestFilterEncoding
 
   "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
   ttlSeconds: FileDownloadRequestFilterTtlSeconds
@@ -6110,8 +6106,8 @@ type FileDownloadRequest {
   "The digest of the file being downloaded, used for integrity verification."
   digest: String!
 
-  "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
-  compression: String
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
 
   "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
   ttlSeconds: Int
@@ -8797,6 +8793,30 @@ type RuntimeInfo {
 
   "The URL that uniquely identifies the Edgehog runtime implementation."
   url: String
+}
+
+"Supported file transfer target kinds."
+enum FileTransferTarget {
+  "Persist file on device storage"
+  STORAGE
+
+  "Process file without storing"
+  STREAMING
+
+  "Persist file on device filesystem"
+  FILESYSTEM
+}
+
+"Describes file transfer capabilities supported by the device."
+type FileTransferCapabilities {
+  "Supported compression and archive formats."
+  encodings: [String]
+
+  "Whether UNIX permissions and ownership are supported."
+  unixPermissions: Boolean
+
+  "Supported transfer targets."
+  targets: [FileTransferTarget]
 }
 
 "Describe the available images on the device."

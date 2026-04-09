@@ -47,6 +47,11 @@ type FileManagementModeOption = {
 const FILE_MANAGEMENT_FRAGMENT = graphql`
   fragment FileManagementTab_fileManagement on Device {
     capabilities
+    fileTransferCapabilities {
+      encodings
+      unixPermissions
+      targets
+    }
     ...FilesUploadTab_fileDownloadRequests
     ...FilesDownloadTab_fileUploadRequests
   }
@@ -57,10 +62,8 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const data = useFragment(FILE_MANAGEMENT_FRAGMENT, deviceRef);
 
   const supportsServerToDevice =
-    data.capabilities.includes("POSIX_FILE_TRANSFER_STORAGE") ||
-    data.capabilities.includes("WINDOWS_FILE_TRANSFER_STORAGE") ||
-    data.capabilities.includes("POSIX_FILE_TRANSFER_STREAM") ||
-    data.capabilities.includes("WINDOWS_FILE_TRANSFER_STREAM");
+    data.capabilities.includes("FILE_TRANSFER_STORAGE") ||
+    data.capabilities.includes("FILE_TRANSFER_STREAM");
 
   const supportsDeviceToServer =
     data.capabilities.includes("FILE_TRANSFER_READ");
@@ -103,10 +106,6 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const [selectedMode, setSelectedMode] =
     useState<FileManagementMode>("to-device-file");
 
-  if (modeOptions.length === 0) {
-    return null;
-  }
-
   const fallbackMode = modeOptions[0]?.value ?? "to-device-file";
 
   const effectiveMode = modeOptions.some((m) => m.value === selectedMode)
@@ -115,6 +114,13 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
 
   const selectedModeOption =
     modeOptions.find((option) => option.value === effectiveMode) ?? null;
+
+  const hasTransferTargets =
+    (data.fileTransferCapabilities?.targets?.length ?? 0) > 0;
+
+  if (modeOptions.length === 0 || !hasTransferTargets) {
+    return null;
+  }
 
   return (
     <Tab eventKey="device-file-management-tab" title="File Management">

@@ -120,6 +120,10 @@ config :edgehog,
        :astarte_file_upload_request_module,
        Edgehog.Astarte.Device.FileUploadRequestMock
 
+config :edgehog,
+       :astarte_file_transfer_capabilities_module,
+       Edgehog.Astarte.Device.FileTransferCapabilitiesMock
+
 config :edgehog, :astarte_forwarder_session_module, Edgehog.Astarte.Device.ForwarderSessionMock
 config :edgehog, :astarte_geolocation_module, Edgehog.Astarte.Device.GeolocationMock
 config :edgehog, :astarte_hardware_info_module, Edgehog.Astarte.Device.HardwareInfoMock

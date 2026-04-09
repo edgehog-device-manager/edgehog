@@ -27,13 +27,28 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Astarte.Device.FileDownloadRequestMock
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.FileTransferCapabilitiesMock
   alias Edgehog.StorageMock
+
+  setup do
+    stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+      {:ok,
+       %FileTransferCapabilities{
+         encodings: [],
+         unix_permissions: false,
+         targets: [:filesystem]
+       }}
+    end)
+
+    :ok
+  end
 
   describe "createManualFileDownloadRequest mutation" do
     test "creates file download request with all fields", %{tenant: tenant} do
       # This sets the capabilities to [] to avoid the check on the presence of the FileTransfer interface
-      expect(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
-      expect(FileDownloadRequestMock, :request_download, fn _, _, _, _ -> :ok end)
+      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+      expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
 
       result =
         create_manual_file_download_request_mutation(tenant: tenant)
@@ -49,7 +64,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       assert file_download_request["fileName"] == "filename"
       assert file_download_request["uncompressedFileSizeBytes"] == 75_555
       assert file_download_request["digest"] == "sha256:jfkdgjkj"
-      assert file_download_request["compression"] == nil
+      assert file_download_request["encoding"] == nil
       assert file_download_request["userId"] == 45
       assert file_download_request["groupId"] == 55
 
@@ -70,9 +85,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     test "fails if Astarte API returns error", %{
       tenant: tenant
     } do
-      expect(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
 
-      expect(FileDownloadRequestMock, :request_download, fn _, _, _, _ ->
+      expect(FileDownloadRequestMock, :request_download, fn _, _, _ ->
         {:error, %APIError{status: 500, response: "Internal Server Error"}}
       end)
 
@@ -86,8 +101,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
 
   describe "createManagedFileDownloadRequest mutation" do
     test "creates managed file download request from file", %{tenant: tenant} do
-      expect(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
-      expect(FileDownloadRequestMock, :request_download, fn _, _, _, _ -> :ok end)
+      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+      expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
 
       file = file_fixture(tenant: tenant, name: "managed.bin", size: 1234, digest: "sha256:abcd")
 
@@ -164,7 +179,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           fileName
           uncompressedFileSizeBytes
           digest
-          compression
+          encoding
           userId
           groupId
           status
@@ -195,7 +210,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       "fileName" => "filename",
       "uncompressedFileSizeBytes" => 75_555,
       "digest" => "sha256:jfkdgjkj",
-      "compression" => "",
+      "encoding" => "",
       "userId" => 45,
       "groupId" => 55,
       "fileDownloadRequestId" => Ash.UUIDv7.generate()
@@ -234,7 +249,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           fileName
           uncompressedFileSizeBytes
           digest
-          compression
+          encoding
           userId
           groupId
           status
@@ -269,7 +284,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       "destination" => nil,
       "progressTracked" => false,
       "ttlSeconds" => 100_000,
-      "compression" => "",
+      "encoding" => "",
       "userId" => 45,
       "groupId" => 55,
       "fileDownloadRequestId" => Ash.UUIDv7.generate()

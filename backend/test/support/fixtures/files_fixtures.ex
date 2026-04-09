@@ -133,7 +133,7 @@ defmodule Edgehog.FilesFixtures do
     * `:file_name` - File name (default: auto-generated unique name)
     * `:uncompressed_file_size_bytes` - File size in bytes (default: random)
     * `:digest` - Content digest (default: auto-generated sha256)
-    * `:compression` - Compression type (default: "")
+    * `:encoding` - Encoding type (default: "")
     * `:ttl_seconds` - TTL (default: 0)
     * `:file_mode` - POSIX file mode (default: random)
     * `:user_id` - POSIX user ID (default: random)
@@ -158,7 +158,7 @@ defmodule Edgehog.FilesFixtures do
         file_name: unique_file_name(),
         uncompressed_file_size_bytes: :rand.uniform(1_000_000),
         digest: unique_file_digest(),
-        compression: "",
+        encoding: "",
         ttl_seconds: 0,
         file_mode: random_file_mode(),
         user_id: random_user_id(),
@@ -203,7 +203,7 @@ defmodule Edgehog.FilesFixtures do
         file_name: filename,
         uncompressed_file_size_bytes: file.size,
         digest: file.digest,
-        compression: "",
+        encoding: "",
         ttl_seconds: 0,
         file_mode: random_file_mode(),
         user_id: random_user_id(),
@@ -229,7 +229,7 @@ defmodule Edgehog.FilesFixtures do
     * `:device_id` - The device ID (default: auto-creates a new device)
     * `:url` - Upload URL (default: auto-generated)
     * `:source` - Device source path/type (default: "storage")
-    * `:compression` - Compression type (default: "")
+    * `:encoding` - Encoding type (default: "")
     * `:progress_tracked` - Progress reporting flag (default: false)
     * `:status` - Status (default: :pending)
     * `:source_type` - Source type (default: "filesystem")
@@ -250,7 +250,7 @@ defmodule Edgehog.FilesFixtures do
       Enum.into(opts, %{
         url: "https://example.com/upload/#{System.unique_integer([:positive])}.bin",
         source: "storage",
-        compression: "",
+        encoding: "",
         progress_tracked: false,
         status: :pending,
         source_type: "filesystem",

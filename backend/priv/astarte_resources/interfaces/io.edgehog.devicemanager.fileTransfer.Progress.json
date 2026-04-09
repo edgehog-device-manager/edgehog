@@ -13,7 +13,7 @@
       "type": "string",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 3600,
-      "description": "Transfer ID for the file"
+      "description": "Transfer ID for the file."
     },
     {
       "endpoint": "/request/type",
@@ -24,11 +24,19 @@
       "doc": "Specifies the direction of the transfer. Allowed values: 'server_to_device' or 'device_to_server'."
     },
     {
-      "endpoint": "/request/progress",
-      "type": "integer",
+      "endpoint": "/request/bytes",
+      "type": "longinteger",
       "database_retention_policy": "use_ttl",
       "database_retention_ttl": 3600,
-      "description": "Progress of the transfer in %"
+      "description": "Progress of the transfer in number of bytes transferred."
+    },
+    {
+      "endpoint": "/request/totalBytes",
+      "type": "longinteger",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Total size of the transfer.",
+      "doc": "Reports the total number of bytes that have to be transferred. If the total size is not known this field contains a value of '-1'."
     }
   ]
 }

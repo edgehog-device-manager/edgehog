@@ -29,6 +29,8 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
   import Edgehog.TenantsFixtures
 
   alias Ash.Error.Invalid
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.FileTransferCapabilitiesMock
   alias Edgehog.Campaigns
   alias Edgehog.Files
   alias Edgehog.StorageMock
@@ -40,6 +42,15 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
 
     stub(StorageMock, :read_presigned_url, fn path ->
       {:ok, %{get_url: "http://example.test/#{path}"}}
+    end)
+
+    stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+      {:ok,
+       %FileTransferCapabilities{
+         encodings: [],
+         unix_permissions: false,
+         targets: [:filesystem]
+       }}
     end)
 
     tenant = tenant_fixture()

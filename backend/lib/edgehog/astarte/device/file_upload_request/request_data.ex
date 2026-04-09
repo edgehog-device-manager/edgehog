@@ -26,9 +26,9 @@ defmodule Edgehog.Astarte.Device.FileUploadRequest.RequestData do
   defstruct [
     :id,
     :url,
-    :httpHeaderKey,
-    :httpHeaderValue,
-    :compression,
+    :httpHeaderKeys,
+    :httpHeaderValues,
+    :encoding,
     :progress,
     :source,
     :sourceType
@@ -37,9 +37,9 @@ defmodule Edgehog.Astarte.Device.FileUploadRequest.RequestData do
   @type t() :: %__MODULE__{
           id: String.t(),
           url: String.t(),
-          httpHeaderKey: String.t(),
-          httpHeaderValue: String.t(),
-          compression: String.t(),
+          httpHeaderKeys: [String.t()],
+          httpHeaderValues: [String.t()],
+          encoding: String.t(),
           progress: boolean(),
           source: String.t(),
           sourceType: String.t()

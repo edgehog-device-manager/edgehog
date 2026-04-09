@@ -146,7 +146,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           value: %{
             "type" => "server_to_device",
             "id" => file_download_request.id,
-            "progress" => 80
+            "bytes" => 80,
+            "totalBytes" => 100
           }
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -183,7 +184,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           value: %{
             "type" => "device_to_server",
             "id" => file_upload_request.id,
-            "progress" => 42
+            "bytes" => 42,
+            "totalBytes" => 100
           }
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -199,7 +201,84 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert request.progress_percentage == 42
     end
 
-    test "marks file upload request as completed when fileTransfer.Progress reaches 100",
+    test "sets file download request to in_progress when totalBytes is -1", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_download_request =
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :sent
+        )
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      progress_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Progress",
+          path: "/request",
+          value: %{
+            "type" => "server_to_device",
+            "id" => file_download_request.id,
+            "bytes" => 1024,
+            "totalBytes" => -1
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, progress_event)
+      |> response(200)
+
+      request = Ash.get!(FileDownloadRequest, file_download_request.id, tenant: tenant)
+      assert request.status == :in_progress
+      assert request.progress_percentage == nil
+    end
+
+    test "sets file upload request to in_progress when totalBytes is -1", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_upload_request =
+        file_upload_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :sent,
+          progress_percentage: nil
+        )
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      progress_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.fileTransfer.Progress",
+          path: "/request",
+          value: %{
+            "type" => "device_to_server",
+            "id" => file_upload_request.id,
+            "bytes" => 1024,
+            "totalBytes" => -1
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, progress_event)
+      |> response(200)
+
+      request = Ash.get!(FileUploadRequest, file_upload_request.id, tenant: tenant)
+      assert request.status == :in_progress
+      assert request.progress_percentage == nil
+    end
+
+    test "marks file upload request as completed when fileTransfer.Progress reaches 100%",
          context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
@@ -221,7 +300,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
           value: %{
             "type" => "device_to_server",
             "id" => file_upload_request.id,
-            "progress" => 100
+            "bytes" => 512,
+            "totalBytes" => 512
           }
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())

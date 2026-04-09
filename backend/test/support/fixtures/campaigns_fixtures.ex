@@ -674,7 +674,7 @@ defmodule Edgehog.CampaignsFixtures do
     Mox.stub(
       Edgehog.Astarte.Device.FileDownloadRequestMock,
       :request_download,
-      fn _client, _device_id, _request_data, _device_type -> :ok end
+      fn _client, _device_id, _request_data -> :ok end
     )
   end
 

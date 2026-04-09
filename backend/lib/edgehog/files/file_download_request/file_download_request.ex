@@ -68,7 +68,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     create :managed do
       accept [
-        :compression,
+        :encoding,
         :ttl_seconds,
         :file_mode,
         :user_id,
@@ -118,7 +118,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
         :file_name,
         :uncompressed_file_size_bytes,
         :digest,
-        :compression,
+        :encoding,
         :ttl_seconds,
         :file_mode,
         :user_id,
@@ -157,7 +157,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
         :file_name,
         :uncompressed_file_size_bytes,
         :digest,
-        :compression,
+        :encoding,
         :ttl_seconds,
         :file_mode,
         :user_id,
@@ -218,6 +218,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
       argument :status, Status, allow_nil?: false
       argument :response_code, :integer, allow_nil?: false
       argument :response_message, :string, allow_nil?: true
+      argument :progress_percentage, :integer, allow_nil?: true
 
       # Needed because and HandleEphemeralFileDeletion are not atomic
       require_atomic? false
@@ -225,6 +226,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
       change set_attribute(:status, arg(:status))
       change set_attribute(:response_code, arg(:response_code))
       change set_attribute(:response_message, arg(:response_message))
+      change set_attribute(:progress_percentage, arg(:progress_percentage))
 
       # After file download request is finished remove data from bucket
       change Changes.HandleEphemeralFileDeletion do
@@ -233,9 +235,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
     end
 
     update :set_progress do
-      argument :progress_percentage, :integer, allow_nil?: false
-
-      change set_attribute(:progress_percentage, arg(:progress_percentage))
+      accept [:progress_percentage, :status]
     end
 
     update :set_status do
@@ -272,8 +272,8 @@ defmodule Edgehog.Files.FileDownloadRequest do
       allow_nil? false
     end
 
-    attribute :compression, :string do
-      description "Optional enum string for the file compression with default value empty, other values are: ['tar.gz']"
+    attribute :encoding, :string do
+      description "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
       public? true
 
       default ""

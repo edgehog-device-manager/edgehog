@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -149,6 +149,25 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
     @desc "The URL that uniquely identifies the Edgehog runtime implementation."
     field :url, :string
+  end
+
+  @desc "Supported file transfer target kinds."
+  enum :file_transfer_target do
+    value :storage, description: "Persist file on device storage"
+    value :streaming, description: "Process file without storing"
+    value :filesystem, description: "Persist file on device filesystem"
+  end
+
+  @desc "Describes file transfer capabilities supported by the device."
+  object :file_transfer_capabilities do
+    @desc "Supported compression and archive formats."
+    field :encodings, list_of(:string)
+
+    @desc "Whether UNIX permissions and ownership are supported."
+    field :unix_permissions, :boolean
+
+    @desc "Supported transfer targets."
+    field :targets, list_of(:file_transfer_target)
   end
 
   @desc "Describe the available images on the device."

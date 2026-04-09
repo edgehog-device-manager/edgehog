@@ -59,7 +59,7 @@ defmodule Edgehog.Files.FileUploadRequest do
     end
 
     create :send_request do
-      accept [:source, :source_type, :compression, :progress_tracked, :http_headers]
+      accept [:source, :source_type, :encoding, :progress_tracked, :http_headers]
 
       argument :device_id, :id do
         allow_nil? false
@@ -82,7 +82,7 @@ defmodule Edgehog.Files.FileUploadRequest do
         :url,
         :source,
         :source_type,
-        :compression,
+        :encoding,
         :progress_tracked,
         :status,
         :progress_percentage,
@@ -133,7 +133,7 @@ defmodule Edgehog.Files.FileUploadRequest do
       allow_nil? false
     end
 
-    attribute :compression, :string do
+    attribute :encoding, :string do
       public? true
 
       default ""

@@ -30,6 +30,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.DeploymentCommandMock
   alias Edgehog.Astarte.Device.DeploymentUpdateMock
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.FileTransferCapabilitiesMock
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
@@ -53,6 +55,15 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
     # Stub the deployment update mock (called when deployment transitions to started - ready action)
     stub(DeploymentUpdateMock, :update, fn _client, _device_id, _data ->
       :ok
+    end)
+
+    stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+      {:ok,
+       %FileTransferCapabilities{
+         encodings: [],
+         unix_permissions: false,
+         targets: [:filesystem]
+       }}
     end)
 
     %{tenant: tenant_fixture()}
@@ -803,7 +814,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatusMock,
     CreateDeploymentRequestMock,
-    DeploymentCommandMock
+    DeploymentCommandMock,
+    FileTransferCapabilitiesMock
   ]
 
   defp start_and_monitor_executor!(campaign, opts \\ []) do

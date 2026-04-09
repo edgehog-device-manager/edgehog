@@ -605,6 +605,11 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :hardware_info}
     end
 
+    calculate :file_transfer_capabilities, Types.FileTransferCapabilities do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :file_transfer_capabilities}
+    end
+
     calculate :location, Edgehog.Geolocation.Location do
       description """
       Describes the place where the device is located.
