@@ -31,12 +31,12 @@ jobs:
       backend--release_created: ${{ steps.release.outputs.backend--release_created }}
       backend--version: ${{ steps.release.outputs.backend--version }}
     steps:
-      - uses: actions/create-github-app-token@v3
+      - uses: actions/create-github-app-token@f8d387b68d61c58ab83c6c016672934102569859 # v3
         id: app-token
         with:
           app-id: ${{ vars.EDGEHOG_APP_APP_ID }}
           private-key: ${{ secrets.EDGEHOG_APP_PRIVATE_KEY }}
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@16a9c90856f42705d54a6fda1823352bdc62cf38 # v4
         id: release
         with:
           token: ${{ steps.app-token.outputs.token }}

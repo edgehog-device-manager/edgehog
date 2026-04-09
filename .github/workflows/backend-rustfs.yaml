@@ -46,7 +46,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Start Rustfs
         run: |
           docker run -d \
@@ -79,7 +79,7 @@ jobs:
           ./mc mb rustfs/edgehog;
           ./mc anonymous set download rustfs/edgehog;
 
-      - uses: team-alembic/staple-actions/actions/mix-task@main
+      - uses: team-alembic/staple-actions/actions/mix-task@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
         with:
           mix-env: test
           working-directory: backend
