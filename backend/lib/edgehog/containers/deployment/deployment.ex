@@ -175,6 +175,19 @@ defmodule Edgehog.Containers.Deployment do
       change Changes.SendDeploymentToDevice
     end
 
+    update :retry_deployment do
+      description """
+      Sends the deployment to the device.
+      Deploys the necessary resources and sends the deployment request.
+      """
+
+      require_atomic? false
+
+      validate {Validations.IsReady, [readiness: false]}
+      change Changes.SendDeploymentToDevice
+      change Changes.Reconcile
+    end
+
     update :upgrade_release do
       argument :target, :uuid do
         allow_nil? false
