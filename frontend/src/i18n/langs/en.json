@@ -485,9 +485,6 @@
   "components.DeploymentDetails.containerWithIndex": {
     "defaultMessage": "Container {index}"
   },
-  "components.DeploymentDetails.containersTab": {
-    "defaultMessage": "Containers"
-  },
   "components.DeploymentDetails.deleteErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot delete an application while it is offline."
   },
@@ -505,9 +502,6 @@
   },
   "components.DeploymentDetails.deviceMappings": {
     "defaultMessage": "Device Mappings"
-  },
-  "components.DeploymentDetails.eventsTab": {
-    "defaultMessage": "Events"
   },
   "components.DeploymentDetails.networks": {
     "defaultMessage": "Networks"

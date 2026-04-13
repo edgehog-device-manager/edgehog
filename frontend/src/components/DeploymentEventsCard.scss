@@ -17,8 +17,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 .device-event-container {
-  height: 50em;
-  overflow-y: scroll;
+  flex-grow: 1;
+  overflow: auto;
+  min-height: 0;
 }
 
 .event-badge {

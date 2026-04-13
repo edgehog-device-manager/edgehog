@@ -137,11 +137,16 @@ const DeploymentContent = ({
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   return (
-    <Page>
+    <Page className="h-100 d-flex flex-column overflow-hidden">
       <Page.Header
         title={`${deployment.release?.application?.name}: ${deployment.release?.version}`}
       />
-      <Page.Main>
+      <Page.Main
+        className="d-flex flex-column flex-grow-1"
+        style={{
+          minHeight: 0,
+        }}
+      >
         <Alert
           show={!!errorFeedback}
           variant="danger"

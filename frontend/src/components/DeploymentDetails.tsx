@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useMemo, useState } from "react";
-import { Card, Col, Row, Tab, Tabs } from "react-bootstrap";
+import { Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -55,6 +55,7 @@ import { parseDeploymentState } from "@/components/DeploymentState";
 import Icon from "@/components/Icon";
 import ResourceStateIcon from "@/components/ResourceStateIcon";
 import { Link, Route, useNavigate } from "@/Navigation";
+import FullHeightCard from "@/components/FullHeightCard";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
@@ -845,8 +846,8 @@ const DeploymentDetails = ({
   }, [setShowUpgradeModal]);
 
   return (
-    <div>
-      <Card className="mb-4">
+    <div className="d-flex flex-column h-100">
+      <Card className="mb-4 flex-shrink-0">
         <Card.Body>
           <Row className="d-flex align-items-center justify-content-between flex-wrap">
             <Col
@@ -1008,52 +1009,40 @@ const DeploymentDetails = ({
           />
         </ConfirmModal>
       )}
-
-      <Tabs
-        defaultActiveKey="containers"
-        id="deployment-details-tabs"
-        className="mb-3"
+      <div
+        className="flex-md-fill"
+        style={{
+          minHeight: 0,
+        }}
       >
-        <Tab
-          eventKey="containers"
-          title={intl.formatMessage({
-            id: "components.DeploymentDetails.containersTab",
-            defaultMessage: "Containers",
-          })}
-        >
-          <div>
-            {containerNodes.length === 0 ? (
-              <div className="p-2">
-                <FormattedMessage
-                  id="components.DeploymentDetails.noContainers"
-                  defaultMessage="No containers"
-                />
-              </div>
-            ) : (
-              containerNodes.map((node, idx) => (
-                <ContainerDeploymentItem
-                  key={node.id || idx}
-                  index={idx}
-                  containerFragmentKey={node}
-                  imageDeployment={node.imageDeployment}
-                  containerState={node.state || ""}
-                  isReady={node.isReady}
-                />
-              ))
-            )}
-          </div>
-        </Tab>
+        <Row className="align-items-stretch h-100">
+          <FullHeightCard md={4} xs={12} className="h-100">
+            <Card.Body className="d-flex flex-column overflow-auto me-3">
+              {containerNodes.length === 0 ? (
+                <div className="p-2">
+                  <FormattedMessage
+                    id="components.DeploymentDetails.noContainers"
+                    defaultMessage="No containers"
+                  />
+                </div>
+              ) : (
+                containerNodes.map((node, idx) => (
+                  <ContainerDeploymentItem
+                    key={node.id || idx}
+                    index={idx}
+                    containerFragmentKey={node}
+                    imageDeployment={node.imageDeployment}
+                    containerState={node.state || ""}
+                    isReady={node.isReady}
+                  />
+                ))
+              )}
+            </Card.Body>
+          </FullHeightCard>
 
-        <Tab
-          eventKey="events"
-          title={intl.formatMessage({
-            id: "components.DeploymentDetails.eventsTab",
-            defaultMessage: "Events",
-          })}
-        >
-          <DeploymentEventsCard events={events} />
-        </Tab>
-      </Tabs>
+          <DeploymentEventsCard events={events} className="h-100" />
+        </Row>
+      </div>
     </div>
   );
 };

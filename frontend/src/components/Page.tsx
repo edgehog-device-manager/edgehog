@@ -33,11 +33,13 @@ import "./Page.scss";
 
 type PageProps = {
   children?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 };
 
-const Page = ({ children }: PageProps) => {
+const Page = ({ children, className = "", style }: PageProps) => {
   return (
-    <div data-testid="page" className="p-4">
+    <div data-testid="page" className={`p-4 ${className}`} style={style}>
       {children}
     </div>
   );
@@ -59,10 +61,16 @@ const PageHeader = ({ children, title }: PageHeaderProps) => {
 
 type PageMainProps = {
   children?: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
 };
 
-const PageMain = ({ children }: PageMainProps) => {
-  return <main className="mt-4">{children}</main>;
+const PageMain = ({ children, className = "", style }: PageMainProps) => {
+  return (
+    <main className={`mt-4 ${className}`} style={style}>
+      {children}
+    </main>
+  );
 };
 
 type PageLoadingErrorProps = {

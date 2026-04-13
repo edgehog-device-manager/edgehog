@@ -142,13 +142,15 @@ const DeploymentEventsView = ({
 
 interface DeploymentEventsCardProps {
   events: Event[];
+  className?: string;
 }
 
 const DeploymentEventsCard = ({
   events,
+  className,
 }: DeploymentEventsCardProps): React.ReactElement => (
-  <FullHeightCard xs={12} className="mb-4">
-    <Card.Body className="d-flex flex-column">
+  <FullHeightCard md={8} xs={12} className={className}>
+    <Card.Body className="d-flex flex-column overflow-hidden">
       <DeploymentEventsView events={events} />
     </Card.Body>
   </FullHeightCard>
