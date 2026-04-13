@@ -112,6 +112,7 @@ defmodule Edgehog.MixProject do
       {:jose, "~> 1.8"},
       {:skogsra, "~> 2.3"},
       {:nimble_parsec, "~> 1.2"},
+      {:protobuf, "~> 0.16"},
       {:excoveralls, "~> 0.10", only: :test},
       {:dialyxir, "~> 1.0", only: [:dev, :test], runtime: false},
       {:pretty_log, "~> 0.1"},

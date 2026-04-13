@@ -339,6 +339,49 @@ _clean-resources:
     -rm -rf edgehog-device-runtime/
     @echo "✅ Clean up complete."
 
+# Check ProtoBuf prerequisites
+[private]
+_check-protobuf-prereq:
+    @echo "🔍 Checking protobuf prerequisites..."
+    @command -v protoc >/dev/null || { echo "❌ protoc is required"; exit 1; }
+    @command -v git >/dev/null || { echo "❌ git is required"; exit 1; }
+    @command -v protoc >/dev/null || { echo "⚠️ protoc-gen-elixir is required. It will be installed via mix"; exit 0; }
+    @ls backend/priv/api &>/dev/null || { echo "⚠️ OpenFGA API protobuf required. It will be cloned in 'backend/priv/api'"; exit 0; }
+    @ls backend/priv/googleapis &>/dev/null || { echo "⚠️ Google API protobuf required. It will be cloned in 'backend/priv/api'"; exit 0; }
+    @ls backend/priv/grpc-gateway &>/dev/null || { echo "⚠️ gRPC gateway protobuf required. It will be cloned in 'backend/priv/grpc-gateway' (v2.28.0)"; exit 0; }
+    @ls backend/priv/protoc-gen-validate &>/dev/null || { echo "⚠️ Protoc-Gen-Validate protobuf required. It will be cloned in 'backend/priv/api' (v1.3.3)"; exit 0; }
+
+# Compile protbufs into a single elixir module, with documentation, after cloning dependencies if necessary
+compile-protobuf: _check-protobuf-prereq
+    #!/usr/bin/env bash
+    command -v protoc-gen-elixir &>/dev/null || mix escript.install hex protobuf
+    if [ ! -d backend/priv/api ] || [ -z "$( ls -A 'backend/priv/api' )" ]; then
+        echo -n "📋 OpenFGA API: "
+        git clone https://github.com/openfga/api.git backend/priv/api
+    fi
+    if [ ! -d backend/priv/googleapis ] || [ -z "$( ls -A 'backend/priv/googleapis' )" ]; then
+        echo -n "📋 Google API: "
+        git clone https://github.com/googleapis/googleapis.git backend/priv/googleapis
+    fi
+    if [ ! -d backend/priv/grpc-gateway ] || [ -z "$( ls -A 'backend/priv/grpc-gateway' )" ]; then
+        echo -n "📋 gRPC gateway: "
+        git clone https://github.com/grpc-ecosystem/grpc-gateway.git -b v2.28.0 backend/priv/grpc-gateway
+    fi
+    if [ ! -d backend/priv/protoc-gen-validate ] && [ -z "$( ls -A 'backend/priv/protoc-gen-validate' )" ]; then
+        echo -n "📋 Protoc-gen-validate: "
+        git clone https://github.com/bufbuild/protoc-gen-validate.git -b v1.3.3 backend/priv/protoc-gen-validate
+    fi
+    echo "⚙️ Compiling protobufs definitions..."
+    protoc \
+        --elixir_out=wplugins=grpc:backend/lib \
+        --elixir_opt=include_docs=true \
+        -I backend/priv/api \
+        -I backend/priv/googleapis \
+        -I backend/priv/grpc-gateway \
+        -I backend/priv/protoc-gen-validate \
+        backend/priv/api/openfga/v1/*
+    echo "⚙️ Done"
+
 # Show the status of running services
 status:
     @echo "📊 Checking service status..."
