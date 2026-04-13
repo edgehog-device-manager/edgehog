@@ -138,7 +138,7 @@ const CreateFileForm = ({
             <Form.Text muted>
               <FormattedMessage
                 id="forms.CreateFile.fileHint"
-                defaultMessage="Select files or a folder. Multiple items will be compressed into a tar.gz archive."
+                defaultMessage="Select files or a folder. Multiple items will be encoded."
               />
             </Form.Text>
           )}
@@ -162,7 +162,7 @@ const CreateFileForm = ({
             <Form.Text muted>
               <FormattedMessage
                 id="forms.CreateFile.archiveNameHint"
-                defaultMessage="Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+                defaultMessage="Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
               />
             </Form.Text>
           </FormRow>

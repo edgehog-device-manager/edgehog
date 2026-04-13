@@ -94,9 +94,15 @@ type FileDropzoneProps = {
   files: File[];
   onChange: (files: File[]) => void;
   isInvalid?: boolean;
+  allowMultiple?: boolean;
 };
 
-const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
+const FileDropzone = ({
+  files,
+  onChange,
+  isInvalid,
+  allowMultiple = true,
+}: FileDropzoneProps) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const folderInputRef = useRef<HTMLInputElement>(null);
@@ -104,13 +110,22 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
 
   const merge = useCallback(
     (newFiles: File[]) => {
+      if (!allowMultiple) {
+        const nextFile = newFiles[0];
+        if (!nextFile) {
+          return;
+        }
+        onChange([nextFile]);
+        return;
+      }
+
       const existingKeys = new Set(files.map(getFileKey));
       const deduplicated = newFiles.filter(
         (f) => !existingKeys.has(getFileKey(f)),
       );
       onChange([...files, ...deduplicated]);
     },
-    [files, onChange],
+    [allowMultiple, files, onChange],
   );
 
   const removeFile = useCallback(
@@ -127,6 +142,10 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
   };
 
   const handleFolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!allowMultiple) {
+      return;
+    }
+
     const newFiles = e.target.files ? Array.from(e.target.files) : [];
     merge(newFiles);
     if (folderInputRef.current) folderInputRef.current.value = "";
@@ -157,6 +176,15 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
     dragCounter.current = 0;
     setIsDragOver(false);
     const droppedFiles = await collectFilesFromDrop(e.dataTransfer);
+
+    if (!allowMultiple) {
+      const droppedSingleFiles = droppedFiles.filter(
+        (file) => !file.webkitRelativePath,
+      );
+      merge(droppedSingleFiles.slice(0, 1));
+      return;
+    }
+
     merge(droppedFiles);
   };
 
@@ -170,18 +198,20 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
       <input
         ref={fileInputRef}
         type="file"
-        multiple
+        multiple={allowMultiple}
         onChange={handleFilesChange}
         className="d-none"
       />
-      <input
-        ref={folderInputRef}
-        type="file"
-        // @ts-expect-error webkitdirectory is non-standard but widely supported
-        webkitdirectory=""
-        onChange={handleFolderChange}
-        className="d-none"
-      />
+      {allowMultiple && (
+        <input
+          ref={folderInputRef}
+          type="file"
+          // @ts-expect-error webkitdirectory is non-standard but widely supported
+          webkitdirectory=""
+          onChange={handleFolderChange}
+          className="d-none"
+        />
+      )}
       <div
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
@@ -198,47 +228,79 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
               <Icon icon="folder" size="3x" />
             </div>
             <p className="mb-1 text-muted">
-              <FormattedMessage
-                id="components.FileDropzone.dropzonePrompt"
-                defaultMessage="Drag & drop files or folders here"
-              />
+              {allowMultiple ? (
+                <FormattedMessage
+                  id="components.FileDropzone.dropzonePrompt"
+                  defaultMessage="Drag & drop files or folders here"
+                />
+              ) : (
+                <FormattedMessage
+                  id="components.FileDropzone.dropzonePromptSingle"
+                  defaultMessage="Drag & drop a file here"
+                />
+              )}
             </p>
-            <p className="mb-0 text-muted small">
-              <FormattedMessage
-                id="components.FileDropzone.dropzoneActions"
-                defaultMessage="or {browseFiles} · {browseFolder}"
-                values={{
-                  browseFiles: (
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        fileInputRef.current?.click();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="components.FileDropzone.browseFiles"
-                        defaultMessage="browse files"
-                      />
-                    </a>
-                  ),
-                  browseFolder: (
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        folderInputRef.current?.click();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="components.FileDropzone.browseFolders"
-                        defaultMessage="browse folders"
-                      />
-                    </a>
-                  ),
-                }}
-              />
-            </p>
+            {allowMultiple ? (
+              <p className="mb-0 text-muted small">
+                <FormattedMessage
+                  id="components.FileDropzone.dropzoneActions"
+                  defaultMessage="or {browseFiles} · {browseFolder}"
+                  values={{
+                    browseFiles: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.browseFiles"
+                          defaultMessage="browse files"
+                        />
+                      </a>
+                    ),
+                    browseFolder: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          folderInputRef.current?.click();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.browseFolders"
+                          defaultMessage="browse folders"
+                        />
+                      </a>
+                    ),
+                  }}
+                />
+              </p>
+            ) : (
+              <p className="mb-0 text-muted small">
+                <FormattedMessage
+                  id="components.FileDropzone.dropzoneActionsSingle"
+                  defaultMessage="or {browseFile}"
+                  values={{
+                    browseFile: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.browseFile"
+                          defaultMessage="browse file"
+                        />
+                      </a>
+                    ),
+                  }}
+                />
+              </p>
+            )}
           </div>
         ) : (
           <>
@@ -261,58 +323,99 @@ const FileDropzone = ({ files, onChange, isInvalid }: FileDropzoneProps) => {
                 </Tag>
               ))}
             </div>
-            <p className="mb-0 text-muted small">
-              <FormattedMessage
-                id="components.FileDropzone.fileSizeSummary"
-                defaultMessage="{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
-                values={{
-                  count: files.length,
-                  size: formatFileSize(totalSize),
-                  addFiles: (
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        fileInputRef.current?.click();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="components.FileDropzone.addMore"
-                        defaultMessage="add files"
-                      />
-                    </a>
-                  ),
-                  addFolder: (
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        folderInputRef.current?.click();
-                      }}
-                    >
-                      <FormattedMessage
-                        id="components.FileDropzone.addFolders"
-                        defaultMessage="add folders"
-                      />
-                    </a>
-                  ),
-                  clearAll: (
-                    <a
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        onChange([]);
-                      }}
-                    >
-                      <FormattedMessage
-                        id="components.FileDropzone.clearAll"
-                        defaultMessage="clear all"
-                      />
-                    </a>
-                  ),
-                }}
-              />
-            </p>
+            {allowMultiple ? (
+              <p className="mb-0 text-muted small">
+                <FormattedMessage
+                  id="components.FileDropzone.fileSizeSummary"
+                  defaultMessage="{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
+                  values={{
+                    count: files.length,
+                    size: formatFileSize(totalSize),
+                    addFiles: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.addMore"
+                          defaultMessage="add files"
+                        />
+                      </a>
+                    ),
+                    addFolder: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          folderInputRef.current?.click();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.addFolders"
+                          defaultMessage="add folders"
+                        />
+                      </a>
+                    ),
+                    clearAll: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onChange([]);
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.clearAll"
+                          defaultMessage="clear all"
+                        />
+                      </a>
+                    ),
+                  }}
+                />
+              </p>
+            ) : (
+              <p className="mb-0 text-muted small">
+                <FormattedMessage
+                  id="components.FileDropzone.fileSizeSummarySingle"
+                  defaultMessage="{count} file selected — {size} total · {replaceFile} · {clearAll}"
+                  values={{
+                    count: files.length,
+                    size: formatFileSize(totalSize),
+                    replaceFile: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          fileInputRef.current?.click();
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.replaceFile"
+                          defaultMessage="replace file"
+                        />
+                      </a>
+                    ),
+                    clearAll: (
+                      <a
+                        href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          onChange([]);
+                        }}
+                      >
+                        <FormattedMessage
+                          id="components.FileDropzone.clearAll"
+                          defaultMessage="clear all"
+                        />
+                      </a>
+                    ),
+                  }}
+                />
+              </p>
+            )}
           </>
         )}
       </div>

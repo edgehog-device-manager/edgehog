@@ -280,7 +280,7 @@ const ManualFileUploadRequestForm = ({
           <Form.Text muted>
             <FormattedMessage
               id="forms.ManualFileUploadRequestForm.encodingHint"
-              defaultMessage="Optional encoding format. Leave empty for no encoding."
+              defaultMessage="Optional encoding format, based on device capabilities. Leave empty for no encoding."
             />
           </Form.Text>
         )}

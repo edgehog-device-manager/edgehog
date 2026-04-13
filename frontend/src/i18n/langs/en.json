@@ -1022,6 +1022,9 @@
   "components.FileDropzone.addMore": {
     "defaultMessage": "add files"
   },
+  "components.FileDropzone.browseFile": {
+    "defaultMessage": "browse file"
+  },
   "components.FileDropzone.browseFiles": {
     "defaultMessage": "browse files"
   },
@@ -1034,11 +1037,23 @@
   "components.FileDropzone.dropzoneActions": {
     "defaultMessage": "or {browseFiles} · {browseFolder}"
   },
+  "components.FileDropzone.dropzoneActionsSingle": {
+    "defaultMessage": "or {browseFile}"
+  },
   "components.FileDropzone.dropzonePrompt": {
     "defaultMessage": "Drag & drop files or folders here"
   },
+  "components.FileDropzone.dropzonePromptSingle": {
+    "defaultMessage": "Drag & drop a file here"
+  },
   "components.FileDropzone.fileSizeSummary": {
     "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
+  },
+  "components.FileDropzone.fileSizeSummarySingle": {
+    "defaultMessage": "{count} file selected — {size} total · {replaceFile} · {clearAll}"
+  },
+  "components.FileDropzone.replaceFile": {
+    "defaultMessage": "replace file"
   },
   "components.FileSelect.ErrorFallback.message": {
     "defaultMessage": "Failed to load files list."
@@ -2050,13 +2065,13 @@
     "defaultMessage": "Create"
   },
   "forms.CreateFile.archiveNameHint": {
-    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+    "defaultMessage": "Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
   },
   "forms.CreateFile.archiveNameLabel": {
     "defaultMessage": "Archive Name"
   },
   "forms.CreateFile.fileHint": {
-    "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
+    "defaultMessage": "Select files or a folder. Multiple items will be encoded."
   },
   "forms.CreateFile.fileLabel": {
     "defaultMessage": "Files"
@@ -2428,7 +2443,7 @@
     "defaultMessage": "Advanced Options"
   },
   "forms.ManualFileDownloadRequestForm.archiveNameHint": {
-    "defaultMessage": "Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+    "defaultMessage": "Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
   },
   "forms.ManualFileDownloadRequestForm.archiveNameLabel": {
     "defaultMessage": "Archive Name"
@@ -2442,8 +2457,17 @@
   "forms.ManualFileDownloadRequestForm.destinationPathLabel": {
     "defaultMessage": "Destination Path"
   },
+  "forms.ManualFileDownloadRequestForm.encodingHint": {
+    "defaultMessage": "Optional encoding format, based on device capabilities. Leave empty for no encoding."
+  },
+  "forms.ManualFileDownloadRequestForm.encodingLabel": {
+    "defaultMessage": "Encoding"
+  },
   "forms.ManualFileDownloadRequestForm.fileHint": {
-    "defaultMessage": "Select files or a folder. Multiple items will be compressed into a tar.gz archive."
+    "defaultMessage": "Select files or a folder. Multiple items will be encoded."
+  },
+  "forms.ManualFileDownloadRequestForm.fileHintSingle": {
+    "defaultMessage": "Select a single file. Archive uploads are not supported by this device."
   },
   "forms.ManualFileDownloadRequestForm.fileLabel": {
     "defaultMessage": "Files"
@@ -2521,13 +2545,16 @@
     "defaultMessage": "User ID"
   },
   "forms.ManualFileUploadRequestForm.encodingHint": {
-    "defaultMessage": "Optional encoding format. Leave empty for no encoding."
+    "defaultMessage": "Optional encoding format, based on device capabilities. Leave empty for no encoding."
   },
   "forms.ManualFileUploadRequestForm.encodingLabel": {
     "defaultMessage": "Encoding"
   },
   "forms.ManualFileUploadRequestForm.encodingNone": {
     "defaultMessage": "None"
+  },
+  "forms.ManualFileUploadRequestForm.encodingNoneDisabled": {
+    "defaultMessage": "None (disabled for multiple files, select an archive encoding instead)"
   },
   "forms.ManualFileUploadRequestForm.progressLabel": {
     "defaultMessage": "Report Progress"

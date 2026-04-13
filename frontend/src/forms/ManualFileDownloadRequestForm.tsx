@@ -21,7 +21,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import Select from "react-select";
 
 import Button from "@/components/Button";
@@ -39,9 +39,16 @@ import {
   type FileDestinationType,
 } from "@/forms/validation";
 
+type EncodingOption = {
+  value: string;
+  label: string;
+  isDisabled?: boolean;
+};
+
 type FileDownloadRequestFormValues = {
   files: File[];
   archiveName?: string;
+  encoding?: string;
   destinationType: FileDestinationType;
   destination: string | null;
   ttlSeconds: number;
@@ -55,6 +62,8 @@ type ManualFileDownloadRequestFormProps = {
   className?: string;
   isLoading: boolean;
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
+  supportedEncodings: string[];
+  allowArchiveUpload: boolean;
   showAdvancedOptions?: boolean;
   destinationTypeOptions: DestinationTypeOption[];
 };
@@ -63,9 +72,13 @@ const ManualFileDownloadRequestForm = ({
   className,
   isLoading,
   onFileSubmit,
+  supportedEncodings,
+  allowArchiveUpload,
   showAdvancedOptions = false,
   destinationTypeOptions,
 }: ManualFileDownloadRequestFormProps) => {
+  const intl = useIntl();
+
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { open: advancedOptionsOpen, toggle: toggleAdvancedOptions } =
     useCollapseToggle();
@@ -75,6 +88,9 @@ const ManualFileDownloadRequestForm = ({
     handleSubmit,
     register,
     control,
+    clearErrors,
+    getValues,
+    setError,
     setValue,
     reset,
   } = useForm({
@@ -82,6 +98,7 @@ const ManualFileDownloadRequestForm = ({
     defaultValues: {
       file: undefined,
       archiveName: "",
+      encoding: "",
       destinationType: "STORAGE",
       destination: null,
       ttlSeconds: 0,
@@ -92,6 +109,47 @@ const ManualFileDownloadRequestForm = ({
     },
     resolver: zodResolver(fileDownloadRequestFormSchema),
   });
+
+  const hasMultipleFilesSelected = selectedFiles.length > 1;
+
+  const archiveEncodingValues = new Set(["tar", "tar.gz", "tar.lz4"]);
+
+  const supportedArchiveEncodings = supportedEncodings.filter((encoding) =>
+    archiveEncodingValues.has(encoding.trim().toLowerCase()),
+  );
+
+  const supportedArchiveEncodingsNormalized = new Set(
+    supportedArchiveEncodings.map((encoding) => encoding.trim().toLowerCase()),
+  );
+
+  const firstSupportedArchiveEncoding = supportedArchiveEncodings[0] ?? "";
+
+  const availableEncodings = hasMultipleFilesSelected
+    ? supportedArchiveEncodings
+    : supportedEncodings.filter((encoding) => encoding.trim().length > 0);
+
+  const noneEncodingLabel = hasMultipleFilesSelected
+    ? intl.formatMessage({
+        id: "forms.ManualFileUploadRequestForm.encodingNoneDisabled",
+        defaultMessage:
+          "None (disabled for multiple files, select an archive encoding instead)",
+      })
+    : intl.formatMessage({
+        id: "forms.ManualFileUploadRequestForm.encodingNone",
+        defaultMessage: "None",
+      });
+
+  const encodingOptions: EncodingOption[] = [
+    {
+      value: "",
+      label: noneEncodingLabel,
+      isDisabled: hasMultipleFilesSelected,
+    },
+    ...availableEncodings.map((encoding) => ({
+      value: encoding,
+      label: encoding,
+    })),
+  ];
 
   const selectedDestinationType = useWatch({
     control,
@@ -104,9 +162,45 @@ const ManualFileDownloadRequestForm = ({
     files.forEach((f) => dt.items.add(f));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     setValue("file", dt.files as any, { shouldValidate: true });
+
+    const hasMultipleFiles = files.length > 1;
+    const selectedEncoding = getValues("encoding")?.trim().toLowerCase() ?? "";
+
+    if (hasMultipleFiles) {
+      if (!supportedArchiveEncodingsNormalized.has(selectedEncoding)) {
+        if (firstSupportedArchiveEncoding) {
+          setValue("encoding", firstSupportedArchiveEncoding, {
+            shouldValidate: true,
+          });
+          clearErrors("encoding");
+        } else {
+          setError("encoding", {
+            type: "manual",
+            message: "validation.required",
+          });
+        }
+      }
+
+      return;
+    }
+
+    clearErrors("encoding");
   };
 
   const onSubmit = handleSubmit((data) => {
+    if (selectedFiles.length > 1) {
+      const selectedEncoding = data.encoding?.trim().toLowerCase() ?? "";
+
+      if (!supportedArchiveEncodingsNormalized.has(selectedEncoding)) {
+        setError("encoding", {
+          type: "manual",
+          message: "validation.required",
+        });
+
+        return;
+      }
+    }
+
     if (selectedFiles.length > 0) {
       onFileSubmit({
         files: selectedFiles,
@@ -116,6 +210,7 @@ const ManualFileDownloadRequestForm = ({
             : undefined,
         destinationType: data.destinationType,
         destination: data.destination,
+        encoding: data.encoding ?? undefined,
         ttlSeconds: data.ttlSeconds,
         progressTracked: data.progress,
         fileMode: data.fileMode,
@@ -128,7 +223,8 @@ const ManualFileDownloadRequestForm = ({
   });
 
   const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
-  const showArchiveName = selectedFiles.length > 1 || hasRelativePaths;
+  const showArchiveName =
+    allowArchiveUpload && (selectedFiles.length > 1 || hasRelativePaths);
 
   return (
     <form className={className} onSubmit={onSubmit} autoComplete="off">
@@ -145,15 +241,23 @@ const ManualFileDownloadRequestForm = ({
           files={selectedFiles}
           onChange={handleFilesChanged}
           isInvalid={!!errors.file}
+          allowMultiple={allowArchiveUpload}
         />
         {errors.file ? (
           <FormFeedback feedback={errors.file.message} />
         ) : (
           <Form.Text muted>
-            <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.fileHint"
-              defaultMessage="Select files or a folder. Multiple items will be compressed into a tar.gz archive."
-            />
+            {allowArchiveUpload ? (
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestForm.fileHint"
+                defaultMessage="Select files or a folder. Multiple items will be encoded."
+              />
+            ) : (
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestForm.fileHintSingle"
+                defaultMessage="Select a single file. Archive uploads are not supported by this device."
+              />
+            )}
           </Form.Text>
         )}
       </FormRow>
@@ -176,11 +280,53 @@ const ManualFileDownloadRequestForm = ({
           <Form.Text muted>
             <FormattedMessage
               id="forms.ManualFileDownloadRequestForm.archiveNameHint"
-              defaultMessage="Optional name for the tar.gz archive. Defaults to 'files-archive' if left empty."
+              defaultMessage="Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
             />
           </Form.Text>
         </FormRow>
       )}
+
+      <FormRow
+        id="encoding"
+        label={
+          <FormattedMessage
+            id="forms.ManualFileDownloadRequestForm.encodingLabel"
+            defaultMessage="Encoding"
+          />
+        }
+      >
+        <Controller
+          control={control}
+          name="encoding"
+          render={({ field }) => {
+            const selectedOption =
+              encodingOptions.find((opt) => opt.value === field.value) ??
+              encodingOptions[0] ??
+              null;
+
+            return (
+              <Select
+                value={selectedOption}
+                onChange={(option) => {
+                  field.onChange(option?.value ?? "");
+                }}
+                options={encodingOptions}
+              />
+            );
+          }}
+        />
+
+        {errors.encoding ? (
+          <FormFeedback feedback={errors.encoding.message} />
+        ) : (
+          <Form.Text muted>
+            <FormattedMessage
+              id="forms.ManualFileDownloadRequestForm.encodingHint"
+              defaultMessage="Optional encoding format, based on device capabilities. Leave empty for no encoding."
+            />
+          </Form.Text>
+        )}
+      </FormRow>
 
       <FormRow
         id="destinationType"

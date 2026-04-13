@@ -564,6 +564,7 @@ const fileDownloadRequestFormSchema = z
       message: messages.baseImageFileSchema.id,
     }),
     archiveName: z.string().optional(),
+    encoding: z.string().optional(),
     destinationType: fileDestinationTypeSchema,
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
@@ -583,6 +584,7 @@ const fileDownloadRequestFormSchema = z
   })
   .transform((data) => ({
     ...data,
+    encoding: data.encoding?.trim() ? data.encoding.trim() : undefined,
     destination:
       data.destinationType === "FILESYSTEM" ? data.destination : null,
   }));

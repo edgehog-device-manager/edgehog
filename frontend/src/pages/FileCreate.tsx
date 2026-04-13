@@ -44,7 +44,11 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import CreateFileForm, { FileFormOutputData } from "@/forms/CreateFile";
-import { computeDigest, createTarGzArchive } from "@/lib/files";
+import {
+  computeDigest,
+  createTarArchive,
+  getUploadRequestHeaders,
+} from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";
 
 const GET_REPOSITORY_QUERY = graphql`
@@ -176,13 +180,8 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         const needsArchive = files.length > 1 || hasRelativePaths;
 
         if (needsArchive) {
-          uploadBlob = await createTarGzArchive(files);
-
-          const baseName = archiveName?.trim() || "files-archive";
-          fileName = baseName.endsWith(".tar.gz")
-            ? baseName
-            : `${baseName}.tar.gz`;
-
+          uploadBlob = await createTarArchive(files);
+          fileName = archiveName?.trim() || "files-archive";
           uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
         } else {
           uploadBlob = files[0];
@@ -190,8 +189,7 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
           uncompressedSize = files[0].size;
         }
 
-        const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
-        const digest = await computeDigest(archiveData);
+        const digest = await computeDigest(uploadBlob);
 
         const result = await commitCreateFile({
           repositoryId,
@@ -215,9 +213,7 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         try {
           const uploadResponse = await fetch(result.putPresignedUrl, {
             method: "PUT",
-            headers: {
-              "x-ms-blob-type": "BlockBlob",
-            },
+            headers: getUploadRequestHeaders(result.putPresignedUrl),
             body: uploadBlob,
           });
 

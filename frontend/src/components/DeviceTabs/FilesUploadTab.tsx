@@ -42,8 +42,8 @@ import { v7 as uuidv7 } from "uuid";
 
 import type { FilesUploadTab_PaginationQuery } from "@/api/__generated__/FilesUploadTab_PaginationQuery.graphql";
 import type { FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation } from "@/api/__generated__/FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation.graphql";
-import type { FilesUploadTab_createManualFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManualFileDownloadRequest_Mutation.graphql";
 import type { FilesUploadTab_createManagedFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManagedFileDownloadRequest_Mutation.graphql";
+import type { FilesUploadTab_createManualFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManualFileDownloadRequest_Mutation.graphql";
 import type { FilesUploadTab_fileDownloadRequests$key } from "@/api/__generated__/FilesUploadTab_fileDownloadRequests.graphql";
 import type { FilesUploadTab_getRepositories_Query } from "@/api/__generated__/FilesUploadTab_getRepositories_Query.graphql";
 
@@ -60,7 +60,11 @@ import type {
   FileDestinationType,
   ManualFileDownloadRequestFromRepositoryData,
 } from "@/forms/validation";
-import { computeDigest, createTarGzArchive } from "@/lib/files";
+import {
+  computeDigest,
+  createTarArchive,
+  getUploadRequestHeaders,
+} from "@/lib/files";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -217,6 +221,8 @@ const formatRelayErrors = (
 type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
+  supportedEncodings: string[];
+  allowArchiveUpload: boolean;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
 };
@@ -224,6 +230,8 @@ type ManualFileDownloadRequestFormWrapperProps = {
 const ManualFileDownloadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
+  supportedEncodings,
+  allowArchiveUpload,
   showAdvancedOptions,
   destinationTypeOptions,
 }: ManualFileDownloadRequestFormWrapperProps) => {
@@ -264,6 +272,7 @@ const ManualFileDownloadRequestFormWrapper = ({
         const {
           files,
           archiveName,
+          encoding,
           destinationType,
           destination,
           ttlSeconds,
@@ -276,7 +285,6 @@ const ManualFileDownloadRequestFormWrapper = ({
         let uploadBlob: Blob;
         let fileName: string;
         let uncompressedSize: number;
-        let encoding: string | null = null;
 
         // Files from folder selection have webkitRelativePath set.
         // These need archiving even if there's only one file, to preserve
@@ -285,27 +293,18 @@ const ManualFileDownloadRequestFormWrapper = ({
         const needsArchive = files.length > 1 || hasRelativePaths;
 
         if (needsArchive) {
-          // Multiple files or folder contents: create tar.gz archive
-          uploadBlob = await createTarGzArchive(files);
-          const baseName = archiveName?.trim() || "files-archive";
-          fileName = baseName.endsWith(".tar.gz")
-            ? baseName
-            : `${baseName}.tar.gz`;
+          // Multiple files or folder content are uploaded as an archive
+          uploadBlob = await createTarArchive(files);
+          fileName = archiveName?.trim() || "files-archive";
           uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
-          encoding = "tar.gz";
         } else {
           uploadBlob = files[0];
           fileName = files[0].name;
           uncompressedSize = files[0].size;
         }
 
-        if (files.length === 1 && /\.(tar\.gz|tgz)$/i.test(files[0].name)) {
-          encoding = "tar.gz";
-        }
-
-        const archiveData = new Uint8Array(await uploadBlob.arrayBuffer());
         const fileDownloadRequestId = uuidv7();
-        const digest = await computeDigest(archiveData);
+        const digest = await computeDigest(uploadBlob);
 
         // Get presigned URL from the backend
         const presignedUrls = await new Promise<{
@@ -361,7 +360,7 @@ const ManualFileDownloadRequestFormWrapper = ({
         // Upload the file to the presigned PUT URL
         const uploadResponse = await fetch(presignedUrls.put_url, {
           method: "PUT",
-          headers: { "x-ms-blob-type": "BlockBlob" },
+          headers: getUploadRequestHeaders(presignedUrls.put_url),
           body: uploadBlob,
         });
 
@@ -459,6 +458,7 @@ const ManualFileDownloadRequestFormWrapper = ({
       deviceId,
       getPresignedUrl,
       createFileDownloadRequest,
+      allowArchiveUpload,
       intl,
       setErrorFeedback,
     ],
@@ -468,6 +468,8 @@ const ManualFileDownloadRequestFormWrapper = ({
     <ManualFileDownloadRequestForm
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
+      supportedEncodings={supportedEncodings}
+      allowArchiveUpload={allowArchiveUpload}
       showAdvancedOptions={showAdvancedOptions}
       destinationTypeOptions={destinationTypeOptions}
     />
@@ -519,12 +521,6 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
           groupId,
         } = values;
 
-        let encoding: string | null = null;
-
-        if (/\.(tar\.gz|tgz)$/i.test(file.name)) {
-          encoding = "tar.gz";
-        }
-
         const fileDownloadRequestId = uuidv7();
 
         // Create the file download request with all metadata
@@ -535,7 +531,6 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
                 deviceId,
                 fileDownloadRequestId,
                 fileId: file.id,
-                encoding,
                 fileMode,
                 userId,
                 groupId,
@@ -702,6 +697,33 @@ const FilesUploadTab = ({
     [data.fileTransferCapabilities?.targets, intl],
   );
 
+  const supportedEncodings = useMemo(() => {
+    const uniqueEncodings = new Set<string>();
+
+    data.fileTransferCapabilities?.encodings?.forEach((encoding) => {
+      const value = encoding?.trim();
+
+      if (value) {
+        uniqueEncodings.add(value);
+      }
+    });
+
+    return Array.from(uniqueEncodings);
+  }, [data.fileTransferCapabilities?.encodings]);
+
+  const allowArchiveUpload = useMemo(
+    () =>
+      supportedEncodings.some((encoding) => {
+        const normalizedEncoding = encoding.trim().toLowerCase();
+        return (
+          normalizedEncoding === "tar" ||
+          normalizedEncoding === "tar.gz" ||
+          normalizedEncoding === "tar.lz4"
+        );
+      }),
+    [supportedEncodings],
+  );
+
   if (destinationTypeOptions?.length === 0) {
     return null;
   }
@@ -766,6 +788,8 @@ const FilesUploadTab = ({
               <ManualFileDownloadRequestFormWrapper
                 setErrorFeedback={setErrorFeedback}
                 deviceId={deviceId}
+                supportedEncodings={supportedEncodings}
+                allowArchiveUpload={allowArchiveUpload}
                 showAdvancedOptions={showAdvancedOptions}
                 destinationTypeOptions={destinationTypeOptions}
               />

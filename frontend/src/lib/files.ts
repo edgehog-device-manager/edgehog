@@ -18,31 +18,70 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { gzip } from "fflate";
+import { sha256 } from "@noble/hashes/sha2.js";
 
 const BLOCK_SIZE = 512;
+const DIGEST_CHUNK_SIZE = 8 * 1024 * 1024;
+const S3_SINGLE_PUT_MAX_SIZE_BYTES = 5 * 1024 * 1024 * 1024;
 
-// Computes a SHA-256 digest of binary data
-// Returns the digest in the format "sha256:<hex>".
-const computeDigest = async (data: Uint8Array): Promise<string> => {
-  const hashBuffer = await crypto.subtle.digest(
-    "SHA-256",
-    data.buffer as ArrayBuffer,
-  );
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
+const toHex = (bytes: Uint8Array): string =>
+  Array.from(bytes)
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
-  return `sha256:${hashHex}`;
+
+// Computes a SHA-256 digest of binary data
+const computeDigest = async (data: Blob | Uint8Array): Promise<string> => {
+  if (data instanceof Uint8Array) {
+    return `sha256:${toHex(sha256(data))}`;
+  }
+
+  const hash = sha256.create();
+  let offset = 0;
+
+  // Hash large blobs in chunks to avoid allocating a giant ArrayBuffer.
+  while (offset < data.size) {
+    const nextOffset = Math.min(offset + DIGEST_CHUNK_SIZE, data.size);
+    const chunk = new Uint8Array(
+      await data.slice(offset, nextOffset).arrayBuffer(),
+    );
+    hash.update(chunk);
+    offset = nextOffset;
+  }
+
+  return `sha256:${toHex(hash.digest())}`;
 };
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  if (bytes < 1024 * 1024 * 1024)
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1)} GB`;
+
+  const k = 1024;
+  const sizes = ["B", "KiB", "MiB", "GiB", "TiB"];
+
+  const i = Math.min(
+    Math.floor(Math.log(bytes) / Math.log(k)),
+    sizes.length - 1,
+  );
+
+  const value = bytes / Math.pow(k, i);
+
+  return `${i === 0 ? value : value.toFixed(1).replace(/\.0$/, "")} ${sizes[i]}`;
+};
+
+const isS3PresignedPutUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    return parsed.searchParams.has("X-Amz-Algorithm");
+  } catch {
+    return false;
+  }
+};
+
+const getUploadRequestHeaders = (url: string): HeadersInit | undefined => {
+  if (isS3PresignedPutUrl(url)) {
+    return undefined;
+  }
+
+  return { "x-ms-blob-type": "BlockBlob" };
 };
 
 // Returns the path to use as the tar entry name.
@@ -51,10 +90,7 @@ const formatFileSize = (bytes: number): string => {
 const getTarEntryPath = (file: File): string =>
   file.webkitRelativePath || file.name;
 
-const writeTarDirectoryEntry = (
-  dirPath: string,
-  chunks: Uint8Array[],
-): void => {
+const writeTarDirectoryEntry = (dirPath: string, chunks: BlobPart[]): void => {
   const header = new Uint8Array(BLOCK_SIZE);
   const encoder = new TextEncoder();
 
@@ -83,9 +119,9 @@ const writeTarDirectoryEntry = (
 };
 
 // Creates a tar archive from an array of files.
-// Returns a Uint8Array containing the raw tar data (uncompressed).
-const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
-  const chunks: Uint8Array[] = [];
+// Returns a Blob containing the raw tar data (uncompressed).
+const createTarArchive = (files: File[]): Blob => {
+  const chunks: BlobPart[] = [];
 
   const directories = new Set<string>();
   for (const file of files) {
@@ -101,7 +137,6 @@ const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
   }
 
   for (const file of files) {
-    const fileData = new Uint8Array(await file.arrayBuffer());
     const fileName = getTarEntryPath(file);
 
     // Build the 512-byte tar header
@@ -122,7 +157,7 @@ const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
     header.set(encoder.encode("0000000\0"), 116);
 
     // File size in octal (offset 124, 12 bytes)
-    const sizeOctal = fileData.length.toString(8).padStart(11, "0");
+    const sizeOctal = file.size.toString(8).padStart(11, "0");
     header.set(encoder.encode(sizeOctal + "\0"), 124);
 
     // Modification time in octal (offset 136, 12 bytes)
@@ -152,10 +187,10 @@ const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
     header.set(encoder.encode(checksumStr), 148);
 
     chunks.push(header);
-    chunks.push(fileData);
+    chunks.push(file);
 
     // Pad file data to a multiple of 512 bytes
-    const remainder = fileData.length % BLOCK_SIZE;
+    const remainder = file.size % BLOCK_SIZE;
     if (remainder > 0) {
       chunks.push(new Uint8Array(BLOCK_SIZE - remainder));
     }
@@ -164,31 +199,14 @@ const createTarArchive = async (files: File[]): Promise<Uint8Array> => {
   // End-of-archive marker: two 512-byte blocks of zeros
   chunks.push(new Uint8Array(BLOCK_SIZE * 2));
 
-  // Concatenate all chunks
-  const totalLength = chunks.reduce((sum, chunk) => sum + chunk.length, 0);
-  const tarData = new Uint8Array(totalLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    tarData.set(chunk, offset);
-    offset += chunk.length;
-  }
-
-  return tarData;
+  return new Blob(chunks, { type: "application/x-tar" });
 };
 
-// Creates a tar.gz archive from multiple files.
-// Returns a Blob of the compressed archive.
-const createTarGzArchive = async (files: File[]): Promise<Blob> => {
-  const tarData = await createTarArchive(files);
-  const gzippedData = await new Promise<Uint8Array>((resolve, reject) => {
-    gzip(tarData, (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
-  });
-  return new Blob([gzippedData.buffer as ArrayBuffer], {
-    type: "application/gzip",
-  });
+export {
+  computeDigest,
+  createTarArchive,
+  formatFileSize,
+  getUploadRequestHeaders,
+  isS3PresignedPutUrl,
+  S3_SINGLE_PUT_MAX_SIZE_BYTES,
 };
-
-export { computeDigest, createTarArchive, createTarGzArchive, formatFileSize };
