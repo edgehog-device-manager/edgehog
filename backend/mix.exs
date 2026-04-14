@@ -94,7 +94,7 @@ defmodule Edgehog.MixProject do
       {:absinthe, "~> 1.7"},
       {:absinthe_plug, "~> 1.5"},
       {:absinthe_relay, "~> 1.5"},
-      {:dataloader, "~> 1.0"},
+      {:dataloader, "~> 2.0"},
       {:astarte_client, github: "astarte-platform/astarte-client-elixir"},
       {:cors_plug, "~> 3.0"},
       {:x509, "~> 0.8"},
