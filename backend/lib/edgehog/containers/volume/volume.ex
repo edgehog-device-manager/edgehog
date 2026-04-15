@@ -86,7 +86,11 @@ defmodule Edgehog.Containers.Volume do
       public? true
     end
 
-    has_many :container_volumes, Edgehog.Containers.ContainerVolume
+    many_to_many :containers, Edgehog.Containers.Container do
+      through Edgehog.Containers.ContainerVolume
+      join_relationship :container_volumes
+      public? true
+    end
   end
 
   calculations do
@@ -106,9 +110,5 @@ defmodule Edgehog.Containers.Volume do
   postgres do
     table "volumes"
     repo Edgehog.Repo
-
-    references do
-      reference :container_volumes, on_delete: :restrict, match_with: [tenant_id: :tenant_id]
-    end
   end
 end

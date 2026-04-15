@@ -97,8 +97,6 @@ defmodule Edgehog.Containers.Network do
       join_relationship :network_deployments
       public? true
     end
-
-    has_many :container_networks, ContainerNetwork
   end
 
   calculations do
@@ -118,9 +116,5 @@ defmodule Edgehog.Containers.Network do
   postgres do
     table "networks"
     repo Edgehog.Repo
-
-    references do
-      reference :container_networks, on_delete: :restrict, match_with: [tenant_id: :tenant_id]
-    end
   end
 end
