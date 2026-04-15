@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.12.4](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.0...v0.12.4) (2026-04-15)
+
+
+### Bug Fixes
+
+* System model image not loaded ([38a13de](https://github.com/edgehog-device-manager/edgehog/pull/1365/changes/38a13de8c2c7c02eeb3844b4d3987))
+
+
 ## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
 
 
