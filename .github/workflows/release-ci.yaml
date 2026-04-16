@@ -21,6 +21,8 @@ on:
     branches:
       - main
       - "release-*"
+    branches-ignore:
+      - "release-please*"
 
 name: Release CI
 

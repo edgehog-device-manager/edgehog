@@ -31,8 +31,6 @@ runs:
       working-directory: ${{ inputs.docs }}
       shell: bash
       run: |
-        git config --local user.email "edgehog-machine@ispirata.com"
-        git config --local user.name "Edgehog Bot"
         git add .
         if git diff --cached --quiet; then
            echo "No documentation changes to commit."
