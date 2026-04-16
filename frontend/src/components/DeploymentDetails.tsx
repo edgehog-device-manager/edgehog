@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
@@ -438,9 +438,25 @@ const ContainerDeploymentItem = ({
 
   const { required, handlers } = useTreeState({
     data: treeData,
-    defaultOpened: true,
     id: prefix,
   });
+
+  useEffect(() => {
+    const openNodeAndChildren = (nodes: any[]) => {
+      if (!nodes) return;
+
+      nodes.forEach((node) => {
+        handlers.setOpen(node.id, true);
+        if (node.children && node.children.length > 0) {
+          openNodeAndChildren(node.children);
+        }
+      });
+    };
+
+    if (treeData && treeData.length > 0) {
+      openNodeAndChildren(treeData);
+    }
+  }, [treeData, handlers]);
 
   return (
     <Tree
