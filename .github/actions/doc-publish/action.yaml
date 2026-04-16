@@ -31,9 +31,9 @@ runs:
   using: "composite"
   steps:
     - name: Setup SSH
-    - uses: webfactory/ssh-agent@v0.10.0
+      uses: webfactory/ssh-agent@v0.10.0
       with:
-        ssh-private-key: ${{ secrets.publish-key }}
+        ssh-private-key: ${{ inputs.publish-key }}
     - name: Commit files
       working-directory: ${{ inputs.docs }}
       shell: bash
