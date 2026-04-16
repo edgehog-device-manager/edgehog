@@ -23,17 +23,10 @@ inputs:
   docs:
     description: "The docs project location."
     required: true
-  publish-key:
-    description: "SSH deploy key for pushing docs."
-    required: true
 
 runs:
   using: "composite"
   steps:
-    - name: Setup SSH
-      uses: webfactory/ssh-agent@v0.10.0
-      with:
-        ssh-private-key: ${{ inputs.publish-key }}
     - name: Commit files
       working-directory: ${{ inputs.docs }}
       shell: bash
@@ -41,6 +34,10 @@ runs:
         git config --local user.email "edgehog-machine@ispirata.com"
         git config --local user.name "Edgehog Bot"
         git add .
+        if git diff --cached --quiet; then
+           echo "No documentation changes to commit."
+           exit 0
+        fi
         git commit -m "Update Documentation"
     - name: Push changes
       working-directory: ${{ inputs.docs }}
