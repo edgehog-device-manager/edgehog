@@ -32,6 +32,9 @@ on:
       publish:
         type: boolean
         default: true
+    secrets:
+      publish-key:
+        required: true
 
 defaults:
   run:
@@ -88,4 +91,4 @@ jobs:
         if: ${{ inputs.publish }}
         with:
           docs: docs
-          deploy-key: ${{ secrets.DOCS_DEPLOY_KEY }}
+          publish-key: ${{ secrets.publish-key }}
