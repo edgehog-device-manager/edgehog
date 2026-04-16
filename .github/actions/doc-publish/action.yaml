@@ -23,7 +23,7 @@ inputs:
   docs:
     description: "The docs project location."
     required: true
-  deploy-key:
+  publish-key:
     description: "SSH deploy key for pushing docs."
     required: true
 
