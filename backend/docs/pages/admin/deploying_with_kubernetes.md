@@ -422,7 +422,7 @@ spec:
             - name: admin-public-key
               mountPath: /keys
               readOnly: true
-          image: edgehogdevicemanager/edgehog-backend:{{VERSION}} # TODO: replace {{VERSION}} with the actual version you want to deploy
+          image: edgehogdevicemanager/edgehog-backend:x-release-please-version
           imagePullPolicy: Always
           name: edgehog-backend
           ports:
@@ -493,7 +493,7 @@ spec:
               value: <BACKEND-HOST>
             - name: HIDE_NAVIGATION_ELEMENTS
               value: <HIDE-NAVIGATION-ELEMENTS>
-          image: edgehogdevicemanager/edgehog-frontend:{{VERSION}} # TODO: replace {{VERSION}} with the actual version you want to deploy
+          image: edgehogdevicemanager/edgehog-frontend:x-release-please-version
           imagePullPolicy: Always
           name: edgehog-frontend
           ports:

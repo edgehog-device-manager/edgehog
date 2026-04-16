@@ -1,7 +1,7 @@
 {
   "bump-minor-pre-major": true,
   "pull-request-header": ":package: New release available",
-  "pull-request-title-pattern": "chore: release ${version}",
+  "pull-request-title-pattern": "chore${scope}: release${component} ${version} - ${branch?}",
   "packages": {
     "backend": {
       "package-name": "backend",
@@ -22,6 +22,12 @@
       "groupName": "edgehog",
       "tagName": "v${version}",
       "components": ["backend", "frontend"]
+    }
+  ],
+  "extra-files": [
+    {
+      "type": "generic",
+      "path": "backend/docs/pages/admin/deploying_with_kubernetes.md"
     }
   ],
   "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
