@@ -30,6 +30,10 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Setup SSH
+    - uses: webfactory/ssh-agent@v0.10.0
+      with:
+        ssh-private-key: ${{ secrets.publish-key }}
     - name: Commit files
       working-directory: ${{ inputs.docs }}
       shell: bash
@@ -39,13 +43,9 @@ runs:
         git add .
         git commit -m "Update Documentation"
     - name: Push changes
-      working-directory: ./docs
+      working-directory: ${{ inputs.docs }}
       shell: bash
       run: |
-        eval `ssh-agent -t 60 -s`
-        echo "${{ inputs.deploy-key }}" | ssh-add -
-        mkdir -p ~/.ssh/
-        ssh-keyscan github.com >> ~/.ssh/known_hosts
         git remote add topush "git@github.com:edgehog-device-manager/docs.git"
         git fetch topush
         git push topush main
