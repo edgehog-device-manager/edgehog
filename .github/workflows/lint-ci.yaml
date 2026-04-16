@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025-2026 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,22 +18,35 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-name: Lint Commits
-on: [pull_request]
+name: Lint
 
 permissions:
   contents: read
 
-env:
-  CLICOLOR: 1
+on: pull_request
 
 concurrency:
   group: "${{ github.workflow }}-${{ github.ref }}"
   cancel-in-progress: true
 
+env:
+  CLICOLOR: 1
+
 jobs:
+  formatting:
+    name: Markdown files formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: dprint/check@9cb3a2b17a8e606d37aae341e49df3654933fc23 # v2.3
+  spelling:
+    name: Files spelling
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: crate-ci/typos@631208b7aac2daa8b707f55e7331f9112b0e062d # v1.44.0
   committed:
-    name: Lint Commits
+    name: Commits follow conventional commits
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Actions Repository
@@ -43,7 +56,7 @@ jobs:
       - name: Lint Commits
         uses: crate-ci/committed@faeed42f2e10c244533a01525f13c4d8b6ce383f # v1.1.11
   typos-in-commit-message:
-    name: Spellcheck Commits
+    name: Commits spelling
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Actions Repository
