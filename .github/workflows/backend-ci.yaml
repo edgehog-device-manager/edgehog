@@ -67,6 +67,9 @@ jobs:
   rustfs:
     needs: [warmup-cache]
     uses: ./.github/workflows/backend-rustfs.yaml
+  openfga:
+    needs: [warmup-cache]
+    uses: ./.github/workflows/backend-openfga.yaml
   azurite:
     needs: [warmup-cache]
     uses: ./.github/workflows/backend-azurite.yaml
