@@ -46,6 +46,58 @@ services:
       - "traefik.http.routers.edgehog-pgadmin.service=pgadmin"
       - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
 
+  openfga:
+    image: openfga/openfga:latest
+    command: run
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=memory
+      - OPENFGA_PLAYGROUND_ENABLED=true
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/grpc_health_probe", "-addr=openfga:8081"]
+      interval: 5s
+      timeout: 30s
+      retries: 3
+    labels:
+      - "traefik.enable=true"
+      # --- HTTP API (port 8080) ---
+      - "traefik.http.routers.openfga-http.rule=Host(`openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.openfga-http.entrypoints=web"
+      - "traefik.http.routers.openfga-http.service=openfga-http"
+      - "traefik.http.services.openfga-http.loadbalancer.server.port=8080"
+      # --- gRPC (port 8081) — requires a TCP/HTTP2 entrypoint in Traefik ---
+      - "traefik.http.routers.openfga-grpc.rule=Host(`openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.openfga-grpc.entrypoints=grpc"
+      - "traefik.http.routers.openfga-grpc.service=openfga-grpc"
+      - "traefik.http.services.openfga-grpc.loadbalancer.server.port=8081"
+      - "traefik.http.services.openfga-grpc.loadbalancer.server.scheme=h2c"
+      # --- Playground (port 3000) ---
+      - "traefik.http.routers.openfga-playground.rule=Host(`openfga-playground.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.openfga-playground.entrypoints=web"
+      - "traefik.http.routers.openfga-playground.service=openfga-playground"
+      - "traefik.http.services.openfga-playground.loadbalancer.server.port=3000"
+
+  openfga-init:
+    image: alpine:3.19
+    depends_on:
+      openfga:
+        condition: service_healthy
+    volumes:
+      - ./backend/priv/fga/model.fga:/model.fga:z
+      - fga-env:/fga-env:z
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+          set -e
+          apk add --no-cache jq tar
+          wget -O /tmp/fga.tar.gz "https://github.com/openfga/cli/releases/download/v0.7.13/fga_0.7.13_linux_amd64.tar.gz"
+          tar -xvzf /tmp/fga.tar.gz -C /bin
+          chmod +x /bin/fga
+          fga store create --model /model.fga --api-url 'http://openfga:8080' \
+            | jq -r '"export OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
+          cat /fga-env/.env
+
   edgehog-backend:
     image: edgehogdevicemanager/edgehog-backend:0.12.1
     build:
@@ -69,15 +121,27 @@ services:
       EDGEHOG_FORWARDER_PORT: 80
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
       ADMIN_JWT_PUBLIC_KEY_PATH: /keys/admin_public.pem
+      AUTHZ_PROVIDER: openfga
+      OPENFGA_GRPC_ENDPOINT: openfga:8081
     restart: on-failure
+    entrypoint: ["/bin/sh", "-c"]
+    command: [". /fga-env/.env && /app/bin/server", "--"]
     volumes:
       - ./backend/priv/repo/seeds/keys/admin_public.pem:/keys/admin_public.pem:z
       - ${SEEDS_TENANT_PRIVATE_KEY_FILE}:/keys/tenant_private.pem:z
       - ${SEEDS_REALM_PRIVATE_KEY_FILE}:/keys/realm_private.pem:z
+      - fga-env:/fga-env:z
     depends_on:
-      - postgres
-      - rustfs
-      - rustfs-init
+      postgres:
+        condition: service_started
+      rustfs:
+        condition: service_started
+      rustfs-init:
+        condition: service_completed_successfully
+      openfga:
+        condition: service_healthy
+      openfga-init:
+        condition: service_completed_successfully
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.edgehog-backend.rule=Host(`api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
@@ -224,6 +288,7 @@ configs:
 
 volumes:
   postgres-data:
+  fga-env:
   pgadmin-data:
   rustfs-data-v2:
     driver: local

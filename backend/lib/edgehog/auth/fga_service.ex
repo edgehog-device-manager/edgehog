@@ -31,7 +31,32 @@ defmodule Edgehog.Auth.FGAService do
     tuple = {subj, rel, obj}
 
     provider = Keyword.fetch!(Config.authz_config!(), :provider)
+    config = Keyword.fetch!(Config.authz_config!(), :config)
 
-    provider.check(tuple, provider.init_context())
+    with {:ok, context} <- provider.init_context(config) do
+      provider.check(tuple, context)
+    end
+  end
+
+  def list_objects(subj, rel, type) do
+    tuple = {subj, rel, type}
+
+    provider = Keyword.fetch!(Config.authz_config!(), :provider)
+    config = Keyword.fetch!(Config.authz_config!(), :config)
+
+    with {:ok, context} <- provider.init_context(config) do
+      provider.list_objects(tuple, context)
+    end
+  end
+
+  def stream_list_objects(subj, rel, type) do
+    tuple = {subj, rel, type}
+
+    provider = Keyword.fetch!(Config.authz_config!(), :provider)
+    config = Keyword.fetch!(Config.authz_config!(), :config)
+
+    with {:ok, context} <- provider.init_context(config) do
+      provider.stream_list_objects(tuple, context)
+    end
   end
 end

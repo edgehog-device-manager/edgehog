@@ -37,7 +37,8 @@ defmodule Edgehog.MixProject do
       test_coverage: [tool: ExCoveralls],
       dialyzer: dialyzer_opts(Mix.env()),
       docs: docs(),
-      source_url: "https://github.com/edgehog-device-manager/edgehog"
+      source_url: "https://github.com/edgehog-device-manager/edgehog",
+      listeners: [Phoenix.CodeReloader]
     ]
   end
 
@@ -146,7 +147,8 @@ defmodule Edgehog.MixProject do
       # break interoperability.
       #
       # Do not upgrade this dependency unless the underlying block size behavior is verified and updated.
-      {:nimble_lz4, "1.1.0"}
+      {:nimble_lz4, "1.1.0"},
+      {:grpc, "~> 0.11"}
     ]
   end
 

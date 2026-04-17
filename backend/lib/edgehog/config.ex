@@ -24,6 +24,7 @@ defmodule Edgehog.Config do
   """
   use Skogsra
 
+  alias Edgehog.Auth.Providers.None
   alias Edgehog.Config.AuthzProvider
   alias Edgehog.Config.GeocodingProviders
   alias Edgehog.Config.GeolocationProviders
@@ -99,12 +100,28 @@ defmodule Edgehog.Config do
 
   @envdoc """
   The preferred fine grained authorization provider.
-  Possible values are: none
+  Possible values are: none, openfga
   """
   app_env :authz_provider, :edgehog, :authz_provider,
     os_env: "AUTHZ_PROVIDER",
     type: AuthzProvider,
-    default: Edgehog.Auth.Providers.None
+    default: None
+
+  @envdoc """
+  OpenFGA gRPC endpoint.
+  Defaults to `localhost:8081`
+  """
+  app_env :openfga_grpc_endpoint, :edgehog, :openfga_grpc_endpoint,
+    os_env: "OPENFGA_GRPC_ENDPOINT",
+    type: :binary,
+    default: "localhost:8081"
+
+  @envdoc """
+  OpenFGA store id. A store in OpenFGA has a unique id associated.
+  """
+  app_env :openfga_store_id, :edgehog, :openfga_store_id,
+    os_env: "OPENFGA_STORE_ID",
+    type: :binary
 
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
@@ -202,13 +219,36 @@ defmodule Edgehog.Config do
   end
 
   @doc """
+  Returns the config of the required provider
+  """
+  @spec authz_provider_config!(provider :: module()) :: Keyword.t()
+  def authz_provider_config!(provider)
+
+  def authz_provider_config!(None), do: Keyword.new()
+
+  def authz_provider_config!(Edgehog.Auth.Providers.OpenFGA) do
+    store_id =
+      with nil <- openfga_store_id!() do
+        raise "OpenFGA Authz provider configured, but no store id provided"
+      end
+
+    [
+      endpoint: openfga_grpc_endpoint!(),
+      store_id: store_id
+    ]
+  end
+
+  @doc """
   Returns the FGA provider configuration.
   """
   @spec authz_config!() :: Keyword.t()
   def authz_config! do
     provider = authz_provider!()
+    config = authz_provider_config!(provider)
 
     # Generate the argument that will be passed down to the providers
-    Keyword.put(Keyword.new(), :provider, provider)
+    Keyword.new()
+    |> Keyword.put(:provider, provider)
+    |> Keyword.put(:config, config)
   end
 end

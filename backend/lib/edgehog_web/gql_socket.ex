@@ -24,11 +24,14 @@ defmodule EdgehogWeb.GqlSocket do
 
   def connect(%{"token" => token, "tenant" => tenant_slug}, socket, _connect_info) do
     with {:ok, tenant} <- Tenants.fetch_tenant_by_slug(tenant_slug),
-         {:ok, claims} <- verify_jwt(token, tenant) do
+         {:ok, claims} <- verify_jwt(token, tenant),
+         {:ok, actor} <- actor_from_claims(claims) do
       socket =
         socket
         |> assign(:tenant, tenant)
         |> assign(:claims, claims)
+        |> assign(:actor, actor)
+        |> Absinthe.Phoenix.Socket.put_options(context: %{actor: actor})
 
       {:ok, socket}
     end
@@ -36,6 +39,41 @@ defmodule EdgehogWeb.GqlSocket do
 
   def connect(_params, _socket, _connect_info) do
     {:error, %{reason: "unauthorized", message: "Missing params"}}
+  end
+
+  def actor_from_claims(claims) do
+    {e_tga, claims} = Map.pop!(claims, "e_tga")
+
+    claims = actor_claims(claims, e_tga)
+
+    Edgehog.Actors.Actor
+    |> Ash.Changeset.for_create(:from_claims, claims)
+    |> Ash.create()
+  end
+
+  defp actor_claims(claims, e_tga) do
+    claims
+    |> Map.put("claims", %{e_tga: e_tga})
+    |> Map.update("auth_time", ~U[1970-01-01 00:00:00Z], &DateTime.from_unix!/1)
+    |> Map.update("exp", ~U[1970-01-01 00:00:01Z], &DateTime.from_unix!/1)
+    |> Map.update("iat", ~U[1970-01-01 00:00:00Z], &DateTime.from_unix!/1)
+    |> drop_unknown_claims()
+  end
+
+  defp drop_unknown_claims(claims) do
+    known_claims = [
+      "sub",
+      "aud",
+      "exp",
+      "iat",
+      "auth_time",
+      "preferred_username",
+      "email",
+      "given_name",
+      "family_name"
+    ]
+
+    Map.take(claims, known_claims)
   end
 
   def id(socket) do
