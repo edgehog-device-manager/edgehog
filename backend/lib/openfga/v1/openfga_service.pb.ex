@@ -594,3 +594,67 @@ defmodule Openfga.V1.Assertions do
 
   field :assertions, 1, repeated: true, type: Openfga.V1.Assertion, deprecated: false
 end
+
+defmodule Openfga.V1.OpenFGAService.Service do
+  @moduledoc false
+  use GRPC.Service, name: "openfga.v1.OpenFGAService", protoc_gen_elixir_version: "0.16.0"
+
+  rpc(:Read, Openfga.V1.ReadRequest, Openfga.V1.ReadResponse)
+
+  rpc(:Write, Openfga.V1.WriteRequest, Openfga.V1.WriteResponse)
+
+  rpc(:Check, Openfga.V1.CheckRequest, Openfga.V1.CheckResponse)
+
+  rpc(:BatchCheck, Openfga.V1.BatchCheckRequest, Openfga.V1.BatchCheckResponse)
+
+  rpc(:Expand, Openfga.V1.ExpandRequest, Openfga.V1.ExpandResponse)
+
+  rpc(
+    :ReadAuthorizationModels,
+    Openfga.V1.ReadAuthorizationModelsRequest,
+    Openfga.V1.ReadAuthorizationModelsResponse
+  )
+
+  rpc(
+    :ReadAuthorizationModel,
+    Openfga.V1.ReadAuthorizationModelRequest,
+    Openfga.V1.ReadAuthorizationModelResponse
+  )
+
+  rpc(
+    :WriteAuthorizationModel,
+    Openfga.V1.WriteAuthorizationModelRequest,
+    Openfga.V1.WriteAuthorizationModelResponse
+  )
+
+  rpc(:WriteAssertions, Openfga.V1.WriteAssertionsRequest, Openfga.V1.WriteAssertionsResponse)
+
+  rpc(:ReadAssertions, Openfga.V1.ReadAssertionsRequest, Openfga.V1.ReadAssertionsResponse)
+
+  rpc(:ReadChanges, Openfga.V1.ReadChangesRequest, Openfga.V1.ReadChangesResponse)
+
+  rpc(:CreateStore, Openfga.V1.CreateStoreRequest, Openfga.V1.CreateStoreResponse)
+
+  rpc(:UpdateStore, Openfga.V1.UpdateStoreRequest, Openfga.V1.UpdateStoreResponse)
+
+  rpc(:DeleteStore, Openfga.V1.DeleteStoreRequest, Openfga.V1.DeleteStoreResponse)
+
+  rpc(:GetStore, Openfga.V1.GetStoreRequest, Openfga.V1.GetStoreResponse)
+
+  rpc(:ListStores, Openfga.V1.ListStoresRequest, Openfga.V1.ListStoresResponse)
+
+  rpc(
+    :StreamedListObjects,
+    Openfga.V1.StreamedListObjectsRequest,
+    stream(Openfga.V1.StreamedListObjectsResponse)
+  )
+
+  rpc(:ListObjects, Openfga.V1.ListObjectsRequest, Openfga.V1.ListObjectsResponse)
+
+  rpc(:ListUsers, Openfga.V1.ListUsersRequest, Openfga.V1.ListUsersResponse)
+end
+
+defmodule Openfga.V1.OpenFGAService.Stub do
+  @moduledoc false
+  use GRPC.Stub, service: Openfga.V1.OpenFGAService.Service
+end
