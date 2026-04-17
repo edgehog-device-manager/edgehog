@@ -25,18 +25,34 @@ defmodule Edgehog.Auth.Providers.None do
 
   @behaviour Edgehog.Auth.Providers.Behaviour
 
+  alias Edgehog.Auth.Providers.Behaviour
+
   require Logger
 
-  @impl Edgehog.Auth.Providers.Behaviour
+  @impl Behaviour
   def init_context(_args) do
     # We do not need a context in this case
     {:ok, []}
   end
 
-  @impl Edgehog.Auth.Providers.Behaviour
+  @impl Behaviour
   def check({subj, rel, obj}, _context) do
     Logger.debug("Authorizing tuple {#{subj}, #{rel}, #{obj}}.")
 
     :ok
+  end
+
+  @impl Behaviour
+  def list_objects({subj, rel, type}, _context) do
+    Logger.debug("Filtering objects for: {#{subj}, #{rel}, #{type}}.")
+
+    {:ok, :all}
+  end
+
+  @impl Behaviour
+  def stream_list_objects({subj, rel, type}, _context) do
+    Logger.debug("Filtering objects for: {#{subj}, #{rel}, #{type}}.")
+
+    {:ok, :all}
   end
 end

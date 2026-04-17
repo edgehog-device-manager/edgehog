@@ -22,8 +22,8 @@ defmodule Edgehog.Config.AuthzProvider do
   @moduledoc false
   use Skogsra.Type
 
-  @allowed_providers ~w(none)
-  @providers [Edgehog.Auth.Providers.None]
+  @allowed_providers ~w(none openfga)
+  @providers [Edgehog.Auth.Providers.None, Edgehog.Auth.Providers.OpenFGA]
   @providers_map @allowed_providers |> Enum.zip(@providers) |> Map.new()
 
   @impl Skogsra.Type

@@ -25,6 +25,9 @@ defmodule Edgehog.Auth.Providers.Behaviour do
 
   @type context() :: term()
   @type fga_tuple() :: {subj :: String.t(), rel :: String.t(), obj :: String.t()}
+  @type fga_access_tuple() :: {subj :: String.t(), rel :: String.t(), type :: String.t()}
+  @type objects() :: %{objects: term()}
+  @type obj_stream() :: term()
 
   @doc """
   The context initialization function. The context can carry useful information for subsequent actions.
@@ -42,11 +45,51 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   The context is also provided.
 
   The check can return
-  - {:ok, context()}    :: meaning that the subject has the right permission to access the resource
-  - {:notok, context()} :: meaning that the subject has not the right permission to access the resource
-  - {:error, error}     :: meaning that there was some error in the request.
+  - :ok             :: meaning that the subject has the right permission to access the resource
+  - :notok          :: meaning that the subject has not the right permission to access the resource
+  - {:error, error} :: meaning that there was some error in the request.
 
   For successful returns the new `context` should be provided.
   """
   @callback check(tuple :: fga_tuple(), context :: context()) :: :ok | :notok | {:error, term()}
+
+  @doc """
+  A list_objects call lists all objects of the selected type a user has access to.
+
+  - subj :: is some id of the person making the request, ideally a OpenID Connect UUID
+  - rel  :: is the requested access to the resource (object) in order to perform the action
+  - type :: is the type of resources we want to fetch
+
+  The context should also be provided.
+
+  NOTICE: This creates a list with all the objects! This might be very
+  inefficient and possibly stalls the request (e.g. 1mln devices), consider
+  using `stream_list_objects`
+
+  The call can return
+  - {:ok, objects()} :: meaning that the user has access to the %{objects: list()} list of objects of type `type`
+  - {:error, error}  :: meaning that there was some error in the request.
+
+  For successful returns the new `context` should be provided.
+  """
+  @callback list_objects(tuple :: fga_access_tuple(), context :: context()) ::
+              {:ok, objects()} | {:ok, :all} | {:error, term()}
+
+  @doc """
+  A stream_list_objects call streams all objects of the selected type a user has access to.
+
+  - subj :: is some id of the person making the request, ideally a OpenID Connect UUID
+  - rel  :: is the requested access to the resource (object) in order to perform the action
+  - type :: is the type of resources we want to fetch
+
+  The context should also be provided.
+
+  The call can return
+  - {:ok, stream(objects())} :: meaning that the user has access to the %{objects: list()} list of objects of type `type`
+  - {:error, error}          :: meaning that there was some error in the request.
+
+  For successful returns the new `context` should be provided.
+  """
+  @callback stream_list_objects(tuple :: fga_access_tuple(), context :: context()) ::
+              {:ok, obj_stream()} | {:ok, :all} | {:error, term()}
 end
