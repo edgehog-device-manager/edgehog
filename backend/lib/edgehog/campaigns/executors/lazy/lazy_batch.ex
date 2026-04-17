@@ -301,8 +301,8 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   def handle_event(:internal, {:temporary_error, target, reason}, :execution, data) do
     %Data{mechanism: mechanism} = data
 
-    reason
-    |> MechanismCore.error_message(mechanism, target.device_id)
+    mechanism
+    |> MechanismCore.error_message(reason, target.device_id)
     |> Logger.notice()
 
     # Since this is a temporary error, and we failed during the initial rollout, for now we do
@@ -320,8 +320,8 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   def handle_event(:internal, {:operation_failure, target, reason}, :execution, data) do
     %Data{mechanism: mechanism} = data
 
-    reason
-    |> MechanismCore.error_message(mechanism, target.device_id)
+    mechanism
+    |> MechanismCore.error_message(reason, target.device_id)
     |> Logger.notice()
 
     # This is a permanent failure, so we mark the target as failed
