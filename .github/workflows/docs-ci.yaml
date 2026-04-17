@@ -97,8 +97,8 @@ jobs:
       - name: Setup git
         if: ${{ inputs.publish }}
         run: |
-          git config user.email "edgehog-machine@ispirata.com"
-          git config user.name "Edgehog Bot"
+          git config --global user.email "edgehog-machine@ispirata.com"
+          git config --global user.name "Edgehog Bot"
       - uses: ./edgehog/.github/actions/doc-publish
         if: ${{ inputs.publish }}
         with:
