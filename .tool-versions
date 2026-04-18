@@ -1,9 +1,9 @@
 # SPDX-FileCopyrightText: 2021 - 2026 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
-erlang 28.3.1
-elixir 1.19.5-otp-28
-nodejs 24.14.1
+erlang 28.4.2
+elixir 1.19.5
+nodejs 24.15.0
 postgres 18.0
-dprint 0.50.2
-typos 1.40.0
+dprint 0.54.0
+typos 1.45.1
