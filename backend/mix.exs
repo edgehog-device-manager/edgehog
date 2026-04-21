@@ -142,14 +142,19 @@ defmodule Edgehog.MixProject do
   # Add here additional documentation files
   defp docs do
     [
-      main: "intro_user",
+      main: "intro",
       logo: "docs/images/logo-favicon.png",
       javascript_config_path: "../versions.js",
       extras: Path.wildcard("docs/pages/*/*.md"),
       filter_modules: ~r/Edgehog/,
-      assets: %{"docs/images/" => "assets"},
+      assets: %{"docs/images/" => "assets", "docs/style/" => "style"},
+      before_closing_head_tag: fn
+        :html -> ~s(<link rel="stylesheet" href="style/cards.css">)
+        _ -> ""
+      end,
       api_reference: false,
       groups_for_extras: [
+        Introduction: ~r/intro/,
         "User Guide": ~r"/user/",
         "OTA Updates": ~r"/ota_updates/",
         "Containers management": ~r"/containers/",
