@@ -86,23 +86,36 @@ jobs:
           docs: docs
           astarte-interfaces: edgehog-astarte-interfaces
           version: ${{ steps.compute-version.outputs.version }}
-
-      - name: Commit files
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        if: ${{ inputs.publish }}
+        with:
+          app-id: ${{ vars.EDGEHOG_APP_APP_ID }}
+          private-key: ${{ secrets.EDGEHOG_APP_PRIVATE_KEY }}
+          repositories: docs
+      - name: Setup git
         if: ${{ inputs.publish }}
         working-directory: docs
         run: |
-          git config --local user.email "edgehog-machine@ispirata.com"
-          git config --local user.name "Edgehog Bot"
+          git config user.email "${{ vars.EDGEHOG_APP_APP_ID }}+edgehog-app[bot]@users.noreply.github.com"
+          git config user.name "edgehog-app[bot]"
+      - name: Commit files
+        if: ${{ inputs.publish }}
+        working-directory: docs
+        shell: bash
+        run: |
           git add .
+          if git diff --cached --quiet; then
+             echo "No documentation changes to commit."
+             exit 0
+          fi
           git commit -m "Update Documentation"
       - name: Push changes
         if: ${{ inputs.publish }}
         working-directory: docs
+        shell: bash
         run: |
-          eval `ssh-agent -t 300 -s`
-          echo "${{ secrets.publish-key }}" | ssh-add -
-          mkdir -p ~/.ssh/
-          ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git remote add topush "git@github.com:edgehog-device-manager/docs.git"
+          git remote add topush "https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/edgehog-device-manager/docs.git"
           git fetch topush
           git push topush main
