@@ -133,5 +133,5 @@ const DeploymentStateComponent = ({
 };
 
 export type { DeploymentState };
-export { parseDeploymentState };
+export { parseDeploymentState, stateMessages };
 export default DeploymentStateComponent;

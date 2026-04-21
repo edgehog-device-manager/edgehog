@@ -18,20 +18,27 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, MessageDescriptor, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useMemo, useState, MouseEvent } from "react";
+import semver from "semver";
+import { Badge, Table } from "react-bootstrap";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "@/api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
-import type { DeployedApplicationsTable_deployedApplications$key } from "@/api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
+import type {
+  DeployedApplicationsTable_deployedApplications$key,
+  DeployedApplicationsTable_deployedApplications$data,
+} from "@/api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
 import Icon from "@/components/Icon";
-import { Link, Route, useNavigate } from "@/Navigation";
-import Table, { createColumnHelper } from "@/components/Table";
+import { Route, useNavigate } from "@/Navigation";
 import Button from "@/components/Button";
-import DeploymentStateComponent, {
+import {
+  DeploymentState,
   parseDeploymentState,
+  stateMessages,
 } from "@/components/DeploymentState";
-import DeploymentReadiness from "@/components/DeploymentReadiness";
+import CollapseItem from "./CollapseItem";
 
 // We use graphql fields below in columns configuration
 
@@ -47,7 +54,6 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
           isReady
           device {
             id
-            name
           }
           release {
             id
@@ -55,231 +61,206 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
             application {
               id
               name
-              releases {
-                edges {
-                  node {
-                    id
-                    version
-                    systemModels {
-                      name
-                    }
-                  }
-                }
-              }
-            }
-          }
-          campaignTarget {
-            campaign {
-              id
-              name
             }
           }
           ...DeploymentDetails_events
           ...DeploymentDetails_containerDeployments
-          containerDeployments(first: $first, after: $after) {
-            edges {
-              node {
-                id
-                state
-                container {
-                  image {
-                    reference
-                  }
-                }
-              }
-            }
-          }
         }
       }
     }
   }
 `;
+type DeploymentNode = NonNullable<
+  NonNullable<
+    NonNullable<
+      DeployedApplicationsTable_deployedApplications$data["applicationDeployments"]
+    >["edges"]
+  >[number]
+>["node"];
 
-type DeploymentTableProps = {
-  className?: string;
-  deviceRef: DeployedApplicationsTable_deployedApplications$key;
-  hideSearch?: boolean;
+const statusConfig: Record<
+  string,
+  { message: MessageDescriptor; color: string }
+> = {
+  STARTED: { message: stateMessages.STARTED, color: "bg-success" },
+  STOPPED: { message: stateMessages.STOPPED, color: "bg-secondary" },
+  DEFAULT: { message: stateMessages.DEPLOYING, color: "bg-light text-muted" },
 };
 
+type DeploymentsByApp = {
+  applicationId: string;
+  applicationName: string;
+  releases: ReturnType<typeof mapDeploymentNode>[];
+};
+
+const mapDeploymentNode = (node: DeploymentNode) => ({
+  id: node.id,
+  applicationId: node.release?.application?.id ?? "Unknown",
+  applicationName: node.release?.application?.name ?? "Unknown",
+  releaseId: node.release?.id ?? "Unknown",
+  releaseVersion: node.release?.version ?? "0.0.0",
+  deviceId: node.device?.id ?? "Unknown",
+  state: parseDeploymentState(node.state ?? undefined),
+});
+
 const DeployedApplicationsTable = ({
-  className,
   deviceRef,
-  hideSearch = false,
-}: DeploymentTableProps) => {
+}: {
+  deviceRef: DeployedApplicationsTable_deployedApplications$key;
+}) => {
   const { data } = usePaginationFragment<
     DeployedApplicationsTable_PaginationQuery,
     DeployedApplicationsTable_deployedApplications$key
   >(DEPLOYED_APPLICATIONS_TABLE_FRAGMENT, deviceRef);
 
-  const intl = useIntl();
   const navigate = useNavigate();
+  const intl = useIntl();
 
-  const deployments =
-    data.applicationDeployments?.edges?.map((edge) => ({
-      id: edge.node.id,
-      applicationId: edge.node.release?.application?.id || "Unknown",
-      applicationName: edge.node.release?.application?.name || "Unknown",
-      releaseId: edge.node.release?.id || "Unknown",
-      releaseVersion: edge.node.release?.version || "N/A",
-      deviceId: edge.node.device?.id || "Unknown",
-      state: parseDeploymentState(edge.node.state || undefined),
-      isReady: edge.node.isReady,
-      campaignTarget: edge.node.campaignTarget,
-    })) || [];
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
 
-  const columnHelper = createColumnHelper<(typeof deployments)[0]>();
-  const columns = [
-    columnHelper.accessor("applicationName", {
-      header: () => (
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.applicationName"
-          defaultMessage="Application Name"
-        />
-      ),
-      cell: ({ row, getValue }) => (
-        <Link
-          route={Route.application}
-          params={{ applicationId: row.original.applicationId }}
-        >
-          {getValue()}
-        </Link>
-      ),
-    }),
-    columnHelper.accessor("releaseVersion", {
-      header: () => (
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.releaseVersion"
-          defaultMessage="Release Version"
-        />
-      ),
-      cell: ({ row, getValue }) => (
-        <Link
-          route={Route.release}
-          params={{
-            applicationId: row.original.applicationId,
-            releaseId: row.original.releaseId,
-          }}
-        >
-          {getValue()}
-        </Link>
-      ),
-    }),
-    columnHelper.accessor((row) => row.campaignTarget?.campaign?.name, {
-      id: "deploymentCampaignName",
-      header: () => (
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.deploymentCampaignNameTitle"
-          defaultMessage="Deployment Campaign"
-        />
-      ),
-      cell: ({ row, getValue }) => (
-        <Link
-          route={Route.deploymentCampaignsEdit}
-          params={{
-            deploymentCampaignId:
-              row.original.campaignTarget?.campaign?.id ?? "",
-          }}
-        >
-          {getValue()}
-        </Link>
-      ),
-    }),
-    columnHelper.accessor("state", {
-      header: () => (
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.state"
-          defaultMessage="State"
-        />
-      ),
-      cell: ({ row, getValue }) => (
-        <DeploymentStateComponent
-          state={getValue()}
-          isReady={row.original.isReady}
-        />
-      ),
-    }),
-    columnHelper.accessor("isReady", {
-      id: "readiness",
-      header: () => (
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.readiness"
-          defaultMessage="Readiness"
-        />
-      ),
-      cell: ({ getValue }) => <DeploymentReadiness isReady={getValue()} />,
-    }),
-    columnHelper.accessor((row) => row, {
-      id: "details",
-      header: () => (
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.details"
-          defaultMessage="Details"
-        />
-      ),
-      cell: ({ row }) => (
-        <div className="d-flex align-items-center">
-          <Button
-            className="btn btn-link border-0 bg-transparent p-0 text-decoration-none d-inline-flex align-items-center"
-            title={intl.formatMessage({
-              id: "components.DeployedApplicationsTable.deploymentDetailsButtonTitle",
-              defaultMessage: "Deployment Details",
-            })}
-            onClick={() => {
-              navigate({
-                route: Route.deploymentEdit,
-                params: {
-                  deploymentId: row.original.id,
-                  deviceId: row.original.deviceId,
-                },
-              });
-            }}
-          >
-            <Icon
-              icon="faCircleInfo"
-              style={{
-                color: "white",
-                backgroundColor: "gray",
-                borderRadius: "50%",
-                padding: "1px",
-                cursor: "pointer",
-                boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
-                transition: "transform 0.3s, box-shadow 0.3s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.transform = "scale(1.2)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = "scale(1)";
-              }}
-            />
-          </Button>
-        </div>
-      ),
-    }),
-  ];
+  const toggleApp = (id: string) => {
+    const next = new Set(expandedApps);
+    if (next.has(id)) {
+      next.delete(id);
+    } else {
+      next.add(id);
+    }
+    setExpandedApps(next);
+  };
 
-  if (!deployments.length) {
+  const groupedDeployments = useMemo(() => {
+    const deploymentsByApp = new Map<string, DeploymentsByApp>();
+    const edges = data.applicationDeployments?.edges ?? [];
+
+    for (const edge of edges) {
+      if (!edge?.node) continue;
+
+      const deployment = mapDeploymentNode(edge.node);
+
+      if (!deploymentsByApp.has(deployment.applicationId)) {
+        deploymentsByApp.set(deployment.applicationId, {
+          applicationId: deployment.applicationId,
+          applicationName: deployment.applicationName,
+          releases: [],
+        });
+      }
+
+      deploymentsByApp.get(deployment.applicationId)!.releases.push(deployment);
+    }
+
+    return Array.from(deploymentsByApp.values()).map((group) => ({
+      ...group,
+      releases: group.releases.sort((a, b) =>
+        semver.rcompare(a.releaseVersion, b.releaseVersion),
+      ),
+    }));
+  }, [data.applicationDeployments?.edges]);
+
+  const getStatusBadge = (state: DeploymentState) => {
+    const config = statusConfig[state] ?? statusConfig.DEFAULT;
     return (
-      <div>
-        <FormattedMessage
-          id="components.DeployedApplicationsTable.noDeployedApplications"
-          defaultMessage="No deployed applications"
-        />
-      </div>
+      <Badge
+        className={`${config.color} d-inline-flex justify-content-center`}
+        style={{ minWidth: "10ch" }}
+      >
+        {intl.formatMessage(config.message)}
+      </Badge>
+    );
+  };
+
+  const handleNavigate = (
+    e: MouseEvent,
+    deploymentId: string,
+    deviceId: string,
+  ) => {
+    e.stopPropagation();
+    navigate({
+      route: Route.deploymentEdit,
+      params: { deploymentId, deviceId },
+    });
+  };
+
+  if (!groupedDeployments.length) {
+    return (
+      <FormattedMessage
+        id="components.DeployedApplicationsTable.noDeployedApplications"
+        defaultMessage="No deployed applications"
+      />
     );
   }
 
   return (
-    <div>
-      <Table
-        className={className}
-        columns={columns}
-        data={deployments}
-        hideSearch={hideSearch}
-      />
+    <div className="d-flex flex-column gap-2">
+      {groupedDeployments.map((app) => {
+        const latest = app.releases[0];
+        const isOpen = expandedApps.has(app.applicationId);
+        return (
+          <CollapseItem
+            key={app.applicationId}
+            open={isOpen}
+            onToggle={() => toggleApp(app.applicationId)}
+            title={app.applicationName}
+            caretPosition="left"
+            headerClassName="fw-bold border rounded"
+            contentClassName="border rounded"
+            rightContent={
+              !isOpen && (
+                <div className="d-flex align-items-center">
+                  <strong className="me-2">v{latest.releaseVersion}</strong>
+                  {getStatusBadge(latest.state)}
+                  <Button
+                    variant="link"
+                    className="p-0 ms-2 hover-scale"
+                    onClick={(e: MouseEvent) =>
+                      handleNavigate(e, latest.id, latest.deviceId)
+                    }
+                  >
+                    <Icon icon="arrowUpRightFromSquare" />
+                  </Button>
+                </div>
+              )
+            }
+          >
+            <div className="ps-3">
+              <Table hover borderless size="sm" className="mb-0">
+                <tbody>
+                  {app.releases.map((rel, index) => (
+                    <tr
+                      key={rel.id}
+                      className={
+                        index !== app.releases.length - 1 ? "border-bottom" : ""
+                      }
+                    >
+                      <td className="align-middle text-secondary">
+                        v{rel.releaseVersion}
+                      </td>
+                      <td className="text-end align-middle">
+                        <div className="d-flex justify-content-end align-items-center gap-2">
+                          {rel.id === latest.id && (
+                            <Badge bg="primary">Latest</Badge>
+                          )}
+                          {getStatusBadge(rel.state)}
+                          <Button
+                            variant="link"
+                            className="p-0"
+                            onClick={(e: MouseEvent) =>
+                              handleNavigate(e, rel.id, rel.deviceId)
+                            }
+                          >
+                            <Icon icon="arrowUpRightFromSquare" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </Table>
+            </div>
+          </CollapseItem>
+        );
+      })}
     </div>
   );
 };
 
-export type { DeploymentTableProps };
 export default DeployedApplicationsTable;

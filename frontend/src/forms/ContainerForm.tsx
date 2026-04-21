@@ -108,6 +108,11 @@ const reduceEnv = (env: EnvironmentVariable[]) =>
 const envToString = (env: EnvironmentVariable[]) =>
   JSON.stringify(reduceEnv(env));
 
+const getSectionSpacing = (isOpen: boolean) =>
+  `border-bottom ${isOpen ? "pb-4" : ""}`;
+
+const collapseHeaderClass = "fw-bold bg-transparent border-0 ps-0 pe-1";
+
 const ContainerForm = ({
   index,
   register,
@@ -178,7 +183,6 @@ const ContainerForm = ({
       <Stack gap={2}>
         {/* Image Configuration Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("image")}
           onToggle={() => toggleSection("image")}
           title={
@@ -187,6 +191,9 @@ const ContainerForm = ({
               defaultMessage="Image Configuration"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("image"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow
@@ -249,7 +256,6 @@ const ContainerForm = ({
 
         {/* Network Configuration Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("network")}
           onToggle={() => toggleSection("network")}
           title={
@@ -258,6 +264,9 @@ const ContainerForm = ({
               defaultMessage="Network Configuration"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("network"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow
@@ -426,7 +435,6 @@ const ContainerForm = ({
 
         {/* Storage Configuration Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("storage")}
           onToggle={() => toggleSection("storage")}
           title={
@@ -435,6 +443,9 @@ const ContainerForm = ({
               defaultMessage="Storage Configuration"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("storage"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow
@@ -723,7 +734,6 @@ const ContainerForm = ({
 
         {/* Resource Limits Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("resourceLimits")}
           onToggle={() => toggleSection("resourceLimits")}
           title={
@@ -732,6 +742,9 @@ const ContainerForm = ({
               defaultMessage="Resource Limits"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("resourceLimits"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow
@@ -942,7 +955,6 @@ const ContainerForm = ({
 
         {/* Security & Capabilities Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("securityCapabilities")}
           onToggle={() => toggleSection("securityCapabilities")}
           title={
@@ -951,6 +963,9 @@ const ContainerForm = ({
               defaultMessage="Security & Capabilities"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("securityCapabilities"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow
@@ -1069,7 +1084,6 @@ const ContainerForm = ({
 
         {/* Runtime & Environment Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("runtimeEnvironment")}
           onToggle={() => toggleSection("runtimeEnvironment")}
           title={
@@ -1078,6 +1092,9 @@ const ContainerForm = ({
               defaultMessage="Runtime & Environment"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("runtimeEnvironment"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow
@@ -1153,7 +1170,6 @@ const ContainerForm = ({
 
         {/* Device Mappings Section */}
         <CollapseItem
-          type="flat"
           open={isSectionOpen("deviceMappings")}
           onToggle={() => toggleSection("deviceMappings")}
           title={
@@ -1162,6 +1178,9 @@ const ContainerForm = ({
               defaultMessage="Device Mappings"
             />
           }
+          caretPosition="right"
+          className={getSectionSpacing(isSectionOpen("deviceMappings"))}
+          headerClassName={collapseHeaderClass}
         >
           <Stack gap={2}>
             <FormRow

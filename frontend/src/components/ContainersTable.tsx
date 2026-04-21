@@ -142,6 +142,11 @@ const styles = {
   },
 };
 
+const baseSectionHeader = "fw-bold bg-transparent border-0 ps-0 pe-1";
+
+const getSectionSpacing = (open: boolean) =>
+  `border-bottom ${open ? "mb-2 pb-4" : "mb-1 pb-1"}`;
+
 const formatJson = (jsonString: unknown) => {
   try {
     if (!jsonString) return "";
@@ -196,6 +201,10 @@ const VolumeDetails = ({
                 title={mount?.volume.label ?? `Volume ${volIndex}`}
                 open={isSectionOpen(volIndex)}
                 onToggle={() => toggleVolume(volIndex)}
+                caretPosition="end"
+                headerClassName="fw-bold border rounded"
+                contentClassName="border rounded p-2"
+                style={{ fontSize: "0.9rem" }}
               >
                 <FormRow
                   id={`containers-${containerIndex}-volume-${volIndex}-target`}
@@ -297,6 +306,10 @@ const NetworkDetails = ({ networks, containerIndex }: NetworkDetailsProps) => {
                 title={net.label ?? `Network ${netIndex}`}
                 open={isSectionOpen(netIndex)}
                 onToggle={() => toggleNetwork(netIndex)}
+                caretPosition="end"
+                headerClassName="fw-bold border rounded"
+                contentClassName="border rounded p-2"
+                style={{ fontSize: "0.9rem" }}
               >
                 <FormRow
                   id={`containers-${containerIndex}-network-${netIndex}-label`}
@@ -395,7 +408,6 @@ const DeviceMappingDetails = ({
 
   return (
     <CollapseItem
-      type="flat"
       title={
         <FormattedMessage
           id="components.ContainersTable.deviceMappingsLabel"
@@ -404,6 +416,9 @@ const DeviceMappingDetails = ({
       }
       open={open}
       onToggle={() => setOpen((o) => !o)}
+      caretPosition="right"
+      className={`${open ? "mb-2 pb-4" : ""}`}
+      headerClassName="fw-bold bg-transparent border-0 ps-0 pe-1"
     >
       {!deviceMappings?.edges?.length ? (
         <p className="fst-italic mb-0">
@@ -468,7 +483,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
     <div style={styles.detailsWrapper}>
       {/* Image Configuration Section */}
       <CollapseItem
-        type="flat"
         open={isSectionOpen("image")}
         onToggle={() => toggleSection("image")}
         title={
@@ -477,6 +491,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             defaultMessage="Image Configuration"
           />
         }
+        caretPosition="right"
+        className={getSectionSpacing(isSectionOpen("image"))}
+        headerClassName={baseSectionHeader}
       >
         <Stack gap={2}>
           <FormRow
@@ -514,7 +531,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
 
       {/* Network Configuration Section */}
       <CollapseItem
-        type="flat"
         open={isSectionOpen("network")}
         onToggle={() => toggleSection("network")}
         title={
@@ -523,6 +539,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             defaultMessage="Network Configuration"
           />
         }
+        caretPosition="right"
+        className={getSectionSpacing(isSectionOpen("network"))}
+        headerClassName={baseSectionHeader}
       >
         <Stack gap={2}>
           <FormRow
@@ -584,7 +603,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
 
       {/* Storage Configuration Section */}
       <CollapseItem
-        type="flat"
         open={isSectionOpen("storage")}
         onToggle={() => toggleSection("storage")}
         title={
@@ -593,6 +611,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             defaultMessage="Storage Configuration"
           />
         }
+        caretPosition="right"
+        className={getSectionSpacing(isSectionOpen("storage"))}
+        headerClassName={baseSectionHeader}
       >
         <Stack gap={2}>
           <FormRow
@@ -672,7 +693,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
 
       {/* Resource Limits Section */}
       <CollapseItem
-        type="flat"
         open={isSectionOpen("resourceLimits")}
         onToggle={() => toggleSection("resourceLimits")}
         title={
@@ -681,6 +701,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             defaultMessage="Resource Limits"
           />
         }
+        caretPosition="right"
+        className={getSectionSpacing(isSectionOpen("resourceLimits"))}
+        headerClassName={baseSectionHeader}
       >
         <Stack gap={2}>
           <FormRow
@@ -783,7 +806,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
 
       {/* Security & Capabilities Section */}
       <CollapseItem
-        type="flat"
         open={isSectionOpen("security")}
         onToggle={() => toggleSection("security")}
         title={
@@ -792,6 +814,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             defaultMessage="Security & Capabilities"
           />
         }
+        caretPosition="right"
+        className={getSectionSpacing(isSectionOpen("security"))}
+        headerClassName={baseSectionHeader}
       >
         <Stack gap={2}>
           <FormRow
@@ -867,7 +892,6 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
 
       {/* Runtime & Environment Section */}
       <CollapseItem
-        type="flat"
         open={isSectionOpen("runtime")}
         onToggle={() => toggleSection("runtime")}
         title={
@@ -876,6 +900,9 @@ const ContainerDetails = ({ container, index }: ContainerDetailsProps) => {
             defaultMessage="Runtime & Environment"
           />
         }
+        caretPosition="right"
+        className={getSectionSpacing(isSectionOpen("runtime"))}
+        headerClassName={baseSectionHeader}
       >
         <Stack gap={2}>
           <FormRow
@@ -967,10 +994,12 @@ const ContainersTable = ({
           onLoadMore={onLoadMore}
         >
           <CollapseItem
-            type="card-parent"
             title={container.image.reference}
             open={isSectionOpen(index)}
             onToggle={() => toggleIndex(index)}
+            caretPosition={"end"}
+            headerClassName="fw-bold border rounded ps-2 pe-1"
+            contentClassName="border px-3 py-2"
           >
             <ContainerDetails container={container} index={index} />
           </CollapseItem>

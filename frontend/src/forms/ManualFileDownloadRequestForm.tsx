@@ -437,10 +437,11 @@ const ManualFileDownloadRequestForm = ({
       {showAdvancedOptions && (
         <div className="mb-3">
           <CollapseItem
-            type="flat"
             open={advancedOptionsOpen}
             onToggle={toggleAdvancedOptions}
-            isInsideTable={true}
+            headerClassName="ps-0 border-0"
+            style={{ backgroundColor: "transparent" }}
+            caretPosition="right"
             title={
               <FormattedMessage
                 id="forms.ManualFileDownloadRequestForm.advancedOptionsTitle"

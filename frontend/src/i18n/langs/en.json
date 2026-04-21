@@ -409,38 +409,17 @@
   "components.DeleteReleaseModal.title": {
     "defaultMessage": "Delete Release"
   },
-  "components.DeployedApplicationsTable.applicationName": {
-    "defaultMessage": "Application Name"
-  },
   "components.DeployedApplicationsTable.deleteButtonTitle": {
     "defaultMessage": "Delete Deployment"
   },
-  "components.DeployedApplicationsTable.deploymentCampaignNameTitle": {
-    "defaultMessage": "Deployment Campaign"
-  },
-  "components.DeployedApplicationsTable.deploymentDetailsButtonTitle": {
-    "defaultMessage": "Deployment Details"
-  },
-  "components.DeployedApplicationsTable.details": {
-    "defaultMessage": "Details"
-  },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
-  },
-  "components.DeployedApplicationsTable.readiness": {
-    "defaultMessage": "Readiness"
-  },
-  "components.DeployedApplicationsTable.releaseVersion": {
-    "defaultMessage": "Release Version"
   },
   "components.DeployedApplicationsTable.sendButtonTitle": {
     "defaultMessage": "Redeploy Application"
   },
   "components.DeployedApplicationsTable.startButtonTitle": {
     "defaultMessage": "Start Deployment"
-  },
-  "components.DeployedApplicationsTable.state": {
-    "defaultMessage": "State"
   },
   "components.DeployedApplicationsTable.stopButtonTitle": {
     "defaultMessage": "Stop Deployment"
@@ -695,7 +674,7 @@
     "defaultMessage": "Deployed Applications"
   },
   "components.DeviceTabs.ApplicationsTab.InstallNewApp": {
-    "defaultMessage": "Add Available Applications"
+    "defaultMessage": "Install Applications"
   },
   "components.DeviceTabs.BaseImageTab": {
     "defaultMessage": "Base Image"

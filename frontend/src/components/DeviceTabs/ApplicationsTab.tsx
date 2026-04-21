@@ -102,7 +102,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
         <h5>
           <FormattedMessage
             id="components.DeviceTabs.ApplicationsTab.InstallNewApp"
-            defaultMessage="Add Available Applications"
+            defaultMessage="Install Applications"
           />
         </h5>
         <AddAvailableApplications

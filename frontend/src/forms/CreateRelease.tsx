@@ -592,9 +592,11 @@ const CreateRelease = ({
             return (
               <CollapseItem
                 key={field.id ?? index}
-                type="card-parent"
                 open={isSectionOpen(index)}
                 onToggle={() => toggleIndex(index)}
+                headerClassName="fw-bold border rounded"
+                contentClassName="border rounded"
+                caretPosition="end"
                 title={
                   <span className="d-flex align-items-center gap-2">
                     <FormattedMessage
