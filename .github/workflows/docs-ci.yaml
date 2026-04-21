@@ -87,19 +87,23 @@ jobs:
           docs: docs
           astarte-interfaces: edgehog-astarte-interfaces
           version: ${{ steps.compute-version.outputs.version }}
-      - name: Setup SSH
+
+      - name: Commit files
         if: ${{ inputs.publish }}
+        working-directory: docs
+        run: |
+          git config --local user.email "edgehog-machine@ispirata.com"
+          git config --local user.name "Edgehog Bot"
+          git add .
+          git commit -m "Update Documentation"
+      - name: Push changes
+        if: ${{ inputs.publish }}
+        working-directory: docs
         run: |
           eval `ssh-agent -t 300 -s`
           echo "${{ secrets.publish-key }}" | ssh-add -
           mkdir -p ~/.ssh/
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-      - name: Setup git
-        if: ${{ inputs.publish }}
-        run: |
-          git config --global user.email "edgehog-machine@ispirata.com"
-          git config --global user.name "Edgehog Bot"
-      - uses: ./edgehog/.github/actions/doc-publish
-        if: ${{ inputs.publish }}
-        with:
-          docs: docs
+          git remote add topush "git@github.com:edgehog-device-manager/docs.git"
+          git fetch topush
+          git push topush main
