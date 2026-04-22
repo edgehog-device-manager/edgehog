@@ -278,9 +278,7 @@ defmodule Edgehog.TenantsTest do
       realm = realm_fixture(cluster_id: cluster.id)
 
       assert {:error, %Invalid{errors: [error]}} =
-               provision_tenant(
-                 astarte_config: [base_api_url: cluster.base_api_url, realm_name: realm.name]
-               )
+               provision_tenant(astarte_config: [base_api_url: cluster.base_api_url, realm_name: realm.name])
 
       # TODO: this should be
       # assert %{field: :realm_name, path: [:astarte_config]} = error

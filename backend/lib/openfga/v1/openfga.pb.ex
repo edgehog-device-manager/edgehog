@@ -92,6 +92,7 @@ defmodule Openfga.V1.UsersetUser do
 end
 
 defmodule Openfga.V1.RelationshipCondition do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.RelationshipCondition",
     protoc_gen_elixir_version: "0.16.0",
@@ -102,6 +103,7 @@ defmodule Openfga.V1.RelationshipCondition do
 end
 
 defmodule Openfga.V1.TupleKeyWithoutCondition do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TupleKeyWithoutCondition",
     protoc_gen_elixir_version: "0.16.0",
@@ -132,6 +134,7 @@ defmodule Openfga.V1.TypedWildcard do
 end
 
 defmodule Openfga.V1.TupleKey do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TupleKey",
     protoc_gen_elixir_version: "0.16.0",
@@ -144,6 +147,7 @@ defmodule Openfga.V1.TupleKey do
 end
 
 defmodule Openfga.V1.Tuple do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Tuple",
     protoc_gen_elixir_version: "0.16.0",
@@ -154,6 +158,7 @@ defmodule Openfga.V1.Tuple do
 end
 
 defmodule Openfga.V1.TupleKeys do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TupleKeys",
     protoc_gen_elixir_version: "0.16.0",
@@ -163,6 +168,7 @@ defmodule Openfga.V1.TupleKeys do
 end
 
 defmodule Openfga.V1.ContextualTupleKeys do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ContextualTupleKeys",
     protoc_gen_elixir_version: "0.16.0",
@@ -199,6 +205,7 @@ defmodule Openfga.V1.UsersetTree.Leaf do
 end
 
 defmodule Openfga.V1.UsersetTree.Nodes do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UsersetTree.Nodes",
     protoc_gen_elixir_version: "0.16.0",
@@ -208,6 +215,7 @@ defmodule Openfga.V1.UsersetTree.Nodes do
 end
 
 defmodule Openfga.V1.UsersetTree.Users do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UsersetTree.Users",
     protoc_gen_elixir_version: "0.16.0",
@@ -217,6 +225,7 @@ defmodule Openfga.V1.UsersetTree.Users do
 end
 
 defmodule Openfga.V1.UsersetTree.Computed do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UsersetTree.Computed",
     protoc_gen_elixir_version: "0.16.0",
@@ -226,6 +235,7 @@ defmodule Openfga.V1.UsersetTree.Computed do
 end
 
 defmodule Openfga.V1.UsersetTree.TupleToUserset do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UsersetTree.TupleToUserset",
     protoc_gen_elixir_version: "0.16.0",
@@ -236,6 +246,7 @@ defmodule Openfga.V1.UsersetTree.TupleToUserset do
 end
 
 defmodule Openfga.V1.UsersetTree.Difference do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UsersetTree.Difference",
     protoc_gen_elixir_version: "0.16.0",
@@ -246,18 +257,21 @@ defmodule Openfga.V1.UsersetTree.Difference do
 end
 
 defmodule Openfga.V1.UsersetTree.Node do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UsersetTree.Node",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
+
+  alias Openfga.V1.UsersetTree.Nodes
 
   oneof(:value, 0)
 
   field :name, 1, type: :string, deprecated: false
   field :leaf, 2, type: Openfga.V1.UsersetTree.Leaf, oneof: 0
   field :difference, 5, type: Openfga.V1.UsersetTree.Difference, oneof: 0
-  field :union, 6, type: Openfga.V1.UsersetTree.Nodes, oneof: 0
-  field :intersection, 7, type: Openfga.V1.UsersetTree.Nodes, oneof: 0
+  field :union, 6, type: Nodes, oneof: 0
+  field :intersection, 7, type: Nodes, oneof: 0
 end
 
 defmodule Openfga.V1.UsersetTree do
@@ -274,6 +288,7 @@ defmodule Openfga.V1.UsersetTree do
 end
 
 defmodule Openfga.V1.TupleChange do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TupleChange",
     protoc_gen_elixir_version: "0.16.0",
@@ -285,19 +300,23 @@ defmodule Openfga.V1.TupleChange do
 end
 
 defmodule Openfga.V1.Store do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Store",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
+  alias Google.Protobuf.Timestamp
+
   field :id, 1, type: :string, deprecated: false
   field :name, 2, type: :string, deprecated: false
-  field :created_at, 3, type: Google.Protobuf.Timestamp, deprecated: false
-  field :updated_at, 4, type: Google.Protobuf.Timestamp, deprecated: false
-  field :deleted_at, 5, type: Google.Protobuf.Timestamp
+  field :created_at, 3, type: Timestamp, deprecated: false
+  field :updated_at, 4, type: Timestamp, deprecated: false
+  field :deleted_at, 5, type: Timestamp
 end
 
 defmodule Openfga.V1.UserTypeFilter do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UserTypeFilter",
     protoc_gen_elixir_version: "0.16.0",

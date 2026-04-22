@@ -21,9 +21,10 @@ defmodule Edgehog.Containers.Validations.IsUpgrade do
 
   use Ash.Resource.Validation
 
+  alias Ash.Resource.Validation
   alias Edgehog.Containers.Release
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, _context) do
     initial_release = Ash.Changeset.get_data(changeset, :release_id)
     tenant = Ash.Changeset.get_data(changeset, :tenant_id)
@@ -36,16 +37,15 @@ defmodule Edgehog.Containers.Validations.IsUpgrade do
       if Version.compare(target_version, current_version) == :gt do
         :ok
       else
-        {:error,
-         field: :target, message: "must be a newer release than the currently installed version"}
+        {:error, field: :target, message: "must be a newer release than the currently installed version"}
       end
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 
   defp parse_version(release) do

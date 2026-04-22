@@ -52,8 +52,8 @@ defmodule Ash.Astarte.Triggers.Handler do
   alias Ash.Astarte.Triggers.Payload
   alias Edgehog.Astarte
 
-  require Logger
   require Ash.Query
+  require Logger
 
   def handle_trigger(tenant, realm, data) do
     read_query =

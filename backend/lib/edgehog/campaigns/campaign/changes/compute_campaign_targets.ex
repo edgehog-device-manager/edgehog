@@ -78,8 +78,7 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargets do
     end
   end
 
-  defp resolve_target_devices(changeset, action, mechanism, tenant)
-       when action in @deployment_mechanisms do
+  defp resolve_target_devices(changeset, action, mechanism, tenant) when action in @deployment_mechanisms do
     with {:ok, release} <- fetch_release(changeset, mechanism, tenant),
          {:ok, channel} <- fetch_channel(changeset, tenant) do
       devices =
@@ -111,16 +110,14 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargets do
   defp fetch_base_image(changeset, campaign_mechanism, tenant) do
     with {:error, _reason} <-
            Ash.get(BaseImage, campaign_mechanism.base_image_id, tenant: tenant) do
-      {:error,
-       Ash.Changeset.add_error(changeset, field: :base_image_id, message: "could not be found")}
+      {:error, Ash.Changeset.add_error(changeset, field: :base_image_id, message: "could not be found")}
     end
   end
 
   defp fetch_release(changeset, campaign_mechanism, tenant) do
     with {:error, _reason} <-
            Ash.get(Release, campaign_mechanism.release_id, tenant: tenant) do
-      {:error,
-       Ash.Changeset.add_error(changeset, field: :release_id, message: "could not be found")}
+      {:error, Ash.Changeset.add_error(changeset, field: :release_id, message: "could not be found")}
     end
   end
 

@@ -55,9 +55,9 @@ defmodule Edgehog.Containers.Container.Validations.VolumeTargetUniqueness do
     ]
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

@@ -21,8 +21,7 @@ defmodule Edgehog.Containers.Deployment.Types.DeploymentState do
 
   use Ash.Type.Enum,
     values: [
-      pending:
-        "The deployment has been created in the database layer, the device yet has to receive it.",
+      pending: "The deployment has been created in the database layer, the device yet has to receive it.",
       sent: "The deployment description has been sent to the device.",
       started: "The deployment is started on the device.",
       stopped: "The deployment is stopped on the device."

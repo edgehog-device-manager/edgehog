@@ -21,12 +21,13 @@ defmodule Edgehog.Containers.Deployment.Validations.DeviceIsCompatible do
   use Ash.Resource.Validation
 
   alias Ash.Error.Changes.InvalidArgument
+  alias Ash.Resource.Validation
   alias Edgehog.Containers
   alias Edgehog.Devices
 
   require Ash.Query
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, %{tenant: tenant}) do
     device_id = Ash.Changeset.get_argument(changeset, :device_id)
     release_id = Ash.Changeset.get_attribute(changeset, :release_id)
@@ -39,10 +40,10 @@ defmodule Edgehog.Containers.Deployment.Validations.DeviceIsCompatible do
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 
   defp invalid_argument_error(changeset) do
@@ -50,8 +51,7 @@ defmodule Edgehog.Containers.Deployment.Validations.DeviceIsCompatible do
       changeset,
       InvalidArgument.exception(
         field: :system_model,
-        message:
-          "The device's system model does not match the system model of the application's release."
+        message: "The device's system model does not match the system model of the application's release."
       )
     )
   end

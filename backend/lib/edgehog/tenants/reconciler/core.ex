@@ -117,9 +117,7 @@ defmodule Edgehog.Tenants.Reconciler.Core do
     check_on_device_registered_and_deletion(astarte_version, required_trigger)
   end
 
-  defp check_on_device_registered_and_deletion(astarte_version, %{
-         "simple_triggers" => simple_triggers
-       }) do
+  defp check_on_device_registered_and_deletion(astarte_version, %{"simple_triggers" => simple_triggers}) do
     features_1_3? =
       Enum.any?(simple_triggers, fn simple_trigger ->
         on = simple_trigger["on"]

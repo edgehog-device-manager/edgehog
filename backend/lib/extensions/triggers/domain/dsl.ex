@@ -25,32 +25,6 @@ defmodule Ash.Astarte.Triggers.Domain do
   With this extension a domain registers resource that handle triggers.
   """
 
-  @trigger %Spark.Dsl.Entity{
-    name: :trigger,
-    target: Ash.Astarte.Triggers.Domain.TriggerTarget,
-    describe: """
-    A trigger module. Ideally an ash resource with `Edgehog.Triggers.Resource.Extension` extension.
-    """,
-    examples: [
-      """
-      triggers do
-          trigger Edgehog.Triggers.IncomingData
-          trigger Edgehog.Triggers.DeviceConnected
-          trigger Edgehog.Triggers.DeviceDisconnected
-          # ...
-      end
-      """
-    ],
-    schema: [
-      module: [
-        type: :module,
-        required: true,
-        doc: "The trigger module."
-      ]
-    ],
-    args: [:module]
-  }
-
   @fallback_handler %Spark.Dsl.Entity{
     name: :handler,
     target: Ash.Astarte.Triggers.Resource.HandlerTarget,
@@ -79,6 +53,69 @@ defmodule Ash.Astarte.Triggers.Domain do
     ],
     args: [:module]
   }
+  @trigger %Spark.Dsl.Entity{
+    name: :trigger,
+    target: Ash.Astarte.Triggers.Domain.TriggerTarget,
+    describe: """
+    A trigger module. Ideally an ash resource with `Edgehog.Triggers.Resource.Extension` extension.
+    """,
+    examples: [
+      """
+      triggers do
+          trigger Edgehog.Triggers.IncomingData
+          trigger Edgehog.Triggers.DeviceConnected
+          trigger Edgehog.Triggers.DeviceDisconnected
+          # ...
+      end
+      """
+    ],
+    schema: [
+      module: [
+        type: :module,
+        required: true,
+        doc: "The trigger module."
+      ]
+    ],
+    args: [:module]
+  }
+  @triggers %Spark.Dsl.Section{
+    name: :triggers,
+    entities: [@trigger],
+    describe: "Configure the triggers of the application."
+  }
+  @handlers %Spark.Dsl.Section{
+    name: :fallback_handlers,
+    entities: [@fallback_handler],
+    describe: "Configure the triggers of the application."
+  }
+  use Spark.Dsl.Extension,
+    sections: [@triggers, @handlers]
+
+  @trigger %Spark.Dsl.Entity{
+    name: :trigger,
+    target: Ash.Astarte.Triggers.Domain.TriggerTarget,
+    describe: """
+    A trigger module. Ideally an ash resource with `Edgehog.Triggers.Resource.Extension` extension.
+    """,
+    examples: [
+      """
+      triggers do
+          trigger Edgehog.Triggers.IncomingData
+          trigger Edgehog.Triggers.DeviceConnected
+          trigger Edgehog.Triggers.DeviceDisconnected
+          # ...
+      end
+      """
+    ],
+    schema: [
+      module: [
+        type: :module,
+        required: true,
+        doc: "The trigger module."
+      ]
+    ],
+    args: [:module]
+  }
 
   @triggers %Spark.Dsl.Section{
     name: :triggers,
@@ -86,15 +123,7 @@ defmodule Ash.Astarte.Triggers.Domain do
     describe: "Configure the triggers of the application."
   }
 
-  @handlers %Spark.Dsl.Section{
-    name: :fallback_handlers,
-    entities: [@fallback_handler],
-    describe: "Configure the triggers of the application."
-  }
-
   # credo:disable-for-next-line
-  use Spark.Dsl.Extension,
-    sections: [@triggers, @handlers]
 end
 
 defmodule Ash.Astarte.Triggers.Domain.TriggerTarget do

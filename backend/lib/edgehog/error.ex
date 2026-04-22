@@ -44,11 +44,7 @@ defmodule Edgehog.Error do
     {:error, error}
   end
 
-  def maybe_match_error(
-        {:error, %APIError{status: status, response: response}},
-        device_id,
-        interface
-      ) do
+  def maybe_match_error({:error, %APIError{status: status, response: response}}, device_id, interface) do
     error =
       Error.AstarteAPIError.exception(
         status: status,

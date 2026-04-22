@@ -17,6 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Openfga.V1.ConditionParamTypeRef.TypeName do
+  @moduledoc false
   use Protobuf,
     enum: true,
     full_name: "openfga.v1.ConditionParamTypeRef.TypeName",
@@ -38,6 +39,7 @@ defmodule Openfga.V1.ConditionParamTypeRef.TypeName do
 end
 
 defmodule Openfga.V1.AuthorizationModel.ConditionsEntry do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.AuthorizationModel.ConditionsEntry",
     map: true,
@@ -49,6 +51,7 @@ defmodule Openfga.V1.AuthorizationModel.ConditionsEntry do
 end
 
 defmodule Openfga.V1.AuthorizationModel do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.AuthorizationModel",
     protoc_gen_elixir_version: "0.16.0",
@@ -66,6 +69,7 @@ defmodule Openfga.V1.AuthorizationModel do
 end
 
 defmodule Openfga.V1.TypeDefinition.RelationsEntry do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TypeDefinition.RelationsEntry",
     map: true,
@@ -77,6 +81,7 @@ defmodule Openfga.V1.TypeDefinition.RelationsEntry do
 end
 
 defmodule Openfga.V1.TypeDefinition do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TypeDefinition",
     protoc_gen_elixir_version: "0.16.0",
@@ -94,6 +99,7 @@ defmodule Openfga.V1.TypeDefinition do
 end
 
 defmodule Openfga.V1.Relation do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Relation",
     protoc_gen_elixir_version: "0.16.0",
@@ -105,6 +111,7 @@ defmodule Openfga.V1.Relation do
 end
 
 defmodule Openfga.V1.RelationTypeInfo do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.RelationTypeInfo",
     protoc_gen_elixir_version: "0.16.0",
@@ -114,6 +121,7 @@ defmodule Openfga.V1.RelationTypeInfo do
 end
 
 defmodule Openfga.V1.Metadata.RelationsEntry do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Metadata.RelationsEntry",
     map: true,
@@ -125,6 +133,7 @@ defmodule Openfga.V1.Metadata.RelationsEntry do
 end
 
 defmodule Openfga.V1.Metadata do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Metadata",
     protoc_gen_elixir_version: "0.16.0",
@@ -136,6 +145,7 @@ defmodule Openfga.V1.Metadata do
 end
 
 defmodule Openfga.V1.SourceInfo do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.SourceInfo",
     protoc_gen_elixir_version: "0.16.0",
@@ -145,6 +155,7 @@ defmodule Openfga.V1.SourceInfo do
 end
 
 defmodule Openfga.V1.RelationMetadata do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.RelationMetadata",
     protoc_gen_elixir_version: "0.16.0",
@@ -174,6 +185,7 @@ defmodule Openfga.V1.RelationReference do
 end
 
 defmodule Openfga.V1.Wildcard do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Wildcard",
     protoc_gen_elixir_version: "0.16.0",
@@ -181,6 +193,7 @@ defmodule Openfga.V1.Wildcard do
 end
 
 defmodule Openfga.V1.Usersets do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Usersets",
     protoc_gen_elixir_version: "0.16.0",
@@ -190,20 +203,26 @@ defmodule Openfga.V1.Usersets do
 end
 
 defmodule Openfga.V1.Difference do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Difference",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
-  field :base, 1, type: Openfga.V1.Userset, deprecated: false
-  field :subtract, 2, type: Openfga.V1.Userset, deprecated: false
+  alias Openfga.V1.Userset
+
+  field :base, 1, type: Userset, deprecated: false
+  field :subtract, 2, type: Userset, deprecated: false
 end
 
 defmodule Openfga.V1.Userset do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Userset",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
+
+  alias Openfga.V1.Usersets
 
   oneof(:userset, 0)
 
@@ -219,8 +238,8 @@ defmodule Openfga.V1.Userset do
     json_name: "tupleToUserset",
     oneof: 0
 
-  field :union, 4, type: Openfga.V1.Usersets, oneof: 0
-  field :intersection, 5, type: Openfga.V1.Usersets, oneof: 0
+  field :union, 4, type: Usersets, oneof: 0
+  field :intersection, 5, type: Usersets, oneof: 0
   field :difference, 6, type: Openfga.V1.Difference, oneof: 0
 end
 
@@ -237,6 +256,7 @@ defmodule Openfga.V1.DirectUserset do
 end
 
 defmodule Openfga.V1.ObjectRelation do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ObjectRelation",
     protoc_gen_elixir_version: "0.16.0",
@@ -247,6 +267,7 @@ defmodule Openfga.V1.ObjectRelation do
 end
 
 defmodule Openfga.V1.ComputedUserset do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ComputedUserset",
     protoc_gen_elixir_version: "0.16.0",
@@ -256,20 +277,24 @@ defmodule Openfga.V1.ComputedUserset do
 end
 
 defmodule Openfga.V1.TupleToUserset do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.TupleToUserset",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
-  field :tupleset, 1, type: Openfga.V1.ObjectRelation, deprecated: false
+  alias Openfga.V1.ObjectRelation
+
+  field :tupleset, 1, type: ObjectRelation, deprecated: false
 
   field :computed_userset, 2,
-    type: Openfga.V1.ObjectRelation,
+    type: ObjectRelation,
     json_name: "computedUserset",
     deprecated: false
 end
 
 defmodule Openfga.V1.Condition.ParametersEntry do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Condition.ParametersEntry",
     map: true,
@@ -281,6 +306,7 @@ defmodule Openfga.V1.Condition.ParametersEntry do
 end
 
 defmodule Openfga.V1.Condition do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Condition",
     protoc_gen_elixir_version: "0.16.0",
@@ -299,6 +325,7 @@ defmodule Openfga.V1.Condition do
 end
 
 defmodule Openfga.V1.ConditionMetadata do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ConditionMetadata",
     protoc_gen_elixir_version: "0.16.0",
@@ -309,6 +336,7 @@ defmodule Openfga.V1.ConditionMetadata do
 end
 
 defmodule Openfga.V1.ConditionParamTypeRef do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ConditionParamTypeRef",
     protoc_gen_elixir_version: "0.16.0",

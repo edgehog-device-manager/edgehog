@@ -174,8 +174,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     end
   end
 
-  defp maybe_stop(%Deployment{state: :stopped}, _updated_target),
-    do: {:ok, :already_in_desired_state}
+  defp maybe_stop(%Deployment{state: :stopped}, _updated_target), do: {:ok, :already_in_desired_state}
 
   defp maybe_stop(%Deployment{state: :deleting}, _updated_target), do: {:ok, :deployment_deleting}
 
@@ -250,9 +249,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
         nil -> "Could not find any error event."
       end
 
-    Logger.notice(
-      "Device #{operation.device_id} #{mechanism.type} operation failed: #{latest_error_message}"
-    )
+    Logger.notice("Device #{operation.device_id} #{mechanism.type} operation failed: #{latest_error_message}")
   end
 
   defp get_latest_error_for_deployment!(tenant_id, deployment_id) do

@@ -39,10 +39,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateBaseImageTest do
 
       file_url = "https://example.com/ota.bin"
 
-      expect(StorageMock, :store, fn tenant_id,
-                                     base_image_collection_id,
-                                     ^base_image_version,
-                                     _upload ->
+      expect(StorageMock, :store, fn tenant_id, base_image_collection_id, ^base_image_version, _upload ->
         assert tenant_id == tenant.tenant_id
         # This is the DB id
         assert base_image_collection_id == base_image_collection.id

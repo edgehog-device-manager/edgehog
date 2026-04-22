@@ -23,7 +23,9 @@ defmodule Edgehog.Files.FileDownloadRequest.Validations.FileExists do
 
   use Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
+  alias Ash.Resource.Validation
+
+  @impl Validation
   def validate(changeset, _opts, %{tenant: tenant} = _context) do
     file_id = Ash.Changeset.get_argument(changeset, :file_id)
 
@@ -32,9 +34,9 @@ defmodule Edgehog.Files.FileDownloadRequest.Validations.FileExists do
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

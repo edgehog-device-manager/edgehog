@@ -27,8 +27,7 @@ defmodule Edgehog.OSManagement.OTAOperation.Status do
       deployed: "The device deployed the update",
       rebooting: "The device is in the process of rebooting",
       error: "A recoverable error happened during the OTA operation",
-      failure:
-        "The OTA operation ended with a failure. This is a final state of the OTA Operation",
+      failure: "The OTA operation ended with a failure. This is a final state of the OTA Operation",
       success: "The OTA operation ended successfully. This is a final state of the OTA Operation"
     ]
 

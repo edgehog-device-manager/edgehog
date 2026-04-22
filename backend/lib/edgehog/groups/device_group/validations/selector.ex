@@ -20,9 +20,10 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.Selector do
   @moduledoc false
   use Ash.Resource.Validation
 
+  alias Ash.Resource.Validation
   alias Edgehog.Selector
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, _context) do
     case Ash.Changeset.fetch_change(changeset, :selector) do
       {:ok, selector} when is_binary(selector) ->
@@ -39,9 +40,9 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.Selector do
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

@@ -20,24 +20,25 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.DeploymentChannelAbsent do
   @moduledoc false
   use Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
+  alias Ash.Resource.Validation
+
+  @impl Validation
   def validate(changeset, _opts, _context) do
     device_group = changeset.data
 
     if device_group.deployment_channel_id do
       {:error,
        field: :deployment_channel_id,
-       message:
-         "The deployment channel is already set for the device group \"#{device_group.name}\"",
+       message: "The deployment channel is already set for the device group \"#{device_group.name}\"",
        short_message: "Deployment channel already set"}
     else
       :ok
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

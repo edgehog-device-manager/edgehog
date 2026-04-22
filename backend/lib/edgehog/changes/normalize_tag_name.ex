@@ -37,8 +37,7 @@ defmodule Edgehog.Changes.NormalizeTagName do
     if ok? do
       {:ok, opts}
     else
-      {:error,
-       "You must provide either `attribute: :attribute_name` or `argument: :argument_name`."}
+      {:error, "You must provide either `attribute: :attribute_name` or `argument: :argument_name`."}
     end
   end
 

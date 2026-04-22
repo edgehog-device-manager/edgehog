@@ -20,11 +20,12 @@ defmodule Edgehog.BaseImages.BaseImage.Validations.BaseImageNotInUse do
   @moduledoc false
   use Ash.Resource.Validation
 
+  alias Ash.Resource.Validation
   alias Edgehog.Campaigns.Campaign
 
   require Ash.Query
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, %{tenant: tenant}) do
     resource = changeset.data
 
@@ -52,15 +53,13 @@ defmodule Edgehog.BaseImages.BaseImage.Validations.BaseImageNotInUse do
         campaign_names = Enum.map_join(campaigns, ", ", & &1.name)
 
         {:error,
-         field: :id,
-         message:
-           "Base image is currently in use by the following running campaigns: #{campaign_names}"}
+         field: :id, message: "Base image is currently in use by the following running campaigns: #{campaign_names}"}
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

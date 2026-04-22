@@ -106,9 +106,7 @@ defmodule Edgehog.StorageTest do
 
       ota_operation =
         Edgehog.OSManagement.OTAOperation
-        |> Ash.Changeset.for_create(:manual, [device_id: device_id, base_image_file: file],
-          tenant: tenant
-        )
+        |> Ash.Changeset.for_create(:manual, [device_id: device_id, base_image_file: file], tenant: tenant)
         |> Ash.create!()
 
       result =

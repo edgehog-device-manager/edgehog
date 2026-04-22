@@ -28,8 +28,9 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateStatus do
   use Ash.Resource.Validation
 
   alias Ash.Error.Changes
+  alias Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, opts, _context) do
     operation = Keyword.fetch!(opts, :operation)
     status = Ash.Changeset.get_attribute(changeset, :status)
@@ -37,10 +38,10 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateStatus do
     validate_transition(status, operation)
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 
   defp validate_transition(status, :pause) do
@@ -52,8 +53,7 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateStatus do
         {:error,
          Changes.InvalidAttribute.exception(
            field: :status,
-           message:
-             "Cannot pause campaign. Campaign must be in progress (current status: #{status})"
+           message: "Cannot pause campaign. Campaign must be in progress (current status: #{status})"
          )}
     end
   end

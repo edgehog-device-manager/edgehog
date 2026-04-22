@@ -29,8 +29,7 @@ defmodule Edgehog.Campaigns.CampaignTarget.Changes.CreateManagedFileDownloadRequ
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
-    case {Ash.Changeset.fetch_argument(changeset, :file),
-          Ash.Changeset.fetch_argument(changeset, :mechanism)} do
+    case {Ash.Changeset.fetch_argument(changeset, :file), Ash.Changeset.fetch_argument(changeset, :mechanism)} do
       {{:ok, file}, {:ok, mechanism}} ->
         device_id = Ash.Changeset.get_attribute(changeset, :device_id)
 

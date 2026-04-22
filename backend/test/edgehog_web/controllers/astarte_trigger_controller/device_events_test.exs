@@ -107,8 +107,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
 
       # We simulate the fact that the device has already disconnected
       expect(DeviceStatusMock, :get, fn _client, ^device_id ->
-        {:ok,
-         device_status_fixture(online: false, last_disconnection: astarte_disconnection_timestamp)}
+        {:ok, device_status_fixture(online: false, last_disconnection: astarte_disconnection_timestamp)}
       end)
 
       assert conn |> post(path, event) |> response(200)

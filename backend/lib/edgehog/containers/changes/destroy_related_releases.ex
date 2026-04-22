@@ -35,8 +35,7 @@ defmodule Edgehog.Containers.Changes.DestroyRelatedReleases do
 
         Ash.Changeset.add_error(
           changeset,
-          message:
-            "Cannot delete application: the following releases cannot be destroyed: #{versions}"
+          message: "Cannot delete application: the following releases cannot be destroyed: #{versions}"
         )
     end
   end

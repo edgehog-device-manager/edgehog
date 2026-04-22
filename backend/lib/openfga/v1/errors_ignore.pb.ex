@@ -17,6 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Openfga.V1.AuthErrorCode do
+  @moduledoc false
   use Protobuf,
     enum: true,
     full_name: "openfga.v1.AuthErrorCode",
@@ -35,6 +36,7 @@ defmodule Openfga.V1.AuthErrorCode do
 end
 
 defmodule Openfga.V1.ErrorCode do
+  @moduledoc false
   use Protobuf,
     enum: true,
     full_name: "openfga.v1.ErrorCode",
@@ -94,6 +96,7 @@ defmodule Openfga.V1.ErrorCode do
 end
 
 defmodule Openfga.V1.UnprocessableContentErrorCode do
+  @moduledoc false
   use Protobuf,
     enum: true,
     full_name: "openfga.v1.UnprocessableContentErrorCode",
@@ -105,6 +108,7 @@ defmodule Openfga.V1.UnprocessableContentErrorCode do
 end
 
 defmodule Openfga.V1.InternalErrorCode do
+  @moduledoc false
   use Protobuf,
     enum: true,
     full_name: "openfga.v1.InternalErrorCode",
@@ -124,6 +128,7 @@ defmodule Openfga.V1.InternalErrorCode do
 end
 
 defmodule Openfga.V1.NotFoundErrorCode do
+  @moduledoc false
   use Protobuf,
     enum: true,
     full_name: "openfga.v1.NotFoundErrorCode",
@@ -137,6 +142,7 @@ defmodule Openfga.V1.NotFoundErrorCode do
 end
 
 defmodule Openfga.V1.ValidationErrorMessageResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ValidationErrorMessageResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -147,6 +153,7 @@ defmodule Openfga.V1.ValidationErrorMessageResponse do
 end
 
 defmodule Openfga.V1.UnauthenticatedResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UnauthenticatedResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -157,6 +164,7 @@ defmodule Openfga.V1.UnauthenticatedResponse do
 end
 
 defmodule Openfga.V1.UnprocessableContentMessageResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UnprocessableContentMessageResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -167,6 +175,7 @@ defmodule Openfga.V1.UnprocessableContentMessageResponse do
 end
 
 defmodule Openfga.V1.InternalErrorMessageResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.InternalErrorMessageResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -177,6 +186,7 @@ defmodule Openfga.V1.InternalErrorMessageResponse do
 end
 
 defmodule Openfga.V1.PathUnknownErrorMessageResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.PathUnknownErrorMessageResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -187,6 +197,7 @@ defmodule Openfga.V1.PathUnknownErrorMessageResponse do
 end
 
 defmodule Openfga.V1.AbortedMessageResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.AbortedMessageResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -197,6 +208,7 @@ defmodule Openfga.V1.AbortedMessageResponse do
 end
 
 defmodule Openfga.V1.ErrorMessageRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ErrorMessageRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -204,6 +216,7 @@ defmodule Openfga.V1.ErrorMessageRequest do
 end
 
 defmodule Openfga.V1.ForbiddenResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ForbiddenResponse",
     protoc_gen_elixir_version: "0.16.0",

@@ -97,9 +97,7 @@ defmodule Edgehog.Containers.Reconciler.Core do
     available_device_mappings
     |> Enum.map(&reconcile_device_mapping(&1, device, tenant))
     |> Enum.reject(&(&1 == :ok))
-    |> Enum.each(
-      &Logger.warning("Error while fetching device_mapping deployment: #{inspect(&1)}")
-    )
+    |> Enum.each(&Logger.warning("Error while fetching device_mapping deployment: #{inspect(&1)}"))
   end
 
   def reconcile_containers(device, tenant) do
@@ -203,8 +201,7 @@ defmodule Edgehog.Containers.Reconciler.Core do
       marking =
         if device_mapping_desc.present,
           do: Containers.mark_device_mapping_deployment_as_present(device_mapping_deployment),
-          else:
-            Containers.mark_device_mapping_deployment_as_not_present(device_mapping_deployment)
+          else: Containers.mark_device_mapping_deployment_as_not_present(device_mapping_deployment)
 
       with {:ok, _} <- marking, do: :ok
     end

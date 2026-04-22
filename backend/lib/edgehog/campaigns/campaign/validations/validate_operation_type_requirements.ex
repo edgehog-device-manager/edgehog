@@ -31,9 +31,10 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
   """
   use Ash.Resource.Validation
 
+  alias Ash.Resource.Validation
   alias Edgehog.Containers.Release
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, context) do
     %{type: campaign_type, value: campaign_mechanism} =
       Ash.Changeset.get_attribute(changeset, :campaign_mechanism)
@@ -59,10 +60,10 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 
   defp validate_upgrade_requirements(campaign_mechanism, %{tenant: tenant}) do
@@ -89,8 +90,7 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
     if current_release.application_id == target_release.application_id do
       :ok
     else
-      {:error,
-       field: :target_release_id, message: "must belong to the same application as the release"}
+      {:error, field: :target_release_id, message: "must belong to the same application as the release"}
     end
   end
 
@@ -100,9 +100,7 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
       if Version.compare(target_version, current_version) == :gt do
         :ok
       else
-        {:error,
-         field: :target_release_id,
-         message: "must be a newer release than the currently installed version"}
+        {:error, field: :target_release_id, message: "must be a newer release than the currently installed version"}
       end
     end
   end

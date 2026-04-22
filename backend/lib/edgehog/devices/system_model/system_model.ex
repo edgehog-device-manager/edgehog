@@ -86,8 +86,7 @@ defmodule Edgehog.Devices.SystemModel do
       change manage_relationship(:hardware_type_id, :hardware_type, type: :append)
       change Changes.HandlePictureUpload
 
-      change {UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     update :update do
@@ -130,8 +129,7 @@ defmodule Edgehog.Devices.SystemModel do
       change Changes.HandlePictureUpload
       change Changes.HandlePictureDeletion
 
-      change {UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
     end
 
     destroy :destroy do

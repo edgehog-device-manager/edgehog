@@ -66,9 +66,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
       :ok
     end)
 
-    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _,
-                                                                                      _,
-                                                                                      data ->
+    expect(CreateContainerRequestMock, :send_create_container_request, containers, fn _, _, data ->
       assert Enum.count(data.volumeIds) == volumes_per_container
 
       binds_by_source =

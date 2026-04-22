@@ -160,16 +160,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentEventsTest d
     end
   end
 
-  defp event_value(event, message),
-    do: %{
-      "status" => event |> to_string() |> String.capitalize(),
-      "message" => message
-    }
+  defp event_value(event, message), do: %{"status" => event |> to_string() |> String.capitalize(), "message" => message}
 
   defp event_value(event, message, add_info),
-    do: %{
-      "status" => event |> to_string() |> String.capitalize(),
-      "message" => message,
-      "addInfo" => add_info
-    }
+    do: %{"status" => event |> to_string() |> String.capitalize(), "message" => message, "addInfo" => add_info}
 end

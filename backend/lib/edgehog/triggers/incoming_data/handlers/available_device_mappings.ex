@@ -36,9 +36,7 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableDeviceMappings do
     case String.split(event.path, "/") do
       ["", device_mapping_id, "present"] ->
         device_mapping_deployment =
-          Containers.fetch_device_mapping_deployment!(device_mapping_id, device.id,
-            tenant: tenant
-          )
+          Containers.fetch_device_mapping_deployment!(device_mapping_id, device.id, tenant: tenant)
 
         case event.value do
           true ->

@@ -34,9 +34,7 @@ defmodule Edgehog.Containers.ManualActions.RunReadyActions do
       ready_actions_results = Enum.map(deployment.ready_actions, &Containers.run_ready_action/1)
 
       for {status, result} <- ready_actions_results, status == :error do
-        Logger.error(
-          "Error running ready action for deployment #{deployment.id}: #{inspect(result)}"
-        )
+        Logger.error("Error running ready action for deployment #{deployment.id}: #{inspect(result)}")
       end
 
       {:ok, deployment}

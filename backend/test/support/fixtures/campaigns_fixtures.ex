@@ -229,8 +229,7 @@ defmodule Edgehog.CampaignsFixtures do
     * `:mechanism_type` - The type of campaign mechanism. Defaults to `:deployment_deploy`.
     * `:tag` - The tag used for device group matching. Defaults to `"foo"`.
   """
-  def campaign_with_targets_fixture(target_count, opts \\ [])
-      when is_integer(target_count) and target_count > 0 do
+  def campaign_with_targets_fixture(target_count, opts \\ []) when is_integer(target_count) and target_count > 0 do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
     {mechanism_type, opts} = Keyword.pop(opts, :mechanism_type, :deployment_deploy)
     {tag, opts} = Keyword.pop(opts, :tag, "foo")
@@ -479,8 +478,7 @@ defmodule Edgehog.CampaignsFixtures do
 
   # Resource Preparation Helpers
 
-  defp prepare_campaign_resource(mechanism_type, tenant, opts)
-       when mechanism_type in @deployment_mechanism_types do
+  defp prepare_campaign_resource(mechanism_type, tenant, opts) when mechanism_type in @deployment_mechanism_types do
     # Always create at least 1 system model to ensure compatible devices can be created
     {release_id, opts} =
       Keyword.pop_lazy(opts, :release_id, fn ->
@@ -565,12 +563,7 @@ defmodule Edgehog.CampaignsFixtures do
 
   # For start/stop/delete/upgrade, the device must already have the release deployed
   defp create_compatible_device(mechanism_type, resource_opts, tag, tenant)
-       when mechanism_type in [
-              :deployment_start,
-              :deployment_stop,
-              :deployment_delete,
-              :deployment_upgrade
-            ] do
+       when mechanism_type in [:deployment_start, :deployment_stop, :deployment_delete, :deployment_upgrade] do
     release_id = Keyword.fetch!(resource_opts, :release_id)
 
     resource_opts = Keyword.delete(resource_opts, :target_release_id)
@@ -680,8 +673,7 @@ defmodule Edgehog.CampaignsFixtures do
 
   # Target Loading Helpers
 
-  defp load_target_for_operation(target, mechanism_type)
-       when mechanism_type in @deployment_mechanism_types do
+  defp load_target_for_operation(target, mechanism_type) when mechanism_type in @deployment_mechanism_types do
     Ash.load!(target, deployment: [:state], device: [realm: [:cluster]])
   end
 
@@ -695,8 +687,7 @@ defmodule Edgehog.CampaignsFixtures do
 
   # Operation Starting Helpers
 
-  defp start_target_operation(target, mechanism_type, tenant)
-       when mechanism_type in @deployment_mechanism_types do
+  defp start_target_operation(target, mechanism_type, tenant) when mechanism_type in @deployment_mechanism_types do
     release = get_release_for_target(target, mechanism_type, tenant)
 
     {:ok, updated_target} =
@@ -705,9 +696,7 @@ defmodule Edgehog.CampaignsFixtures do
     # Send the deployment request
     updated_target
     |> Map.get(:deployment)
-    |> Ash.Changeset.for_update(:send_deployment, %{deployment: updated_target.deployment},
-      tenant: tenant
-    )
+    |> Ash.Changeset.for_update(:send_deployment, %{deployment: updated_target.deployment}, tenant: tenant)
     |> Ash.update()
 
     updated_target
@@ -821,8 +810,7 @@ defmodule Edgehog.CampaignsFixtures do
     )
   end
 
-  defp reload_target_with_operation(target, mechanism_type)
-       when mechanism_type in @deployment_mechanism_types do
+  defp reload_target_with_operation(target, mechanism_type) when mechanism_type in @deployment_mechanism_types do
     Ash.load!(target, deployment: :state)
   end
 

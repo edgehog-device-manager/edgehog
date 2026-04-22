@@ -349,13 +349,7 @@ defmodule Edgehog.Selector.Parser do
     {rest, [node], context}
   end
 
-  defp finalize_attribute_filter(
-         rest,
-         [{type, value}, operator, key, namespace],
-         context,
-         _line,
-         _column
-       ) do
+  defp finalize_attribute_filter(rest, [{type, value}, operator, key, namespace], context, _line, _column) do
     # This function just passes the parsed value as-is without performing any other checks (e.g. if
     # the operator is valid for that value, if the datetime is a valid ISO8601 etc.).
     # All these semantic checks will be performed when traversing the tree (see

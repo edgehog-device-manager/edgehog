@@ -32,9 +32,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.OtaUpdatesTest do
   describe "process_event/2 for OTA updates" do
     setup %{tenant: tenant} do
       # Some events might trigger an ephemeral image deletion
-      stub(Edgehog.OSManagement.EphemeralImageMock, :delete, fn _tenant_id,
-                                                                _ota_operation_id,
-                                                                _url ->
+      stub(Edgehog.OSManagement.EphemeralImageMock, :delete, fn _tenant_id, _ota_operation_id, _url ->
         :ok
       end)
 

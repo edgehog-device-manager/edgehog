@@ -187,9 +187,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     else
       upgrade_result =
         current_deployment
-        |> Ash.Changeset.for_update(:upgrade_release, %{target: target_release.id},
-          tenant: target.tenant_id
-        )
+        |> Ash.Changeset.for_update(:upgrade_release, %{target: target_release.id}, tenant: target.tenant_id)
         |> Ash.update()
 
       case upgrade_result do
@@ -284,9 +282,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
         nil -> "Could not find any error event."
       end
 
-    Logger.notice(
-      "Device #{operation.device_id} #{mechanism.type} operation failed: #{latest_error_message}"
-    )
+    Logger.notice("Device #{operation.device_id} #{mechanism.type} operation failed: #{latest_error_message}")
   end
 
   defp get_latest_error_for_deployment!(tenant_id, deployment_id) do

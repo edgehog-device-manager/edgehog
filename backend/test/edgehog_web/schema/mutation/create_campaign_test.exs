@@ -257,9 +257,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
       channel_id = AshGraphql.Resource.encode_relay_id(channel)
 
       campaign_mechanism =
-        build_deployment_mechanism(:deployment_upgrade, release_id,
-          target_release_id: target_release_id
-        )
+        build_deployment_mechanism(:deployment_upgrade, release_id, target_release_id: target_release_id)
 
       campaign_data =
         [

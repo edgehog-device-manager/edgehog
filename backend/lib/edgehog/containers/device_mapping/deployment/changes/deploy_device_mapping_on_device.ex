@@ -36,16 +36,13 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.Changes.DeployDeviceMappin
       device = device_mapping_deployment.device
 
       with {:ok, _device} <-
-             Devices.send_create_device_mapping_request(device, device_mapping, deployment,
-               tenant: tenant
-             ) do
+             Devices.send_create_device_mapping_request(device, device_mapping, deployment, tenant: tenant) do
         maybe_update_state(changeset, device_mapping_deployment.state)
       end
     end
   end
 
-  defp maybe_update_state(changeset, :created),
-    do: Ash.Changeset.change_attribute(changeset, :state, :sent)
+  defp maybe_update_state(changeset, :created), do: Ash.Changeset.change_attribute(changeset, :state, :sent)
 
   defp maybe_update_state(changeset, _), do: changeset
 end

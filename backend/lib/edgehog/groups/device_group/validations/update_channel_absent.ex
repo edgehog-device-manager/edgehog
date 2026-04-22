@@ -20,7 +20,9 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.ChannelAbsent do
   @moduledoc false
   use Ash.Resource.Validation
 
-  @impl Ash.Resource.Validation
+  alias Ash.Resource.Validation
+
+  @impl Validation
   def validate(changeset, _opts, _context) do
     device_group = changeset.data
 
@@ -34,9 +36,9 @@ defmodule Edgehog.Groups.DeviceGroup.Validations.ChannelAbsent do
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

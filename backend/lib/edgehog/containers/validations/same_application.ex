@@ -20,9 +20,10 @@ defmodule Edgehog.Containers.Validations.SameApplication do
   @moduledoc false
   use Ash.Resource.Validation
 
+  alias Ash.Resource.Validation
   alias Edgehog.Containers.Release
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def validate(changeset, _opts, _context) do
     initial_release = Ash.Changeset.get_data(changeset, :release_id)
     tenant = Ash.Changeset.get_data(changeset, :tenant_id)
@@ -33,16 +34,14 @@ defmodule Edgehog.Containers.Validations.SameApplication do
       if current.application_id == target.application_id do
         :ok
       else
-        {:error,
-         field: :target,
-         message: "must belong to the same application as the currently installed release."}
+        {:error, field: :target, message: "must belong to the same application as the currently installed release."}
       end
     end
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

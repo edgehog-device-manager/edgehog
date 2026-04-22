@@ -42,10 +42,7 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
       {:error, :not_found}
     end)
 
-    stub(FileDownloadRequestMock, :request_download, fn _client,
-                                                        _device_id,
-                                                        _request_data,
-                                                        _device_type ->
+    stub(FileDownloadRequestMock, :request_download, fn _client, _device_id, _request_data, _device_type ->
       :ok
     end)
 
@@ -706,10 +703,7 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
     parent = self()
     ref = make_ref()
 
-    expect(FileDownloadRequestMock, :request_download, count, fn _client,
-                                                                 _device_id,
-                                                                 _request_data,
-                                                                 _device_type ->
+    expect(FileDownloadRequestMock, :request_download, count, fn _client, _device_id, _request_data, _device_type ->
       send_sync(parent, ref)
       :ok
     end)

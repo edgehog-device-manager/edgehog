@@ -909,21 +909,16 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
     end
   end
 
-  defp set_ready(%Image.Deployment{} = deployment),
-    do: Containers.mark_image_deployment_as_pulled!(deployment)
+  defp set_ready(%Image.Deployment{} = deployment), do: Containers.mark_image_deployment_as_pulled!(deployment)
 
-  defp set_ready(%Network.Deployment{} = deployment),
-    do: Containers.mark_network_deployment_as_available!(deployment)
+  defp set_ready(%Network.Deployment{} = deployment), do: Containers.mark_network_deployment_as_available!(deployment)
 
-  defp set_ready(%Volume.Deployment{} = deployment),
-    do: Containers.mark_volume_deployment_as_available!(deployment)
+  defp set_ready(%Volume.Deployment{} = deployment), do: Containers.mark_volume_deployment_as_available!(deployment)
 
   defp set_ready(%DeviceMapping.Deployment{} = deployment),
     do: Containers.mark_device_mapping_deployment_as_present!(deployment)
 
-  defp set_ready(%Container.Deployment{} = deployment),
-    do: Containers.mark_container_deployment_as_created!(deployment)
+  defp set_ready(%Container.Deployment{} = deployment), do: Containers.mark_container_deployment_as_created!(deployment)
 
-  defp set_ready(%Deployment{} = deployment),
-    do: Containers.mark_deployment_as_stopped!(deployment)
+  defp set_ready(%Deployment{} = deployment), do: Containers.mark_deployment_as_stopped!(deployment)
 end

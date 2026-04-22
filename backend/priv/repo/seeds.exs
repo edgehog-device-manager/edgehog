@@ -426,8 +426,7 @@ _application_with_system_model =
     Application,
     %{
       name: "App with System Model",
-      description:
-        "Application that specifies a required system model for deployment. \
+      description: "Application that specifies a required system model for deployment. \
 This ensures the app can only be installed on compatible hardware configurations \
 matching the associated system model, improving deployment reliability and hardware compatibility validation.",
       initial_release: %{
@@ -462,8 +461,7 @@ _app_with_volumes =
     Application,
     %{
       name: "App with Volumes",
-      description:
-        "Application demonstrating how to attach multiple volumes to a single container. \
+      description: "Application demonstrating how to attach multiple volumes to a single container. \
 Each volume is mounted inside the container at a specific target path, allowing data persistence \
 and shared storage between containers or across deployments.",
       initial_release: %{
@@ -495,8 +493,7 @@ _app_with_networks =
     Application,
     %{
       name: "App with Networks",
-      description:
-        "Application demonstrating how to connect a container to one or more user-defined networks. \
+      description: "Application demonstrating how to connect a container to one or more user-defined networks. \
 This setup allows fine-grained control over container communication, network isolation, and service discovery.",
       initial_release: %{
         version: "1.0.0",

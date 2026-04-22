@@ -34,8 +34,7 @@ defmodule Edgehog.AstarteFixtures do
   @doc """
   Generate a unique cluster API URL.
   """
-  def unique_cluster_base_api_url,
-    do: "https://api-#{System.unique_integer([:positive])}.astarte.example.com"
+  def unique_cluster_base_api_url, do: "https://api-#{System.unique_integer([:positive])}.astarte.example.com"
 
   @doc """
   Generate a unique realm name.

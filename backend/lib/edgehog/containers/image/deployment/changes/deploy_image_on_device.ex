@@ -41,8 +41,7 @@ defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
     end
   end
 
-  defp maybe_update_state(changeset, :created),
-    do: Ash.Changeset.change_attribute(changeset, :state, :sent)
+  defp maybe_update_state(changeset, :created), do: Ash.Changeset.change_attribute(changeset, :state, :sent)
 
   defp maybe_update_state(changeset, _), do: changeset
 end

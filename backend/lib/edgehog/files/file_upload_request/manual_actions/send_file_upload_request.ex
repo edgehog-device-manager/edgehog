@@ -80,9 +80,7 @@ defmodule Edgehog.Files.FileUploadRequest.ManualActions.SendFileUploadRequest do
         {:error, reason}
 
       result ->
-        Files.set_file_upload_request_status(file_upload_request, %{status: :sent},
-          tenant: tenant
-        )
+        Files.set_file_upload_request_status(file_upload_request, %{status: :sent}, tenant: tenant)
 
         result
     end

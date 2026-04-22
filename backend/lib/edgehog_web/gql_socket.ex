@@ -54,11 +54,9 @@ defmodule EdgehogWeb.GqlSocket do
     end
   end
 
-  defp signer_from_jwk_map(%{"kty" => "RSA"} = jwk_map),
-    do: {:ok, Joken.Signer.create("RS256", jwk_map)}
+  defp signer_from_jwk_map(%{"kty" => "RSA"} = jwk_map), do: {:ok, Joken.Signer.create("RS256", jwk_map)}
 
-  defp signer_from_jwk_map(%{"kty" => "EC"} = jwk_map),
-    do: {:ok, Joken.Signer.create("ES256", jwk_map)}
+  defp signer_from_jwk_map(%{"kty" => "EC"} = jwk_map), do: {:ok, Joken.Signer.create("ES256", jwk_map)}
 
   defp signer_from_jwk_map(_), do: {:error, :unsupported_key_type}
 

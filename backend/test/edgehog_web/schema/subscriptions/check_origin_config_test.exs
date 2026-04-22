@@ -105,8 +105,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.CheckOriginConfigTest do
           {"URL_HOST", "api.edgehog.localhost"},
           {"URL_SCHEME", "https"},
           {"URL_PORT", "443"},
-          {"GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS",
-           "https://ui.edgehog.localhost, https://ops.edgehog.localhost"}
+          {"GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS", "https://ui.edgehog.localhost, https://ops.edgehog.localhost"}
         ],
         fn ->
           endpoint = read_endpoint_config!("config/runtime.exs", :prod)

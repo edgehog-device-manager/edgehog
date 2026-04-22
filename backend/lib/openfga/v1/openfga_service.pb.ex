@@ -17,6 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule Openfga.V1.ListObjectsRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ListObjectsRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -33,6 +34,7 @@ defmodule Openfga.V1.ListObjectsRequest do
 end
 
 defmodule Openfga.V1.ListObjectsResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ListObjectsResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -42,6 +44,7 @@ defmodule Openfga.V1.ListObjectsResponse do
 end
 
 defmodule Openfga.V1.ListUsersRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ListUsersRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -58,6 +61,7 @@ defmodule Openfga.V1.ListUsersRequest do
 end
 
 defmodule Openfga.V1.ListUsersResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ListUsersResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -67,6 +71,7 @@ defmodule Openfga.V1.ListUsersResponse do
 end
 
 defmodule Openfga.V1.StreamedListObjectsRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.StreamedListObjectsRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -115,6 +120,7 @@ defmodule Openfga.V1.ReadRequest do
 end
 
 defmodule Openfga.V1.ReadRequestTupleKey do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadRequestTupleKey",
     protoc_gen_elixir_version: "0.16.0",
@@ -126,6 +132,7 @@ defmodule Openfga.V1.ReadRequestTupleKey do
 end
 
 defmodule Openfga.V1.ReadResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -136,6 +143,7 @@ defmodule Openfga.V1.ReadResponse do
 end
 
 defmodule Openfga.V1.WriteRequestWrites do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteRequestWrites",
     protoc_gen_elixir_version: "0.16.0",
@@ -146,6 +154,7 @@ defmodule Openfga.V1.WriteRequestWrites do
 end
 
 defmodule Openfga.V1.WriteRequestDeletes do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteRequestDeletes",
     protoc_gen_elixir_version: "0.16.0",
@@ -160,6 +169,7 @@ defmodule Openfga.V1.WriteRequestDeletes do
 end
 
 defmodule Openfga.V1.WriteRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -172,6 +182,7 @@ defmodule Openfga.V1.WriteRequest do
 end
 
 defmodule Openfga.V1.WriteResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -179,6 +190,7 @@ defmodule Openfga.V1.WriteResponse do
 end
 
 defmodule Openfga.V1.CheckRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.CheckRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -194,6 +206,7 @@ defmodule Openfga.V1.CheckRequest do
 end
 
 defmodule Openfga.V1.CheckRequestTupleKey do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.CheckRequestTupleKey",
     protoc_gen_elixir_version: "0.16.0",
@@ -205,6 +218,7 @@ defmodule Openfga.V1.CheckRequestTupleKey do
 end
 
 defmodule Openfga.V1.CheckResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.CheckResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -215,6 +229,7 @@ defmodule Openfga.V1.CheckResponse do
 end
 
 defmodule Openfga.V1.BatchCheckRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.BatchCheckRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -227,6 +242,7 @@ defmodule Openfga.V1.BatchCheckRequest do
 end
 
 defmodule Openfga.V1.BatchCheckItem do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.BatchCheckItem",
     protoc_gen_elixir_version: "0.16.0",
@@ -239,6 +255,7 @@ defmodule Openfga.V1.BatchCheckItem do
 end
 
 defmodule Openfga.V1.BatchCheckResponse.ResultEntry do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.BatchCheckResponse.ResultEntry",
     map: true,
@@ -250,6 +267,7 @@ defmodule Openfga.V1.BatchCheckResponse.ResultEntry do
 end
 
 defmodule Openfga.V1.BatchCheckResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.BatchCheckResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -263,6 +281,7 @@ defmodule Openfga.V1.BatchCheckResponse do
 end
 
 defmodule Openfga.V1.BatchCheckSingleResult do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.BatchCheckSingleResult",
     protoc_gen_elixir_version: "0.16.0",
@@ -275,6 +294,7 @@ defmodule Openfga.V1.BatchCheckSingleResult do
 end
 
 defmodule Openfga.V1.CheckError do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.CheckError",
     protoc_gen_elixir_version: "0.16.0",
@@ -288,6 +308,7 @@ defmodule Openfga.V1.CheckError do
 end
 
 defmodule Openfga.V1.ExpandRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ExpandRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -301,6 +322,7 @@ defmodule Openfga.V1.ExpandRequest do
 end
 
 defmodule Openfga.V1.ExpandRequestTupleKey do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ExpandRequestTupleKey",
     protoc_gen_elixir_version: "0.16.0",
@@ -311,6 +333,7 @@ defmodule Openfga.V1.ExpandRequestTupleKey do
 end
 
 defmodule Openfga.V1.ExpandResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ExpandResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -320,6 +343,7 @@ defmodule Openfga.V1.ExpandResponse do
 end
 
 defmodule Openfga.V1.ReadAuthorizationModelRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadAuthorizationModelRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -330,6 +354,7 @@ defmodule Openfga.V1.ReadAuthorizationModelRequest do
 end
 
 defmodule Openfga.V1.ReadAuthorizationModelResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadAuthorizationModelResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -339,6 +364,7 @@ defmodule Openfga.V1.ReadAuthorizationModelResponse do
 end
 
 defmodule Openfga.V1.WriteAuthorizationModelRequest.ConditionsEntry do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteAuthorizationModelRequest.ConditionsEntry",
     map: true,
@@ -350,6 +376,7 @@ defmodule Openfga.V1.WriteAuthorizationModelRequest.ConditionsEntry do
 end
 
 defmodule Openfga.V1.WriteAuthorizationModelRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteAuthorizationModelRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -367,6 +394,7 @@ defmodule Openfga.V1.WriteAuthorizationModelRequest do
 end
 
 defmodule Openfga.V1.WriteAuthorizationModelResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteAuthorizationModelResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -376,6 +404,7 @@ defmodule Openfga.V1.WriteAuthorizationModelResponse do
 end
 
 defmodule Openfga.V1.ReadAuthorizationModelsRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadAuthorizationModelsRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -387,6 +416,7 @@ defmodule Openfga.V1.ReadAuthorizationModelsRequest do
 end
 
 defmodule Openfga.V1.ReadAuthorizationModelsResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadAuthorizationModelsResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -401,6 +431,7 @@ defmodule Openfga.V1.ReadAuthorizationModelsResponse do
 end
 
 defmodule Openfga.V1.WriteAssertionsRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteAssertionsRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -412,6 +443,7 @@ defmodule Openfga.V1.WriteAssertionsRequest do
 end
 
 defmodule Openfga.V1.WriteAssertionsResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.WriteAssertionsResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -419,6 +451,7 @@ defmodule Openfga.V1.WriteAssertionsResponse do
 end
 
 defmodule Openfga.V1.ReadAssertionsRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadAssertionsRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -429,6 +462,7 @@ defmodule Openfga.V1.ReadAssertionsRequest do
 end
 
 defmodule Openfga.V1.ReadAssertionsResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadAssertionsResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -439,6 +473,7 @@ defmodule Openfga.V1.ReadAssertionsResponse do
 end
 
 defmodule Openfga.V1.ReadChangesRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadChangesRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -452,6 +487,7 @@ defmodule Openfga.V1.ReadChangesRequest do
 end
 
 defmodule Openfga.V1.ReadChangesResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ReadChangesResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -462,6 +498,7 @@ defmodule Openfga.V1.ReadChangesResponse do
 end
 
 defmodule Openfga.V1.CreateStoreRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.CreateStoreRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -471,18 +508,22 @@ defmodule Openfga.V1.CreateStoreRequest do
 end
 
 defmodule Openfga.V1.CreateStoreResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.CreateStoreResponse",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
+  alias Google.Protobuf.Timestamp
+
   field :id, 1, type: :string, deprecated: false
   field :name, 2, type: :string, deprecated: false
-  field :created_at, 3, type: Google.Protobuf.Timestamp, deprecated: false
-  field :updated_at, 4, type: Google.Protobuf.Timestamp, deprecated: false
+  field :created_at, 3, type: Timestamp, deprecated: false
+  field :updated_at, 4, type: Timestamp, deprecated: false
 end
 
 defmodule Openfga.V1.UpdateStoreRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UpdateStoreRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -493,18 +534,22 @@ defmodule Openfga.V1.UpdateStoreRequest do
 end
 
 defmodule Openfga.V1.UpdateStoreResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.UpdateStoreResponse",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
+  alias Google.Protobuf.Timestamp
+
   field :id, 1, type: :string, deprecated: false
   field :name, 2, type: :string, deprecated: false
-  field :created_at, 3, type: Google.Protobuf.Timestamp, deprecated: false
-  field :updated_at, 4, type: Google.Protobuf.Timestamp, deprecated: false
+  field :created_at, 3, type: Timestamp, deprecated: false
+  field :updated_at, 4, type: Timestamp, deprecated: false
 end
 
 defmodule Openfga.V1.DeleteStoreRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.DeleteStoreRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -514,6 +559,7 @@ defmodule Openfga.V1.DeleteStoreRequest do
 end
 
 defmodule Openfga.V1.DeleteStoreResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.DeleteStoreResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -521,6 +567,7 @@ defmodule Openfga.V1.DeleteStoreResponse do
 end
 
 defmodule Openfga.V1.GetStoreRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.GetStoreRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -530,19 +577,23 @@ defmodule Openfga.V1.GetStoreRequest do
 end
 
 defmodule Openfga.V1.GetStoreResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.GetStoreResponse",
     protoc_gen_elixir_version: "0.16.0",
     syntax: :proto3
 
+  alias Google.Protobuf.Timestamp
+
   field :id, 1, type: :string, deprecated: false
   field :name, 2, type: :string, deprecated: false
-  field :created_at, 3, type: Google.Protobuf.Timestamp, deprecated: false
-  field :updated_at, 4, type: Google.Protobuf.Timestamp, deprecated: false
-  field :deleted_at, 5, type: Google.Protobuf.Timestamp
+  field :created_at, 3, type: Timestamp, deprecated: false
+  field :updated_at, 4, type: Timestamp, deprecated: false
+  field :deleted_at, 5, type: Timestamp
 end
 
 defmodule Openfga.V1.ListStoresRequest do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ListStoresRequest",
     protoc_gen_elixir_version: "0.16.0",
@@ -554,6 +605,7 @@ defmodule Openfga.V1.ListStoresRequest do
 end
 
 defmodule Openfga.V1.ListStoresResponse do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.ListStoresResponse",
     protoc_gen_elixir_version: "0.16.0",
@@ -564,6 +616,7 @@ defmodule Openfga.V1.ListStoresResponse do
 end
 
 defmodule Openfga.V1.AssertionTupleKey do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.AssertionTupleKey",
     protoc_gen_elixir_version: "0.16.0",
@@ -575,6 +628,7 @@ defmodule Openfga.V1.AssertionTupleKey do
 end
 
 defmodule Openfga.V1.Assertion do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Assertion",
     protoc_gen_elixir_version: "0.16.0",
@@ -587,6 +641,7 @@ defmodule Openfga.V1.Assertion do
 end
 
 defmodule Openfga.V1.Assertions do
+  @moduledoc false
   use Protobuf,
     full_name: "openfga.v1.Assertions",
     protoc_gen_elixir_version: "0.16.0",

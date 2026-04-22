@@ -48,11 +48,7 @@ defmodule Edgehog.Selector.AST.TagFilterTest do
       device_no_tags =
         device_fixture(realm_id: realm.id, tenant: tenant)
 
-      {:ok,
-       tenant: tenant,
-       device_foo: device_foo,
-       device_bar: device_bar,
-       device_no_tags: device_no_tags}
+      {:ok, tenant: tenant, device_foo: device_foo, device_bar: device_bar, device_no_tags: device_no_tags}
     end
 
     test "returns expression that matches devices with the tag", ctx do

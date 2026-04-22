@@ -80,12 +80,10 @@ defmodule Edgehog.BaseImages.BaseImage do
       change Changes.HandleFileUpload
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
 
-      change {UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
 
       change {UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names,
-              target_attribute: :release_display_name}
+              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
     end
 
     create :create_fixture do
@@ -106,12 +104,10 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       change manage_relationship(:base_image_collection_id, :base_image_collection, type: :append)
 
-      change {UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
 
       change {UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names,
-              target_attribute: :release_display_name}
+              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
     end
 
     update :update do
@@ -132,12 +128,10 @@ defmodule Edgehog.BaseImages.BaseImage do
 
       accept [:starting_version_requirement]
 
-      change {UpsertLocalizedAttribute,
-              input_argument: :localized_descriptions, target_attribute: :description}
+      change {UpsertLocalizedAttribute, input_argument: :localized_descriptions, target_attribute: :description}
 
       change {UpsertLocalizedAttribute,
-              input_argument: :localized_release_display_names,
-              target_attribute: :release_display_name}
+              input_argument: :localized_release_display_names, target_attribute: :release_display_name}
     end
 
     destroy :destroy do

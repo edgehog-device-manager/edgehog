@@ -65,9 +65,7 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
 
       {:error, error} ->
         # If we can't load the deployment target, log and allow (safer than blocking)
-        Logger.warning(
-          "Failed to load deployment_target for conflict validation: #{inspect(error)}"
-        )
+        Logger.warning("Failed to load deployment_target for conflict validation: #{inspect(error)}")
 
         :ok
     end
@@ -107,9 +105,9 @@ defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
     Atom.to_string(operation_type)
   end
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false
 
-  @impl Ash.Resource.Validation
+  @impl Validation
   def has_batch_validate?, do: false
 end

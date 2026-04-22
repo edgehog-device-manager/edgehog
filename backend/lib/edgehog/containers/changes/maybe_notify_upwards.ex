@@ -38,8 +38,7 @@ defmodule Edgehog.Containers.Changes.MaybeNotifyUpwards do
   defp maybe_notify_upwards(resource_deployment) do
     resource_deployment
     |> Map.get(:container_deployments, [])
-    |> Enum.reduce_while({:ok, resource_deployment}, fn container_deployment,
-                                                        {:ok, resource_deployment} ->
+    |> Enum.reduce_while({:ok, resource_deployment}, fn container_deployment, {:ok, resource_deployment} ->
       case notify_upwards(container_deployment) do
         {:ok, _} -> {:cont, {:ok, resource_deployment}}
         error -> {:halt, error}
