@@ -1,0 +1,112 @@
+model
+  schema 1.1
+
+type user
+  relations
+    define realm: [realm]
+    define device: [device, realm#device, group#member_device]
+    define system_model: [system_model, realm#system_model, device#system_model, hardware_type#system_model]
+    define hardware_type: [hardware_type, realm#hardware_type, system_model#hardware_type]
+    define tag: [tag, realm#tag, group#tag, device#tag]
+    define application: [application, realm#application]
+    define release: [release, realm#release, application#release, container#release, deployment#deployed_release]
+    define container: [container, realm#container, release#container]
+    define volume: [volume, realm#volume, container#volume]
+    define network: [network, realm#network, container#network]
+    define device_mapping: [device_mapping, realm#device_mapping, container#device_mapping]
+    define base_image_collection: [base_image_collection, base_image#collection, realm#base_image_collection]
+    define base_image: [base_image, realm#base_image, base_image_collection#image]
+    define campaign: [campaign, realm#campaign]
+    define channel: [channel, realm#channel, campaign#channel]
+    define group: [group, realm#group, channel#group]
+
+type realm
+  relations
+    define device: [device]
+    define system_model: [system_model, device#system_model, hardware_type#system_model]
+    define tag: [tag, group#tag, device#tag]
+    define application: [application]
+    define release: [release, application#release, container#release, deployment#deployed_release]
+    define container: [container, release#container]
+    define volume: [volume, container#volume]
+    define network: [network, container#network]
+    define device_mapping: [device_mapping, container#device_mapping]
+    define base_image_collection: [base_image_collection, base_image#collection]
+    define base_image: [base_image, base_image_collection#image]
+    define campaign: [campaign]
+    define channel: [channel, campaign#channel]
+    define group: [group, channel#group]
+
+type device
+  relations
+    define system_model: [system_model]
+    define tag: [tag, group#tag, device#tag]
+
+type system_model
+  relations
+    define hardware_type: [hardware_type]
+
+type hardware_type
+  relations
+    define system_model: [system_model]
+
+type tag
+  relations
+    define device: [device]
+
+type application
+  relations
+    define release: [release]
+
+type release
+  relations
+    define container: [container]
+
+type container
+  relations
+    define release: [release]
+    define volume: [volume]
+    define network: [network]
+    define device_mapping: [device_mapping]
+
+type volume
+  relations
+    define container: [container]
+
+type network
+  relations
+    define container: [container]
+
+type device_mapping
+  relations
+    define container: [container]
+
+type deployment
+  relations
+    define device: [device]
+    define deployed_application: [application]
+    define deployed_release: release from deployed_application
+
+type base_image_collection
+  relations
+    define image: [base_image]
+
+type base_image
+  relations
+    define collection: [base_image_collection]
+
+type campaign
+  relations
+    define ota_campaign: [base_image_collection, channel]
+    define deployment_campaigns: [application, channel]
+    define channel: [channel]
+
+type channel
+  relations
+    define group: [group]
+
+type group
+  relations
+    define tag: [tag]
+    define member_device: device from tag
+
