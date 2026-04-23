@@ -158,6 +158,6 @@ jobs:
           echo "${{ secrets.DOCS_DEPLOY_KEY }}" | ssh-add -
           mkdir -p ~/.ssh/
           ssh-keyscan github.com >> ~/.ssh/known_hosts
-          git remote add topush "git@github.com:edgehog-device-manager/docs.git"
-          git fetch topush
-          git push topush main
+          git config --global --unset-all url."https://${{ github.token }}:x-oauth-basic@github.com/".insteadOf || true
+          git remote set-url origin git@github.com:edgehog-device-manager/docs.git
+          git push origin main
