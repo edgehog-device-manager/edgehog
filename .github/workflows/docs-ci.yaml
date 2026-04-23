@@ -79,8 +79,7 @@ jobs:
       - name: Compute docs version
         id: compute-version
         run: |
-          version=$(${{ inputs.release-made }} && echo ${{ inputs.release-version }} || echo "snapshot")
-          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "version=${{ inputs.release-made && inputs.release-version || 'snapshot' }}" >> "$GITHUB_OUTPUT"
       - uses: ./edgehog/.github/actions/doc-generate
         with:
           edgehog: edgehog
