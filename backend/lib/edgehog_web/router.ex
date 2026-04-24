@@ -54,6 +54,8 @@ defmodule EdgehogWeb.Router do
     interface: :playground,
     socket: EdgehogWeb.GqlSocket
 
+  get "/version", EdgehogWeb.VersionController, :show
+
   scope "/tenants/:tenant_slug" do
     scope "/api" do
       pipe_through :api
