@@ -11,28 +11,28 @@
       "endpoint": "/request/session_token",
       "type": "string",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "description": "The session token thanks to which the device can authenticates itself through Edgehog."
     },
     {
       "endpoint": "/request/port",
       "type": "integer",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "description": "The host port the device must connect to."
     },
     {
       "endpoint": "/request/host",
       "type": "string",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "description": "The IP address or host name the device must connect to."
     },
     {
       "endpoint": "/request/secure",
       "type": "boolean",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "description": "Indicates whether the connection should use TLS, i.e. 'ws' or 'wss' scheme."
     }
   ]

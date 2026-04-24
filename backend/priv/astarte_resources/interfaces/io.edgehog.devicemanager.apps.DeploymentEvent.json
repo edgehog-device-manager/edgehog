@@ -10,7 +10,7 @@
       "endpoint": "/%{deployment_id}/status",
       "type": "string",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "explicit_timestamp": true,
       "description": "Deployment status",
       "doc": "Possible values: [Starting, Started, Stopping, Stopped, Updating, Deleting, Error]"
@@ -19,7 +19,7 @@
       "endpoint": "/%{deployment_id}/message",
       "type": "string",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "explicit_timestamp": true,
       "description": "Optional message for the event"
     },
@@ -27,7 +27,7 @@
       "endpoint": "/%{deployment_id}/addInfo",
       "type": "stringarray",
       "database_retention_policy": "use_ttl",
-      "database_retention_ttl": 31556952,
+      "database_retention_ttl": 2592000,
       "explicit_timestamp": true,
       "description": "Additional info",
       "doc": "Additional info about the event."
