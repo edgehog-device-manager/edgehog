@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
+# SPDX-FileCopyrightText: 2021-2026 SECO Mind Srl
 # SPDX-License-Identifier: CC0-1.0
 
 # The directory Mix will write compiled artifacts to.
@@ -37,3 +37,6 @@ edgehog-*.tar
 
 # Ignore expert lsp files
 /.expert
+
+# ignore dexter lsp files
+/.dexter.db*
