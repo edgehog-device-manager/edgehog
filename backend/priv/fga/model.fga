@@ -2,14 +2,6 @@
 ## Edgehog Fine-Grained Authorization Model
 ## https://github.com/edgehog-device-manager/edgehog
 ##
-## Key architectural notes:
-##   - Tenant scoping is handled at the application layer; it is NOT modeled here.
-##   - A `realm` groups devices only. All other resources (system models, hardware
-##     types, base images, containers, volumes, networks, …) are tenant-wide.
-##   - Realm-level roles (device_editor, device_admin) are expressed as assignable
-##     relations on the `realm` object and are then reused via relation traversals
-##     on individual `device` objects.
-##
 
 model
   schema 1.1
@@ -19,6 +11,22 @@ model
 ## ---------------------------------------------------------------------------
 
 type user
+
+## ---------------------------------------------------------------------------
+## TENANT  (top-level container for all non-device resources)
+##
+## Tenant-level relations grant blanket access to all resources of a type
+## within the tenant (e.g. "can create system models", "can view all volumes").
+##
+## These are intentionally kept as flat assignable relations on the tenant
+## object so that application code can check:
+##   Check(user, "can_create_system_model", tenant:<id>)
+##   Check(user, "can_view_all_system_models", tenant:<id>)
+##   … etc.
+##
+## Individual resource objects still carry their own relations for per-resource
+## grants (whitelist / blacklist patterns).
+## ---------------------------------------------------------------------------
 
 type tenant
   relations
@@ -31,6 +39,154 @@ type tenant
     define can_edit:    editor or admin or owner
     define is_admin:    admin or owner
     define is_owner:    owner
+
+    # TODO: blacklist per-tenant
+
+    ## ---- Realms ----
+    define realm_owner:      [user]
+    define realm_admin:      [user]
+    define realm_editor:     [user]
+    define realm_viewer:     [user]
+
+    define can_view_realm:   realm_viewer or realm_editor or realm_admin or realm_owner
+    define can_update_realm:   realm_editor or realm_admin or realm_owner
+    define can_delete_realm:    realm_owner
+
+    ## ---- System models ----
+    define system_model_viewer:  [user]
+    define system_model_editor:  [user]
+    define system_model_creator: [user]
+    define system_model_deleter: [user]
+
+    define can_view_all_system_models:   system_model_viewer or system_model_editor or system_model_creator or system_model_deleter
+    define can_create_system_model:      system_model_creator or system_model_editor
+    define can_update_all_system_models: system_model_editor
+    define can_delete_all_system_models: system_model_deleter
+
+    ## ---- Hardware types ----
+    define hardware_type_viewer:  [user]
+    define hardware_type_editor:  [user]
+    define hardware_type_creator: [user]
+    define hardware_type_deleter: [user]
+
+    define can_view_all_hardware_types:   hardware_type_viewer or hardware_type_editor or hardware_type_creator or hardware_type_deleter
+    define can_create_hardware_type:      hardware_type_creator or hardware_type_editor
+    define can_update_all_hardware_types: hardware_type_editor
+    define can_delete_all_hardware_types: hardware_type_deleter
+
+    ## ---- Base image collections ----
+    define base_image_collection_viewer:       [user]
+    define base_image_collection_editor:       [user]
+    define base_image_collection_creator:      [user]
+    define base_image_collection_deleter:      [user]
+    define base_image_collection_image_adder:  [user]
+    define base_image_collection_image_remover:[user]
+
+    define can_view_all_base_image_collections:   base_image_collection_viewer or base_image_collection_editor or base_image_collection_creator or base_image_collection_deleter
+    define can_create_base_image_collection:      base_image_collection_creator or base_image_collection_editor
+    define can_update_all_base_image_collections: base_image_collection_editor
+    define can_delete_all_base_image_collections: base_image_collection_deleter
+    define can_add_image_to_all_collections:      base_image_collection_image_adder or base_image_collection_editor
+    define can_remove_image_from_all_collections: base_image_collection_image_remover or base_image_collection_editor
+
+    ## ---- Image credentials ----
+    define image_credential_viewer:  [user]
+    define image_credential_editor:  [user]
+    define image_credential_deleter: [user]
+
+    # define can_create_image_credential:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_image_credentials:   image_credential_viewer or image_credential_editor or image_credential_deleter
+    define can_update_all_image_credentials: image_credential_editor
+    define can_delete_all_image_credentials: image_credential_deleter
+
+    ## ---- Volumes ----
+    define volume_viewer:  [user]
+    define volume_editor:  [user]
+    define volume_deleter: [user]
+
+    # define can_create_volume:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_volumes:   volume_viewer or volume_editor or volume_deleter
+    define can_update_all_volumes: volume_editor
+    define can_delete_all_volumes: volume_deleter
+
+    ## ---- Networks ----
+    define network_viewer:  [user]
+    define network_editor:  [user]
+    define network_deleter: [user]
+
+    # define can_create_network:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_networks:   network_viewer or network_editor or network_deleter
+    define can_update_all_networks: network_editor
+    define can_delete_all_networks: network_deleter
+
+    ## ---- Containers ----
+    define container_viewer:  [user]
+    define container_editor:  [user]
+    define container_deleter: [user]
+
+    # define can_create_container:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_containers:   container_viewer or container_editor or container_deleter
+    define can_update_all_containers: container_editor
+    define can_delete_all_containers: container_deleter
+
+    ## ---- Applications ----
+    define application_viewer:  [user]
+    define application_editor:  [user]
+    define application_creator: [user]
+    define application_deleter: [user]
+
+    define can_view_all_applications:   application_viewer or application_editor or application_creator or application_deleter
+    define can_create_application:      application_creator or application_editor
+    define can_update_all_applications: application_editor
+    define can_delete_all_applications: application_deleter
+
+    ## ---- Releases ----
+    # TODO
+    # define can_create_release:  (editor or is_admin) from tenant #? maybe a role?
+
+    ## ---- Deployments ----
+    # TODO
+
+    ## ---- Channels ----
+    define channel_viewer:  [user]
+    define channel_editor:  [user]
+    define channel_creator: [user]
+    define channel_deleter: [user]
+
+    # define can_create_channel:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_channels:   channel_viewer or channel_editor or channel_creator or channel_deleter
+    define can_create_channel:      channel_creator or channel_editor
+    define can_update_all_channels: channel_editor
+    define can_delete_all_channels: channel_deleter
+
+    ## ---- Device groups ----
+    define device_group_viewer:  [user]
+    define device_group_editor:  [user]
+    define device_group_creator: [user]
+    define device_group_deleter: [user]
+
+    # define can_create_device_group:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_device_groups:   device_group_viewer or device_group_editor or device_group_creator or device_group_deleter
+    define can_create_device_group:      device_group_creator or device_group_editor
+    define can_update_all_device_groups: device_group_editor
+    define can_delete_all_device_groups: device_group_deleter
+
+    ## ---- Campaigns ----
+    define campaign_viewer:  [user]
+    define campaign_editor:  [user]
+    define campaign_creator: [user]
+    define campaign_deleter: [user]
+
+    # define can_create_campaign:  (editor or is_admin) from tenant #? maybe a role?
+    define can_view_all_campaigns:  campaign_viewer or campaign_editor or campaign_creator or campaign_deleter
+    define can_create_firmware_upgrade_campaign: campaign_creator or campaign_editor
+    define can_create_deployment_campaign: campaign_creator or campaign_editor
+    define can_create_start_campaign: campaign_creator or campaign_editor
+    define can_create_stop_campaign: campaign_creator or campaign_editor
+    define can_create_update_campaign: campaign_creator or campaign_editor
+    define can_create_uninstall_campaign: campaign_creator or campaign_editor
+    define can_pause_resume_all_campaigns: campaign_editor or campaign_creator
+    define can_update_all_campaigns: campaign_editor
 
 ## ---------------------------------------------------------------------------
 ## REALM
@@ -57,19 +213,19 @@ type tenant
 type realm
   relations
     ## Assignable roles
-    define tenant:          [tenant]
-    define device_viewer:   [user]
-    define device_editor:   [user]
-    define device_admin:    [user]
-    define device_updater:  [user]
-    define identifier:      [user]
+    define tenant:                 [tenant]
+    define device_viewer:          [user]
+    define device_editor:          [user]
+    define device_admin:           [user]
+    define device_updater:         [user]
+    define device_identifier:      [user]
 
     ## Derived realm-wide permissions
-    define can_view_devices:     device_viewer or device_editor or device_admin or device_updater or identifier or can_view from tenant
+    define can_view_devices:     device_viewer or device_editor or device_admin or device_updater or device_identifier or can_view from tenant
     define can_edit_device_tags: device_editor or device_admin or can_edit from tenant
     define can_rename_devices:   device_editor or device_admin or can_edit from tenant
     define can_access_terminal:  device_admin or is_admin from tenant
-    define can_identify_devices: identifier or device_editor or device_admin or can_view from tenant
+    define can_identify_devices: device_identifier or device_editor or device_admin or can_view from tenant
     define can_update_devices:   device_updater or device_admin or can_edit from tenant
 
 ## ---------------------------------------------------------------------------
@@ -112,10 +268,10 @@ type device
     ## Computed permissions
     define can_view: viewer or can_view_devices from realm
 
-    ## Tag editing requires view + explicit grant (guard: can_view)
+    ## Tag editing requires view + explicit grant (guard: can_view; see type realm)
     define can_edit_tags: tag_editor or can_edit_device_tags from realm
 
-    define can_rename: renamer or can_rename_devices from realm
+    define can_rename: renamer or can_rename_devices from realm or updater or can_update_devices from realm
 
     define can_access_terminal: terminal or can_access_terminal from realm
 
@@ -136,7 +292,7 @@ type device
 ##   tenant_creator – (on tenant) can create new system models
 ##
 ## Note: "view all" / "update all" / "delete all" and "create" are tenant-level
-##       operations and are expressed via the `tenant` type below.
+##       operations and are expressed via the `tenant` type above.
 ## ---------------------------------------------------------------------------
 
 type system_model
@@ -182,12 +338,14 @@ type base_image_collection
     define image_adder:  [user]           ## can add base images to this collection
     define image_remover:[user]           ## can remove base images from this collection
     define deleter:      [user]
+    define blacklisted:  [user]           ## users that cannot perform actions in this collection
 
-    define can_view:         viewer or editor or image_adder or image_remover or deleter or can_view from tenant
-    define can_update:       editor or can_edit from tenant
-    define can_add_image:    image_adder or editor or can_edit from tenant
-    define can_remove_image: image_remover or editor or can_edit from tenant
-    define can_delete:       deleter or is_admin from tenant
+    define can_view:          viewer or editor or image_adder or image_remover or deleter or can_view from tenant
+    define can_update:        editor or can_edit from tenant
+    define can_add_image:     image_adder or editor or can_edit from tenant
+    define can_remove_image:  image_remover or editor or can_edit from tenant
+    define can_manage_images: image_adder or image_remover
+    define can_delete:        deleter or is_admin from tenant
 
 ## ---------------------------------------------------------------------------
 ## BASE IMAGE  (child of base_image_collection)
@@ -202,14 +360,15 @@ type base_image
     define collection:  [base_image_collection]
 
     ## Direct per-image grants (whitelist/blacklist overrides)
-    define viewer:  [user]
-    define editor:  [user]
-    define deleter: [user]
+    define viewer:      [user]
+    define editor:      [user]
+    define deleter:     [user]
+    define blacklisted: [user] or blacklisted from collection ## users that cannot perform actions in this collection
 
     ## Computed permissions
-    define can_view:   viewer or can_view from collection or can_view from tenant
-    define can_edit:   editor or can_update from collection or can_edit from tenant
-    define can_delete: deleter or can_delete from collection or is_admin from tenant
+    define can_view:   viewer or can_view from collection or can_view from tenant but not blacklisted
+    define can_edit:   editor or can_update from collection or can_edit from tenant but not blacklisted
+    define can_delete: deleter or can_delete from collection or is_admin from tenant but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## IMAGE CREDENTIAL  (tenant-wide, Applications domain)
@@ -227,7 +386,7 @@ type image_credential
 
     define can_view:   viewer or editor or owner or can_view from tenant
     define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from [tenant]
+    define can_delete: owner or is_admin from tenant
 
 ## ---------------------------------------------------------------------------
 ## VOLUME  (tenant-wide, Applications domain)
@@ -291,10 +450,11 @@ type application
     define owner:  [user]
     define editor: [user]
     define viewer: [user]
+    define blacklisted: [user]
 
     define can_view:   viewer or editor or owner or can_view from tenant
     define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from [tenant]
+    define can_delete: owner or is_admin from tenant
     define can_create_release: editor or owner or is_admin from tenant
 
 ## ---------------------------------------------------------------------------
@@ -312,11 +472,12 @@ type release
     define owner:  [user]
     define editor: [user]
     define viewer: [user]
+    define blacklisted: [user] or blacklisted from application
 
     ## Computed permissions
-    define can_view:   viewer or owner or can_view from application or can_view from tenant
-    define can_update: editor or owner or can_update from application or can_update from tenant
-    define can_delete: owner or can_delete from application or is_admin from tenant
+    define can_view:   viewer or owner or can_view from application or can_view from tenant but not blacklisted
+    define can_update: editor or owner or can_update from application or can_update from tenant but not blacklisted
+    define can_delete: owner or can_delete from application or is_admin from tenant but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## DEPLOYMENT
@@ -415,142 +576,3 @@ type device_group
     define can_update: editor or owner or can_edit from tenant
     define can_delete: owner or is_admin from tenant
 
-## ---------------------------------------------------------------------------
-## TENANT  (top-level container for all non-device resources)
-##
-## Tenant-level relations grant blanket access to all resources of a type
-## within the tenant (e.g. "can create system models", "can view all volumes").
-##
-## These are intentionally kept as flat assignable relations on the tenant
-## object so that application code can check:
-##   Check(user, "can_create_system_model", tenant:<id>)
-##   Check(user, "can_view_all_system_models", tenant:<id>)
-##   … etc.
-##
-## Individual resource objects still carry their own relations for per-resource
-## grants (whitelist / blacklist patterns).
-## ---------------------------------------------------------------------------
-
-type tenant
-  relations
-    ## ---- System models ----
-    define system_model_viewer:  [user]
-    define system_model_editor:  [user]
-    define system_model_creator: [user]
-    define system_model_deleter: [user]
-
-    define can_view_all_system_models:   system_model_viewer or system_model_editor or system_model_creator or system_model_deleter
-    define can_create_system_model:      system_model_creator or system_model_editor
-    define can_update_all_system_models: system_model_editor
-    define can_delete_all_system_models: system_model_deleter
-
-    ## ---- Hardware types ----
-    define hardware_type_viewer:  [user]
-    define hardware_type_editor:  [user]
-    define hardware_type_creator: [user]
-    define hardware_type_deleter: [user]
-
-    define can_view_all_hardware_types:   hardware_type_viewer or hardware_type_editor or hardware_type_creator or hardware_type_deleter
-    define can_create_hardware_type:      hardware_type_creator or hardware_type_editor
-    define can_update_all_hardware_types: hardware_type_editor
-    define can_delete_all_hardware_types: hardware_type_deleter
-
-    ## ---- Base image collections ----
-    define base_image_collection_viewer:       [user]
-    define base_image_collection_editor:       [user]
-    define base_image_collection_creator:      [user]
-    define base_image_collection_deleter:      [user]
-    define base_image_collection_image_adder:  [user]
-    define base_image_collection_image_remover:[user]
-
-    define can_view_all_base_image_collections:   base_image_collection_viewer or base_image_collection_editor or base_image_collection_creator or base_image_collection_deleter
-    define can_create_base_image_collection:      base_image_collection_creator or base_image_collection_editor
-    define can_update_all_base_image_collections: base_image_collection_editor
-    define can_delete_all_base_image_collections: base_image_collection_deleter
-    define can_add_image_to_all_collections:      base_image_collection_image_adder or base_image_collection_editor
-    define can_remove_image_from_all_collections: base_image_collection_image_remover or base_image_collection_editor
-
-    ## ---- Image credentials ----
-    define image_credential_viewer:  [user]
-    define image_credential_editor:  [user]
-    define image_credential_deleter: [user]
-
-    define can_view_all_image_credentials:   image_credential_viewer or image_credential_editor or image_credential_deleter
-    define can_update_all_image_credentials: image_credential_editor
-    define can_delete_all_image_credentials: image_credential_deleter
-
-    ## ---- Volumes ----
-    define volume_viewer:  [user]
-    define volume_editor:  [user]
-    define volume_deleter: [user]
-
-    define can_view_all_volumes:   volume_viewer or volume_editor or volume_deleter
-    define can_update_all_volumes: volume_editor
-    define can_delete_all_volumes: volume_deleter
-
-    ## ---- Networks ----
-    define network_viewer:  [user]
-    define network_editor:  [user]
-    define network_deleter: [user]
-
-    define can_view_all_networks:   network_viewer or network_editor or network_deleter
-    define can_update_all_networks: network_editor
-    define can_delete_all_networks: network_deleter
-
-    ## ---- Containers ----
-    define container_viewer:  [user]
-    define container_editor:  [user]
-    define container_deleter: [user]
-
-    define can_view_all_containers:   container_viewer or container_editor or container_deleter
-    define can_update_all_containers: container_editor
-    define can_delete_all_containers: container_deleter
-
-    ## ---- Channels ----
-    define channel_viewer:  [user]
-    define channel_editor:  [user]
-    define channel_creator: [user]
-    define channel_deleter: [user]
-
-    define can_view_all_channels:   channel_viewer or channel_editor or channel_creator or channel_deleter
-    define can_create_channel:      channel_creator or channel_editor
-    define can_update_all_channels: channel_editor
-    define can_delete_all_channels: channel_deleter
-
-    ## ---- Device groups ----
-    define device_group_viewer:  [user]
-    define device_group_editor:  [user]
-    define device_group_creator: [user]
-    define device_group_deleter: [user]
-
-    define can_view_all_device_groups:   device_group_viewer or device_group_editor or device_group_creator or device_group_deleter
-    define can_create_device_group:      device_group_creator or device_group_editor
-    define can_update_all_device_groups: device_group_editor
-    define can_delete_all_device_groups: device_group_deleter
-
-    ## ---- Applications ----
-    define application_viewer:  [user]
-    define application_editor:  [user]
-    define application_creator: [user]
-    define application_deleter: [user]
-
-    define can_view_all_applications:   application_viewer or application_editor or application_creator or application_deleter
-    define can_create_application:      application_creator or application_editor
-    define can_update_all_applications: application_editor
-    define can_delete_all_applications: application_deleter
-
-    ## ---- Campaigns ----
-    define campaign_viewer:  [user]
-    define campaign_editor:  [user]
-    define campaign_creator: [user]
-    define campaign_deleter: [user]
-
-    define can_view_all_campaigns:  campaign_viewer or campaign_editor or campaign_creator or campaign_deleter
-    define can_create_firmware_upgrade_campaign: campaign_creator or campaign_editor
-    define can_create_deployment_campaign: campaign_creator or campaign_editor
-    define can_create_start_campaign: campaign_creator or campaign_editor
-    define can_create_stop_campaign: campaign_creator or campaign_editor
-    define can_create_update_campaign: campaign_creator or campaign_editor
-    define can_create_uninstall_campaign: campaign_creator or campaign_editor
-    define can_pause_resume_all_campaigns: campaign_editor or campaign_creator
-    define can_update_all_campaigns: campaign_editor
