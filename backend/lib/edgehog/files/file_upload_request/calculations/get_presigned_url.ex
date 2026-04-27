@@ -26,7 +26,7 @@ defmodule Edgehog.Files.FileUploadRequest.Calculations.GetPresignedUrl do
 
   @files_storage_module Application.compile_env(
                           :edgehog,
-                          :files_storage_module,
+                          :presigned_urls_storage_module,
                           Edgehog.Storage
                         )
 

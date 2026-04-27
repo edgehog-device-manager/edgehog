@@ -810,7 +810,7 @@ defmodule Edgehog.CampaignsFixtures do
     file_download_request =
       Files.fetch_file_download_request!(target.file_download_request_id, tenant: tenant)
 
-    Files.set_response(
+    Files.set_file_download_response(
       file_download_request,
       %{
         status: file_status,

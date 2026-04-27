@@ -20,7 +20,7 @@
 
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
-import { FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
   graphql,
@@ -31,12 +31,10 @@ import {
 import { useParams } from "react-router-dom";
 
 import type { FileCreate_createFile_Mutation } from "@/api/__generated__/FileCreate_createFile_Mutation.graphql";
-import type { FileCreate_deleteFile_Mutation } from "@/api/__generated__/FileCreate_deleteFile_Mutation.graphql";
 import type {
   FileCreate_getOptions_Query,
   FileCreate_getOptions_Query$data,
 } from "@/api/__generated__/FileCreate_getOptions_Query.graphql";
-import type { FileCreate_setFileUploaded_Mutation } from "@/api/__generated__/FileCreate_setFileUploaded_Mutation.graphql";
 
 import Alert from "@/components/Alert";
 import Center from "@/components/Center";
@@ -44,12 +42,9 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import CreateFileForm, { FileFormOutputData } from "@/forms/CreateFile";
-import {
-  computeDigest,
-  createTarArchive,
-  getUploadRequestHeaders,
-} from "@/lib/files";
+import { createTarArchive } from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { PayloadError } from "relay-runtime";
 
 const GET_REPOSITORY_QUERY = graphql`
   query FileCreate_getOptions_Query($repositoryId: ID!) {
@@ -66,39 +61,22 @@ const CREATE_FILE_MUTATION = graphql`
       result {
         id
         name
-        putPresignedUrl
       }
     }
   }
 `;
 
-const SET_FILE_UPLOADED_MUTATION = graphql`
-  mutation FileCreate_setFileUploaded_Mutation($fileId: ID!) {
-    setFileUploaded(id: $fileId) {
-      result {
-        id
-        fileUploaded
-      }
-    }
+class APIValidationError extends Error {
+  constructor(public errors: PayloadError[]) {
+    super("API Validation Error");
   }
-`;
-
-const DELETE_FILE_MUTATION = graphql`
-  mutation FileCreate_deleteFile_Mutation($fileId: ID!) {
-    deleteFile(id: $fileId) {
-      result {
-        id
-      }
-    }
-  }
-`;
+}
 
 type FileCreateContentProps = {
   repository: NonNullable<FileCreate_getOptions_Query$data["repository"]>;
 };
 
 const FileCreateContent = ({ repository }: FileCreateContentProps) => {
-  const intl = useIntl();
   const navigate = useNavigate();
 
   const [isUploading, setIsUploading] = useState(false);
@@ -107,167 +85,103 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
   const [createFile, isCreatingFile] =
     useMutation<FileCreate_createFile_Mutation>(CREATE_FILE_MUTATION);
 
-  const [setFileUploaded] = useMutation<FileCreate_setFileUploaded_Mutation>(
-    SET_FILE_UPLOADED_MUTATION,
-  );
+  const prepareUploadFile = async (files: File[], archiveName?: string) => {
+    const hasRelativePaths = files.some((f) => !!f.webkitRelativePath);
+    const needsArchive = files.length > 1 || hasRelativePaths;
 
-  const [deleteFile] =
-    useMutation<FileCreate_deleteFile_Mutation>(DELETE_FILE_MUTATION);
+    if (needsArchive) {
+      const tarBlob = await createTarArchive(files);
+      const baseName = archiveName?.trim() || "files-archive";
+      const fileName = baseName.endsWith(".tar") ? baseName : `${baseName}.tar`;
+      const uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
+
+      return {
+        file: new File([tarBlob], fileName, { type: "application/x-tar" }),
+        fileName,
+        uncompressedSize,
+      };
+    }
+
+    const singleFile = files[0];
+    return {
+      file: singleFile,
+      fileName: singleFile.name,
+      uncompressedSize: singleFile.size,
+    };
+  };
 
   const commitCreateFile = useCallback(
     (input: FileCreate_createFile_Mutation["variables"]["input"]) =>
-      new Promise<
-        NonNullable<
-          FileCreate_createFile_Mutation["response"]["createFile"]
-        >["result"]
-      >((resolve, reject) => {
+      new Promise((resolve, reject) => {
         createFile({
           variables: { input },
           onCompleted: (data, errors) => {
-            if (errors?.length) return reject(errors);
+            if (errors && errors.length > 0) {
+              return reject(new APIValidationError(errors));
+            }
 
-            const result = data.createFile?.result;
-            if (!result) return reject(new Error("Missing file result"));
-
-            resolve(result);
+            const result = data?.createFile?.result;
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error("No result returned from mutation"));
+            }
           },
-          onError: reject,
+          onError: (err) => reject(err),
         });
       }),
     [createFile],
   );
 
-  const commitSetFileUploaded = useCallback(
-    (variables: FileCreate_setFileUploaded_Mutation["variables"]) =>
-      new Promise<void>((resolve, reject) => {
-        setFileUploaded({
-          variables,
-          onCompleted: (_data, errors) => {
-            if (errors?.length) return reject(errors);
-            resolve();
-          },
-          onError: reject,
-        });
-      }),
-    [setFileUploaded],
-  );
-
-  const commitDeleteFile = useCallback(
-    (variables: FileCreate_deleteFile_Mutation["variables"]) =>
-      new Promise<void>((resolve, reject) => {
-        deleteFile({
-          variables,
-          onCompleted: (_data, errors) => {
-            if (errors?.length) return reject(errors);
-            resolve();
-          },
-          onError: reject,
-        });
-      }),
-    [deleteFile],
-  );
-
   const handleCreateFile = useCallback(
     async (values: FileFormOutputData) => {
+      const { files, archiveName, repositoryId } = values;
+      if (!files?.length) return;
+
+      setIsUploading(true);
+      setErrorFeedback(null);
+
       try {
-        const { files, archiveName, repositoryId } = values;
+        const { file, fileName, uncompressedSize } = await prepareUploadFile(
+          files,
+          archiveName,
+        );
 
-        let uploadBlob: Blob;
-        let fileName: string;
-        let uncompressedSize: number;
-
-        const hasRelativePaths = files.some((f) => f.webkitRelativePath);
-        const needsArchive = files.length > 1 || hasRelativePaths;
-
-        if (needsArchive) {
-          uploadBlob = await createTarArchive(files);
-          fileName = archiveName?.trim() || "files-archive";
-          uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
-        } else {
-          uploadBlob = files[0];
-          fileName = files[0].name;
-          uncompressedSize = files[0].size;
-        }
-
-        const digest = await computeDigest(uploadBlob);
-
-        const result = await commitCreateFile({
+        await commitCreateFile({
           repositoryId,
+          file,
           name: fileName,
           size: uncompressedSize,
-          digest,
         });
 
-        if (!result) {
-          throw new Error("File creation returned no result");
-        }
-
-        const fileId = result.id;
-
-        if (!result.putPresignedUrl) {
-          throw new Error("Missing upload URL");
-        }
-
-        setIsUploading(true);
-
-        try {
-          const uploadResponse = await fetch(result.putPresignedUrl, {
-            method: "PUT",
-            headers: getUploadRequestHeaders(result.putPresignedUrl),
-            body: uploadBlob,
-          });
-
-          if (!uploadResponse.ok) {
-            await commitDeleteFile({ fileId });
-
-            throw new Error(
-              intl.formatMessage(
-                {
-                  id: "pages.FileCreate.error.uploadFailed",
-                  defaultMessage:
-                    "File upload failed with status {status}: {statusText}.",
-                },
-                {
-                  status: uploadResponse.status,
-                  statusText: uploadResponse.statusText,
-                },
-              ),
-            );
-          }
-        } finally {
-          setIsUploading(false);
-        }
-
-        await commitSetFileUploaded({ fileId });
-
-        setErrorFeedback(null);
-
+        setIsUploading(false);
         navigate({
           route: Route.repositoryEdit,
           params: { repositoryId },
         });
-      } catch (err: unknown) {
-        let message: React.ReactNode = null;
+      } catch (err) {
+        setIsUploading(false);
 
-        if (Array.isArray(err) && err.every((e) => e?.message)) {
-          message = err.map((e) => e.message).join(".\n");
-        } else if (err instanceof Error) {
-          message = err.message;
-        }
-
-        setErrorFeedback(
-          message || (
+        if (err instanceof APIValidationError) {
+          const message = err.errors
+            .map(({ fields, message }) =>
+              fields.length ? `${fields.join(", ")}: ${message}` : message,
+            )
+            .join(". ");
+          setErrorFeedback(message);
+        } else {
+          setErrorFeedback(
             <FormattedMessage
-              id="pages.FileCreate.creationErrorFeedback"
-              defaultMessage="Could not create the File, please try again."
-            />
-          ),
-        );
+              id="pages.FileCreate.archivationErrorFeedback"
+              defaultMessage="Could not process or upload selected files. {details}"
+              values={{ details: err instanceof Error ? err.message : "" }}
+            />,
+          );
+        }
       }
     },
-    [commitCreateFile, commitSetFileUploaded, commitDeleteFile, navigate, intl],
+    [navigate, commitCreateFile, setIsUploading, setErrorFeedback],
   );
-
   return (
     <Page>
       <Page.Header

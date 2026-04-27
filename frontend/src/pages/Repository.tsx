@@ -126,13 +126,11 @@ const DELETE_REPOSITORY_MUTATION = graphql`
 `;
 
 interface FilesLayoutContainerProps {
-  setErrorFeedback: (feedback: React.ReactNode) => void;
   repositoryRef: Repository_FilesFragment$key;
   searchText: string | null;
 }
 
 const FilesLayoutContainer = ({
-  setErrorFeedback,
   repositoryRef,
   searchText,
 }: FilesLayoutContainerProps) => {
@@ -167,7 +165,6 @@ const FilesLayoutContainer = ({
 
   return (
     <FilesTable
-      setErrorFeedback={setErrorFeedback}
       filesRef={filesRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
@@ -323,7 +320,6 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
           onChange={setSearchText}
         />
         <FilesLayoutContainer
-          setErrorFeedback={setErrorFeedback}
           repositoryRef={repository}
           searchText={searchText}
         />

@@ -20,37 +20,42 @@
 
 defmodule Edgehog.Files.FileDownloadRequest.Changes.HandleEphemeralFileDeletion do
   @moduledoc """
-  Deletes a file from the storage backend that was uploaded via a presigned URL.
+  Ash change responsible for deleting the ephemeral file associated
+  with a file download request when the request is deleted.
   """
+
   use Ash.Resource.Change
 
-  @files_storage_module Application.compile_env(
-                          :edgehog,
-                          :files_storage_module,
-                          Edgehog.Storage
-                        )
+  alias Edgehog.Files.EphemeralFile
+
+  @ephemeral_file_module Application.compile_env(
+                           :edgehog,
+                           :files_ephemeral_file_module,
+                           EphemeralFile
+                         )
 
   @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
 
   def change(changeset, _opts, _context) do
-    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
-      delete_old_file(result)
-    end)
+    Ash.Changeset.after_transaction(changeset, &cleanup_file_url/2)
   end
 
-  defp delete_old_file({:ok, file_download_request} = result) do
-    tenant_id = file_download_request.tenant_id
-    file_download_request_id = file_download_request.id
-    filename = file_download_request.file_name
+  defp cleanup_file_url(changeset, {:ok, file_download_request} = result) do
+    tenant_id = changeset.to_tenant
 
-    file_path =
-      "uploads/tenants/#{tenant_id}/ephemeral_file_download_requests/#{file_download_request_id}/files/#{filename}"
-
-    _ = @files_storage_module.delete(file_path)
+    # We do our best to clean up
+    _ =
+      @ephemeral_file_module.delete(
+        tenant_id,
+        file_download_request.id,
+        file_download_request.url
+      )
 
     result
   end
 
-  defp delete_old_file(result), do: result
+  defp cleanup_file_url(_changeset, result) do
+    result
+  end
 end

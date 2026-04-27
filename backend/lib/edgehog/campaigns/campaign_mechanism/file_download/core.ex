@@ -61,7 +61,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   def mark_operation_as_timed_out!(_mechanism, operation_id, tenant_id) do
     file_download_request = Files.fetch_file_download_request!(operation_id, tenant: tenant_id)
 
-    case Files.set_response(
+    case Files.set_file_download_response(
            file_download_request,
            %{status: :failed, response_code: -1, response_message: "Request timed out"},
            tenant: tenant_id

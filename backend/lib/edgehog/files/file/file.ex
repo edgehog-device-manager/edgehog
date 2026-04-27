@@ -24,8 +24,8 @@ defmodule Edgehog.Files.File do
     domain: Edgehog.Files,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Files.File.Calculations
   alias Edgehog.Files.File.Changes
+  alias Edgehog.Files.File.FileData
 
   graphql do
     type :file
@@ -38,28 +38,33 @@ defmodule Edgehog.Files.File do
       description "Creates a new file"
       primary? true
 
-      accept [:name, :size, :digest]
+      accept [:name, :size]
 
       argument :repository_id, :uuid do
         description "The ID of the repository this file will belong to."
         allow_nil? false
       end
 
+      argument :file, Edgehog.Types.Upload do
+        description "The file to upload, which will be stored in the bucket."
+        allow_nil? false
+      end
+
+      change Changes.HandleFileUpload
+
+      change Changes.SetIsArchive
+
       change manage_relationship(:repository_id, :repository, type: :append)
     end
 
     create :create_fixture do
-      accept [:name, :size, :digest]
+      accept [:name, :size, :base_file, :gz_file, :lz4_file, :is_archive]
 
       argument :repository_id, :uuid do
         allow_nil? false
       end
 
       change manage_relationship(:repository_id, :repository, type: :append)
-    end
-
-    update :set_file_uploaded do
-      change set_attribute(:file_uploaded, true)
     end
 
     destroy :destroy do
@@ -67,7 +72,7 @@ defmodule Edgehog.Files.File do
       primary? true
       require_atomic? false
 
-      change Changes.DeleteFile
+      change Changes.HandleFileDeletion
     end
 
     destroy :destroy_fixture
@@ -88,16 +93,28 @@ defmodule Edgehog.Files.File do
       public? true
     end
 
-    attribute :digest, :string do
-      description "File digest in format algorithm:hash (e.g., sha256:abc123) for integrity checks."
+    attribute :is_archive, :boolean do
+      description "Used to determine encoding in campaigns"
       allow_nil? false
       public? true
     end
 
-    attribute :file_uploaded, :boolean do
-      description "Represents whether a file is uploaded using the put url"
+    attribute :base_file, FileData do
+      description "The computed url and digest for the base file"
+      allow_nil? false
       public? true
-      default false
+    end
+
+    attribute :gz_file, FileData do
+      description "The computed url and digest for the gz compressed base file"
+      allow_nil? false
+      public? true
+    end
+
+    attribute :lz4_file, FileData do
+      description "The computed url and digest for the lz4 compressed base file"
+      allow_nil? false
+      public? true
     end
 
     timestamps()
@@ -110,24 +127,6 @@ defmodule Edgehog.Files.File do
       attribute_public? false
       attribute_type :uuid
       allow_nil? false
-    end
-  end
-
-  calculations do
-    calculate :get_presigned_url, :string do
-      public? true
-
-      description "Get a presigned URL for downloading the file. The URL is valid for a limited time."
-
-      calculation Calculations.GetPresignedUrl
-    end
-
-    calculate :put_presigned_url, :string do
-      public? true
-
-      description "Get a presigned URL for uploading the file. The URL is valid for a limited time."
-
-      calculation Calculations.PutPresignedUrl
     end
   end
 

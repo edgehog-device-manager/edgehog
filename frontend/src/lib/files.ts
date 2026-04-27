@@ -18,38 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { sha256 } from "@noble/hashes/sha2.js";
-
 const BLOCK_SIZE = 512;
-const DIGEST_CHUNK_SIZE = 8 * 1024 * 1024;
-const S3_SINGLE_PUT_MAX_SIZE_BYTES = 5 * 1024 * 1024 * 1024;
-
-const toHex = (bytes: Uint8Array): string =>
-  Array.from(bytes)
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-
-// Computes a SHA-256 digest of binary data
-const computeDigest = async (data: Blob | Uint8Array): Promise<string> => {
-  if (data instanceof Uint8Array) {
-    return `sha256:${toHex(sha256(data))}`;
-  }
-
-  const hash = sha256.create();
-  let offset = 0;
-
-  // Hash large blobs in chunks to avoid allocating a giant ArrayBuffer.
-  while (offset < data.size) {
-    const nextOffset = Math.min(offset + DIGEST_CHUNK_SIZE, data.size);
-    const chunk = new Uint8Array(
-      await data.slice(offset, nextOffset).arrayBuffer(),
-    );
-    hash.update(chunk);
-    offset = nextOffset;
-  }
-
-  return `sha256:${toHex(hash.digest())}`;
-};
 
 const formatFileSize = (bytes: number): string => {
   if (bytes === 0) return "0 B";
@@ -65,23 +34,6 @@ const formatFileSize = (bytes: number): string => {
   const value = bytes / Math.pow(k, i);
 
   return `${i === 0 ? value : value.toFixed(1).replace(/\.0$/, "")} ${sizes[i]}`;
-};
-
-const isS3PresignedPutUrl = (url: string): boolean => {
-  try {
-    const parsed = new URL(url);
-    return parsed.searchParams.has("X-Amz-Algorithm");
-  } catch {
-    return false;
-  }
-};
-
-const getUploadRequestHeaders = (url: string): HeadersInit | undefined => {
-  if (isS3PresignedPutUrl(url)) {
-    return undefined;
-  }
-
-  return { "x-ms-blob-type": "BlockBlob" };
 };
 
 // Returns the path to use as the tar entry name.
@@ -202,11 +154,4 @@ const createTarArchive = (files: File[]): Blob => {
   return new Blob(chunks, { type: "application/x-tar" });
 };
 
-export {
-  computeDigest,
-  createTarArchive,
-  formatFileSize,
-  getUploadRequestHeaders,
-  isS3PresignedPutUrl,
-  S3_SINGLE_PUT_MAX_SIZE_BYTES,
-};
+export { createTarArchive, formatFileSize };

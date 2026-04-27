@@ -18,11 +18,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.File.Changes.DeleteFile do
+defmodule Edgehog.Files.File.Changes.HandleFileDeletion do
   @moduledoc """
-  Deletes a file from the storage backend that was uploaded via a presigned URL.
+  Ash change to handle file deletion after a file record is deleted.
   """
+
   use Ash.Resource.Change
+
+  alias Edgehog.Files.File.BucketStorage
+
+  require Logger
+
+  @storage_module Application.compile_env(
+                    :edgehog,
+                    :files_storage_module,
+                    BucketStorage
+                  )
 
   @impl Ash.Resource.Change
   def change(%Ash.Changeset{valid?: false} = changeset, _opts, _context), do: changeset
@@ -34,13 +45,9 @@ defmodule Edgehog.Files.File.Changes.DeleteFile do
   end
 
   defp delete_old_file({:ok, file} = result) do
-    tenant_id = file.tenant_id
-    repository_id = file.repository_id
-    filename = file.name
-
-    file_path = "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}"
-
-    _ = Edgehog.Storage.delete(file_path)
+    _ = @storage_module.delete(file, nil)
+    _ = @storage_module.delete(file, :gz)
+    _ = @storage_module.delete(file, :lz4)
 
     result
   end

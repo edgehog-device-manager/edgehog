@@ -751,6 +751,12 @@
   "components.DeviceTabs.FilesUploadTab": {
     "defaultMessage": "Files Upload"
   },
+  "components.DeviceTabs.FilesUploadTab.archivationErrorFeedback": {
+    "defaultMessage": "Could not process files locally. Please try again."
+  },
+  "components.DeviceTabs.FilesUploadTab.creationErrorFeedback": {
+    "defaultMessage": "Could not create file download request, please try again."
+  },
   "components.DeviceTabs.FilesUploadTab.destinationType.filesystem": {
     "defaultMessage": "File System"
   },
@@ -760,18 +766,6 @@
   "components.DeviceTabs.FilesUploadTab.destinationType.streaming": {
     "defaultMessage": "Streaming"
   },
-  "components.DeviceTabs.FilesUploadTab.error.presignedUrlMissingFields": {
-    "defaultMessage": "Presigned URL response is missing put_url or get_url."
-  },
-  "components.DeviceTabs.FilesUploadTab.error.presignedUrlParseFailed": {
-    "defaultMessage": "Failed to parse the presigned URL response."
-  },
-  "components.DeviceTabs.FilesUploadTab.error.unknownError": {
-    "defaultMessage": "An unknown error occurred."
-  },
-  "components.DeviceTabs.FilesUploadTab.error.uploadFailed": {
-    "defaultMessage": "File upload failed with status {status}: {statusText}{body}."
-  },
   "components.DeviceTabs.FilesUploadTab.modeFile": {
     "defaultMessage": "Direct File"
   },
@@ -780,6 +774,9 @@
   },
   "components.DeviceTabs.FilesUploadTab.requestHistory": {
     "defaultMessage": "Request History"
+  },
+  "components.DeviceTabs.FilesUploadTab.uploadErrorFeedback": {
+    "defaultMessage": "Upload failed. Please check your connection."
   },
   "components.DeviceTabs.FilesUploadTab.uploadLocation": {
     "defaultMessage": "Upload Location"
@@ -1111,9 +1108,6 @@
   },
   "components.FilesTable.action": {
     "defaultMessage": "Action"
-  },
-  "components.FilesTable.downloadError": {
-    "defaultMessage": "Failed to download file"
   },
   "components.FilesTable.nameTitle": {
     "defaultMessage": "File Name",
@@ -3299,11 +3293,8 @@
   "pages.Devices.title": {
     "defaultMessage": "Devices"
   },
-  "pages.FileCreate.creationErrorFeedback": {
-    "defaultMessage": "Could not create the File, please try again."
-  },
-  "pages.FileCreate.error.uploadFailed": {
-    "defaultMessage": "File upload failed with status {status}: {statusText}."
+  "pages.FileCreate.archivationErrorFeedback": {
+    "defaultMessage": "Could not process or upload selected files. {details}"
   },
   "pages.FileCreate.repositoryNotFound.message": {
     "defaultMessage": "Return to the Repository list."

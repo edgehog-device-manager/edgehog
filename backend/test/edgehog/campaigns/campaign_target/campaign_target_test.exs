@@ -273,7 +273,8 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
       assert {:ok, request} =
                Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
 
-      assert {:ok, _request} = Files.set_status(request, %{status: :pending}, tenant: tenant)
+      assert {:ok, _request} =
+               Files.set_file_download_status(request, %{status: :pending}, tenant: tenant)
 
       assert {:ok, [pending_target]} =
                Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
@@ -300,7 +301,8 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
       assert {:ok, request} =
                Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
 
-      assert {:ok, _request} = Files.set_status(request, %{status: :in_progress}, tenant: tenant)
+      assert {:ok, _request} =
+               Files.set_file_download_status(request, %{status: :in_progress}, tenant: tenant)
 
       assert {:ok, []} =
                Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
@@ -314,7 +316,8 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
       assert {:ok, request} =
                Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
 
-      assert {:ok, _request} = Files.set_status(request, %{status: :completed}, tenant: tenant)
+      assert {:ok, _request} =
+               Files.set_file_download_status(request, %{status: :completed}, tenant: tenant)
 
       assert {:ok, []} =
                Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
@@ -328,7 +331,8 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
       assert {:ok, request} =
                Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
 
-      assert {:ok, _request} = Files.set_status(request, %{status: :failed}, tenant: tenant)
+      assert {:ok, _request} =
+               Files.set_file_download_status(request, %{status: :failed}, tenant: tenant)
 
       assert {:ok, []} =
                Campaigns.list_targets_with_pending_file_download_request(target.campaign_id,
@@ -342,7 +346,8 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
       assert {:ok, request} =
                Files.fetch_file_download_request(target.file_download_request_id, tenant: tenant)
 
-      assert {:ok, _request} = Files.set_status(request, %{status: :sent}, tenant: tenant)
+      assert {:ok, _request} =
+               Files.set_file_download_status(request, %{status: :sent}, tenant: tenant)
 
       assert {:ok, _target} =
                Campaigns.mark_target_as_successful(

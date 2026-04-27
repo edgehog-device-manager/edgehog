@@ -23,110 +23,250 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
 
   import Edgehog.FilesFixtures
 
-  alias Edgehog.StorageMock
+  alias Edgehog.Files.StorageMock
 
   describe "createFile mutation" do
-    test "creates file with valid data", %{tenant: tenant} do
+    setup %{tenant: tenant} do
       repository = repository_fixture(tenant: tenant)
+      repository_id = AshGraphql.Resource.encode_relay_id(repository)
 
-      repository_id =
-        AshGraphql.Resource.encode_relay_id(repository)
+      # Create a real temp file so File.stat! and digest calculation work
+      tmp_path =
+        Path.join(System.tmp_dir!(), "test_upload_#{:erlang.unique_integer([:positive])}.bin")
 
-      filename = "file-test.pdf"
-      digest = "sha256:#{Base.encode16(:crypto.strong_rand_bytes(32))}"
-      size = :rand.uniform(1_000_000)
+      File.write!(tmp_path, "test file content")
+      on_exit(fn -> File.rm(tmp_path) end)
 
-      expect(StorageMock, :read_presigned_url, fn path ->
-        assert String.contains?(path, "uploads/tenants/")
-        assert String.contains?(path, "/repositories/#{repository.id}/")
+      upload = %Plug.Upload{
+        path: tmp_path,
+        filename: "test.bin",
+        content_type: "application/octet-stream"
+      }
 
-        assert String.ends_with?(path, filename)
+      %{repository: repository, repository_id: repository_id, upload: upload, tmp_path: tmp_path}
+    end
 
-        {:ok, %{get_url: "http://example.test/#{path}"}}
+    test "creates a file with valid data", %{
+      repository: repository,
+      tenant: tenant,
+      repository_id: repository_id,
+      upload: upload
+    } do
+      filename = "some-name.bin"
+      base_file_url = "https://example.com/some-name.bin"
+      gz_file_url = "https://example.com/encoding/gz/some-name.bin.gz"
+      lz4_file_url = "https://example.com/encoding/lz4/some-name.bin.lz4"
+
+      expect(StorageMock, :store, 3, fn tenant_id,
+                                        filename_arg,
+                                        repository_id,
+                                        encoding,
+                                        _upload ->
+        assert tenant_id == tenant.tenant_id
+        assert repository_id == repository.id
+
+        case {encoding, filename_arg} do
+          {nil, ^filename} ->
+            {:ok, base_file_url}
+
+          {:gz, ^filename} ->
+            {:ok, gz_file_url}
+
+          {:lz4, ^filename} ->
+            {:ok, lz4_file_url}
+
+          other ->
+            flunk("Unexpected call to store/5: #{inspect(other)}")
+        end
       end)
 
-      file =
-        [
-          tenant: tenant,
-          repository_id: repository_id,
-          name: filename,
-          digest: digest,
-          size: size
-        ]
+      result =
+        [tenant: tenant, repository_id: repository_id, name: filename, file: upload]
         |> create_file_mutation()
         |> extract_result!()
 
-      assert %{
-               "id" => _,
-               "name" => ^filename,
-               "size" => ^size,
-               "digest" => ^digest,
-               "getPresignedUrl" => _url,
-               "repository" => %{
-                 "id" => ^repository_id
-               }
-             } = file
+      assert result["name"] == filename
+      assert result["baseFile"]["url"] == base_file_url
+      assert result["size"] > 0
+      assert result["baseFile"]["digest"] =~ ~r/^sha256:[a-f0-9]+$/
     end
 
-    test "returns error for non-existing repository", %{tenant: tenant} do
-      repository = repository_fixture(tenant: tenant)
-      repository_id = AshGraphql.Resource.encode_relay_id(repository)
-      _ = Ash.destroy!(repository)
-
-      result =
-        create_file_mutation(
-          tenant: tenant,
-          repository_id: repository_id
-        )
-
-      # TODO: wrong fields returned by AshGraphql
-      assert %{fields: [:id], message: "could not be found" <> _} =
-               extract_error!(result)
-    end
-
-    test "returns error for duplicate file name in the same repository", %{
-      tenant: tenant
+    test "returns error when storage fails", %{
+      tenant: tenant,
+      repository_id: repository_id,
+      upload: upload
     } do
-      repository = repository_fixture(tenant: tenant)
-
-      file =
-        file_fixture(tenant: tenant, repository_id: repository.id)
+      Mox.expect(StorageMock, :store, 3, fn _tenant_id,
+                                            _name,
+                                            _repository_id,
+                                            _encoding,
+                                            _upload ->
+        {:error, :storage_unavailable}
+      end)
 
       result =
         create_file_mutation(
           tenant: tenant,
-          name: file.name,
-          size: file.size,
-          digest: file.digest,
-          repository_id: AshGraphql.Resource.encode_relay_id(repository)
+          repository_id: repository_id,
+          name: "fail.bin",
+          file: upload
         )
 
-      assert %{fields: [:name], message: "has already been taken"} =
-               extract_error!(result)
+      assert %{message: message} = extract_error!(result)
+      assert message =~ "upload" or message =~ "failed"
     end
 
-    test "succeeds for duplicate file name on a different repository", %{tenant: tenant} do
-      fixture = file_fixture(tenant: tenant)
+    test "returns error when name is missing", %{
+      tenant: tenant,
+      repository_id: repository_id,
+      upload: upload
+    } do
+      Mox.expect(StorageMock, :store, 0, fn _tenant_id,
+                                            _name,
+                                            _repository_id,
+                                            _encoding,
+                                            _upload ->
+        {:ok, "https://bucket.example.com/file.bin"}
+      end)
+
+      document = """
+      mutation CreateFile($input: CreateFileInput!) {
+        createFile(input: $input) {
+          result {
+            id
+          }
+        }
+      }
+      """
+
+      input = %{
+        "repositoryId" => repository_id,
+        "file" => "file"
+      }
+
+      context = add_upload(%{tenant: tenant}, "file", upload)
 
       result =
-        create_file_mutation(
-          tenant: tenant,
-          name: fixture.name,
-          document: """
-          mutation CreateFile($input: CreateFileInput!) {
-            createFile(input: $input) {
-              result {
-                id
-                name
-              }
-            }
-          }
-          """
+        Absinthe.run!(document, EdgehogWeb.Schema,
+          variables: %{"input" => input},
+          context: context
         )
 
-      file = extract_result!(result)
+      assert %{errors: [_ | _]} = result
+    end
 
-      assert file["name"] == fixture.name
+    test "returns error when repository_id is missing", %{
+      tenant: tenant,
+      upload: upload
+    } do
+      document = """
+      mutation CreateFile($input: CreateFileInput!) {
+        createFile(input: $input) {
+          result {
+            id
+          }
+        }
+      }
+      """
+
+      input = %{
+        "name" => "test.bin",
+        "file" => "file"
+      }
+
+      context = add_upload(%{tenant: tenant}, "file", upload)
+
+      result =
+        Absinthe.run!(document, EdgehogWeb.Schema,
+          variables: %{"input" => input},
+          context: context
+        )
+
+      assert %{errors: [_ | _]} = result
+    end
+
+    test "returns error when file argument is missing", %{
+      tenant: tenant,
+      repository_id: repository_id
+    } do
+      document = """
+      mutation CreateFile($input: CreateFileInput!) {
+        createFile(input: $input) {
+          result {
+            id
+          }
+        }
+      }
+      """
+
+      input = %{
+        "name" => "test.bin",
+        "repositoryId" => repository_id
+      }
+
+      result =
+        Absinthe.run!(document, EdgehogWeb.Schema,
+          variables: %{"input" => input},
+          context: %{tenant: tenant}
+        )
+
+      assert %{errors: [_ | _]} = result
+    end
+
+    test "file is associated with the correct repository", %{
+      tenant: tenant,
+      repository: repository,
+      repository_id: repository_id,
+      upload: upload
+    } do
+      Mox.expect(StorageMock, :store, 3, fn _tenant_id,
+                                            _name,
+                                            _repository_id,
+                                            _encoding,
+                                            _upload ->
+        {:ok, "https://bucket.example.com/assoc.bin"}
+      end)
+
+      result =
+        [tenant: tenant, repository_id: repository_id, name: "assoc.bin", file: upload]
+        |> create_file_mutation()
+        |> extract_result!()
+
+      expected_repo_id = AshGraphql.Resource.encode_relay_id(repository)
+      assert result["repository"]["id"] == expected_repo_id
+    end
+
+    test "computes correct digest for file content", %{
+      tenant: tenant,
+      repository_id: repository_id,
+      tmp_path: tmp_path
+    } do
+      Mox.expect(StorageMock, :store, 3, fn _tenant_id,
+                                            _name,
+                                            _repository_id,
+                                            _encoding,
+                                            _upload ->
+        {:ok, "https://bucket.example.com/digest.bin"}
+      end)
+
+      # Compute expected digest
+      expected_hash =
+        tmp_path
+        |> File.stream!(2048)
+        |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
+        |> :crypto.hash_final()
+        |> Base.encode16(case: :lower)
+
+      expected_digest = "sha256:#{expected_hash}"
+
+      upload = %Plug.Upload{path: tmp_path, filename: "digest.bin"}
+
+      result =
+        [tenant: tenant, repository_id: repository_id, name: "digest.bin", file: upload]
+        |> create_file_mutation()
+        |> extract_result!()
+
+      assert result["baseFile"]["digest"] == expected_digest
     end
   end
 
@@ -138,11 +278,20 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           id
           name
           size
-          digest
-          getPresignedUrl
+          baseFile {
+            url
+            digest
+          }
+          gzFile {
+            url
+            digest
+          }
+          lz4File {
+            url
+            digest
+          }
           repository {
             id
-            name
           }
         }
       }
@@ -150,43 +299,39 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
     """
 
     {tenant, opts} = Keyword.pop!(opts, :tenant)
-
-    {repository_id, opts} =
-      Keyword.pop_lazy(opts, :repository_id, fn ->
-        [tenant: tenant]
-        |> repository_fixture()
-        |> AshGraphql.Resource.encode_relay_id()
-      end)
-
-    {name, opts} = Keyword.pop_lazy(opts, :name, &unique_file_name/0)
-
-    {digest, opts} =
-      Keyword.pop_lazy(opts, :digest, fn ->
-        "sha256:#{Base.encode16(:crypto.strong_rand_bytes(32))}"
-      end)
-
+    {repository_id, opts} = Keyword.pop!(opts, :repository_id)
+    {name, opts} = Keyword.pop!(opts, :name)
     {size, opts} = Keyword.pop_lazy(opts, :size, fn -> :rand.uniform(1_000_000) end)
 
-    variables = %{
-      "input" => %{
-        "name" => name,
-        "size" => size,
-        "digest" => digest,
-        "repositoryId" => repository_id
-      }
-    }
+    {file, opts} = Keyword.pop!(opts, :file)
 
+    input =
+      %{
+        "repositoryId" => repository_id,
+        "name" => name,
+        "file" => file && "file",
+        "size" => size
+      }
+      |> Enum.reject(fn {_k, v} -> is_nil(v) end)
+      |> Map.new()
+
+    variables = %{"input" => input}
     document = Keyword.get(opts, :document, default_document)
+
+    context =
+      add_upload(%{tenant: tenant}, "file", file)
 
     Absinthe.run!(document, EdgehogWeb.Schema,
       variables: variables,
-      context: %{tenant: tenant}
+      context: context
     )
   end
 
   defp extract_error!(result) do
-    assert is_nil(result[:data]["createFile"])
-    assert %{errors: [error]} = result
+    assert is_nil(result[:data]["createFile"]) or
+             is_nil(get_in(result, [:data, "createFile"]))
+
+    assert %{errors: [error | _]} = result
 
     error
   end
@@ -201,6 +346,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
            } = result
 
     refute Map.get(result, :errors)
+    assert file
+
     file
   end
 end

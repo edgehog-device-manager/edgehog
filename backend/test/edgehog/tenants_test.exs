@@ -29,8 +29,9 @@ defmodule Edgehog.TenantsTest do
   alias Ash.Error.Invalid
   alias Edgehog.Astarte
   alias Edgehog.BaseImages.StorageMock, as: BaseImagesStorageMock
+  alias Edgehog.Files.EphemeralFileMock
+  alias Edgehog.Files.StorageMock, as: FilesStorageMock
   alias Edgehog.OSManagement.EphemeralImageMock
-  alias Edgehog.StorageMock
   alias Edgehog.Tenants
   alias Edgehog.Tenants.ReconcilerMock
   alias Edgehog.Tenants.Tenant
@@ -366,10 +367,8 @@ defmodule Edgehog.TenantsTest do
         :ok
       end)
 
-      test_pid = self()
-
-      expect(StorageMock, :delete, 2, fn path ->
-        send(test_pid, {:file_deleted, path})
+      expect(FilesStorageMock, :delete, 3, fn to_delete, _encoding ->
+        assert to_delete.id == file.id
         :ok
       end)
 
@@ -380,16 +379,14 @@ defmodule Edgehog.TenantsTest do
         :ok
       end)
 
+      expect(EphemeralFileMock, :delete, fn tenant_id, file_download_request_id, url ->
+        assert tenant_id == file_download_request.tenant_id
+        assert file_download_request_id == file_download_request.id
+        assert url == file_download_request.url
+        :ok
+      end)
+
       assert :ok = Tenants.destroy_tenant(tenant)
-
-      expected_repository_path =
-        "uploads/tenants/#{tenant.tenant_id}/repositories/#{repository.id}/files/#{file.name}"
-
-      expected_ephemeral_path =
-        "uploads/tenants/#{tenant.tenant_id}/ephemeral_file_download_requests/#{file_download_request.id}/files/#{file_download_request.file_name}"
-
-      assert_received {:file_deleted, ^expected_repository_path}
-      assert_received {:file_deleted, ^expected_ephemeral_path}
 
       refute entry_exists?(Edgehog.Devices.HardwareType, hardware_type.id, tenant)
       refute entry_exists?(Edgehog.Devices.SystemModel, system_model.id, tenant)

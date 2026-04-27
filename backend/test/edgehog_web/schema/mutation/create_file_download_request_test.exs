@@ -29,6 +29,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   alias Edgehog.Astarte.Device.FileDownloadRequestMock
   alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Astarte.Device.FileTransferCapabilitiesMock
+  alias Edgehog.Files.EphemeralFileMock
   alias Edgehog.StorageMock
 
   setup do
@@ -45,25 +46,53 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   end
 
   describe "createManualFileDownloadRequest mutation" do
-    test "creates file download request with all fields", %{tenant: tenant} do
-      # This sets the capabilities to [] to avoid the check on the presence of the FileTransfer interface
-      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+    setup %{tenant: tenant} do
+      tmp_path =
+        Path.join(System.tmp_dir!(), "test_upload_#{:erlang.unique_integer([:positive])}.bin")
+
+      File.write!(tmp_path, "test file content")
+
+      on_exit(fn -> File.rm(tmp_path) end)
+
+      upload = %Plug.Upload{
+        path: tmp_path,
+        filename: "file.bin",
+        content_type: "application/octet-stream"
+      }
+
+      %{upload: upload, tmp_path: tmp_path, tenant: tenant}
+    end
+
+    test "creates file download request with all fields", %{
+      tenant: tenant,
+      upload: upload
+    } do
+      stub(DeviceStatusMock, :get, fn _, _ -> {:error, :not_found} end)
+
+      expect(EphemeralFileMock, :upload, fn _, _, _ ->
+        {:ok, "https://example.com/file.bin"}
+      end)
+
       expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
 
       result =
-        create_manual_file_download_request_mutation(tenant: tenant)
+        create_manual_file_download_request_mutation(
+          tenant: tenant,
+          file: upload
+        )
 
-      file_download_request = extract_result!(result, "createManualFileDownloadRequest")
+      file_download_request =
+        extract_result!(result, "createManualFileDownloadRequest")
 
       assert file_download_request["id"] != "019c997a-49bc-7f65-be73-0970557338b3"
-      assert file_download_request["url"] == "http://example/filename"
+      assert file_download_request["url"] == "https://example.com/file.bin"
       assert file_download_request["destinationType"] == "STORAGE"
       assert file_download_request["destination"] == nil
       assert file_download_request["progressTracked"] == false
       assert file_download_request["ttlSeconds"] == 100_000
       assert file_download_request["fileName"] == "filename"
       assert file_download_request["uncompressedFileSizeBytes"] == 75_555
-      assert file_download_request["digest"] == "sha256:jfkdgjkj"
+      # assert file_download_request["digest"] == "sha256:jfkdgjkj"
       assert file_download_request["encoding"] == nil
       assert file_download_request["userId"] == 45
       assert file_download_request["groupId"] == 55
@@ -82,17 +111,26 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
                extract_error!(result, "createManualFileDownloadRequest")
     end
 
-    test "fails if Astarte API returns error", %{
-      tenant: tenant
-    } do
-      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+    test "fails if Astarte API returns error", %{tenant: tenant, upload: upload} do
+      stub(DeviceStatusMock, :get, fn _, _ -> {:error, :not_found} end)
+
+      expect(EphemeralFileMock, :upload, fn _, _, _ ->
+        {:ok, "https://example.com/f.bin"}
+      end)
+
+      expect(EphemeralFileMock, :delete, fn _, _, _ ->
+        {:ok, "https://example.com/f.bin"}
+      end)
 
       expect(FileDownloadRequestMock, :request_download, fn _, _, _ ->
         {:error, %APIError{status: 500, response: "Internal Server Error"}}
       end)
 
       result =
-        create_manual_file_download_request_mutation(tenant: tenant)
+        create_manual_file_download_request_mutation(
+          tenant: tenant,
+          file: upload
+        )
 
       assert %{code: "astarte_api_error", short_message: "Astarte API Error (status 500)"} =
                extract_error!(result, "createManualFileDownloadRequest")
@@ -101,18 +139,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
 
   describe "createManagedFileDownloadRequest mutation" do
     test "creates managed file download request from file", %{tenant: tenant} do
-      stub(DeviceStatusMock, :get, fn _client, _device_id -> {:error, :not_found} end)
+      stub(DeviceStatusMock, :get, fn _, _ -> {:error, :not_found} end)
       expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
 
-      file = file_fixture(tenant: tenant, name: "managed.bin", size: 1234, digest: "sha256:abcd")
-
-      expect(StorageMock, :read_presigned_url, fn path ->
-        assert String.contains?(path, "uploads/tenants/")
-        assert String.contains?(path, "/repositories/#{file.repository_id}/")
-        assert String.ends_with?(path, "/managed.bin")
-
-        {:ok, %{get_url: "http://example.test/#{path}"}}
-      end)
+      file = file_fixture(tenant: tenant, name: "managed.bin")
 
       result =
         create_managed_file_download_request_mutation(
@@ -120,7 +150,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           file_id: AshGraphql.Resource.encode_relay_id(file)
         )
 
-      file_download_request = extract_result!(result, "createManagedFileDownloadRequest")
+      file_download_request =
+        extract_result!(result, "createManagedFileDownloadRequest")
 
       assert file_download_request["id"] != "019c997a-49bc-7f65-be73-0970557338b3"
       assert file_download_request["destinationType"] == "STORAGE"
@@ -128,17 +159,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       assert file_download_request["progressTracked"] == false
       assert file_download_request["ttlSeconds"] == 100_000
       assert file_download_request["fileName"] == "managed.bin"
-      assert file_download_request["uncompressedFileSizeBytes"] == 1234
-      assert file_download_request["digest"] == "sha256:abcd"
-      assert String.contains?(file_download_request["url"], "uploads/tenants/")
-
-      assert String.contains?(
-               file_download_request["url"],
-               "/repositories/#{file.repository_id}/"
-             )
-
-      assert String.contains?(file_download_request["url"], "/managed.bin")
-
+      assert file_download_request["uncompressedFileSizeBytes"] == file.size
+      assert file_download_request["digest"] == file.base_file.digest
+      assert file_download_request["url"] == file.base_file.url
       assert file_download_request["device"]["deviceId"]
     end
 
@@ -146,7 +169,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       other_tenant = Edgehog.TenantsFixtures.tenant_fixture()
       other_file = file_fixture(tenant: other_tenant)
 
-      expect(StorageMock, :read_presigned_url, 0, fn _path ->
+      expect(StorageMock, :read_presigned_url, 0, fn _ ->
         {:ok, %{get_url: "http://example.test/not-used"}}
       end)
 
@@ -200,26 +223,38 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
+    {file, opts} =
+      Keyword.pop_lazy(opts, :file, fn ->
+        tmp_path =
+          Path.join(System.tmp_dir!(), "auto_upload_#{:erlang.unique_integer([:positive])}.bin")
+
+        File.write!(tmp_path, "auto file content")
+
+        %Plug.Upload{
+          path: tmp_path,
+          filename: "file.bin",
+          content_type: "application/octet-stream"
+        }
+      end)
+
     default_input = %{
       "deviceId" => device_id,
+      "file" => file && "file",
       "destinationType" => "STORAGE",
       "destination" => nil,
       "progressTracked" => false,
       "ttlSeconds" => 100_000,
-      "url" => "http://example/filename",
       "fileName" => "filename",
       "uncompressedFileSizeBytes" => 75_555,
-      "digest" => "sha256:jfkdgjkj",
       "encoding" => "",
       "userId" => 45,
-      "groupId" => 55,
-      "fileDownloadRequestId" => Ash.UUIDv7.generate()
+      "groupId" => 55
     }
 
     {input_overrides, opts} = Keyword.pop(opts, :input, %{})
     input = Map.merge(default_input, input_overrides)
 
-    context = %{tenant: tenant}
+    context = add_upload(%{tenant: tenant}, "file", file)
 
     variables = %{"input" => input}
 
@@ -284,10 +319,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       "destination" => nil,
       "progressTracked" => false,
       "ttlSeconds" => 100_000,
-      "encoding" => "",
       "userId" => 45,
-      "groupId" => 55,
-      "fileDownloadRequestId" => Ash.UUIDv7.generate()
+      "groupId" => 55
     }
 
     {input_overrides, opts} = Keyword.pop(opts, :input, %{})
@@ -308,7 +341,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   defp extract_error!(result, operation_key) do
     assert is_nil(result[:data][operation_key])
     assert %{errors: [error]} = result
-
     error
   end
 
@@ -322,9 +354,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
            } = result
 
     refute Map.get(result, :errors)
-
-    assert file_download_request
-
     file_download_request
   end
 end

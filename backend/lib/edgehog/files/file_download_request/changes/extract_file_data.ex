@@ -23,17 +23,65 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.ExtractFileData do
 
   use Ash.Resource.Change
 
-  alias Edgehog.Files
+  alias Edgehog.Devices.Device
+  alias Edgehog.Files.File
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant} = _context) do
     file_id = Ash.Changeset.get_argument(changeset, :file_id)
-    file = Files.File |> Ash.get!(file_id, tenant: tenant) |> Ash.load!(:get_presigned_url)
+    file = Ash.get!(File, file_id, tenant: tenant)
 
-    changeset
-    |> Ash.Changeset.change_attribute(:file_name, file.name)
-    |> Ash.Changeset.change_attribute(:uncompressed_file_size_bytes, file.size)
-    |> Ash.Changeset.change_attribute(:digest, file.digest)
-    |> Ash.Changeset.change_attribute(:url, file.get_presigned_url)
+    device_id = Ash.Changeset.get_argument(changeset, :device_id)
+
+    device_file_transfer_capabilities =
+      Device
+      |> Ash.get!(device_id, tenant: tenant)
+      |> Ash.load!(:file_transfer_capabilities)
+      |> Map.get(:file_transfer_capabilities)
+
+    case choose_url_and_encoding(file, device_file_transfer_capabilities) do
+      {:error, message} ->
+        Ash.Changeset.add_error(changeset,
+          field: :device_id,
+          message: message
+        )
+
+      {:ok, file_url, encoding, digest} ->
+        changeset
+        |> Ash.Changeset.change_attribute(:file_name, file.name)
+        |> Ash.Changeset.change_attribute(:uncompressed_file_size_bytes, file.size)
+        |> Ash.Changeset.change_attribute(:digest, digest)
+        |> Ash.Changeset.change_attribute(:url, file_url)
+        |> Ash.Changeset.change_attribute(:encoding, encoding)
+    end
+  end
+
+  defp choose_url_and_encoding(%{is_archive: true} = file, %{encodings: encodings}) do
+    cond do
+      "tar.gz" in encodings ->
+        {:ok, file.gz_file.url, "tar.gz", file.gz_file.digest}
+
+      "tar.lz4" in encodings ->
+        {:ok, file.lz4_file.url, "tar.lz4", file.lz4_file.digest}
+
+      "tar" in encodings ->
+        {:ok, file.base_file.url, "tar", file.base_file.digest}
+
+      true ->
+        {:error, "Device does not support archives"}
+    end
+  end
+
+  defp choose_url_and_encoding(%{is_archive: false} = file, %{encodings: encodings}) do
+    cond do
+      "gz" in encodings ->
+        {:ok, file.gz_file.url, "gz", file.gz_file.digest}
+
+      "lz4" in encodings ->
+        {:ok, file.lz4_file.url, "lz4", file.lz4_file.digest}
+
+      true ->
+        {:ok, file.base_file.url, "", file.base_file.digest}
+    end
   end
 end

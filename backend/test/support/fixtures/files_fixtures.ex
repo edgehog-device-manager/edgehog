@@ -193,16 +193,14 @@ defmodule Edgehog.FilesFixtures do
         file_fixture(tenant: tenant, repository_id: repository_id)
       end)
 
-    tenant_id = tenant.tenant_id
     filename = file.name
 
     params =
       Enum.into(opts, %{
-        url:
-          "https://example.com/uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/#{filename}",
+        url: file.base_file.url,
         file_name: filename,
         uncompressed_file_size_bytes: file.size,
-        digest: file.digest,
+        digest: file.base_file.digest,
         encoding: "",
         ttl_seconds: 0,
         file_mode: random_file_mode(),
@@ -304,19 +302,35 @@ defmodule Edgehog.FilesFixtures do
 
     {repository_id, opts} =
       Keyword.pop_lazy(opts, :repository_id, fn ->
-        [tenant: tenant] |> repository_fixture() |> Map.fetch!(:id)
+        [tenant: tenant]
+        |> repository_fixture()
+        |> Map.fetch!(:id)
       end)
+
+    file_data = fn ->
+      %{
+        url: "https://example.com/#{unique_file_name()}",
+        digest: unique_file_digest()
+      }
+    end
 
     params =
       Enum.into(opts, %{
         name: unique_file_name(),
+        is_archive: false,
+        repository_id: repository_id,
         size: :rand.uniform(1_000_000),
-        digest: unique_file_digest(),
-        repository_id: repository_id
+        base_file: file_data.(),
+        gz_file: file_data.(),
+        lz4_file: file_data.()
       })
 
     Edgehog.Files.File
-    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.Changeset.for_create(
+      :create_fixture,
+      params,
+      tenant: tenant
+    )
     |> Ash.create!()
   end
 end

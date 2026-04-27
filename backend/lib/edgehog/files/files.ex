@@ -55,15 +55,7 @@ defmodule Edgehog.Files do
         relay_id_translations input: [repository_id: :repository]
       end
 
-      update File, :set_file_uploaded, :set_file_uploaded
-
       destroy File, :delete_file, :destroy
-
-      action FileDownloadRequest,
-             :create_file_download_request_presigned_url,
-             :create_presigned_url do
-        description "Generates presigned URLs to upload and download a file via HTTP requests."
-      end
 
       create Repository, :create_repository, :create
       update Repository, :update_repository, :update
@@ -92,9 +84,9 @@ defmodule Edgehog.Files do
       define :send_file_download_request, args: [:file_download_request]
       define :set_path_on_device, args: [:path_on_device]
       define :set_size_bytes, args: [:decompressed_file_size_bytes]
-      define :set_response
+      define :set_file_download_response, action: :set_response
       define :set_file_download_progress, action: :set_progress
-      define :set_status
+      define :set_file_download_status, action: :set_status
     end
 
     resource FileUploadRequest do

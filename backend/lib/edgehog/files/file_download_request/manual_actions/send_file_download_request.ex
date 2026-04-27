@@ -95,7 +95,7 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
         {:error, reason}
 
       result ->
-        Files.set_status(file_download_request, %{status: :sent}, tenant: tenant)
+        Files.set_file_download_status(file_download_request, %{status: :sent}, tenant: tenant)
 
         result
     end

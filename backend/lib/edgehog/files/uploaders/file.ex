@@ -1,0 +1,62 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+defmodule Edgehog.Files.Uploaders.File do
+  @moduledoc """
+  Waffle uploader for files.
+  """
+
+  use Waffle.Definition
+
+  @async false
+  @acl :public_read
+  @versions [:original]
+
+  def validate(_) do
+    # TODO: everything is considered a valid file for now
+    true
+  end
+
+  def gcs_optional_params(_version, {_file, _scope}) do
+    [predefinedAcl: "publicRead"]
+  end
+
+  def storage_dir(_version, {_file, %{encoding: nil} = scope}) do
+    %{tenant_id: tenant_id, repository_id: repository_id} = scope
+
+    "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files"
+  end
+
+  def storage_dir(_version, {_file, %{encoding: :gz} = scope}) do
+    %{tenant_id: tenant_id, repository_id: repository_id} = scope
+
+    "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/encoding/gz"
+  end
+
+  def storage_dir(_version, {_file, %{encoding: :lz4} = scope}) do
+    %{tenant_id: tenant_id, repository_id: repository_id} = scope
+
+    "uploads/tenants/#{tenant_id}/repositories/#{repository_id}/files/encoding/lz4"
+  end
+
+  def filename(_version, {_file, scope}) do
+    scope.file_name
+  end
+end

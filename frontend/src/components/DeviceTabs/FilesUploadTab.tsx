@@ -26,7 +26,7 @@ import React, {
   useState,
 } from "react";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
-import { FormattedMessage, useIntl } from "react-intl";
+import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
   ConnectionHandler,
@@ -38,12 +38,14 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import { v7 as uuidv7 } from "uuid";
 
 import type { FilesUploadTab_PaginationQuery } from "@/api/__generated__/FilesUploadTab_PaginationQuery.graphql";
-import type { FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation } from "@/api/__generated__/FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation.graphql";
 import type { FilesUploadTab_createManagedFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManagedFileDownloadRequest_Mutation.graphql";
-import type { FilesUploadTab_createManualFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManualFileDownloadRequest_Mutation.graphql";
+import type {
+  CreateManualFileDownloadRequestInput,
+  FilesUploadTab_createManualFileDownloadRequest_Mutation,
+  FilesUploadTab_createManualFileDownloadRequest_Mutation$data,
+} from "@/api/__generated__/FilesUploadTab_createManualFileDownloadRequest_Mutation.graphql";
 import type { FilesUploadTab_fileDownloadRequests$key } from "@/api/__generated__/FilesUploadTab_fileDownloadRequests.graphql";
 import type { FilesUploadTab_getRepositories_Query } from "@/api/__generated__/FilesUploadTab_getRepositories_Query.graphql";
 
@@ -60,11 +62,8 @@ import type {
   FileDestinationType,
   ManualFileDownloadRequestFromRepositoryData,
 } from "@/forms/validation";
-import {
-  computeDigest,
-  createTarArchive,
-  getUploadRequestHeaders,
-} from "@/lib/files";
+import { createTarArchive } from "@/lib/files";
+import { PayloadError } from "relay-runtime";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -121,14 +120,6 @@ const GET_REPOSITORIES_QUERY = graphql`
   }
 `;
 
-const DEVICE_GET_PRESIGNED_URL_MUTATION = graphql`
-  mutation FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation(
-    $input: CreateFileDownloadRequestPresignedUrlInput!
-  ) {
-    createFileDownloadRequestPresignedUrl(input: $input)
-  }
-`;
-
 const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
   mutation FilesUploadTab_createManualFileDownloadRequest_Mutation(
     $input: CreateManualFileDownloadRequestInput!
@@ -156,6 +147,10 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
     }
   }
 `;
+
+type FileDownloadRequest = NonNullable<
+  FilesUploadTab_createManualFileDownloadRequest_Mutation$data["createManualFileDownloadRequest"]
+>["result"];
 
 const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
   mutation FilesUploadTab_createManagedFileDownloadRequest_Mutation(
@@ -201,22 +196,27 @@ const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
   }
 `;
 
+class APIValidationError extends Error {
+  constructor(public errors: PayloadError[]) {
+    super("API Validation Error");
+  }
+}
+
 type DestinationTypeOption = {
   value: FileDestinationType;
   label: string;
 };
 
-const formatRelayErrors = (
-  errors: ReadonlyArray<{
-    fields?: ReadonlyArray<string> | null;
-    message: string;
-  }>,
-): string =>
-  errors
-    .map(({ fields, message }) =>
-      fields?.length ? `${fields.join(" ")} ${message}` : message,
-    )
-    .join(". \n");
+const messages = defineMessages({
+  archiveError: {
+    id: "components.DeviceTabs.FilesUploadTab.archivationErrorFeedback",
+    defaultMessage: "Could not process files locally. Please try again.",
+  },
+  uploadError: {
+    id: "components.DeviceTabs.FilesUploadTab.uploadErrorFeedback",
+    defaultMessage: "Upload failed. Please check your connection.",
+  },
+});
 
 type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
@@ -235,13 +235,7 @@ const ManualFileDownloadRequestFormWrapper = ({
   showAdvancedOptions,
   destinationTypeOptions,
 }: ManualFileDownloadRequestFormWrapperProps) => {
-  const intl = useIntl();
   const [isUploading, setIsUploading] = useState(false);
-
-  const [getPresignedUrl] =
-    useMutation<FilesUploadTab_createFileDownloadRequestPresignedUrl_Mutation>(
-      DEVICE_GET_PRESIGNED_URL_MUTATION,
-    );
 
   const [createFileDownloadRequest] =
     useMutation<FilesUploadTab_createManualFileDownloadRequest_Mutation>(
@@ -263,171 +257,64 @@ const ManualFileDownloadRequestFormWrapper = ({
     };
   }, [isUploading]);
 
-  const handleFileUpload = useCallback(
-    async (values: FileDownloadRequestFormValues) => {
-      setErrorFeedback(null);
-      setIsUploading(true);
+  const prepareUploadFile = async (files: File[], archiveName?: string) => {
+    const hasRelativePaths = files.some((f) => !!f.webkitRelativePath);
+    const needsArchive = files.length > 1 || hasRelativePaths;
 
-      try {
-        const {
-          files,
-          archiveName,
-          encoding,
-          destinationType,
-          destination,
-          ttlSeconds,
-          progressTracked,
-          fileMode,
-          userId,
-          groupId,
-        } = values;
+    if (needsArchive) {
+      const tarBlob = await createTarArchive(files);
+      const baseName = archiveName?.trim() || "files-archive";
+      const fileName = baseName.endsWith(".tar") ? baseName : `${baseName}.tar`;
+      const uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
 
-        let uploadBlob: Blob;
-        let fileName: string;
-        let uncompressedSize: number;
+      return {
+        file: new File([tarBlob], fileName, { type: "application/x-tar" }),
+        fileName,
+        uncompressedSize,
+      };
+    }
 
-        // Files from folder selection have webkitRelativePath set.
-        // These need archiving even if there's only one file, to preserve
-        // the directory structure.
-        const hasRelativePaths = files.some((f) => f.webkitRelativePath);
-        const needsArchive = files.length > 1 || hasRelativePaths;
+    return {
+      file: files[0],
+      fileName: files[0].name,
+      uncompressedSize: files[0].size,
+    };
+  };
 
-        if (needsArchive) {
-          // Multiple files or folder content are uploaded as an archive
-          uploadBlob = await createTarArchive(files);
-          fileName = archiveName?.trim() || "files-archive";
-          uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
-        } else {
-          uploadBlob = files[0];
-          fileName = files[0].name;
-          uncompressedSize = files[0].size;
-        }
+  const commitDownloadRequest = useCallback(
+    (input: CreateManualFileDownloadRequestInput) =>
+      new Promise<FileDownloadRequest>((resolve, reject) => {
+        createFileDownloadRequest({
+          variables: { input },
+          onCompleted: (data, errors) => {
+            if (errors && errors.length > 0) {
+              return reject(new APIValidationError(errors));
+            }
 
-        const fileDownloadRequestId = uuidv7();
-        const digest = await computeDigest(uploadBlob);
+            const result = data?.createManualFileDownloadRequest?.result;
 
-        // Get presigned URL from the backend
-        const presignedUrls = await new Promise<{
-          get_url: string;
-          put_url: string;
-        }>((resolve, reject) => {
-          getPresignedUrl({
-            variables: {
-              input: {
-                fileDownloadRequestId,
-                filename: fileName,
-              },
-            },
-            onCompleted(responseData, errors) {
-              if (errors && errors.length > 0) {
-                reject(new Error(formatRelayErrors(errors)));
-                return;
-              }
-              try {
-                const raw = responseData.createFileDownloadRequestPresignedUrl;
-                const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-                if (!parsed?.put_url || !parsed?.get_url) {
-                  reject(
-                    new Error(
-                      intl.formatMessage({
-                        id: "components.DeviceTabs.FilesUploadTab.error.presignedUrlMissingFields",
-                        defaultMessage:
-                          "Presigned URL response is missing put_url or get_url.",
-                      }),
-                    ),
-                  );
-                  return;
-                }
-                resolve(parsed);
-              } catch {
-                reject(
-                  new Error(
-                    intl.formatMessage({
-                      id: "components.DeviceTabs.FilesUploadTab.error.presignedUrlParseFailed",
-                      defaultMessage:
-                        "Failed to parse the presigned URL response.",
-                    }),
-                  ),
-                );
-              }
-            },
-            onError(error) {
-              reject(error);
-            },
-          });
-        });
+            if (result) {
+              resolve(result);
+            } else {
+              reject(new Error("Mutation succeeded but returned no result."));
+            }
+          },
+          onError: reject,
+          updater: (store) => {
+            const payload = store.getRootField(
+              "createManualFileDownloadRequest",
+            );
+            const newRequest = payload?.getLinkedRecord("result");
+            const storedDevice = store.get(deviceId);
 
-        // Upload the file to the presigned PUT URL
-        const uploadResponse = await fetch(presignedUrls.put_url, {
-          method: "PUT",
-          headers: getUploadRequestHeaders(presignedUrls.put_url),
-          body: uploadBlob,
-        });
+            if (!storedDevice || !newRequest) return;
 
-        if (!uploadResponse.ok) {
-          const responseBody = await uploadResponse.text().catch(() => "");
-          throw new Error(
-            intl.formatMessage(
-              {
-                id: "components.DeviceTabs.FilesUploadTab.error.uploadFailed",
-                defaultMessage:
-                  "File upload failed with status {status}: {statusText}{body}.",
-              },
-              {
-                status: uploadResponse.status,
-                statusText: uploadResponse.statusText,
-                body: responseBody ? ` - ${responseBody}` : "",
-              },
-            ),
-          );
-        }
+            const connection = ConnectionHandler.getConnection(
+              storedDevice,
+              "FilesUploadTab_fileDownloadRequests",
+            );
 
-        // Create the file download request with all metadata
-        await new Promise<void>((resolve, reject) => {
-          createFileDownloadRequest({
-            variables: {
-              input: {
-                deviceId,
-                fileDownloadRequestId,
-                url: presignedUrls.get_url,
-                fileName,
-                uncompressedFileSizeBytes: uncompressedSize,
-                digest,
-                encoding,
-                fileMode,
-                userId,
-                groupId,
-                destinationType,
-                destination,
-                progressTracked,
-                ttlSeconds,
-              },
-            },
-            onCompleted(_responseData, errors) {
-              if (errors && errors.length > 0) {
-                reject(new Error(formatRelayErrors(errors)));
-                return;
-              }
-              resolve();
-            },
-            updater(store, data) {
-              const newRequestId =
-                data?.createManualFileDownloadRequest?.result?.id;
-              if (!newRequestId) return;
-              const newRequest = store.get(newRequestId);
-              const storedDevice = store.get(deviceId);
-              if (!storedDevice || !newRequest) return;
-              const connection = ConnectionHandler.getConnection(
-                storedDevice,
-                "FilesUploadTab_fileDownloadRequests",
-              );
-              if (!connection) return;
-              const edges = connection.getLinkedRecords("edges") ?? [];
-              const alreadyPresent = edges.some(
-                (edge) =>
-                  edge.getLinkedRecord("node")?.getDataID() === newRequestId,
-              );
-              if (alreadyPresent) return;
+            if (connection) {
               const edge = ConnectionHandler.createEdge(
                 store,
                 connection,
@@ -435,35 +322,53 @@ const ManualFileDownloadRequestFormWrapper = ({
                 "FileDownloadRequestEdge",
               );
               ConnectionHandler.insertEdgeBefore(connection, edge);
-            },
-            onError(error) {
-              reject(error);
-            },
-          });
+            }
+          },
         });
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : intl.formatMessage({
-                id: "components.DeviceTabs.FilesUploadTab.error.unknownError",
-                defaultMessage: "An unknown error occurred.",
-              });
-        setErrorFeedback(message);
-      } finally {
-        setIsUploading(false);
-      }
-    },
-    [
-      deviceId,
-      getPresignedUrl,
-      createFileDownloadRequest,
-      allowArchiveUpload,
-      intl,
-      setErrorFeedback,
-    ],
+      }),
+    [createFileDownloadRequest, deviceId],
   );
 
+  const handleFileUpload = useCallback(
+    async (values: FileDownloadRequestFormValues) => {
+      const { files, archiveName, ...rest } = values;
+      if (!files?.length) return;
+
+      setIsUploading(true);
+      setErrorFeedback(null);
+
+      try {
+        const { file, fileName, uncompressedSize } = await prepareUploadFile(
+          files,
+          archiveName,
+        );
+
+        await commitDownloadRequest({
+          ...rest,
+          file,
+          fileName,
+          uncompressedFileSizeBytes: uncompressedSize,
+          deviceId,
+        });
+
+        setIsUploading(false);
+      } catch (err) {
+        setIsUploading(false);
+
+        if (err instanceof APIValidationError) {
+          const message = err.errors
+            .map(({ fields, message }) =>
+              fields?.length ? `${fields.join(", ")}: ${message}` : message,
+            )
+            .join(". ");
+          setErrorFeedback(message);
+        } else {
+          setErrorFeedback(<FormattedMessage {...messages.uploadError} />);
+        }
+      }
+    },
+    [deviceId, commitDownloadRequest, setIsUploading, setErrorFeedback],
+  );
   return (
     <ManualFileDownloadRequestForm
       isLoading={isUploading}
@@ -491,7 +396,6 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   showAdvancedOptions,
   destinationTypeOptions,
 }: ManualFileDownloadRequestFromRepositoryFormWrapperProps) => {
-  const intl = useIntl();
   const [isUploading, setIsUploading] = useState(false);
 
   const repositoriesData = usePreloadedQuery(
@@ -505,93 +409,82 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
     );
 
   const handleFileUpload = useCallback(
-    async (values: ManualFileDownloadRequestFromRepositoryData) => {
+    (values: ManualFileDownloadRequestFromRepositoryData) => {
+      const {
+        file,
+        destinationType,
+        destination,
+        ttlSeconds,
+        progressTracked,
+        fileMode,
+        userId,
+        groupId,
+      } = values;
+
       setErrorFeedback(null);
       setIsUploading(true);
 
-      try {
-        const {
-          file,
-          destinationType,
-          destination,
-          ttlSeconds,
-          progressTracked,
-          fileMode,
-          userId,
-          groupId,
-        } = values;
+      createFileDownloadRequest({
+        variables: {
+          input: {
+            deviceId,
+            fileId: file.id,
+            fileMode,
+            userId,
+            groupId,
+            destinationType,
+            destination,
+            progressTracked,
+            ttlSeconds,
+          },
+        },
+        onCompleted: (_data, errors) => {
+          setIsUploading(false);
+          if (errors?.length) {
+            const message = errors
+              .map(({ fields, message }) =>
+                fields?.length ? `${fields.join(", ")}: ${message}` : message,
+              )
+              .join(". ");
+            setErrorFeedback(message);
+          }
+        },
+        onError: () => {
+          setIsUploading(false);
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeviceTabs.FilesUploadTab.creationErrorFeedback"
+              defaultMessage="Could not create file download request, please try again."
+            />,
+          );
+        },
+        updater: (store) => {
+          const payload = store.getRootField(
+            "createManagedFileDownloadRequest",
+          );
+          const newRequest = payload?.getLinkedRecord("result");
+          const storedDevice = store.get(deviceId);
 
-        const fileDownloadRequestId = uuidv7();
+          if (!storedDevice || !newRequest) return;
 
-        // Create the file download request with all metadata
-        await new Promise<void>((resolve, reject) => {
-          createFileDownloadRequest({
-            variables: {
-              input: {
-                deviceId,
-                fileDownloadRequestId,
-                fileId: file.id,
-                fileMode,
-                userId,
-                groupId,
-                destinationType,
-                destination,
-                progressTracked,
-                ttlSeconds,
-              },
-            },
-            onCompleted(_responseData, errors) {
-              if (errors && errors.length > 0) {
-                reject(new Error(formatRelayErrors(errors)));
-                return;
-              }
-              resolve();
-            },
-            updater(store, data) {
-              const newRequestId =
-                data?.createManagedFileDownloadRequest?.result?.id;
-              if (!newRequestId) return;
-              const newRequest = store.get(newRequestId);
-              const storedDevice = store.get(deviceId);
-              if (!storedDevice || !newRequest) return;
-              const connection = ConnectionHandler.getConnection(
-                storedDevice,
-                "FilesUploadTab_fileDownloadRequests",
-              );
-              if (!connection) return;
-              const edges = connection.getLinkedRecords("edges") ?? [];
-              const alreadyPresent = edges.some(
-                (edge) =>
-                  edge.getLinkedRecord("node")?.getDataID() === newRequestId,
-              );
-              if (alreadyPresent) return;
-              const edge = ConnectionHandler.createEdge(
-                store,
-                connection,
-                newRequest,
-                "FileDownloadRequestEdge",
-              );
-              ConnectionHandler.insertEdgeBefore(connection, edge);
-            },
-            onError(error) {
-              reject(error);
-            },
-          });
-        });
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-            : intl.formatMessage({
-                id: "components.DeviceTabs.FilesUploadTab.error.unknownError",
-                defaultMessage: "An unknown error occurred.",
-              });
-        setErrorFeedback(message);
-      } finally {
-        setIsUploading(false);
-      }
+          const connection = ConnectionHandler.getConnection(
+            storedDevice,
+            "FilesUploadTab_fileDownloadRequests",
+          );
+
+          if (connection) {
+            const edge = ConnectionHandler.createEdge(
+              store,
+              connection,
+              newRequest,
+              "FileDownloadRequestEdge",
+            );
+            ConnectionHandler.insertEdgeBefore(connection, edge);
+          }
+        },
+      });
     },
-    [deviceId, createFileDownloadRequest, intl, setErrorFeedback],
+    [deviceId, createFileDownloadRequest, setErrorFeedback],
   );
 
   return (

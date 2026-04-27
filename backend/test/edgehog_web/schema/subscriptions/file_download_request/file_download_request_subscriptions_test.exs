@@ -32,7 +32,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.FileDownloadRequest.FileDownloadReques
 
       subscribe(socket)
 
-      Files.set_response(
+      Files.set_file_download_response(
         file_download_request,
         [status: :completed, response_code: 0, response_message: "success"],
         tenant: tenant
@@ -72,7 +72,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.FileDownloadRequest.FileDownloadReques
 
       subscribe(socket, query: query, variables: %{"deviceId" => file_download_request.device_id})
 
-      Files.set_response(
+      Files.set_file_download_response(
         file_download_request,
         [status: :completed, response_code: 0, response_message: "success"],
         tenant: tenant
@@ -113,7 +113,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.FileDownloadRequest.FileDownloadReques
 
       subscribe(socket, query: query, variables: %{"deviceId" => Ecto.UUID.generate()})
 
-      Files.set_response(
+      Files.set_file_download_response(
         file_download_request,
         [status: :completed, response_code: 0, response_message: "success"],
         tenant: tenant

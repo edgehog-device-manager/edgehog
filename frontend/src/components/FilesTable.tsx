@@ -41,7 +41,9 @@ const FILES_TABLE_FRAGMENT = graphql`
         id
         name
         size
-        getPresignedUrl
+        baseFile {
+          url
+        }
       }
     }
   }
@@ -52,9 +54,7 @@ type TableRecord = NonNullable<
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
-const getColumnsDefinition = (
-  setErrorFeedback: (feedback: React.ReactNode) => void,
-) => [
+const getColumnsDefinition = () => [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
@@ -90,30 +90,17 @@ const getColumnsDefinition = (
     cell: ({ row }) => (
       <Button
         className="btn p-0 border-0 bg-transparent ms-4"
-        onClick={async () => {
-          const url = row.original.getPresignedUrl;
+        onClick={() => {
+          const url = row.original.baseFile.url;
           if (!url) return;
-          try {
-            const resp = await fetch(url);
-            if (!resp.ok)
-              throw new Error(`Network response was not ok: ${resp.status}`);
-            const blob = await resp.blob();
-            const downloadUrl = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = downloadUrl;
-            a.download = row.original.name || "file";
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            URL.revokeObjectURL(downloadUrl);
-          } catch {
-            setErrorFeedback(
-              <FormattedMessage
-                id="components.FilesTable.downloadError"
-                defaultMessage="Failed to download file"
-              />,
-            );
-          }
+
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = row.original.name || "file";
+          a.target = "_blank";
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
         }}
       >
         <Icon className="text-primary" icon={"arrowDown"} />
@@ -124,7 +111,6 @@ const getColumnsDefinition = (
 
 type Props = {
   className?: string;
-  setErrorFeedback: (feedback: React.ReactNode) => void;
   filesRef: FilesTable_FileEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
@@ -132,7 +118,6 @@ type Props = {
 
 const FilesTable = ({
   className,
-  setErrorFeedback,
   filesRef,
   loading = false,
   onLoadMore,
@@ -142,10 +127,7 @@ const FilesTable = ({
     return _.compact(filesFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [filesFragment]);
 
-  const columns = useMemo(
-    () => getColumnsDefinition(setErrorFeedback),
-    [setErrorFeedback],
-  );
+  const columns = useMemo(() => getColumnsDefinition(), []);
 
   return (
     <InfiniteTable

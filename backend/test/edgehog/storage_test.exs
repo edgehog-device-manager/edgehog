@@ -22,8 +22,13 @@ defmodule Edgehog.StorageTest do
   @moduledoc false
   use Edgehog.DataCase, async: true
 
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.FileTransferCapabilitiesMock
   alias Edgehog.BaseImages.BaseImage
+  alias Edgehog.Files.Compressor
   alias Edgehog.Files.FileDownloadRequest
+
+  alias Edgehog.Files.File
 
   @moduletag :integration_storage
 
@@ -39,6 +44,8 @@ defmodule Edgehog.StorageTest do
       Mox.stub_with(Edgehog.BaseImages.StorageMock, Edgehog.BaseImages.BucketStorage)
       Mox.stub_with(Edgehog.Assets.SystemModelPictureMock, Edgehog.Assets.SystemModelPicture)
       Mox.stub_with(Edgehog.OSManagement.EphemeralImageMock, Edgehog.OSManagement.EphemeralImage)
+      Mox.stub_with(Edgehog.Files.StorageMock, Edgehog.Files.File.BucketStorage)
+      Mox.stub_with(Edgehog.Files.EphemeralFileMock, Edgehog.Files.EphemeralFile)
 
       :ok
     end
@@ -117,142 +124,98 @@ defmodule Edgehog.StorageTest do
       assert {:ok, %{status_code: 200, body: result_body}} = result
       assert Elixir.File.read!(file.path) == result_body
     end
-  end
 
-  describe "File presigned URL" do
-    setup do
-      # Do not mock the storage for integration
-      Mox.stub_with(Edgehog.StorageMock, Edgehog.Storage)
-      :ok
-    end
+    test "Files can be uploaded, read and deleted", %{tenant: tenant} do
+      repository =
+        Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
 
-    test "presigned URL files can be uploaded and deleted" do
-      tenant = Edgehog.TenantsFixtures.tenant_fixture()
-      filename = "upload-test.bin"
-      contents = "integration test contents"
+      temp_file = temporary_file_fixture()
+      filename = "file-test"
 
       file =
-        [tenant: tenant, name: filename]
-        |> Edgehog.FilesFixtures.file_fixture()
-        |> Ash.load!([:put_presigned_url, :get_presigned_url])
+        Ash.create!(
+          File,
+          %{name: filename, repository_id: repository.id, file: temp_file, size: 12_345},
+          tenant: tenant
+        )
 
-      # Azure requires x-ms-blob-type; S3 ignores unknown headers on presigned PUTs
-      assert {:ok, %{status_code: upload_status}} =
-               HTTPoison.request(%HTTPoison.Request{
-                 method: :put,
-                 url: file.put_presigned_url,
-                 body: contents,
-                 headers: [
-                   {"x-ms-blob-type", "BlockBlob"},
-                   {"content-length", "#{byte_size(contents)}"}
-                 ]
-               })
+      result1 =
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file.base_file.url})
 
-      assert upload_status in [200, 201]
+      result2 =
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file.gz_file.url})
 
-      assert {:ok, %{status_code: 200, body: ^contents}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
+      result3 =
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file.lz4_file.url})
 
-      file |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
+      {:ok, gz_temp_file} = Compressor.compress(temp_file, :gz)
+      {:ok, lz4_temp_file} = Compressor.compress(temp_file, :lz4)
 
-      assert {:ok, %{status_code: 404}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
+      assert {:ok, %{status_code: 200, body: result_body1}} = result1
+      assert {:ok, %{status_code: 200, body: result_body2}} = result2
+
+      assert {:ok, %{status_code: 200, body: result_body3}} = result3
+
+      assert Elixir.File.read!(temp_file.path) == result_body1
+
+      assert Elixir.File.read!(gz_temp_file.path) == result_body2
+
+      assert Elixir.File.read!(lz4_temp_file.path) == result_body3
+
+      Ash.destroy!(file)
+
+      result1 =
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file.base_file.url})
+
+      result2 =
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file.gz_file.url})
+
+      result3 =
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file.lz4_file.url})
+
+      assert {:ok, %{status_code: 404}} = result1
+      assert {:ok, %{status_code: 404}} = result2
+      assert {:ok, %{status_code: 404}} = result3
     end
 
-    test "repository deletion deletes uploaded files from storage" do
-      tenant = Edgehog.TenantsFixtures.tenant_fixture()
-      filename = "repository-delete-test.bin"
-      contents = "repository deletion integration test contents"
+    test "Ephemeral Files can be uploaded and read", %{tenant: tenant} do
+      file = temporary_file_fixture()
+      device_id = [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
 
-      repository = Edgehog.FilesFixtures.repository_fixture(tenant: tenant)
+      Mox.stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           encodings: [],
+           unix_permissions: false,
+           targets: [:storage]
+         }}
+      end)
 
-      file =
-        [repository_id: repository.id, tenant: tenant, name: filename]
-        |> Edgehog.FilesFixtures.file_fixture()
-        |> Ash.load!([:put_presigned_url, :get_presigned_url])
+      Mox.stub(Edgehog.Astarte.Device.FileDownloadRequestMock, :request_download, fn _, _, _ ->
+        :ok
+      end)
 
-      assert {:ok, %{status_code: upload_status}} =
-               HTTPoison.request(%HTTPoison.Request{
-                 method: :put,
-                 url: file.put_presigned_url,
-                 body: contents,
-                 headers: [
-                   {"x-ms-blob-type", "BlockBlob"},
-                   {"content-length", "#{byte_size(contents)}"}
-                 ]
-               })
-
-      assert upload_status in [200, 201]
-
-      assert {:ok, %{status_code: 200, body: ^contents}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
-
-      repository |> Ash.Changeset.for_destroy(:destroy) |> Ash.destroy!()
-
-      assert {:ok, %{status_code: 404}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: file.get_presigned_url})
-    end
-  end
-
-  describe "FileDownloadRequest presigned URL" do
-    test "create_presigned_url returns presigned URLs containing the correct file path", %{
-      tenant: tenant
-    } do
-      tenant_id = tenant.tenant_id
-      file_download_request_id = "36075cab-9c99-4659-ab47-f5cb993e18e3"
-      filename = "My File 1"
+      file_download_request =
+        FileDownloadRequest
+        |> Ash.Changeset.for_create(
+          :manual,
+          [
+            device_id: device_id,
+            file: file,
+            destination_type: :storage,
+            encoding: "",
+            file_name: "some-name",
+            progress_tracked: false
+          ],
+          tenant: tenant
+        )
+        |> Ash.create!()
 
       result =
-        FileDownloadRequest
-        |> Ash.ActionInput.for_action(:create_presigned_url, %{
-          filename: filename,
-          file_download_request_id: file_download_request_id
-        })
-        |> Ash.run_action!(tenant: tenant)
+        HTTPoison.request(%HTTPoison.Request{method: :get, url: file_download_request.url})
 
-      assert is_map(result)
-      assert Map.has_key?(result, :get_url)
-      assert Map.has_key?(result, :put_url)
-
-      encoded_filename = URI.encode(filename)
-
-      expected_path =
-        "uploads/tenants/#{tenant_id}/ephemeral_file_download_requests/#{file_download_request_id}/files/#{encoded_filename}"
-
-      assert result[:get_url] =~ expected_path
-      assert result[:put_url] =~ expected_path
-    end
-
-    test "files can be uploaded" do
-      tenant = Edgehog.TenantsFixtures.tenant_fixture()
-      file_download_request_id = "36075cab-9c99-4659-ab47-f5cb993e18e3"
-      filename = "upload-test.bin"
-      contents = "integration test contents"
-
-      %{put_url: put_url, get_url: get_url} =
-        FileDownloadRequest
-        |> Ash.ActionInput.for_action(:create_presigned_url, %{
-          filename: filename,
-          file_download_request_id: file_download_request_id
-        })
-        |> Ash.run_action!(tenant: tenant)
-
-      # Azure requires x-ms-blob-type; S3 ignores unknown headers on presigned PUTs
-      assert {:ok, %{status_code: upload_status}} =
-               HTTPoison.request(%HTTPoison.Request{
-                 method: :put,
-                 url: put_url,
-                 body: contents,
-                 headers: [
-                   {"x-ms-blob-type", "BlockBlob"},
-                   {"content-length", "#{byte_size(contents)}"}
-                 ]
-               })
-
-      assert upload_status in [200, 201]
-
-      assert {:ok, %{status_code: 200, body: ^contents}} =
-               HTTPoison.request(%HTTPoison.Request{method: :get, url: get_url})
+      assert {:ok, %{status_code: 200, body: result_body}} = result
+      assert Elixir.File.read!(file.path) == result_body
     end
   end
 

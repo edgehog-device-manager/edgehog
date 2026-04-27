@@ -41,7 +41,7 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.FileTransfer.Response do
 
     file_download_request = Files.fetch_file_download_request!(request_id, tenant: tenant)
 
-    Files.set_response(
+    Files.set_file_download_response(
       file_download_request,
       [
         status: status,

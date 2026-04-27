@@ -135,7 +135,17 @@ defmodule Edgehog.MixProject do
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
-      {:ex_doc, "~> 0.40", only: :dev}
+      {:ex_doc, "~> 0.40", only: :dev},
+      # NOTE:
+      # This project intentionally pins nimble_lz4 to v1.1.0 because it depends on lz4_flex v0.9.0,
+      # which uses a fixed default block size of 64kB — this matches our device/protocol requirement.
+      #
+      # Newer versions of nimble_lz4 upgrade to lz4_flex v0.11.0, which introduces automatic frame
+      # block size detection. That behavior is incompatible with our expected 64kB framing and may
+      # break interoperability.
+      #
+      # Do not upgrade this dependency unless the underlying block size behavior is verified and updated.
+      {:nimble_lz4, "1.1.0"}
     ]
   end
 

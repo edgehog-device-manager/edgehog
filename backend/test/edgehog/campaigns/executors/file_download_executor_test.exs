@@ -51,7 +51,7 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
     stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
       {:ok,
        %FileTransferCapabilities{
-         encodings: [],
+         encodings: ["tar.gz"],
          unix_permissions: false,
          targets: [:filesystem]
        }}
@@ -736,7 +736,7 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
     assert {:ok, file_download_request} =
              file_download_request_id
              |> Files.fetch_file_download_request!(tenant: tenant)
-             |> Files.set_response(response, tenant: tenant)
+             |> Files.set_file_download_response(response, tenant: tenant)
 
     file_download_request
   end

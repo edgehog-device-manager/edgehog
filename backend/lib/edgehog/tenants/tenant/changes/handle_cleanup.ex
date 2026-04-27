@@ -26,6 +26,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.BucketStorage
   alias Edgehog.Devices.SystemModel
+  alias Edgehog.Files.EphemeralFile
   alias Edgehog.Files.File
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.OSManagement.EphemeralImage
@@ -40,6 +41,12 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
                             EphemeralImage
                           )
 
+  @ephemeral_file_module Application.compile_env(
+                           :edgehog,
+                           :files_ephemeral_file_module,
+                           EphemeralFile
+                         )
+
   @storage_module Application.compile_env(
                     :edgehog,
                     :base_images_storage_module,
@@ -49,7 +56,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
   @files_storage_module Application.compile_env(
                           :edgehog,
                           :files_storage_module,
-                          Edgehog.Storage
+                          Edgehog.Files.File.BucketStorage
                         )
 
   @impl Ash.Resource.Change
@@ -81,7 +88,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
           cleanup_system_models(system_models)
           cleanup_base_images(base_images)
           cleanup_repository_files(repository_files)
-          cleanup_ephemeral_files(manual_file_download_requests)
+          cleanup_ephemeral_files(manual_file_download_requests, tenant.tenant_id)
           cleanup_ephemeral_images(manual_otas, tenant.tenant_id)
         catch
           signal, error ->
@@ -121,19 +128,20 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
 
   defp cleanup_repository_files(files) do
     Enum.each(files, fn file ->
-      file_path =
-        "uploads/tenants/#{file.tenant_id}/repositories/#{file.repository_id}/files/#{file.name}"
-
-      _ = @files_storage_module.delete(file_path)
+      _ = @files_storage_module.delete(file, nil)
+      _ = @files_storage_module.delete(file, :gz)
+      _ = @files_storage_module.delete(file, :lz4)
     end)
   end
 
-  defp cleanup_ephemeral_files(file_download_requests) do
+  defp cleanup_ephemeral_files(file_download_requests, tenant_id) do
     Enum.each(file_download_requests, fn file_download_request ->
-      file_path =
-        "uploads/tenants/#{file_download_request.tenant_id}/ephemeral_file_download_requests/#{file_download_request.id}/files/#{file_download_request.file_name}"
-
-      _ = @files_storage_module.delete(file_path)
+      _ =
+        @ephemeral_file_module.delete(
+          tenant_id,
+          file_download_request.id,
+          file_download_request.url
+        )
     end)
   end
 
