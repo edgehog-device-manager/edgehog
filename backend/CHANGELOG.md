@@ -9,6 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.13.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.0...v0.13.0) (2026-04-27)
+
+
+### ⚠ BREAKING CHANGES
+
+* **backend:** rename CHECK_ORIGIN_ALLOWED_ORIGINS to GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS
+* **backend:** the backend now reads a new environment variable: `CHECK_ORIGIN_ALLOWED_ORIGINS` that sets the allowed origins for graphql subscriptions. If not set the subscriptions will not work in a Kubernetes environment. Please update your environment accordingly
+
+### Features
+
+* Add download functionality to uploaded files ([749490a](https://github.com/edgehog-device-manager/edgehog/commit/749490a7cf47c90e3ac23caa6e6edf9efe5d2332))
+* add endpoint to check app version ([4a45be6](https://github.com/edgehog-device-manager/edgehog/commit/4a45be686be636a004fb6fc38c6c4718a4a0d0d0))
+* Add file download request subscription ([#1313](https://github.com/edgehog-device-manager/edgehog/issues/1313)) ([d097005](https://github.com/edgehog-device-manager/edgehog/commit/d097005bab9dcffe927c90d5cf6ccbd971171efd))
+* Add Files Upload tab with manual file download request ([#1270](https://github.com/edgehog-device-manager/edgehog/issues/1270)) ([23f8951](https://github.com/edgehog-device-manager/edgehog/commit/23f895108d890b2f04fdd1db0f76e0724dacfe73))
+* add unified file management with upload and download requests ([7e59bd7](https://github.com/edgehog-device-manager/edgehog/commit/7e59bd7ace150de3fced21491bf0763f5f8367e2))
+* **backend:** Add CORS policy for GraphQL subscriptions ([#1272](https://github.com/edgehog-device-manager/edgehog/issues/1272)) ([3d77c0a](https://github.com/edgehog-device-manager/edgehog/commit/3d77c0a368c94e7ca5504a8947268327c5de2d6f))
+* **backend:** add file download campaigns ([939a63a](https://github.com/edgehog-device-manager/edgehog/commit/939a63aa4f352603f4ceaae8a8aff74fde42aa3c))
+* **backend:** Add single file download request feature ([799479c](https://github.com/edgehog-device-manager/edgehog/commit/799479c474b3b67a9cf7eb3e62879d282ed3a0ab))
+* **backend:** allow devs to setup database connection ([649829a](https://github.com/edgehog-device-manager/edgehog/commit/649829af09106f283e6b929abec2987fbc7cd8fa))
+* **backend:** introduce OpenID Connect fields to `Actor` ([20344f4](https://github.com/edgehog-device-manager/edgehog/commit/20344f470fc39109b1a5f5fd141b139cec1f241e))
+* **frontend:** Add realtime subscriptions for deployment pages ([f4e8fde](https://github.com/edgehog-device-manager/edgehog/commit/f4e8fde5f566bf90fcee0ab6e4ab3f0a5f27c0d3))
+* reconcile on retry ([aee844d](https://github.com/edgehog-device-manager/edgehog/commit/aee844d476782bd5bc3b422887c08ed61876d132))
+
+
+### Bug Fixes
+
+* **backend:** DeploymentEvent interface not working ([eed0dcb](https://github.com/edgehog-device-manager/edgehog/commit/eed0dcbb031653c791577f6bbe9677dcc65191c3))
+* correct load of realm management client ([d03e737](https://github.com/edgehog-device-manager/edgehog/commit/d03e737bd28a9d2a5af928dda4293bc84aff6df7))
+* do not crash on not loaded device attributes ([7f4f963](https://github.com/edgehog-device-manager/edgehog/commit/7f4f9639b921ea561149d1da383eef3eaad1fbbd))
+* do not erase device names ([f7a9e85](https://github.com/edgehog-device-manager/edgehog/commit/f7a9e854bd9a0b5f545649401b2f121a526a00b9))
+* run reconciliation after provisioning is complete ([d9938eb](https://github.com/edgehog-device-manager/edgehog/commit/d9938eb1a15292ba3463a52e35ca984f8f8e82d9))
+* S3 presign host parsing for schemeless asset hosts ([39ff3f0](https://github.com/edgehog-device-manager/edgehog/commit/39ff3f05f4383b8b9b1f87c8aaa18067b160c854))
+* Wrong endpoint type in ServerToDevice for fileSizeBytes ([d43c948](https://github.com/edgehog-device-manager/edgehog/commit/d43c94851a57bec9a870be8a6c0c65729e3b3023))
+
+
+### Performance Improvements
+
+* **backend:** embed `Edgehog.Actors.Actor` resource ([fad68a6](https://github.com/edgehog-device-manager/edgehog/commit/fad68a6386c84be591f857f06a7be89e47b4a93a))
+
+
+### Miscellaneous Chores
+
+* **backend:** rename CHECK_ORIGIN_ALLOWED_ORIGINS to GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS ([89f43e4](https://github.com/edgehog-device-manager/edgehog/commit/89f43e495b17b510a61a999737657e30f657ec6f))
+
 ## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
 
 
