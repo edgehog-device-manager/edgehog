@@ -90,7 +90,7 @@ jobs:
           az storage container create --name edgehog --connection-string $AZURE_STORAGE_CONNECTION_STRING
           az storage container set-permission --name edgehog --public-access blob --connection-string $AZURE_STORAGE_CONNECTION_STRING
 
-      - uses: team-alembic/staple-actions/actions/mix-task@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
+      - uses: team-alembic/staple-actions/actions/mix-task@28dda7d1b982096b1b01400df551b561b9b70030 # main
         with:
           mix-env: test
           working-directory: backend

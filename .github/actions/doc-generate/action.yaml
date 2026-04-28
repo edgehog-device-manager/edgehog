@@ -36,7 +36,7 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+    - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
       with:
         node-version-file: ${{ inputs.edgehog }}/.tool-versions
     - name: Install astarte-docs-cli
@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         ln -s ${{ inputs.edgehog }}/.tool-versions .tool-versions
-    - uses: team-alembic/staple-actions/actions/mix-task@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
+    - uses: team-alembic/staple-actions/actions/mix-task@28dda7d1b982096b1b01400df551b561b9b70030 # main
       with:
         working-directory: ${{ inputs.edgehog }}/backend
         mix-env: dev

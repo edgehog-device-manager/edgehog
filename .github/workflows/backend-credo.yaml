@@ -35,7 +35,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: team-alembic/staple-actions/actions/mix-credo@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
+      - uses: team-alembic/staple-actions/actions/mix-credo@28dda7d1b982096b1b01400df551b561b9b70030 # main
         with:
           working-directory: backend
           mix-env: test
