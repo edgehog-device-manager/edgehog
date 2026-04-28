@@ -52,6 +52,8 @@ defmodule Edgehog.Application do
       EdgehogWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Edgehog.PubSub},
+      # gRPC connections batcher
+      {GRPC.Client.Supervisor, []},
       # Ash GraphQL subscription batcher
       AshGraphql.Subscription.Batcher,
       # Start Finch

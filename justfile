@@ -373,7 +373,7 @@ compile-protobuf: _check-protobuf-prereq
     fi
     echo "⚙️ Compiling protobufs definitions..."
     protoc \
-        --elixir_out=wplugins=grpc:backend/lib \
+        --elixir_out=plugins=grpc:backend/lib \
         --elixir_opt=include_docs=true \
         -I backend/priv/api \
         -I backend/priv/googleapis \
