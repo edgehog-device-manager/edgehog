@@ -80,10 +80,11 @@ const DeploymentEventMessage = ({ event }: DeploymentEventMessageProps) => {
           />
         )
       }
-      type="flat"
       open={isOpen}
       onToggle={toggleIsOpen}
-      isInsideTable
+      headerClassName="border-0 ps-0"
+      style={{ backgroundColor: "transparent" }}
+      caretPosition="right"
     >
       <div className="mt-1 p-1 bg-light">{addInfo}</div>
     </CollapseItem>

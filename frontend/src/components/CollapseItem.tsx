@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025 - 2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { Card, Button, Collapse } from "react-bootstrap";
+import { Button, Collapse } from "react-bootstrap";
 
 import Icon from "@/components/Icon";
-import ContainerStatus, {
-  parseContainerState,
-} from "@/components/ContainerStatus";
 
 export function useCollapseToggle(defaultOpen = false) {
   const [open, setOpen] = useState(defaultOpen);
@@ -50,32 +47,26 @@ export function useCollapsibleSections<T extends string | number>(
   return { openSections, toggleSection, isSectionOpen, setOpenSections };
 }
 
-interface CollapseCaretProps {
-  open: boolean;
-}
+const CollapseCaret = ({ open }: { open: boolean }) => (
+  <span
+    style={{
+      display: "inline-flex",
+      transition: "transform 0.2s ease-in-out",
+      transform: open ? "rotate(0deg)" : "rotate(-180deg)",
+    }}
+  >
+    <Icon icon="caretDown" />
+  </span>
+);
 
-const CollapseCaret = ({ open }: CollapseCaretProps) => {
-  return (
-    <span
-      style={{
-        display: "inline-flex",
-        transition: "transform 0.2s ease-in-out",
-        transform: open ? "rotate(0deg)" : "rotate(-180deg)",
-      }}
-    >
-      <Icon icon="caretDown" />
-    </span>
-  );
-};
-
-interface CollapseHeaderButtonProps {
+type CollapseHeaderButtonProps = {
   open: boolean;
   onToggle: () => void;
   children: React.ReactNode;
   className?: string;
   style?: React.CSSProperties;
   title?: string;
-}
+};
 
 const CollapseHeaderButton = ({
   open,
@@ -96,98 +87,89 @@ const CollapseHeaderButton = ({
     {children}
   </Button>
 );
-
-type CollapseType = "flat" | "card-parent" | "card-child";
-
-interface CollapseItemProps {
+type CollapseItemProps = {
   title: React.ReactNode;
   children: React.ReactNode;
+  rightContent?: React.ReactNode;
+  caretPosition?: "left" | "right" | "end";
   open: boolean;
   onToggle: () => void;
-  containerStatus?: string | null;
-  isInsideTable?: boolean;
-  type?: CollapseType;
-}
+  showToggleTooltip?: boolean;
+  style?: React.CSSProperties;
+  className?: string;
+  headerClassName?: string;
+  contentClassName?: string;
+};
 
 const CollapseItem = ({
   title,
   children,
+  rightContent,
+  caretPosition,
   open,
   onToggle,
-  containerStatus,
-  isInsideTable = false,
-  type = "card-child",
+  showToggleTooltip = false,
+  style,
+  className,
+  headerClassName,
+  contentClassName,
 }: CollapseItemProps) => {
   const intl = useIntl();
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const isFlat = type === "flat";
-  const isParent = type === "card-parent";
+  const handleScrollIntoView = useCallback(() => {
+    if (!containerRef.current) return;
 
-  if (isFlat) {
-    const collapseTitle = isInsideTable
-      ? open
-        ? intl.formatMessage({
-            id: "components.CollapseItem.collapseList",
-            defaultMessage: "Collapse list",
-          })
-        : intl.formatMessage({
-            id: "components.CollapseItem.expandList",
-            defaultMessage: "Expand list",
-          })
-      : undefined;
+    const rect = containerRef.current.getBoundingClientRect();
+    if (rect.bottom > window.innerHeight) {
+      containerRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    }
+  }, []);
 
-    return (
-      <div
-        className={
-          !isInsideTable ? `mb-2 border-bottom ${open ? "pb-4" : "pb-1"}` : ""
-        }
-      >
-        <CollapseHeaderButton
-          open={open}
-          onToggle={onToggle}
-          title={collapseTitle}
-          className={`d-flex align-items-center ps-0 pe-1 ${!isInsideTable ? "fw-bold" : ""}`}
-          style={{ backgroundColor: "transparent", border: "none" }}
-        >
-          <span className="d-flex align-items-center gap-2">
-            {title}
-            <CollapseCaret open={open} />
-          </span>
-        </CollapseHeaderButton>
+  const collapseTitle = showToggleTooltip
+    ? open
+      ? intl.formatMessage({
+          id: "components.CollapseItem.collapseList",
+          defaultMessage: "Collapse list",
+        })
+      : intl.formatMessage({
+          id: "components.CollapseItem.expandList",
+          defaultMessage: "Expand list",
+        })
+    : undefined;
 
-        <Collapse in={open}>
-          <div className={isInsideTable ? "" : "pt-3"}>{children}</div>
-        </Collapse>
-      </div>
-    );
-  }
+  const renderCaret = () => <CollapseCaret open={open} />;
 
   return (
-    <Card className={`shadow-sm ${isParent ? "mb-3" : "mb-2"}`}>
-      <Card.Header className="p-0">
-        <CollapseHeaderButton
-          open={open}
-          onToggle={onToggle}
-          className={`w-100 d-flex align-items-center ${isParent ? "fw-bold p-2" : "fw-semibold p-1"}`}
-          style={{ fontSize: isParent ? "1rem" : "0.9rem" }}
-        >
+    <div ref={containerRef} className={className}>
+      <CollapseHeaderButton
+        open={open}
+        onToggle={onToggle}
+        title={collapseTitle}
+        className={`d-flex align-items-center w-100 ${headerClassName ?? ""}`}
+        style={style}
+      >
+        <div className="d-flex align-items-center gap-2">
+          {caretPosition === "left" && renderCaret()}
           <span>{title}</span>
-
-          <span className="ms-auto d-inline-flex gap-2 align-items-center">
-            {containerStatus && (
-              <ContainerStatus state={parseContainerState(containerStatus)} />
-            )}
-            <CollapseCaret open={open} />
-          </span>
-        </CollapseHeaderButton>
-      </Card.Header>
-
-      <Collapse in={open}>
-        <div className={`border-top ${isParent ? "p-3" : "p-2"}`}>
-          {children}
+          {caretPosition === "right" && renderCaret()}
         </div>
+
+        {(rightContent || caretPosition === "end") && (
+          <div className="ms-auto d-flex align-items-center gap-2">
+            {caretPosition === "end" && renderCaret()}
+            {rightContent}
+          </div>
+        )}
+      </CollapseHeaderButton>
+
+      <Collapse in={open} onEntered={handleScrollIntoView}>
+        <div className={contentClassName}>{children}</div>
       </Collapse>
-    </Card>
+    </div>
   );
 };
 

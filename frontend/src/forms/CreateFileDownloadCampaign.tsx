@@ -669,16 +669,17 @@ const CreateFileDownloadCampaignForm = ({
         </FormRow>
 
         <CollapseItem
-          type="flat"
           open={advancedOptionsOpen}
           onToggle={toggleAdvancedOptions}
-          isInsideTable={true}
           title={
             <FormattedMessage
               id="forms.CreateFileDownloadCampaign.advancedOptionsTitle"
               defaultMessage="Advanced Options"
             />
           }
+          headerClassName="ps-0 border-0"
+          style={{ backgroundColor: "transparent" }}
+          caretPosition="right"
         >
           <Stack gap={3}>
             <FormRow

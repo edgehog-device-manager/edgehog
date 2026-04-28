@@ -56,6 +56,7 @@ import {
   faCircleQuestion,
   faRotate,
   faCircleInfo,
+  faArrowUpRightFromSquare,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -63,6 +64,7 @@ const icons = {
   arrowDown: faArrowDown,
   arrowUp: faArrowUp,
   arrowRight: faArrowRight,
+  arrowUpRightFromSquare: faArrowUpRightFromSquare,
   bug: faBug,
   caretDown: faAngleDown,
   caretUp: faAngleUp,
