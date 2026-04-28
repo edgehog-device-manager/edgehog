@@ -3,6 +3,11 @@
 ## https://github.com/edgehog-device-manager/edgehog
 ##
 
+# TODO: update all comments, or remove them
+# TODO: make sure all resources have owners/admins/editors, and that there are 'can_'
+# relations for all relevant operations on them,
+# including managing roles operations (? no, i think this will go to portal)
+
 model
   schema 1.1
 
@@ -40,7 +45,22 @@ type tenant
     define is_admin:    admin or owner
     define is_owner:    owner
 
-    # TODO: blacklist per-tenant
+    # Blacklist per-tenant
+    define realm_blacklisted: [user]
+    # define device_blacklisted: [user]
+    define system_model_blacklisted: [user]
+    define hardware_type_blacklisted: [user]
+    define base_image_collection_blacklisted: [user]
+    define image_credential_blacklisted: [user]
+    define volume_blacklisted: [user]
+    define network_blacklisted: [user]
+    define container_blacklisted: [user]
+    define application_blacklisted: [user]
+    # define release_blacklisted: [user]
+    # define deployment_blacklisted: [user]
+    define channel_blacklisted: [user]
+    define device_group_blacklisted: [user]
+    define campaign_blacklisted: [user]
 
     ## ---- Realms ----
     define realm_owner:      [user]
@@ -48,31 +68,45 @@ type tenant
     define realm_editor:     [user]
     define realm_viewer:     [user]
 
-    define can_view_realm:   realm_viewer or realm_editor or realm_admin or realm_owner
-    define can_update_realm:   realm_editor or realm_admin or realm_owner
-    define can_delete_realm:    realm_owner
+    define can_view_realm:   (realm_viewer or realm_editor or realm_admin or realm_owner or can_view) but not realm_blacklisted
+    define can_view_all_realms:  can_view but not realm_blacklisted
+    define can_edit_realm:   (realm_editor or realm_admin or realm_owner or can_edit) but not realm_blacklisted
+    define can_edit_all_realms:  can_edit but not realm_blacklisted
+    define can_delete_realm:    (realm_owner or is_admin) but not realm_blacklisted
+    define can_delete_all_realms:  is_admin but not realm_blacklisted
+
+    ## ---- Devices ----
+    # queste credo che possano essere ottentute in altri modi tramite il realm
+    # però possono servire per blacklist
+    # define can_view_all_devices: can_view_all_realms
+    # define can_rename_all_devices: can_view_all_devices and can_edit_all_realms
+    # define can_edit_tags_all_devices: can_view_all_devices and can_edit_all_realms
+    # define can_access_terminal_all_devices: can_view_all_realms and can_edit_all_realms
+    # define can_update_all_devices: can_view_all_realms and can_edit_all_realms
+    # define can_identify_devices: can_view_all_realms and can_edit_all_realms
+
 
     ## ---- System models ----
+    define system_model_creator: [user]
     define system_model_viewer:  [user]
     define system_model_editor:  [user]
-    define system_model_creator: [user]
     define system_model_deleter: [user]
 
-    define can_view_all_system_models:   system_model_viewer or system_model_editor or system_model_creator or system_model_deleter
     define can_create_system_model:      system_model_creator or system_model_editor
-    define can_update_all_system_models: system_model_editor
-    define can_delete_all_system_models: system_model_deleter
+    define can_view_all_system_models:   (system_model_viewer or system_model_editor or system_model_creator or system_model_deleter) but not system_model_blacklisted
+    define can_edit_all_system_models: system_model_editor but not system_model_blacklisted
+    define can_delete_all_system_models: system_model_deleter but not system_model_blacklisted
 
     ## ---- Hardware types ----
+    define hardware_type_creator: [user]
     define hardware_type_viewer:  [user]
     define hardware_type_editor:  [user]
-    define hardware_type_creator: [user]
     define hardware_type_deleter: [user]
 
-    define can_view_all_hardware_types:   hardware_type_viewer or hardware_type_editor or hardware_type_creator or hardware_type_deleter
     define can_create_hardware_type:      hardware_type_creator or hardware_type_editor
-    define can_update_all_hardware_types: hardware_type_editor
-    define can_delete_all_hardware_types: hardware_type_deleter
+    define can_view_all_hardware_types:   (hardware_type_viewer or hardware_type_editor or hardware_type_creator or hardware_type_deleter) but not hardware_type_blacklisted
+    define can_edit_all_hardware_types: hardware_type_editor but not hardware_type_blacklisted
+    define can_delete_all_hardware_types: hardware_type_deleter but not hardware_type_blacklisted
 
     ## ---- Base image collections ----
     define base_image_collection_viewer:       [user]
@@ -82,12 +116,12 @@ type tenant
     define base_image_collection_image_adder:  [user]
     define base_image_collection_image_remover:[user]
 
-    define can_view_all_base_image_collections:   base_image_collection_viewer or base_image_collection_editor or base_image_collection_creator or base_image_collection_deleter
+    define can_view_all_base_image_collections:   (base_image_collection_viewer or base_image_collection_editor or base_image_collection_creator or base_image_collection_deleter) but not base_image_collection_blacklisted
     define can_create_base_image_collection:      base_image_collection_creator or base_image_collection_editor
-    define can_update_all_base_image_collections: base_image_collection_editor
-    define can_delete_all_base_image_collections: base_image_collection_deleter
-    define can_add_image_to_all_collections:      base_image_collection_image_adder or base_image_collection_editor
-    define can_remove_image_from_all_collections: base_image_collection_image_remover or base_image_collection_editor
+    define can_edit_all_base_image_collections: base_image_collection_editor but not base_image_collection_blacklisted
+    define can_delete_all_base_image_collections: base_image_collection_deleter but not base_image_collection_blacklisted
+    define can_add_image_to_all_collections:      (base_image_collection_image_adder or base_image_collection_editor) but not base_image_collection_blacklisted
+    define can_remove_image_from_all_collections: (base_image_collection_image_remover or base_image_collection_editor) but not base_image_collection_blacklisted
 
     ## ---- Image credentials ----
     define image_credential_viewer:  [user]
@@ -95,9 +129,9 @@ type tenant
     define image_credential_deleter: [user]
 
     # define can_create_image_credential:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_image_credentials:   image_credential_viewer or image_credential_editor or image_credential_deleter
-    define can_update_all_image_credentials: image_credential_editor
-    define can_delete_all_image_credentials: image_credential_deleter
+    define can_view_all_image_credentials:   (image_credential_viewer or image_credential_editor or image_credential_deleter) but not image_credential_blacklisted
+    define can_edit_all_image_credentials: image_credential_editor but not image_credential_blacklisted
+    define can_delete_all_image_credentials: image_credential_deleter but not image_credential_blacklisted
 
     ## ---- Volumes ----
     define volume_viewer:  [user]
@@ -105,9 +139,9 @@ type tenant
     define volume_deleter: [user]
 
     # define can_create_volume:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_volumes:   volume_viewer or volume_editor or volume_deleter
-    define can_update_all_volumes: volume_editor
-    define can_delete_all_volumes: volume_deleter
+    define can_view_all_volumes:   (volume_viewer or volume_editor or volume_deleter) but not volume_blacklisted
+    define can_edit_all_volumes: volume_editor but not volume_blacklisted
+    define can_delete_all_volumes: volume_deleter but not volume_blacklisted
 
     ## ---- Networks ----
     define network_viewer:  [user]
@@ -115,9 +149,9 @@ type tenant
     define network_deleter: [user]
 
     # define can_create_network:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_networks:   network_viewer or network_editor or network_deleter
-    define can_update_all_networks: network_editor
-    define can_delete_all_networks: network_deleter
+    define can_view_all_networks:   (network_viewer or network_editor or network_deleter) but not network_blacklisted
+    define can_edit_all_networks: network_editor but not network_blacklisted
+    define can_delete_all_networks: network_deleter but not network_blacklisted
 
     ## ---- Containers ----
     define container_viewer:  [user]
@@ -125,9 +159,9 @@ type tenant
     define container_deleter: [user]
 
     # define can_create_container:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_containers:   container_viewer or container_editor or container_deleter
-    define can_update_all_containers: container_editor
-    define can_delete_all_containers: container_deleter
+    define can_view_all_containers:   (container_viewer or container_editor or container_deleter) but not container_blacklisted
+    define can_edit_all_containers: container_editor but not container_blacklisted
+    define can_delete_all_containers: container_deleter but not container_blacklisted
 
     ## ---- Applications ----
     define application_viewer:  [user]
@@ -135,10 +169,10 @@ type tenant
     define application_creator: [user]
     define application_deleter: [user]
 
-    define can_view_all_applications:   application_viewer or application_editor or application_creator or application_deleter
+    define can_view_all_applications:   (application_viewer or application_editor or application_creator or application_deleter) but not application_blacklisted
     define can_create_application:      application_creator or application_editor
-    define can_update_all_applications: application_editor
-    define can_delete_all_applications: application_deleter
+    define can_edit_all_applications: application_editor but not application_blacklisted
+    define can_delete_all_applications: application_deleter but not application_blacklisted
 
     ## ---- Releases ----
     # TODO
@@ -154,10 +188,10 @@ type tenant
     define channel_deleter: [user]
 
     # define can_create_channel:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_channels:   channel_viewer or channel_editor or channel_creator or channel_deleter
+    define can_view_all_channels:   (channel_viewer or channel_editor or channel_creator or channel_deleter) but not channel_blacklisted
     define can_create_channel:      channel_creator or channel_editor
-    define can_update_all_channels: channel_editor
-    define can_delete_all_channels: channel_deleter
+    define can_edit_all_channels: channel_editor but not channel_blacklisted
+    define can_delete_all_channels: channel_deleter but not channel_blacklisted
 
     ## ---- Device groups ----
     define device_group_viewer:  [user]
@@ -166,10 +200,10 @@ type tenant
     define device_group_deleter: [user]
 
     # define can_create_device_group:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_device_groups:   device_group_viewer or device_group_editor or device_group_creator or device_group_deleter
+    define can_view_all_device_groups:   (device_group_viewer or device_group_editor or device_group_creator or device_group_deleter) but not device_group_blacklisted
     define can_create_device_group:      device_group_creator or device_group_editor
-    define can_update_all_device_groups: device_group_editor
-    define can_delete_all_device_groups: device_group_deleter
+    define can_edit_all_device_groups: device_group_editor but not device_group_blacklisted
+    define can_delete_all_device_groups: device_group_deleter but not device_group_blacklisted
 
     ## ---- Campaigns ----
     define campaign_viewer:  [user]
@@ -178,15 +212,15 @@ type tenant
     define campaign_deleter: [user]
 
     # define can_create_campaign:  (editor or is_admin) from tenant #? maybe a role?
-    define can_view_all_campaigns:  campaign_viewer or campaign_editor or campaign_creator or campaign_deleter
+    define can_view_all_campaigns:  (campaign_viewer or campaign_editor or campaign_creator or campaign_deleter) but not campaign_blacklisted
     define can_create_firmware_upgrade_campaign: campaign_creator or campaign_editor
     define can_create_deployment_campaign: campaign_creator or campaign_editor
     define can_create_start_campaign: campaign_creator or campaign_editor
     define can_create_stop_campaign: campaign_creator or campaign_editor
     define can_create_update_campaign: campaign_creator or campaign_editor
     define can_create_uninstall_campaign: campaign_creator or campaign_editor
-    define can_pause_resume_all_campaigns: campaign_editor or campaign_creator
-    define can_update_all_campaigns: campaign_editor
+    define can_pause_resume_all_campaigns: (campaign_editor or campaign_creator) but not campaign_blacklisted
+    define can_edit_all_campaigns: campaign_editor but not campaign_blacklisted
 
 ## ---------------------------------------------------------------------------
 ## REALM
@@ -203,30 +237,33 @@ type tenant
 ##
 ## Computed permissions:
 ##   can_view_devices          – any of the above roles
-##   can_edit_device_tags      – device_editor or device_admin
+##   can_edit_tags_devices      – device_editor or device_admin
 ##   can_rename_devices        – device_editor or device_admin
-##   can_access_terminal       – device_admin
+##   can_access_terminals       – device_admin
 ##   can_identify_devices      – identifier or device_editor or device_admin
-##   can_update_devices        – device_updater or device_admin
+##   can_edit_devices        – device_updater or device_admin
 ## ---------------------------------------------------------------------------
 
 type realm
   relations
     ## Assignable roles
     define tenant:                 [tenant]
+    define device_owner:           [user]
+    define device_admin:           [user]
     define device_viewer:          [user]
     define device_editor:          [user]
-    define device_admin:           [user]
     define device_updater:         [user]
     define device_identifier:      [user]
+    define device_blacklisted:     [user]
 
     ## Derived realm-wide permissions
-    define can_view_devices:     device_viewer or device_editor or device_admin or device_updater or device_identifier or can_view from tenant
-    define can_edit_device_tags: device_editor or device_admin or can_edit from tenant
-    define can_rename_devices:   device_editor or device_admin or can_edit from tenant
-    define can_access_terminal:  device_admin or is_admin from tenant
-    define can_identify_devices: device_identifier or device_editor or device_admin or can_view from tenant
-    define can_update_devices:   device_updater or device_admin or can_edit from tenant
+    define can_view_devices:     (device_viewer or device_editor or device_admin or device_updater or device_identifier or can_view from tenant) but not device_blacklisted
+    define can_edit_tags_devices: (device_editor or device_admin or can_edit from tenant) but not device_blacklisted
+    define can_rename_devices:   (device_editor or device_admin or can_edit from tenant) but not device_blacklisted
+    define can_access_terminals:  (device_admin or is_admin from tenant) but not device_blacklisted
+    define can_identify_devices: (device_identifier or device_editor or device_admin or can_view from tenant) but not device_blacklisted
+    define can_update_devices:   (device_updater or device_admin or can_edit from tenant) but not device_blacklisted
+    define can_delete_devices: (device_admin or is_admin from tenant) but not device_blacklisted
 
 ## ---------------------------------------------------------------------------
 ## DEVICE
@@ -257,8 +294,14 @@ type device
     ## Parent realm (object-to-object)
     define realm: [realm]
 
-    ## Direct per-device assignable relations
+    ## General per-device roles
+    define owner:      [user]
+    define admin:      [user]
+    define editor:     [user] # TODO: probs reconcile this with all the separate permissions
     define viewer:     [user]
+    define blacklisted: [user] or device_blacklisted from realm
+
+    ## Direct per-device assignable relations for operations
     define tag_editor: [user]
     define renamer:    [user]
     define terminal:   [user]
@@ -266,18 +309,18 @@ type device
     define identifier: [user]
 
     ## Computed permissions
-    define can_view: viewer or can_view_devices from realm
+    define can_view: (viewer or editor or admin or owner or can_view_devices from realm) but not blacklisted
 
-    ## Tag editing requires view + explicit grant (guard: can_view; see type realm)
-    define can_edit_tags: tag_editor or can_edit_device_tags from realm
+    ### Tag editing requires view + explicit grant (guard: can_view; see type realm)
+    define can_edit_tags: (tag_editor or editor or admin or owner or can_edit_tags_devices from realm) but not blacklisted
+    ### do these also require view + explicit grant?
+    define can_rename: (renamer or editor or admin or owner or can_rename_devices from realm or updater or can_update_devices from realm) but not blacklisted
+    define can_access_terminal: (terminal or editor or admin or owner or can_access_terminals from realm) but not blacklisted
+    define can_update: (updater or editor or admin or owner or can_update_devices from realm) but not blacklisted
+    define can_identify: (identifier or editor or admin or owner or can_identify_devices from realm) but not blacklisted
 
-    define can_rename: renamer or can_rename_devices from realm or updater or can_update_devices from realm
-
-    define can_access_terminal: terminal or can_access_terminal from realm
-
-    define can_update: updater or can_update_devices from realm
-
-    define can_identify: identifier or can_identify_devices from realm
+    define can_edit: (can_edit_tags and can_rename and can_access_terminal and can_update and can_identify) but not blacklisted
+    define can_delete: (admin or owner or can_delete_devices from realm) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## SYSTEM MODEL  (tenant-wide resource)
@@ -299,13 +342,16 @@ type system_model
   relations
     define tenant:  [tenant]
 
+    define owner:   [user]
+    define admin:   [user]
     define viewer:  [user]
     define editor:  [user]
     define deleter: [user]
+    define blacklisted: [user] or system_model_blacklisted from tenant
 
-    define can_view:   viewer or can_view from tenant
-    define can_update: editor or can_edit from tenant
-    define can_delete: deleter or can_edit from tenant
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or can_edit from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## HARDWARE TYPE  (tenant-wide resource)
@@ -315,13 +361,16 @@ type hardware_type
   relations
     define tenant:  [tenant]
 
+    define owner:   [user]
+    define admin:   [user]
     define viewer:  [user]
     define editor:  [user]
     define deleter: [user]
+    define blacklisted: [user] or hardware_type_blacklisted from tenant
 
-    define can_view:   viewer or can_view from tenant
-    define can_update: editor or can_edit from tenant
-    define can_delete: deleter or can_edit from tenant
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or editor or admin or owner or can_edit from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## BASE IMAGE COLLECTION  (tenant-wide resource)
@@ -333,6 +382,8 @@ type base_image_collection
   relations
     define tenant: [tenant]
 
+    define owner:        [user]
+    define admin:        [user]
     define viewer:       [user]
     define editor:       [user]           ## update collection metadata
     define image_adder:  [user]           ## can add base images to this collection
@@ -340,12 +391,12 @@ type base_image_collection
     define deleter:      [user]
     define blacklisted:  [user]           ## users that cannot perform actions in this collection
 
-    define can_view:          viewer or editor or image_adder or image_remover or deleter or can_view from tenant
-    define can_update:        editor or can_edit from tenant
-    define can_add_image:     image_adder or editor or can_edit from tenant
-    define can_remove_image:  image_remover or editor or can_edit from tenant
-    define can_manage_images: image_adder or image_remover
-    define can_delete:        deleter or is_admin from tenant
+    define can_view:          (viewer or editor or image_adder or image_remover or deleter or can_view from tenant) but not base_image_collection_blacklisted from tenant
+    define can_edit:        (editor or can_edit from tenant) but not base_image_collection_blacklisted from tenant
+    define can_add_image:     (image_adder or editor or admin or owner or can_edit from tenant) but not base_image_collection_blacklisted from tenant
+    define can_remove_image:  (image_remover or editor or admin or owner or can_edit from tenant) but not base_image_collection_blacklisted from tenant
+    define can_manage_images: (image_adder or image_remover) but not base_image_collection_blacklisted from tenant
+    define can_delete:        (deleter or admin or owner or is_admin from tenant) but not base_image_collection_blacklisted from tenant
 
 ## ---------------------------------------------------------------------------
 ## BASE IMAGE  (child of base_image_collection)
@@ -360,15 +411,17 @@ type base_image
     define collection:  [base_image_collection]
 
     ## Direct per-image grants (whitelist/blacklist overrides)
+    define owner:       [user]
+    define admin:       [user]
     define viewer:      [user]
     define editor:      [user]
     define deleter:     [user]
     define blacklisted: [user] or blacklisted from collection ## users that cannot perform actions in this collection
 
     ## Computed permissions
-    define can_view:   viewer or can_view from collection or can_view from tenant but not blacklisted
-    define can_edit:   editor or can_update from collection or can_edit from tenant but not blacklisted
-    define can_delete: deleter or can_delete from collection or is_admin from tenant but not blacklisted
+    define can_view:   (viewer or editor or admin or owner or can_view from collection or can_view from tenant) but not blacklisted
+    define can_edit:   (editor or admin or owner or can_edit from collection or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or can_delete from collection or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## IMAGE CREDENTIAL  (tenant-wide, Applications domain)
@@ -380,13 +433,16 @@ type image_credential
   relations
     define tenant: [tenant]
 
-    define owner:  [user]
-    define editor: [user]
-    define viewer: [user]
+    define owner:   [user]
+    define admin:   [user]
+    define editor:  [user]
+    define viewer:  [user]
+    define deleter: [user]
+    define blacklisted: [user] or image_credential_blacklisted from tenant
 
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from tenant
+    define can_view:   (viewer or editor or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## VOLUME  (tenant-wide, Applications domain)
@@ -397,12 +453,15 @@ type volume
     define tenant: [tenant]
 
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or volume_blacklisted from tenant
 
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from [tenant]
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## NETWORK  (tenant-wide, Applications domain)
@@ -413,12 +472,15 @@ type network
     define tenant: [tenant]
 
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or network_blacklisted from tenant
 
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from [tenant]
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## CONTAINER  (tenant-wide, Applications domain)
@@ -429,12 +491,15 @@ type container
     define tenant: [tenant]
 
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or container_blacklisted from tenant
 
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from [tenant]
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## APPLICATION  (tenant-wide)
@@ -448,14 +513,16 @@ type application
     define tenant: [tenant]
 
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
     define blacklisted: [user]
 
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from tenant
-    define can_create_release: editor or owner or is_admin from tenant
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not application_blacklisted from tenant
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not application_blacklisted from tenant
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not application_blacklisted from tenant
+    define can_create_release: (editor or admin or owner or is_admin from tenant) but not application_blacklisted from tenant
 
 ## ---------------------------------------------------------------------------
 ## RELEASE  (child of application)
@@ -470,14 +537,16 @@ type release
     define application: [application]
 
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
     define blacklisted: [user] or blacklisted from application
 
     ## Computed permissions
-    define can_view:   viewer or owner or can_view from application or can_view from tenant but not blacklisted
-    define can_update: editor or owner or can_update from application or can_update from tenant but not blacklisted
-    define can_delete: owner or can_delete from application or is_admin from tenant but not blacklisted
+    define can_view:   (viewer or editor or admin or owner or can_view from application or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from application or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or can_delete from application or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## DEPLOYMENT
@@ -501,16 +570,18 @@ type deployment
 
     ## Assignable roles
     define owner:   [user]
-    define manager: [user]
+    define admin:   [user]
+    define manager: [user] # TODO: editor? also, aggiungere ruoli separati per le diverse cose?
     define viewer:  [user]
 
     ## Computed permissions
-    define can_view:      viewer or manager or owner or (can_view from device and can_view from release)
-    define can_start_stop: manager or owner or can_edit from tenant
-    define can_upgrade:    manager or owner
-    define can_delete:     manager or owner
-    define can_set_manager: owner
-    define can_set_viewer:  owner
+    define can_view:      viewer or manager or admin or owner or (can_view from device and can_view from release) or can_view from tenant
+    define can_start_stop: manager or admin or owner or can_edit from tenant
+    define can_upgrade:    manager or admin or owner or can_edit from tenant
+    define can_delete:     manager or admin or owner or can_edit from tenant
+    ### TODO: queste cose le teniamo in edgehog oppure le lasciamo a portal?
+    define can_set_manager: admin or owner or is_admin from tenant
+    define can_set_viewer:  admin or owner or is_admin from tenant
 
 ## ---------------------------------------------------------------------------
 ## CAMPAIGN
@@ -529,16 +600,20 @@ type campaign
 
     ## Assignable roles
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or campaign_blacklisted from tenant
 
     ## Computed permissions
-    define can_view:         viewer or editor or owner or can view from tenant
-    define can_edit_params:  editor or owner or can_edit from tenant
-    define can_pause_resume: editor or owner or can_edit from tenant
-    define can_delete:       owner or is_admin from tenant
-    define can_add_editor:   owner or is_admin from tenant
-    define can_add_viewer:   owner or is_admin from tenant
+    define can_view:         (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit_params:  (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_pause_resume: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete:       (deleter or admin or owner or is_admin from tenant) but not blacklisted
+    ### TODO: queste cose le teniamo in edgehog oppure le lasciamo a portal?
+    define can_add_editor:   (admin or owner or is_admin from tenant) but not blacklisted
+    define can_add_viewer:   (admin or owner or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## CHANNEL  (tenant-wide)
@@ -550,13 +625,16 @@ type channel
 
     ## Assignable roles
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or channel_blacklisted from tenant
 
     ## Computed permissions
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from tenant
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
 
 ## ---------------------------------------------------------------------------
 ## DEVICE GROUP  (tenant-wide)
@@ -568,11 +646,14 @@ type device_group
 
     ## Assignable roles
     define owner:  [user]
+    define admin:  [user]
     define editor: [user]
     define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or device_group_blacklisted from tenant
 
     ## Computed permissions
-    define can_view:   viewer or editor or owner or can_view from tenant
-    define can_update: editor or owner or can_edit from tenant
-    define can_delete: owner or is_admin from tenant
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
 
