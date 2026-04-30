@@ -607,7 +607,7 @@ const fileSchema = z.object({
   file: z.instanceof(FileList).refine((files) => files.length > 0, {
     message: messages.baseImageFileSchema.id,
   }),
-  archiveName: z.string().optional(),
+  customFileName: z.string().optional(),
 });
 
 type FileFormData = z.infer<typeof fileSchema>;

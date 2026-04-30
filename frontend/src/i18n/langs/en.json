@@ -1094,8 +1094,17 @@
   "components.FileUploadRequestsTable.status.notTracked": {
     "defaultMessage": "Not Tracked"
   },
-  "components.FilesTable.action": {
-    "defaultMessage": "Action"
+  "components.FilesTable.actionsTitle": {
+    "defaultMessage": "Actions"
+  },
+  "components.FilesTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the file."
+  },
+  "components.FilesTable.deleteModal.title": {
+    "defaultMessage": "Delete File"
+  },
+  "components.FilesTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the file, please try again."
   },
   "components.FilesTable.nameTitle": {
     "defaultMessage": "File Name",
@@ -2052,9 +2061,6 @@
   "forms.CreateDeviceGroup.submitButton": {
     "defaultMessage": "Create"
   },
-  "forms.CreateFile.archiveNameHint": {
-    "defaultMessage": "Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
-  },
   "forms.CreateFile.archiveNameLabel": {
     "defaultMessage": "Archive Name"
   },
@@ -2063,6 +2069,12 @@
   },
   "forms.CreateFile.fileLabel": {
     "defaultMessage": "Files"
+  },
+  "forms.CreateFile.fileNameLabel": {
+    "defaultMessage": "File Name"
+  },
+  "forms.CreateFile.nameHint": {
+    "defaultMessage": "You can customize the name before creation."
   },
   "forms.CreateFile.repositoryLabel": {
     "defaultMessage": "Repository"

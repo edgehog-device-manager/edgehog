@@ -29,6 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { PayloadError } from "relay-runtime";
 
 import type { FileCreate_createFile_Mutation } from "@/api/__generated__/FileCreate_createFile_Mutation.graphql";
 import type {
@@ -41,10 +42,9 @@ import Center from "@/components/Center";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
-import CreateFileForm, { FileFormOutputData } from "@/forms/CreateFile";
+import CreateFileForm, { type FileFormOutputData } from "@/forms/CreateFile";
 import { createTarArchive } from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";
-import { PayloadError } from "relay-runtime";
 
 const GET_REPOSITORY_QUERY = graphql`
   query FileCreate_getOptions_Query($repositoryId: ID!) {
@@ -72,6 +72,14 @@ class APIValidationError extends Error {
   }
 }
 
+const getDefaultArchiveName = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}-${pad(now.getMinutes())}`;
+
+  return `archive-${dateStr}`;
+};
+
 type FileCreateContentProps = {
   repository: NonNullable<FileCreate_getOptions_Query$data["repository"]>;
 };
@@ -85,13 +93,15 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
   const [createFile, isCreatingFile] =
     useMutation<FileCreate_createFile_Mutation>(CREATE_FILE_MUTATION);
 
-  const prepareUploadFile = async (files: File[], archiveName?: string) => {
-    const hasRelativePaths = files.some((f) => !!f.webkitRelativePath);
-    const needsArchive = files.length > 1 || hasRelativePaths;
+  const prepareUploadFile = async (files: File[], customFileName?: string) => {
+    const needsArchive =
+      files.length > 1 || files.some((f) => !!f.webkitRelativePath);
+    const baseName =
+      customFileName?.trim() ||
+      (needsArchive ? getDefaultArchiveName() : files[0].name);
 
     if (needsArchive) {
       const tarBlob = await createTarArchive(files);
-      const baseName = archiveName?.trim() || "files-archive";
       const fileName = baseName.endsWith(".tar") ? baseName : `${baseName}.tar`;
       const uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
 
@@ -103,10 +113,16 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
     }
 
     const singleFile = files[0];
+
+    const finalFile =
+      baseName !== singleFile.name
+        ? new File([singleFile], baseName, { type: singleFile.type })
+        : singleFile;
+
     return {
-      file: singleFile,
-      fileName: singleFile.name,
-      uncompressedSize: singleFile.size,
+      file: finalFile,
+      fileName: baseName,
+      uncompressedSize: finalFile.size,
     };
   };
 
@@ -116,7 +132,7 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         createFile({
           variables: { input },
           onCompleted: (data, errors) => {
-            if (errors && errors.length > 0) {
+            if (errors?.length) {
               return reject(new APIValidationError(errors));
             }
 
@@ -127,15 +143,14 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
               reject(new Error("No result returned from mutation"));
             }
           },
-          onError: (err) => reject(err),
+          onError: reject,
         });
       }),
     [createFile],
   );
 
   const handleCreateFile = useCallback(
-    async (values: FileFormOutputData) => {
-      const { files, archiveName, repositoryId } = values;
+    async ({ files, customFileName, repositoryId }: FileFormOutputData) => {
       if (!files?.length) return;
 
       setIsUploading(true);
@@ -144,7 +159,7 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
       try {
         const { file, fileName, uncompressedSize } = await prepareUploadFile(
           files,
-          archiveName,
+          customFileName,
         );
 
         await commitCreateFile({
@@ -165,7 +180,7 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         if (err instanceof APIValidationError) {
           const message = err.errors
             .map(({ fields, message }) =>
-              fields.length ? `${fields.join(", ")}: ${message}` : message,
+              fields?.length ? `${fields.join(", ")}: ${message}` : message,
             )
             .join(". ");
           setErrorFeedback(message);
@@ -174,14 +189,17 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
             <FormattedMessage
               id="pages.FileCreate.archivationErrorFeedback"
               defaultMessage="Could not process or upload selected files. {details}"
-              values={{ details: err instanceof Error ? err.message : "" }}
+              values={{
+                details: err instanceof Error ? err.message : "Unknown error",
+              }}
             />,
           );
         }
       }
     },
-    [navigate, commitCreateFile, setIsUploading, setErrorFeedback],
+    [navigate, commitCreateFile],
   );
+
   return (
     <Page>
       <Page.Header
@@ -281,5 +299,7 @@ const FileCreatePage = () => {
     </Suspense>
   );
 };
+
+export { getDefaultArchiveName };
 
 export default FileCreatePage;

@@ -17,16 +17,20 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import _ from "lodash";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
+import { useMutation } from "react-relay";
 
 import type {
   FilesTable_FileEdgeFragment$data,
   FilesTable_FileEdgeFragment$key,
 } from "@/api/__generated__/FilesTable_FileEdgeFragment.graphql";
 
+import type { FilesTable_deleteFile_Mutation } from "@/api/__generated__/FilesTable_deleteFile_Mutation.graphql";
+
 import Button from "@/components/Button";
+import DeleteModal from "@/components/DeleteModal";
 import Icon from "@/components/Icon";
 import InfiniteTable from "@/components/InfiniteTable";
 import { createColumnHelper } from "@/components/Table";
@@ -49,12 +53,60 @@ const FILES_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const DELETE_FILE_MUTATION = graphql`
+  mutation FilesTable_deleteFile_Mutation($fileId: ID!) {
+    deleteFile(id: $fileId) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
+type FileActionsProps = {
+  file: TableRecord;
+  onDeleteClick: (file: TableRecord) => void;
+};
+
+const FileActions = ({ file, onDeleteClick }: FileActionsProps) => {
+  const handleDownload = () => {
+    const url = file.baseFile.url;
+    if (!url) return;
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = file.name || "file";
+    a.target = "_blank";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  };
+
+  return (
+    <div className="d-inline-flex align-items-center gap-2">
+      <Button
+        className="btn p-0 border-0 bg-transparent"
+        onClick={handleDownload}
+      >
+        <Icon className="text-primary" icon="arrowDown" />
+      </Button>
+
+      <Button
+        className="btn p-0 border-0 bg-transparent"
+        onClick={() => onDeleteClick(file)}
+      >
+        <Icon className="text-danger" icon="delete" />
+      </Button>
+    </div>
+  );
+};
+
 type TableRecord = NonNullable<
   NonNullable<FilesTable_FileEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
-const getColumnsDefinition = () => [
+const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
@@ -75,37 +127,22 @@ const getColumnsDefinition = () => [
     ),
     cell: ({ getValue }) => {
       const size = getValue();
-      if (size == null) return null;
-      return formatFileSize(size);
+      return size != null ? formatFileSize(size) : null;
     },
   }),
   columnHelper.accessor((row) => row, {
     id: "action",
     header: () => (
       <FormattedMessage
-        id="components.FilesTable.action"
-        defaultMessage="Action"
+        id="components.FilesTable.actionsTitle"
+        defaultMessage="Actions"
       />
     ),
-    cell: ({ row }) => (
-      <Button
-        className="btn p-0 border-0 bg-transparent ms-4"
-        onClick={() => {
-          const url = row.original.baseFile.url;
-          if (!url) return;
+    cell: ({ row }) => {
+      const file = row.original;
 
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = row.original.name || "file";
-          a.target = "_blank";
-          document.body.appendChild(a);
-          a.click();
-          a.remove();
-        }}
-      >
-        <Icon className="text-primary" icon={"arrowDown"} />
-      </Button>
-    ),
+      return <FileActions file={file} onDeleteClick={onDeleteClick} />;
+    },
   }),
 ];
 
@@ -127,17 +164,86 @@ const FilesTable = ({
     return _.compact(filesFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [filesFragment]);
 
-  const columns = useMemo(() => getColumnsDefinition(), []);
+  const [fileToDelete, setFileToDelete] = useState<TableRecord | null>(null);
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const columns = useMemo(() => getColumnsDefinition(setFileToDelete), []);
+
+  const handleCancelDelete = useCallback(() => {
+    setFileToDelete(null);
+    setErrorFeedback(null);
+  }, []);
+
+  const [deleteFile, isDeletingFile] =
+    useMutation<FilesTable_deleteFile_Mutation>(DELETE_FILE_MUTATION);
+
+  const handleDeleteFile = useCallback(() => {
+    if (!fileToDelete) return;
+
+    deleteFile({
+      variables: { fileId: fileToDelete.id },
+      onCompleted(_data, errors) {
+        if (errors) {
+          const errorMessages = errors
+            .map((error) => error.message)
+            .join(". \n");
+          setErrorFeedback(errorMessages);
+          return;
+        }
+
+        setErrorFeedback(null);
+        setFileToDelete(null);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.FilesTable.deletionErrorFeedback"
+            defaultMessage="Could not delete the file, please try again."
+          />,
+        );
+      },
+      updater(store, response) {
+        const deletedId = response?.deleteFile?.result?.id;
+        if (!deletedId) return;
+
+        store.delete(deletedId);
+      },
+    });
+  }, [deleteFile, fileToDelete]);
 
   return (
-    <InfiniteTable
-      className={className}
-      columns={columns}
-      data={files}
-      loading={loading}
-      onLoadMore={onLoadMore}
-      hideSearch
-    />
+    <>
+      <InfiniteTable
+        className={className}
+        columns={columns}
+        data={files}
+        loading={loading}
+        onLoadMore={onLoadMore}
+        hideSearch
+      />
+      {fileToDelete && (
+        <DeleteModal
+          confirmText={fileToDelete.name || ""}
+          onCancel={handleCancelDelete}
+          onConfirm={handleDeleteFile}
+          isDeleting={isDeletingFile}
+          title={
+            <FormattedMessage
+              id="components.FilesTable.deleteModal.title"
+              defaultMessage="Delete File"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.FilesTable.deleteModal.description"
+              defaultMessage="This action cannot be undone. This will permanently delete the file."
+            />
+          </p>
+          {errorFeedback && <p className="text-danger">{errorFeedback}</p>}
+        </DeleteModal>
+      )}
+    </>
   );
 };
 
