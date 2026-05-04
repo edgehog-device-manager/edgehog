@@ -34,6 +34,7 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import { FileFormData, fileSchema } from "@/forms/validation";
+import { getDefaultArchiveName } from "@/pages/FileCreate";
 
 const CREATE_FILE_FRAGMENT = graphql`
   fragment CreateFile_RepositoryFragment on Repository {
@@ -43,15 +44,25 @@ const CREATE_FILE_FRAGMENT = graphql`
 `;
 
 type FileFormOutputData = {
-  files: File[];
-  archiveName?: string;
   repositoryId: string;
+  files: File[];
+  customFileName?: string;
 };
 
 type CreateFileFormProps = {
   repositoryRef: CreateFile_RepositoryFragment$key;
   isLoading?: boolean;
   onSubmit: (data: FileFormOutputData) => void;
+};
+
+const getFileExtension = (filename: string) => {
+  const lastDotIdx = filename.lastIndexOf(".");
+  return lastDotIdx > 0 ? filename.substring(lastDotIdx) : "";
+};
+
+const getBaseName = (filename: string) => {
+  const lastDotIdx = filename.lastIndexOf(".");
+  return lastDotIdx > 0 ? filename.substring(0, lastDotIdx) : filename;
 };
 
 const CreateFileForm = ({
@@ -71,37 +82,60 @@ const CreateFileForm = ({
   } = useForm<FileFormData>({
     mode: "onTouched",
     defaultValues: {
-      file: undefined,
-      archiveName: "",
       repository: repositoryData.name,
+      file: undefined,
+      customFileName: "",
     },
     resolver: zodResolver(fileSchema),
   });
 
+  const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
+  const needsArchive = selectedFiles.length > 1 || hasRelativePaths;
+  const hasFiles = selectedFiles.length > 0;
+
+  const fileExtension = needsArchive
+    ? ".tar"
+    : hasFiles
+      ? getFileExtension(selectedFiles[0].name)
+      : "";
+
   const handleFilesChanged = (files: File[]) => {
     setSelectedFiles(files);
-    const dt = new DataTransfer();
-    files.forEach((f) => dt.items.add(f));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    setValue("file", dt.files as any, { shouldValidate: true });
+
+    const dataTransfer = new DataTransfer();
+    files.forEach((f) => dataTransfer.items.add(f));
+
+    setValue("file", dataTransfer.files as unknown as FileList, {
+      shouldValidate: true,
+    });
+
+    if (files.length === 0) {
+      setValue("customFileName", "");
+      return;
+    }
+
+    const requiresArchive =
+      files.length > 1 || files.some((f) => f.webkitRelativePath);
+    const generatedName = requiresArchive
+      ? getDefaultArchiveName()
+      : getBaseName(files[0].name);
+
+    setValue("customFileName", generatedName, { shouldValidate: true });
   };
 
   const onFormSubmit = (data: FileFormData) => {
-    if (data.file instanceof FileList && data.file[0]) {
-      const formOutputData = {
-        repositoryId: repositoryData.id,
-        files: selectedFiles,
-        archiveName:
-          selectedFiles.length > 1 && data.archiveName
-            ? data.archiveName
-            : undefined,
-      };
-      onSubmit(formOutputData);
-    }
-  };
+    if (!data.file || data.file.length === 0) return;
 
-  const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
-  const showArchiveName = selectedFiles.length > 1 || hasRelativePaths;
+    const finalName = data.customFileName
+      ? `${data.customFileName}${fileExtension}`
+      : undefined;
+
+    onSubmit({
+      repositoryId: repositoryData.id,
+      files: selectedFiles,
+      customFileName: finalName,
+    });
+  };
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -144,25 +178,35 @@ const CreateFileForm = ({
           )}
         </FormRow>
 
-        {showArchiveName && (
+        {hasFiles && (
           <FormRow
-            id="archiveName"
+            id="customFileName"
             label={
-              <FormattedMessage
-                id="forms.CreateFile.archiveNameLabel"
-                defaultMessage="Archive Name"
-              />
+              needsArchive ? (
+                <FormattedMessage
+                  id="forms.CreateFile.archiveNameLabel"
+                  defaultMessage="Archive Name"
+                />
+              ) : (
+                <FormattedMessage
+                  id="forms.CreateFile.fileNameLabel"
+                  defaultMessage="File Name"
+                />
+              )
             }
           >
-            <Form.Control
-              type="text"
-              {...register("archiveName")}
-              placeholder="files-archive"
-            />
+            <div className="input-group">
+              <Form.Control type="text" {...register("customFileName")} />
+              {fileExtension && (
+                <span className="input-group-text bg-light text-muted border-start-0">
+                  {fileExtension}
+                </span>
+              )}
+            </div>
             <Form.Text muted>
               <FormattedMessage
-                id="forms.CreateFile.archiveNameHint"
-                defaultMessage="Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
+                id="forms.CreateFile.nameHint"
+                defaultMessage="You can customize the name before creation."
               />
             </Form.Text>
           </FormRow>

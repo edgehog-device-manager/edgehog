@@ -57,6 +57,6 @@ defmodule Edgehog.Files.Uploaders.File do
   end
 
   def filename(_version, {_file, scope}) do
-    scope.file_name
+    Path.rootname(scope.file_name)
   end
 end
