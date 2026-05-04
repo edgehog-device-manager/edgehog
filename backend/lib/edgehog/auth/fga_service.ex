@@ -38,6 +38,17 @@ defmodule Edgehog.Auth.FGAService do
     end
   end
 
+  def write(subj, rel, obj) do
+    tuple = {subj, rel, obj}
+
+    provider = Keyword.fetch!(Config.authz_config!(), :provider)
+    config = Keyword.fetch!(Config.authz_config!(), :config)
+
+    with {:ok, context} <- provider.init_context(config) do
+      provider.write(tuple, context)
+    end
+  end
+
   def list_objects(subj, rel, type) do
     tuple = {subj, rel, type}
 

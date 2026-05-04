@@ -55,4 +55,12 @@ defmodule Edgehog.Auth.Providers.None do
 
     {:ok, :all}
   end
+
+  @impl Behaviour
+  def write(tuple, _context) do
+    Logger.debug("Writing tuple onto the service", tuple: tuple)
+
+    # Result actually not important here
+    {:ok, nil}
+  end
 end

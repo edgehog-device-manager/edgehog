@@ -84,4 +84,25 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
 
     Stub.streamed_list_objects(channel, request)
   end
+
+  @impl Behaviour
+  def write({subj, rel, obj}, %{channel: channel, store_id: store_id}) do
+    tuple = %Openfga.V1.TupleKey{
+      user: subj,
+      relation: rel,
+      object: obj
+    }
+
+    to_write = %Openfga.V1.WriteRequestWrites{
+      tuple_keys: [tuple],
+      on_duplicate: "ignore"
+    }
+
+    request = %Openfga.V1.WriteRequest{
+      store_id: store_id,
+      writes: to_write
+    }
+
+    Stub.write(channel, request)
+  end
 end

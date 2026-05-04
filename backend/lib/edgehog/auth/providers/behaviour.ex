@@ -36,6 +36,18 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   @callback init_context(args :: Keyword.t()) :: {:ok, context()} | {:error, term()}
 
   @doc """
+  Writes a tuple to the provider.
+
+  - tuple :: the fga tuple, composed of `subject`, `relationship` and `object`
+  - context :: the context from `init_context`
+
+  A write can return
+  - {:ok, result}   :: if the write was successful
+  - {:error, error} :: if some error was encountered while writing
+  """
+  @callback write(tuple :: fga_tuple(), context :: context()) :: {:ok, term()} | {:error, term()}
+
+  @doc """
   A check call checks a tuple against the provider
 
   - subj :: is some id of the person making the request, ideally a OpenID Connect UUID

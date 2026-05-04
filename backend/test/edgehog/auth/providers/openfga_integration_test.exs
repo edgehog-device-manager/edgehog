@@ -45,6 +45,30 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
     assert ctx.store_id == config[:store_id]
   end
 
+  describe "write/2" do
+    setup do
+      config = Edgehog.Config.authz_config!()[:config]
+
+      {:ok, ctx} = OpenFGA.init_context(config)
+
+      %{context: ctx}
+    end
+
+    test "Writes correct tuples", %{context: context} do
+      opts = [
+        subj_type: "user",
+        subj_id: System.unique_integer([:positive]),
+        rel: "owner",
+        obj_type: "tenant",
+        obj_id: "test"
+      ]
+
+      tuple = TupleFixtures.tuple(opts)
+
+      assert {:ok, _} = OpenFGA.write(tuple, context)
+    end
+  end
+
   describe "check/2" do
     setup do
       config = Edgehog.Config.authz_config!()[:config]
