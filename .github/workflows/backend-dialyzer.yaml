@@ -35,7 +35,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: Compute Dialyzer cache prefix
+        id: dialyzer-cache-prefix
+        run: |
+          cache_prefix="dialyzer-$(awk '/^(erlang|elixir) / { print $2 }' ../.tool-versions | tr '\n' '-' | sed 's/-$//')"
+          echo "prefix=$cache_prefix" >> "$GITHUB_OUTPUT"
       - uses: team-alembic/staple-actions/actions/mix-dialyzer@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
         with:
           working-directory: backend
           mix-env: test
+          cache-prefix: ${{ steps.dialyzer-cache-prefix.outputs.prefix }}
