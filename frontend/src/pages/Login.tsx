@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -48,17 +48,19 @@ const LoginPage = () => {
   const urlSearchParams = new URLSearchParams(location.search);
   const initialFormData = getInitialFormData(urlSearchParams);
   const redirectTo = urlSearchParams.get("redirectTo") || "";
+  const shouldAutoLogin = Boolean(
+    initialFormData.tenantSlug && initialFormData.authToken,
+  );
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [validated, setValidated] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(shouldAutoLogin);
   const auth = useAuth();
   const intl = useIntl();
   const navigate = useNavigate();
 
   const handleLogin = useCallback(
     (formData: FormData) => {
-      setIsLoggingIn(true);
       const session = _.pick(formData, ["tenantSlug", "authToken"]);
       const persistConfig = formData.keepMeLoggedIn;
       auth.login(session, persistConfig).then((success) => {
@@ -86,6 +88,8 @@ const LoginPage = () => {
       if (form.checkValidity() === false) {
         return setValidated(true);
       }
+
+      setIsLoggingIn(true);
       handleLogin({ ...formData, authToken: formData.authToken.trim() });
     },
     [formData, handleLogin],
@@ -100,7 +104,7 @@ const LoginPage = () => {
     }, []);
 
   useEffect(() => {
-    if (initialFormData.tenantSlug && initialFormData.authToken) {
+    if (shouldAutoLogin) {
       handleLogin(initialFormData);
     }
     // Run once on mount
