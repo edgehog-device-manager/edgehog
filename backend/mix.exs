@@ -100,6 +100,7 @@ defmodule Edgehog.MixProject do
       {:cors_plug, "~> 3.0"},
       {:x509, "~> 0.9"},
       {:mox, "~> 1.2"},
+      {:mimic, "~> 2.3", only: :test},
       {:tesla, "~> 1.17"},
       {:finch, "~> 0.21", override: true},
       {:waffle, "~> 1.1"},

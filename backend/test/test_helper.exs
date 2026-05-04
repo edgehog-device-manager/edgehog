@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,7 +18,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-ExUnit.start(exclude: [:integration_storage], capture_log: true)
+Mimic.copy(Openfga.V1.OpenFGAService.Stub)
+Mimic.copy(GRPC.Stub)
+
+ExUnit.start(exclude: [:integration_storage, :integration_openfga], capture_log: true)
 Ecto.Adapters.SQL.Sandbox.mode(Edgehog.Repo, :manual)
 
 Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,

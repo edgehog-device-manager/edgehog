@@ -37,6 +37,7 @@ jobs:
       postgres:
         image: postgres:18
         env:
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432
@@ -47,18 +48,26 @@ jobs:
           --health-retries 5
       openfga:
         image: openfga/openfga:v1.15.0
+        command: run
         ports:
           - 8080:8080
           - 8081:8081
     steps:
-      - name: Store setup
-        id: setup
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - name: "Setup jq"
+        uses: dcarbone/install-jq-action@v3
+      - name: Install OpenFGA cli
+        uses: jaxxstorm/action-install-gh-release@v1.11.0
+        with:
+          repo: openfga/cli
+          cache: enable
+      - name: Setup OpenFGA store
+        id: store
         run: |
-          wget https://github.com/openfga/cli/releases/download/v0.7.13/fga_0.7.13_linux_amd64.tar.gz -O fga.tar.gz
-          tar -xzvf gfa.tar.gz
-          chmod +x ./fga
-          STORE_ID=$(./fga store create --model backend/priv/fga/model.fga --api-url "http://localhost:8080" | jq -r .store.id)
-          echo "store-id=$STORE_ID" >> $GITHUB_OUTPUT
+          fga store create --model ./priv/fga/model.fga > store_response.json
+          cat store_response.json
+          store_id=$(jq -r '.store.id' store_response.json)
+          echo "store_id=$store_id" >> $GITHUB_OUTPUT
       - uses: team-alembic/staple-actions/actions/mix-task@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
         with:
           mix-env: test
@@ -69,4 +78,4 @@ jobs:
           POSTGRES_PASSWORD: postgres
           AUTHZ_PROVIDER: openfga
           OPENFGA_GRPC_ENDPOINT: "localhost:8081"
-          OPENFGA_STORE_ID: ${{ steps.setup.outputs.store-id }}
+          OPENFGA_STORE_ID: ${{ steps.store.outputs.store_id }}
