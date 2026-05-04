@@ -220,8 +220,7 @@ get_matching_reuse_pattern() {
 
   # Extract all path patterns from REUSE.toml
   local patterns
-  patterns=$(grep "^path =" "$REUSE_CONFIG" \
-    | sed -E 's/^path = [\[]?//;s/[\]]?$//;s/"//g;s/'"'"'//g;s/,/ /g')
+  patterns=$(grep "^path =" "$REUSE_CONFIG" | sed -E 's/^path = \[?//;s/\]$//;s/"//g;s/'"'"'//g;s/, /\n/g')
 
   # Disable globbing temporarily for safe pattern matching
   set -f
