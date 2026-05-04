@@ -30,18 +30,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       repository = repository_fixture(tenant: tenant)
       repository_id = AshGraphql.Resource.encode_relay_id(repository)
 
-      # Create a real temp file so File.stat! and digest calculation work
-      tmp_path =
-        Path.join(System.tmp_dir!(), "test_upload_#{:erlang.unique_integer([:positive])}.bin")
+      tmp_path = build_temp_file!("test.bin", "test file content")
 
-      File.write!(tmp_path, "test file content")
-      on_exit(fn -> File.rm(tmp_path) end)
-
-      upload = %Plug.Upload{
-        path: tmp_path,
-        filename: "test.bin",
-        content_type: "application/octet-stream"
-      }
+      upload = plug_upload(tmp_path, "test.bin")
 
       %{repository: repository, repository_id: repository_id, upload: upload, tmp_path: tmp_path}
     end
@@ -89,6 +80,75 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
       assert result["baseFile"]["url"] == base_file_url
       assert result["size"] > 0
       assert result["baseFile"]["digest"] =~ ~r/^sha256:[a-f0-9]+$/
+      assert result["isArchive"] == false
+    end
+
+    test "marks file as archive when USTAR", %{tenant: tenant, repository_id: repo_id} do
+      binary = :binary.copy(<<0>>, 257) <> "ustar"
+      path = build_temp_file!("ustar.tar", binary)
+      upload = plug_upload(path, "ustar.tar")
+
+      Mox.expect(StorageMock, :store, 3, fn _, _, _, _, _ ->
+        {:ok, "https://example.com/file.tar"}
+      end)
+
+      result =
+        [tenant: tenant, repository_id: repo_id, name: "ustar.tar", file: upload]
+        |> create_file_mutation()
+        |> extract_result!()
+
+      assert result["isArchive"] == true
+    end
+
+    test "fails for zip archive", %{tenant: tenant, repository_id: repo_id} do
+      binary = <<0x50, 0x4B, 0x03, 0x04>>
+      path = build_temp_file!("file.zip", binary)
+      upload = plug_upload(path, "file.zip")
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          repository_id: repo_id,
+          name: "file.zip",
+          file: upload
+        )
+
+      assert [%{message: message}] = extract_error!(result)
+      assert message =~ "Only USTAR tar archives are supported"
+    end
+
+    test "fails for rar archive", %{tenant: tenant, repository_id: repo_id} do
+      binary = <<0x52, 0x61, 0x72, 0x21>>
+      path = build_temp_file!("file.rar", binary)
+      upload = plug_upload(path, "file.rar")
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          repository_id: repo_id,
+          name: "file.rar",
+          file: upload
+        )
+
+      assert [%{message: message}] = extract_error!(result)
+      assert message =~ "Only USTAR tar archives are supported"
+    end
+
+    test "fails for 7z archive", %{tenant: tenant, repository_id: repo_id} do
+      binary = <<0x37, 0x7A, 0xBC, 0xAF, 0x27, 0x1C>>
+      path = build_temp_file!("file.7z", binary)
+      upload = plug_upload(path, "file.7z")
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          repository_id: repo_id,
+          name: "file.7z",
+          file: upload
+        )
+
+      assert [%{message: message}] = extract_error!(result)
+      assert message =~ "Only USTAR tar archives are supported"
     end
 
     test "returns error when storage fails", %{
@@ -112,8 +172,134 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           file: upload
         )
 
-      assert %{message: message} = extract_error!(result)
-      assert message =~ "upload" or message =~ "failed"
+      errors = extract_error!(result)
+
+      messages =
+        Enum.map(errors, fn %{message: msg} -> msg end)
+
+      expected_messages = [
+        "Upload failed for base file",
+        "Upload failed for gz file",
+        "Upload failed for lz4 file"
+      ]
+
+      assert Enum.sort(messages) == Enum.sort(expected_messages)
+    end
+
+    test "returns error when storage fails and cleans up successful uploads", %{
+      repository: repository,
+      tenant: tenant,
+      repository_id: repository_id,
+      upload: upload
+    } do
+      filename = "some-name.bin"
+      lz4_file_url = "https://example.com/encoding/lz4/some-name.bin.lz4"
+
+      expect(StorageMock, :store, 3, fn tenant_id,
+                                        filename_arg,
+                                        repository_id,
+                                        encoding,
+                                        _upload ->
+        assert tenant_id == tenant.tenant_id
+        assert repository_id == repository.id
+
+        case {encoding, filename_arg} do
+          {nil, ^filename} ->
+            {:error, :storage_unavailable}
+
+          {:gz, ^filename} ->
+            {:error, :storage_unavailable}
+
+          {:lz4, ^filename} ->
+            {:ok, lz4_file_url}
+
+          other ->
+            flunk("Unexpected call to store/5: #{inspect(other)}")
+        end
+      end)
+
+      Mox.expect(StorageMock, :delete, 1, fn _file, :lz4 ->
+        :ok
+      end)
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          repository_id: repository_id,
+          name: filename,
+          file: upload
+        )
+
+      errors = extract_error!(result)
+
+      messages =
+        Enum.map(errors, fn %{message: msg} -> msg end)
+
+      expected_messages = [
+        "Upload failed for base file",
+        "Upload failed for gz file"
+      ]
+
+      assert Enum.sort(messages) == Enum.sort(expected_messages)
+    end
+
+    test "returns error when storage fails and cleans up a successful base upload", %{
+      repository: repository,
+      tenant: tenant,
+      repository_id: repository_id,
+      upload: upload
+    } do
+      filename = "some-name.bin"
+      base_file_url = "https://example.com/some-name.bin"
+
+      expect(StorageMock, :store, 3, fn tenant_id,
+                                        filename_arg,
+                                        repository_id,
+                                        encoding,
+                                        _upload ->
+        assert tenant_id == tenant.tenant_id
+        assert repository_id == repository.id
+
+        case {encoding, filename_arg} do
+          {nil, ^filename} ->
+            {:ok, base_file_url}
+
+          {:gz, ^filename} ->
+            {:error, :storage_unavailable}
+
+          {:lz4, ^filename} ->
+            {:error, :storage_unavailable}
+
+          other ->
+            flunk("Unexpected call to store/5: #{inspect(other)}")
+        end
+      end)
+
+      Mox.expect(StorageMock, :delete, 1, fn file, nil ->
+        assert file.name == filename
+        assert file.base_file.url == base_file_url
+        :ok
+      end)
+
+      result =
+        create_file_mutation(
+          tenant: tenant,
+          repository_id: repository_id,
+          name: filename,
+          file: upload
+        )
+
+      errors = extract_error!(result)
+
+      messages =
+        Enum.map(errors, fn %{message: msg} -> msg end)
+
+      expected_messages = [
+        "Upload failed for gz file",
+        "Upload failed for lz4 file"
+      ]
+
+      assert Enum.sort(messages) == Enum.sort(expected_messages)
     end
 
     test "returns error when name is missing", %{
@@ -278,6 +464,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
           id
           name
           size
+          isArchive
           baseFile {
             url
             digest
@@ -331,9 +518,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
     assert is_nil(result[:data]["createFile"]) or
              is_nil(get_in(result, [:data, "createFile"]))
 
-    assert %{errors: [error | _]} = result
+    assert %{errors: errors} = result
 
-    error
+    errors
   end
 
   defp extract_result!(result) do
@@ -349,5 +536,29 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileTest do
     assert file
 
     file
+  end
+
+  defp build_temp_file!(filename, content) do
+    path =
+      Path.join(
+        System.tmp_dir!(),
+        "test_upload_#{System.unique_integer([:positive])}_#{filename}"
+      )
+
+    File.write!(path, content)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      File.rm(path)
+    end)
+
+    path
+  end
+
+  defp plug_upload(path, filename) do
+    %Plug.Upload{
+      path: path,
+      filename: filename,
+      content_type: "application/octet-stream"
+    }
   end
 end

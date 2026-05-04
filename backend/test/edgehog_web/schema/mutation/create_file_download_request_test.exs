@@ -25,7 +25,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   import Edgehog.FilesFixtures
 
   alias Astarte.Client.APIError
-  alias Edgehog.Astarte.Device.DeviceStatusMock
   alias Edgehog.Astarte.Device.FileDownloadRequestMock
   alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Astarte.Device.FileTransferCapabilitiesMock
@@ -46,31 +45,21 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
   end
 
   describe "createManualFileDownloadRequest mutation" do
-    setup %{tenant: tenant} do
-      tmp_path =
-        Path.join(System.tmp_dir!(), "test_upload_#{:erlang.unique_integer([:positive])}.bin")
+    setup do
+      tmp_path = build_temp_file!("test.bin", "test file content")
 
-      File.write!(tmp_path, "test file content")
+      upload = plug_upload(tmp_path, "test.bin")
 
-      on_exit(fn -> File.rm(tmp_path) end)
-
-      upload = %Plug.Upload{
-        path: tmp_path,
-        filename: "file.bin",
-        content_type: "application/octet-stream"
-      }
-
-      %{upload: upload, tmp_path: tmp_path, tenant: tenant}
+      %{upload: upload, tmp_path: tmp_path}
     end
 
     test "creates file download request with all fields", %{
       tenant: tenant,
-      upload: upload
+      upload: upload,
+      tmp_path: tmp_path
     } do
-      stub(DeviceStatusMock, :get, fn _, _ -> {:error, :not_found} end)
-
       expect(EphemeralFileMock, :upload, fn _, _, _ ->
-        {:ok, "https://example.com/file.bin"}
+        {:ok, "https://example.com/test.bin"}
       end)
 
       expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
@@ -81,18 +70,25 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           file: upload
         )
 
+      expected_hash =
+        tmp_path
+        |> File.stream!(2048)
+        |> Enum.reduce(:crypto.hash_init(:sha256), &:crypto.hash_update(&2, &1))
+        |> :crypto.hash_final()
+        |> Base.encode16(case: :lower)
+
       file_download_request =
         extract_result!(result, "createManualFileDownloadRequest")
 
       assert file_download_request["id"] != "019c997a-49bc-7f65-be73-0970557338b3"
-      assert file_download_request["url"] == "https://example.com/file.bin"
+      assert file_download_request["url"] == "https://example.com/test.bin"
       assert file_download_request["destinationType"] == "STORAGE"
       assert file_download_request["destination"] == nil
       assert file_download_request["progressTracked"] == false
       assert file_download_request["ttlSeconds"] == 100_000
       assert file_download_request["fileName"] == "filename"
       assert file_download_request["uncompressedFileSizeBytes"] == 75_555
-      # assert file_download_request["digest"] == "sha256:jfkdgjkj"
+      assert file_download_request["digest"] == "sha256:#{expected_hash}"
       assert file_download_request["encoding"] == nil
       assert file_download_request["userId"] == 45
       assert file_download_request["groupId"] == 55
@@ -112,8 +108,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     end
 
     test "fails if Astarte API returns error", %{tenant: tenant, upload: upload} do
-      stub(DeviceStatusMock, :get, fn _, _ -> {:error, :not_found} end)
-
       expect(EphemeralFileMock, :upload, fn _, _, _ ->
         {:ok, "https://example.com/f.bin"}
       end)
@@ -135,11 +129,22 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       assert %{code: "astarte_api_error", short_message: "Astarte API Error (status 500)"} =
                extract_error!(result, "createManualFileDownloadRequest")
     end
+
+    test "fails if unsupported encoding is passed", %{tenant: tenant, upload: upload} do
+      result =
+        create_manual_file_download_request_mutation(
+          tenant: tenant,
+          file: upload,
+          encoding: "gz"
+        )
+
+      assert %{short_message: "Encoding type not supported by device"} =
+               extract_error!(result, "createManualFileDownloadRequest")
+    end
   end
 
   describe "createManagedFileDownloadRequest mutation" do
     test "creates managed file download request from file", %{tenant: tenant} do
-      stub(DeviceStatusMock, :get, fn _, _ -> {:error, :not_found} end)
       expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
 
       file = file_fixture(tenant: tenant, name: "managed.bin")
@@ -165,6 +170,17 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       assert file_download_request["device"]["deviceId"]
     end
 
+    test "returns error when device does not exist", %{tenant: tenant} do
+      result =
+        create_managed_file_download_request_mutation(
+          tenant: tenant,
+          device_id: "ZGV2aWNlOjEyMzQ="
+        )
+
+      assert %{message: "could not be found"} =
+               extract_error!(result, "createManagedFileDownloadRequest")
+    end
+
     test "returns error when file does not exist", %{tenant: tenant} do
       other_tenant = Edgehog.TenantsFixtures.tenant_fixture()
       other_file = file_fixture(tenant: other_tenant)
@@ -180,6 +196,132 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
         )
 
       assert %{message: "could not be found"} =
+               extract_error!(result, "createManagedFileDownloadRequest")
+    end
+
+    test "chooses correct url and encoding depending on device capabilities", %{tenant: tenant} do
+      stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           encodings: ["gz"],
+           unix_permissions: false,
+           targets: [:filesystem]
+         }}
+      end)
+
+      expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
+
+      file = file_fixture(tenant: tenant, name: "managed.bin")
+
+      result =
+        create_managed_file_download_request_mutation(
+          tenant: tenant,
+          file_id: AshGraphql.Resource.encode_relay_id(file)
+        )
+
+      file_download_request =
+        extract_result!(result, "createManagedFileDownloadRequest")
+
+      assert file_download_request["url"] == file.gz_file.url
+      assert file_download_request["fileName"] == file.name
+      assert file_download_request["uncompressedFileSizeBytes"] == file.size
+      assert file_download_request["digest"] == file.gz_file.digest
+      assert file_download_request["encoding"] == "gz"
+    end
+
+    for encoding <- ["gz", "lz4"] do
+      test "test encoding #{encoding} for non archive file", %{tenant: tenant} do
+        encoding = unquote(encoding)
+
+        stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+          {:ok,
+           %FileTransferCapabilities{
+             encodings: [encoding],
+             unix_permissions: false,
+             targets: [:filesystem]
+           }}
+        end)
+
+        expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
+
+        file = file_fixture(tenant: tenant, name: "managed.bin")
+
+        result =
+          create_managed_file_download_request_mutation(
+            tenant: tenant,
+            file_id: AshGraphql.Resource.encode_relay_id(file)
+          )
+
+        expected_file =
+          case encoding do
+            "gz" -> file.gz_file
+            "lz4" -> file.lz4_file
+          end
+
+        file_download_request =
+          extract_result!(result, "createManagedFileDownloadRequest")
+
+        assert file_download_request["url"] == expected_file.url
+        assert file_download_request["fileName"] == file.name
+        assert file_download_request["uncompressedFileSizeBytes"] == file.size
+        assert file_download_request["digest"] == expected_file.digest
+        assert file_download_request["encoding"] == encoding
+      end
+    end
+
+    for encoding <- ["tar", "tar.gz", "tar.lz4"] do
+      test "test encoding #{encoding} for archive file", %{tenant: tenant} do
+        encoding = unquote(encoding)
+
+        stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
+          {:ok,
+           %FileTransferCapabilities{
+             encodings: [encoding],
+             unix_permissions: false,
+             targets: [:filesystem]
+           }}
+        end)
+
+        expect(FileDownloadRequestMock, :request_download, fn _, _, _ -> :ok end)
+
+        file = file_fixture(tenant: tenant, name: "managed.bin", is_archive: true)
+
+        result =
+          create_managed_file_download_request_mutation(
+            tenant: tenant,
+            file_id: AshGraphql.Resource.encode_relay_id(file)
+          )
+
+        expected_file =
+          case encoding do
+            "tar" -> file.base_file
+            "tar.gz" -> file.gz_file
+            "tar.lz4" -> file.lz4_file
+          end
+
+        file_download_request =
+          extract_result!(result, "createManagedFileDownloadRequest")
+
+        assert file_download_request["url"] == expected_file.url
+        assert file_download_request["fileName"] == file.name
+        assert file_download_request["uncompressedFileSizeBytes"] == file.size
+        assert file_download_request["digest"] == expected_file.digest
+        assert file_download_request["encoding"] == encoding
+      end
+    end
+
+    test "fails if we try to upload an archive file without supporting capabilities", %{
+      tenant: tenant
+    } do
+      file = file_fixture(tenant: tenant, name: "managed.bin", is_archive: true)
+
+      result =
+        create_managed_file_download_request_mutation(
+          tenant: tenant,
+          file_id: AshGraphql.Resource.encode_relay_id(file)
+        )
+
+      assert %{message: "Device does not support archives"} =
                extract_error!(result, "createManagedFileDownloadRequest")
     end
   end
@@ -237,6 +379,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
         }
       end)
 
+    {encoding, opts} = Keyword.pop(opts, :encoding, "")
+
     default_input = %{
       "deviceId" => device_id,
       "file" => file && "file",
@@ -246,7 +390,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       "ttlSeconds" => 100_000,
       "fileName" => "filename",
       "uncompressedFileSizeBytes" => 75_555,
-      "encoding" => "",
+      "encoding" => encoding,
       "userId" => 45,
       "groupId" => 55
     }
@@ -355,5 +499,29 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
 
     refute Map.get(result, :errors)
     file_download_request
+  end
+
+  defp build_temp_file!(filename, content) do
+    path =
+      Path.join(
+        System.tmp_dir!(),
+        "test_upload_#{System.unique_integer([:positive])}_#{filename}"
+      )
+
+    File.write!(path, content)
+
+    ExUnit.Callbacks.on_exit(fn ->
+      File.rm(path)
+    end)
+
+    path
+  end
+
+  defp plug_upload(path, filename) do
+    %Plug.Upload{
+      path: path,
+      filename: filename,
+      content_type: "application/octet-stream"
+    }
   end
 end
