@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,10 +28,13 @@ defmodule Edgehog.Campaigns.Channel.Calculations.DeployableDevices do
   use Ash.Resource.Calculation
 
   alias Ash.Resource.Calculation
+  alias Edgehog.Selector
+
+  require Ash.Query
 
   @impl Calculation
   def load(_query, _opts, _context) do
-    [target_groups: [devices: :system_model]]
+    [target_groups: [:selector]]
   end
 
   @impl Calculation
@@ -43,22 +46,42 @@ defmodule Edgehog.Campaigns.Channel.Calculations.DeployableDevices do
       |> Ash.load!(:system_models)
       |> Map.get(:system_models, [])
 
-    Enum.map(deployment_channels, fn deployment_channel ->
-      deployment_channel.target_groups
-      |> Enum.flat_map(fn target_group ->
-        Enum.filter(
-          target_group.devices,
-          &satisfies?(&1.system_model, system_model_requirements)
-        )
-      end)
-      |> Enum.uniq_by(& &1.id)
-    end)
+    deployment_channels
+    |> Ash.load!(target_groups: [:selector])
+    |> Enum.map(&resolve_deployment_channel(&1, system_model_requirements, context))
   end
 
-  defp satisfies?(_system_model, [] = _system_model_requirements), do: true
-  defp satisfies?(nil = _system_model, _system_model_requirements), do: false
+  defp resolve_deployment_channel(deployment_channel, system_model_requirements, context) do
+    combined_expr = Enum.reduce(deployment_channel.target_groups, nil, &combine_selectors/2)
 
-  defp satisfies?(system_model, system_model_requirements) do
-    Enum.any?(system_model_requirements, &(system_model.id == &1.id))
+    if combined_expr do
+      query =
+        Edgehog.Devices.Device
+        |> Ash.Query.filter(^combined_expr)
+        |> Ash.Query.set_tenant(context.tenant)
+
+      query =
+        if system_model_requirements != [] do
+          system_model_ids = Enum.map(system_model_requirements, & &1.id)
+          Ash.Query.filter(query, system_model_part_number.system_model_id in ^system_model_ids)
+        else
+          query
+        end
+
+      Ash.read!(query)
+    else
+      []
+    end
+  end
+
+  defp combine_selectors(group, acc) do
+    case Selector.parse(group.selector) do
+      {:ok, ast} ->
+        expr = Selector.to_ash_expr(ast)
+        if acc, do: Ash.Expr.expr(^expr or ^acc), else: expr
+
+      _ ->
+        acc
+    end
   end
 end

@@ -132,6 +132,7 @@ defmodule Edgehog.MixProject do
       {:open_api_spex, "~> 3.22"},
       {:ymlr, "~> 5.1"},
       {:sourceror, "~> 1.12", only: [:dev, :test]},
+      {:spark, ">= 2.6.0", override: true},
       {:phoenix_pubsub, "~> 2.2"},
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},

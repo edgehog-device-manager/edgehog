@@ -22,16 +22,43 @@ defmodule Edgehog.Campaigns.Channel.Calculations.DownloadCapableDevices do
   @moduledoc false
   use Ash.Resource.Calculation
 
+  alias Edgehog.Selector
+
   require Ash.Query
 
   @impl Ash.Resource.Calculation
-  def calculate(channels, _opts, _context) do
+  def load(_query, _opts, _context) do
+    [target_groups: [:selector]]
+  end
+
+  @impl Ash.Resource.Calculation
+  def calculate(channels, _opts, context) do
     channels
-    |> Ash.load!(target_groups: [:devices])
-    |> Enum.map(fn channel ->
-      channel.target_groups
-      |> Enum.flat_map(& &1.devices)
-      |> Enum.uniq_by(& &1.id)
-    end)
+    |> Ash.load!(target_groups: [:selector])
+    |> Enum.map(&resolve_channel(&1, context))
+  end
+
+  defp resolve_channel(channel, context) do
+    combined_expr = Enum.reduce(channel.target_groups, nil, &combine_selectors/2)
+
+    if combined_expr do
+      Edgehog.Devices.Device
+      |> Ash.Query.filter(^combined_expr)
+      |> Ash.Query.set_tenant(context.tenant)
+      |> Ash.read!()
+    else
+      []
+    end
+  end
+
+  defp combine_selectors(group, acc) do
+    case Selector.parse(group.selector) do
+      {:ok, ast} ->
+        expr = Selector.to_ash_expr(ast)
+        if acc, do: Ash.Expr.expr(^expr or ^acc), else: expr
+
+      _ ->
+        acc
+    end
   end
 end
