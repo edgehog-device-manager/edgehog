@@ -96,5 +96,7 @@ defmodule Edgehog.Files do
       define :set_file_upload_progress
       define :set_file_upload_response
     end
+
+    resource Edgehog.Files.FileDeleteRequest
   end
 end
