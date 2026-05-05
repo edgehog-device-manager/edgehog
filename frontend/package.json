@@ -50,7 +50,7 @@
     "react-datepicker": "^9.1.0",
     "react-dom": "^18.3.1",
     "react-error-boundary": "^6.1.1",
-    "react-hook-form": "^7.74.0",
+    "react-hook-form": "^7.75.0",
     "react-hyper-tree": "^0.3.12",
     "react-intl": "^7.1.14",
     "react-leaflet": "^4.2.1",
@@ -70,7 +70,7 @@
     "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-relay-lite": "^0.12.0",
     "vite-tsconfig-paths": "^6.1.1",
-    "zod": "^4.4.1"
+    "zod": "^4.4.2"
   },
   "scripts": {
     "init": "npm run relay:compile && npm run i18n:compile",
@@ -120,7 +120,7 @@
     "@typescript-eslint/eslint-plugin": "^8.59.1",
     "@typescript-eslint/parser": "^8.59.1",
     "@vitest/coverage-v8": "^4.1.5",
-    "baseline-browser-mapping": "^2.10.24",
+    "baseline-browser-mapping": "^2.10.25",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
