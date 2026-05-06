@@ -46,6 +46,7 @@ type FileManagementModeOption = {
 
 const FILE_MANAGEMENT_FRAGMENT = graphql`
   fragment FileManagementTab_fileManagement on Device {
+    online
     capabilities
     fileTransferCapabilities {
       encodings
@@ -115,6 +116,8 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const selectedModeOption =
     modeOptions.find((option) => option.value === effectiveMode) ?? null;
 
+  const isOnline = useMemo(() => data?.online ?? false, [data]);
+
   const hasTransferTargets =
     (data.fileTransferCapabilities?.targets?.length ?? 0) > 0;
 
@@ -153,11 +156,21 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
       )}
 
       {effectiveMode === "from-device" ? (
-        <FilesDownloadTab deviceRef={data} embedded />
+        <FilesDownloadTab deviceRef={data} embedded isOnline={isOnline} />
       ) : effectiveMode === "to-device-repository" ? (
-        <FilesUploadTab deviceRef={data} embedded embeddedMode="repository" />
+        <FilesUploadTab
+          deviceRef={data}
+          embedded
+          embeddedMode="repository"
+          isOnline={isOnline}
+        />
       ) : (
-        <FilesUploadTab deviceRef={data} embedded embeddedMode="file" />
+        <FilesUploadTab
+          deviceRef={data}
+          embedded
+          embeddedMode="file"
+          isOnline={isOnline}
+        />
       )}
     </Tab>
   );

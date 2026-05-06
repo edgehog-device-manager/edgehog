@@ -225,6 +225,7 @@ type ManualFileDownloadRequestFormWrapperProps = {
   allowArchiveUpload: boolean;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
+  isOnline: boolean;
 };
 
 const ManualFileDownloadRequestFormWrapper = ({
@@ -234,6 +235,7 @@ const ManualFileDownloadRequestFormWrapper = ({
   allowArchiveUpload,
   showAdvancedOptions,
   destinationTypeOptions,
+  isOnline,
 }: ManualFileDownloadRequestFormWrapperProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -307,6 +309,16 @@ const ManualFileDownloadRequestFormWrapper = ({
 
   const handleFileUpload = useCallback(
     async (values: FileDownloadRequestFormValues) => {
+      if (!isOnline) {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeviceTabs.FilesUploadTab.deviceOfflineError"
+            defaultMessage="The device is disconnected. You cannot transfer files while it is offline."
+          />,
+        );
+        return;
+      }
+
       const { files, customFileName, ...rest } = values;
       if (!files?.length) return;
 
@@ -344,7 +356,13 @@ const ManualFileDownloadRequestFormWrapper = ({
         }
       }
     },
-    [deviceId, commitDownloadRequest, setIsUploading, setErrorFeedback],
+    [
+      deviceId,
+      commitDownloadRequest,
+      setIsUploading,
+      setErrorFeedback,
+      isOnline,
+    ],
   );
   return (
     <ManualFileDownloadRequestForm
@@ -364,6 +382,7 @@ type ManualFileDownloadRequestFromRepositoryFormWrapperProps = {
   deviceId: string;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
+  isOnline: boolean;
 };
 
 const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
@@ -372,6 +391,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   deviceId,
   showAdvancedOptions,
   destinationTypeOptions,
+  isOnline,
 }: ManualFileDownloadRequestFromRepositoryFormWrapperProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
@@ -387,6 +407,16 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
 
   const handleFileUpload = useCallback(
     (values: ManualFileDownloadRequestFromRepositoryData) => {
+      if (!isOnline) {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.DeviceTabs.FilesUploadTab.deviceOfflineError"
+            defaultMessage="The device is disconnected. You cannot transfer files while it is offline."
+          />,
+        );
+        return;
+      }
+
       const {
         file,
         destinationType,
@@ -461,7 +491,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
         },
       });
     },
-    [deviceId, createFileDownloadRequest, setErrorFeedback],
+    [deviceId, createFileDownloadRequest, setErrorFeedback, isOnline],
   );
 
   return (
@@ -479,12 +509,14 @@ type FilesUploadTabProps = {
   deviceRef: FilesUploadTab_fileDownloadRequests$key;
   embedded?: boolean;
   embeddedMode?: "file" | "repository";
+  isOnline?: boolean;
 };
 
 const FilesUploadTab = ({
   deviceRef,
   embedded = false,
   embeddedMode,
+  isOnline = false,
 }: FilesUploadTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -662,6 +694,7 @@ const FilesUploadTab = ({
                 allowArchiveUpload={allowArchiveUpload}
                 showAdvancedOptions={showAdvancedOptions}
                 destinationTypeOptions={destinationTypeOptions}
+                isOnline={isOnline}
               />
             ) : (
               getRepositoriesQuery && (
@@ -671,6 +704,7 @@ const FilesUploadTab = ({
                   deviceId={deviceId}
                   showAdvancedOptions={showAdvancedOptions}
                   destinationTypeOptions={destinationTypeOptions}
+                  isOnline={isOnline}
                 />
               )
             )}
