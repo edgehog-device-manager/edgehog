@@ -20,30 +20,19 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
-import {
-  graphql,
-  useFragment,
-  useMutation,
-  usePaginationFragment,
-} from "react-relay";
-import { useParams } from "react-router-dom";
+import { graphql, useFragment, usePaginationFragment } from "react-relay";
 import Select, { SingleValue } from "react-select";
 import semver from "semver";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
 import type { DeploymentDetails_containerDeployments$key } from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
-import type { DeploymentDetails_deleteDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_deleteDeployment_Mutation.graphql";
 import type { DeploymentDetails_deviceMappingDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
 import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
 } from "@/api/__generated__/DeploymentDetails_events.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
-import type { DeploymentDetails_sendDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_sendDeployment_Mutation.graphql";
-import type { DeploymentDetails_startDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_startDeployment_Mutation.graphql";
-import type { DeploymentDetails_stopDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_stopDeployment_Mutation.graphql";
-import type { DeploymentDetails_upgradeDeployment_Mutation } from "@/api/__generated__/DeploymentDetails_upgradeDeployment_Mutation.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
@@ -54,7 +43,7 @@ import DeploymentEventsCard from "@/components/DeploymentEventsCard";
 import { parseDeploymentState } from "@/components/DeploymentState";
 import Icon from "@/components/Icon";
 import ResourceStateIcon from "@/components/ResourceStateIcon";
-import { Link, Route, useNavigate } from "@/Navigation";
+import { Link, Route } from "@/Navigation";
 import FullHeightCard from "@/components/FullHeightCard";
 
 /* eslint-disable relay/unused-fields */
@@ -167,69 +156,6 @@ const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
             cgroupPermissions
           }
         }
-      }
-    }
-  }
-`;
-
-const SEND_DEPLOYMENT_MUTATION = graphql`
-  mutation DeploymentDetails_sendDeployment_Mutation($id: ID!) {
-    sendDeployment(id: $id) {
-      result {
-        id
-        state
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
-
-const START_DEPLOYMENT_MUTATION = graphql`
-  mutation DeploymentDetails_startDeployment_Mutation($id: ID!) {
-    startDeployment(id: $id) {
-      result {
-        id
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
-
-const STOP_DEPLOYMENT_MUTATION = graphql`
-  mutation DeploymentDetails_stopDeployment_Mutation($id: ID!) {
-    stopDeployment(id: $id) {
-      result {
-        id
-      }
-      errors {
-        message
-      }
-    }
-  }
-`;
-
-const DELETE_DEPLOYMENT_MUTATION = graphql`
-  mutation DeploymentDetails_deleteDeployment_Mutation($id: ID!) {
-    deleteDeployment(id: $id) {
-      result {
-        id
-      }
-    }
-  }
-`;
-
-const UPGRADE_DEPLOYMENT_MUTATION = graphql`
-  mutation DeploymentDetails_upgradeDeployment_Mutation(
-    $id: ID!
-    $input: UpgradeDeploymentInput!
-  ) {
-    upgradeDeployment(id: $id, input: $input) {
-      result {
-        id
       }
     }
   }
@@ -499,14 +425,23 @@ const ContainerDeploymentItem = ({
 
 type DeploymentDetailsProps = {
   deploymentRef: Deployment;
-  isOnline: boolean;
+  isDeletingDeployment: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
+  onStart: (id: string) => void;
+  onStop: (id: string) => void;
+  onRedeploy: (id: string) => void;
+  onDelete: (id: string) => void;
+  onUpgrade: (id: string, targetId: string) => void;
 };
 
 const DeploymentDetails = ({
   deploymentRef,
-  isOnline,
-  setErrorFeedback,
+  isDeletingDeployment,
+  onStart,
+  onStop,
+  onRedeploy,
+  onDelete,
+  onUpgrade,
 }: DeploymentDetailsProps) => {
   const { data: eventsData } = usePaginationFragment<
     DeploymentEventsPaginationQuery,
@@ -541,8 +476,6 @@ const DeploymentDetails = ({
   const deploymentState = parseDeploymentState(state ?? undefined);
 
   const intl = useIntl();
-  const navigate = useNavigate();
-  const { deviceId } = useParams();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -596,7 +529,8 @@ const DeploymentDetails = ({
         const appliesToAll = systemModelNames.length === 0;
 
         const matchesSystemModel =
-          systemModelName && systemModelNames.includes(systemModelName);
+          appliesToAll ||
+          (systemModelName && systemModelNames.includes(systemModelName));
 
         const label = !matchesSystemModel
           ? intl.formatMessage(
@@ -628,253 +562,6 @@ const DeploymentDetails = ({
       ) || null
     );
   }, [upgradeReleaseOptions, upgradeTargetRelease?.id]);
-
-  const [sendDeployment] =
-    useMutation<DeploymentDetails_sendDeployment_Mutation>(
-      SEND_DEPLOYMENT_MUTATION,
-    );
-  const [startDeployment] =
-    useMutation<DeploymentDetails_startDeployment_Mutation>(
-      START_DEPLOYMENT_MUTATION,
-    );
-  const [stopDeployment] =
-    useMutation<DeploymentDetails_stopDeployment_Mutation>(
-      STOP_DEPLOYMENT_MUTATION,
-    );
-
-  const [deleteDeployment, isDeletingDeployment] =
-    useMutation<DeploymentDetails_deleteDeployment_Mutation>(
-      DELETE_DEPLOYMENT_MUTATION,
-    );
-
-  const [upgradeDeployment] =
-    useMutation<DeploymentDetails_upgradeDeployment_Mutation>(
-      UPGRADE_DEPLOYMENT_MUTATION,
-    );
-
-  const handleSendDeployedApplication = useCallback(
-    (deploymentId: string) => {
-      if (!isOnline) {
-        return setErrorFeedback(
-          <FormattedMessage
-            id="components.DeploymentDetails.sendErrorOffline"
-            defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
-          />,
-        );
-      }
-
-      sendDeployment({
-        variables: { id: deploymentId },
-        onCompleted: (_data, errors) => {
-          if (errors) {
-            const errorFeedback = errors
-              .map(({ fields, message }) =>
-                fields.length ? `${fields.join(" ")} ${message}` : message,
-              )
-              .join(". \n");
-            return setErrorFeedback(errorFeedback);
-          }
-          setErrorFeedback(null);
-        },
-        onError: () => {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.DeploymentDetails.sendErrorFeedback"
-              defaultMessage="Could not send the Application to the device, please try again."
-            />,
-          );
-        },
-      });
-    },
-    [isOnline, sendDeployment, setErrorFeedback],
-  );
-
-  const handleStartDeployedApplication = useCallback(
-    (deploymentId: string) => {
-      if (!isOnline) {
-        return setErrorFeedback(
-          <FormattedMessage
-            id="components.DeploymentDetails.startErrorOffline"
-            defaultMessage="The device is disconnected. You cannot start an application while it is offline."
-          />,
-        );
-      }
-
-      startDeployment({
-        variables: { id: deploymentId },
-        onCompleted: (_data, errors) => {
-          if (errors) {
-            const errorFeedback = errors
-              .map(({ fields, message }) =>
-                fields.length ? `${fields.join(" ")} ${message}` : message,
-              )
-              .join(". \n");
-            return setErrorFeedback(errorFeedback);
-          }
-          setErrorFeedback(null);
-        },
-        onError: () => {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.DeploymentDetails.startErrorFeedback"
-              defaultMessage="Could not Start the Deployed Application, please try again."
-            />,
-          );
-        },
-      });
-    },
-    [isOnline, startDeployment, setErrorFeedback],
-  );
-
-  const handleStopDeployedApplication = useCallback(
-    (deploymentId: string) => {
-      if (!isOnline) {
-        return setErrorFeedback(
-          <FormattedMessage
-            id="components.DeploymentDetails.stopErrorOffline"
-            defaultMessage="The device is disconnected. You cannot stop an application while it is offline."
-          />,
-        );
-      }
-
-      stopDeployment({
-        variables: { id: deploymentId },
-        onCompleted: (_data, errors) => {
-          if (errors) {
-            const errorFeedback = errors
-              .map(({ fields, message }) =>
-                fields.length ? `${fields.join(" ")} ${message}` : message,
-              )
-              .join(". \n");
-            return setErrorFeedback(errorFeedback);
-          }
-          setErrorFeedback(null);
-        },
-        onError: () => {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.DeploymentDetails.stopErrorFeedback"
-              defaultMessage="Could not Stop the Deployed Application, please try again."
-            />,
-          );
-        },
-      });
-    },
-    [isOnline, stopDeployment, setErrorFeedback],
-  );
-
-  const handleDeleteDeployedApplication = useCallback(
-    (deploymentId: string) => {
-      if (!isOnline) {
-        return setErrorFeedback(
-          <FormattedMessage
-            id="components.DeploymentDetails.deleteErrorOffline"
-            defaultMessage="The device is disconnected. You cannot delete an application while it is offline."
-          />,
-        );
-      }
-
-      deleteDeployment({
-        variables: { id: deploymentId },
-
-        onCompleted(_data, errors) {
-          if (
-            !errors ||
-            errors.length === 0 ||
-            errors[0].code === "not_found"
-          ) {
-            setErrorFeedback(null);
-            setShowDeleteModal(false);
-            if (deviceId) {
-              navigate({
-                route: Route.devicesEdit,
-                params: { deviceId },
-              });
-            }
-            return;
-          }
-
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-
-          setErrorFeedback(errorFeedback);
-          setShowDeleteModal(false);
-        },
-
-        onError() {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.DeploymentDetails.deletionErrorFeedback"
-              defaultMessage="Could not delete the deployment, please try again."
-            />,
-          );
-          setShowDeleteModal(false);
-        },
-      });
-    },
-    [deleteDeployment, setErrorFeedback, navigate, deviceId, isOnline],
-  );
-
-  const handleUpgradeDeployedRelease = useCallback(
-    (deploymentId: string, upgradeTargetReleaseId: string) => {
-      if (!isOnline) {
-        return setErrorFeedback(
-          <FormattedMessage
-            id="components.DeploymentDetails.upgradeErrorOffline"
-            defaultMessage="The device is disconnected. You cannot upgrade an application while it is offline."
-          />,
-        );
-      }
-
-      upgradeDeployment({
-        variables: {
-          id: deploymentId,
-          input: { target: upgradeTargetReleaseId },
-        },
-        onCompleted(data, errors) {
-          if (
-            !errors ||
-            errors.length === 0 ||
-            errors[0].code === "not_found"
-          ) {
-            setErrorFeedback(null);
-            setShowUpgradeModal(false);
-            if (deviceId && data.upgradeDeployment?.result?.id) {
-              navigate({
-                route: Route.deploymentEdit,
-                params: {
-                  deviceId,
-                  deploymentId: data.upgradeDeployment?.result?.id,
-                },
-              });
-            }
-            return;
-          }
-
-          const errorFeedback = errors
-            .map(({ fields, message }) =>
-              fields.length ? `${fields.join(" ")} ${message}` : message,
-            )
-            .join(". \n");
-          setErrorFeedback(errorFeedback);
-          setShowUpgradeModal(false);
-        },
-        onError() {
-          setErrorFeedback(
-            <FormattedMessage
-              id="components.DeploymentDetails.upgradeErrorFeedback"
-              defaultMessage="Could not upgrade the deployment, please try again."
-            />,
-          );
-          setShowUpgradeModal(false);
-        },
-      });
-    },
-    [upgradeDeployment, setErrorFeedback, isOnline, deviceId, navigate],
-  );
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
@@ -914,15 +601,9 @@ const DeploymentDetails = ({
                 state={deploymentState}
                 isReady={isReady}
                 isDeleting={deploymentState === "DELETING"}
-                onStart={() =>
-                  deploymentId && handleStartDeployedApplication(deploymentId)
-                }
-                onStop={() =>
-                  deploymentId && handleStopDeployedApplication(deploymentId)
-                }
-                onRedeploy={() =>
-                  deploymentId && handleSendDeployedApplication(deploymentId)
-                }
+                onStart={() => deploymentId && onStart(deploymentId)}
+                onStop={() => deploymentId && onStop(deploymentId)}
+                onRedeploy={() => deploymentId && onRedeploy(deploymentId)}
                 onUpgrade={() => {
                   setUpgradeTargetRelease(null);
                   handleShowUpgradeModal();
@@ -941,7 +622,7 @@ const DeploymentDetails = ({
           onCancel={() => setShowDeleteModal(false)}
           onConfirm={() => {
             if (deploymentRef?.id) {
-              handleDeleteDeployedApplication(deploymentRef.id);
+              onDelete(deploymentRef.id);
             }
             setShowDeleteModal(false);
           }}
@@ -982,10 +663,7 @@ const DeploymentDetails = ({
           }}
           onConfirm={() => {
             if (deploymentRef && upgradeTargetRelease) {
-              handleUpgradeDeployedRelease(
-                deploymentRef.id,
-                upgradeTargetRelease.id,
-              );
+              onUpgrade(deploymentRef.id, upgradeTargetRelease.id);
             }
             setShowUpgradeModal(false);
             setUpgradeTargetRelease(null);
