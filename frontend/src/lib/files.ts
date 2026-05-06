@@ -154,4 +154,125 @@ const createTarArchive = (files: File[]): Blob => {
   return new Blob(chunks, { type: "application/x-tar" });
 };
 
-export { createTarArchive, formatFileSize };
+const getFileExtension = (filename: string): string => {
+  const lastDotIdx = filename.lastIndexOf(".");
+  return lastDotIdx > 0 ? filename.substring(lastDotIdx) : "";
+};
+
+const getBaseName = (filename: string): string => {
+  const lastDotIdx = filename.lastIndexOf(".");
+  return lastDotIdx > 0 ? filename.substring(0, lastDotIdx) : filename;
+};
+
+const getArchiveExtension = (encoding?: string | null): string => {
+  switch (encoding?.trim().toLowerCase()) {
+    case "tar.gz":
+      return ".tar.gz";
+    case "tar.lz4":
+      return ".tar.lz4";
+    case "tar":
+      return ".tar";
+    default:
+      return "";
+  }
+};
+
+const isArchiveEncoding = (encoding?: string | null): boolean =>
+  getArchiveExtension(encoding).length > 0;
+
+type PreparedUploadFile = {
+  file: File;
+  fileName: string;
+  uncompressedSize: number;
+};
+
+const prepareUploadFile = async ({
+  files,
+  customFileName,
+  encoding,
+}: {
+  files: File[];
+  customFileName?: string;
+  encoding?: string | null;
+}): Promise<PreparedUploadFile> => {
+  if (files.length === 0) {
+    throw new Error("No files selected.");
+  }
+
+  const hasRelativePaths = files.some((file) => !!file.webkitRelativePath);
+  const archiveExtension = getArchiveExtension(encoding);
+  const shouldArchive =
+    files.length > 1 || hasRelativePaths || archiveExtension.length > 0;
+
+  if (shouldArchive) {
+    const tarBlob = await createTarArchive(files);
+    const fallbackName =
+      files.length > 1 || hasRelativePaths
+        ? getDefaultArchiveName()
+        : getBaseName(files[0].name);
+    const baseName = customFileName?.trim() || fallbackName;
+    const suffix = archiveExtension.length > 0 ? archiveExtension : ".tar";
+    const fileName = baseName.endsWith(suffix)
+      ? baseName
+      : `${baseName}${suffix}`;
+    const uncompressedSize = files.reduce((sum, file) => sum + file.size, 0);
+
+    return {
+      file: new File([tarBlob], fileName, { type: "application/x-tar" }),
+      fileName,
+      uncompressedSize,
+    };
+  }
+
+  const originalFile = files[0];
+  const desiredNameBase = customFileName?.trim();
+  if (desiredNameBase && files.length === 1) {
+    const originalExt = getFileExtension(originalFile.name);
+    const hasExt = /\.[^./\\]+$/.test(desiredNameBase);
+    const desiredName =
+      hasExt || !originalExt
+        ? desiredNameBase
+        : `${desiredNameBase}${originalExt}`;
+    const file =
+      desiredName !== originalFile.name
+        ? new File([originalFile], desiredName, { type: originalFile.type })
+        : originalFile;
+
+    return {
+      file,
+      fileName: desiredName,
+      uncompressedSize: originalFile.size,
+    };
+  }
+
+  const desiredName = desiredNameBase || originalFile.name;
+  const file =
+    desiredName !== originalFile.name
+      ? new File([originalFile], desiredName, { type: originalFile.type })
+      : originalFile;
+
+  return {
+    file,
+    fileName: desiredName,
+    uncompressedSize: originalFile.size,
+  };
+};
+
+const getDefaultArchiveName = () => {
+  const now = new Date();
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}-${pad(now.getMinutes())}`;
+
+  return `archive-${dateStr}`;
+};
+
+export {
+  createTarArchive,
+  formatFileSize,
+  getArchiveExtension,
+  getBaseName,
+  getDefaultArchiveName,
+  getFileExtension,
+  isArchiveEncoding,
+  prepareUploadFile,
+};

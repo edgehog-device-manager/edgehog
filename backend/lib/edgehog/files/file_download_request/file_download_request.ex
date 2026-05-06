@@ -354,6 +354,10 @@ defmodule Edgehog.Files.FileDownloadRequest do
     end
   end
 
+  identities do
+    identity :file_name, [:file_name, :device_id]
+  end
+
   pub_sub do
     prefix "file_download_requests"
     module EdgehogWeb.Endpoint

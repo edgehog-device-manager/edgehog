@@ -38,6 +38,13 @@ import {
   fileDownloadRequestFormSchema,
   type FileDestinationType,
 } from "@/forms/validation";
+import {
+  getArchiveExtension,
+  getBaseName,
+  getDefaultArchiveName,
+  getFileExtension,
+  isArchiveEncoding,
+} from "@/lib/files";
 
 type EncodingOption = {
   value: string;
@@ -47,7 +54,7 @@ type EncodingOption = {
 
 type FileDownloadRequestFormValues = {
   files: File[];
-  archiveName?: string;
+  customFileName?: string;
   encoding?: string;
   destinationType: FileDestinationType;
   destination: string | null;
@@ -97,7 +104,7 @@ const ManualFileDownloadRequestForm = ({
     mode: "onTouched",
     defaultValues: {
       file: undefined,
-      archiveName: "",
+      customFileName: "",
       encoding: "",
       destinationType: "STORAGE",
       destination: null,
@@ -155,6 +162,12 @@ const ManualFileDownloadRequestForm = ({
     control,
     name: "destinationType",
   });
+  const selectedEncoding = useWatch({
+    control,
+    name: "encoding",
+  });
+  const selectedEncodingValue = (selectedEncoding ?? "").trim();
+  const selectedArchiveExtension = getArchiveExtension(selectedEncodingValue);
 
   const handleFilesChanged = (files: File[]) => {
     setSelectedFiles(files);
@@ -165,6 +178,21 @@ const ManualFileDownloadRequestForm = ({
 
     const hasMultipleFiles = files.length > 1;
     const selectedEncoding = getValues("encoding")?.trim().toLowerCase() ?? "";
+
+    if (files.length === 0) {
+      setValue("customFileName", "");
+      clearErrors("encoding");
+      return;
+    }
+
+    const requiresArchive =
+      hasMultipleFiles || files.some((f) => f.webkitRelativePath);
+
+    const generatedName = requiresArchive
+      ? getDefaultArchiveName()
+      : getBaseName(files[0].name);
+
+    setValue("customFileName", generatedName, { shouldValidate: true });
 
     if (hasMultipleFiles) {
       if (!supportedArchiveEncodingsNormalized.has(selectedEncoding)) {
@@ -204,10 +232,7 @@ const ManualFileDownloadRequestForm = ({
     if (selectedFiles.length > 0) {
       onFileSubmit({
         files: selectedFiles,
-        archiveName:
-          selectedFiles.length > 1 && data.archiveName
-            ? data.archiveName
-            : undefined,
+        customFileName: data.customFileName?.trim() || undefined,
         destinationType: data.destinationType,
         destination: data.destination,
         encoding: data.encoding ?? undefined,
@@ -223,8 +248,17 @@ const ManualFileDownloadRequestForm = ({
   });
 
   const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
-  const showArchiveName =
-    allowArchiveUpload && (selectedFiles.length > 1 || hasRelativePaths);
+  const hasFiles = selectedFiles.length > 0;
+  const isArchiveSelected = isArchiveEncoding(selectedEncodingValue);
+  const needsArchive =
+    selectedFiles.length > 1 || hasRelativePaths || isArchiveSelected;
+  const fileExtension = needsArchive
+    ? selectedArchiveExtension || ".tar"
+    : hasFiles
+      ? getFileExtension(selectedFiles[0].name)
+      : "";
+
+  const showArchiveName = hasFiles;
 
   return (
     <form className={className} onSubmit={onSubmit} autoComplete="off">
@@ -264,23 +298,31 @@ const ManualFileDownloadRequestForm = ({
 
       {showArchiveName && (
         <FormRow
-          id="archiveName"
+          id="customFileName"
           label={
-            <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.archiveNameLabel"
-              defaultMessage="Archive Name"
-            />
+            needsArchive ? (
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestForm.archiveNameLabel"
+                defaultMessage="Archive Name"
+              />
+            ) : (
+              <FormattedMessage
+                id="forms.ManualFileDownloadRequestForm.fileNameLabel"
+                defaultMessage="File Name"
+              />
+            )
           }
         >
-          <Form.Control
-            type="text"
-            {...register("archiveName")}
-            placeholder="files-archive"
-          />
+          <div className="input-group">
+            <Form.Control type="text" {...register("customFileName")} />
+            <span className="input-group-text bg-light text-muted border-start-0">
+              {fileExtension}
+            </span>
+          </div>
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.archiveNameHint"
-              defaultMessage="Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
+              id="forms.ManualFileDownloadRequestForm.fileNameHint"
+              defaultMessage="You can customize the name before upload."
             />
           </Form.Text>
         </FormRow>

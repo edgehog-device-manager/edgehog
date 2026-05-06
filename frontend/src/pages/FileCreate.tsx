@@ -43,13 +43,12 @@ import Page from "@/components/Page";
 import Result from "@/components/Result";
 import Spinner from "@/components/Spinner";
 import CreateFileForm, { type FileFormOutputData } from "@/forms/CreateFile";
-import { createTarArchive } from "@/lib/files";
+import { prepareUploadFile } from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";
 
 const GET_REPOSITORY_QUERY = graphql`
   query FileCreate_getOptions_Query($repositoryId: ID!) {
     repository(id: $repositoryId) {
-      id
       ...CreateFile_RepositoryFragment
     }
   }
@@ -72,14 +71,6 @@ class APIValidationError extends Error {
   }
 }
 
-const getDefaultArchiveName = () => {
-  const now = new Date();
-  const pad = (n: number) => String(n).padStart(2, "0");
-  const dateStr = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}-${pad(now.getHours())}-${pad(now.getMinutes())}`;
-
-  return `archive-${dateStr}`;
-};
-
 type FileCreateContentProps = {
   repository: NonNullable<FileCreate_getOptions_Query$data["repository"]>;
 };
@@ -92,39 +83,6 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
 
   const [createFile, isCreatingFile] =
     useMutation<FileCreate_createFile_Mutation>(CREATE_FILE_MUTATION);
-
-  const prepareUploadFile = async (files: File[], customFileName?: string) => {
-    const needsArchive =
-      files.length > 1 || files.some((f) => !!f.webkitRelativePath);
-    const baseName =
-      customFileName?.trim() ||
-      (needsArchive ? getDefaultArchiveName() : files[0].name);
-
-    if (needsArchive) {
-      const tarBlob = await createTarArchive(files);
-      const fileName = baseName.endsWith(".tar") ? baseName : `${baseName}.tar`;
-      const uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
-
-      return {
-        file: new File([tarBlob], fileName, { type: "application/x-tar" }),
-        fileName,
-        uncompressedSize,
-      };
-    }
-
-    const singleFile = files[0];
-
-    const finalFile =
-      baseName !== singleFile.name
-        ? new File([singleFile], baseName, { type: singleFile.type })
-        : singleFile;
-
-    return {
-      file: finalFile,
-      fileName: baseName,
-      uncompressedSize: finalFile.size,
-    };
-  };
 
   const commitCreateFile = useCallback(
     (input: FileCreate_createFile_Mutation["variables"]["input"]) =>
@@ -157,10 +115,10 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
       setErrorFeedback(null);
 
       try {
-        const { file, fileName, uncompressedSize } = await prepareUploadFile(
+        const { file, fileName, uncompressedSize } = await prepareUploadFile({
           files,
           customFileName,
-        );
+        });
 
         await commitCreateFile({
           repositoryId,
@@ -299,7 +257,5 @@ const FileCreatePage = () => {
     </Suspense>
   );
 };
-
-export { getDefaultArchiveName };
 
 export default FileCreatePage;

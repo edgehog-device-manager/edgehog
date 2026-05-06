@@ -38,6 +38,7 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { PayloadError } from "relay-runtime";
 
 import type { FilesUploadTab_PaginationQuery } from "@/api/__generated__/FilesUploadTab_PaginationQuery.graphql";
 import type { FilesUploadTab_createManagedFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManagedFileDownloadRequest_Mutation.graphql";
@@ -62,8 +63,7 @@ import type {
   FileDestinationType,
   ManualFileDownloadRequestFromRepositoryData,
 } from "@/forms/validation";
-import { createTarArchive } from "@/lib/files";
-import { PayloadError } from "relay-runtime";
+import { prepareUploadFile } from "@/lib/files";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -257,30 +257,6 @@ const ManualFileDownloadRequestFormWrapper = ({
     };
   }, [isUploading]);
 
-  const prepareUploadFile = async (files: File[], archiveName?: string) => {
-    const hasRelativePaths = files.some((f) => !!f.webkitRelativePath);
-    const needsArchive = files.length > 1 || hasRelativePaths;
-
-    if (needsArchive) {
-      const tarBlob = await createTarArchive(files);
-      const baseName = archiveName?.trim() || "files-archive";
-      const fileName = baseName.endsWith(".tar") ? baseName : `${baseName}.tar`;
-      const uncompressedSize = files.reduce((sum, f) => sum + f.size, 0);
-
-      return {
-        file: new File([tarBlob], fileName, { type: "application/x-tar" }),
-        fileName,
-        uncompressedSize,
-      };
-    }
-
-    return {
-      file: files[0],
-      fileName: files[0].name,
-      uncompressedSize: files[0].size,
-    };
-  };
-
   const commitDownloadRequest = useCallback(
     (input: CreateManualFileDownloadRequestInput) =>
       new Promise<FileDownloadRequest>((resolve, reject) => {
@@ -331,17 +307,18 @@ const ManualFileDownloadRequestFormWrapper = ({
 
   const handleFileUpload = useCallback(
     async (values: FileDownloadRequestFormValues) => {
-      const { files, archiveName, ...rest } = values;
+      const { files, customFileName, ...rest } = values;
       if (!files?.length) return;
 
       setIsUploading(true);
       setErrorFeedback(null);
 
       try {
-        const { file, fileName, uncompressedSize } = await prepareUploadFile(
+        const { file, fileName, uncompressedSize } = await prepareUploadFile({
           files,
-          archiveName,
-        );
+          customFileName,
+          encoding: values.encoding,
+        });
 
         await commitDownloadRequest({
           ...rest,

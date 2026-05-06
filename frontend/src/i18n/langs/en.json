@@ -2454,9 +2454,6 @@
   "forms.ManualFileDownloadRequestForm.advancedOptionsTitle": {
     "defaultMessage": "Advanced Options"
   },
-  "forms.ManualFileDownloadRequestForm.archiveNameHint": {
-    "defaultMessage": "Optional name for the encoded archive. Defaults to 'files-archive' if left empty."
-  },
   "forms.ManualFileDownloadRequestForm.archiveNameLabel": {
     "defaultMessage": "Archive Name"
   },
@@ -2486,6 +2483,12 @@
   },
   "forms.ManualFileDownloadRequestForm.fileModeLabel": {
     "defaultMessage": "File Mode"
+  },
+  "forms.ManualFileDownloadRequestForm.fileNameHint": {
+    "defaultMessage": "You can customize the name before upload."
+  },
+  "forms.ManualFileDownloadRequestForm.fileNameLabel": {
+    "defaultMessage": "File Name"
   },
   "forms.ManualFileDownloadRequestForm.groupIdLabel": {
     "defaultMessage": "Group ID"

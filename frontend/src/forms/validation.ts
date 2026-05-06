@@ -563,7 +563,7 @@ const fileDownloadRequestFormSchema = z
     file: z.instanceof(FileList).refine((files) => files.length > 0, {
       message: messages.baseImageFileSchema.id,
     }),
-    archiveName: z.string().optional(),
+    customFileName: z.string().optional(),
     encoding: z.string().optional(),
     destinationType: fileDestinationTypeSchema,
     destination: nullableDestinationSchema,

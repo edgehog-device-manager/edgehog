@@ -34,7 +34,11 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import { FileFormData, fileSchema } from "@/forms/validation";
-import { getDefaultArchiveName } from "@/pages/FileCreate";
+import {
+  getBaseName,
+  getDefaultArchiveName,
+  getFileExtension,
+} from "@/lib/files";
 
 const CREATE_FILE_FRAGMENT = graphql`
   fragment CreateFile_RepositoryFragment on Repository {
@@ -53,16 +57,6 @@ type CreateFileFormProps = {
   repositoryRef: CreateFile_RepositoryFragment$key;
   isLoading?: boolean;
   onSubmit: (data: FileFormOutputData) => void;
-};
-
-const getFileExtension = (filename: string) => {
-  const lastDotIdx = filename.lastIndexOf(".");
-  return lastDotIdx > 0 ? filename.substring(lastDotIdx) : "";
-};
-
-const getBaseName = (filename: string) => {
-  const lastDotIdx = filename.lastIndexOf(".");
-  return lastDotIdx > 0 ? filename.substring(0, lastDotIdx) : filename;
 };
 
 const CreateFileForm = ({
