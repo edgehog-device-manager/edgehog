@@ -85,7 +85,7 @@ services:
         condition: service_healthy
     volumes:
       - ./backend/priv/fga/model.fga:/model.fga:z
-      - fga-env:/fga-env:z
+      - fga-env:/fga-env
     entrypoint: ["/bin/sh", "-c"]
     command:
       - |
@@ -130,7 +130,7 @@ services:
       - ./backend/priv/repo/seeds/keys/admin_public.pem:/keys/admin_public.pem:z
       - ${SEEDS_TENANT_PRIVATE_KEY_FILE}:/keys/tenant_private.pem:z
       - ${SEEDS_REALM_PRIVATE_KEY_FILE}:/keys/realm_private.pem:z
-      - fga-env:/fga-env:z
+      - fga-env:/fga-env
     depends_on:
       postgres:
         condition: service_started
