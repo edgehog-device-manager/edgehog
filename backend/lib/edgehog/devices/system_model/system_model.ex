@@ -22,7 +22,9 @@ defmodule Edgehog.Devices.SystemModel do
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    fga_type: :system_model,
+    fga_id_attribute: :handle
 
   alias Edgehog.Devices.SystemModel.Changes
   alias Edgehog.Devices.SystemModel.Validations

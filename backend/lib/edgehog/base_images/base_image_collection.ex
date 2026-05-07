@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022-2024 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.BaseImages.BaseImageCollection do
   @moduledoc false
@@ -24,7 +22,9 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     domain: Edgehog.BaseImages,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    fga_type: :base_image_collection,
+    fga_id_attribute: :handle
 
   alias Edgehog.Validations
 

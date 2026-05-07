@@ -24,7 +24,9 @@ defmodule Edgehog.Devices.HardwareType do
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    fga_type: :hardware_type,
+    fga_id_attribute: :handle
 
   alias Edgehog.Validations
 

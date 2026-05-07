@@ -30,12 +30,15 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
   - AUTHZ_PROVIDER        :: must be openfga for these tests to work
   """
 
-  use ExUnit.Case, async: true
+  use Edgehog.Auth.AuthzCase, async: true
 
-  @moduletag :integration_openfga
+  import Edgehog.TenantsFixtures
+  import Edgehog.AstarteFixtures
 
   alias Edgehog.Auth.Providers.OpenFGA
   alias Edgehog.TupleFixtures
+
+  @moduletag :integration_openfga
 
   test "init_context/1 properly inits a connection with OpenFGA" do
     config = Edgehog.Config.authz_config!()[:config]
@@ -66,6 +69,16 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
       tuple = TupleFixtures.tuple(opts)
 
       assert {:ok, _} = OpenFGA.write(tuple, context)
+    end
+
+    test "is invoked correctly after operations with Ash", %{context: context} do
+      tenant = tenant_fixture()
+      realm = realm_fixture(tenant: tenant)
+
+      assert {:ok, %{objects: [object]}} =
+               OpenFGA.list_objects({"tenant:#{tenant.slug}", "tenant", "realm"}, context)
+
+      assert "realm:#{realm.name}" == object
     end
   end
 

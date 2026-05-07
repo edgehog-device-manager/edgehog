@@ -24,7 +24,9 @@ defmodule Edgehog.Campaigns.Channel do
     domain: Edgehog.Campaigns,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    fga_type: :channel,
+    fga_id_attribute: :handle
 
   alias Edgehog.Campaigns.Channel.Calculations
   alias Edgehog.Campaigns.Channel.Changes

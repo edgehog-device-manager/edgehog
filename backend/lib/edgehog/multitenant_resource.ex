@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +15,34 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.MultitenantResource do
-  @moduledoc false
+  @moduledoc """
+  Define the resource as `belong_to` with a `Edgehog.Tenant.Tenant`.
+
+  # Opts
+  ## Types
+  :tenant_id_in_primary_key? :: boolean()
+  :fga_type      :: atom() | nil
+  :fga_id_attribute :: atom() | nil
+  ## Description
+  :tenant_id_in_primary_key? :: whether the tenant_id is primary key in the relationship
+  :fga_type      :: name of the FGA type for this resource, defined in the model
+  :fga_id_attribute :: name of the attribute to be used as FGA id in tuples
+
+  `:fga_id_attribute` should be defined only if `:fga_type` is `nil`.
+  When defined, `:fga_type` should correspond to a type defined in the FGA model,
+  and `:fga_id_attribute` should be a valid attribute.
+  """
   alias Edgehog.Tenants.Tenant
 
-  @custom_opts [:tenant_id_in_primary_key?]
+  @custom_opts [:tenant_id_in_primary_key?, :fga_type, :fga_id_attribute]
 
   defmacro __using__(opts) do
+    fga_type = Keyword.get(opts, :fga_type)
+    fga_id_attribute = Keyword.get(opts, :fga_id_attribute, :id)
+    fga_tenancy? = not is_nil(fga_type)
+
     quote do
       use Ash.Resource,
           unquote(
@@ -44,6 +62,14 @@ defmodule Edgehog.MultitenantResource do
       multitenancy do
         strategy :attribute
         attribute :tenant_id
+      end
+
+      if unquote(fga_tenancy?) do
+        changes do
+          change {Edgehog.Auth.Changes.WriteTenant,
+                  obj: unquote(fga_type), obj_id: unquote(fga_id_attribute)},
+                 on: :create
+        end
       end
 
       postgres do

@@ -23,7 +23,8 @@ defmodule Edgehog.Campaigns.Campaign do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Campaigns,
     extensions: [AshGraphql.Resource],
-    notifiers: [Ash.Notifier.PubSub]
+    notifiers: [Ash.Notifier.PubSub],
+    fga_type: :campaign
 
   alias Edgehog.Campaigns.Campaign.Changes
   alias Edgehog.Campaigns.Campaign.Validations
