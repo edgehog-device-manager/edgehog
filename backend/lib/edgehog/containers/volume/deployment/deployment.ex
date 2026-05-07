@@ -160,5 +160,9 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   postgres do
     table "application_volume_deployments"
+
+    references do
+      reference :device, on_delete: :delete
+    end
   end
 end
