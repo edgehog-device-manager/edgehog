@@ -28,46 +28,35 @@ defmodule Edgehog.Auth.FGAService do
   alias Edgehog.Config
 
   def check(subj, rel, obj) do
-    tuple = {subj, rel, obj}
-
-    provider = Keyword.fetch!(Config.authz_config!(), :provider)
-    config = Keyword.fetch!(Config.authz_config!(), :config)
-
-    with {:ok, context} <- provider.init_context(config) do
-      provider.check(tuple, context)
-    end
+    with_provider_context(fn provider, context ->
+      provider.check({subj, rel, obj}, context)
+    end)
   end
 
   def write(subj, rel, obj) do
-    tuple = {subj, rel, obj}
-
-    provider = Keyword.fetch!(Config.authz_config!(), :provider)
-    config = Keyword.fetch!(Config.authz_config!(), :config)
-
-    with {:ok, context} <- provider.init_context(config) do
-      provider.write(tuple, context)
-    end
+    with_provider_context(fn provider, context ->
+      provider.write({subj, rel, obj}, context)
+    end)
   end
 
   def list_objects(subj, rel, type) do
-    tuple = {subj, rel, type}
-
-    provider = Keyword.fetch!(Config.authz_config!(), :provider)
-    config = Keyword.fetch!(Config.authz_config!(), :config)
-
-    with {:ok, context} <- provider.init_context(config) do
-      provider.list_objects(tuple, context)
-    end
+    with_provider_context(fn provider, context ->
+      provider.list_objects({subj, rel, type}, context)
+    end)
   end
 
   def stream_list_objects(subj, rel, type) do
-    tuple = {subj, rel, type}
+    with_provider_context(fn provider, context ->
+      provider.stream_list_objects({subj, rel, type}, context)
+    end)
+  end
 
+  defp with_provider_context(function) do
     provider = Keyword.fetch!(Config.authz_config!(), :provider)
     config = Keyword.fetch!(Config.authz_config!(), :config)
 
     with {:ok, context} <- provider.init_context(config) do
-      provider.stream_list_objects(tuple, context)
+      function.(provider, context)
     end
   end
 end
