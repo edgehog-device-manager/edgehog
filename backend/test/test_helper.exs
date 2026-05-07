@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+Mimic.copy(Edgehog.Auth.FGAService)
 Mimic.copy(Openfga.V1.OpenFGAService.Stub)
 Mimic.copy(GRPC.Stub)
 

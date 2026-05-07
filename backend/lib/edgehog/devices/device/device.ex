@@ -42,6 +42,8 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Devices.Device.NetworkInterface
   alias Edgehog.Devices.Device.Types
 
+  @fga_type :device
+
   resource do
     description """
     Denotes a device instance that connects and exchanges data.
@@ -689,6 +691,16 @@ defmodule Edgehog.Devices.Device do
 
   identities do
     identity :unique_realm_device_id, [:device_id, :realm_id]
+  end
+
+  changes do
+    change {Edgehog.Auth.Changes.WriteRelation,
+            relationship: :realm,
+            destination_id: :name,
+            source_type: @fga_type,
+            source_id: :device_id} do
+      on [:create]
+    end
   end
 
   postgres do
