@@ -62,13 +62,13 @@ services:
     labels:
       - "traefik.enable=true"
       # --- HTTP API (port 8080) ---
-      - "traefik.http.routers.openfga-http.rule=Host(`openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.openfga-http.rule=Host(`api.openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.openfga-http.entrypoints=web"
       - "traefik.http.routers.openfga-http.service=openfga-http"
       - "traefik.http.services.openfga-http.loadbalancer.server.port=8080"
       # --- gRPC (port 8081) — requires a TCP/HTTP2 entrypoint in Traefik ---
-      - "traefik.http.routers.openfga-grpc.rule=Host(`openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
-      - "traefik.http.routers.openfga-grpc.entrypoints=grpc"
+      - "traefik.http.routers.openfga-grpc.rule=Host(`grpc.openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.openfga-grpc.entrypoints=web"
       - "traefik.http.routers.openfga-grpc.service=openfga-grpc"
       - "traefik.http.services.openfga-grpc.loadbalancer.server.port=8081"
       - "traefik.http.services.openfga-grpc.loadbalancer.server.scheme=h2c"
