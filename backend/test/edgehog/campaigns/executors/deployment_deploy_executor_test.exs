@@ -374,7 +374,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
             max_in_progress_operations: target_count,
             max_failure_percentage: max_failure_percentage
           ],
-          tenant: tenant.tenant_id
+          tenant: tenant
         )
 
       %{pid: pid, ref: ref} =

@@ -355,7 +355,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeleteExecutorTest do
             max_in_progress_operations: target_count,
             max_failure_percentage: max_failure_percentage
           ],
-          tenant: tenant.tenant_id
+          tenant: tenant
         )
 
       %{pid: pid, ref: ref} =

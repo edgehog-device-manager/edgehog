@@ -71,7 +71,7 @@ defmodule Edgehog.AstarteFixtures do
       name: unique_realm_name(),
       private_key: @private_key
     })
-    |> Edgehog.Astarte.create_realm!(tenant: tenant.tenant_id)
+    |> Edgehog.Astarte.create_realm!(tenant: tenant)
   end
 
   @doc """
