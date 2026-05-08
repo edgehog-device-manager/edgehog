@@ -40,14 +40,9 @@ defmodule Edgehog.Auth.FGAService do
   end
 
   def delete(subj, rel, obj) do
-    tuple = {subj, rel, obj}
-
-    provider = Keyword.fetch!(Config.authz_config!(), :provider)
-    config = Keyword.fetch!(Config.authz_config!(), :config)
-
-    with {:ok, context} <- provider.init_context(config) do
-      provider.delete(tuple, context)
-    end
+    with_provider_context(fn provider, context ->
+      provider.delete({subj, rel, obj}, context)
+    end)
   end
 
   def list_objects(subj, rel, type) do

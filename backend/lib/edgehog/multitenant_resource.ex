@@ -43,10 +43,6 @@ defmodule Edgehog.MultitenantResource do
   @custom_opts [:tenant_id_in_primary_key?, :fga_type, :fga_id_attribute]
 
   defmacro __using__(opts) do
-    fga_type = Keyword.get(opts, :fga_type)
-    fga_id_attribute = Keyword.get(opts, :fga_id_attribute, :id)
-    fga_tenancy? = not is_nil(fga_type)
-
     quote do
       use Ash.Resource,
           unquote(
@@ -66,18 +62,6 @@ defmodule Edgehog.MultitenantResource do
       multitenancy do
         strategy :attribute
         attribute :tenant_id
-      end
-
-      if unquote(fga_tenancy?) do
-        changes do
-          change {Edgehog.Auth.Changes.WriteTenant,
-                  obj: unquote(fga_type), obj_id: unquote(fga_id_attribute)},
-                 on: :create
-
-          change {Edgehog.Auth.Changes.EraseTenant,
-                  obj: unquote(opts[:fga_type]), obj_id: unquote(opts[:fga_id_attribute])},
-                 on: :destroy
-        end
       end
 
       postgres do
