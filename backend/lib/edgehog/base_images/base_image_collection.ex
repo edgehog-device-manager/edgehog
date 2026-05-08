@@ -21,10 +21,9 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
   use Edgehog.MultitenantResource,
     domain: Edgehog.BaseImages,
     extensions: [
-      AshGraphql.Resource
-    ],
-    fga_type: :base_image_collection,
-    fga_id_attribute: :handle
+      AshGraphql.Resource,
+      Ash.FGA
+    ]
 
   alias Edgehog.Validations
 
@@ -35,6 +34,11 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     A base image collection represents the collection of all Base Images that \
     can run on a specific System Model.
     """
+  end
+
+  fga do
+    type :base_image_collection
+    id(:handle)
   end
 
   graphql do

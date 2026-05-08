@@ -22,8 +22,14 @@ defmodule Edgehog.Containers.Application do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource],
-    fga_type: :application
+    extensions: [
+      AshGraphql.Resource,
+      Ash.FGA
+    ]
+
+  fga do
+    type :application
+  end
 
   graphql do
     type :application

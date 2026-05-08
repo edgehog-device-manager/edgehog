@@ -22,8 +22,10 @@ defmodule Edgehog.Containers.Container do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource],
-    fga_type: :container
+    extensions: [
+      AshGraphql.Resource,
+      Ash.FGA
+    ]
 
   alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Container.EnvEncoding
@@ -35,6 +37,11 @@ defmodule Edgehog.Containers.Container do
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
   alias Edgehog.Containers.Validations
+
+  fga do
+    type :container
+    exclude([:image])
+  end
 
   graphql do
     type :container

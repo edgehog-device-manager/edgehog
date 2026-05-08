@@ -25,7 +25,8 @@ defmodule Edgehog.Devices.Device do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [
-      AshGraphql.Resource
+      AshGraphql.Resource,
+      Ash.FGA
     ],
     authorizers: [Ash.Policy.Authorizer]
 
@@ -45,8 +46,6 @@ defmodule Edgehog.Devices.Device do
   alias Edgehog.Devices.Device.NetworkInterface
   alias Edgehog.Devices.Device.Types
 
-  @fga_type :device
-
   resource do
     description """
     Denotes a device instance that connects and exchanges data.
@@ -56,6 +55,12 @@ defmodule Edgehog.Devices.Device do
     A Device also exposes info about its connection status and some sets of \
     data read by its operating system.
     """
+  end
+
+  fga do
+    type :device
+    id(:device_id)
+    exclude([:system_model_part_number])
   end
 
   policies do
@@ -713,16 +718,6 @@ defmodule Edgehog.Devices.Device do
 
   identities do
     identity :unique_realm_device_id, [:device_id, :realm_id]
-  end
-
-  changes do
-    change {Edgehog.Auth.Changes.WriteRelation,
-            relationship: :realm,
-            destination_id: :name,
-            source_type: @fga_type,
-            source_id: :device_id} do
-      on [:create]
-    end
   end
 
   postgres do

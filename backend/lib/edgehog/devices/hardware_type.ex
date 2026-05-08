@@ -23,10 +23,9 @@ defmodule Edgehog.Devices.HardwareType do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [
-      AshGraphql.Resource
-    ],
-    fga_type: :hardware_type,
-    fga_id_attribute: :handle
+      AshGraphql.Resource,
+      Ash.FGA
+    ]
 
   alias Edgehog.Validations
 
@@ -39,6 +38,11 @@ defmodule Edgehog.Devices.HardwareType do
     different part number) which are functionally equivalent from the device
     point of view.
     """
+  end
+
+  fga do
+    type :hardware_type
+    id(:handle)
   end
 
   graphql do

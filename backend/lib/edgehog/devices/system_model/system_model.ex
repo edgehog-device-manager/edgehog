@@ -21,10 +21,9 @@ defmodule Edgehog.Devices.SystemModel do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [
-      AshGraphql.Resource
-    ],
-    fga_type: :system_model,
-    fga_id_attribute: :handle
+      AshGraphql.Resource,
+      Ash.FGA
+    ]
 
   alias Edgehog.Devices.SystemModel.Changes
   alias Edgehog.Devices.SystemModel.Validations
@@ -39,6 +38,11 @@ defmodule Edgehog.Devices.SystemModel do
     embedded chips but having the same enclosure and the same functionality).
     Each SystemModel must be associated to a specific HardwareType.
     """
+  end
+
+  fga do
+    type :system_model
+    id(:handle)
   end
 
   graphql do

@@ -22,12 +22,15 @@ defmodule Edgehog.Containers.Network do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource],
-    fga_type: :network,
-    fga_id_attribute: :label
+    extensions: [AshGraphql.Resource, Ash.FGA]
 
   alias Edgehog.Containers.ContainerNetwork
   alias Edgehog.Containers.Validations
+
+  fga do
+    type :network
+    id(:label)
+  end
 
   graphql do
     type :network
