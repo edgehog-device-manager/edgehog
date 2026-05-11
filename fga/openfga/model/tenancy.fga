@@ -1,0 +1,48 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+  
+module tenancy
+
+## ---------------------------------------------------------------------------
+## TENANT  (top-level container for all non-device resources)
+##
+## Tenant-level relations grant blanket access to all resources of a type
+## within the tenant (e.g. "can create system models", "can view all volumes").
+##
+## These are intentionally kept as flat assignable relations on the tenant
+## object so that application code can check:
+##   Check(user, "can_create_system_model", tenant:<id>)
+##   Check(user, "can_view_all_system_models", tenant:<id>)
+##   … etc.
+##
+## Individual resource objects still carry their own relations for per-resource
+## grants (whitelist / blacklist patterns).
+## ---------------------------------------------------------------------------
+
+type tenant
+  relations
+    define owner:       [user]
+    define admin:       [user]
+    define editor:      [user]
+    define viewer:      [user]
+    define can_view:    viewer or editor or admin or owner
+    define can_edit:    editor or admin or owner
+    define is_admin:    admin or owner
+    define is_owner:    owner

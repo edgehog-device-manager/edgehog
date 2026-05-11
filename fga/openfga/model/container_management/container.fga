@@ -1,0 +1,54 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+module container
+
+## ---------------------------------------------------------------------------
+## CONTAINER  (tenant-wide, Applications domain)
+## ---------------------------------------------------------------------------
+
+type container
+  relations
+    define tenant: [tenant]
+
+    define owner:  [user]
+    define admin:  [user]
+    define editor: [user]
+    define viewer: [user]
+    define deleter: [user]
+    define blacklisted: [user] or container_blacklisted from tenant
+
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
+
+extend type tenant
+  relations
+    define container_blacklisted: [user]
+
+    define container_creator: [user]
+    define container_viewer:  [user]
+    define container_editor:  [user]
+    define container_deleter: [user]
+
+    define can_create_container:  (container_creator or container_editor or is_admin) but not container_blacklisted
+    define can_view_all_containers:   (container_viewer or container_editor or container_deleter) but not container_blacklisted
+    define can_edit_all_containers: container_editor but not container_blacklisted
+    define can_delete_all_containers: container_deleter but not container_blacklisted
