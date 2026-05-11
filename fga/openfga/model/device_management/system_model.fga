@@ -1,0 +1,66 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+module system_model
+
+## ---------------------------------------------------------------------------
+## SYSTEM MODEL  (tenant-wide resource)
+##
+## Assignable relations:
+##   viewer  – can view a specific system model
+##   editor  – can update a specific system model
+##   deleter – can delete a specific system model
+##   tenant_viewer  – (on tenant) can view all system models
+##   tenant_editor  – (on tenant) can update all system models
+##   tenant_deleter – (on tenant) can delete all system models
+##   tenant_creator – (on tenant) can create new system models
+##
+## Note: "view all" / "update all" / "delete all" and "create" are tenant-level
+##       operations and are expressed via the `tenant` type above.
+## ---------------------------------------------------------------------------
+
+type system_model
+  relations
+    define tenant:  [tenant]
+
+    define owner:   [user]
+    define admin:   [user]
+    define viewer:  [user]
+    define editor:  [user]
+    define deleter: [user]
+    define blacklisted: [user] or system_model_blacklisted from tenant
+
+    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
+    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
+    define can_delete: (deleter or admin or owner or can_edit from tenant) but not blacklisted
+
+extend type tenant
+  relations
+    define system_model_blacklisted: [user]
+
+    define system_model_creator: [user]
+    define system_model_viewer:  [user]
+    define system_model_editor:  [user]
+    define system_model_deleter: [user]
+
+    define can_create_system_model:      (system_model_creator or system_model_editor) but not system_model_blacklisted
+    define can_view_all_system_models:   (system_model_viewer or system_model_editor or system_model_creator or system_model_deleter) but not system_model_blacklisted
+    define can_edit_all_system_models: system_model_editor but not system_model_blacklisted
+    define can_delete_all_system_models: system_model_deleter but not system_model_blacklisted
