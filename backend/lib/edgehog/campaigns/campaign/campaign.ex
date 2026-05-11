@@ -184,6 +184,8 @@ defmodule Edgehog.Campaigns.Campaign do
     destroy :destroy do
       description "Deletes a Campaign"
       primary? true
+
+      require_atomic? false
     end
   end
 

@@ -63,4 +63,11 @@ defmodule Edgehog.Auth.Providers.None do
     # Result actually not important here
     {:ok, nil}
   end
+
+  @impl Behaviour
+  def delete(tuple, _context) do
+    Logger.debug("Deleting tuple from the service", tuple: tuple)
+
+    {:ok, nil}
+  end
 end

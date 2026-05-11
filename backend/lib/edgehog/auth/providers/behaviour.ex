@@ -48,6 +48,18 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   @callback write(tuple :: fga_tuple(), context :: context()) :: {:ok, term()} | {:error, term()}
 
   @doc """
+  Delete a tuple from the provider.
+
+  - tuple :: the fga tuple, composed of `subject`, `relationship` and `object`
+  - context :: the context from `init_context`
+
+  A delete can return
+  - {:ok, result}   :: if the delete was successful
+  - {:error, error} :: if some error was encountered while deleting
+  """
+  @callback delete(tuple :: fga_tuple(), context :: context()) :: {:ok, term()} | {:error, term()}
+
+  @doc """
   A check call checks a tuple against the provider
 
   - subj :: is some id of the person making the request, ideally a OpenID Connect UUID

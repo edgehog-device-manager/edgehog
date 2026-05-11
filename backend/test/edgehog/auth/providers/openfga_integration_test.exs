@@ -82,6 +82,47 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
     end
   end
 
+  describe "delete/2" do
+    setup do
+      config = Edgehog.Config.authz_config!()[:config]
+
+      {:ok, ctx} = OpenFGA.init_context(config)
+
+      %{context: ctx}
+    end
+
+    test "Deletes correct tuples", %{context: context} do
+      opts = [
+        subj_type: "user",
+        subj_id: System.unique_integer([:positive]),
+        rel: "owner",
+        obj_type: "tenant",
+        obj_id: "test"
+      ]
+
+      tuple = TupleFixtures.tuple(opts)
+      {:ok, _} = OpenFGA.write(tuple, context)
+
+      assert {:ok, _} = OpenFGA.delete(tuple, context)
+    end
+
+    test "is invoked correctly after operations with Ash", %{context: context} do
+      tenant = tenant_fixture()
+      tenant_fga_id = "tenant:#{tenant.slug}"
+      realm = realm_fixture(tenant: tenant)
+
+      assert {:ok, %{objects: [object]}} =
+               OpenFGA.list_objects({tenant_fga_id, "tenant", "realm"}, context)
+
+      assert "realm:#{realm.name}" == object
+
+      Ash.destroy!(realm, tenant: tenant)
+
+      assert {:ok, %{objects: []}} =
+               OpenFGA.list_objects({tenant_fga_id, "tenant", "realm"}, context)
+    end
+  end
+
   describe "check/2" do
     setup do
       config = Edgehog.Config.authz_config!()[:config]
