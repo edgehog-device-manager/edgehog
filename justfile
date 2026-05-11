@@ -154,7 +154,7 @@ _ensure-astarte-running:
 [private]
 _edgehog-dev-backend: 
     #!/usr/bin/env bash
-    @echo "🚀 Initializing Edgehog backend in dev environment..."
+    echo "🚀 Initializing Edgehog backend in dev environment..."
     export EDGEHOG_IP=$(docker network inspect astarte --format="{{{{(index .IPAM.Config 0).Gateway}}")
     export SEEDS_REALM_PRIVATE_KEY_FILE=./priv/repo/seeds/keys/realm_private.pem
     export SEEDS_TENANT_PRIVATE_KEY_FILE=./priv/repo/seeds/keys/tenant_private.pem
@@ -441,6 +441,12 @@ avoid-nitpick:
     dprint fmt
     typos -w
     @echo "🤓 everything should be good now."
+
+test-openfga:
+    @echo "Compiling the model into json"
+    (fga model transform --file fga/openfga/model.mod --input-format=modular --output-format=json > fga/openfga/model.json)
+    @echo "Testing the model"
+    (fga model test --tests fga/openfga/tests/*)
 
 # Show available recipes with descriptions
 help:
