@@ -47,7 +47,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       openfga:
-        image: openfga/openfga:v1.15.0
+        image: openfga/openfga:v1.15.1
         command: run
         ports:
           - 8080:8080
@@ -57,7 +57,7 @@ jobs:
       - name: "Setup jq"
         uses: dcarbone/install-jq-action@v3
       - name: Install OpenFGA cli
-        uses: jaxxstorm/action-install-gh-release@v1.11.0
+        uses: jaxxstorm/action-install-gh-release@cd6b2b78ad38bdd294341cda064ec0692b06215b # v1.14.0
         with:
           repo: openfga/cli
           cache: enable
@@ -68,7 +68,7 @@ jobs:
           cat store_response.json
           store_id=$(jq -r '.store.id' store_response.json)
           echo "store_id=$store_id" >> $GITHUB_OUTPUT
-      - uses: team-alembic/staple-actions/actions/mix-task@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
+      - uses: team-alembic/staple-actions/actions/mix-task@6ea0d8a51c3c97a530d3c34cfb8ab9c15a1de4a1 # main
         with:
           mix-env: test
           working-directory: backend

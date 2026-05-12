@@ -40,7 +40,7 @@ jobs:
         run: |
           cache_prefix="dialyzer-$(awk '/^(erlang|elixir) / { print $2 }' ../.tool-versions | tr '\n' '-' | sed 's/-$//')"
           echo "prefix=$cache_prefix" >> "$GITHUB_OUTPUT"
-      - uses: team-alembic/staple-actions/actions/mix-dialyzer@41b1e46995448f976551fedad3ef6bf6ba7df873 # main
+      - uses: team-alembic/staple-actions/actions/mix-dialyzer@6ea0d8a51c3c97a530d3c34cfb8ab9c15a1de4a1 # main
         with:
           working-directory: backend
           mix-env: test
