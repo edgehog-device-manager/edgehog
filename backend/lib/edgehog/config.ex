@@ -103,7 +103,7 @@ defmodule Edgehog.Config do
   Possible values are: none, openfga
   """
   app_env :authz_provider, :edgehog, :authz_provider,
-    os_env: "AUTHZ_PROVIDER",
+    os_env: "EDGEHOG_AUTHZ_PROVIDER",
     type: AuthzProvider,
     default: None
 
@@ -112,7 +112,7 @@ defmodule Edgehog.Config do
   Defaults to `localhost:8081`
   """
   app_env :openfga_grpc_endpoint, :edgehog, :openfga_grpc_endpoint,
-    os_env: "OPENFGA_GRPC_ENDPOINT",
+    os_env: "EDGEHOG_OPENFGA_GRPC_ENDPOINT",
     type: :binary,
     default: "localhost:8081"
 
@@ -120,14 +120,14 @@ defmodule Edgehog.Config do
   OpenFGA store id. A store in OpenFGA has a unique id associated.
   """
   app_env :openfga_store_id, :edgehog, :openfga_store_id,
-    os_env: "OPENFGA_STORE_ID",
+    os_env: "EDGEHOG_OPENFGA_STORE_ID",
     type: :binary
 
   @envdoc """
   OpenFGA authorization model id. Each model written in OpenFGA has a unique id associated.
   """
   app_env :openfga_auth_model_id, :edgehog, :openfga_auth_model_id,
-    os_env: "OPENFGA_AUTH_MODEL_ID",
+    os_env: "EDGEHOG_OPENFGA_AUTH_MODEL_ID",
     type: :binary
 
   @doc """

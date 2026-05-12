@@ -95,8 +95,8 @@ services:
           tar -xvzf /tmp/fga.tar.gz -C /bin
           chmod +x /bin/fga
           fga store create --model /openfga/fga.mod --format modular --api-url 'http://openfga:8080' > /store-out
-          cat /store-out | jq -r '"export OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
-          cat /store-out | jq -r '"export OPENFGA_AUTH_MODEL_ID=\(.model.authorization_model_id)"' >> /fga-env/.env
+          cat /store-out | jq -r '"export EDGEHOG_OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
+          cat /store-out | jq -r '"export EDGEHOG_OPENFGA_AUTH_MODEL_ID=\(.model.authorization_model_id)"' >> /fga-env/.env
           cat /fga-env/.env
 
   edgehog-backend:
@@ -122,8 +122,8 @@ services:
       EDGEHOG_FORWARDER_PORT: 80
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
       ADMIN_JWT_PUBLIC_KEY_PATH: /keys/admin_public.pem
-      AUTHZ_PROVIDER: openfga
-      OPENFGA_GRPC_ENDPOINT: openfga:8081
+      EDGEHOG_AUTHZ_PROVIDER: openfga
+      EDGEHOG_OPENFGA_GRPC_ENDPOINT: openfga:8081
     restart: on-failure
     entrypoint: ["/bin/sh", "-c"]
     command: [". /fga-env/.env && /app/bin/server", "--"]

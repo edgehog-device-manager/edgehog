@@ -25,7 +25,6 @@ permissions:
 defaults:
   run:
     shell: bash
-    working-directory: backend
 env:
   MIX_ENV: test
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -64,10 +63,12 @@ jobs:
       - name: Setup OpenFGA store
         id: store
         run: |
-          fga store create --model ./priv/fga/model.fga > store_response.json
+          fga store create --model ./fga/openfga/fga.mod --format modular > store_response.json
           cat store_response.json
           store_id=$(jq -r '.store.id' store_response.json)
+          auth_model_id=$(jq -r '.model.authorization_model_id' store_response.json)
           echo "store_id=$store_id" >> $GITHUB_OUTPUT
+          echo "auth_model_id=$auth_model_id" >> $GITHUB_OUTPUT
       - uses: team-alembic/staple-actions/actions/mix-task@6ea0d8a51c3c97a530d3c34cfb8ab9c15a1de4a1 # main
         with:
           mix-env: test
@@ -76,6 +77,7 @@ jobs:
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
-          AUTHZ_PROVIDER: openfga
-          OPENFGA_GRPC_ENDPOINT: "localhost:8081"
-          OPENFGA_STORE_ID: ${{ steps.store.outputs.store_id }}
+          EDGEHOG_AUTHZ_PROVIDER: openfga
+          EDGEHOG_OPENFGA_GRPC_ENDPOINT: "localhost:8081"
+          EDGEHOG_OPENFGA_STORE_ID: ${{ steps.store.outputs.store_id }}
+          EDGEHOG_OPENFGA_AUTH_MODEL_ID: ${{ steps.store.outputs.auth_model_id }}

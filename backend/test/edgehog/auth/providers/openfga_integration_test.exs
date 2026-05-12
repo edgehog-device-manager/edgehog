@@ -25,9 +25,9 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
   These tests have as prerequisite a running instance of OpenFGA and environment
   variables properly set:
 
-  - OPENFGA_GRPC_ENDPOINT :: with the openfga grpc endpoint (usually localhost:8081 works)
-  - OPENFGA_STORE_ID      :: with the store id configured with the model. Check OpenFGA docs on how to properly setup a store
-  - AUTHZ_PROVIDER        :: must be openfga for these tests to work
+  - EDGEHOG_OPENFGA_GRPC_ENDPOINT :: with the openfga grpc endpoint (usually localhost:8081 works)
+  - EDGEHOG_OPENFGA_STORE_ID      :: with the store id configured with the model. Check OpenFGA docs on how to properly setup a store
+  - EDGEHOG_AUTHZ_PROVIDER        :: must be openfga for these tests to work
   """
 
   use Edgehog.Auth.AuthzCase, async: true

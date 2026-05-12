@@ -179,8 +179,8 @@ _edgehog-dev-backend:
     export EDGEHOG_FORWARDER_PORT=80
     export EDGEHOG_FORWARDER_SECURE_SESSIONS="false"
     export ADMIN_JWT_PUBLIC_KEY_PATH=./priv/repo/seeds/keys/admin_public.pem
-    export AUTHZ_PROVIDER=openfga
-    export OPENFGA_GRPC_ENDPOINT="http://grpc.openfga.edgehog.localhost"
+    export EDGEHOG_AUTHZ_PROVIDER=openfga
+    export EDGEHOG_OPENFGA_GRPC_ENDPOINT="http://grpc.openfga.edgehog.localhost"
     docker pull busybox
     docker wait openfga-init || true
     eval $(docker run --rm -v edgehog_fga-env:/vol busybox cat /vol/.env)
