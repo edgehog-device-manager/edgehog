@@ -94,8 +94,9 @@ services:
           wget -O /tmp/fga.tar.gz "https://github.com/openfga/cli/releases/download/v0.7.13/fga_0.7.13_linux_amd64.tar.gz"
           tar -xvzf /tmp/fga.tar.gz -C /bin
           chmod +x /bin/fga
-          fga store create --model /openfga/fga.mod --format modular --api-url 'http://openfga:8080' \
-            | jq -r '"export OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
+          fga store create --model /openfga/fga.mod --format modular --api-url 'http://openfga:8080' > /store-out
+          cat /store-out | jq -r '"export OPENFGA_STORE_ID=\(.store.id)"' > /fga-env/.env
+          cat /store-out | jq -r '"export OPENFGA_AUTH_MODEL_ID=\(.model.authorization_model_id)"' >> /fga-env/.env
           cat /fga-env/.env
 
   edgehog-backend:

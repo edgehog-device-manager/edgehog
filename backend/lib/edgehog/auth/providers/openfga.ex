@@ -44,7 +44,11 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
   end
 
   @impl Behaviour
-  def check({subj, rel, obj}, %{channel: channel, store_id: store_id}) do
+  def check({subj, rel, obj}, %{
+        channel: channel,
+        store_id: store_id,
+        auth_model_id: auth_model_id
+      }) do
     tuple = %Openfga.V1.CheckRequestTupleKey{
       user: subj,
       relation: rel,
@@ -53,6 +57,7 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
 
     request = %Openfga.V1.CheckRequest{
       store_id: store_id,
+      authorization_model_id: auth_model_id,
       tuple_key: tuple
     }
 
@@ -62,9 +67,14 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
   end
 
   @impl Behaviour
-  def list_objects({subj, rel, type}, %{channel: channel, store_id: store_id}) do
+  def list_objects({subj, rel, type}, %{
+        channel: channel,
+        store_id: store_id,
+        auth_model_id: auth_model_id
+      }) do
     request = %Openfga.V1.ListObjectsRequest{
       store_id: store_id,
+      authorization_model_id: auth_model_id,
       type: type,
       relation: rel,
       user: subj
@@ -74,9 +84,14 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
   end
 
   @impl Behaviour
-  def stream_list_objects({subj, rel, type}, %{channel: channel, store_id: store_id}) do
+  def stream_list_objects({subj, rel, type}, %{
+        channel: channel,
+        store_id: store_id,
+        auth_model_id: auth_model_id
+      }) do
     request = %Openfga.V1.StreamedListObjectsRequest{
       store_id: store_id,
+      authorization_model_id: auth_model_id,
       type: type,
       relation: rel,
       user: subj
@@ -86,7 +101,11 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
   end
 
   @impl Behaviour
-  def write({subj, rel, obj}, %{channel: channel, store_id: store_id}) do
+  def write({subj, rel, obj}, %{
+        channel: channel,
+        store_id: store_id,
+        auth_model_id: auth_model_id
+      }) do
     tuple = %Openfga.V1.TupleKey{
       user: subj,
       relation: rel,
@@ -100,6 +119,7 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
 
     request = %Openfga.V1.WriteRequest{
       store_id: store_id,
+      authorization_model_id: auth_model_id,
       writes: to_write
     }
 

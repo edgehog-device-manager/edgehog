@@ -123,6 +123,13 @@ defmodule Edgehog.Config do
     os_env: "OPENFGA_STORE_ID",
     type: :binary
 
+  @envdoc """
+  OpenFGA authorization model id. Each model written in OpenFGA has a unique id associated.
+  """
+  app_env :openfga_auth_model_id, :edgehog, :openfga_auth_model_id,
+    os_env: "OPENFGA_AUTH_MODEL_ID",
+    type: :binary
+
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
   """
@@ -234,6 +241,7 @@ defmodule Edgehog.Config do
 
     [
       endpoint: openfga_grpc_endpoint!(),
+      auth_model_id: openfga_auth_model_id!(),
       store_id: store_id
     ]
   end

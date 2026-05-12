@@ -78,7 +78,8 @@ defmodule Edgehog.Auth.Providers.OpenFGATest do
   defp localhost_config do
     [
       endpoint: "localhost:8081",
-      store_id: "some-store-id"
+      store_id: "some-store-id",
+      auth_model_id: "some-auth-model-id"
     ]
   end
 end
