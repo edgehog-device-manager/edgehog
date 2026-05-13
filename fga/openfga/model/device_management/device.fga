@@ -66,7 +66,7 @@ type device
     ## Computed permissions
     define can_view: (viewer or editor or admin or owner or can_view_devices from realm) but not blacklisted
     ### Tag editing requires view + explicit grant (guard: can_view; see type realm)
-    define can_edit_tags: (tag_editor or editor or admin or owner or can_edit_devices_tags from realm) but not blacklisted
+    define can_edit_tags: (tag_editor or editor or admin or owner or can_edit_device_tags from realm) but not blacklisted
     ### do these also require view + explicit grant?
     define can_rename: (renamer or editor or admin or owner or can_rename_devices from realm or updater or can_update_devices from realm) but not blacklisted
     define can_access_terminal: (terminal or editor or admin or owner or can_access_terminals from realm) but not blacklisted

@@ -26,12 +26,51 @@ tuples:
   # Alice viewer in realm
   - user: "user:alice"
     relation: "viewer"
+    object: "device:1"
+  - user: "user:bob"
+    relation: "viewer"
     object: "realm:test"
+  - user: "user:cindy"
+    relation: "realm_viewer"
+    object: "tenant:test"
+  - user: "user:daniel"
+    relation: "viewer"
+    object: "tenant:test"
 
 tests:
   - name: Device can be viewed by viewer user
     check:
       - user: "user:alice"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_update: false
+          can_identify: false
+          can_edit: false
+          can_delete: false
+      - user: "user:bob"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_update: false
+          can_identify: false
+          can_edit: false
+          can_delete: false
+      - user: "user:cindy"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_update: false
+          can_identify: false
+          can_edit: false
+          can_delete: false
+      - user: "user:daniel"
         object: "device:1"
         assertions:
           can_view: true
