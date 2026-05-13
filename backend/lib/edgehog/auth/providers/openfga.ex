@@ -105,4 +105,25 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
 
     Stub.write(channel, request)
   end
+
+  @impl Behaviour
+  def delete({subj, rel, obj}, %{channel: channel, store_id: store_id}) do
+    tuple = %Openfga.V1.TupleKeyWithoutCondition{
+      user: subj,
+      relation: rel,
+      object: obj
+    }
+
+    to_write = %Openfga.V1.WriteRequestDeletes{
+      tuple_keys: [tuple],
+      on_missing: "error"
+    }
+
+    request = %Openfga.V1.WriteRequest{
+      store_id: store_id,
+      deletes: to_write
+    }
+
+    Stub.write(channel, request)
+  end
 end

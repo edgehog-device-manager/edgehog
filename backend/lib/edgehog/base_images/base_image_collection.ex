@@ -78,6 +78,8 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
     destroy :destroy do
       description "Deletes a base image collection."
       primary? true
+
+      require_atomic? false
     end
   end
 

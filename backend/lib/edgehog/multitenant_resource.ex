@@ -69,6 +69,10 @@ defmodule Edgehog.MultitenantResource do
           change {Edgehog.Auth.Changes.WriteTenant,
                   obj: unquote(fga_type), obj_id: unquote(fga_id_attribute)},
                  on: :create
+
+          change {Edgehog.Auth.Changes.EraseTenant,
+                  obj: unquote(opts[:fga_type]), obj_id: unquote(opts[:fga_id_attribute])},
+                 on: :destroy
         end
       end
 

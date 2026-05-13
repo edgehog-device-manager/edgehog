@@ -81,6 +81,8 @@ defmodule Edgehog.Groups.DeviceGroup do
     destroy :destroy do
       description "Deletes a device group."
       primary? true
+
+      require_atomic? false
     end
   end
 

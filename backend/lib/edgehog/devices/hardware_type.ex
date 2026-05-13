@@ -104,6 +104,8 @@ defmodule Edgehog.Devices.HardwareType do
     destroy :destroy do
       description "Deletes a hardware type."
       primary? true
+
+      require_atomic? false
     end
   end
 
