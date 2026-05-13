@@ -19,7 +19,9 @@
 #
 
 defmodule Edgehog.Devices.Device do
-  @moduledoc false
+  @moduledoc """
+  Device resource schema and operations.
+  """
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [

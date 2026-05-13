@@ -42,8 +42,8 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   - context :: the context from `init_context`
 
   A write can return
-  - {:ok, result}   :: if the write was successful
-  - {:error, error} :: if some error was encountered while writing
+  - `{:ok, result}`   :: if the write was successful
+  - `{:error, error}` :: if some error was encountered while writing
   """
   @callback write(tuple :: fga_tuple(), context :: context()) :: {:ok, term()} | {:error, term()}
 
@@ -54,8 +54,8 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   - context :: the context from `init_context`
 
   A delete can return
-  - {:ok, result}   :: if the delete was successful
-  - {:error, error} :: if some error was encountered while deleting
+  - `{:ok, result}`   :: if the delete was successful
+  - `{:error, error}` :: if some error was encountered while deleting
   """
   @callback delete(tuple :: fga_tuple(), context :: context()) :: {:ok, term()} | {:error, term()}
 
@@ -69,9 +69,9 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   The context is also provided.
 
   The check can return
-  - {:ok, true}     :: meaning that the subject has the right permission to access the resource
-  - {:ok, false}    :: meaning that the subject has not the right permission to access the resource
-  - {:error, error} :: meaning that there was some error in the request.
+  - `{:ok, true}`     :: meaning that the subject has the right permission to access the resource
+  - `{:ok, false}`    :: meaning that the subject has not the right permission to access the resource
+  - `{:error, error}` :: meaning that there was some error in the request.
 
   For successful returns the new `context` should be provided.
   """
@@ -92,8 +92,8 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   using `stream_list_objects`
 
   The call can return
-  - {:ok, objects()} :: meaning that the user has access to the %{objects: list()} list of objects of type `type`
-  - {:error, error}  :: meaning that there was some error in the request.
+  - `{:ok, objects()}` :: meaning that the user has access to the %{objects: list()} list of objects of type `type`
+  - `{:error, error}`  :: meaning that there was some error in the request.
 
   For successful returns the new `context` should be provided.
   """
@@ -110,8 +110,8 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   The context should also be provided.
 
   The call can return
-  - {:ok, stream(objects())} :: meaning that the user has access to the %{objects: list()} list of objects of type `type`
-  - {:error, error}          :: meaning that there was some error in the request.
+  - `{:ok, stream(objects())}` :: meaning that the user has access to the %{objects: list()} list of objects of type `type`
+  - `{:error, error}`          :: meaning that there was some error in the request.
 
   For successful returns the new `context` should be provided.
   """

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,9 @@
 #
 
 defmodule Edgehog.Config.JWTPublicKeyPEMType do
-  @moduledoc false
+  @moduledoc """
+  JWT public key PEM type for configuration.
+  """
   use Skogsra.Type
 
   alias JOSE.JWK

@@ -19,7 +19,9 @@
 #
 
 defmodule Edgehog.Config.AuthzProvider do
-  @moduledoc false
+  @moduledoc """
+  Authorization provider type for configuration.
+  """
   use Skogsra.Type
 
   @allowed_providers ~w(none openfga)

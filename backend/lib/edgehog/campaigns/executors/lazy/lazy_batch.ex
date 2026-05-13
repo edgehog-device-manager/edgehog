@@ -44,8 +44,6 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
   Callback for handling `:info` messages.
 
   This callback is invoked when the executor receives a message.
-  Implementing modules should pattern match on the message and return
-  the same result type as `GenStateMachine.handle_event/4`.
   """
   @callback handle_info(message :: term(), state :: atom(), data :: %Data{}) ::
               :gen_statem.event_handler_result(:state_enter)
