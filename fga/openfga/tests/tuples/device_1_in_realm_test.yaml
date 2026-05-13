@@ -17,27 +17,12 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: "Test device view"
-model_file: "../fga.mod"
-tuple_files:
-  - "./tuples/device_1_in_realm_test.yaml"
-
-tuples:
-  # Alice viewer in realm
-  - user: "user:alice"
-    relation: "viewer"
-    object: "realm:test"
-
-tests:
-  - name: Device can be viewed by viewer user
-    check:
-      - user: "user:alice"
-        object: "device:1"
-        assertions:
-          can_view: true
-          can_edit_tags: false
-          can_rename: false
-          can_update: false
-          can_identify: false
-          can_edit: false
-          can_delete: false
+# tenant: test
+# realm: test
+- user: "tenant:test"
+  relation: "tenant"
+  object: "realm:test"
+# device:1 in realm test
+- user: "realm:test"
+  relation: "realm"
+  object: "device:1"
