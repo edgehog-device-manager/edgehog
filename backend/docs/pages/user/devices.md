@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021 - 2025 SECO Mind Srl
+  Copyright 2021 - 2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -145,6 +145,19 @@ Depending on the data exposed by the Device, the coordinates can be estimated fr
 
 Based on the available data, Edgehog's geolocation modules try to find to best estimate by relying
 on the most up-to-date info and using the ones that provide the most accuracy.
+
+### File Management
+
+This section allows you to manage files on a Device. Users can upload, download, and delete files directly from a Device with the use of a [Repository](overview_file_management.html#repository) or without one.
+
+![Device File Management Screenshot](assets/device_file_management.png)
+
+For more information about file management, including repository-based operations, see the
+[File Management](overview_file_management.html) documentation. Specific are available for:
+
+- [Downloading files to devices](overview_file_management.html#file-download-requests)
+- [Uploading files from devices](overview_file_management.html#file-upload-requests)
+- [Deleting files from devices](overview_file_management.html#file-delete-requests)
 
 ### Applications
 

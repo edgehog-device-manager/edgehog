@@ -171,6 +171,7 @@ defmodule Edgehog.MixProject do
         Introduction: ~r/intro/,
         "User Guide": ~r"/user/",
         "OTA Updates": ~r"/ota_updates/",
+        "File Management": ~r"/file_management/",
         "Containers management": ~r"/containers/",
         Architecture: ~r"/architecture/",
         "Admin Guide": ~r"/admin/",

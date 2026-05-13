@@ -37,6 +37,7 @@ From hardware-independent monitoring to remote container management, Edgehog all
 - **Docker Application Management:** Remotely deploy, start, stop, and update Docker containers on your devices.
 - **Geolocation:** Automatically geolocate devices using GPS data, nearby WiFi signals, or IP-based location services.
 - **GraphQL API:** Fully programmable platform. Every action available in the frontend can be performed via our GraphQL API.
+- **File Management**: Upload, download, and delete files on devices through repositories or manual operations
 
 Edgehog is built on top of [Astarte](https://docs.astarte-platform.org/), the Open Source IoT platform. It uses Astarte for secure device communication (MQTT) and data orchestration.
 

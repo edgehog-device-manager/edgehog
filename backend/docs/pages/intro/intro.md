@@ -54,6 +54,12 @@ An open-source IoT device fleet management platform built on [Astarte](https://g
 </div>
 </div>
 
+<div class="feature-card">
+<div class="card-icon" style="background: #eeedfe;">📁</div>
+<h3>File Management</h3>
+<p>Upload, download, and delete files on devices through repositories or manual operations.</p>
+</div>
+
 ## API reference
 
 ### Admin REST APIs
