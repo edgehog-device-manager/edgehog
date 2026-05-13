@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.DevicesFixtures
+  import Edgehog.FilesFixtures
 
   alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.FileUploadRequest.RequestData
@@ -75,6 +76,90 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
       assert normalize_json_map(file_upload_request["httpHeaders"]) == %{"X-Test" => "1"}
 
       assert file_upload_request["device"]["deviceId"]
+    end
+
+    test "creates storage file upload request with decoded source id", %{tenant: tenant} do
+      expect(StorageMock, :create_presigned_urls, fn path ->
+        assert String.contains?(path, "uploads/tenants/#{tenant.tenant_id}/file_upload_requests/")
+
+        {:ok,
+         %{
+           put_url: "http://example.test/upload",
+           get_url: "http://example.test/download"
+         }}
+      end)
+
+      file_download_request = manual_file_download_request_fixture(tenant: tenant)
+      encoded_source = AshGraphql.Resource.encode_relay_id(file_download_request)
+
+      expect(FileUploadRequestMock, :request_upload, fn _client, _device_id, request_data ->
+        assert %RequestData{source: source, sourceType: :storage} = request_data
+        assert source == file_download_request.id
+        :ok
+      end)
+
+      result =
+        create_file_upload_request_mutation(
+          tenant: tenant,
+          input: %{
+            "sourceType" => "STORAGE",
+            "source" => encoded_source,
+            "encoding" => "gzip",
+            "progressTracked" => true
+          }
+        )
+
+      file_upload_request = extract_result!(result, "createFileUploadRequest")
+
+      assert file_upload_request["source"] == file_download_request.id
+      assert file_upload_request["sourceType"] == "STORAGE"
+    end
+
+    test "creates streaming file upload request with empty source", %{tenant: tenant} do
+      expect(StorageMock, :create_presigned_urls, fn path ->
+        assert String.contains?(path, "uploads/tenants/#{tenant.tenant_id}/file_upload_requests/")
+
+        {:ok,
+         %{
+           put_url: "http://example.test/upload",
+           get_url: "http://example.test/download"
+         }}
+      end)
+
+      expect(FileUploadRequestMock, :request_upload, fn _client, _device_id, request_data ->
+        assert %RequestData{source: "", sourceType: :streaming} = request_data
+        :ok
+      end)
+
+      result =
+        create_file_upload_request_mutation(
+          tenant: tenant,
+          input: %{
+            "sourceType" => "STREAMING",
+            "source" => "",
+            "encoding" => "gzip",
+            "progressTracked" => true
+          }
+        )
+
+      file_upload_request = extract_result!(result, "createFileUploadRequest")
+
+      assert file_upload_request["source"] == nil
+      assert file_upload_request["sourceType"] == "STREAMING"
+    end
+
+    test "returns error for invalid storage source id", %{tenant: tenant} do
+      result =
+        create_file_upload_request_mutation(
+          tenant: tenant,
+          input: %{
+            "sourceType" => "STORAGE",
+            "source" => "not-a-relay-id"
+          }
+        )
+
+      assert %{message: "invalid storage file id"} =
+               extract_error!(result, "createFileUploadRequest")
     end
 
     test "returns error when device does not exist", %{tenant: tenant} do

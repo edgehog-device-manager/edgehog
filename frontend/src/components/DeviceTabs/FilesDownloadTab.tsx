@@ -78,10 +78,15 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
     storageFileDownloadRequests: fileDownloadRequests(
       first: $first
       after: $after
-      filter: { destinationType: { eq: STORAGE } }
+      filter: {
+        destinationType: { eq: STORAGE }
+        status: { eq: COMPLETED }
+        deleted: { eq: false }
+      }
     ) {
       edges {
         node {
+          id
           pathOnDevice
           fileName
         }
@@ -321,34 +326,20 @@ const FilesDownloadTab = ({
     return options;
   }, [data.fileTransferCapabilities?.targets, intl]);
 
-  const storageSourceOptions: StorageSourceOption[] = useMemo(() => {
-    const uniqueStorageIds = new Map<string, string>();
-
-    data.storageFileDownloadRequests?.edges?.forEach((edge) => {
-      const request = edge?.node;
-
-      if (!request) {
-        return;
-      }
-
-      const storageId = request.pathOnDevice?.trim();
-
-      if (!storageId || uniqueStorageIds.has(storageId)) {
-        return;
-      }
-
-      const label = request.fileName
-        ? `${request.fileName} (${storageId})`
-        : storageId;
-
-      uniqueStorageIds.set(storageId, label);
-    });
-
-    return Array.from(uniqueStorageIds.entries()).map(([value, label]) => ({
-      value,
-      label,
-    }));
-  }, [data.storageFileDownloadRequests]);
+  const storageSourceOptions: StorageSourceOption[] = useMemo(
+    () =>
+      data.storageFileDownloadRequests?.edges?.flatMap((edge) => {
+        const request = edge?.node;
+        if (!request?.id) return [];
+        return [
+          {
+            value: request.id,
+            label: request.fileName || request.id,
+          },
+        ];
+      }) ?? [],
+    [data.storageFileDownloadRequests],
+  );
 
   const supportedEncodings = useMemo(() => {
     const uniqueEncodings = new Set<string>();

@@ -73,6 +73,7 @@ defmodule Edgehog.Files.FileUploadRequest do
                eager_validate_with: Edgehog.Devices
              )
 
+      change Changes.ValidateSource
       change Changes.SetUploadUrl
       change Changes.SendFileUploadRequest
     end

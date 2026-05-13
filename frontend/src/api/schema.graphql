@@ -27,58 +27,24 @@ input ContainerCreateWithNestedDeviceMappingsInput {
 
 input CampaignCampaignMechanismFileDownloadInput {
   """
-  Destination-specific information on where to write the file to.
-  Required when destination_type is :filesystem.
-  """
-  destination: String
-
-  """
-  Optional unix uid of the user owning the file. Set to -1 to use device default.
-  Defaults to -1.
-  """
-  userId: Int
-
-  fileId: ID
-
-  """
-  The maximum number of in progress file downloads. The File Download Campaign will
-  have at most this number of File Download Requests that are started but not yet
-  finished (either successfully or not).
-  """
-  maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  File Download Request lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
-
-  """
-  The number of attempts that have to be tried before giving up on the
-  file download of a specific target (and considering it an error). Note that the
-  file download is retried only if the request doesn't get acknowledged from the
-  device.
-  """
-  requestRetries: Int
-
-  """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the File Download Campaign terminates with
-  a failure.
-  """
-  maxFailurePercentage: Float
-
-  """
   Optional compression type for the file (e.g., "tar.gz").
   Other values are: ['tar.gz']. Defaults to empty string (no compression).
   """
   compression: String
 
   """
-  Optional ttl for how long to keep the file for on the device, if 0 is forever.
-  Defaults to 0.
+  Destination-specific information on where to write the file to.
+  Required when destination_type is :filesystem.
   """
-  ttlSeconds: Int
+  destination: String
+
+  """
+  Device-specific field indicating where the file should be stored.
+  Supported values are: storage, streaming, filesystem.
+  """
+  destinationType: FileDestination
+
+  fileId: ID
 
   """
   Optional unix mode for the file (e.g., 0o644 for readable by all, writable by owner).
@@ -93,10 +59,44 @@ input CampaignCampaignMechanismFileDownloadInput {
   groupId: Int
 
   """
-  Device-specific field indicating where the file should be stored.
-  Supported values are: storage, streaming, filesystem.
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the File Download Campaign terminates with
+  a failure.
   """
-  destinationType: FileDestination
+  maxFailurePercentage: Float
+
+  """
+  The maximum number of in progress file downloads. The File Download Campaign will
+  have at most this number of File Download Requests that are started but not yet
+  finished (either successfully or not).
+  """
+  maxInProgressOperations: Int
+
+  """
+  The number of attempts that have to be tried before giving up on the
+  file download of a specific target (and considering it an error). Note that the
+  file download is retried only if the request doesn't get acknowledged from the
+  device.
+  """
+  requestRetries: Int
+
+  """
+  The timeout (in seconds) Edgehog has to wait before considering a
+  File Download Request lost (and possibly retry). It must be at least 30 seconds.
+  """
+  requestTimeoutSeconds: Int
+
+  """
+  Optional ttl for how long to keep the file for on the device, if 0 is forever.
+  Defaults to 0.
+  """
+  ttlSeconds: Int
+
+  """
+  Optional unix uid of the user owning the file. Set to -1 to use device default.
+  Defaults to -1.
+  """
+  userId: Int
 }
 
 "An object representing the properties of a File Download campaign mechanism."
@@ -181,17 +181,24 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   baseImageId: ID
 
   """
+  This boolean flag determines if the Base Image will be pushed to the
+  Device even if it already has a greater version of the Base Image.
+  """
+  forceDowngrade: Boolean
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress updates. The Update Campaign will have
   at most this number of OTA Operations that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering an OTA
-  Request lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -202,17 +209,10 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Update Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
-
-  """
-  This boolean flag determines if the Base Image will be pushed to the
-  Device even if it already has a greater version of the Base Image.
-  """
-  forceDowngrade: Boolean
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Firmware Upgrade campaign mechanism."
@@ -258,9 +258,12 @@ type FirmwareUpgrade {
 }
 
 input CampaignCampaignMechanismDeploymentUpgradeInput {
-  releaseId: ID
-
-  targetReleaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -269,11 +272,7 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   """
   maxInProgressOperations: Int
 
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
+  releaseId: ID
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -284,11 +283,12 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
+
+  targetReleaseId: ID
 }
 
 "An object representing the properties of a Upgrade deployment campaign mechanism."
@@ -333,7 +333,12 @@ type DeploymentUpgrade {
 }
 
 input CampaignCampaignMechanismDeploymentDeleteInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -342,11 +347,7 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   """
   maxInProgressOperations: Int
 
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
+  releaseId: ID
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -357,11 +358,10 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Delete deployment campaign mechanism."
@@ -401,7 +401,12 @@ type DeploymentDelete {
 }
 
 input CampaignCampaignMechanismDeploymentStopInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -410,11 +415,7 @@ input CampaignCampaignMechanismDeploymentStopInput {
   """
   maxInProgressOperations: Int
 
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
+  releaseId: ID
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -425,11 +426,10 @@ input CampaignCampaignMechanismDeploymentStopInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Stop deployment campaign mechanism."
@@ -469,7 +469,12 @@ type DeploymentStop {
 }
 
 input CampaignCampaignMechanismDeploymentStartInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress operations. The Campaign will
@@ -478,11 +483,7 @@ input CampaignCampaignMechanismDeploymentStartInput {
   """
   maxInProgressOperations: Int
 
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
+  releaseId: ID
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -493,11 +494,10 @@ input CampaignCampaignMechanismDeploymentStartInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Start deployment campaign mechanism."
@@ -537,7 +537,12 @@ type DeploymentStart {
 }
 
 input CampaignCampaignMechanismDeploymentDeployInput {
-  releaseId: ID
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress deployments. The Update Campaign will
@@ -546,11 +551,7 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   """
   maxInProgressOperations: Int
 
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
+  releaseId: ID
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -561,11 +562,10 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Deploy deployment campaign mechanism."
@@ -851,6 +851,20 @@ enum ForwarderSessionStatus {
   CONNECTING
 }
 
+enum FileDeleteRequestStatus {
+  "Deletion completed successfully (response_code = 0)"
+  COMPLETED
+
+  "Deletion failed (response_code != 0 or timeout)"
+  FAILED
+
+  "Request created in database, not yet sent to device"
+  PENDING
+
+  "Request sent to device via Astarte, awaiting response"
+  SENT
+}
+
 enum FileUploadRequestStatus {
   "Transfer completed successfully (response_code = 0)"
   COMPLETED
@@ -1005,6 +1019,9 @@ enum DeviceCapability {
 
   "The device supports running applications using containers."
   CONTAINER_MANAGEMENT
+
+  "The device supports deleting files transferred to the device using file transfer storage"
+  FILE_TRANSFER_DELETE
 
   "The device supports reading files from it."
   FILE_TRANSFER_READ
@@ -1237,6 +1254,8 @@ input BaseImageCollectionFilterHandle {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1253,6 +1272,8 @@ input BaseImageCollectionFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1448,6 +1469,8 @@ input BaseImageFilterUrl {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1464,6 +1487,8 @@ input BaseImageFilterStartingVersionRequirement {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1480,6 +1505,8 @@ input BaseImageFilterVersion {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1698,6 +1725,8 @@ input ContainerVolumeFilterTarget {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1899,6 +1928,8 @@ input DeviceMappingFilterCgroupPermissions {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1915,6 +1946,8 @@ input DeviceMappingFilterPathInContainer {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -1931,6 +1964,8 @@ input DeviceMappingFilterPathOnHost {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2174,6 +2209,8 @@ input VolumeFilterDriver {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2190,6 +2227,8 @@ input VolumeFilterLabel {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2494,6 +2533,8 @@ input NetworkFilterDriver {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2510,6 +2551,8 @@ input NetworkFilterLabel {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2675,6 +2718,8 @@ input ReleaseFilterVersion {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2836,6 +2881,8 @@ input ImageCredentialsFilterUsername {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2852,6 +2899,8 @@ input ImageCredentialsFilterLabel {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -2997,6 +3046,8 @@ input ImageFilterReference {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -3136,6 +3187,8 @@ input DeploymentEventFilterMessage {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -3732,6 +3785,8 @@ input ContainerFilterVolumeDriver {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -3852,6 +3907,8 @@ input ContainerFilterNetworkMode {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -3881,6 +3938,8 @@ input ContainerFilterHostname {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4137,6 +4196,8 @@ input ApplicationFilterDescription {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4153,6 +4214,8 @@ input ApplicationFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4254,6 +4317,8 @@ input SystemModelPartNumberFilterPartNumber {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4423,6 +4488,8 @@ input SystemModelFilterPictureUrl {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4439,6 +4506,8 @@ input SystemModelFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4455,6 +4524,8 @@ input SystemModelFilterHandle {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4618,6 +4689,8 @@ input HardwareTypePartNumberFilterPartNumber {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4765,6 +4838,8 @@ input HardwareTypeFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4781,6 +4856,8 @@ input HardwareTypeFilterHandle {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4973,6 +5050,8 @@ input DeviceFilterPartNumber {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -4989,6 +5068,8 @@ input DeviceFilterSerialNumber {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5005,6 +5086,8 @@ input DeviceFilterLastSeenIp {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5060,6 +5143,8 @@ input DeviceFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5076,6 +5161,8 @@ input DeviceFilterDeviceId {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5142,6 +5229,9 @@ input DeviceFilterInput {
 
   "The existing file upload requests for this device"
   fileUploadRequests: FileUploadRequestFilterInput
+
+  "The existing file delete requests for this device"
+  fileDeleteRequests: FileDeleteRequestFilterInput
 
   applicationDeployments: DeploymentFilterInput
 }
@@ -5286,6 +5376,27 @@ type Device implements Node {
     last: Int
   ): FileUploadRequestConnection!
 
+  "The existing file delete requests for this device"
+  fileDeleteRequests(
+    "How to sort the records in the response"
+    sort: [FileDeleteRequestSortInput]
+
+    "A filter to limit the results"
+    filter: FileDeleteRequestFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): FileDeleteRequestConnection!
+
   applicationDeployments(
     "How to sort the records in the response"
     sort: [DeploymentSortInput]
@@ -5360,6 +5471,154 @@ type Device implements Node {
   systemStatus: SystemStatus
 
   wifiScanResults: [WifiScanResult!]
+}
+
+"The result of the :create_file_delete_request mutation"
+type CreateFileDeleteRequestResult {
+  "The successful result of the mutation"
+  result: FileDeleteRequest
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateFileDeleteRequestInput {
+  "Force the deletion of the file even if it's currently in use, this could cause errors. Default to false."
+  force: Boolean
+
+  deviceId: ID!
+
+  fileDownloadRequestId: ID!
+}
+
+enum FileDeleteRequestSortField {
+  ID
+  FORCE
+  STATUS
+  RESPONSE_CODE
+}
+
+":file_delete_request connection"
+type FileDeleteRequestConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":file_delete_request edges"
+  edges: [FileDeleteRequestEdge!]
+}
+
+":file_delete_request edge"
+type FileDeleteRequestEdge {
+  "Cursor"
+  cursor: String!
+
+  ":file_delete_request node"
+  node: FileDeleteRequest!
+}
+
+input FileDeleteRequestFilterResponseCode {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input FileDeleteRequestFilterStatus {
+  isNil: Boolean
+  eq: FileDeleteRequestStatus
+  notEq: FileDeleteRequestStatus
+  in: [FileDeleteRequestStatus]
+  lessThan: FileDeleteRequestStatus
+  greaterThan: FileDeleteRequestStatus
+  lessThanOrEqual: FileDeleteRequestStatus
+  greaterThanOrEqual: FileDeleteRequestStatus
+  isDistinctFrom: FileDeleteRequestStatus
+  isNotDistinctFrom: FileDeleteRequestStatus
+}
+
+input FileDeleteRequestFilterForce {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input FileDeleteRequestFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input FileDeleteRequestFilterInput {
+  and: [FileDeleteRequestFilterInput!]
+
+  or: [FileDeleteRequestFilterInput!]
+
+  not: [FileDeleteRequestFilterInput!]
+
+  id: FileDeleteRequestFilterId
+
+  "Force the deletion of the file even if it's currently in use, this could cause errors. Default to false."
+  force: FileDeleteRequestFilterForce
+
+  status: FileDeleteRequestFilterStatus
+
+  "Success or error code for the transfer. A 0 code is a success, errors are POSIX errno."
+  responseCode: FileDeleteRequestFilterResponseCode
+
+  "The device associated with this file delete request."
+  device: DeviceFilterInput
+
+  "The file download request that resulted in the file targeted by this delete request"
+  fileDownloadRequest: FileDownloadRequestFilterInput
+}
+
+input FileDeleteRequestSortInput {
+  order: SortOrder
+  field: FileDeleteRequestSortField!
+}
+
+type FileDeleteRequest {
+  id: ID!
+
+  "Force the deletion of the file even if it's currently in use, this could cause errors. Default to false."
+  force: Boolean
+
+  status: FileDeleteRequestStatus
+
+  "Success or error code for the transfer. A 0 code is a success, errors are POSIX errno."
+  responseCode: Int
+
+  "Optional messages for the response"
+  responseMessages: [String!]
+
+  "The device associated with this file delete request."
+  device: Device!
+
+  "The file download request that resulted in the file targeted by this delete request"
+  fileDownloadRequest: FileDownloadRequest!
 }
 
 type file_upload_requests_by_device_result {
@@ -5450,6 +5709,8 @@ input FileUploadRequestFilterResponseMessage {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5518,6 +5779,8 @@ input FileUploadRequestFilterEncoding {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5547,6 +5810,8 @@ input FileUploadRequestFilterSource {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5563,6 +5828,8 @@ input FileUploadRequestFilterUrl {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5746,6 +6013,7 @@ enum FileDownloadRequestSortField {
   PROGRESS_PERCENTAGE
   RESPONSE_CODE
   RESPONSE_MESSAGE
+  DELETED
 }
 
 ":file_download_request connection"
@@ -5769,6 +6037,19 @@ type FileDownloadRequestEdge {
   node: FileDownloadRequest!
 }
 
+input FileDownloadRequestFilterDeleted {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
 input FileDownloadRequestFilterResponseMessage {
   isNil: Boolean
   eq: String
@@ -5781,6 +6062,8 @@ input FileDownloadRequestFilterResponseMessage {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5849,6 +6132,8 @@ input FileDownloadRequestFilterPathOnDevice {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5865,6 +6150,8 @@ input FileDownloadRequestFilterDestination {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5946,6 +6233,8 @@ input FileDownloadRequestFilterEncoding {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5962,6 +6251,8 @@ input FileDownloadRequestFilterDigest {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -5991,6 +6282,8 @@ input FileDownloadRequestFilterFileName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6007,6 +6300,8 @@ input FileDownloadRequestFilterUrl {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6084,6 +6379,9 @@ input FileDownloadRequestFilterInput {
   "Optional message for the response sent by the device."
   responseMessage: FileDownloadRequestFilterResponseMessage
 
+  "Whether the file transferred with this request was deleted from the device"
+  deleted: FileDownloadRequestFilterDeleted
+
   "The device associated with this file download request."
   device: DeviceFilterInput
 
@@ -6154,6 +6452,9 @@ type FileDownloadRequest {
 
   "Optional message for the response sent by the device."
   responseMessage: String
+
+  "Whether the file transferred with this request was deleted from the device"
+  deleted: Boolean
 
   "The device associated with this file download request."
   device: Device!
@@ -6259,6 +6560,8 @@ input RepositoryFilterDescription {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6275,6 +6578,8 @@ input RepositoryFilterHandle {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6291,6 +6596,8 @@ input RepositoryFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6523,6 +6830,8 @@ input FileFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6752,6 +7061,8 @@ input DeviceGroupFilterSelector {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6768,6 +7079,8 @@ input DeviceGroupFilterHandle {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6784,6 +7097,8 @@ input DeviceGroupFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -6916,6 +7231,8 @@ input TagFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -7057,6 +7374,8 @@ input OtaOperationFilterMessage {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -7112,6 +7431,8 @@ input OtaOperationFilterBaseImageUrl {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -7324,6 +7645,8 @@ input ChannelFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -7340,6 +7663,8 @@ input ChannelFilterHandle {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -7844,6 +8169,8 @@ input CampaignFilterName {
   contains: String
   isDistinctFrom: String
   isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
   like: String
   ilike: String
 }
@@ -8462,6 +8789,10 @@ type RootMutationType {
   createFileUploadRequest(
     input: CreateFileUploadRequestInput!
   ): CreateFileUploadRequestResult
+
+  createFileDeleteRequest(
+    input: CreateFileDeleteRequestInput!
+  ): CreateFileDeleteRequestResult
 
   "Updates a device."
   updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult
