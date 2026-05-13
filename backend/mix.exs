@@ -159,7 +159,7 @@ defmodule Edgehog.MixProject do
       main: "intro",
       logo: "docs/images/logo-favicon.png",
       javascript_config_path: "../versions.js",
-      extras: Path.wildcard("docs/pages/*/*.md"),
+      extras: extras(),
       filter_modules: ~r/Edgehog/,
       assets: %{"docs/images/" => "assets", "docs/style/" => "style"},
       before_closing_head_tag: fn
@@ -197,6 +197,43 @@ defmodule Edgehog.MixProject do
         "Other modules": ~r"Edgehog"
       ],
       source_ref: "v#{@version}/backend"
+    ]
+  end
+
+  defp extras do
+    [
+      "docs/pages/intro/intro.md",
+      "docs/pages/user/core_concepts.md",
+      "docs/pages/user/hardware_types.md",
+      "docs/pages/user/system_models.md",
+      "docs/pages/user/devices.md",
+      "docs/pages/user/devices_and_runtime.md",
+      "docs/pages/user/attribute_value_sources.md",
+      "docs/pages/user/groups.md",
+      "docs/pages/user/channels.md",
+      "docs/pages/user/batch_operations.md",
+      "docs/pages/ota_updates/ota_update_concepts.md",
+      "docs/pages/ota_updates/base_images.md",
+      "docs/pages/ota_updates/base_image_collections.md",
+      "docs/pages/ota_updates/update_campaigns.md",
+      "docs/pages/ota_updates/ota_updates.md",
+      "docs/pages/file_management/overview_file_management.md",
+      "docs/pages/file_management/repositories.md",
+      "docs/pages/file_management/files.md",
+      "docs/pages/file_management/file_download_campaigns.md",
+      "docs/pages/containers/core_concepts.md",
+      "docs/pages/containers/volume_management.md",
+      "docs/pages/containers/network_management.md",
+      "docs/pages/containers/image_credentials_management.md",
+      "docs/pages/containers/applications_management.md",
+      "docs/pages/containers/deployment_campaigns.md",
+      "docs/pages/tutorials/edgehog_in_5_minutes.md",
+      "docs/pages/devguide/edgehog_just_in_time.md",
+      "docs/pages/devguide/typos_and_formatting.md",
+      "docs/pages/architecture/overview.md",
+      "docs/pages/integrating/interacting_with_edgehog.md",
+      "docs/pages/integrating/astarte_interfaces.md",
+      "docs/pages/admin/deploying_with_kubernetes.md"
     ]
   end
 
