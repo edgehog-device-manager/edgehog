@@ -1,5 +1,5 @@
 <!---
-  Copyright 2022-2023 SECO Mind Srl
+  Copyright 2022-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -19,7 +19,7 @@ demonstrates the usage of an OTA update mechanism.
 
 ## Managed OTA Updates
 
-Edgehog provides a mechanism to roll-out OTA updates to devices automatically, based on their [System Model](core_concepts.html#system-model) and their membership to specific [Groups](core_concepts-1.html#group).
+Edgehog provides a mechanism to roll-out OTA updates to devices automatically, based on their [System Model](user_core_concepts.html#system-model) and their membership to specific [Groups](user_core_concepts.html#group).
 
 To push updates towards Devices, an Update Campaign must be created. It's important to note that an Update
 Campaign can only send updates for the same Base Image Collection. Special operations, such as
@@ -45,10 +45,10 @@ is verified for fulfillment of Base Image and Roll-out mechanism criteria. For e
 
 ## Manual OTA Updates
 
-As an escape hatch, it's always possible to manually update a [Device](core_concepts.html#device)
+As an escape hatch, it's always possible to manually update a [Device](user_core_concepts.html#device)
 from its page on the Edgehog dashboard (or using the Edgehog GraphQL API).
 
-Note that Manual OTA Updates do not perform any check on the [System Model](core_concepts.html#system-model),
+Note that Manual OTA Updates do not perform any check on the [System Model](user_core_concepts.html#system-model),
 so they can effectively be used to change the System Model of a Device. This also means that the user
 must exercise particular attention to avoid bricking a Device, if the Device does not implement the necessary
 safety checks.

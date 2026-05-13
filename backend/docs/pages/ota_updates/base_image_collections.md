@@ -1,5 +1,5 @@
 <!---
-  Copyright 2023 SECO Mind Srl
+  Copyright 2023-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -7,8 +7,8 @@
 # Base Image Collections
 
 As mentioned in the [OTA Update concepts](ota_update_concepts.html), Base Image Collection represent
-a set of Base Images associated with a specific [System Model](core_concepts.html#system-model) and,
-implicitly via the System Model, with a specific [Hardware Type](core_concepts.html#hardware-types).
+a set of Base Images associated with a specific [System Model](user_core_concepts.html#system-model) and,
+implicitly via the System Model, with a specific [Hardware Type](user_core_concepts.html#hardware-type).
 The mapping relation between Base Image Collection and System Models is 1:1, so a Base Image Collection
 is associated with a single System Model and viceversa.
 

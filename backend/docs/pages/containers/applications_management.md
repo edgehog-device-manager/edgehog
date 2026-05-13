@@ -1,5 +1,5 @@
 <!---
-  Copyright 2025 SECO Mind Srl
+  Copyright 2025-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -60,9 +60,9 @@ Specify the image that will be used to run the container.
   [registry-host[:port]/][image-repo/]image-name[:(tag|digest)]
   ```
 
-  For more details, refer to [Images](core_concepts-2.html#images)
+  For more details, refer to [Images](containers_core_concepts.html#images)
 
-- **Image Credentials** – Select credentials if the image is stored in a private registry. For more details, refer to [Image Credentials](core_concepts-2.html#image_credentials.md)
+- **Image Credentials** – Select credentials if the image is stored in a private registry. For more details, refer to [Image Credentials](containers_core_concepts.html#image-credentials)
 
 #### **Network Configuration**
 
@@ -100,7 +100,6 @@ Set performance and usage restrictions for the container.
 - **Memory**: Defines the maximum amount of **RAM (in bytes)** available to processes in the container. The minimum allowed value is **6 000 000 bytes** (≈6 MiB).
 
 - **Memory Reservation**: A _soft_ memory limit, also specified in **bytes**. It serves as a hint to Docker and the kernel about how much memory the container should typically use.
-
   - It must always be **less than the hard Memory limit**.
   - The container can still use memory up to the hard limit.
   - When the host is under memory pressure, Docker attempts to reclaim memory so that the container stays near or below the reservation value.
@@ -108,9 +107,7 @@ Set performance and usage restrictions for the container.
 - **Memory Swap**: Defines the total amount of **RAM + swap**, in **bytes**. This value only has effect if **Memory** is also set.
 
   **Rules:**
-
   - If **Memory Swap** is **set to a positive integer**:
-
     - **Memory** must also be set.
     - **Memory** = maximum RAM (bytes).
     - **Memory Swap** = total (RAM + swap), in bytes.
@@ -148,7 +145,6 @@ Set performance and usage restrictions for the container.
     → **Unlimited swap**, up to the host’s available swap space.
 
 * **Memory Swappiness**: controls how aggressively the kernel swaps out anonymous memory pages used by a container. It’s a percentage between 0 and 100.
-
   - `0` – turn **off** anonymous page swapping for the container.
   - `100` – allow **all** anonymous pages to be swappable (most aggressive swapping).
   - If not set – the container **inherits** the host’s swappiness value.
@@ -159,7 +155,6 @@ Set performance and usage restrictions for the container.
   - Effective CPU share = `CPU Quota / CPU Period`.
 * **CPU Quota**: sets a **hard upper limit on CPU time** a container can use per CFS period (used with `CPU Period`).
 * **CPU Real-Time Period**: configures the **real‑time scheduler period** for a container, in microseconds. It works together with `CPU Real-Time Runtime` and requires special kernel/daemon setup.
-
   - It sets the **length of the real‑time scheduling period** for a container.
   - `--cpu-rt-runtime` then specifies how many microseconds within that period the container may run at real‑time priority.
   - Both values **cannot exceed** the limits configured on the daemon/parent cgroup, and require the host kernel to support real‑time scheduling with `CONFIG_RT_GROUP_SCHED`.
@@ -167,7 +162,6 @@ Set performance and usage restrictions for the container.
     #### Requirements
 
     To use `--cpu-rt-period`/`--cpu-rt-runtime`:
-
     1. Kernel must have `CONFIG_RT_GROUP_SCHED` enabled.
     2. Docker daemon must be started with real‑time runtime configured, e.g.:
 
@@ -185,7 +179,6 @@ Control container privileges and security-related settings.
 
 - **Privileged Mode** – gives a container almost the same power as the host, bypassing most isolation. Use it only when absolutely necessary.
   Makes these changes for the container:
-
   - Enables **all Linux kernel capabilities** (no capability dropping).
   - Disables the **default seccomp** profile.
   - Disables the **default AppArmor** profile.
@@ -211,7 +204,6 @@ Set runtime behavior and environment variables.
 
 - **Restart Policy** – Define what happens if the container exits.
   Supported policies:
-
   - `No` (default)\
     Don’t automatically restart the container.
 

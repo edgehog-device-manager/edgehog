@@ -1,15 +1,15 @@
 <!---
-  Copyright 2023 - 2025 SECO Mind Srl
+  Copyright 2023-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
 
 # Channels
 
-A Channel is an aggregation of [Groups](core_concepts-1.html#group) that can be targeted in campaigns
+A Channel is an aggregation of [Groups](user_core_concepts.html#group) that can be targeted in campaigns
 (either update or deployment campaigns).
 
-To assign a Device to a specific Channel the device must belong to a [Group](core_concepts-1.html#group)
+To assign a Device to a specific Channel the device must belong to a [Group](user_core_concepts.html#group)
 and that Group has to be assigned to the Target Groups of the Channel.
 
 In Edgehog a Channel has this information associated with it:

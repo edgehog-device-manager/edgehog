@@ -100,7 +100,7 @@ Replace `<your-host>` with your Edgehog instance hostname and `<your-tenant>` wi
 
 **1. Core concepts**
 
-Before exploring features or the API, read the [Core concepts](core_concepts-1.html) page. It defines the building blocks (**Hardware Types**, **Devices**, **System Models**, **Groups**, and **Selectors**) that all other sections depend on.
+Before exploring features or the API, read the [Core concepts](user_core_concepts.html) page. It defines the building blocks (**Hardware Types**, **Devices**, **System Models**, **Groups**, and **Selectors**) that all other sections depend on.
 
 **2. Follow the feature guides**
 

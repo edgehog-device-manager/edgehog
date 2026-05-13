@@ -1,12 +1,12 @@
 <!---
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
 
 # System Models
 
-As already mentioned in the [Core concepts](core_concepts.html), System Model represent a group of
+As already mentioned in the [Core concepts](user_core_concepts.html), System Model represent a group of
 devices providing the same functionalities to users.
 
 In Edgehog a System Model has this information associated with it:
@@ -15,7 +15,7 @@ In Edgehog a System Model has this information associated with it:
 - Handle: a machine friendly identifier for the System Model (e.g. "e-bike-v2"). A valid handle must
   begin with a lowercase letter followed by any number of lower case letters, numbers or dashes
   (`-`).
-- Hardware type: the [Hardware Type](core_concepts.html#hardware-type) that is used for this system model.
+- Hardware type: the [Hardware Type](user_core_concepts.html#hardware-type) that is used for this system model.
   Each System Model is associated with exactly one Hardware Type.
 - Part numbers: the Part Numbers for this System Model. Each System Model can have one or more Part
   Numbers associated with it, and Devices will be associated with a System Model based on the Part

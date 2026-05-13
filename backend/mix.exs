@@ -200,10 +200,13 @@ defmodule Edgehog.MixProject do
     ]
   end
 
+  # Avoid using duplicate `.md` filenames anywhere in the `docs` directory,
+  # even across different subdirectories, as ExDoc may append numeric suffixes
+  # that can break documentation links.
   defp extras do
     [
       "docs/pages/intro/intro.md",
-      "docs/pages/user/core_concepts.md",
+      "docs/pages/user/user_core_concepts.md",
       "docs/pages/user/hardware_types.md",
       "docs/pages/user/system_models.md",
       "docs/pages/user/devices.md",
@@ -221,7 +224,7 @@ defmodule Edgehog.MixProject do
       "docs/pages/file_management/repositories.md",
       "docs/pages/file_management/files.md",
       "docs/pages/file_management/file_download_campaigns.md",
-      "docs/pages/containers/core_concepts.md",
+      "docs/pages/containers/containers_core_concepts.md",
       "docs/pages/containers/volume_management.md",
       "docs/pages/containers/network_management.md",
       "docs/pages/containers/image_credentials_management.md",

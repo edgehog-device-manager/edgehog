@@ -1,5 +1,5 @@
 <!---
-  Copyright 2025 SECO Mind Srl
+  Copyright 2025-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -132,7 +132,7 @@ Each volume consists of the following fields:
 
 ### Volume Purpose and Relationship to Containers
 
-While volumes can exist independently, a volume is not meaningful unless it is attached to at least one [container](core_concepts-2.html#containers).
+While volumes can exist independently, a volume is not meaningful unless it is attached to at least one [container](containers_core_concepts.html#containers).
 
 The purpose of a volume is to provide persistent storage for containerized applications, so it becomes valuable only when linked to a container’s filesystem.
 

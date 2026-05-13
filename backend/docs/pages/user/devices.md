@@ -6,7 +6,7 @@
 
 # Devices
 
-As mentioned in the [core concepts](core_concepts.html), a Device is an entity connected to Astarte.
+As mentioned in the [core concepts](user_core_concepts.html), a Device is an entity connected to Astarte.
 
 In the device list you can see all the Devices that are available.
 
@@ -47,7 +47,7 @@ Number with the ones of the System Model.
 
 ## Tags and Attributes
 
-A Device can have some [Tags and Attributes](core_concepts.html#tags-attributes-and-groups)
+A Device can have some [Tags and Attributes](user_core_concepts.html#tags-attributes-and-groups)
 associated with it.
 
 Tags are purely user-defined and can be added and removed from the Device page.
@@ -166,4 +166,4 @@ This section allows you to manage containerized workloads deployed to that speci
 ![Device Applications Screenshot](assets/device_applications.png)
 
 For more information about the core concepts behind applications and deployments, see the
-[Container Core Concepts](core_concepts-2.html) page.
+[Container Core Concepts](containers_core_concepts.html) page.

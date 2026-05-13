@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021-2023 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -66,9 +66,9 @@ users are free to use them as they see fit.
 Some examples of tags that can be assigned to the e-bikes or electric scooters in our examples
 could be `out-of-order`, `test_machine` or `Upgraded Brakes`.
 
-### Attributes*
+### Attributes\*
 
-*_This feature is planned for a future release_
+\*_This feature is planned for a future release_
 
 Attributes are namespaced key-value pairs that can be attached to Devices. The namespacing happens
 by prepending the namespace to the key using a colon as separator (i.e. `namespace:key`). This
@@ -95,9 +95,9 @@ The supported namespaces are:
 
 Note that all values will be converted to a string when using them as attribute values
 
-### Attribute Value Source*
+### Attribute Value Source\*
 
-*_This feature is planned for a future release_
+\*_This feature is planned for a future release_
 
 An Attribute Value Source populates the attributes of a Device according to some rule.
 
@@ -146,9 +146,9 @@ Pattern matching supports two types of patterns:
 Note that regex patterns (unquoted `/pattern/`) can only be used with the `~=` and `!~=` operators,
 while quoted strings work with all tag operators (`in`, `not in`, `~=`, `!~=`).
 
-##### Attribute filter*
+##### Attribute filter\*
 
-*_Note that while Attribute filters are already supported, Attributes are going to be available in a
+\*_Note that while Attribute filters are already supported, Attributes are going to be available in a
 future release_
 
 Created with the syntax `attributes["<namespace>:<key>"] <operator> <value>`, it returns `true` if
@@ -171,9 +171,9 @@ of the values supported using special syntax:
   string contained in double quotes must be a valid Base64 encoding of the binary value. Example:
   `binaryblob("Zm9vYmFy")` to encode the string `"foobar"`.
 
-##### Attribute inclusion filter*
+##### Attribute inclusion filter\*
 
-*_This feature is planned for a future release_
+\*_This feature is planned for a future release_
 
 - `"<value>" in attributes["<namespace>:<key>"]`: returns `true` if `value` is included in the
   chosen attribute. Note that the attribute must be an array for the expression to be valid.

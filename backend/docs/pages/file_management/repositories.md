@@ -7,7 +7,7 @@
 # Repositories
 
 As mentioned in the [File Management concepts](overview_file_management.html#core-concepts), a Repository is a centralized
-storage location for files that can be uploaded to [Devices](core_concepts-2.html#device).
+storage location for files that can be uploaded to [Devices](user_core_concepts.html#device).
 
 For each Repository the following information can be displayed:
 
