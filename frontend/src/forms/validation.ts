@@ -589,6 +589,11 @@ const fileDownloadRequestFormSchema = z
       data.destinationType === "FILESYSTEM" ? data.destination : null,
   }));
 
+const fileDeleteRequestFormSchema = z.object({
+  fileDownloadRequestId: z.string().min(1),
+  force: z.boolean(),
+});
+
 const repositorySchema = z.object({
   name: z.string().min(1),
   handle: handleSchema.min(1),
@@ -1143,4 +1148,5 @@ export {
   fileSchema,
   manualFileDownloadRequestFromRepositorySchema,
   fileUploadRequestFormSchema,
+  fileDeleteRequestFormSchema,
 };

@@ -5473,6 +5473,16 @@ type Device implements Node {
   wifiScanResults: [WifiScanResult!]
 }
 
+type file_delete_requests_by_device_result {
+  created: FileDeleteRequest
+  updated: FileDeleteRequest
+}
+
+type file_delete_requests_result {
+  created: FileDeleteRequest
+  updated: FileDeleteRequest
+}
+
 "The result of the :create_file_delete_request mutation"
 type CreateFileDeleteRequestResult {
   "The successful result of the mutation"
@@ -8974,6 +8984,16 @@ type RootSubscriptionType {
 
     deviceId: ID!
   ): file_upload_requests_by_device_result
+  fileDeleteRequests(
+    "A filter to limit the results"
+    filter: FileDeleteRequestFilterInput
+  ): file_delete_requests_result
+  fileDeleteRequestsByDevice(
+    "A filter to limit the results"
+    filter: FileDeleteRequestFilterInput
+
+    deviceId: ID!
+  ): file_delete_requests_by_device_result
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput

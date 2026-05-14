@@ -29,6 +29,7 @@ import FilesDownloadTab from "@/components/DeviceTabs/FilesDownloadTab";
 import FilesUploadTab from "@/components/DeviceTabs/FilesUploadTab";
 import Form from "@/components/Form";
 import { Tab } from "@/components/Tabs";
+import FilesDeleteTab from "@/components/DeviceTabs/FilesDeleteTab";
 
 type FileManagementTabProps = {
   deviceRef: FileManagementTab_fileManagement$key;
@@ -37,7 +38,8 @@ type FileManagementTabProps = {
 type FileManagementMode =
   | "to-device-file"
   | "to-device-repository"
-  | "from-device";
+  | "from-device"
+  | "delete-from-device";
 
 type FileManagementModeOption = {
   value: FileManagementMode;
@@ -55,6 +57,7 @@ const FILE_MANAGEMENT_FRAGMENT = graphql`
     }
     ...FilesUploadTab_fileDownloadRequests
     ...FilesDownloadTab_fileUploadRequests
+    ...FilesDeleteTab_fileManagement
   }
 `;
 
@@ -69,6 +72,10 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const supportsDeviceToServer =
     data.capabilities.includes("FILE_TRANSFER_READ");
 
+  const supportsDeleteFromDevice = data.capabilities.includes(
+    "FILE_TRANSFER_DELETE",
+  );
+
   const modeOptions = useMemo<Array<FileManagementModeOption>>(() => {
     const options: Array<FileManagementModeOption> = [];
 
@@ -78,14 +85,14 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
           value: "to-device-file",
           label: intl.formatMessage({
             id: "components.DeviceTabs.FileManagementTab.toDeviceDirect",
-            defaultMessage: "To Device - Direct File",
+            defaultMessage: "Download to Device - Direct File",
           }),
         },
         {
           value: "to-device-repository",
           label: intl.formatMessage({
             id: "components.DeviceTabs.FileManagementTab.toDeviceRepository",
-            defaultMessage: "To Device - Repository",
+            defaultMessage: "Download to Device - Repository",
           }),
         },
       );
@@ -96,13 +103,28 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
         value: "from-device",
         label: intl.formatMessage({
           id: "components.DeviceTabs.FileManagementTab.fromDevice",
-          defaultMessage: "From Device",
+          defaultMessage: "Upload from Device",
+        }),
+      });
+    }
+
+    if (supportsDeleteFromDevice) {
+      options.push({
+        value: "delete-from-device",
+        label: intl.formatMessage({
+          id: "components.DeviceTabs.FileManagementTab.deleteFromDevice",
+          defaultMessage: "Delete from Device",
         }),
       });
     }
 
     return options;
-  }, [intl, supportsDeviceToServer, supportsServerToDevice]);
+  }, [
+    intl,
+    supportsDeviceToServer,
+    supportsServerToDevice,
+    supportsDeleteFromDevice,
+  ]);
 
   const [selectedMode, setSelectedMode] =
     useState<FileManagementMode>("to-device-file");
@@ -157,6 +179,8 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
 
       {effectiveMode === "from-device" ? (
         <FilesDownloadTab deviceRef={data} embedded isOnline={isOnline} />
+      ) : effectiveMode === "delete-from-device" ? (
+        <FilesDeleteTab deviceRef={data} embedded isOnline={isOnline} />
       ) : effectiveMode === "to-device-repository" ? (
         <FilesUploadTab
           deviceRef={data}

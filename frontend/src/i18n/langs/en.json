@@ -676,17 +676,35 @@
   "components.DeviceTabs.CellularConnectionTab": {
     "defaultMessage": "Cellular Connection"
   },
+  "components.DeviceTabs.FileManagementTab.deleteFromDevice": {
+    "defaultMessage": "Delete from Device"
+  },
   "components.DeviceTabs.FileManagementTab.fileManagementLabel": {
     "defaultMessage": "File Management Mode"
   },
   "components.DeviceTabs.FileManagementTab.fromDevice": {
-    "defaultMessage": "From Device"
+    "defaultMessage": "Upload from Device"
   },
   "components.DeviceTabs.FileManagementTab.toDeviceDirect": {
-    "defaultMessage": "To Device - Direct File"
+    "defaultMessage": "Download to Device - Direct File"
   },
   "components.DeviceTabs.FileManagementTab.toDeviceRepository": {
-    "defaultMessage": "To Device - Repository"
+    "defaultMessage": "Download to Device - Repository"
+  },
+  "components.DeviceTabs.FilesDeleteTab.deleteSource": {
+    "defaultMessage": "Delete Source"
+  },
+  "components.DeviceTabs.FilesDeleteTab.deviceOffline": {
+    "defaultMessage": "The device is offline."
+  },
+  "components.DeviceTabs.FilesDeleteTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.DeviceTabs.FilesDeleteTab.title": {
+    "defaultMessage": "Files Delete"
+  },
+  "components.DeviceTabs.FilesDeleteTab.unknownError": {
+    "defaultMessage": "Unknown error."
   },
   "components.DeviceTabs.FilesDownloadTab": {
     "defaultMessage": "Files Download"
@@ -889,6 +907,27 @@
   },
   "components.FieldHelp.exampleTitle": {
     "defaultMessage": "Example:"
+  },
+  "components.FileDeleteRequestsTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.FileDeleteRequestsTable.force": {
+    "defaultMessage": "Force Delete"
+  },
+  "components.FileDeleteRequestsTable.force.disabled": {
+    "defaultMessage": "No"
+  },
+  "components.FileDeleteRequestsTable.force.enabled": {
+    "defaultMessage": "Yes"
+  },
+  "components.FileDeleteRequestsTable.noRequests": {
+    "defaultMessage": "No file delete requests have been sent yet."
+  },
+  "components.FileDeleteRequestsTable.responseMessages": {
+    "defaultMessage": "Response Messages"
+  },
+  "components.FileDeleteRequestsTable.status": {
+    "defaultMessage": "Status"
   },
   "components.FileDownloadCampaignsTable.channelNameTitle": {
     "defaultMessage": "Channel"
@@ -2426,6 +2465,18 @@
   },
   "forms.FileDownloadCampaignForm.userIdLabel": {
     "defaultMessage": "User ID"
+  },
+  "forms.ManualFileDeleteRequestForm.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.ManualFileDeleteRequestForm.fileLabel": {
+    "defaultMessage": "Select File"
+  },
+  "forms.ManualFileDeleteRequestForm.forceDescription": {
+    "defaultMessage": "Deletes files even if they are currently in use, this could cause errors."
+  },
+  "forms.ManualFileDeleteRequestForm.forceLabel": {
+    "defaultMessage": "Force delete"
   },
   "forms.ManualFileDownloadRequestForm.advancedOptionsTitle": {
     "defaultMessage": "Advanced Options"
