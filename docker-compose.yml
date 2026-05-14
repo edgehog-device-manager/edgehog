@@ -79,7 +79,7 @@ services:
       - "traefik.http.services.openfga-playground.loadbalancer.server.port=3000"
 
   openfga-init:
-    image: alpine:3.19
+    image: alpine:3.23
     depends_on:
       openfga:
         condition: service_healthy
@@ -247,7 +247,7 @@ services:
       - registry-auth:/auth
 
   registry-init:
-    image: docker:29.4.0-dind
+    image: docker:29.4.3-dind
     depends_on:
       - registry
     privileged: true
