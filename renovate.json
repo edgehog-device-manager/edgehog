@@ -40,7 +40,9 @@
 
   "vulnerabilityAlerts": {
     "enabled": true,
-    "addLabels": ["security"]
+    "addLabels": ["security"],
+    "schedule": [],
+    "transitiveRemediation": true
   },
 
   "lockFileMaintenance": {
@@ -49,6 +51,12 @@
   },
 
   "packageRules": [
+    {
+      "description": "Ensure security vulnerabilities are automerged immediately",
+      "isVulnerabilityAlert": true,
+      "automerge": true,
+      "schedule": []
+    },
     {
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "matchCurrentVersion": "!/^0/",
@@ -59,7 +67,8 @@
     {
       "description": "Semantic commit prefix for frontend: chore(deps)",
       "matchManagers": ["npm"],
-      "semanticCommitType": "chore"
+      "semanticCommitType": "chore",
+      "postUpdateOptions": ["npmDedupe"]
     },
     {
       "description": "Semantic commit prefix for GitHub Actions: ci(deps)",
@@ -167,7 +176,7 @@
       "groupName": "tools releases (major)",
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true,
-      "addLabels": ["dependencies", "tools", "automerge"]
+      "addLabels": ["dependencies", "tools", "major"]
     }
   ]
 }
