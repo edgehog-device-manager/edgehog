@@ -1,5 +1,5 @@
 <!---
-  Copyright 2021,2022 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -17,6 +17,16 @@ You can find:
   [GitHub page](https://github.com/edgehog-device-manager/edgehog-esp32-device).
 - The APIs for each version at the following links:
   - [0.8](../devices/esp32/0.8/api/index.html).
+
+## Edgehog device for Zephyr
+
+The Edgehog device for Zephyr is a portable device library for the
+[Zephyr framework](https://docs.zephyrproject.org/latest/), written in C, that enables remote
+device management using Edgehog.
+You can find:
+
+- The source code and installation instructions in the
+  [GitHub page](https://github.com/edgehog-device-manager/edgehog-zephyr-device).
 
 ## Edgehog device runtime
 
