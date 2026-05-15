@@ -130,6 +130,8 @@ defmodule Edgehog.Containers.Deployment do
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_start}
 
+      change {Edgehog.Changes.Log, mode: :after_action, message: "Deployment start message sent."}
+
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
 
@@ -140,6 +142,8 @@ defmodule Edgehog.Containers.Deployment do
 
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_stop}
+
+      change {Edgehog.Changes.Log, mode: :after_action, message: "Deployment stop message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
@@ -211,11 +215,21 @@ defmodule Edgehog.Containers.Deployment do
     update :mark_as_started do
       change set_attribute(:state, :started)
 
+      change {Edgehog.Changes.Log,
+              mode: :after_transaction,
+              message_success: "Deployment started successfully.",
+              message_fail: "Deployment could not start."}
+
       require_atomic? false
     end
 
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
+
+      change {Edgehog.Changes.Log,
+              mode: :after_transaction,
+              message_success: "Deployment stopped successfully.",
+              message_fail: "Deployment could not stop."}
 
       require_atomic? false
     end
@@ -325,6 +339,14 @@ defmodule Edgehog.Containers.Deployment do
 
   identities do
     identity :release_instance, [:device_id, :release_id]
+  end
+
+  changes do
+    change {Edgehog.Changes.Log,
+            mode: :after_transaction,
+            message_success: "Deployment created successfully.",
+            message_fail: "Deployment creation failed."},
+           on: :create
   end
 
   pub_sub do
