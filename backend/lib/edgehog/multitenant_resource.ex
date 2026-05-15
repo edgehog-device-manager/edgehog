@@ -22,13 +22,17 @@ defmodule Edgehog.MultitenantResource do
 
   # Opts
   ## Types
-  :tenant_id_in_primary_key? :: boolean()
-  :fga_type      :: atom() | nil
-  :fga_id_attribute :: atom() | nil
+
+  :tenant_id_in_primary_key?    :: boolean()
+  :disable_logging              :: boolean()
+  :fga_type                     :: atom() | nil
+  :fga_id_attribute             :: atom() | nil
+
   ## Description
-  :tenant_id_in_primary_key? :: whether the tenant_id is primary key in the relationship
-  :fga_type      :: name of the FGA type for this resource, defined in the model
-  :fga_id_attribute :: name of the attribute to be used as FGA id in tuples
+  :tenant_id_in_primary_key?    :: whether the tenant_id is primary key in the relationship
+  :disable_logging              :: whether to disable debug logging on each action
+  :fga_type                     :: name of the FGA type for this resource, defined in the model
+  :fga_id_attribute             :: name of the attribute to be used as FGA id in tuples
 
   `:fga_id_attribute` should be defined only if `:fga_type` is `nil`.
   When defined, `:fga_type` should correspond to a type defined in the FGA model,
@@ -42,6 +46,7 @@ defmodule Edgehog.MultitenantResource do
     fga_type = Keyword.get(opts, :fga_type)
     fga_id_attribute = Keyword.get(opts, :fga_id_attribute, :id)
     fga_tenancy? = not is_nil(fga_type)
+    disable_logging = Keyword.get(opts, :disable_logging, false)
 
     quote do
       use Ash.Resource,
@@ -73,6 +78,17 @@ defmodule Edgehog.MultitenantResource do
           change {Edgehog.Auth.Changes.EraseTenant,
                   obj: unquote(opts[:fga_type]), obj_id: unquote(opts[:fga_id_attribute])},
                  on: :destroy
+        end
+      end
+
+      unless unquote(disable_logging) do
+        changes do
+          change {Edgehog.Changes.Log,
+                  mode: :after_action,
+                  log_level: :debug,
+                  log_meta: [source: :multitenant_debug],
+                  message: "Action performed successfully."},
+                 on: [:create, :update, :destroy]
         end
       end
 
