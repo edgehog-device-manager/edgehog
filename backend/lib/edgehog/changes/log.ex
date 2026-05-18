@@ -155,14 +155,14 @@ defmodule Edgehog.Changes.Log do
 
   # Before action / transaction
   defp log(opts, changeset) do
-    do_log(opts[@log_level], opts[@message], opts[@log_meta])
+    Logger.log(opts[@log_level], opts[@message], opts[@log_meta])
 
     changeset
   end
 
   # After transaction, success
   defp log(opts, _changeset, {:ok, _result} = data) do
-    do_log(opts[@log_level], opts[@message_success], opts[@log_meta])
+    Logger.log(opts[@log_level], opts[@message_success], opts[@log_meta])
 
     data
   end
@@ -175,31 +175,16 @@ defmodule Edgehog.Changes.Log do
       |> Keyword.fetch!(@log_meta)
       |> Keyword.put_new(:error, error)
 
-    do_log(opts[@log_level], opts[@message_fail], log_meta)
+    Logger.log(opts[@log_level], opts[@message_fail], log_meta)
 
     data
   end
 
   # After action
   defp log(opts, _changeset, result) do
-    do_log(opts[@log_level], opts[@message], opts[@log_meta])
+    Logger.log(opts[@log_level], opts[@message], opts[@log_meta])
 
     {:ok, result}
-  end
-
-  # Although there exists the `&log/3` function, the logger documentation speaks
-  # against that. Check it out: https://hexdocs.pm/logger/Logger.html#log/3
-  defp do_log(level, message, metadata) do
-    case level do
-      :emergency -> Logger.emergency(message, metadata)
-      :alert -> Logger.alert(message, metadata)
-      :critical -> Logger.critical(message, metadata)
-      :error -> Logger.error(message, metadata)
-      :warning -> Logger.warning(message, metadata)
-      :notice -> Logger.notice(message, metadata)
-      :info -> Logger.info(message, metadata)
-      :debug -> Logger.debug(message, metadata)
-    end
   end
 
   defp error_if_not_present(key, {opts, errors}) do
