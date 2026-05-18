@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -22,7 +22,14 @@ defmodule Edgehog.Campaigns.Channel.Calculations.UpdatableDevices do
   @moduledoc false
   use Ash.Resource.Calculation
 
+  alias Edgehog.Selector
+
   require Ash.Query
+
+  @impl Ash.Resource.Calculation
+  def load(_query, _opts, _context) do
+    [target_groups: [:selector]]
+  end
 
   @impl Ash.Resource.Calculation
   def calculate(channels, _opts, context) do
@@ -33,16 +40,32 @@ defmodule Edgehog.Campaigns.Channel.Calculations.UpdatableDevices do
     system_model_id = base_image.base_image_collection.system_model_id
 
     channels
-    |> Ash.load!(target_groups: [devices: :system_model])
-    |> Enum.map(fn channel ->
-      channel.target_groups
-      |> Enum.flat_map(fn target_group ->
-        Enum.filter(
-          target_group.devices,
-          &(&1.system_model != nil && &1.system_model.id == system_model_id)
-        )
-      end)
-      |> Enum.uniq_by(& &1.id)
-    end)
+    |> Ash.load!(target_groups: [:selector])
+    |> Enum.map(&resolve_channel(&1, system_model_id, context))
+  end
+
+  defp resolve_channel(channel, system_model_id, context) do
+    combined_expr = Enum.reduce(channel.target_groups, nil, &combine_selectors/2)
+
+    if combined_expr do
+      Edgehog.Devices.Device
+      |> Ash.Query.filter(^combined_expr)
+      |> Ash.Query.filter(system_model_part_number.system_model_id == ^system_model_id)
+      |> Ash.Query.set_tenant(context.tenant)
+      |> Ash.read!()
+    else
+      []
+    end
+  end
+
+  defp combine_selectors(group, acc) do
+    case Selector.parse(group.selector) do
+      {:ok, ast} ->
+        expr = Selector.to_ash_expr(ast)
+        if acc, do: Ash.Expr.expr(^expr or ^acc), else: expr
+
+      _ ->
+        acc
+    end
   end
 end

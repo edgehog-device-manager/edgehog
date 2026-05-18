@@ -32,105 +32,113 @@ defmodule Edgehog.Devices do
   alias Edgehog.Devices.SystemModel
 
   authorization do
-    authorize :when_requested
+    authorize(:when_requested)
   end
 
   graphql do
-    root_level_errors? true
+    root_level_errors?(true)
 
     queries do
       get Device, :device, :read do
-        description "Returns a single device."
+        description("Returns a single device.")
       end
 
       list Device, :devices, :read do
-        description "Returns a list of devices."
-        paginate_with :keyset
-        relay? true
+        description("Returns a list of devices.")
+        paginate_with(:keyset)
+        relay_id_translations(matching_group_id: :device_group)
+        relay?(true)
       end
 
       get HardwareType, :hardware_type, :read do
-        description "Returns a single hardware type."
+        description("Returns a single hardware type.")
       end
 
       list HardwareType, :hardware_types, :read do
-        description "Returns a list of hardware types."
-        paginate_with :keyset
-        relay? true
+        description("Returns a list of hardware types.")
+        paginate_with(:keyset)
+        relay?(true)
       end
 
       get SystemModel, :system_model, :read do
-        description "Returns a single system model."
+        description("Returns a single system model.")
       end
 
       list SystemModel, :system_models, :read do
-        description "Returns a list of system models."
-        relay? true
-        paginate_with :keyset
+        description("Returns a list of system models.")
+        relay?(true)
+        paginate_with(:keyset)
       end
     end
 
     mutations do
-      update Device, :update_device, :update
-      update Device, :add_device_tags, :add_tags
-      update Device, :remove_device_tags, :remove_tags
-      update Device, :set_device_led_behavior, :set_led_behavior
-      create HardwareType, :create_hardware_type, :create
-      update HardwareType, :update_hardware_type, :update
-      destroy HardwareType, :delete_hardware_type, :destroy
+      update(Device, :update_device, :update)
+      update(Device, :add_device_tags, :add_tags)
+      update(Device, :remove_device_tags, :remove_tags)
+      update(Device, :set_device_led_behavior, :set_led_behavior)
+      create(HardwareType, :create_hardware_type, :create)
+      update(HardwareType, :update_hardware_type, :update)
+      destroy(HardwareType, :delete_hardware_type, :destroy)
 
       create SystemModel, :create_system_model, :create do
-        relay_id_translations input: [hardware_type_id: :hardware_type]
+        relay_id_translations(input: [hardware_type_id: :hardware_type])
       end
 
-      update SystemModel, :update_system_model, :update
-      destroy SystemModel, :delete_system_model, :destroy
+      update(SystemModel, :update_system_model, :update)
+      destroy(SystemModel, :delete_system_model, :destroy)
     end
   end
 
   resources do
     resource Device do
-      define :fetch_device, action: :read, get_by: [:id]
-      define :fetch_device_by_identity, action: :read, get_by_identity: :unique_realm_device_id
+      define(:fetch_device, action: :read, get_by: [:id])
+      define(:fetch_device_by_identity, action: :read, get_by_identity: :unique_realm_device_id)
 
-      define :send_create_image_request,
+      define(:send_create_image_request,
         action: :send_create_image,
         args: [:image, :deployment]
+      )
 
-      define :send_create_container_request,
+      define(:send_create_container_request,
         action: :send_create_container_request,
         args: [:container, :deployment]
+      )
 
-      define :send_create_network_request,
+      define(:send_create_network_request,
         action: :send_create_network_request,
         args: [:network, :deployment]
+      )
 
-      define :send_create_volume_request,
+      define(:send_create_volume_request,
         action: :send_create_volume_request,
         args: [:volume, :deployment]
+      )
 
-      define :send_create_device_mapping_request,
+      define(:send_create_device_mapping_request,
         action: :send_create_device_mapping_request,
         args: [:device_mapping, :deployment]
+      )
 
-      define :send_create_deployment_request,
+      define(:send_create_deployment_request,
         action: :send_create_deployment_request,
         args: [:deployment]
+      )
 
-      define :send_release_command,
+      define(:send_release_command,
         action: :send_release_command,
         args: [:release, :command]
+      )
 
-      define :update_application, action: :update_application, args: [:from, :to]
+      define(:update_application, action: :update_application, args: [:from, :to])
     end
 
-    resource HardwareType
-    resource Edgehog.Devices.HardwareTypePartNumber
+    resource(HardwareType)
+    resource(Edgehog.Devices.HardwareTypePartNumber)
 
     resource SystemModel do
-      define :delete_system_model, action: :destroy
+      define(:delete_system_model, action: :destroy)
     end
 
-    resource Edgehog.Devices.SystemModelPartNumber
+    resource(Edgehog.Devices.SystemModelPartNumber)
   end
 end

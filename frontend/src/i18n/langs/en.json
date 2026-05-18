@@ -835,32 +835,6 @@
   "components.DeviceTabs.WiFiScanResultsTab": {
     "defaultMessage": "WiFi APs"
   },
-  "components.DevicesGroupsTable.deviceIdTitle": {
-    "defaultMessage": "Device ID",
-    "description": "Title for the Device ID column of the devices table"
-  },
-  "components.DevicesGroupsTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.DevicesGroupsTable.lastSeenTitle": {
-    "defaultMessage": "Last Seen",
-    "description": "Title for the Last Seen column of the devices table"
-  },
-  "components.DevicesGroupsTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the devices table"
-  },
-  "components.DevicesGroupsTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.DevicesGroupsTable.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "components.DevicesGroupsTable.tagsTitle": {
-    "defaultMessage": "Tags",
-    "description": "Title for the Tags column of the devices table"
-  },
   "components.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
     "description": "Title for the Device ID column of the devices table"

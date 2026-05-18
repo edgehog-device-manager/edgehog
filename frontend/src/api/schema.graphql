@@ -38,7 +38,38 @@ input CampaignCampaignMechanismFileDownloadInput {
   """
   userId: Int
 
+  """
+  Optional unix gid of the group owning the file. Set to -1 to use device default.
+  Defaults to -1.
+  """
+  groupId: Int
+
   fileId: ID
+
+  """
+  Device-specific field indicating where the file should be stored.
+  Supported values are: storage, streaming, filesystem.
+  """
+  destinationType: FileDestination
+
+  """
+  Optional unix mode for the file (e.g., 0o644 for readable by all, writable by owner).
+  Set to 0 to use device default. Defaults to 0.
+  """
+  fileMode: Int
+
+  """
+  Optional ttl for how long to keep the file for on the device, if 0 is forever.
+  Defaults to 0.
+  """
+  ttlSeconds: Int
+
+  """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the File Download Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
 
   """
   The maximum number of in progress file downloads. The File Download Campaign will
@@ -46,12 +77,6 @@ input CampaignCampaignMechanismFileDownloadInput {
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  File Download Request lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -62,41 +87,16 @@ input CampaignCampaignMechanismFileDownloadInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the File Download Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  File Download Request lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 
   """
   Optional compression type for the file (e.g., "tar.gz").
   Other values are: ['tar.gz']. Defaults to empty string (no compression).
   """
   compression: String
-
-  """
-  Optional ttl for how long to keep the file for on the device, if 0 is forever.
-  Defaults to 0.
-  """
-  ttlSeconds: Int
-
-  """
-  Optional unix mode for the file (e.g., 0o644 for readable by all, writable by owner).
-  Set to 0 to use device default. Defaults to 0.
-  """
-  fileMode: Int
-
-  """
-  Optional unix gid of the group owning the file. Set to -1 to use device default.
-  Defaults to -1.
-  """
-  groupId: Int
-
-  """
-  Device-specific field indicating where the file should be stored.
-  Supported values are: storage, streaming, filesystem.
-  """
-  destinationType: FileDestination
 }
 
 "An object representing the properties of a File Download campaign mechanism."
@@ -181,17 +181,18 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   baseImageId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Update Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress updates. The Update Campaign will have
   at most this number of OTA Operations that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering an OTA
-  Request lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -202,11 +203,10 @@ input CampaignCampaignMechanismFirmwareUpgradeInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Update Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering an OTA
+  Request lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 
   """
   This boolean flag determines if the Base Image will be pushed to the
@@ -263,17 +263,18 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   targetReleaseId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -284,11 +285,10 @@ input CampaignCampaignMechanismDeploymentUpgradeInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Upgrade deployment campaign mechanism."
@@ -336,17 +336,18 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   releaseId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -357,11 +358,10 @@ input CampaignCampaignMechanismDeploymentDeleteInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Delete deployment campaign mechanism."
@@ -404,17 +404,18 @@ input CampaignCampaignMechanismDeploymentStopInput {
   releaseId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -425,11 +426,10 @@ input CampaignCampaignMechanismDeploymentStopInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Stop deployment campaign mechanism."
@@ -472,17 +472,18 @@ input CampaignCampaignMechanismDeploymentStartInput {
   releaseId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress operations. The Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -493,11 +494,10 @@ input CampaignCampaignMechanismDeploymentStartInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Start deployment campaign mechanism."
@@ -540,17 +540,18 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   releaseId: ID
 
   """
+  The maximum percentage of failures allowed over the number of total targets.
+  If the failures exceed this threshold, the Deployment Campaign terminates with
+  a failure.
+  """
+  maxFailurePercentage: Float
+
+  """
   The maximum number of in progress deployments. The Update Campaign will
   have at most this number of Deployments that are started but not yet
   finished (either successfully or not).
   """
   maxInProgressOperations: Int
-
-  """
-  The timeout (in seconds) Edgehog has to wait before considering a
-  Deployment lost (and possibly retry). It must be at least 30 seconds.
-  """
-  requestTimeoutSeconds: Int
 
   """
   The number of attempts that have to be tried before giving up on the
@@ -561,11 +562,10 @@ input CampaignCampaignMechanismDeploymentDeployInput {
   requestRetries: Int
 
   """
-  The maximum percentage of failures allowed over the number of total targets.
-  If the failures exceed this threshold, the Deployment Campaign terminates with
-  a failure.
+  The timeout (in seconds) Edgehog has to wait before considering a
+  Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
-  maxFailurePercentage: Float
+  requestTimeoutSeconds: Int
 }
 
 "An object representing the properties of a Deploy deployment campaign mechanism."
@@ -2236,6 +2236,12 @@ type Volume implements Node {
     "A filter to limit the results"
     filter: DeviceFilterInput
 
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
     "The number of records to return from the beginning. Maximum 250"
     first: Int
 
@@ -2578,6 +2584,12 @@ type Network implements Node {
 
     "A filter to limit the results"
     filter: DeviceFilterInput
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -3038,6 +3050,12 @@ type Image {
     "A filter to limit the results"
     filter: DeviceFilterInput
 
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
     "The number of records to return from the beginning. Maximum 250"
     first: Int
 
@@ -3409,7 +3427,13 @@ type Deployment implements Node {
 
   releaseId: ID
 
-  device: Device
+  device(
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device
 
   release: Release
 
@@ -3586,7 +3610,13 @@ type ContainerDeployment {
   deviceId: Int
   imageDeploymentId: ID
   container: Container
-  device: Device
+  device(
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device
   imageDeployment: ImageDeployment
   networkDeployments(
     "How to sort the records in the response"
@@ -4014,6 +4044,12 @@ type Container {
 
     "A filter to limit the results"
     filter: DeviceFilterInput
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
 
     "The number of records to return from the beginning. Maximum 250"
     first: Int
@@ -5626,7 +5662,13 @@ type FileUploadRequest {
 
   httpHeaders: JsonString
 
-  device: Device!
+  device(
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device!
 
   "Get a presigned URL for downloading the uploaded file. The URL is valid for a limited time."
   getPresignedUrl: String
@@ -6156,7 +6198,13 @@ type FileDownloadRequest {
   responseMessage: String
 
   "The device associated with this file download request."
-  device: Device!
+  device(
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device!
 
   "The campaign target that created the file download request, if any."
   campaignTarget: CampaignTarget
@@ -6867,6 +6915,12 @@ type DeviceGroup implements Node {
     "A filter to limit the results"
     filter: DeviceFilterInput
 
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
     "The number of records to return."
     limit: Int
 
@@ -7200,7 +7254,13 @@ type OtaOperation {
   updatedAt: DateTime!
 
   "The device targeted from the operation"
-  device: Device!
+  device(
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device!
 
   """
   The update target of an update campaign that created the managed
@@ -7621,7 +7681,13 @@ type CampaignTarget {
 
   campaign: Campaign!
 
-  device: Device!
+  device(
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device!
 
   deployment: Deployment
 
@@ -8159,7 +8225,16 @@ type RootQueryType {
   ): RepositoryConnection
 
   "Returns a single device."
-  device("The id of the record" id: ID!): Device
+  device(
+    "The id of the record"
+    id: ID!
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+  ): Device
 
   "Returns a list of devices."
   devices(
@@ -8180,6 +8255,12 @@ type RootQueryType {
 
     "The number of records to return to the end. Maximum 250"
     last: Int
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
   ): DeviceConnection
 
   "Returns a single hardware type."
@@ -8464,20 +8545,54 @@ type RootMutationType {
   ): CreateFileUploadRequestResult
 
   "Updates a device."
-  updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult
+  updateDevice(
+    id: ID!
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
+    input: UpdateDeviceInput
+  ): UpdateDeviceResult
 
   "Add tags to a device."
-  addDeviceTags(id: ID!, input: AddDeviceTagsInput!): AddDeviceTagsResult
+  addDeviceTags(
+    id: ID!
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
+    input: AddDeviceTagsInput!
+  ): AddDeviceTagsResult
 
   "Remove tags from a device."
   removeDeviceTags(
     id: ID!
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
     input: RemoveDeviceTagsInput!
   ): RemoveDeviceTagsResult
 
   "Sets led behavior."
   setDeviceLedBehavior(
     id: ID!
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
+
     input: SetDeviceLedBehaviorInput!
   ): SetDeviceLedBehaviorResult
 
@@ -8646,6 +8761,12 @@ type RootSubscriptionType {
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput
+
+    "Filters devices dynamically based on a DeviceGroup's selector"
+    matchingGroupId: ID
+
+    "Optional raw selector for dry-runs"
+    matchingSelector: String
   ): device_changed_result
   hardwareType(
     "A filter to limit the results"

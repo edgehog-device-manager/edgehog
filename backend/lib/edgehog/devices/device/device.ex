@@ -21,6 +21,7 @@
 defmodule Edgehog.Devices.Device do
   @moduledoc false
   use Edgehog.MultitenantResource,
+    primary_read_warning?: false,
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
@@ -78,7 +79,24 @@ defmodule Edgehog.Devices.Device do
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:destroy]
+
+    read :read do
+      primary? true
+      pagination keyset?: true, offset?: true, required?: false
+
+      argument :matching_group_id, :id do
+        description "Filters devices dynamically based on a DeviceGroup's selector"
+        allow_nil? true
+      end
+
+      argument :matching_selector, :string do
+        description "Optional raw selector for dry-runs"
+        allow_nil? true
+      end
+
+      prepare Edgehog.Devices.Device.Preparations.FilterBySelector
+    end
 
     create :create do
       primary? true
@@ -711,20 +729,21 @@ defmodule Edgehog.Devices.Device do
   end
 
   postgres do
-    table "devices"
-    repo Edgehog.Repo
+    table("devices")
+    repo(Edgehog.Repo)
 
     references do
-      reference :realm,
+      reference(:realm,
         index?: true,
         on_delete: :nothing,
         match_with: [tenant_id: :tenant_id],
         match_type: :full
+      )
 
       # We don't generate a foreign key for the system model part number since we want the device
       # to be able to declare its part number even _before_ we add the relative system model to
       # Edgehog
-      reference :system_model_part_number, ignore?: true
+      reference(:system_model_part_number, ignore?: true)
     end
   end
 end
