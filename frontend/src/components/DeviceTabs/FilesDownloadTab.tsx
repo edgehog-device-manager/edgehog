@@ -42,7 +42,10 @@ import ManualFileUploadRequestForm, {
   type StorageSourceOption,
   type SourceTypeOption,
 } from "@/forms/ManualFileUploadRequestForm";
-import type { ManualFileUploadRequestData } from "@/forms/validation";
+import type {
+  FileSourceType,
+  ManualFileUploadRequestData,
+} from "@/forms/validation";
 
 // We use graphql fields below in table columns configuration
 /* eslint-disable relay/unused-fields */
@@ -52,9 +55,17 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
     id
     capabilities
     fileTransferCapabilities {
-      encodings
       unixPermissions
-      targets
+      serverToDevice {
+        storage
+        streaming
+        filesystem
+      }
+      deviceToServer {
+        storage
+        streaming
+        filesystem
+      }
     }
     fileUploadRequests(first: $first, after: $after)
       @connection(key: "FilesDownloadTab_fileUploadRequests") {
@@ -137,7 +148,7 @@ const FILE_UPLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
 type ManualFileUploadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
-  supportedEncodings: string[];
+  supportedEncodingsBySourceType: Record<FileSourceType, string[]>;
   sourceTypeOptions: SourceTypeOption[];
   storageSourceOptions: StorageSourceOption[];
   isOnline: boolean;
@@ -146,7 +157,7 @@ type ManualFileUploadRequestFormWrapperProps = {
 const ManualFileUploadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
-  supportedEncodings,
+  supportedEncodingsBySourceType,
   sourceTypeOptions,
   storageSourceOptions,
   isOnline,
@@ -186,7 +197,7 @@ const ManualFileUploadRequestFormWrapper = ({
               },
             },
             onCompleted(_responseData, errors) {
-              if (errors && errors.length > 0) {
+              if (errors?.length) {
                 reject(
                   new Error(
                     errors
@@ -231,9 +242,7 @@ const ManualFileUploadRequestFormWrapper = ({
               );
               ConnectionHandler.insertEdgeBefore(connection, edge);
             },
-            onError(error) {
-              reject(error);
-            },
+            onError: reject,
           });
         });
       } catch (error) {
@@ -255,7 +264,7 @@ const ManualFileUploadRequestFormWrapper = ({
     <ManualFileUploadRequestForm
       isLoading={isCreating}
       onSubmit={handleSubmit}
-      supportedEncodings={supportedEncodings}
+      supportedEncodingsBySourceType={supportedEncodingsBySourceType}
       sourceTypeOptions={sourceTypeOptions}
       storageSourceOptions={storageSourceOptions}
     />
@@ -299,11 +308,15 @@ const FilesDownloadTab = ({
   );
 
   const sourceTypeOptions = useMemo<SourceTypeOption[]>(() => {
-    const targets = data.fileTransferCapabilities?.targets ?? [];
+    const capabilities = data.fileTransferCapabilities?.deviceToServer;
+
+    if (!capabilities) {
+      return [];
+    }
 
     const options: SourceTypeOption[] = [];
 
-    if (targets.includes("STORAGE")) {
+    if (capabilities.storage != null) {
       options.push({
         value: "STORAGE",
         label: intl.formatMessage({
@@ -313,7 +326,7 @@ const FilesDownloadTab = ({
       });
     }
 
-    if (targets.includes("FILESYSTEM")) {
+    if (capabilities.filesystem != null) {
       options.push({
         value: "FILESYSTEM",
         label: intl.formatMessage({
@@ -323,8 +336,11 @@ const FilesDownloadTab = ({
       });
     }
 
+    // STEAMING capability is currently not supported as source type for uploads,
+    // as it is not clear how it should be handled on the frontend.
+
     return options;
-  }, [data.fileTransferCapabilities?.targets, intl]);
+  }, [data.fileTransferCapabilities?.deviceToServer, intl]);
 
   const storageSourceOptions: StorageSourceOption[] = useMemo(
     () =>
@@ -341,19 +357,29 @@ const FilesDownloadTab = ({
     [data.storageFileDownloadRequests],
   );
 
-  const supportedEncodings = useMemo(() => {
-    const uniqueEncodings = new Set<string>();
+  const supportedEncodingsBySourceType = useMemo<
+    Record<FileSourceType, string[]>
+  >(() => {
+    const capabilities = data.fileTransferCapabilities?.deviceToServer;
 
-    data.fileTransferCapabilities?.encodings?.forEach((encoding) => {
-      const value = encoding?.trim();
+    if (!capabilities) {
+      return { STORAGE: [], FILESYSTEM: [] };
+    }
 
-      if (value) {
-        uniqueEncodings.add(value);
-      }
-    });
+    const normalizeEncodings = (
+      encodings: readonly (string | null)[] | null,
+    ) => {
+      if (!encodings) return [];
+      return encodings
+        .map((e) => e?.trim())
+        .filter((e): e is string => e != null && e.length > 0);
+    };
 
-    return Array.from(uniqueEncodings);
-  }, [data.fileTransferCapabilities?.encodings]);
+    return {
+      STORAGE: normalizeEncodings(capabilities.storage),
+      FILESYSTEM: normalizeEncodings(capabilities.filesystem),
+    };
+  }, [data.fileTransferCapabilities?.deviceToServer]);
 
   if (
     !data.capabilities.includes("FILE_TRANSFER_READ") ||
@@ -378,7 +404,7 @@ const FilesDownloadTab = ({
           <ManualFileUploadRequestFormWrapper
             setErrorFeedback={setErrorFeedback}
             deviceId={deviceId}
-            supportedEncodings={supportedEncodings}
+            supportedEncodingsBySourceType={supportedEncodingsBySourceType}
             sourceTypeOptions={sourceTypeOptions}
             storageSourceOptions={storageSourceOptions}
             isOnline={isOnline}

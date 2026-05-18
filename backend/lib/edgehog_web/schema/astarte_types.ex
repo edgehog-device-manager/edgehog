@@ -158,16 +158,28 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     value :filesystem, description: "Persist file on device filesystem"
   end
 
+  @desc "Supported encodings for file transfer targets."
+  object :file_transfer_target_capabilities do
+    @desc "Supported encodings for storage transfers."
+    field :storage, list_of(:string)
+
+    @desc "Supported encodings for filesystem transfers."
+    field :filesystem, list_of(:string)
+
+    @desc "Supported encodings for streaming transfers."
+    field :streaming, list_of(:string)
+  end
+
   @desc "Describes file transfer capabilities supported by the device."
   object :file_transfer_capabilities do
-    @desc "Supported compression and archive formats."
-    field :encodings, list_of(:string)
-
     @desc "Whether UNIX permissions and ownership are supported."
     field :unix_permissions, :boolean
 
-    @desc "Supported transfer targets."
-    field :targets, list_of(:file_transfer_target)
+    @desc "File transfer capabilities for server-to-device transfers."
+    field :server_to_device, :file_transfer_target_capabilities
+
+    @desc "File transfer capabilities for device-to-server transfers."
+    field :device_to_server, :file_transfer_target_capabilities
   end
 
   @desc "Describe the available images on the device."

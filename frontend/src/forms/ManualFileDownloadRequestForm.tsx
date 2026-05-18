@@ -69,7 +69,7 @@ type ManualFileDownloadRequestFormProps = {
   className?: string;
   isLoading: boolean;
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
-  supportedEncodings: string[];
+  supportedEncodingsByDestination: Record<FileDestinationType, string[]>;
   allowArchiveUpload: boolean;
   showAdvancedOptions?: boolean;
   destinationTypeOptions: DestinationTypeOption[];
@@ -79,7 +79,7 @@ const ManualFileDownloadRequestForm = ({
   className,
   isLoading,
   onFileSubmit,
-  supportedEncodings,
+  supportedEncodingsByDestination,
   allowArchiveUpload,
   showAdvancedOptions = false,
   destinationTypeOptions,
@@ -121,8 +121,18 @@ const ManualFileDownloadRequestForm = ({
 
   const archiveEncodingValues = new Set(["tar", "tar.gz", "tar.lz4"]);
 
-  const supportedArchiveEncodings = supportedEncodings.filter((encoding) =>
-    archiveEncodingValues.has(encoding.trim().toLowerCase()),
+  const selectedDestinationType = useWatch({
+    control,
+    name: "destinationType",
+  }) as FileDestinationType | undefined;
+
+  const effectiveDestinationType = selectedDestinationType ?? "STORAGE";
+
+  const supportedEncodingsForDestination =
+    supportedEncodingsByDestination[effectiveDestinationType] ?? [];
+
+  const supportedArchiveEncodings = supportedEncodingsForDestination.filter(
+    (encoding) => archiveEncodingValues.has(encoding.trim().toLowerCase()),
   );
 
   const supportedArchiveEncodingsNormalized = new Set(
@@ -133,7 +143,9 @@ const ManualFileDownloadRequestForm = ({
 
   const availableEncodings = hasMultipleFilesSelected
     ? supportedArchiveEncodings
-    : supportedEncodings.filter((encoding) => encoding.trim().length > 0);
+    : supportedEncodingsForDestination.filter(
+        (encoding) => encoding.trim().length > 0,
+      );
 
   const noneEncodingLabel = hasMultipleFilesSelected
     ? intl.formatMessage({
@@ -158,10 +170,6 @@ const ManualFileDownloadRequestForm = ({
     })),
   ];
 
-  const selectedDestinationType = useWatch({
-    control,
-    name: "destinationType",
-  });
   const selectedEncoding = useWatch({
     control,
     name: "encoding",
@@ -392,6 +400,8 @@ const ManualFileDownloadRequestForm = ({
                 value={selectedOption}
                 onChange={(option) => {
                   field.onChange(option ? option.value : null);
+                  // Reset encoding when destination type changes
+                  setValue("encoding", "");
                 }}
                 options={destinationTypeOptions}
               />

@@ -51,9 +51,9 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
     stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
       {:ok,
        %FileTransferCapabilities{
-         encodings: ["tar.gz"],
          unix_permissions: false,
-         targets: [:filesystem]
+         server_to_device: %{storage: ["tar.gz"], streaming: nil, filesystem: nil},
+         device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
        }}
     end)
 

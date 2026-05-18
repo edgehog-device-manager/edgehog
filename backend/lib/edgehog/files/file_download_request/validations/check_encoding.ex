@@ -27,10 +27,11 @@ defmodule Edgehog.Files.FileDownloadRequest.Validations.CheckEncoding do
   @impl Ash.Resource.Validation
   def validate(changeset, _opts, %{tenant: tenant} = _context) do
     encoding = Ash.Changeset.get_attribute(changeset, :encoding)
+    destination_type = Ash.Changeset.get_attribute(changeset, :destination_type)
     device_id = Ash.Changeset.get_argument(changeset, :device_id)
 
     with {:ok, capabilities} <- get_device_file_transfer_capabilities(device_id, tenant) do
-      check_valid_encoding(encoding, capabilities)
+      check_valid_encoding(encoding, destination_type, capabilities)
     end
   end
 
@@ -54,16 +55,37 @@ defmodule Edgehog.Files.FileDownloadRequest.Validations.CheckEncoding do
     end
   end
 
-  defp check_valid_encoding(nil, _capabilities), do: :ok
-  defp check_valid_encoding("", _capabilities), do: :ok
+  defp check_valid_encoding(
+         encoding,
+         destination_type,
+         %{server_to_device: server_to_device} = _capabilities
+       ) do
+    target = parse_destination_type(destination_type)
 
-  defp check_valid_encoding(encoding, %{encodings: encodings} = _capabilities) do
-    if encoding in encodings do
-      :ok
-    else
-      {:error, "Encoding type not supported by device"}
+    case Map.get(server_to_device, target) do
+      nil ->
+        {:error, "Target #{target} not supported for server-to-device transfers"}
+
+      target_encodings when is_list(target_encodings) ->
+        cond do
+          encoding in [nil, ""] ->
+            :ok
+
+          encoding in target_encodings ->
+            :ok
+
+          true ->
+            {:error, "Encoding type not supported by device for this target"}
+        end
     end
   end
+
+  defp parse_destination_type(nil), do: :storage
+  defp parse_destination_type(dest) when is_atom(dest), do: dest
+  defp parse_destination_type("storage"), do: :storage
+  defp parse_destination_type("streaming"), do: :streaming
+  defp parse_destination_type("filesystem"), do: :filesystem
+  defp parse_destination_type(_), do: :storage
 
   @impl Ash.Resource.Validation
   def batch_callbacks?(_changeset, _opts, _context), do: false

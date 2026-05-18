@@ -35,9 +35,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
       {:ok,
        %FileTransferCapabilities{
-         encodings: [],
          unix_permissions: false,
-         targets: [:filesystem]
+         server_to_device: %{storage: [], streaming: nil, filesystem: nil},
+         device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
        }}
     end)
 
@@ -138,7 +138,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
           encoding: "gz"
         )
 
-      assert %{short_message: "Encoding type not supported by device"} =
+      assert %{short_message: "Encoding type not supported by device for this target"} =
                extract_error!(result, "createManualFileDownloadRequest")
     end
   end
@@ -203,9 +203,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
         {:ok,
          %FileTransferCapabilities{
-           encodings: ["gz"],
            unix_permissions: false,
-           targets: [:filesystem]
+           server_to_device: %{storage: ["gz"], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
          }}
       end)
 
@@ -236,9 +236,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
         stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
           {:ok,
            %FileTransferCapabilities{
-             encodings: [encoding],
              unix_permissions: false,
-             targets: [:filesystem]
+             server_to_device: %{storage: [encoding], streaming: nil, filesystem: nil},
+             device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
            }}
         end)
 
@@ -276,9 +276,9 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
         stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
           {:ok,
            %FileTransferCapabilities{
-             encodings: [encoding],
              unix_permissions: false,
-             targets: [:filesystem]
+             server_to_device: %{storage: [encoding], streaming: nil, filesystem: nil},
+             device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
            }}
         end)
 

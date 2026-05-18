@@ -24,36 +24,128 @@ defmodule Edgehog.Astarte.Device.FileTransferCapabilitiesTest do
   alias Edgehog.Astarte.Device.FileTransferCapabilities
 
   describe "parse_data/1" do
-    test "correctly parses file transfer capabilities" do
+    test "correctly parses file transfer capabilities with all fields" do
       data = %{
-        "encodings" => ["gz", "tar.gz"],
-        "unixPermissions" => true,
-        "targets" => ["storage", "streaming"]
+        "transfer" => %{
+          "unixPermissions" => true,
+          "serverToDevice" => %{
+            "targets" => ["storage", "streaming"]
+          },
+          "deviceToServer" => %{
+            "targets" => ["filesystem"]
+          }
+        },
+        "serverToDevice" => %{
+          "storage" => %{"encodings" => ["gz", "tar.gz"]},
+          "streaming" => %{"encodings" => ["lz4"]}
+        },
+        "deviceToServer" => %{
+          "filesystem" => %{"encodings" => ["tar", "tar.lz4"]}
+        }
       }
 
-      assert %FileTransferCapabilities{
-               encodings: ["gz", "tar.gz"],
-               unix_permissions: true,
-               targets: [:storage, :streaming]
-             } == FileTransferCapabilities.parse_data(data)
+      result = FileTransferCapabilities.parse_data(data)
+
+      assert result.unix_permissions == true
+
+      assert result.server_to_device == %{
+               storage: ["gz", "tar.gz"],
+               streaming: ["lz4"],
+               filesystem: nil
+             }
+
+      assert result.device_to_server == %{
+               storage: nil,
+               streaming: nil,
+               filesystem: ["tar", "tar.lz4"]
+             }
     end
 
-    test "uses defaults for missing array values" do
-      data = %{"unixPermissions" => false}
+    test "uses defaults for missing values" do
+      data = %{"transfer" => %{"unixPermissions" => false}}
 
-      assert %FileTransferCapabilities{
-               encodings: [],
-               unix_permissions: false,
-               targets: []
-             } == FileTransferCapabilities.parse_data(data)
+      result = FileTransferCapabilities.parse_data(data)
+
+      assert result.unix_permissions == false
+
+      assert result.server_to_device == %{
+               storage: nil,
+               streaming: nil,
+               filesystem: nil
+             }
+
+      assert result.device_to_server == %{
+               storage: nil,
+               streaming: nil,
+               filesystem: nil
+             }
+    end
+
+    test "handles missing transfer section" do
+      data = %{}
+
+      result = FileTransferCapabilities.parse_data(data)
+
+      assert result.unix_permissions == nil
+
+      assert result.server_to_device == %{
+               storage: nil,
+               streaming: nil,
+               filesystem: nil
+             }
+
+      assert result.device_to_server == %{
+               storage: nil,
+               streaming: nil,
+               filesystem: nil
+             }
     end
 
     test "ignores unsupported targets" do
-      data = %{"targets" => ["storage", "invalid", "filesystem"]}
+      data = %{
+        "transfer" => %{
+          "unixPermissions" => true,
+          "serverToDevice" => %{
+            "targets" => ["storage", "invalid", "filesystem"]
+          }
+        }
+      }
 
-      parsed = FileTransferCapabilities.parse_data(data)
+      result = FileTransferCapabilities.parse_data(data)
 
-      assert parsed.targets == [:storage, :filesystem]
+      assert result.server_to_device == %{
+               storage: [],
+               streaming: nil,
+               filesystem: []
+             }
+    end
+
+    test "handles missing encodings for targets" do
+      data = %{
+        "transfer" => %{
+          "serverToDevice" => %{
+            "targets" => ["storage"]
+          }
+        },
+        "serverToDevice" => %{
+          "storage" => %{"encodings" => []},
+          "streaming" => %{}
+        }
+      }
+
+      result = FileTransferCapabilities.parse_data(data)
+
+      assert result.server_to_device == %{
+               storage: [],
+               streaming: nil,
+               filesystem: nil
+             }
+
+      assert result.device_to_server == %{
+               storage: nil,
+               streaming: nil,
+               filesystem: nil
+             }
     end
   end
 end

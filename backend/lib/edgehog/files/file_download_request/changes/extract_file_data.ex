@@ -39,7 +39,9 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.ExtractFileData do
       |> Ash.load!(:file_transfer_capabilities)
       |> Map.get(:file_transfer_capabilities)
 
-    case choose_url_and_encoding(file, device_file_transfer_capabilities) do
+    destination_type = Ash.Changeset.get_attribute(changeset, :destination_type)
+
+    case choose_url_and_encoding(file, device_file_transfer_capabilities, destination_type) do
       {:error, message} ->
         Ash.Changeset.add_error(changeset,
           field: :device_id,
@@ -56,7 +58,19 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.ExtractFileData do
     end
   end
 
-  defp choose_url_and_encoding(%{is_archive: true} = file, %{encodings: encodings}) do
+  defp choose_url_and_encoding(file, %{server_to_device: server_to_device}, destination_type) do
+    target = parse_destination_type(destination_type)
+
+    case Map.get(server_to_device, target) do
+      nil ->
+        {:error, "Target #{target} not supported for server-to-device transfers"}
+
+      target_encodings when is_list(target_encodings) ->
+        choose_url_and_encoding(file, target_encodings)
+    end
+  end
+
+  defp choose_url_and_encoding(%{is_archive: true} = file, encodings) do
     cond do
       "tar.gz" in encodings ->
         {:ok, file.gz_file.url, "tar.gz", file.gz_file.digest}
@@ -72,7 +86,7 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.ExtractFileData do
     end
   end
 
-  defp choose_url_and_encoding(%{is_archive: false} = file, %{encodings: encodings}) do
+  defp choose_url_and_encoding(%{is_archive: false} = file, encodings) do
     cond do
       "gz" in encodings ->
         {:ok, file.gz_file.url, "gz", file.gz_file.digest}
@@ -84,4 +98,11 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.ExtractFileData do
         {:ok, file.base_file.url, "", file.base_file.digest}
     end
   end
+
+  defp parse_destination_type(nil), do: :storage
+  defp parse_destination_type(dest) when is_atom(dest), do: dest
+  defp parse_destination_type("storage"), do: :storage
+  defp parse_destination_type("streaming"), do: :streaming
+  defp parse_destination_type("filesystem"), do: :filesystem
+  defp parse_destination_type(_), do: :storage
 end

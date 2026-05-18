@@ -51,9 +51,17 @@ const FILE_MANAGEMENT_FRAGMENT = graphql`
     online
     capabilities
     fileTransferCapabilities {
-      encodings
       unixPermissions
-      targets
+      serverToDevice {
+        storage
+        streaming
+        filesystem
+      }
+      deviceToServer {
+        storage
+        streaming
+        filesystem
+      }
     }
     ...FilesUploadTab_fileDownloadRequests
     ...FilesDownloadTab_fileUploadRequests
@@ -65,12 +73,13 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const intl = useIntl();
   const data = useFragment(FILE_MANAGEMENT_FRAGMENT, deviceRef);
 
-  const supportsServerToDevice =
-    data.capabilities.includes("FILE_TRANSFER_STORAGE") ||
-    data.capabilities.includes("FILE_TRANSFER_STREAM");
+  const supportsServerToDevice = Object.values(
+    data.fileTransferCapabilities?.serverToDevice ?? {},
+  ).some(Boolean);
 
-  const supportsDeviceToServer =
-    data.capabilities.includes("FILE_TRANSFER_READ");
+  const supportsDeviceToServer = Object.values(
+    data.fileTransferCapabilities?.deviceToServer ?? {},
+  ).some(Boolean);
 
   const supportsDeleteFromDevice = data.capabilities.includes(
     "FILE_TRANSFER_DELETE",
@@ -140,10 +149,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
 
   const isOnline = useMemo(() => data?.online ?? false, [data]);
 
-  const hasTransferTargets =
-    (data.fileTransferCapabilities?.targets?.length ?? 0) > 0;
-
-  if (modeOptions.length === 0 || !hasTransferTargets) {
+  if (modeOptions.length === 0) {
     return null;
   }
 

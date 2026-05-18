@@ -9205,28 +9205,28 @@ type RuntimeInfo {
   url: String
 }
 
-"Supported file transfer target kinds."
-enum FileTransferTarget {
-  "Persist file on device storage"
-  STORAGE
+"Supported encodings for file transfer targets."
+type FileTransferTargetCapabilities {
+  "Supported encodings for storage transfers."
+  storage: [String]
 
-  "Process file without storing"
-  STREAMING
+  "Supported encodings for filesystem transfers."
+  filesystem: [String]
 
-  "Persist file on device filesystem"
-  FILESYSTEM
+  "Supported encodings for streaming transfers."
+  streaming: [String]
 }
 
 "Describes file transfer capabilities supported by the device."
 type FileTransferCapabilities {
-  "Supported compression and archive formats."
-  encodings: [String]
-
   "Whether UNIX permissions and ownership are supported."
   unixPermissions: Boolean
 
-  "Supported transfer targets."
-  targets: [FileTransferTarget]
+  "File transfer capabilities for server-to-device transfers."
+  serverToDevice: FileTransferTargetCapabilities
+
+  "File transfer capabilities for device-to-server transfers."
+  deviceToServer: FileTransferTargetCapabilities
 }
 
 "Describe the available images on the device."

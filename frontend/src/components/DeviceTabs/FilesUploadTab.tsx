@@ -72,9 +72,17 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
   @refetchable(queryName: "FilesUploadTab_PaginationQuery") {
     id
     fileTransferCapabilities {
-      encodings
       unixPermissions
-      targets
+      serverToDevice {
+        storage
+        streaming
+        filesystem
+      }
+      deviceToServer {
+        storage
+        streaming
+        filesystem
+      }
     }
     fileDownloadRequests(first: $first, after: $after)
       @connection(key: "FilesUploadTab_fileDownloadRequests") {
@@ -222,7 +230,7 @@ const messages = defineMessages({
 type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
-  supportedEncodings: string[];
+  supportedEncodingsByDestination: Record<FileDestinationType, string[]>;
   allowArchiveUpload: boolean;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
@@ -232,7 +240,7 @@ type ManualFileDownloadRequestFormWrapperProps = {
 const ManualFileDownloadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
-  supportedEncodings,
+  supportedEncodingsByDestination,
   allowArchiveUpload,
   showAdvancedOptions,
   destinationTypeOptions,
@@ -369,7 +377,7 @@ const ManualFileDownloadRequestFormWrapper = ({
     <ManualFileDownloadRequestForm
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
-      supportedEncodings={supportedEncodings}
+      supportedEncodingsByDestination={supportedEncodingsByDestination}
       allowArchiveUpload={allowArchiveUpload}
       showAdvancedOptions={showAdvancedOptions}
       destinationTypeOptions={destinationTypeOptions}
@@ -565,66 +573,86 @@ const FilesUploadTab = ({
 
   const showAdvancedOptions = !!data.fileTransferCapabilities?.unixPermissions;
 
-  const destinationTypeOptions = useMemo<DestinationTypeOption[]>(
-    () =>
-      (data.fileTransferCapabilities?.targets ?? [])
-        .filter((target): target is FileDestinationType => target != null)
-        .map((target) => {
-          switch (target) {
-            case "STORAGE":
-              return {
-                value: target,
-                label: intl.formatMessage({
-                  id: "components.DeviceTabs.FilesUploadTab.destinationType.storage",
-                  defaultMessage: "Storage",
-                }),
-              };
-            case "STREAMING":
-              return {
-                value: target,
-                label: intl.formatMessage({
-                  id: "components.DeviceTabs.FilesUploadTab.destinationType.streaming",
-                  defaultMessage: "Streaming",
-                }),
-              };
-            case "FILESYSTEM":
-              return {
-                value: target,
-                label: intl.formatMessage({
-                  id: "components.DeviceTabs.FilesUploadTab.destinationType.filesystem",
-                  defaultMessage: "File System",
-                }),
-              };
-          }
+  const destinationTypeOptions = useMemo<DestinationTypeOption[]>(() => {
+    const capabilities = data.fileTransferCapabilities?.serverToDevice;
+
+    if (!capabilities) {
+      return [];
+    }
+
+    const options: DestinationTypeOption[] = [];
+
+    if (capabilities.storage != null) {
+      options.push({
+        value: "STORAGE",
+        label: intl.formatMessage({
+          id: "components.DeviceTabs.FilesUploadTab.destinationType.storage",
+          defaultMessage: "Storage",
         }),
-    [data.fileTransferCapabilities?.targets, intl],
-  );
+      });
+    }
 
-  const supportedEncodings = useMemo(() => {
-    const uniqueEncodings = new Set<string>();
+    if (capabilities.streaming != null) {
+      options.push({
+        value: "STREAMING",
+        label: intl.formatMessage({
+          id: "components.DeviceTabs.FilesUploadTab.destinationType.streaming",
+          defaultMessage: "Streaming",
+        }),
+      });
+    }
 
-    data.fileTransferCapabilities?.encodings?.forEach((encoding) => {
-      const value = encoding?.trim();
+    if (capabilities.filesystem != null) {
+      options.push({
+        value: "FILESYSTEM",
+        label: intl.formatMessage({
+          id: "components.DeviceTabs.FilesUploadTab.destinationType.filesystem",
+          defaultMessage: "File System",
+        }),
+      });
+    }
 
-      if (value) {
-        uniqueEncodings.add(value);
-      }
-    });
+    return options;
+  }, [data.fileTransferCapabilities?.serverToDevice, intl]);
 
-    return Array.from(uniqueEncodings);
-  }, [data.fileTransferCapabilities?.encodings]);
+  const supportedEncodingsByDestination = useMemo<
+    Record<FileDestinationType, string[]>
+  >(() => {
+    const capabilities = data.fileTransferCapabilities?.serverToDevice;
+
+    if (!capabilities) {
+      return { STORAGE: [], STREAMING: [], FILESYSTEM: [] };
+    }
+
+    const normalizeEncodings = (
+      encodings: readonly (string | null)[] | null,
+    ) => {
+      if (!encodings) return [];
+      return encodings
+        .map((e) => e?.trim())
+        .filter((e): e is string => e != null && e.length > 0);
+    };
+
+    return {
+      STORAGE: normalizeEncodings(capabilities.storage),
+      STREAMING: normalizeEncodings(capabilities.streaming),
+      FILESYSTEM: normalizeEncodings(capabilities.filesystem),
+    };
+  }, [data.fileTransferCapabilities?.serverToDevice]);
 
   const allowArchiveUpload = useMemo(
     () =>
-      supportedEncodings.some((encoding) => {
-        const normalizedEncoding = encoding.trim().toLowerCase();
-        return (
-          normalizedEncoding === "tar" ||
-          normalizedEncoding === "tar.gz" ||
-          normalizedEncoding === "tar.lz4"
-        );
-      }),
-    [supportedEncodings],
+      Object.values(supportedEncodingsByDestination).some((encodings) =>
+        encodings.some((encoding) => {
+          const normalizedEncoding = encoding.trim().toLowerCase();
+          return (
+            normalizedEncoding === "tar" ||
+            normalizedEncoding === "tar.gz" ||
+            normalizedEncoding === "tar.lz4"
+          );
+        }),
+      ),
+    [supportedEncodingsByDestination],
   );
 
   if (destinationTypeOptions?.length === 0) {
@@ -691,7 +719,9 @@ const FilesUploadTab = ({
               <ManualFileDownloadRequestFormWrapper
                 setErrorFeedback={setErrorFeedback}
                 deviceId={deviceId}
-                supportedEncodings={supportedEncodings}
+                supportedEncodingsByDestination={
+                  supportedEncodingsByDestination
+                }
                 allowArchiveUpload={allowArchiveUpload}
                 showAdvancedOptions={showAdvancedOptions}
                 destinationTypeOptions={destinationTypeOptions}

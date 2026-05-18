@@ -9,22 +9,34 @@
   "doc": "Features and capabilities the Device implementation or plafrom supports and is able to receive from Astarte.",
   "mappings": [
     {
-      "endpoint": "/encodings",
-      "type": "stringarray",
-      "description": "Supported compressions and archive algorithms.",
-      "doc": "List of encoding formats supported by the device, possible values are: [gz, lz4, tar, tar.gz, tar.lz4]."
-    },
-    {
-      "endpoint": "/unixPermissions",
+      "endpoint": "/transfer/unixPermissions",
       "type": "boolean",
       "description": "Support unix file mode, user id and group id.",
       "doc": "Flag to support setting the file mode, user and group ownership of a transferred file in a unix system."
     },
     {
-      "endpoint": "/targets",
+      "endpoint": "/transfer/serverToDevice/targets",
       "type": "stringarray",
       "description": "Supported destination and sources for the transfers.",
       "doc": "List of sources and destinations that the device can handle, possible values are: [storage, streaming, filesystem]"
+    },
+    {
+      "endpoint": "/transfer/deviceToServer/targets",
+      "type": "stringarray",
+      "description": "Supported destination and sources for the transfers.",
+      "doc": "List of sources and destinations that the device can handle, possible values are: [storage, streaming, filesystem]"
+    },
+    {
+      "endpoint": "/deviceToServer/%{target}/encodings",
+      "type": "stringarray",
+      "description": "Supported compressions and archive algorithms for the target.",
+      "doc": "List of encoding formats supported by the device for this target, possible values are: [gz, lz4, tar, tar.gz, tar.lz4]."
+    },
+    {
+      "endpoint": "/serverToDevice/%{target}/encodings",
+      "type": "stringarray",
+      "description": "Supported compressions and archive algorithms for the target.",
+      "doc": "List of encoding formats supported by the device for this target, possible values are: [gz, lz4, tar, tar.gz, tar.lz4]."
     }
   ]
 }

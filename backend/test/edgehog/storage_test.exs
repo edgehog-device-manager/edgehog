@@ -185,9 +185,9 @@ defmodule Edgehog.StorageTest do
       Mox.stub(FileTransferCapabilitiesMock, :get, fn _client, _device_id ->
         {:ok,
          %FileTransferCapabilities{
-           encodings: [],
            unix_permissions: false,
-           targets: [:storage]
+           server_to_device: %{storage: [], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
          }}
       end)
 
