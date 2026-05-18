@@ -27,6 +27,7 @@ defmodule Edgehog.Files do
     extensions: [AshGraphql.Domain, Ash.Authorizer]
 
   alias Edgehog.Files.File
+  alias Edgehog.Files.FileDeleteRequest
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileUploadRequest
   alias Edgehog.Files.Repository
@@ -72,6 +73,13 @@ defmodule Edgehog.Files do
       create FileUploadRequest, :create_file_upload_request, :send_request do
         relay_id_translations input: [device_id: :device]
       end
+
+      create FileDeleteRequest, :create_file_delete_request, :send_request do
+        relay_id_translations input: [
+                                device_id: :device,
+                                file_download_request_id: :file_download_request
+                              ]
+      end
     end
   end
 
@@ -87,6 +95,7 @@ defmodule Edgehog.Files do
       define :set_file_download_response, action: :set_response
       define :set_file_download_progress, action: :set_progress
       define :set_file_download_status, action: :set_status
+      define :set_file_download_deleted_attribute, action: :set_deleted
     end
 
     resource FileUploadRequest do
@@ -97,6 +106,11 @@ defmodule Edgehog.Files do
       define :set_file_upload_response
     end
 
-    resource Edgehog.Files.FileDeleteRequest
+    resource Edgehog.Files.FileDeleteRequest do
+      define :fetch_file_delete_request, action: :read, get_by: [:id]
+      define :send_file_delete_request, args: [:file_delete_request]
+      define :set_file_deletion_status, action: :set_status
+      define :set_file_delete_response, action: :set_response
+    end
   end
 end

@@ -217,6 +217,10 @@ defmodule Edgehog.Files.FileDownloadRequest do
     update :set_status do
       accept [:status]
     end
+
+    update :set_deleted do
+      change set_attribute(:deleted, true)
+    end
   end
 
   attributes do
@@ -332,6 +336,13 @@ defmodule Edgehog.Files.FileDownloadRequest do
     attribute :manual?, :boolean do
       description "Flag to indicate if the file download request was initiated manually by a user."
       source :is_manual
+    end
+
+    attribute :deleted, :boolean do
+      description "Whether the file transferred with this request was deleted from the device"
+      public? true
+
+      default false
     end
 
     timestamps()

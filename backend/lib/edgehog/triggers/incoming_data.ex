@@ -29,6 +29,7 @@ defmodule Edgehog.Triggers.IncomingData do
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableNetworks
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableVolumes
   alias Edgehog.Triggers.IncomingData.Handlers.DeploymentEvent
+  alias Edgehog.Triggers.IncomingData.Handlers.FileDeleteResponse
   alias Edgehog.Triggers.IncomingData.Handlers.FileStorage
   alias Edgehog.Triggers.IncomingData.Handlers.FileTransfer
   alias Edgehog.Triggers.IncomingData.Handlers.OTAEvent
@@ -86,6 +87,10 @@ defmodule Edgehog.Triggers.IncomingData do
 
     handler FileTransfer.Progress do
       filter interface: "io.edgehog.devicemanager.fileTransfer.Progress"
+    end
+
+    handler FileDeleteResponse do
+      filter interface: "io.edgehog.devicemanager.storage.Response"
     end
 
     handler Edgehog.Triggers.Handlers.Fallback
