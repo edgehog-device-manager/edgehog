@@ -31,6 +31,8 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       file_transfer_storage:
         "The device supports transferring files to and from its storage units.",
       file_transfer_read: "The device supports reading files from it.",
+      file_transfer_delete:
+        "The device supports deleting files transferred to the device using file transfer storage",
       geolocation: "The device can be geolocated.",
       hardware_info: "The device provides information about its hardware.",
       led_behaviors: "The device can be asked to blink its LED in a specific pattern.",

@@ -738,6 +738,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         "FILE_TRANSFER_STREAM",
         "FILE_TRANSFER_STORAGE",
         "FILE_TRANSFER_READ",
+        "FILE_TRANSFER_DELETE",
         "GEOLOCATION",
         "HARDWARE_INFO",
         "LED_BEHAVIORS",

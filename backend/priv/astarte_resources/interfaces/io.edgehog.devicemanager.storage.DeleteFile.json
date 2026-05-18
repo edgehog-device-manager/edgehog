@@ -1,0 +1,30 @@
+{
+  "interface_name": "io.edgehog.devicemanager.storage.DeleteFile",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "aggregation": "object",
+  "ownership": "server",
+  "description": "Delete a file stored on a device",
+  "doc": "Requests the deletion of a file stored on the device. The file must be one published through the `io.edgehog.devicemanager.storage.File` interface.",
+  "mappings": [
+    {
+      "endpoint": "/request/id",
+      "type": "string",
+      "description": "Id of the delete request",
+      "doc": "Id of a request on which we will be used to send the `io.edgehog.devicemanager.storage.Response`."
+    },
+    {
+      "endpoint": "/request/fileId",
+      "type": "string",
+      "description": "ID of the file to delete",
+      "doc": "Id of a file on the device published through the `io.edgehog.devicemanager.storage.File` interface."
+    },
+    {
+      "endpoint": "/request/force",
+      "type": "boolean",
+      "description": "Force the deletion of the file.",
+      "doc": "Force the deletion of the file even if it's currently in use, this could cause errors. Default to false."
+    }
+  ]
+}

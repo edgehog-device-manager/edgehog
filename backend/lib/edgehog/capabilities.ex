@@ -189,6 +189,18 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
+    file_transfer_delete: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.storage.DeleteFile",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.storage.Response",
+        major: 0,
+        minor: 1
+      }
+    ],
     hardware_info: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.HardwareInfo",

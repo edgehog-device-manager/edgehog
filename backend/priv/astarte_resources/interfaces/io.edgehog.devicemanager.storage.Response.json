@@ -1,0 +1,46 @@
+{
+  "interface_name": "io.edgehog.devicemanager.storage.Response",
+  "version_major": 0,
+  "version_minor": 1,
+  "type": "datastream",
+  "ownership": "device",
+  "aggregation": "object",
+  "description": "Response for a storage operation",
+  "doc": "Used by the device to report the storage operation status upon completion.",
+  "mappings": [
+    {
+      "endpoint": "/request/id",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Operation ID associated with the response"
+    },
+    {
+      "endpoint": "/request/type",
+      "type": "string",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Type of storage response",
+      "doc": "Specifies the direction of the transfer. Allowed values: 'delete'."
+    },
+    {
+      "endpoint": "/request/code",
+      "type": "longinteger",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Success or error code for the transfer",
+      "doc": "A 0 code is a success, errors are POSIX errno."
+    },
+    {
+      "endpoint": "/request/messages",
+      "type": "stringarray",
+      "reliability": "guaranteed",
+      "database_retention_policy": "use_ttl",
+      "database_retention_ttl": 3600,
+      "description": "Optional messages for the response"
+    }
+  ]
+}

@@ -76,6 +76,14 @@ defmodule Edgehog.CapabilitiesTest do
           major: 0,
           minor: 1
         },
+        "io.edgehog.devicemanager.storage.DeleteFile" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.storage.Response" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
         "io.edgehog.devicemanager.apps.AvailableContainers" => %InterfaceVersion{
           major: 0,
           minor: 1
@@ -121,6 +129,7 @@ defmodule Edgehog.CapabilitiesTest do
         :file_transfer_stream,
         :file_transfer_storage,
         :file_transfer_read,
+        :file_transfer_delete,
         :geolocation,
         :hardware_info,
         :led_behaviors,
@@ -305,6 +314,28 @@ defmodule Edgehog.CapabilitiesTest do
 
       expected_capabilities = [
         :file_transfer_read,
+        :geolocation
+      ]
+
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert Enum.sort(expected_capabilities) == Enum.sort(device_capabilities)
+    end
+
+    test "returns file_transfer_delete capability when all required interfaces are present" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.storage.DeleteFile" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.storage.Response" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      expected_capabilities = [
+        :file_transfer_delete,
         :geolocation
       ]
 
