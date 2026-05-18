@@ -26,6 +26,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.FilesFixtures
 
   alias Edgehog.Files.EphemeralFileMock
+  alias Edgehog.Files.FileDeleteRequest
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileUploadRequest
 
@@ -393,6 +394,106 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       assert request.status == :failed
       assert request.response_code == 17
       assert request.response_message == "upload failed"
+    end
+
+    test "updates file delete request status from storage.Response to completed",
+         context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_download_request =
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :pending
+        )
+
+      file_delete_request =
+        file_delete_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          file_download_request_id: file_download_request.id,
+          status: :pending
+        )
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      response_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.storage.Response",
+          path: "/request",
+          value: %{
+            "type" => "delete",
+            "id" => file_delete_request.id,
+            "code" => 0,
+            "messages" => ["transfer complete"]
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, response_event)
+      |> response(200)
+
+      file_delete_request = Ash.get!(FileDeleteRequest, file_delete_request.id, tenant: tenant)
+      file_download_request = Ash.get!(FileDownloadRequest, file_download_request, tenant: tenant)
+      assert file_delete_request.status == :completed
+      assert file_delete_request.response_code == 0
+      assert file_delete_request.response_messages == ["transfer complete"]
+      assert file_download_request.deleted == true
+    end
+
+    test "updates file delete request status from storage.Response to failed",
+         context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      file_download_request =
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :pending
+        )
+
+      file_delete_request =
+        file_delete_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          file_download_request_id: file_download_request.id,
+          status: :pending
+        )
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      response_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.storage.Response",
+          path: "/request",
+          value: %{
+            "type" => "delete",
+            "id" => file_delete_request.id,
+            "code" => 22,
+            "messages" => ["File doesn't exist"]
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, response_event)
+      |> response(200)
+
+      file_delete_request = Ash.get!(FileDeleteRequest, file_delete_request.id, tenant: tenant)
+      file_download_request = Ash.get!(FileDownloadRequest, file_download_request, tenant: tenant)
+      assert file_delete_request.status == :failed
+      assert file_delete_request.response_code == 22
+      assert file_delete_request.response_messages == ["File doesn't exist"]
+      assert file_download_request.deleted == false
     end
   end
 end

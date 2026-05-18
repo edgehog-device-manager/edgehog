@@ -122,6 +122,10 @@ config :edgehog,
        Edgehog.Astarte.Device.FileUploadRequestMock
 
 config :edgehog,
+       :astarte_file_delete_request_module,
+       Edgehog.Astarte.Device.FileDeleteRequestMock
+
+config :edgehog,
        :astarte_file_transfer_capabilities_module,
        Edgehog.Astarte.Device.FileTransferCapabilitiesMock
 

@@ -152,6 +152,10 @@ Mox.defmock(Edgehog.Astarte.Device.FileUploadRequestMock,
   for: Edgehog.Astarte.Device.FileUploadRequest.Behaviour
 )
 
+Mox.defmock(Edgehog.Astarte.Device.FileDeleteRequestMock,
+  for: Edgehog.Astarte.Device.FileDeleteRequest.Behaviour
+)
+
 Mox.defmock(Edgehog.Astarte.Device.FileTransferCapabilitiesMock,
   for: Edgehog.Astarte.Device.FileTransferCapabilities.Behaviour
 )

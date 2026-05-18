@@ -24,6 +24,7 @@ defmodule Edgehog.FilesFixtures do
   entities via the `Edgehog.Files` domain.
   """
 
+  alias Edgehog.Files.FileDeleteRequest
   alias Edgehog.Files.FileDownloadRequest
 
   @doc """
@@ -258,6 +259,34 @@ defmodule Edgehog.FilesFixtures do
       })
 
     Edgehog.Files.FileUploadRequest
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  def file_delete_request_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
+
+    {file_download_request_id, opts} =
+      Keyword.pop_lazy(opts, :file_download_request_id, fn ->
+        managed_file_download_request_fixture(tenant: tenant).id
+      end)
+
+    params =
+      Enum.into(opts, %{
+        file_download_request_id: file_download_request_id,
+        force: false,
+        status: :pending,
+        response_code: 0,
+        response_messages: ["Successful delete request"],
+        device_id: device_id
+      })
+
+    FileDeleteRequest
     |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
