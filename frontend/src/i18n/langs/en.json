@@ -157,6 +157,30 @@
   "components.CampaignStatus.Scheduled": {
     "defaultMessage": "Scheduled"
   },
+  "components.CampaignTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.CampaignTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.CampaignTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.CampaignTargetStatus.Successful": {
+    "defaultMessage": "Successful"
+  },
+  "components.CellularConnectionTabs.EUTRAN": {
+    "defaultMessage": "E-UTRAN"
+  },
+  "components.CellularConnectionTabs.GSM": {
+    "defaultMessage": "GSM"
+  },
+  "components.CellularConnectionTabs.GSM_COMPACT": {
+    "defaultMessage": "GSM Compact"
+  },
+  "components.CellularConnectionTabs.GSM_EGPRS": {
+    "defaultMessage": "GSM with EGPRS"
+  },
   "components.CellularConnectionTabs.Modem.APN": {
     "defaultMessage": "APN"
   },
@@ -189,6 +213,36 @@
   },
   "components.CellularConnectionTabs.Modem.technology": {
     "defaultMessage": "Technology"
+  },
+  "components.CellularConnectionTabs.NotRegistered": {
+    "defaultMessage": "Not Registered"
+  },
+  "components.CellularConnectionTabs.Registered": {
+    "defaultMessage": "Registered"
+  },
+  "components.CellularConnectionTabs.RegisteredRoaming": {
+    "defaultMessage": "Registered, roaming"
+  },
+  "components.CellularConnectionTabs.RegistrationDenied": {
+    "defaultMessage": "Registration denied"
+  },
+  "components.CellularConnectionTabs.SearchingOperator": {
+    "defaultMessage": "Searching an operator to register to"
+  },
+  "components.CellularConnectionTabs.UTRAN": {
+    "defaultMessage": "UTRAN"
+  },
+  "components.CellularConnectionTabs.UTRAN_HSDPA": {
+    "defaultMessage": "UTRAN with HSDPA"
+  },
+  "components.CellularConnectionTabs.UTRAN_HSDPA_HSUPA": {
+    "defaultMessage": "UTRAN with HSDPA and HSUPA"
+  },
+  "components.CellularConnectionTabs.UTRAN_HSUPA": {
+    "defaultMessage": "UTRAN with HSUPA"
+  },
+  "components.CellularConnectionTabs.Unknown": {
+    "defaultMessage": "Unknown"
   },
   "components.CellularConnectionTabs.noModems.message": {
     "defaultMessage": "The device has not detected any modems yet."
@@ -412,25 +466,25 @@
   "components.DeleteReleaseModal.title": {
     "defaultMessage": "Delete Release"
   },
-  "components.DeployedApplicationsTable.deleteButtonTitle": {
-    "defaultMessage": "Delete Deployment"
-  },
   "components.DeployedApplicationsTable.latest": {
     "defaultMessage": "Latest"
   },
   "components.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
-  "components.DeployedApplicationsTable.sendButtonTitle": {
+  "components.DeploymentActionButtons.deleteButtonTitle": {
+    "defaultMessage": "Delete Deployment"
+  },
+  "components.DeploymentActionButtons.sendButtonTitle": {
     "defaultMessage": "Redeploy Application"
   },
-  "components.DeployedApplicationsTable.startButtonTitle": {
+  "components.DeploymentActionButtons.startButtonTitle": {
     "defaultMessage": "Start Deployment"
   },
-  "components.DeployedApplicationsTable.stopButtonTitle": {
+  "components.DeploymentActionButtons.stopButtonTitle": {
     "defaultMessage": "Stop Deployment"
   },
-  "components.DeployedApplicationsTable.upgradeButtonTitle": {
+  "components.DeploymentActionButtons.upgradeButtonTitle": {
     "defaultMessage": "Upgrade Deployment"
   },
   "components.DeploymentCampaignsTable.applicationNameTitle": {
@@ -521,25 +575,25 @@
   "components.DeploymentEventMessage.noShortMessage": {
     "defaultMessage": "No short message. Click to show extended info."
   },
-  "components.DeploymentLogs.EventType.Deleting": {
+  "components.DeploymentEventsCard.Deleting": {
     "defaultMessage": "Deleting"
   },
-  "components.DeploymentLogs.EventType.Error": {
+  "components.DeploymentEventsCard.Error": {
     "defaultMessage": "Error"
   },
-  "components.DeploymentLogs.EventType.Started": {
+  "components.DeploymentEventsCard.Started": {
     "defaultMessage": "Started"
   },
-  "components.DeploymentLogs.EventType.Starting": {
+  "components.DeploymentEventsCard.Starting": {
     "defaultMessage": "Starting"
   },
-  "components.DeploymentLogs.EventType.Stopped": {
+  "components.DeploymentEventsCard.Stopped": {
     "defaultMessage": "Stopped"
   },
-  "components.DeploymentLogs.EventType.Stopping": {
+  "components.DeploymentEventsCard.Stopping": {
     "defaultMessage": "Stopping"
   },
-  "components.DeploymentLogs.EventType.Updating": {
+  "components.DeploymentEventsCard.Updating": {
     "defaultMessage": "Updating"
   },
   "components.DeploymentReadiness.notReady": {
@@ -548,31 +602,31 @@
   "components.DeploymentReadiness.ready": {
     "defaultMessage": "Ready"
   },
-  "components.DeploymentStateComponent.deleting": {
+  "components.DeploymentState.deleting": {
     "defaultMessage": "Deleting"
   },
-  "components.DeploymentStateComponent.deploying": {
+  "components.DeploymentState.deploying": {
     "defaultMessage": "Deploying"
   },
-  "components.DeploymentStateComponent.error": {
+  "components.DeploymentState.error": {
     "defaultMessage": "Error"
   },
-  "components.DeploymentStateComponent.pending": {
+  "components.DeploymentState.pending": {
     "defaultMessage": "Pending"
   },
-  "components.DeploymentStateComponent.sent": {
+  "components.DeploymentState.sent": {
     "defaultMessage": "Sent"
   },
-  "components.DeploymentStateComponent.started": {
+  "components.DeploymentState.started": {
     "defaultMessage": "Started"
   },
-  "components.DeploymentStateComponent.starting": {
+  "components.DeploymentState.starting": {
     "defaultMessage": "Starting"
   },
-  "components.DeploymentStateComponent.stopped": {
+  "components.DeploymentState.stopped": {
     "defaultMessage": "Stopped"
   },
-  "components.DeploymentStateComponent.stopping": {
+  "components.DeploymentState.stopping": {
     "defaultMessage": "Stopping"
   },
   "components.DeploymentTargetsTable.completionTimestampTitle": {
@@ -646,17 +700,14 @@
   "components.DeviceMappingsFormInput.pathOnHostLabel": {
     "defaultMessage": "Path On Host"
   },
-  "components.DeviceTabs.ApplicationsTab": {
-    "defaultMessage": "Applications"
-  },
   "components.DeviceTabs.ApplicationsTab.DeployedApplications": {
     "defaultMessage": "Deployed Applications"
   },
   "components.DeviceTabs.ApplicationsTab.InstallNewApp": {
     "defaultMessage": "Install Applications"
   },
-  "components.DeviceTabs.BaseImageTab": {
-    "defaultMessage": "Base Image"
+  "components.DeviceTabs.ApplicationsTab.title": {
+    "defaultMessage": "Applications"
   },
   "components.DeviceTabs.BaseImageTab.buildId": {
     "defaultMessage": "Build identifier"
@@ -667,13 +718,16 @@
   "components.DeviceTabs.BaseImageTab.name": {
     "defaultMessage": "Name"
   },
+  "components.DeviceTabs.BaseImageTab.title": {
+    "defaultMessage": "Base Image"
+  },
   "components.DeviceTabs.BaseImageTab.version": {
     "defaultMessage": "Version"
   },
-  "components.DeviceTabs.BatteryTab": {
+  "components.DeviceTabs.BatteryTab.title": {
     "defaultMessage": "Battery"
   },
-  "components.DeviceTabs.CellularConnectionTab": {
+  "components.DeviceTabs.CellularConnectionTab.title": {
     "defaultMessage": "Cellular Connection"
   },
   "components.DeviceTabs.FileManagementTab.deleteFromDevice": {
@@ -706,9 +760,6 @@
   "components.DeviceTabs.FilesDeleteTab.unknownError": {
     "defaultMessage": "Unknown error."
   },
-  "components.DeviceTabs.FilesDownloadTab": {
-    "defaultMessage": "Files Download"
-  },
   "components.DeviceTabs.FilesDownloadTab.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
   },
@@ -724,11 +775,11 @@
   "components.DeviceTabs.FilesDownloadTab.sourceType.storage": {
     "defaultMessage": "Storage"
   },
+  "components.DeviceTabs.FilesDownloadTab.title": {
+    "defaultMessage": "Files Download"
+  },
   "components.DeviceTabs.FilesDownloadTab.uploadSource": {
     "defaultMessage": "Upload Source"
-  },
-  "components.DeviceTabs.FilesUploadTab": {
-    "defaultMessage": "Files Upload"
   },
   "components.DeviceTabs.FilesUploadTab.archivationErrorFeedback": {
     "defaultMessage": "Could not process files locally. Please try again."
@@ -757,14 +808,14 @@
   "components.DeviceTabs.FilesUploadTab.requestHistory": {
     "defaultMessage": "Request History"
   },
+  "components.DeviceTabs.FilesUploadTab.title": {
+    "defaultMessage": "Files Upload"
+  },
   "components.DeviceTabs.FilesUploadTab.uploadErrorFeedback": {
     "defaultMessage": "Upload failed. Please check your connection."
   },
   "components.DeviceTabs.FilesUploadTab.uploadLocation": {
     "defaultMessage": "Upload Location"
-  },
-  "components.DeviceTabs.HardwareInfoTab": {
-    "defaultMessage": "Hardware Info"
   },
   "components.DeviceTabs.HardwareInfoTab.cpuArchitecture": {
     "defaultMessage": "CPU architecture"
@@ -781,26 +832,26 @@
   "components.DeviceTabs.HardwareInfoTab.memoryTotalBytes": {
     "defaultMessage": "Total memory"
   },
-  "components.DeviceTabs.LocationTab": {
-    "defaultMessage": "Geolocation"
+  "components.DeviceTabs.HardwareInfoTab.title": {
+    "defaultMessage": "Hardware Info"
   },
   "components.DeviceTabs.LocationTab.lastUpdateAt": {
     "defaultMessage": "Last known location, updated at {date}"
   },
-  "components.DeviceTabs.NetworkInterfacesTab": {
-    "defaultMessage": "Network Interfaces"
+  "components.DeviceTabs.LocationTab.title": {
+    "defaultMessage": "Geolocation"
   },
-  "components.DeviceTabs.OSInfoTab": {
-    "defaultMessage": "Operating System"
+  "components.DeviceTabs.NetworkInterfacesTab.title": {
+    "defaultMessage": "Network Interfaces"
   },
   "components.DeviceTabs.OSInfoTab.name": {
     "defaultMessage": "OS name"
   },
+  "components.DeviceTabs.OSInfoTab.title": {
+    "defaultMessage": "Operating System"
+  },
   "components.DeviceTabs.OSInfoTab.version": {
     "defaultMessage": "OS version"
-  },
-  "components.DeviceTabs.RuntimeInfoTab": {
-    "defaultMessage": "Runtime"
   },
   "components.DeviceTabs.RuntimeInfoTab.environment": {
     "defaultMessage": "Environment"
@@ -808,14 +859,14 @@
   "components.DeviceTabs.RuntimeInfoTab.name": {
     "defaultMessage": "Name"
   },
+  "components.DeviceTabs.RuntimeInfoTab.title": {
+    "defaultMessage": "Runtime"
+  },
   "components.DeviceTabs.RuntimeInfoTab.url": {
     "defaultMessage": "URL"
   },
   "components.DeviceTabs.RuntimeInfoTab.version": {
     "defaultMessage": "Version"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab": {
-    "defaultMessage": "Software Updates"
   },
   "components.DeviceTabs.SoftwareUpdateTab.manualOTAUpdate": {
     "defaultMessage": "Manual OTA Update"
@@ -829,14 +880,14 @@
   "components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
     "defaultMessage": "Could not start the OTA update, please try again."
   },
+  "components.DeviceTabs.SoftwareUpdateTab.title": {
+    "defaultMessage": "Software Updates"
+  },
   "components.DeviceTabs.SoftwareUpdateTab.updatesHistory": {
     "defaultMessage": "History"
   },
-  "components.DeviceTabs.StorageUsageTab": {
+  "components.DeviceTabs.StorageUsageTab.title": {
     "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.SystemStatusTab": {
-    "defaultMessage": "System Status"
   },
   "components.DeviceTabs.SystemStatusTab.lastUpdateAt": {
     "defaultMessage": "Last updated at {date}"
@@ -847,10 +898,13 @@
   "components.DeviceTabs.SystemStatusTab.taskCount": {
     "defaultMessage": "Active Tasks"
   },
+  "components.DeviceTabs.SystemStatusTab.title": {
+    "defaultMessage": "System Status"
+  },
   "components.DeviceTabs.SystemStatusTab.uptimeMilliseconds": {
     "defaultMessage": "Last boot at"
   },
-  "components.DeviceTabs.WiFiScanResultsTab": {
+  "components.DeviceTabs.WiFiScanResultsTab.title": {
     "defaultMessage": "WiFi APs"
   },
   "components.DevicesGroupsTable.deviceIdTitle": {
@@ -1545,249 +1599,6 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
-  },
-  "components.campaignTargetStatus.Failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.campaignTargetStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.campaignTargetStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.campaignTargetStatus.Successful": {
-    "defaultMessage": "Successful"
-  },
-  "fieldExplanation.binds.description": {
-    "defaultMessage": "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]"
-  },
-  "fieldExplanation.binds.example": {
-    "defaultMessage": "/data:/data or /config:/config:ro"
-  },
-  "fieldExplanation.binds.title": {
-    "defaultMessage": "Binds"
-  },
-  "fieldExplanation.capAdd.description": {
-    "defaultMessage": "Add Linux kernel capabilities to the container, e.g., 'NET_ADMIN' for network management."
-  },
-  "fieldExplanation.capAdd.example": {
-    "defaultMessage": "[\"NET_ADMIN\", \"SYS_ADMIN\"]"
-  },
-  "fieldExplanation.capAdd.title": {
-    "defaultMessage": "Add Capabilities (Cap Add)"
-  },
-  "fieldExplanation.capDrop.description": {
-    "defaultMessage": "Remove default Linux kernel capabilities to improve container security."
-  },
-  "fieldExplanation.capDrop.example": {
-    "defaultMessage": "[\"MKNOD\", \"SETPCAP\"]"
-  },
-  "fieldExplanation.capDrop.title": {
-    "defaultMessage": "Drop Capabilities (Cap Drop)"
-  },
-  "fieldExplanation.cpuPeriod.description": {
-    "defaultMessage": "Duration of a CPU scheduling period. Used with CPU Quota to limit CPU usage."
-  },
-  "fieldExplanation.cpuPeriod.example": {
-    "defaultMessage": "100000"
-  },
-  "fieldExplanation.cpuPeriod.title": {
-    "defaultMessage": "CPU Period (microseconds)"
-  },
-  "fieldExplanation.cpuQuota.description": {
-    "defaultMessage": "CPU time allowed per period. Example: quota 50000 with period 100000 → 50% of one CPU."
-  },
-  "fieldExplanation.cpuQuota.example": {
-    "defaultMessage": "50000"
-  },
-  "fieldExplanation.cpuQuota.title": {
-    "defaultMessage": "CPU Quota (microseconds)"
-  },
-  "fieldExplanation.cpuRealtimePeriod.description": {
-    "defaultMessage": "Scheduling period for CPU time dedicated to real-time tasks. Set to 0 to allocate no time allocated to real-time tasks."
-  },
-  "fieldExplanation.cpuRealtimePeriod.example": {
-    "defaultMessage": "1000000"
-  },
-  "fieldExplanation.cpuRealtimePeriod.title": {
-    "defaultMessage": "CPU Real-Time Period (microseconds)"
-  },
-  "fieldExplanation.cpuRealtimeRuntime.description": {
-    "defaultMessage": "Max real-time CPU time within the real-time period. Cannot exceed the real-time period."
-  },
-  "fieldExplanation.cpuRealtimeRuntime.example": {
-    "defaultMessage": "950000"
-  },
-  "fieldExplanation.cpuRealtimeRuntime.title": {
-    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
-  },
-  "fieldExplanation.deviceMappings.description": {
-    "defaultMessage": "Maps host devices to container paths with specific access permissions."
-  },
-  "fieldExplanation.deviceMappings.example": {
-    "defaultMessage": "[(\"pathOnHost\":\"/dev/sda1\",\"pathInContainer\":\"/dev/storage\",\"cGroupPermissions\":\"mrw\")]"
-  },
-  "fieldExplanation.deviceMappings.title": {
-    "defaultMessage": "Device Mappings"
-  },
-  "fieldExplanation.env.description": {
-    "defaultMessage": "JSON array of environment variables in 'KEY=VALUE' format, used to pass config to the containerized app."
-  },
-  "fieldExplanation.env.example": {
-    "defaultMessage": "[\"NODE_ENV=production\", \"PORT=8080\"]"
-  },
-  "fieldExplanation.env.title": {
-    "defaultMessage": "Environment Variables (JSON String)"
-  },
-  "fieldExplanation.extraHosts.description": {
-    "defaultMessage": "List of hostname/IP mappings added to the container's /etc/hosts for custom DNS resolution. 'host-gateway' resolves to the host IP."
-  },
-  "fieldExplanation.extraHosts.example": {
-    "defaultMessage": "\"database:192.168.1.5\" or \"gateway:host-gateway\""
-  },
-  "fieldExplanation.extraHosts.title": {
-    "defaultMessage": "Extra Hosts"
-  },
-  "fieldExplanation.hostname.description": {
-    "defaultMessage": "The network hostname to assign to the container, which must comply with RFC 1123."
-  },
-  "fieldExplanation.hostname.example": {
-    "defaultMessage": "web-server-1"
-  },
-  "fieldExplanation.hostname.title": {
-    "defaultMessage": "Hostname"
-  },
-  "fieldExplanation.imageCredentials.description": {
-    "defaultMessage": "Select credentials needed to pull this image from a private registry. Leave empty for public images."
-  },
-  "fieldExplanation.imageCredentials.title": {
-    "defaultMessage": "Image Credentials"
-  },
-  "fieldExplanation.imageReference.description": {
-    "defaultMessage": "The complete reference for the container image you want to use, including registry, repository, and tag."
-  },
-  "fieldExplanation.imageReference.example": {
-    "defaultMessage": "my-image:latest or registry.example.com/my-app:v1.0"
-  },
-  "fieldExplanation.imageReference.title": {
-    "defaultMessage": "Image Reference"
-  },
-  "fieldExplanation.memory.description": {
-    "defaultMessage": "Maximum physical memory the container can use. Set 0 for unlimited memory."
-  },
-  "fieldExplanation.memory.example": {
-    "defaultMessage": "104857600 (100MB)"
-  },
-  "fieldExplanation.memory.title": {
-    "defaultMessage": "Memory Limit (bytes)"
-  },
-  "fieldExplanation.memoryReservation.description": {
-    "defaultMessage": "Allows you to specify a soft limit smaller than Memory which is activated when Docker detects contention or low memory on the host machine. If you use Memory Reservation, it must be set lower than Memory for it to take precedence. Because it is a soft limit, it doesn't guarantee that the container doesn't exceed the limit."
-  },
-  "fieldExplanation.memoryReservation.example": {
-    "defaultMessage": "104857600 (100MB)"
-  },
-  "fieldExplanation.memoryReservation.title": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "fieldExplanation.memorySwap.description": {
-    "defaultMessage": "The total amount of memory plus swap the container can use. If memorySwap is set to a positive value, both Memory and Memory Swap must be set. Memory controls the amount of physical memory, and Memory Swap represents the combined limit of memory and swap. For example, if memory='300m' and memorySwap='1g', the container can use 300MB of memory and 700MB of swap (1GB - 300MB)."
-  },
-  "fieldExplanation.memorySwap.example": {
-    "defaultMessage": "1073741824 (1GB)"
-  },
-  "fieldExplanation.memorySwap.title": {
-    "defaultMessage": "Memory + Swap Limit (bytes)"
-  },
-  "fieldExplanation.memorySwappiness.description": {
-    "defaultMessage": "Controls kernel swap behavior. 0 = avoid swapping, 100 = swap aggressively."
-  },
-  "fieldExplanation.memorySwappiness.example": {
-    "defaultMessage": "60"
-  },
-  "fieldExplanation.memorySwappiness.title": {
-    "defaultMessage": "Memory Swappiness (0-100)"
-  },
-  "fieldExplanation.networkMode.description": {
-    "defaultMessage": "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is treated as the name of a user-defined network. Other container engines may support additional modes."
-  },
-  "fieldExplanation.networkMode.example": {
-    "defaultMessage": "bridge"
-  },
-  "fieldExplanation.networkMode.title": {
-    "defaultMessage": "Network Mode"
-  },
-  "fieldExplanation.networks.description": {
-    "defaultMessage": "Select custom networks the container should connect to, usually for inter-service communication."
-  },
-  "fieldExplanation.networks.title": {
-    "defaultMessage": "Attached Networks"
-  },
-  "fieldExplanation.portBindings.description": {
-    "defaultMessage": "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol defaults to TCP."
-  },
-  "fieldExplanation.portBindings.example": {
-    "defaultMessage": "\"8080:80\" or \"8080:443/udp\""
-  },
-  "fieldExplanation.portBindings.title": {
-    "defaultMessage": "Port Bindings"
-  },
-  "fieldExplanation.privileged.description": {
-    "defaultMessage": "Run container with extended privileges, giving full host resource access (like root)."
-  },
-  "fieldExplanation.privileged.title": {
-    "defaultMessage": "Privileged Mode"
-  },
-  "fieldExplanation.readOnlyRootfs.description": {
-    "defaultMessage": "Prevents modification of system files by making the container's root filesystem read-only."
-  },
-  "fieldExplanation.readOnlyRootfs.title": {
-    "defaultMessage": "Read-Only Root Filesystem"
-  },
-  "fieldExplanation.restartPolicy.description": {
-    "defaultMessage": "Defines container restart behavior. Options: 'no' (never restart), 'always', 'unless-stopped', 'on-failure'."
-  },
-  "fieldExplanation.restartPolicy.example": {
-    "defaultMessage": "unless-stopped"
-  },
-  "fieldExplanation.restartPolicy.title": {
-    "defaultMessage": "Restart Policy"
-  },
-  "fieldExplanation.storageOpt.description": {
-    "defaultMessage": "Driver-specific storage options, such as limiting the size of the writable layer."
-  },
-  "fieldExplanation.storageOpt.example": {
-    "defaultMessage": "\"size=100G\""
-  },
-  "fieldExplanation.storageOpt.title": {
-    "defaultMessage": "Storage Options"
-  },
-  "fieldExplanation.tmpfs.description": {
-    "defaultMessage": "In-memory filesystems mounted at specified container paths. Data is fast but lost on container restart."
-  },
-  "fieldExplanation.tmpfs.example": {
-    "defaultMessage": "\"/tmp:size=64m\""
-  },
-  "fieldExplanation.tmpfs.title": {
-    "defaultMessage": "Tmpfs Mounts"
-  },
-  "fieldExplanation.volumeDriver.description": {
-    "defaultMessage": "Driver/plugin used to manage and mount volumes."
-  },
-  "fieldExplanation.volumeDriver.example": {
-    "defaultMessage": "local"
-  },
-  "fieldExplanation.volumeDriver.title": {
-    "defaultMessage": "Volume Driver"
-  },
-  "fieldExplanation.volumes.description": {
-    "defaultMessage": "Attach an existing volume to a path inside the container. This allows the container to persist data or share it with other containers. You only need to select the volume and provide the container path where it will be mounted."
-  },
-  "fieldExplanation.volumes.example": {
-    "defaultMessage": "my-named-volume:/app/data"
-  },
-  "fieldExplanation.volumes.title": {
-    "defaultMessage": "Volume Mounts"
   },
   "forms.ContainerForm.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
@@ -2499,6 +2310,12 @@
   "forms.ManualFileDownloadRequestForm.encodingLabel": {
     "defaultMessage": "Encoding"
   },
+  "forms.ManualFileDownloadRequestForm.encodingNone": {
+    "defaultMessage": "None"
+  },
+  "forms.ManualFileDownloadRequestForm.encodingNoneDisabled": {
+    "defaultMessage": "None (disabled for multiple files, select an archive encoding instead)"
+  },
   "forms.ManualFileDownloadRequestForm.fileHint": {
     "defaultMessage": "Select files or a folder. Multiple items will be encoded."
   },
@@ -2595,9 +2412,6 @@
   "forms.ManualFileUploadRequestForm.encodingNone": {
     "defaultMessage": "None"
   },
-  "forms.ManualFileUploadRequestForm.encodingNoneDisabled": {
-    "defaultMessage": "None (disabled for multiple files, select an archive encoding instead)"
-  },
   "forms.ManualFileUploadRequestForm.progressLabel": {
     "defaultMessage": "Report Progress"
   },
@@ -2651,9 +2465,6 @@
   },
   "forms.ManualOtaFromFileForm.update": {
     "defaultMessage": "Update"
-  },
-  "forms.ReleaseCreate.reuseReleaseTitleButton": {
-    "defaultMessage": "Copy configuration from an existing release"
   },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -2851,47 +2662,305 @@
   "forms.UpdateSystemModel.submitButton": {
     "defaultMessage": "Update"
   },
-  "modem.RegistrationStatus.NotRegistered": {
-    "defaultMessage": "Not Registered"
+  "forms.fieldExplanation.binds.description": {
+    "defaultMessage": "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]"
   },
-  "modem.RegistrationStatus.Registered": {
-    "defaultMessage": "Registered"
+  "forms.fieldExplanation.binds.example": {
+    "defaultMessage": "/data:/data or /config:/config:ro"
   },
-  "modem.RegistrationStatus.RegisteredRoaming": {
-    "defaultMessage": "Registered, roaming"
+  "forms.fieldExplanation.binds.title": {
+    "defaultMessage": "Binds"
   },
-  "modem.RegistrationStatus.RegistrationDenied": {
-    "defaultMessage": "Registration denied"
+  "forms.fieldExplanation.capAdd.description": {
+    "defaultMessage": "Add Linux kernel capabilities to the container, e.g., 'NET_ADMIN' for network management."
   },
-  "modem.RegistrationStatus.SearchingOperator": {
-    "defaultMessage": "Searching an operator to register to"
+  "forms.fieldExplanation.capAdd.example": {
+    "defaultMessage": "[\"NET_ADMIN\", \"SYS_ADMIN\"]"
   },
-  "modem.RegistrationStatus.Unknown": {
-    "defaultMessage": "Unknown"
+  "forms.fieldExplanation.capAdd.title": {
+    "defaultMessage": "Add Capabilities (Cap Add)"
   },
-  "modem.technology.EUTRAN": {
-    "defaultMessage": "E-UTRAN"
+  "forms.fieldExplanation.capDrop.description": {
+    "defaultMessage": "Remove default Linux kernel capabilities to improve container security."
   },
-  "modem.technology.GSM": {
-    "defaultMessage": "GSM"
+  "forms.fieldExplanation.capDrop.example": {
+    "defaultMessage": "[\"MKNOD\", \"SETPCAP\"]"
   },
-  "modem.technology.GSM_COMPACT": {
-    "defaultMessage": "GSM Compact"
+  "forms.fieldExplanation.capDrop.title": {
+    "defaultMessage": "Drop Capabilities (Cap Drop)"
   },
-  "modem.technology.GSM_EGPRS": {
-    "defaultMessage": "GSM with EGPRS"
+  "forms.fieldExplanation.cpuPeriod.description": {
+    "defaultMessage": "Duration of a CPU scheduling period. Used with CPU Quota to limit CPU usage."
   },
-  "modem.technology.UTRAN": {
-    "defaultMessage": "UTRAN"
+  "forms.fieldExplanation.cpuPeriod.example": {
+    "defaultMessage": "100000"
   },
-  "modem.technology.UTRAN_HSDPA": {
-    "defaultMessage": "UTRAN with HSDPA"
+  "forms.fieldExplanation.cpuPeriod.title": {
+    "defaultMessage": "CPU Period (microseconds)"
   },
-  "modem.technology.UTRAN_HSDPA_HSUPA": {
-    "defaultMessage": "UTRAN with HSDPA and HSUPA"
+  "forms.fieldExplanation.cpuQuota.description": {
+    "defaultMessage": "CPU time allowed per period. Example: quota 50000 with period 100000 → 50% of one CPU."
   },
-  "modem.technology.UTRAN_HSUPA": {
-    "defaultMessage": "UTRAN with HSUPA"
+  "forms.fieldExplanation.cpuQuota.example": {
+    "defaultMessage": "50000"
+  },
+  "forms.fieldExplanation.cpuQuota.title": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "forms.fieldExplanation.cpuRealtimePeriod.description": {
+    "defaultMessage": "Scheduling period for CPU time dedicated to real-time tasks. Set to 0 to allocate no time allocated to real-time tasks."
+  },
+  "forms.fieldExplanation.cpuRealtimePeriod.example": {
+    "defaultMessage": "1000000"
+  },
+  "forms.fieldExplanation.cpuRealtimePeriod.title": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "forms.fieldExplanation.cpuRealtimeRuntime.description": {
+    "defaultMessage": "Max real-time CPU time within the real-time period. Cannot exceed the real-time period."
+  },
+  "forms.fieldExplanation.cpuRealtimeRuntime.example": {
+    "defaultMessage": "950000"
+  },
+  "forms.fieldExplanation.cpuRealtimeRuntime.title": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.fieldExplanation.deviceMappings.description": {
+    "defaultMessage": "Maps host devices to container paths with specific access permissions."
+  },
+  "forms.fieldExplanation.deviceMappings.example": {
+    "defaultMessage": "[(\"pathOnHost\":\"/dev/sda1\",\"pathInContainer\":\"/dev/storage\",\"cGroupPermissions\":\"mrw\")]"
+  },
+  "forms.fieldExplanation.deviceMappings.title": {
+    "defaultMessage": "Device Mappings"
+  },
+  "forms.fieldExplanation.env.description": {
+    "defaultMessage": "JSON array of environment variables in 'KEY=VALUE' format, used to pass config to the containerized app."
+  },
+  "forms.fieldExplanation.env.example": {
+    "defaultMessage": "[\"NODE_ENV=production\", \"PORT=8080\"]"
+  },
+  "forms.fieldExplanation.env.title": {
+    "defaultMessage": "Environment Variables (JSON String)"
+  },
+  "forms.fieldExplanation.extraHosts.description": {
+    "defaultMessage": "List of hostname/IP mappings added to the container's /etc/hosts for custom DNS resolution. 'host-gateway' resolves to the host IP."
+  },
+  "forms.fieldExplanation.extraHosts.example": {
+    "defaultMessage": "\"database:192.168.1.5\" or \"gateway:host-gateway\""
+  },
+  "forms.fieldExplanation.extraHosts.title": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "forms.fieldExplanation.hostname.description": {
+    "defaultMessage": "The network hostname to assign to the container, which must comply with RFC 1123."
+  },
+  "forms.fieldExplanation.hostname.example": {
+    "defaultMessage": "web-server-1"
+  },
+  "forms.fieldExplanation.hostname.title": {
+    "defaultMessage": "Hostname"
+  },
+  "forms.fieldExplanation.imageCredentials.description": {
+    "defaultMessage": "Select credentials needed to pull this image from a private registry. Leave empty for public images."
+  },
+  "forms.fieldExplanation.imageCredentials.title": {
+    "defaultMessage": "Image Credentials"
+  },
+  "forms.fieldExplanation.imageReference.description": {
+    "defaultMessage": "The complete reference for the container image you want to use, including registry, repository, and tag."
+  },
+  "forms.fieldExplanation.imageReference.example": {
+    "defaultMessage": "my-image:latest or registry.example.com/my-app:v1.0"
+  },
+  "forms.fieldExplanation.imageReference.title": {
+    "defaultMessage": "Image Reference"
+  },
+  "forms.fieldExplanation.memory.description": {
+    "defaultMessage": "Maximum physical memory the container can use. Set 0 for unlimited memory."
+  },
+  "forms.fieldExplanation.memory.example": {
+    "defaultMessage": "104857600 (100MB)"
+  },
+  "forms.fieldExplanation.memory.title": {
+    "defaultMessage": "Memory Limit (bytes)"
+  },
+  "forms.fieldExplanation.memoryReservation.description": {
+    "defaultMessage": "Allows you to specify a soft limit smaller than Memory which is activated when Docker detects contention or low memory on the host machine. If you use Memory Reservation, it must be set lower than Memory for it to take precedence. Because it is a soft limit, it doesn't guarantee that the container doesn't exceed the limit."
+  },
+  "forms.fieldExplanation.memoryReservation.example": {
+    "defaultMessage": "104857600 (100MB)"
+  },
+  "forms.fieldExplanation.memoryReservation.title": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.fieldExplanation.memorySwap.description": {
+    "defaultMessage": "The total amount of memory plus swap the container can use. If memorySwap is set to a positive value, both Memory and Memory Swap must be set. Memory controls the amount of physical memory, and Memory Swap represents the combined limit of memory and swap. For example, if memory='300m' and memorySwap='1g', the container can use 300MB of memory and 700MB of swap (1GB - 300MB)."
+  },
+  "forms.fieldExplanation.memorySwap.example": {
+    "defaultMessage": "1073741824 (1GB)"
+  },
+  "forms.fieldExplanation.memorySwap.title": {
+    "defaultMessage": "Memory + Swap Limit (bytes)"
+  },
+  "forms.fieldExplanation.memorySwappiness.description": {
+    "defaultMessage": "Controls kernel swap behavior. 0 = avoid swapping, 100 = swap aggressively."
+  },
+  "forms.fieldExplanation.memorySwappiness.example": {
+    "defaultMessage": "60"
+  },
+  "forms.fieldExplanation.memorySwappiness.title": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.fieldExplanation.networkMode.description": {
+    "defaultMessage": "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is treated as the name of a user-defined network. Other container engines may support additional modes."
+  },
+  "forms.fieldExplanation.networkMode.example": {
+    "defaultMessage": "bridge"
+  },
+  "forms.fieldExplanation.networkMode.title": {
+    "defaultMessage": "Network Mode"
+  },
+  "forms.fieldExplanation.networks.description": {
+    "defaultMessage": "Select custom networks the container should connect to, usually for inter-service communication."
+  },
+  "forms.fieldExplanation.networks.title": {
+    "defaultMessage": "Attached Networks"
+  },
+  "forms.fieldExplanation.portBindings.description": {
+    "defaultMessage": "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol defaults to TCP."
+  },
+  "forms.fieldExplanation.portBindings.example": {
+    "defaultMessage": "\"8080:80\" or \"8080:443/udp\""
+  },
+  "forms.fieldExplanation.portBindings.title": {
+    "defaultMessage": "Port Bindings"
+  },
+  "forms.fieldExplanation.privileged.description": {
+    "defaultMessage": "Run container with extended privileges, giving full host resource access (like root)."
+  },
+  "forms.fieldExplanation.privileged.title": {
+    "defaultMessage": "Privileged Mode"
+  },
+  "forms.fieldExplanation.readOnlyRootfs.description": {
+    "defaultMessage": "Prevents modification of system files by making the container's root filesystem read-only."
+  },
+  "forms.fieldExplanation.readOnlyRootfs.title": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "forms.fieldExplanation.restartPolicy.description": {
+    "defaultMessage": "Defines container restart behavior. Options: 'no' (never restart), 'always', 'unless-stopped', 'on-failure'."
+  },
+  "forms.fieldExplanation.restartPolicy.example": {
+    "defaultMessage": "unless-stopped"
+  },
+  "forms.fieldExplanation.restartPolicy.title": {
+    "defaultMessage": "Restart Policy"
+  },
+  "forms.fieldExplanation.storageOpt.description": {
+    "defaultMessage": "Driver-specific storage options, such as limiting the size of the writable layer."
+  },
+  "forms.fieldExplanation.storageOpt.example": {
+    "defaultMessage": "\"size=100G\""
+  },
+  "forms.fieldExplanation.storageOpt.title": {
+    "defaultMessage": "Storage Options"
+  },
+  "forms.fieldExplanation.tmpfs.description": {
+    "defaultMessage": "In-memory filesystems mounted at specified container paths. Data is fast but lost on container restart."
+  },
+  "forms.fieldExplanation.tmpfs.example": {
+    "defaultMessage": "\"/tmp:size=64m\""
+  },
+  "forms.fieldExplanation.tmpfs.title": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
+  "forms.fieldExplanation.volumeDriver.description": {
+    "defaultMessage": "Driver/plugin used to manage and mount volumes."
+  },
+  "forms.fieldExplanation.volumeDriver.example": {
+    "defaultMessage": "local"
+  },
+  "forms.fieldExplanation.volumeDriver.title": {
+    "defaultMessage": "Volume Driver"
+  },
+  "forms.fieldExplanation.volumes.description": {
+    "defaultMessage": "Attach an existing volume to a path inside the container. This allows the container to persist data or share it with other containers. You only need to select the volume and provide the container path where it will be mounted."
+  },
+  "forms.fieldExplanation.volumes.example": {
+    "defaultMessage": "my-named-volume:/app/data"
+  },
+  "forms.fieldExplanation.volumes.title": {
+    "defaultMessage": "Volume Mounts"
+  },
+  "forms.validation.baseImageFile.required": {
+    "defaultMessage": "Required."
+  },
+  "forms.validation.baseImageStartingVersionRequirement.format": {
+    "defaultMessage": "The supported starting versions must be a valid version range"
+  },
+  "forms.validation.baseImageVersion.format": {
+    "defaultMessage": "The version must follow the Semantic Versioning spec"
+  },
+  "forms.validation.binds.format": {
+    "defaultMessage": "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'."
+  },
+  "forms.validation.cpuQuotaPeriod.format": {
+    "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
+  },
+  "forms.validation.extraHosts.format": {
+    "defaultMessage": "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'."
+  },
+  "forms.validation.handle.format": {
+    "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  },
+  "forms.validation.invalidJson": {
+    "defaultMessage": "Must be a valid JSON string."
+  },
+  "forms.validation.json.expectedObject": {
+    "defaultMessage": "Expected an object with key-value pairs"
+  },
+  "forms.validation.json.invalidIsNested": {
+    "defaultMessage": "Values cannot be nested."
+  },
+  "forms.validation.memoryReservationInvalid": {
+    "defaultMessage": "Memory Reservation must be set lower than Memory in order to take precedence."
+  },
+  "forms.validation.memorySwapInvalid": {
+    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
+  },
+  "forms.validation.number": {
+    "defaultMessage": "Must be a number."
+  },
+  "forms.validation.number.int": {
+    "defaultMessage": "Decimals are not allowed."
+  },
+  "forms.validation.number.max": {
+    "defaultMessage": "Must be less than or equal to {max}."
+  },
+  "forms.validation.number.min": {
+    "defaultMessage": "Must be greater than or equal to {min}."
+  },
+  "forms.validation.number.positive": {
+    "defaultMessage": "Must be a positive number."
+  },
+  "forms.validation.portBindings.format": {
+    "defaultMessage": "Invalid port binding format. Use [host_port:]container_port[/protocol]."
+  },
+  "forms.validation.required": {
+    "defaultMessage": "Required."
+  },
+  "forms.validation.storage.format": {
+    "defaultMessage": "Invalid storage option format. Use 'key=value'."
+  },
+  "forms.validation.tmpfs.format": {
+    "defaultMessage": "Invalid tmpfs mount format. Use '/container/path=option1,option2'."
+  },
+  "forms.validation.unique": {
+    "defaultMessage": "Duplicate value."
+  },
+  "forms.validation.volumeTarget.duplicate": {
+    "defaultMessage": "Duplicate target value."
   },
   "navigation.routeTitle.Application": {
     "defaultMessage": "Application"
@@ -3598,6 +3667,9 @@
   "pages.ReleaseCreate.reuseReleaseButton": {
     "defaultMessage": "Reuse Release"
   },
+  "pages.ReleaseCreate.reuseReleaseTitleButton": {
+    "defaultMessage": "Copy configuration from an existing release"
+  },
   "pages.ReleaseCreate.title": {
     "defaultMessage": "Create Release for {applicationName}"
   },
@@ -3778,74 +3850,5 @@
   },
   "pages.Volumes.title": {
     "defaultMessage": "Volumes"
-  },
-  "validation.baseImageFile.required": {
-    "defaultMessage": "Required."
-  },
-  "validation.baseImageStartingVersionRequirement.format": {
-    "defaultMessage": "The supported starting versions must be a valid version range"
-  },
-  "validation.baseImageVersion.format": {
-    "defaultMessage": "The version must follow the Semantic Versioning spec"
-  },
-  "validation.binds.format": {
-    "defaultMessage": "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'."
-  },
-  "validation.cpuQuotaPeriod.format": {
-    "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
-  },
-  "validation.extraHosts.format": {
-    "defaultMessage": "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'."
-  },
-  "validation.handle.format": {
-    "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
-  },
-  "validation.invalidJson": {
-    "defaultMessage": "Must be a valid JSON string."
-  },
-  "validation.json.expectedObject": {
-    "defaultMessage": "Expected an object with key-value pairs"
-  },
-  "validation.json.invalidIsNested": {
-    "defaultMessage": "Values cannot be nested."
-  },
-  "validation.memoryReservationInvalid": {
-    "defaultMessage": "Memory Reservation must be set lower than Memory in order to take precedence."
-  },
-  "validation.memorySwapInvalid": {
-    "defaultMessage": "Memory Swap must be greater than/equal to Memory."
-  },
-  "validation.number": {
-    "defaultMessage": "Must be a number."
-  },
-  "validation.number.int": {
-    "defaultMessage": "Decimals are not allowed."
-  },
-  "validation.number.max": {
-    "defaultMessage": "Must be less than or equal to {max}."
-  },
-  "validation.number.min": {
-    "defaultMessage": "Must be greater than or equal to {min}."
-  },
-  "validation.number.positive": {
-    "defaultMessage": "Must be a positive number."
-  },
-  "validation.portBindings.format": {
-    "defaultMessage": "Invalid port binding format. Use [host_port:]container_port[/protocol]."
-  },
-  "validation.required": {
-    "defaultMessage": "Required."
-  },
-  "validation.storage.format": {
-    "defaultMessage": "Invalid storage option format. Use 'key=value'."
-  },
-  "validation.tmpfs.format": {
-    "defaultMessage": "Invalid tmpfs mount format. Use '/container/path=option1,option2'."
-  },
-  "validation.unique": {
-    "defaultMessage": "Duplicate value."
-  },
-  "validation.volumeTarget.duplicate": {
-    "defaultMessage": "Duplicate target value."
   }
 }

@@ -204,7 +204,7 @@ const ReleaseWrapper = ({
         <Button
           variant="secondary"
           title={intl.formatMessage({
-            id: "forms.ReleaseCreate.reuseReleaseTitleButton",
+            id: "pages.ReleaseCreate.reuseReleaseTitleButton",
             defaultMessage: "Copy configuration from an existing release",
           })}
           onClick={() => onToggleModal(true)}

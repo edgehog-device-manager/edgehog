@@ -85,7 +85,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
     <Tab
       eventKey="applications-tab"
       title={intl.formatMessage({
-        id: "components.DeviceTabs.ApplicationsTab",
+        id: "components.DeviceTabs.ApplicationsTab.title",
         defaultMessage: "Applications",
       })}
     >

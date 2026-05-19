@@ -38,62 +38,62 @@ import type {
 
 const registrationStatusMessages = defineMessages<ModemRegistrationStatus>({
   NOT_REGISTERED: {
-    id: "modem.RegistrationStatus.NotRegistered",
+    id: "components.CellularConnectionTabs.NotRegistered",
     defaultMessage: "Not Registered",
   },
   REGISTERED: {
-    id: "modem.RegistrationStatus.Registered",
+    id: "components.CellularConnectionTabs.Registered",
     defaultMessage: "Registered",
   },
   REGISTRATION_DENIED: {
-    id: "modem.RegistrationStatus.RegistrationDenied",
+    id: "components.CellularConnectionTabs.RegistrationDenied",
     defaultMessage: "Registration denied",
   },
   REGISTERED_ROAMING: {
-    id: "modem.RegistrationStatus.RegisteredRoaming",
+    id: "components.CellularConnectionTabs.RegisteredRoaming",
     defaultMessage: "Registered, roaming",
   },
   SEARCHING_OPERATOR: {
-    id: "modem.RegistrationStatus.SearchingOperator",
+    id: "components.CellularConnectionTabs.SearchingOperator",
     defaultMessage: "Searching an operator to register to",
   },
   UNKNOWN: {
-    id: "modem.RegistrationStatus.Unknown",
+    id: "components.CellularConnectionTabs.Unknown",
     defaultMessage: "Unknown",
   },
 });
 
 const technologyMessages = defineMessages<ModemTechnology>({
   EUTRAN: {
-    id: "modem.technology.EUTRAN",
+    id: "components.CellularConnectionTabs.EUTRAN",
     defaultMessage: "E-UTRAN",
   },
   GSM: {
-    id: "modem.technology.GSM",
+    id: "components.CellularConnectionTabs.GSM",
     defaultMessage: "GSM",
   },
   GSM_COMPACT: {
-    id: "modem.technology.GSM_COMPACT",
+    id: "components.CellularConnectionTabs.GSM_COMPACT",
     defaultMessage: "GSM Compact",
   },
   GSM_EGPRS: {
-    id: "modem.technology.GSM_EGPRS",
+    id: "components.CellularConnectionTabs.GSM_EGPRS",
     defaultMessage: "GSM with EGPRS",
   },
   UTRAN: {
-    id: "modem.technology.UTRAN",
+    id: "components.CellularConnectionTabs.UTRAN",
     defaultMessage: "UTRAN",
   },
   UTRAN_HSDPA: {
-    id: "modem.technology.UTRAN_HSDPA",
+    id: "components.CellularConnectionTabs.UTRAN_HSDPA",
     defaultMessage: "UTRAN with HSDPA",
   },
   UTRAN_HSDPA_HSUPA: {
-    id: "modem.technology.UTRAN_HSDPA_HSUPA",
+    id: "components.CellularConnectionTabs.UTRAN_HSDPA_HSUPA",
     defaultMessage: "UTRAN with HSDPA and HSUPA",
   },
   UTRAN_HSUPA: {
-    id: "modem.technology.UTRAN_HSUPA",
+    id: "components.CellularConnectionTabs.UTRAN_HSUPA",
     defaultMessage: "UTRAN with HSUPA",
   },
 });

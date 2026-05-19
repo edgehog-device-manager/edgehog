@@ -26,6 +26,7 @@
  *   node langs_updater.js --check [directory]
  *   node langs_updater.js --reorder [directory]
  *   node langs_updater.js --check-paths [directory]
+ *   node langs_updater.js --fix-paths [directory]
  *
  * If no directory is provided, the script will use the current working directory.
  *
@@ -46,11 +47,15 @@
  *   - The script prints detailed messages on the changes made.
  *
  * --check-paths flag:
- *  - Scans source files for `FormattedMessage` IDs.
+ *  - Scans source files for translation IDs used in `FormattedMessage`, `formatMessage`, and `defineMessages`.
  *  - Ensures every ID follows the prefix derived from the file path:
  *      • `frontend/src/forms/MyForm.tsx` -> `forms.MyForm.<...>`
  *      • `frontend/src/components/MyCmp.tsx` -> `components.MyCmp.<...>`
- *  - Ensures IDs used in source files exist in en.json.
+ *  - Reports any IDs that do not match the expected prefix.
+ *
+ * --fix-paths flag:
+ *  - Performs the exact same scan as --check-paths.
+ *  - Automatically modifies the source code files to replace the invalid IDs with the correct ones.
  */
 
 const fs = require("fs");
@@ -81,15 +86,20 @@ const emoji = {
   wrench: "🛠️ ",
 };
 
-const knownFlags = new Set(["--check", "--reorder", "--check-paths"]);
+const knownFlags = new Set([
+  "--check",
+  "--reorder",
+  "--check-paths",
+  "--fix-paths",
+]);
 
-// Get command-line flags and optional directory
+// Argument Parsing
+
 const args = process.argv.slice(2);
 const modeFlags = new Set();
 const positionalArgs = [];
 
-for (let i = 0; i < args.length; i++) {
-  const arg = args[i];
+for (const arg of args) {
   if (knownFlags.has(arg)) {
     modeFlags.add(arg);
   } else {
@@ -100,18 +110,11 @@ for (let i = 0; i < args.length; i++) {
 const checkFlag = modeFlags.has("--check");
 const reorderFlag = modeFlags.has("--reorder");
 const checkPathsFlag = modeFlags.has("--check-paths");
-const modeCount = modeFlags.size;
+const fixPathsFlag = modeFlags.has("--fix-paths");
 
-if (modeCount === 0) {
+if (modeFlags.size !== 1) {
   console.error(
-    `${ansi.red} ${emoji.error} Error: ${ansi.reset} Please provide one mode: --check, --reorder, or --check-paths.`,
-  );
-  process.exit(1);
-}
-
-if (modeCount > 1) {
-  console.error(
-    `${ansi.red} ${emoji.error} Error: ${ansi.reset} Please provide only one mode at a time.`,
+    `${ansi.red}${emoji.error} Error:${ansi.reset} Please provide exactly one mode: --check, --reorder, --check-paths, or --fix-paths.`,
   );
   process.exit(1);
 }
@@ -195,20 +198,86 @@ const getSourceFiles = (rootDir) => {
   return files;
 };
 
-// Helper: Improved Regex to handle single quotes and formatting variants
-const findFormattedMessageIds = (source) => {
+// Helper: Expand the ID search to find FormattedMessage, formatMessage, defineMessages, and raw objects.
+// Returns array of objects with the matched id, line number, and start/end string indices.
+const findTranslationIds = (source) => {
   const matches = [];
-  const regex = /<FormattedMessage\b[\s\S]*?\bid\s*=\s*(['"])(.*?)\1/g;
   let match;
 
-  while ((match = regex.exec(source)) !== null) {
-    // match[0] is the full string from "<FormattedMessage" up to the end of the "id" prop.
-    // By adding match[0].length to match.index, we get the exact position of the id prop.
+  // 1. FormattedMessage components
+  const regexJSX = /<FormattedMessage\b[\s\S]*?\bid\s*=\s*(['"])(.*?)\1/g;
+  while ((match = regexJSX.exec(source)) !== null) {
     const idPositionIndex = match.index + match[0].length;
     const line = source.slice(0, idPositionIndex).split("\n").length;
-
-    matches.push({ id: match[2], line }); // match[2] is the actual ID content
+    const endIndex = idPositionIndex - 1; // index of closing quote
+    const startIndex = endIndex - match[2].length; // index of first char of ID string
+    matches.push({ id: match[2], line, startIndex, endIndex });
   }
+
+  // 2. formatMessage calls (e.g., intl.formatMessage({ id: "..." }))
+  const regexFormatMsg =
+    /formatMessage\s*\(\s*\{[\s\S]*?\bid\s*:\s*(['"])(.*?)\1/g;
+  while ((match = regexFormatMsg.exec(source)) !== null) {
+    const idPositionIndex = match.index + match[0].length;
+    const line = source.slice(0, idPositionIndex).split("\n").length;
+    const endIndex = idPositionIndex - 1;
+    const startIndex = endIndex - match[2].length;
+    matches.push({ id: match[2], line, startIndex, endIndex });
+  }
+
+  // 3. defineMessages blocks
+  const regexDefineMsgsBlock = /defineMessages\s*\(\s*\{([\s\S]*?)\}\s*\)/g;
+  let blockMatch;
+  while ((blockMatch = regexDefineMsgsBlock.exec(source)) !== null) {
+    const blockContent = blockMatch[1];
+    const blockStartIndex =
+      blockMatch.index + blockMatch[0].indexOf(blockMatch[1]);
+
+    const idRegex = /\bid\s*:\s*(['"])(.*?)\1/g;
+    let idMatch;
+    while ((idMatch = idRegex.exec(blockContent)) !== null) {
+      const absoluteIndex = blockStartIndex + idMatch.index + idMatch[0].length;
+      const line = source.slice(0, absoluteIndex).split("\n").length;
+      const endIndex = absoluteIndex - 1;
+      const startIndex = endIndex - idMatch[2].length;
+      matches.push({ id: idMatch[2], line, startIndex, endIndex });
+    }
+  }
+
+  // 4. Raw translation objects (e.g., standard JS objects with id and defaultMessage)
+  // We use two regexes to catch both ordering possibilities within a single object block `{ ... }`.
+  const rawObjRegexes = [
+    // Matches if id comes before defaultMessage: { ..., id: "...", ..., defaultMessage: ...
+    /\{\s*[^{}]*?\bid\s*:\s*(['"])(.*?)\1[^{}]*?\bdefaultMessage\s*:/g,
+    // Matches if defaultMessage comes before id: { ..., defaultMessage: ..., ..., id: "..." ...
+    /\{\s*[^{}]*?\bdefaultMessage\s*:[^{}]*?\bid\s*:\s*(['"])(.*?)\1/g,
+  ];
+
+  for (const regex of rawObjRegexes) {
+    let rawBlockMatch;
+    while ((rawBlockMatch = regex.exec(source)) !== null) {
+      const blockContent = rawBlockMatch[0];
+      const blockStartIndex = rawBlockMatch.index;
+
+      const idRegex = /\bid\s*:\s*(['"])(.*?)\1/;
+      const idMatch = idRegex.exec(blockContent);
+
+      if (idMatch) {
+        const absoluteIndex =
+          blockStartIndex + idMatch.index + idMatch[0].length;
+        const endIndex = absoluteIndex - 1;
+        const startIndex = endIndex - idMatch[2].length;
+
+        // Ensure we don't duplicate matches already caught by defineMessages or formatMessage
+        const exists = matches.some((m) => m.startIndex === startIndex);
+        if (!exists) {
+          const line = source.slice(0, absoluteIndex).split("\n").length;
+          matches.push({ id: idMatch[2], line, startIndex, endIndex });
+        }
+      }
+    }
+  }
+
   return matches;
 };
 
@@ -239,8 +308,8 @@ const getExpectedPrefix = (sourceFilePath, sourceRoot, pathScopes) => {
   };
 };
 
-// CORE FUNCTION: Validates Path mismatches in Source Code
-const runPathValidation = () => {
+// CORE FUNCTION: Validates and optionally Fixes Path mismatches in Source Code
+const runPathValidation = (isFixMode = false) => {
   const sourceDir = resolveSourceDirectory();
   if (!sourceDir || !fs.existsSync(sourceDir)) {
     console.error(
@@ -272,9 +341,9 @@ const runPathValidation = () => {
       process.exit(1);
     }
 
-    const ids = findFormattedMessageIds(sourceContent);
+    const ids = findTranslationIds(sourceContent);
     for (const item of ids) {
-      const { id, line } = item;
+      const { id, line, startIndex, endIndex } = item;
 
       if (id.startsWith(prefixInfo.expectedPrefix)) continue;
 
@@ -295,10 +364,20 @@ const runPathValidation = () => {
         suggested = `${prefixInfo.expectedParts.join(".")}.${parts.slice(2).join(".")}`;
       }
 
+      // Fallback: Append the last segment of the mismatched ID to the expected prefix.
+      // Solves mismatches like `validation.required` -> `forms.validation.required`
+      // and `components.OldTable.myTitle` -> `components.NewTable.myTitle`
+      if (!suggested) {
+        suggested = `${prefixInfo.expectedPrefix}${parts[parts.length - 1]}`;
+      }
+
       mismatches.push({
         file: sourceFilePath,
+        sourceContent, // passed along to facilitate rewriting
         line,
         id,
+        startIndex,
+        endIndex,
         expectedPrefix: prefixInfo.expectedPrefix,
         suggested,
       });
@@ -307,25 +386,87 @@ const runPathValidation = () => {
 
   // 2. Report & Resolve
   if (mismatches.length > 0) {
-    console.error(
-      `\n${ansi.red}${emoji.error} Found ${mismatches.length} translation ID path mismatches:${ansi.reset}`,
-    );
-    for (const mismatch of mismatches) {
+    if (!isFixMode) {
       console.error(
-        `  ${ansi.yellow}${mismatch.file}:${mismatch.line}${ansi.reset} -> ${ansi.red}${mismatch.id}${ansi.reset} (expected prefix ${ansi.green}${mismatch.expectedPrefix}${ansi.reset})`,
+        `\n${ansi.red}${emoji.error} Found ${mismatches.length} translation ID path mismatches:${ansi.reset}`,
       );
-      if (mismatch.suggested) {
+      for (const mismatch of mismatches) {
         console.error(
-          `    ${emoji.arrow} Suggested fix: ${ansi.green}${mismatch.suggested}${ansi.reset}`,
+          `  ${ansi.yellow}${mismatch.file}:${mismatch.line}${ansi.reset} -> ${ansi.red}${mismatch.id}${ansi.reset} (expected prefix ${ansi.green}${mismatch.expectedPrefix}${ansi.reset})`,
         );
+        if (mismatch.suggested) {
+          console.error(
+            `    ${emoji.arrow} Suggested fix: ${ansi.green}${mismatch.suggested}${ansi.reset}`,
+          );
+        }
+      }
+      process.exit(1);
+    } else {
+      // Fix mode applies changes back to the source code files
+      console.log(
+        `\n${ansi.cyan}${emoji.wrench} Applying automated fixes to source files...${ansi.reset}`,
+      );
+
+      // Group by file
+      const mismatchesByFile = {};
+      for (const m of mismatches) {
+        if (!mismatchesByFile[m.file]) {
+          mismatchesByFile[m.file] = { content: m.sourceContent, fixes: [] };
+        }
+        mismatchesByFile[m.file].fixes.push(m);
+      }
+
+      let totalFixed = 0;
+      let totalSkipped = 0;
+
+      for (const [file, data] of Object.entries(mismatchesByFile)) {
+        let newContent = data.content;
+        let fileModified = false;
+
+        // Sort descending by index so that multiple replacements in one file
+        // do not throw off the position mapping for earlier substrings
+        data.fixes.sort((a, b) => b.startIndex - a.startIndex);
+
+        for (const fix of data.fixes) {
+          if (fix.suggested) {
+            newContent =
+              newContent.slice(0, fix.startIndex) +
+              fix.suggested +
+              newContent.slice(fix.endIndex);
+            fileModified = true;
+            totalFixed++;
+          } else {
+            console.error(
+              `  ${ansi.yellow}${emoji.warn} Could not auto-fix ${ansi.red}${fix.id}${ansi.reset} in ${ansi.cyan}${file}:${fix.line}${ansi.reset}`,
+            );
+            totalSkipped++;
+          }
+        }
+
+        if (fileModified) {
+          try {
+            fs.writeFileSync(file, newContent, "utf8");
+          } catch (err) {
+            console.error(
+              `\n${ansi.red}${emoji.error} Error:${ansi.reset} Failed to write changes to ${ansi.yellow}${file}${ansi.reset}: ${err.message}`,
+            );
+            process.exit(1);
+          }
+        }
+      }
+
+      console.log(
+        `\n${ansi.green}${emoji.sparkles} Fix complete: ${ansi.reset} Automatically fixed ${totalFixed} IDs. Skipped ${totalSkipped} IDs that couldn't be resolved.`,
+      );
+      if (totalSkipped > 0) {
+        process.exit(1); // Exit with error if some files still require manual attention
       }
     }
-    process.exit(1);
+  } else {
+    console.log(
+      `\n${ansi.green}${emoji.sparkles} Success: ${ansi.reset} All path-based translation IDs are valid.`,
+    );
   }
-
-  console.log(
-    `\n${ansi.green}${emoji.sparkles} Success: ${ansi.reset} All path-based translation IDs are valid.`,
-  );
 };
 
 // --- Execution Blocks ---
@@ -500,5 +641,12 @@ if (checkPathsFlag) {
   console.log(
     `${ansi.blue}${emoji.gear} Starting path-based translation check${ansi.reset}...\n`,
   );
-  runPathValidation();
+  runPathValidation(false);
+}
+
+if (fixPathsFlag) {
+  console.log(
+    `${ansi.blue}${emoji.gear} Starting path-based translation fix${ansi.reset}...\n`,
+  );
+  runPathValidation(true);
 }

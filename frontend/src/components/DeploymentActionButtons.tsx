@@ -56,7 +56,7 @@ const DeploymentActionButtons = ({
         <Button
           className="btn p-0 border-0 bg-transparent icon-click"
           title={intl.formatMessage({
-            id: "components.DeployedApplicationsTable.sendButtonTitle",
+            id: "components.DeploymentActionButtons.sendButtonTitle",
             defaultMessage: "Redeploy Application",
           })}
           onClick={onRedeploy}
@@ -72,7 +72,7 @@ const DeploymentActionButtons = ({
           onClick={onStart}
           className="btn p-0 border-0 bg-transparent icon-click"
           title={intl.formatMessage({
-            id: "components.DeployedApplicationsTable.startButtonTitle",
+            id: "components.DeploymentActionButtons.startButtonTitle",
             defaultMessage: "Start Deployment",
           })}
         >
@@ -87,7 +87,7 @@ const DeploymentActionButtons = ({
           onClick={onStop}
           className="btn p-0 border-0 bg-transparent icon-click"
           title={intl.formatMessage({
-            id: "components.DeployedApplicationsTable.stopButtonTitle",
+            id: "components.DeploymentActionButtons.stopButtonTitle",
             defaultMessage: "Stop Deployment",
           })}
         >
@@ -115,7 +115,7 @@ const DeploymentActionButtons = ({
         disabled={isDeleting || isNotReady}
         className="btn p-0 border-0 bg-transparent icon-click"
         title={intl.formatMessage({
-          id: "components.DeployedApplicationsTable.upgradeButtonTitle",
+          id: "components.DeploymentActionButtons.upgradeButtonTitle",
           defaultMessage: "Upgrade Deployment",
         })}
       >
@@ -127,7 +127,7 @@ const DeploymentActionButtons = ({
         disabled={isDeleting || isNotReady}
         className="btn p-0 border-0 bg-transparent icon-click"
         title={intl.formatMessage({
-          id: "components.DeployedApplicationsTable.deleteButtonTitle",
+          id: "components.DeploymentActionButtons.deleteButtonTitle",
           defaultMessage: "Delete Deployment",
         })}
       >

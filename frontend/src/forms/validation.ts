@@ -26,103 +26,103 @@ import z from "zod";
 /* ----------------------------- Error Messages ----------------------------- */
 const messages = defineMessages({
   required: {
-    id: "validation.required",
+    id: "forms.validation.required",
     defaultMessage: "Required.",
   },
   unique: {
-    id: "validation.unique",
+    id: "forms.validation.unique",
     defaultMessage: "Duplicate value.",
   },
   invalidJson: {
-    id: "validation.invalidJson",
+    id: "forms.validation.invalidJson",
     defaultMessage: "Must be a valid JSON string.",
   },
   handleFormat: {
-    id: "validation.handle.format",
+    id: "forms.validation.handle.format",
     defaultMessage:
       "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -",
   },
   baseImageFileSchema: {
-    id: "validation.baseImageFile.required",
+    id: "forms.validation.baseImageFile.required",
     defaultMessage: "Required.",
   },
   baseImageVersionFormat: {
-    id: "validation.baseImageVersion.format",
+    id: "forms.validation.baseImageVersion.format",
     defaultMessage: "The version must follow the Semantic Versioning spec",
   },
   baseImageStartingVersionRequirementFormat: {
-    id: "validation.baseImageStartingVersionRequirement.format",
+    id: "forms.validation.baseImageStartingVersionRequirement.format",
     defaultMessage:
       "The supported starting versions must be a valid version range",
   },
   number: {
-    id: "validation.number",
+    id: "forms.validation.number",
     defaultMessage: "Must be a number.",
   },
   numberPositive: {
-    id: "validation.number.positive",
+    id: "forms.validation.number.positive",
     defaultMessage: "Must be a positive number.",
   },
   numberInt: {
-    id: "validation.number.int",
+    id: "forms.validation.number.int",
     defaultMessage: "Decimals are not allowed.",
   },
   numberMin: {
-    id: "validation.number.min",
+    id: "forms.validation.number.min",
     defaultMessage: "Must be greater than or equal to {min}.",
   },
   numberMax: {
-    id: "validation.number.max",
+    id: "forms.validation.number.max",
     defaultMessage: "Must be less than or equal to {max}.",
   },
   invalidIsNested: {
-    id: "validation.json.invalidIsNested",
+    id: "forms.validation.json.invalidIsNested",
     defaultMessage: "Values cannot be nested.",
   },
   expectedObject: {
-    id: "validation.json.expectedObject",
+    id: "forms.validation.json.expectedObject",
     defaultMessage: "Expected an object with key-value pairs",
   },
   portBindingsFormat: {
-    id: "validation.portBindings.format",
+    id: "forms.validation.portBindings.format",
     defaultMessage:
       "Invalid port binding format. Use [host_port:]container_port[/protocol].",
   },
   bindsInvalid: {
-    id: "validation.binds.format",
+    id: "forms.validation.binds.format",
     defaultMessage:
       "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'.",
   },
   extraHostsFormat: {
-    id: "validation.extraHosts.format",
+    id: "forms.validation.extraHosts.format",
     defaultMessage:
       "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'.",
   },
   tmpfsFormat: {
-    id: "validation.tmpfs.format",
+    id: "forms.validation.tmpfs.format",
     defaultMessage:
       "Invalid tmpfs mount format. Use '/container/path=option1,option2'.",
   },
   storageFormat: {
-    id: "validation.storage.format",
+    id: "forms.validation.storage.format",
     defaultMessage: "Invalid storage option format. Use 'key=value'.",
   },
   memorySwap: {
-    id: "validation.memorySwapInvalid",
+    id: "forms.validation.memorySwapInvalid",
     defaultMessage: "Memory Swap must be greater than/equal to Memory.",
   },
   memoryReservation: {
-    id: "validation.memoryReservationInvalid",
+    id: "forms.validation.memoryReservationInvalid",
     defaultMessage:
       "Memory Reservation must be set lower than Memory in order to take precedence.",
   },
   cpuQuotaPeriod: {
-    id: "validation.cpuQuotaPeriod.format",
+    id: "forms.validation.cpuQuotaPeriod.format",
     defaultMessage:
       "CPU Period and CPU Quota must be either both set or both unset",
   },
   volumeTarget: {
-    id: "validation.volumeTarget.duplicate",
+    id: "forms.validation.volumeTarget.duplicate",
     defaultMessage: "Duplicate target value.",
   },
 });

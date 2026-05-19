@@ -46,31 +46,31 @@ const getEventTypeVariant = (eventType: DeploymentEventType): string => {
 
 const eventTypeMessages = defineMessages<DeploymentEventType>({
   ERROR: {
-    id: "components.DeploymentLogs.EventType.Error",
+    id: "components.DeploymentEventsCard.Error",
     defaultMessage: "Error",
   },
   STOPPED: {
-    id: "components.DeploymentLogs.EventType.Stopped",
+    id: "components.DeploymentEventsCard.Stopped",
     defaultMessage: "Stopped",
   },
   STARTING: {
-    id: "components.DeploymentLogs.EventType.Starting",
+    id: "components.DeploymentEventsCard.Starting",
     defaultMessage: "Starting",
   },
   DELETING: {
-    id: "components.DeploymentLogs.EventType.Deleting",
+    id: "components.DeploymentEventsCard.Deleting",
     defaultMessage: "Deleting",
   },
   STARTED: {
-    id: "components.DeploymentLogs.EventType.Started",
+    id: "components.DeploymentEventsCard.Started",
     defaultMessage: "Started",
   },
   STOPPING: {
-    id: "components.DeploymentLogs.EventType.Stopping",
+    id: "components.DeploymentEventsCard.Stopping",
     defaultMessage: "Stopping",
   },
   UPDATING: {
-    id: "components.DeploymentLogs.EventType.Updating",
+    id: "components.DeploymentEventsCard.Updating",
     defaultMessage: "Updating",
   },
 });

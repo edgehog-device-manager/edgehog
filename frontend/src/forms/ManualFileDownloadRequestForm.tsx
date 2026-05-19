@@ -137,12 +137,12 @@ const ManualFileDownloadRequestForm = ({
 
   const noneEncodingLabel = hasMultipleFilesSelected
     ? intl.formatMessage({
-        id: "forms.ManualFileUploadRequestForm.encodingNoneDisabled",
+        id: "forms.ManualFileDownloadRequestForm.encodingNoneDisabled",
         defaultMessage:
           "None (disabled for multiple files, select an archive encoding instead)",
       })
     : intl.formatMessage({
-        id: "forms.ManualFileUploadRequestForm.encodingNone",
+        id: "forms.ManualFileDownloadRequestForm.encodingNone",
         defaultMessage: "None",
       });
 

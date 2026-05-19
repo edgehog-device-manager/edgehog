@@ -66,39 +66,39 @@ const stateColors: Record<DeploymentState, string> = {
 
 const stateMessages = defineMessages<DeploymentState>({
   PENDING: {
-    id: "components.DeploymentStateComponent.pending",
+    id: "components.DeploymentState.pending",
     defaultMessage: "Pending",
   },
   SENT: {
-    id: "components.DeploymentStateComponent.sent",
+    id: "components.DeploymentState.sent",
     defaultMessage: "Sent",
   },
   STARTING: {
-    id: "components.DeploymentStateComponent.starting",
+    id: "components.DeploymentState.starting",
     defaultMessage: "Starting",
   },
   STARTED: {
-    id: "components.DeploymentStateComponent.started",
+    id: "components.DeploymentState.started",
     defaultMessage: "Started",
   },
   STOPPING: {
-    id: "components.DeploymentStateComponent.stopping",
+    id: "components.DeploymentState.stopping",
     defaultMessage: "Stopping",
   },
   STOPPED: {
-    id: "components.DeploymentStateComponent.stopped",
+    id: "components.DeploymentState.stopped",
     defaultMessage: "Stopped",
   },
   ERROR: {
-    id: "components.DeploymentStateComponent.error",
+    id: "components.DeploymentState.error",
     defaultMessage: "Error",
   },
   DELETING: {
-    id: "components.DeploymentStateComponent.deleting",
+    id: "components.DeploymentState.deleting",
     defaultMessage: "Deleting",
   },
   DEPLOYING: {
-    id: "components.DeploymentStateComponent.deploying",
+    id: "components.DeploymentState.deploying",
     defaultMessage: "Deploying",
   },
 });

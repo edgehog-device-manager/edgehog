@@ -412,7 +412,7 @@ const FilesDownloadTab = ({
     <Tab
       eventKey="device-files-download-tab"
       title={intl.formatMessage({
-        id: "components.DeviceTabs.FilesDownloadTab",
+        id: "components.DeviceTabs.FilesDownloadTab.title",
         defaultMessage: "Files Download",
       })}
     >
