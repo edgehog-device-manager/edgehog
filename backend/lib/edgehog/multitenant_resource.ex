@@ -46,7 +46,6 @@ defmodule Edgehog.MultitenantResource do
     fga_type = Keyword.get(opts, :fga_type)
     fga_id_attribute = Keyword.get(opts, :fga_id_attribute, :id)
     fga_tenancy? = not is_nil(fga_type)
-    disable_logging = Keyword.get(opts, :disable_logging, false)
 
     quote do
       use Ash.Resource,
@@ -78,17 +77,6 @@ defmodule Edgehog.MultitenantResource do
           change {Edgehog.Auth.Changes.EraseTenant,
                   obj: unquote(opts[:fga_type]), obj_id: unquote(opts[:fga_id_attribute])},
                  on: :destroy
-        end
-      end
-
-      unless unquote(disable_logging) do
-        changes do
-          change {Edgehog.Changes.Log,
-                  mode: :after_action,
-                  log_level: :debug,
-                  log_meta: [source: :multitenant_debug],
-                  message: "Action performed successfully."},
-                 on: [:create, :update, :destroy]
         end
       end
 

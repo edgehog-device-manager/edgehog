@@ -130,7 +130,7 @@ defmodule Edgehog.Containers.Deployment do
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_start}
 
-      change {Edgehog.Changes.Log, mode: :after_action, message: "Deployment start message sent."}
+      change {Edgehog.Changes.Log, message: "Deployment start message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :start}
     end
@@ -143,7 +143,7 @@ defmodule Edgehog.Containers.Deployment do
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_stop}
 
-      change {Edgehog.Changes.Log, mode: :after_action, message: "Deployment stop message sent."}
+      change {Edgehog.Changes.Log, message: "Deployment stop message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :stop}
     end
@@ -155,6 +155,8 @@ defmodule Edgehog.Containers.Deployment do
 
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_delete}
+
+      change {Edgehog.Changes.Log, message: "Deployment delete message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :delete}
     end
@@ -215,10 +217,7 @@ defmodule Edgehog.Containers.Deployment do
     update :mark_as_started do
       change set_attribute(:state, :started)
 
-      change {Edgehog.Changes.Log,
-              mode: :after_transaction,
-              message_success: "Deployment started successfully.",
-              message_fail: "Deployment could not start."}
+      change {Edgehog.Changes.Log, message: "Deployment started successfully."}
 
       require_atomic? false
     end
@@ -226,10 +225,7 @@ defmodule Edgehog.Containers.Deployment do
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
 
-      change {Edgehog.Changes.Log,
-              mode: :after_transaction,
-              message_success: "Deployment stopped successfully.",
-              message_fail: "Deployment could not stop."}
+      change {Edgehog.Changes.Log, message: "Deployment stopped successfully."}
 
       require_atomic? false
     end
@@ -342,11 +338,11 @@ defmodule Edgehog.Containers.Deployment do
   end
 
   changes do
-    change {Edgehog.Changes.Log,
-            mode: :after_transaction,
-            message_success: "Deployment created successfully.",
-            message_fail: "Deployment creation failed."},
-           on: :create
+    change {Edgehog.Changes.Log, message: "Deployment provision started."},
+      on: :create
+
+    change {Edgehog.Changes.Log, message: "Deployment deleted successfully."},
+      on: :destroy
   end
 
   pub_sub do
