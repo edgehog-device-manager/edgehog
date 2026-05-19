@@ -27,6 +27,7 @@ defmodule Edgehog.Containers.Deployment do
 
   alias Edgehog.Containers.Deployment.Calculations
   alias Edgehog.Containers.Deployment.Changes
+  alias Edgehog.Containers.Deployment.Types.DeploymentContext
   alias Edgehog.Containers.Deployment.Types.DeploymentState
   alias Edgehog.Containers.Deployment.Validations
   alias Edgehog.Containers.ManualActions
@@ -130,6 +131,7 @@ defmodule Edgehog.Containers.Deployment do
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_start}
 
+      change set_attribute(:context, :start_message_sent)
       change {Edgehog.Changes.Log, message: "Deployment start message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :start}
@@ -143,6 +145,7 @@ defmodule Edgehog.Containers.Deployment do
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_stop}
 
+      change set_attribute(:context, :stop_message_sent)
       change {Edgehog.Changes.Log, message: "Deployment stop message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :stop}
@@ -156,6 +159,7 @@ defmodule Edgehog.Containers.Deployment do
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_delete}
 
+      change set_attribute(:context, :delete_message_sent)
       change {Edgehog.Changes.Log, message: "Deployment delete message sent."}
 
       manual {ManualActions.SendDeploymentCommand, command: :delete}
@@ -205,6 +209,8 @@ defmodule Edgehog.Containers.Deployment do
       validate SameApplication
       validate IsUpgrade
 
+      change set_attribute(:context, :upgrade_message_sent)
+
       manual ManualActions.SendDeploymentUpgrade
     end
 
@@ -216,6 +222,7 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_started do
       change set_attribute(:state, :started)
+      change set_attribute(:context, nil)
 
       change {Edgehog.Changes.Log, message: "Deployment started successfully."}
 
@@ -224,6 +231,7 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
+      change set_attribute(:context, nil)
 
       change {Edgehog.Changes.Log, message: "Deployment stopped successfully."}
 
@@ -277,6 +285,10 @@ defmodule Edgehog.Containers.Deployment do
     attribute :state, DeploymentState do
       default :pending
       public? true
+    end
+
+    attribute :context, DeploymentContext do
+      default nil
     end
 
     attribute :timed_out, :boolean do
