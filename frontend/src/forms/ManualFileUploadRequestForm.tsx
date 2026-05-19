@@ -22,7 +22,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import Select from "react-select";
-import CreatableSelect from "react-select/creatable";
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
@@ -98,7 +97,7 @@ const ManualFileUploadRequestForm = ({
   const sourcePlaceholderByType: Record<FileSourceType, string> = {
     STORAGE: intl.formatMessage({
       id: "forms.ManualFileUploadRequestForm.sourceStoragePlaceholder",
-      defaultMessage: "Select or enter a storage file ID",
+      defaultMessage: "Select storage file by its name...",
     }),
     FILESYSTEM: "/tmp/file.bin",
   };
@@ -171,7 +170,7 @@ const ManualFileUploadRequestForm = ({
         <Controller
           control={control}
           name="source"
-          render={({ field }) => {
+          render={({ field, fieldState }) => {
             if (effectiveSourceType === "STORAGE") {
               const selectedOption =
                 storageSourceOptions.find((opt) => opt.value === field.value) ??
@@ -183,65 +182,73 @@ const ManualFileUploadRequestForm = ({
                   : null);
 
               return (
-                <CreatableSelect
-                  value={selectedOption}
-                  onChange={(option) => {
-                    field.onChange(option?.value ?? null);
-                  }}
-                  onBlur={field.onBlur}
-                  options={storageSourceOptions}
-                  placeholder={sourcePlaceholderByType[effectiveSourceType]}
-                  formatCreateLabel={(inputValue) =>
-                    intl.formatMessage(
-                      {
-                        id: "forms.ManualFileUploadRequestForm.sourceStorageCreateOption",
-                        defaultMessage: 'Use "{value}"',
-                      },
-                      { value: inputValue },
-                    )
-                  }
-                  noOptionsMessage={() =>
-                    intl.formatMessage({
-                      id: "forms.ManualFileUploadRequestForm.sourceStorageNoOptions",
-                      defaultMessage:
-                        "No known storage file IDs for this device yet.",
-                    })
-                  }
-                  isClearable
-                />
+                <>
+                  <Select
+                    value={selectedOption}
+                    onChange={(option) => {
+                      field.onChange(option?.value ?? null);
+                    }}
+                    onBlur={field.onBlur}
+                    options={storageSourceOptions}
+                    filterOption={(option, inputValue) => {
+                      // Only search by name (label), not by ID (value)
+                      return option.label
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase());
+                    }}
+                    placeholder={sourcePlaceholderByType[effectiveSourceType]}
+                    noOptionsMessage={({ inputValue }) =>
+                      inputValue
+                        ? intl.formatMessage(
+                            {
+                              id: "forms.ManualFileUploadRequestForm.sourceStorageNoMatch",
+                              defaultMessage:
+                                'No file found with name "{value}"',
+                            },
+                            { value: inputValue },
+                          )
+                        : intl.formatMessage({
+                            id: "forms.ManualFileUploadRequestForm.sourceStorageEmpty",
+                            defaultMessage:
+                              "No known storage file names for this device yet.",
+                          })
+                    }
+                    isClearable
+                    className={fieldState.invalid ? "is-invalid" : ""}
+                  />
+
+                  {fieldState.error && (
+                    <FormFeedback feedback={fieldState.error.message} />
+                  )}
+                </>
               );
             }
 
             return (
-              <Form.Control
-                type="text"
-                value={(field.value as string | null) ?? ""}
-                onChange={(event) => field.onChange(event.target.value)}
-                onBlur={field.onBlur}
-                placeholder={sourcePlaceholderByType[effectiveSourceType]}
-                isInvalid={!!errors.source}
-              />
+              <>
+                <Form.Control
+                  type="text"
+                  value={(field.value as string | null) ?? ""}
+                  onChange={(event) => field.onChange(event.target.value)}
+                  onBlur={field.onBlur}
+                  placeholder={sourcePlaceholderByType[effectiveSourceType]}
+                  isInvalid={fieldState.invalid}
+                />
+
+                {fieldState.error ? (
+                  <FormFeedback feedback={fieldState.error.message} />
+                ) : (
+                  <Form.Text muted>
+                    <FormattedMessage
+                      id="forms.ManualFileUploadRequestForm.sourcePathHint"
+                      defaultMessage="Absolute path to the file on the device that should be uploaded."
+                    />
+                  </Form.Text>
+                )}
+              </>
             );
           }}
         />
-
-        {errors.source ? (
-          <FormFeedback feedback={errors.source.message} />
-        ) : (
-          <Form.Text muted>
-            {effectiveSourceType === "STORAGE" ? (
-              <FormattedMessage
-                id="forms.ManualFileUploadRequestForm.sourceStorageHint"
-                defaultMessage="Select a known storage file ID from previous storage downloads, or type one manually."
-              />
-            ) : (
-              <FormattedMessage
-                id="forms.ManualFileUploadRequestForm.sourcePathHint"
-                defaultMessage="Absolute path to the file on the device that should be uploaded."
-              />
-            )}
-          </Form.Text>
-        )}
       </FormRow>
 
       <FormRow

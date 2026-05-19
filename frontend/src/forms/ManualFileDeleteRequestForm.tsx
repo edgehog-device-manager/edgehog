@@ -20,7 +20,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import Select from "react-select";
 
 import Button from "@/components/Button";
@@ -56,6 +56,7 @@ const ManualFileDeleteRequestForm = ({
   onSubmit,
   deleteOptions,
 }: ManualFileDeleteRequestFormProps) => {
+  const intl = useIntl();
   const {
     formState: { errors },
     handleSubmit,
@@ -83,14 +84,14 @@ const ManualFileDeleteRequestForm = ({
         label={
           <FormattedMessage
             id="forms.ManualFileDeleteRequestForm.fileLabel"
-            defaultMessage="Select File"
+            defaultMessage="File"
           />
         }
       >
         <Controller
           control={control}
           name="fileDownloadRequestId"
-          render={({ field }) => {
+          render={({ field, fieldState }) => {
             const selectedOption =
               deleteOptions.find((opt) => opt.value === field.value) || null;
 
@@ -99,7 +100,18 @@ const ManualFileDeleteRequestForm = ({
                 value={selectedOption}
                 onChange={(option) => field.onChange(option?.value ?? "")}
                 options={deleteOptions}
+                placeholder={intl.formatMessage({
+                  id: "forms.ManualFileDeleteRequestForm.filePlaceholder",
+                  defaultMessage: "Select a file to delete...",
+                })}
+                noOptionsMessage={() =>
+                  intl.formatMessage({
+                    id: "forms.ManualFileDeleteRequestForm.fileNoOptions",
+                    defaultMessage: "No files for delete.",
+                  })
+                }
                 isClearable
+                className={fieldState.invalid ? "is-invalid" : ""}
               />
             );
           }}

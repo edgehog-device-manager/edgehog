@@ -224,6 +224,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
               isLoading={isLoadingNextRepository}
               onMenuScrollToBottom={onLoadMoreRepositoryOptions}
               onInputChange={(text) => setSearchRepositoryText(text)}
+              isClearable
             />
           )}
         />
@@ -459,8 +460,8 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestFromRepositoryForm.uploadButton"
-              defaultMessage="Upload"
+              id="forms.ManualFileDownloadRequestFromRepositoryForm.downloadButton"
+              defaultMessage="Request download"
             />
           </Button>
         </Col>

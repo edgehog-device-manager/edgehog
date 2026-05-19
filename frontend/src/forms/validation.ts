@@ -560,9 +560,13 @@ type ManualOtaFromFileData = z.infer<typeof manualOtaFromFileSchema>;
 
 const fileDownloadRequestFormSchema = z
   .object({
-    file: z.instanceof(FileList).refine((files) => files.length > 0, {
-      message: messages.baseImageFileSchema.id,
-    }),
+    file: z.custom<FileList>(
+      (files) => files instanceof FileList && files.length > 0,
+      {
+        message: messages.baseImageFileSchema.id,
+      },
+    ),
+
     customFileName: z.string().optional(),
     encoding: z.string().optional(),
     destinationType: fileDestinationTypeSchema,
@@ -590,7 +594,9 @@ const fileDownloadRequestFormSchema = z
   }));
 
 const fileDeleteRequestFormSchema = z.object({
-  fileDownloadRequestId: z.string().min(1),
+  fileDownloadRequestId: z.string().min(1, {
+    message: messages.required.id,
+  }),
   force: z.boolean(),
 });
 
@@ -636,19 +642,30 @@ const manualFileDownloadRequestFromRepositorySchema = z
     groupId: z.number(messages.number.id).int().positive().optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.destinationType === "FILESYSTEM" && data.destination === null) {
+    if (!data.repository?.id) {
       ctx.addIssue({
+        path: ["repository"],
         code: "custom",
         message: messages.required.id,
-        path: ["destination"],
       });
     }
-  })
-  .transform((data) => ({
-    ...data,
-    destination:
-      data.destinationType === "FILESYSTEM" ? data.destination : null,
-  }));
+
+    if (!data.file?.id) {
+      ctx.addIssue({
+        path: ["file"],
+        code: "custom",
+        message: messages.required.id,
+      });
+    }
+
+    if (data.destinationType === "FILESYSTEM" && !data.destination) {
+      ctx.addIssue({
+        path: ["destination"],
+        code: "custom",
+        message: messages.required.id,
+      });
+    }
+  });
 
 type ManualFileDownloadRequestFromRepositoryData = z.infer<
   typeof manualFileDownloadRequestFromRepositorySchema

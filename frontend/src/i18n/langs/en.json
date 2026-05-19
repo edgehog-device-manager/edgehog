@@ -2281,7 +2281,13 @@
     "defaultMessage": "Delete"
   },
   "forms.ManualFileDeleteRequestForm.fileLabel": {
-    "defaultMessage": "Select File"
+    "defaultMessage": "File"
+  },
+  "forms.ManualFileDeleteRequestForm.fileNoOptions": {
+    "defaultMessage": "No files for delete."
+  },
+  "forms.ManualFileDeleteRequestForm.filePlaceholder": {
+    "defaultMessage": "Select a file to delete..."
   },
   "forms.ManualFileDeleteRequestForm.forceDescription": {
     "defaultMessage": "Deletes files even if they are currently in use, this could cause errors."
@@ -2303,6 +2309,9 @@
   },
   "forms.ManualFileDownloadRequestForm.destinationPathLabel": {
     "defaultMessage": "Destination Path"
+  },
+  "forms.ManualFileDownloadRequestForm.downloadButton": {
+    "defaultMessage": "Request download"
   },
   "forms.ManualFileDownloadRequestForm.encodingHint": {
     "defaultMessage": "Optional encoding format, based on device capabilities. Leave empty for no encoding."
@@ -2346,9 +2355,6 @@
   "forms.ManualFileDownloadRequestForm.ttlLabel": {
     "defaultMessage": "TTL (seconds)"
   },
-  "forms.ManualFileDownloadRequestForm.uploadButton": {
-    "defaultMessage": "Upload"
-  },
   "forms.ManualFileDownloadRequestForm.userIdLabel": {
     "defaultMessage": "User ID"
   },
@@ -2363,6 +2369,9 @@
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathLabel": {
     "defaultMessage": "Destination Path"
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.downloadButton": {
+    "defaultMessage": "Request download"
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.fileLabel": {
     "defaultMessage": "File"
@@ -2397,9 +2406,6 @@
   "forms.ManualFileDownloadRequestFromRepositoryForm.ttlLabel": {
     "defaultMessage": "TTL (seconds)"
   },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.uploadButton": {
-    "defaultMessage": "Upload"
-  },
   "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
     "defaultMessage": "User ID"
   },
@@ -2421,17 +2427,14 @@
   "forms.ManualFileUploadRequestForm.sourcePathHint": {
     "defaultMessage": "Absolute path to the file on the device that should be uploaded."
   },
-  "forms.ManualFileUploadRequestForm.sourceStorageCreateOption": {
-    "defaultMessage": "Use \"{value}\""
+  "forms.ManualFileUploadRequestForm.sourceStorageEmpty": {
+    "defaultMessage": "No known storage file names for this device yet."
   },
-  "forms.ManualFileUploadRequestForm.sourceStorageHint": {
-    "defaultMessage": "Select a known storage file ID from previous storage downloads, or type one manually."
-  },
-  "forms.ManualFileUploadRequestForm.sourceStorageNoOptions": {
-    "defaultMessage": "No known storage file IDs for this device yet."
+  "forms.ManualFileUploadRequestForm.sourceStorageNoMatch": {
+    "defaultMessage": "No file found with name \"{value}\""
   },
   "forms.ManualFileUploadRequestForm.sourceStoragePlaceholder": {
-    "defaultMessage": "Select or enter a storage file ID"
+    "defaultMessage": "Select storage file by its name..."
   },
   "forms.ManualFileUploadRequestForm.sourceTypeLabel": {
     "defaultMessage": "Source Type"

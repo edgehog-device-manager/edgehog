@@ -556,8 +556,8 @@ const ManualFileDownloadRequestForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.uploadButton"
-              defaultMessage="Upload"
+              id="forms.ManualFileDownloadRequestForm.downloadButton"
+              defaultMessage="Request download"
             />
           </Button>
         </Col>

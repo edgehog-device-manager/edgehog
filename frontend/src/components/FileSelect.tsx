@@ -171,6 +171,7 @@ const FileSelect = ({ filesFragmentRef, controllerProps }: FileSelectProps) => {
       isLoading={isLoadingNext}
       onMenuScrollToBottom={onLoadMore}
       onInputChange={(text) => setSearchText(text)}
+      isClearable
     />
   );
 };

@@ -191,6 +191,7 @@ const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
         progressPercentage
         responseCode
         responseMessage
+        pathOnDevice
       }
     }
   }
