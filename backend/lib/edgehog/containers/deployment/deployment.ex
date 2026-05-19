@@ -212,6 +212,8 @@ defmodule Edgehog.Containers.Deployment do
       validate SameApplication
       validate IsUpgrade
 
+      change {Edgehog.Changes.Log, message: "Deployment upgrade message sent."}
+
       change set_attribute(:context, :upgrade_message_sent)
 
       change Changes.SendUpgrade
@@ -230,6 +232,18 @@ defmodule Edgehog.Containers.Deployment do
 
       change {Edgehog.Changes.Log, message: "Deployment started successfully."}
 
+      change {Edgehog.Changes.Log, message: "Deployment successfully provisioned."} do
+        where [data_one_of(:state, [:pending, :sent])]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment successfully started."} do
+        where [data_one_of(:context, [:start_message_sent])]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
+        where [data_one_of(:context, [:upgrade_message_sent])]
+      end
+
       require_atomic? false
     end
 
@@ -238,6 +252,18 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:context, nil)
 
       change {Edgehog.Changes.Log, message: "Deployment stopped successfully."}
+
+      change {Edgehog.Changes.Log, message: "Deployment successfully provisioned."} do
+        where [data_one_of(:state, [:pending, :sent])]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment successfully stopped."} do
+        where [data_one_of(:context, [:stop_message_sent])]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
+        where [data_one_of(:context, [:upgrade_message_sent])]
+      end
 
       require_atomic? false
     end
@@ -253,6 +279,41 @@ defmodule Edgehog.Containers.Deployment do
 
       argument :event, :map do
         allow_nil? false
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment could not be started."} do
+        where [
+          data_one_of(:context, [:start_message_sent]),
+          {Validations.Event, type: "Error"}
+        ]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment could not be stopped."} do
+        where [
+          data_one_of(:context, [:stop_message_sent]),
+          {Validations.Event, type: "Error"}
+        ]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment deletion failed."} do
+        where [
+          data_one_of(:context, [:delete_message_sent]),
+          {Validations.Event, type: "Error"}
+        ]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment upgrade failed."} do
+        where [
+          data_one_of(:context, [:upgrade_message_sent]),
+          {Validations.Event, type: "Error"}
+        ]
+      end
+
+      change {Edgehog.Changes.Log, message: "Deployment provisioning failed."} do
+        where [
+          data_one_of(:state, [:pending, :sent]),
+          {Validations.Event, type: "Error"}
+        ]
       end
 
       change Changes.AppendEvent
