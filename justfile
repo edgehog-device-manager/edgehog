@@ -182,7 +182,7 @@ _edgehog-dev-backend:
     export EDGEHOG_AUTHZ_PROVIDER=openfga
     export EDGEHOG_OPENFGA_GRPC_ENDPOINT="http://grpc.openfga.edgehog.localhost"
     docker pull busybox
-    docker wait openfga-init || true
+    docker compose wait openfga-init || true
     eval $(docker run --rm -v edgehog_fga-env:/vol busybox cat /vol/.env)
     cd backend
     mix deps.get
