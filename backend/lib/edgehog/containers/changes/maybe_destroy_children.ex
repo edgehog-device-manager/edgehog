@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@ defmodule Edgehog.Containers.Changes.MaybeDestroyChildren do
       |> compute_children(changeset.data)
 
     with {:ok, children} <- children do
-      Ash.Changeset.after_transaction(
+      Ash.Changeset.after_action(
         changeset,
         &maybe_destroy_children(&1, &2, children, tenant)
       )
@@ -62,7 +62,7 @@ defmodule Edgehog.Containers.Changes.MaybeDestroyChildren do
     end
   end
 
-  defp maybe_destroy_children(_changeset, {:ok, resource}, children, tenant) do
+  defp maybe_destroy_children(_changeset, resource, children, tenant) do
     Enum.each(children, fn child ->
       child
       |> Ash.Changeset.for_destroy(:destroy_if_dangling, %{})
@@ -71,6 +71,4 @@ defmodule Edgehog.Containers.Changes.MaybeDestroyChildren do
 
     {:ok, resource}
   end
-
-  defp maybe_destroy_children(_changeset, error, _children, _tenant), do: error
 end

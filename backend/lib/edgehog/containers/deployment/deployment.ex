@@ -134,7 +134,8 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:context, :start_message_sent)
       change {Edgehog.Changes.Log, message: "Deployment start message sent."}
 
-      manual {ManualActions.SendDeploymentCommand, command: :start}
+      change {Changes.SendCommand, command: :start}
+      require_atomic? false
     end
 
     update :stop do
@@ -148,7 +149,8 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:context, :stop_message_sent)
       change {Edgehog.Changes.Log, message: "Deployment stop message sent."}
 
-      manual {ManualActions.SendDeploymentCommand, command: :stop}
+      change {Changes.SendCommand, command: :stop}
+      require_atomic? false
     end
 
     update :delete do
@@ -162,7 +164,8 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:context, :delete_message_sent)
       change {Edgehog.Changes.Log, message: "Deployment delete message sent."}
 
-      manual {ManualActions.SendDeploymentCommand, command: :delete}
+      change {Changes.SendCommand, command: :delete}
+      require_atomic? false
     end
 
     update :run_ready_actions do
@@ -211,7 +214,8 @@ defmodule Edgehog.Containers.Deployment do
 
       change set_attribute(:context, :upgrade_message_sent)
 
-      manual ManualActions.SendDeploymentUpgrade
+      change Changes.SendUpgrade
+      require_atomic? false
     end
 
     update :mark_as_sent do

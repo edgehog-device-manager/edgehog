@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,10 +29,8 @@ defmodule Edgehog.Containers.Deployment.Changes.SendRequest do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
-      with {:ok, deployment} <- result do
-        Containers.send_deployment(deployment, tenant: tenant)
-      end
+    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
+      Containers.send_deployment(deployment, tenant: tenant)
     end)
   end
 end
