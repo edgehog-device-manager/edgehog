@@ -243,8 +243,6 @@ defmodule Edgehog.Containers.Deployment do
       change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
         where [data_one_of(:context, [:upgrade_message_sent])]
       end
-
-      require_atomic? false
     end
 
     update :mark_as_stopped do
@@ -264,8 +262,6 @@ defmodule Edgehog.Containers.Deployment do
       change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
         where [data_one_of(:context, [:upgrade_message_sent])]
       end
-
-      require_atomic? false
     end
 
     update :mark_as_timed_out do
