@@ -48,6 +48,11 @@ defmodule Edgehog.ContainersFixtures do
   def unique_container_hostname, do: "hostname#{System.unique_integer()}"
 
   @doc """
+  Generate a unique container name.
+  """
+  def unique_container_name, do: "container#{System.unique_integer()}"
+
+  @doc """
   Generate a unique image reference.
   """
   def unique_image_reference, do: "image#{System.unique_integer()}"
@@ -184,16 +189,38 @@ defmodule Edgehog.ContainersFixtures do
     # number of volumes to associate with the container
     {volumes, opts} = Keyword.pop(opts, :volumes, 0)
 
-    {volume_target, opts} = Keyword.pop(opts, :volume_target, "/fixture/target")
-    {volume_label, opts} = Keyword.pop(opts, :volume_label, "label#{System.unique_integer()}")
-    volume_params = %{target: volume_target, label: volume_label}
-    volumes = Enum.map(1..volumes//1, fn _ -> volume_params end)
+    {volume_target, opts} = Keyword.pop(opts, :volume_target, nil)
+    {volume_label, opts} = Keyword.pop(opts, :volume_label, nil)
+
+    volume_params = fn i ->
+      %{
+        target:
+          volume_target ||
+            "/fixture/target-#{System.unique_integer([:positive])}-#{i}",
+        label:
+          volume_label ||
+            "label#{System.unique_integer([:positive])}-#{i}"
+      }
+    end
+
+    volumes =
+      if volumes > 0 do
+        Enum.map(1..volumes, fn i -> volume_params.(i) end)
+      else
+        []
+      end
 
     {networks, opts} = Keyword.pop(opts, :networks, [])
     {device_mappings, opts} = Keyword.pop(opts, :device_mappings, [])
 
+    {name, opts} =
+      Keyword.pop_lazy(opts, :name, fn ->
+        "container#{System.unique_integer()}"
+      end)
+
     params =
       Enum.into(opts, %{
+        name: name,
         image_id: image_id,
         volumes: volumes,
         networks: networks,
@@ -234,7 +261,11 @@ defmodule Edgehog.ContainersFixtures do
     {container_params, opts} = Keyword.pop(opts, :container_params, [])
     container_params = Keyword.put(container_params, :tenant, tenant)
 
-    containers = Enum.map(1..containers//1, fn _ -> container_fixture(container_params) end)
+    containers =
+      Enum.map(1..containers//1, fn _ ->
+        container = container_fixture(container_params)
+        %{id: container.id}
+      end)
 
     # number of system models to associate with the release
     {system_models, opts} = Keyword.pop(opts, :system_models, 0)

@@ -59,32 +59,7 @@ defmodule Edgehog.Containers.Container do
       :read,
       :destroy,
       create: [
-        :port_bindings,
-        :restart_policy,
-        :hostname,
-        :network_mode,
-        :env,
-        :privileged,
-        :extra_hosts,
-        :image_id,
-        :cap_add,
-        :cap_drop,
-        :cpu_period,
-        :cpu_quota,
-        :cpu_realtime_period,
-        :cpu_realtime_runtime,
-        :memory,
-        :memory_reservation,
-        :memory_swap,
-        :memory_swappiness,
-        :volume_driver,
-        :storage_opt,
-        :read_only_rootfs,
-        :tmpfs,
-        :binds,
-        :image_id
-      ],
-      update: [
+        :name,
         :port_bindings,
         :restart_policy,
         :hostname,
@@ -114,6 +89,7 @@ defmodule Edgehog.Containers.Container do
 
     create :create_with_nested do
       accept [
+        :name,
         :restart_policy,
         :hostname,
         :env,
@@ -167,6 +143,7 @@ defmodule Edgehog.Containers.Container do
 
     create :create_fixture do
       accept [
+        :name,
         :port_bindings,
         :restart_policy,
         :hostname,
@@ -212,6 +189,13 @@ defmodule Edgehog.Containers.Container do
       filter expr(image_id == ^arg(:image_id))
     end
 
+    update :update do
+      description "Updates a container."
+      require_atomic? false
+
+      accept [:name]
+    end
+
     destroy :destroy_if_dangling do
       description "Destroys the container if it's dangling (not referenced by any release)"
 
@@ -229,6 +213,12 @@ defmodule Edgehog.Containers.Container do
 
   attributes do
     uuid_primary_key :id
+
+    attribute :name, :string do
+      allow_nil? false
+
+      public? true
+    end
 
     attribute :restart_policy, RestartPolicy do
       public? true
@@ -395,6 +385,10 @@ defmodule Edgehog.Containers.Container do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :releases]}
+  end
+
+  identities do
+    identity :name, [:name]
   end
 
   postgres do

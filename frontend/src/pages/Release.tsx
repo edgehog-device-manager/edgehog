@@ -30,6 +30,8 @@ import {
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
+import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
+import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
 import { Release_DeploymentsFragment$key } from "@/api/__generated__/Release_DeploymentsFragment.graphql";
 import type {
   Release_getRelease_Query,
@@ -39,7 +41,7 @@ import { ReleaseDevices_PaginationQuery } from "@/api/__generated__/ReleaseDevic
 
 import Alert from "@/components/Alert";
 import Center from "@/components/Center";
-import ContainersTable from "@/components/ContainersTable";
+import ContainersOverview from "@/components/ContainersOverview";
 import Page from "@/components/Page";
 import ReleaseDevicesTable from "@/components/ReleaseDevicesTable";
 import ReleaseSystemModelsTable from "@/components/ReleaseSystemModelsTable";
@@ -49,8 +51,6 @@ import Tabs, { Tab } from "@/components/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
-import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
-import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -85,7 +85,7 @@ const DEPLOYMENTS_FRAGMENT = graphql`
 /* eslint-disable relay/unused-fields */
 const CONTAINERS_FRAGMENT = graphql`
   fragment Release_ContainersFragment on Release
-  @refetchable(queryName: "Containers_PaginationQuery") {
+  @refetchable(queryName: "ReleaseContainers_PaginationQuery") {
     containers(first: $first, after: $after)
       @connection(key: "Release_containers") {
       edges {
@@ -93,7 +93,7 @@ const CONTAINERS_FRAGMENT = graphql`
           __typename
         }
       }
-      ...ContainersTable_ContainerEdgeFragment
+      ...ContainersOverview_ContainerEdgeFragment
     }
   }
 `;
@@ -107,16 +107,10 @@ interface ContainersLayoutContainerProps {
 const ContainersLayoutContainer = ({
   releaseRef,
 }: ContainersLayoutContainerProps) => {
-  const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
+  const { data } = usePaginationFragment<
     Containers_PaginationQuery,
     Release_ContainersFragment$key
   >(CONTAINERS_FRAGMENT, releaseRef);
-
-  const { onLoadMore } = useRelayConnectionPagination({
-    hasNext,
-    isLoadingNext,
-    loadNext,
-  });
 
   const containersRef = data?.containers;
 
@@ -126,11 +120,7 @@ const ContainersLayoutContainer = ({
 
   return (
     <div className="mt-3">
-      <ContainersTable
-        containersRef={containersRef}
-        loading={isLoadingNext}
-        onLoadMore={onLoadMore}
-      />
+      <ContainersOverview containersRef={containersRef} />
     </div>
   );
 };

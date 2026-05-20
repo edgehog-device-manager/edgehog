@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,18 +43,15 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
       name = "application_name"
       description = "application description"
       hostname = unique_container_hostname()
-      reference = unique_image_reference()
+
+      c1 =
+        [tenant: tenant, name: "service-a", hostname: hostname]
+        |> container_fixture()
+        |> Ash.load!(:image)
 
       initial_release = %{
         "version" => "0.0.1",
-        "containers" => [
-          %{
-            "hostname" => hostname,
-            "image" => %{
-              "reference" => reference
-            }
-          }
-        ]
+        "containers" => [%{"id" => c1.id}]
       }
 
       input = %{
@@ -118,7 +115,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateApplicationTest do
 
       assert %{"image" => image_result} = container_result
 
-      assert image_result["reference"] == reference
+      assert image_result["reference"] == c1.image.reference
     end
   end
 

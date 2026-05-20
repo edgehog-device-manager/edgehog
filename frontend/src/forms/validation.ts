@@ -1009,90 +1009,85 @@ const deviceMappingsSchema = z.array(
   }),
 );
 
-const containerSchema = z.object({
-  image: imageSchema.optional(),
-  hostname: nullableTrimString.optional(),
-  networkMode: nullableTrimString.optional(),
-  networks: networksSchema.optional(),
-  extraHosts: extraHostsSchema.optional(),
-  portBindings: portBindingsSchema.optional(),
-  binds: bindingsSchema.optional(),
-  volumes: volumesSchema.optional(),
-  volumeDriver: nullableTrimString.optional(),
-  storageOpt: storageOptSchema.optional(),
-  tmpfs: tmpfsOptSchema.optional(),
-  readOnlyRootfs: z.boolean().optional(),
-  memory: memorySchema.optional(),
-  memoryReservation: memoryReservationSchema.optional(),
-  memorySwap: memorySwapSchema.optional(),
-  memorySwappiness: memorySwappinessSchema.optional(),
-  cpuPeriod: cpuPeriodSchema.optional(),
-  cpuQuota: cpuQuotaSchema.optional(),
-  cpuRealtimePeriod: cpuRealtimePeriodSchema.optional(),
-  cpuRealtimeRuntime: cpuRealtimeRuntimeSchema.optional(),
-  privileged: z.boolean().optional(),
-  capAdd: capAddSchema.optional(),
-  capDrop: capDropSchema.optional(),
-  restartPolicy: nullableTrimString.optional(),
-  env: envSchema.optional(),
-  deviceMappings: deviceMappingsSchema.optional(),
-});
+const containerSchema = z
+  .object({
+    name: z.string().min(1),
+    image: imageSchema.optional(),
+    hostname: nullableTrimString.optional(),
+    networkMode: nullableTrimString.optional(),
+    networks: networksSchema.optional(),
+    extraHosts: extraHostsSchema.optional(),
+    portBindings: portBindingsSchema.optional(),
+    binds: bindingsSchema.optional(),
+    volumes: volumesSchema.optional(),
+    volumeDriver: nullableTrimString.optional(),
+    storageOpt: storageOptSchema.optional(),
+    tmpfs: tmpfsOptSchema.optional(),
+    readOnlyRootfs: z.boolean().optional(),
+    memory: memorySchema.optional(),
+    memoryReservation: memoryReservationSchema.optional(),
+    memorySwap: memorySwapSchema.optional(),
+    memorySwappiness: memorySwappinessSchema.optional(),
+    cpuPeriod: cpuPeriodSchema.optional(),
+    cpuQuota: cpuQuotaSchema.optional(),
+    cpuRealtimePeriod: cpuRealtimePeriodSchema.optional(),
+    cpuRealtimeRuntime: cpuRealtimeRuntimeSchema.optional(),
+    privileged: z.boolean().optional(),
+    capAdd: capAddSchema.optional(),
+    capDrop: capDropSchema.optional(),
+    restartPolicy: nullableTrimString.optional(),
+    env: envSchema.optional(),
+    deviceMappings: deviceMappingsSchema.optional(),
+  })
+  .superRefine((container, ctx) => {
+    const cpuPeriod = container.cpuPeriod;
+    const cpuQuota = container.cpuQuota;
+
+    const cpuBothEmpty = cpuPeriod == null && cpuQuota == null;
+    const cpuBothSet = cpuPeriod != null && cpuQuota != null;
+
+    if (!cpuBothEmpty && !cpuBothSet) {
+      ctx.addIssue({
+        path: [cpuPeriod == null ? "cpuPeriod" : "cpuQuota"],
+        message: messages.cpuQuotaPeriod.id,
+        code: "custom",
+      });
+    }
+
+    const memory = container.memory;
+    const memoryReservation = container.memoryReservation;
+    const memorySwap = container.memorySwap;
+
+    if (
+      memory != null &&
+      memoryReservation != null &&
+      memoryReservation > memory
+    ) {
+      ctx.addIssue({
+        path: ["memoryReservation"],
+        message: messages.memoryReservation.id,
+        code: "custom",
+      });
+    }
+
+    if (memory != null && memorySwap != null && memorySwap < memory) {
+      ctx.addIssue({
+        path: ["memorySwap"],
+        message: messages.memorySwap.id,
+        code: "custom",
+      });
+    }
+  });
 
 type ContainerInputData = z.infer<typeof containerSchema>;
 
 const requiredSystemModelsSchema = z.array(z.object({ id: z.string().min(1) }));
 
-const releaseSchema = z
-  .object({
-    version: z.string().min(1),
-    requiredSystemModels: requiredSystemModelsSchema.optional(),
-    containers: z.array(containerSchema).optional(),
-  })
-  .superRefine((data, ctx) => {
-    data.containers?.forEach((container, index) => {
-      const cpuPeriod = container.cpuPeriod;
-      const cpuQuota = container.cpuQuota;
-
-      const cpuBothEmpty = cpuPeriod == null && cpuQuota == null;
-      const cpuBothSet = cpuPeriod != null && cpuQuota != null;
-
-      if (!cpuBothEmpty && !cpuBothSet) {
-        ctx.addIssue({
-          path: [
-            "containers",
-            index,
-            cpuPeriod == null ? "cpuPeriod" : "cpuQuota",
-          ],
-          message: messages.cpuQuotaPeriod.id,
-          code: "custom",
-        });
-      }
-
-      const memory = container.memory;
-      const memoryReservation = container.memoryReservation;
-      const memorySwap = container.memorySwap;
-
-      if (
-        memory != null &&
-        memoryReservation != null &&
-        memoryReservation > memory
-      ) {
-        ctx.addIssue({
-          path: ["containers", index, "memoryReservation"],
-          message: messages.memoryReservation.id,
-          code: "custom",
-        });
-      }
-
-      if (memory != null && memorySwap != null && memorySwap < memory) {
-        ctx.addIssue({
-          path: ["containers", index, "memorySwap"],
-          message: messages.memorySwap.id,
-          code: "custom",
-        });
-      }
-    });
-  });
+const releaseSchema = z.object({
+  version: z.string().min(1),
+  requiredSystemModels: requiredSystemModelsSchema.optional(),
+  containers: z.array(z.object({ id: z.string().min(1) })),
+});
 
 type ReleaseFormData = z.infer<typeof releaseSchema>;
 
@@ -1158,6 +1153,7 @@ export {
   updateCampaignSchema,
   fileDownloadCampaignSchema,
   releaseSchema,
+  containerSchema,
   CapAddList,
   CapDropList,
   repositorySchema,

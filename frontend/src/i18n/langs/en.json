@@ -278,6 +278,144 @@
   "components.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Disconnected"
   },
+  "components.ContainerDetails.bindsLabel": {
+    "defaultMessage": "Binds"
+  },
+  "components.ContainerDetails.capAdd": {
+    "defaultMessage": "Cap Add"
+  },
+  "components.ContainerDetails.capDrop": {
+    "defaultMessage": "Cap Drop"
+  },
+  "components.ContainerDetails.cpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "components.ContainerDetails.cpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "components.ContainerDetails.cpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real Time Period (microseconds)"
+  },
+  "components.ContainerDetails.cpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Realtime Runtime (microseconds)"
+  },
+  "components.ContainerDetails.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
+  },
+  "components.ContainerDetails.envLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "components.ContainerDetails.extraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "components.ContainerDetails.hostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "components.ContainerDetails.imageConfigSection": {
+    "defaultMessage": "Image Configuration"
+  },
+  "components.ContainerDetails.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "components.ContainerDetails.imageReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "components.ContainerDetails.memoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "components.ContainerDetails.memoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "components.ContainerDetails.memorySwapLabel": {
+    "defaultMessage": "Memory + Swap (bytes)"
+  },
+  "components.ContainerDetails.memorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "components.ContainerDetails.nameLabel": {
+    "defaultMessage": "Container Name"
+  },
+  "components.ContainerDetails.networkConfigSection": {
+    "defaultMessage": "Network Configuration"
+  },
+  "components.ContainerDetails.networkDriverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.ContainerDetails.networkEnableIPv6Label": {
+    "defaultMessage": "Enable IPv6"
+  },
+  "components.ContainerDetails.networkInternalLabel": {
+    "defaultMessage": "Internal"
+  },
+  "components.ContainerDetails.networkLabelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.ContainerDetails.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "components.ContainerDetails.networkOptionsLabel": {
+    "defaultMessage": "Options (JSON)"
+  },
+  "components.ContainerDetails.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "components.ContainerDetails.noDeviceMappings": {
+    "defaultMessage": "No device mappings assigned."
+  },
+  "components.ContainerDetails.noNetworks": {
+    "defaultMessage": "No networks assigned."
+  },
+  "components.ContainerDetails.noVolumes": {
+    "defaultMessage": "No volumes assigned."
+  },
+  "components.ContainerDetails.options": {
+    "defaultMessage": "Options"
+  },
+  "components.ContainerDetails.portBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "components.ContainerDetails.privilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "components.ContainerDetails.readOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "components.ContainerDetails.resourceLimitsSection": {
+    "defaultMessage": "Resource Limits"
+  },
+  "components.ContainerDetails.restartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "components.ContainerDetails.runtimeSection": {
+    "defaultMessage": "Runtime & Environment"
+  },
+  "components.ContainerDetails.securitySection": {
+    "defaultMessage": "Security & Capabilities"
+  },
+  "components.ContainerDetails.storageConfigSection": {
+    "defaultMessage": "Storage Configuration"
+  },
+  "components.ContainerDetails.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
+  "components.ContainerDetails.targetLabel": {
+    "defaultMessage": "Target"
+  },
+  "components.ContainerDetails.tmpfsLabel": {
+    "defaultMessage": "Tmpfs"
+  },
+  "components.ContainerDetails.volumeDriver": {
+    "defaultMessage": "Volume Driver"
+  },
+  "components.ContainerDetails.volumeDriverLabel": {
+    "defaultMessage": "Driver"
+  },
+  "components.ContainerDetails.volumeLabelLabel": {
+    "defaultMessage": "Label"
+  },
+  "components.ContainerDetails.volumesLabel": {
+    "defaultMessage": "Volumes"
+  },
   "components.ContainerStatus.created": {
     "defaultMessage": "Created"
   },
@@ -302,143 +440,16 @@
   "components.ContainerStatus.unknown": {
     "defaultMessage": "Unknown"
   },
-  "components.ContainersTable.bindsLabel": {
-    "defaultMessage": "Binds"
-  },
-  "components.ContainersTable.capAdd": {
-    "defaultMessage": "Cap Add"
-  },
-  "components.ContainersTable.capDrop": {
-    "defaultMessage": "Cap Drop"
-  },
-  "components.ContainersTable.cpuPeriodLabel": {
-    "defaultMessage": "CPU Period (microseconds)"
-  },
-  "components.ContainersTable.cpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (microseconds)"
-  },
-  "components.ContainersTable.cpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real Time Period (microseconds)"
-  },
-  "components.ContainersTable.cpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Realtime Runtime (microseconds)"
-  },
-  "components.ContainersTable.deviceMappingsLabel": {
-    "defaultMessage": "Device Mappings"
-  },
-  "components.ContainersTable.envLabel": {
-    "defaultMessage": "Environment (JSON String)"
-  },
-  "components.ContainersTable.extraHostsLabel": {
-    "defaultMessage": "Extra Hosts"
-  },
-  "components.ContainersTable.hostnameLabel": {
-    "defaultMessage": "Hostname"
-  },
-  "components.ContainersTable.imageConfigSection": {
-    "defaultMessage": "Image Configuration"
-  },
-  "components.ContainersTable.imageCredentialsLabel": {
-    "defaultMessage": "Image Credentials"
-  },
-  "components.ContainersTable.imageReferenceLabel": {
-    "defaultMessage": "Image Reference"
-  },
-  "components.ContainersTable.memoryLabel": {
-    "defaultMessage": "Memory (bytes)"
-  },
-  "components.ContainersTable.memoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "components.ContainersTable.memorySwapLabel": {
-    "defaultMessage": "Memory + Swap (bytes)"
-  },
-  "components.ContainersTable.memorySwappinessLabel": {
-    "defaultMessage": "Memory Swappiness (0-100)"
-  },
-  "components.ContainersTable.networkConfigSection": {
-    "defaultMessage": "Network Configuration"
-  },
-  "components.ContainersTable.networkDriverLabel": {
-    "defaultMessage": "Driver"
-  },
-  "components.ContainersTable.networkEnableIPv6Label": {
-    "defaultMessage": "Enable IPv6"
-  },
-  "components.ContainersTable.networkInternalLabel": {
-    "defaultMessage": "Internal"
-  },
-  "components.ContainersTable.networkLabelLabel": {
-    "defaultMessage": "Label"
-  },
-  "components.ContainersTable.networkModeLabel": {
-    "defaultMessage": "Network Mode"
-  },
-  "components.ContainersTable.networkOptionsLabel": {
-    "defaultMessage": "Options (JSON)"
-  },
-  "components.ContainersTable.networksLabel": {
-    "defaultMessage": "Networks"
-  },
-  "components.ContainersTable.noContainers": {
+  "components.ContainersOverview.noContainers": {
     "defaultMessage": "No containers available."
   },
-  "components.ContainersTable.noDeviceMappings": {
-    "defaultMessage": "No device mappings assigned."
+  "components.ContainersTable.Name": {
+    "defaultMessage": "Name",
+    "description": "Title for the Name column of the containers table"
   },
-  "components.ContainersTable.noNetworks": {
-    "defaultMessage": "No networks assigned."
-  },
-  "components.ContainersTable.noVolumes": {
-    "defaultMessage": "No volumes assigned."
-  },
-  "components.ContainersTable.options": {
-    "defaultMessage": "Options"
-  },
-  "components.ContainersTable.portBindingsLabel": {
-    "defaultMessage": "Port Bindings"
-  },
-  "components.ContainersTable.privilegedLabel": {
-    "defaultMessage": "Privileged"
-  },
-  "components.ContainersTable.readOnlyRootfsLabel": {
-    "defaultMessage": "Read-Only Root Filesystem"
-  },
-  "components.ContainersTable.resourceLimitsSection": {
-    "defaultMessage": "Resource Limits"
-  },
-  "components.ContainersTable.restartPolicyLabel": {
-    "defaultMessage": "Restart Policy"
-  },
-  "components.ContainersTable.runtimeSection": {
-    "defaultMessage": "Runtime & Environment"
-  },
-  "components.ContainersTable.securitySection": {
-    "defaultMessage": "Security & Capabilities"
-  },
-  "components.ContainersTable.storageConfigSection": {
-    "defaultMessage": "Storage Configuration"
-  },
-  "components.ContainersTable.storageOptLabel": {
-    "defaultMessage": "Storage Options"
-  },
-  "components.ContainersTable.targetLabel": {
-    "defaultMessage": "Target"
-  },
-  "components.ContainersTable.tmpfsLabel": {
-    "defaultMessage": "Tmpfs"
-  },
-  "components.ContainersTable.volumeDriver": {
-    "defaultMessage": "Volume Driver"
-  },
-  "components.ContainersTable.volumeDriverLabel": {
-    "defaultMessage": "Driver"
-  },
-  "components.ContainersTable.volumeLabelLabel": {
-    "defaultMessage": "Label"
-  },
-  "components.ContainersTable.volumesLabel": {
-    "defaultMessage": "Volumes"
+  "components.ContainersTable.imageTitle": {
+    "defaultMessage": "Image",
+    "description": "Title for the Image column of the containers table"
   },
   "components.DeleteApplicationModal.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the application."
@@ -1373,6 +1384,18 @@
   "components.RequestStatus.sent": {
     "defaultMessage": "Sent"
   },
+  "components.ReuseContainerModal.confirmButton": {
+    "defaultMessage": "Confirm"
+  },
+  "components.ReuseContainerModal.confirmPrompt": {
+    "defaultMessage": "Choose a container from which you want to copy configuration."
+  },
+  "components.ReuseContainerModal.reuseResourcesTitle": {
+    "defaultMessage": "Reuse Resources"
+  },
+  "components.ReuseContainerModal.selectContainer": {
+    "defaultMessage": "Select Container"
+  },
   "components.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search",
     "description": "Placeholder for the search input of the SearchBox"
@@ -1385,6 +1408,9 @@
   },
   "components.Sidebar.applications.campaignsLabel": {
     "defaultMessage": "Campaigns"
+  },
+  "components.Sidebar.applications.containersLabel": {
+    "defaultMessage": "Containers"
   },
   "components.Sidebar.applications.credentialsLabel": {
     "defaultMessage": "Image Credentials"
@@ -1600,138 +1626,6 @@
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
   },
-  "forms.ContainerForm.deviceMappingsLabel": {
-    "defaultMessage": "Device Mappings"
-  },
-  "forms.ContainerForm.deviceMappingsSection": {
-    "defaultMessage": "Device Mappings"
-  },
-  "forms.ContainerForm.imageCredentialsLabel": {
-    "defaultMessage": "Image Credentials"
-  },
-  "forms.ContainerForm.imageReferenceLabel": {
-    "defaultMessage": "Image Reference"
-  },
-  "forms.ContainerForm.imageSection": {
-    "defaultMessage": "Image Configuration"
-  },
-  "forms.ContainerForm.networkAddExtraHostButton": {
-    "defaultMessage": "Add Extra Host"
-  },
-  "forms.ContainerForm.networkAddPortBindingButton": {
-    "defaultMessage": "Add Port Binding"
-  },
-  "forms.ContainerForm.networkExtraHostsLabel": {
-    "defaultMessage": "Extra Hosts"
-  },
-  "forms.ContainerForm.networkHostnameLabel": {
-    "defaultMessage": "Hostname"
-  },
-  "forms.ContainerForm.networkModeLabel": {
-    "defaultMessage": "Network Mode"
-  },
-  "forms.ContainerForm.networkMultiselectLabel": {
-    "defaultMessage": "Networks"
-  },
-  "forms.ContainerForm.networkPortBindingsLabel": {
-    "defaultMessage": "Port Bindings"
-  },
-  "forms.ContainerForm.networkSection": {
-    "defaultMessage": "Network Configuration"
-  },
-  "forms.ContainerForm.removeContainerButton": {
-    "defaultMessage": "Remove Container"
-  },
-  "forms.ContainerForm.resourceLimitsCpuPeriodLabel": {
-    "defaultMessage": "CPU Period (microseconds)"
-  },
-  "forms.ContainerForm.resourceLimitsCpuQuotaLabel": {
-    "defaultMessage": "CPU Quota (microseconds)"
-  },
-  "forms.ContainerForm.resourceLimitsCpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real-Time Period (microseconds)"
-  },
-  "forms.ContainerForm.resourceLimitsCpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
-  },
-  "forms.ContainerForm.resourceLimitsMemoryLabel": {
-    "defaultMessage": "Memory (bytes)"
-  },
-  "forms.ContainerForm.resourceLimitsMemoryReservationLabel": {
-    "defaultMessage": "Memory Reservation (bytes)"
-  },
-  "forms.ContainerForm.resourceLimitsMemorySwapLabel": {
-    "defaultMessage": "Memory Swap (bytes)"
-  },
-  "forms.ContainerForm.resourceLimitsMemorySwappinessLabel": {
-    "defaultMessage": "Memory Swappiness (0-100)"
-  },
-  "forms.ContainerForm.resourceLimitsSection": {
-    "defaultMessage": "Resource Limits"
-  },
-  "forms.ContainerForm.runtimeEnvironmentEnvLabel": {
-    "defaultMessage": "Environment (JSON String)"
-  },
-  "forms.ContainerForm.runtimeEnvironmentRestartPolicyLabel": {
-    "defaultMessage": "Restart Policy"
-  },
-  "forms.ContainerForm.runtimeEnvironmentSection": {
-    "defaultMessage": "Runtime & Environment"
-  },
-  "forms.ContainerForm.securityCapabilitiesCapAddLabel": {
-    "defaultMessage": "Cap Add"
-  },
-  "forms.ContainerForm.securityCapabilitiesCapDropLabel": {
-    "defaultMessage": "Cap Drop"
-  },
-  "forms.ContainerForm.securityCapabilitiesPrivilegedLabel": {
-    "defaultMessage": "Privileged"
-  },
-  "forms.ContainerForm.securityCapabilitiesSection": {
-    "defaultMessage": "Security & Capabilities"
-  },
-  "forms.ContainerForm.storageAddBindsButton": {
-    "defaultMessage": "Add Binds"
-  },
-  "forms.ContainerForm.storageAddStorageOptButton": {
-    "defaultMessage": "Add Storage Option"
-  },
-  "forms.ContainerForm.storageAddTmpfsButton": {
-    "defaultMessage": "Add Tmpfs Mount"
-  },
-  "forms.ContainerForm.storageAddVolumeButton": {
-    "defaultMessage": "Add Volume"
-  },
-  "forms.ContainerForm.storageBindsLabel": {
-    "defaultMessage": "Binds"
-  },
-  "forms.ContainerForm.storageNoVolumesMessage": {
-    "defaultMessage": "No volumes available"
-  },
-  "forms.ContainerForm.storageOptLabel": {
-    "defaultMessage": "Storage Options"
-  },
-  "forms.ContainerForm.storageReadOnlyRootfsLabel": {
-    "defaultMessage": "Read-Only Root Filesystem"
-  },
-  "forms.ContainerForm.storageSection": {
-    "defaultMessage": "Storage Configuration"
-  },
-  "forms.ContainerForm.storageTmpfsLabel": {
-    "defaultMessage": "Tmpfs Mounts"
-  },
-  "forms.ContainerForm.storageVolumeDriverLabel": {
-    "defaultMessage": "Volume Driver"
-  },
-  "forms.ContainerForm.storageVolumeSelectLabel": {
-    "defaultMessage": "Volume:"
-  },
-  "forms.ContainerForm.storageVolumeTargetLabel": {
-    "defaultMessage": "Target:"
-  },
-  "forms.ContainerForm.storageVolumesLabel": {
-    "defaultMessage": "Volumes"
-  },
   "forms.CreateApplication.descriptionLabel": {
     "defaultMessage": "Description"
   },
@@ -1802,6 +1696,117 @@
   },
   "forms.CreateChannel.targetGroupsLabel": {
     "defaultMessage": "Target Groups"
+  },
+  "forms.CreateContainer.ReferenceLabel": {
+    "defaultMessage": "Image Reference"
+  },
+  "forms.CreateContainer.deviceMappingsLabel": {
+    "defaultMessage": "Device Mappings"
+  },
+  "forms.CreateContainer.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "forms.CreateContainer.nameLabel": {
+    "defaultMessage": "Container Name"
+  },
+  "forms.CreateContainer.networkAddExtraHostButton": {
+    "defaultMessage": "Add Extra Host"
+  },
+  "forms.CreateContainer.networkAddPortBindingButton": {
+    "defaultMessage": "Add Port Binding"
+  },
+  "forms.CreateContainer.networkExtraHostsLabel": {
+    "defaultMessage": "Extra Hosts"
+  },
+  "forms.CreateContainer.networkHostnameLabel": {
+    "defaultMessage": "Hostname"
+  },
+  "forms.CreateContainer.networkModeLabel": {
+    "defaultMessage": "Network Mode"
+  },
+  "forms.CreateContainer.networkMultiselectLabel": {
+    "defaultMessage": "Networks"
+  },
+  "forms.CreateContainer.networkPortBindingsLabel": {
+    "defaultMessage": "Port Bindings"
+  },
+  "forms.CreateContainer.resourceLimitsCpuPeriodLabel": {
+    "defaultMessage": "CPU Period (microseconds)"
+  },
+  "forms.CreateContainer.resourceLimitsCpuQuotaLabel": {
+    "defaultMessage": "CPU Quota (microseconds)"
+  },
+  "forms.CreateContainer.resourceLimitsCpuRealtimePeriodLabel": {
+    "defaultMessage": "CPU Real-Time Period (microseconds)"
+  },
+  "forms.CreateContainer.resourceLimitsCpuRealtimeRuntimeLabel": {
+    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.CreateContainer.resourceLimitsMemoryLabel": {
+    "defaultMessage": "Memory (bytes)"
+  },
+  "forms.CreateContainer.resourceLimitsMemoryReservationLabel": {
+    "defaultMessage": "Memory Reservation (bytes)"
+  },
+  "forms.CreateContainer.resourceLimitsMemorySwapLabel": {
+    "defaultMessage": "Memory Swap (bytes)"
+  },
+  "forms.CreateContainer.resourceLimitsMemorySwappinessLabel": {
+    "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.CreateContainer.runtimeEnvironmentEnvLabel": {
+    "defaultMessage": "Environment (JSON String)"
+  },
+  "forms.CreateContainer.runtimeEnvironmentRestartPolicyLabel": {
+    "defaultMessage": "Restart Policy"
+  },
+  "forms.CreateContainer.securityCapabilitiesCapAddLabel": {
+    "defaultMessage": "Cap Add"
+  },
+  "forms.CreateContainer.securityCapabilitiesCapDropLabel": {
+    "defaultMessage": "Cap Drop"
+  },
+  "forms.CreateContainer.securityCapabilitiesPrivilegedLabel": {
+    "defaultMessage": "Privileged"
+  },
+  "forms.CreateContainer.storageAddBindsButton": {
+    "defaultMessage": "Add Binds"
+  },
+  "forms.CreateContainer.storageAddStorageOptButton": {
+    "defaultMessage": "Add Storage Option"
+  },
+  "forms.CreateContainer.storageAddTmpfsButton": {
+    "defaultMessage": "Add Tmpfs Mount"
+  },
+  "forms.CreateContainer.storageAddVolumeButton": {
+    "defaultMessage": "Add Volume"
+  },
+  "forms.CreateContainer.storageBindsLabel": {
+    "defaultMessage": "Binds"
+  },
+  "forms.CreateContainer.storageOptLabel": {
+    "defaultMessage": "Storage Options"
+  },
+  "forms.CreateContainer.storageReadOnlyRootfsLabel": {
+    "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "forms.CreateContainer.storageTmpfsLabel": {
+    "defaultMessage": "Tmpfs Mounts"
+  },
+  "forms.CreateContainer.storageVolumeDriverLabel": {
+    "defaultMessage": "Volume Driver"
+  },
+  "forms.CreateContainer.storageVolumeSelectLabel": {
+    "defaultMessage": "Volume"
+  },
+  "forms.CreateContainer.storageVolumeTargetLabel": {
+    "defaultMessage": "Target"
+  },
+  "forms.CreateContainer.storageVolumesLabel": {
+    "defaultMessage": "Volumes"
+  },
+  "forms.CreateContainer.submitButton": {
+    "defaultMessage": "Create Container"
   },
   "forms.CreateDeploymentCampaign.applicationLabel": {
     "defaultMessage": "Application"
@@ -2028,50 +2033,8 @@
   "forms.CreateNetwork.submitButton": {
     "defaultMessage": "Create"
   },
-  "forms.CreateRelease.addContainerButton": {
-    "defaultMessage": "Add Container"
-  },
-  "forms.CreateRelease.confirmButton": {
-    "defaultMessage": "Confirm"
-  },
-  "forms.CreateRelease.confirmPrompt": {
-    "defaultMessage": "Choose a release from which you want to copy containers and their configurations."
-  },
-  "forms.CreateRelease.confirmRemoveDescription": {
-    "defaultMessage": "Are you sure you want to remove <bold>Container {number}</bold>?"
-  },
-  "forms.CreateRelease.confirmRemoveLabel": {
-    "defaultMessage": "Remove"
-  },
-  "forms.CreateRelease.confirmRemoveTitle": {
-    "defaultMessage": "Remove Container"
-  },
-  "forms.CreateRelease.containerTitle": {
-    "defaultMessage": "Container {containerNumber}"
-  },
-  "forms.CreateRelease.containersTitle": {
+  "forms.CreateRelease.containersLabel": {
     "defaultMessage": "Containers"
-  },
-  "forms.CreateRelease.importSuccessMessage": {
-    "defaultMessage": "Release configuration has been successfully imported!"
-  },
-  "forms.CreateRelease.importedLabel": {
-    "defaultMessage": "Imported"
-  },
-  "forms.CreateRelease.modifiedLabel": {
-    "defaultMessage": "Modified"
-  },
-  "forms.CreateRelease.noContainersFeedback": {
-    "defaultMessage": "The release does not include any container."
-  },
-  "forms.CreateRelease.reuseResourcesTitle": {
-    "defaultMessage": "Reuse Resources"
-  },
-  "forms.CreateRelease.selectApplication": {
-    "defaultMessage": "Select Application"
-  },
-  "forms.CreateRelease.selectRelease": {
-    "defaultMessage": "Select Release"
   },
   "forms.CreateRelease.submitButton": {
     "defaultMessage": "Create"
@@ -2998,6 +2961,15 @@
   "navigation.routeTitle.ChannelsNew": {
     "defaultMessage": "Create Channel"
   },
+  "navigation.routeTitle.Containers": {
+    "defaultMessage": "Containers"
+  },
+  "navigation.routeTitle.ContainersEdit": {
+    "defaultMessage": "Container Details"
+  },
+  "navigation.routeTitle.ContainersNew": {
+    "defaultMessage": "Create Containers"
+  },
   "navigation.routeTitle.DeploymentCampaigns": {
     "defaultMessage": "Campaigns"
   },
@@ -3267,6 +3239,36 @@
   },
   "pages.Channels.title": {
     "defaultMessage": "Channels"
+  },
+  "pages.Container.containerNotFound.message": {
+    "defaultMessage": "Return to the containers list."
+  },
+  "pages.Container.containerNotFound.title": {
+    "defaultMessage": "Container not found."
+  },
+  "pages.Container.name": {
+    "defaultMessage": "Container Name"
+  },
+  "pages.Container.updateContainerErrorFeedback": {
+    "defaultMessage": "Could not update the container, please try again."
+  },
+  "pages.ContainerCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Container, please try again."
+  },
+  "pages.ContainerCreate.reuseContainerButton": {
+    "defaultMessage": "Reuse Container"
+  },
+  "pages.ContainerCreate.reuseContainerTitleButton": {
+    "defaultMessage": "Copy configuration from an existing container"
+  },
+  "pages.ContainerCreate.title": {
+    "defaultMessage": "Create Container"
+  },
+  "pages.Containers.createButton": {
+    "defaultMessage": "Create Container"
+  },
+  "pages.Containers.title": {
+    "defaultMessage": "Containers"
   },
   "pages.Deployment.deleteErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot delete an application while it is offline."
@@ -3666,12 +3668,6 @@
   },
   "pages.ReleaseCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the release, please try again."
-  },
-  "pages.ReleaseCreate.reuseReleaseButton": {
-    "defaultMessage": "Reuse Release"
-  },
-  "pages.ReleaseCreate.reuseReleaseTitleButton": {
-    "defaultMessage": "Copy configuration from an existing release"
   },
   "pages.ReleaseCreate.title": {
     "defaultMessage": "Create Release for {applicationName}"

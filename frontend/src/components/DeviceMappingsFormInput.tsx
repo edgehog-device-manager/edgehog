@@ -21,35 +21,35 @@ import {
   FieldErrors,
   UseFieldArrayReturn,
   UseFormRegister,
+  Path,
 } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
-
-import { ContainersTable_ContainerEdgeFragment$data } from "@/api/__generated__/ContainersTable_ContainerEdgeFragment.graphql";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import Icon from "@/components/Icon";
-import { ReleaseFormData } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
+import { ContainerInputData } from "@/forms/validation";
 
-type DeviceMappingsData = NonNullable<
-  ContainersTable_ContainerEdgeFragment$data["edges"]
->[number]["node"]["deviceMappings"];
-
-type ReadOnlyFormInputProps = {
-  deviceMappings: DeviceMappingsData;
+type DeviceMapping = {
+  pathInContainer: string;
+  pathOnHost: string;
+  cgroupPermissions: string;
 };
 
-type EditableFormInputProps = {
-  containerIndex: number;
+type ReadOnlyFormInputProps = {
+  deviceMappings: DeviceMapping[];
+};
+
+export type EditableFormInputProps = {
   deviceMappingsForm: UseFieldArrayReturn<
-    ReleaseFormData,
-    `containers.${number}.deviceMappings`,
+    ContainerInputData,
+    "deviceMappings",
     "id"
   >;
   canAddDeviceMapping: boolean;
-  errorFeedback: FieldErrors<ReleaseFormData>;
-  register: UseFormRegister<ReleaseFormData>;
+  errorFeedback: FieldErrors<ContainerInputData>;
+  register: UseFormRegister<ContainerInputData>;
   removeDeviceMapping: (dmIndex: number) => void;
 };
 
@@ -64,31 +64,34 @@ const DeviceMappingsFormInput = ({
   editableProps,
   readOnlyProps,
 }: DeviceMappingsFormInputProps) => {
-  const otherFormControlFields = (
-    dmProp: "pathInContainer" | "pathOnHost" | "cgroupPermissions",
-    dmIndex: number,
+  const fields = editableProps?.deviceMappingsForm?.fields ?? [];
+
+  const data: DeviceMapping[] = readOnly
+    ? (readOnlyProps?.deviceMappings ?? [])
+    : fields.map((f) => ({
+        pathInContainer: f.pathInContainer ?? "",
+        pathOnHost: f.pathOnHost ?? "",
+        cgroupPermissions: f.cgroupPermissions ?? "",
+      }));
+
+  const registerField = (
+    index: number,
+    field: keyof DeviceMapping,
     value?: string,
   ) => {
-    return readOnly
-      ? {
-          value: value ?? "",
-        }
-      : {
-          ...editableProps?.register(
-            `containers.${editableProps.containerIndex}.deviceMappings.${dmIndex}.${dmProp}` as const,
-          ),
-        };
-  };
+    if (readOnly) {
+      return { value: value ?? "" };
+    }
 
-  const data = readOnly
-    ? readOnlyProps?.deviceMappings.edges?.map((edge) => edge.node)
-    : editableProps?.deviceMappingsForm?.fields;
+    return editableProps?.register(
+      `deviceMappings.${index}.${field}` as Path<ContainerInputData>,
+    );
+  };
 
   return (
     <>
       <Container fluid>
-        {(editableProps?.deviceMappingsForm?.fields?.length ||
-          readOnlyProps?.deviceMappings?.edges?.length) && (
+        {data.length > 0 && (
           <Row className="mb-3">
             <Col>
               <FormattedMessage
@@ -108,62 +111,58 @@ const DeviceMappingsFormInput = ({
                 defaultMessage="Container Group Permissions"
               />
             </Col>
-            {!readOnly && <Col></Col>}
+            {!readOnly && <Col />}
           </Row>
         )}
 
-        {data?.map((deviceMapping, dmIndex) => {
-          const fieldErrors = readOnly
-            ? null
-            : editableProps?.errorFeedback?.containers?.[
-                editableProps?.containerIndex
-              ]?.deviceMappings?.[dmIndex];
+        {data.map((deviceMapping, dmIndex) => {
+          const errors =
+            editableProps?.errorFeedback?.deviceMappings?.[dmIndex];
 
           return (
             <Row className="mb-3" key={`deviceMapping-${dmIndex}`}>
               <Col>
                 <Form.Control
-                  {...otherFormControlFields(
+                  {...registerField(
+                    dmIndex,
                     "pathInContainer",
-                    dmIndex,
-                    deviceMapping?.pathInContainer,
+                    deviceMapping.pathInContainer,
                   )}
                   placeholder="e.g., /dev/net/1"
-                  isInvalid={!!fieldErrors?.pathInContainer}
+                  isInvalid={!!errors?.pathInContainer}
                   readOnly={readOnly}
                 />
-                <FormFeedback
-                  feedback={fieldErrors?.pathInContainer?.message}
-                />
+                <FormFeedback feedback={errors?.pathInContainer?.message} />
               </Col>
+
               <Col>
                 <Form.Control
-                  {...otherFormControlFields(
+                  {...registerField(
+                    dmIndex,
                     "pathOnHost",
-                    dmIndex,
-                    deviceMapping?.pathOnHost,
+                    deviceMapping.pathOnHost,
                   )}
                   placeholder="e.g., /dev/net/1"
-                  isInvalid={!!fieldErrors?.pathOnHost}
+                  isInvalid={!!errors?.pathOnHost}
                   readOnly={readOnly}
                 />
-                <FormFeedback feedback={fieldErrors?.pathOnHost?.message} />
+                <FormFeedback feedback={errors?.pathOnHost?.message} />
               </Col>
+
               <Col>
                 <Form.Control
-                  {...otherFormControlFields(
-                    "cgroupPermissions",
+                  {...registerField(
                     dmIndex,
-                    deviceMapping?.cgroupPermissions,
+                    "cgroupPermissions",
+                    deviceMapping.cgroupPermissions,
                   )}
                   placeholder="e.g., mrw"
-                  isInvalid={!!fieldErrors?.cgroupPermissions}
+                  isInvalid={!!errors?.cgroupPermissions}
                   readOnly={readOnly}
                 />
-                <FormFeedback
-                  feedback={fieldErrors?.cgroupPermissions?.message}
-                />
+                <FormFeedback feedback={errors?.cgroupPermissions?.message} />
               </Col>
+
               {!readOnly && (
                 <Col>
                   <Button

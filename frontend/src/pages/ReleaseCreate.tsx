@@ -19,41 +19,40 @@
  */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { FormattedMessage, useIntl } from "react-intl";
 import { ErrorBoundary } from "react-error-boundary";
+import { FormattedMessage } from "react-intl";
+import type { PreloadedQuery } from "react-relay/hooks";
 import {
   graphql,
   useMutation,
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import type { PreloadedQuery } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
+import type {
+  CreateReleaseInput,
+  ReleaseCreate_createRelease_Mutation,
+} from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 import type {
   ReleaseCreate_getOptions_Query,
   ReleaseCreate_getOptions_Query$data,
 } from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
-import type { ReleaseCreate_createRelease_Mutation } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Page from "@/components/Page";
-import CreateRelease from "@/forms/CreateRelease";
-import type { ReleaseSubmitData } from "@/forms/CreateRelease";
-import { Route, useNavigate } from "@/Navigation";
-import Spinner from "@/components/Spinner";
 import Center from "@/components/Center";
+import Page from "@/components/Page";
+import Spinner from "@/components/Spinner";
+import CreateRelease from "@/forms/CreateRelease";
+import { Route, useNavigate } from "@/Navigation";
 
 const CREATE_RELEASE_PAGE_QUERY = graphql`
   query ReleaseCreate_getOptions_Query($applicationId: ID!) {
     application(id: $applicationId) {
       name
     }
-    ...CreateRelease_ImageCredentialsOptionsFragment
-    ...CreateRelease_NetworksOptionsFragment
-    ...CreateRelease_VolumesOptionsFragment
-    ...CreateRelease_SystemModelsOptionsFragment
+    ...hooks_SystemModelsOptionsFragment
+    ...hooks_ContainersOptionsFragment
   }
 `;
 
@@ -80,15 +79,9 @@ const CREATE_RELEASE_MUTATION = graphql`
 
 type ReleaseOptions = {
   releaseOptions: ReleaseCreate_getOptions_Query$data;
-  showModal: boolean;
-  onToggleModal: (show: boolean) => void;
 };
 
-const Release = ({
-  releaseOptions,
-  showModal,
-  onToggleModal,
-}: ReleaseOptions) => {
+const Release = ({ releaseOptions }: ReleaseOptions) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
   const { applicationId = "" } = useParams();
@@ -96,7 +89,7 @@ const Release = ({
     useMutation<ReleaseCreate_createRelease_Mutation>(CREATE_RELEASE_MUTATION);
 
   const handleCreateRelease = useCallback(
-    (release: ReleaseSubmitData) => {
+    (release: CreateReleaseInput) => {
       const newRelease = { ...release, applicationId };
 
       createRelease({
@@ -158,14 +151,10 @@ const Release = ({
         {errorFeedback}
       </Alert>
       <CreateRelease
-        imageCredentialsOptionsRef={releaseOptions}
-        networksOptionsRef={releaseOptions}
-        volumesOptionsRef={releaseOptions}
         requiredSystemModelsOptionsRef={releaseOptions}
+        containersOptionsRef={releaseOptions}
         onSubmit={handleCreateRelease}
         isLoading={isCreatingRelease}
-        showModal={showModal}
-        onToggleModal={onToggleModal}
       />
     </>
   );
@@ -173,21 +162,14 @@ const Release = ({
 
 type ReleaseWrapperProps = {
   getReleaseOptionsQuery: PreloadedQuery<ReleaseCreate_getOptions_Query>;
-  showModal: boolean;
-  onToggleModal: (show: boolean) => void;
 };
 
-const ReleaseWrapper = ({
-  getReleaseOptionsQuery,
-  showModal,
-  onToggleModal,
-}: ReleaseWrapperProps) => {
+const ReleaseWrapper = ({ getReleaseOptionsQuery }: ReleaseWrapperProps) => {
   const releaseOptions = usePreloadedQuery(
     CREATE_RELEASE_PAGE_QUERY,
     getReleaseOptionsQuery,
   );
 
-  const intl = useIntl();
   const applicationName = releaseOptions.application?.name ?? "";
 
   return (
@@ -200,27 +182,9 @@ const ReleaseWrapper = ({
             values={{ applicationName }}
           />
         }
-      >
-        <Button
-          variant="secondary"
-          title={intl.formatMessage({
-            id: "pages.ReleaseCreate.reuseReleaseTitleButton",
-            defaultMessage: "Copy configuration from an existing release",
-          })}
-          onClick={() => onToggleModal(true)}
-        >
-          <FormattedMessage
-            id="pages.ReleaseCreate.reuseReleaseButton"
-            defaultMessage="Reuse Release"
-          />
-        </Button>
-      </Page.Header>
+      />
       <Page.Main>
-        <Release
-          releaseOptions={releaseOptions}
-          showModal={showModal}
-          onToggleModal={onToggleModal}
-        />
+        <Release releaseOptions={releaseOptions} />
       </Page.Main>
     </Page>
   );
@@ -228,7 +192,6 @@ const ReleaseWrapper = ({
 
 const ReleaseCreatePage = () => {
   const { applicationId = "" } = useParams();
-  const [showModal, setShowModal] = useState(false);
 
   const [getReleaseOptionsQuery, getReleaseOptions] =
     useQueryLoader<ReleaseCreate_getOptions_Query>(CREATE_RELEASE_PAGE_QUERY);
@@ -257,11 +220,7 @@ const ReleaseCreatePage = () => {
         onReset={fetchReleaseOptions}
       >
         {getReleaseOptionsQuery && (
-          <ReleaseWrapper
-            getReleaseOptionsQuery={getReleaseOptionsQuery}
-            showModal={showModal}
-            onToggleModal={setShowModal}
-          />
+          <ReleaseWrapper getReleaseOptionsQuery={getReleaseOptionsQuery} />
         )}
       </ErrorBoundary>
     </Suspense>

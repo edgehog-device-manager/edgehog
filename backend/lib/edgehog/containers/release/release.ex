@@ -53,10 +53,8 @@ defmodule Edgehog.Containers.Release do
       argument :containers, {:array, :map}
       argument :required_system_models, {:array, :map}
 
-      # TODO this should be a manual change, checking for existing containers,
-      # for now each new release creates brand new containers
       change manage_relationship(:containers,
-               on_no_match: {:create, :create_with_nested},
+               on_no_match: :error,
                on_match: :ignore,
                on_lookup: :relate
              )

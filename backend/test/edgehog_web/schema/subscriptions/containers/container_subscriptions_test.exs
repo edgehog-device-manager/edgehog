@@ -28,32 +28,32 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.ContainerSubscriptionsTest 
     test "receive data on container creation", %{socket: socket, tenant: tenant} do
       subscribe(socket, query: container_created_query())
 
-      hostname = unique_container_hostname()
-      container = container_fixture(tenant: tenant, hostname: hostname)
+      name = unique_container_name()
+      container = container_fixture(tenant: tenant, name: name)
 
       assert_push "subscription:data", push
       assert_created "container", container_data, push
 
       assert container_data["id"] == AshGraphql.Resource.encode_relay_id(container)
-      assert container_data["hostname"] == hostname
+      assert container_data["name"] == name
     end
 
     test "receive data on container update", %{socket: socket, tenant: tenant} do
       container = container_fixture(tenant: tenant)
       subscribe(socket, query: container_updated_query())
 
-      new_hostname = unique_container_hostname()
+      new_name = unique_container_name()
 
       container =
         container
-        |> Ash.Changeset.for_update(:update, %{hostname: new_hostname})
+        |> Ash.Changeset.for_update(:update, %{name: new_name})
         |> Ash.update!(tenant: tenant)
 
       assert_push "subscription:data", push
       assert_updated "container", container_data, push
 
       assert container_data["id"] == AshGraphql.Resource.encode_relay_id(container)
-      assert container_data["hostname"] == new_hostname
+      assert container_data["name"] == new_name
     end
 
     test "receive data on container destroy", %{socket: socket, tenant: tenant} do
@@ -84,7 +84,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.ContainerSubscriptionsTest 
       container {
         created {
           id
-          hostname
+          name
         }
       }
     }
@@ -97,7 +97,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.ContainerSubscriptionsTest 
       container {
         updated {
           id
-          hostname
+          name
         }
       }
     }

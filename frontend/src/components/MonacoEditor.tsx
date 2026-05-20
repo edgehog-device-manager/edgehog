@@ -97,10 +97,10 @@ const MonacoEditor = ({
         defaultValue={defaultValue}
         onMount={handleEditorDidMount}
         options={{
-          automaticLayout: true,
+          automaticLayout: false,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
-          wordWrap: "on",
+          wordWrap: "off",
           readOnly: readonly,
           lineNumbers: "off",
           scrollbar: {

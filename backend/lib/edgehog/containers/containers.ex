@@ -25,6 +25,7 @@ defmodule Edgehog.Containers do
     ]
 
   alias Edgehog.Containers.Application
+  alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeploymentContainerDeployment
   alias Edgehog.Containers.DeploymentReadyAction
@@ -95,6 +96,16 @@ defmodule Edgehog.Containers do
       get Deployment, :deployment, :read do
         description "Returns the desired deployment."
       end
+
+      list Container, :containers, :read do
+        description "Returns all available containers"
+        paginate_with :keyset
+        relay? true
+      end
+
+      get Container, :container, :read do
+        description "Returns the desired container"
+      end
     end
 
     mutations do
@@ -127,21 +138,29 @@ defmodule Edgehog.Containers do
         relay_id_translations input: [
                                 application_id: :application,
                                 containers: [
-                                  image: [
-                                    image_credentials_id: :image_credentials
-                                  ],
-                                  networks: [
-                                    id: :network
-                                  ],
-                                  volumes: [
-                                    id: :volume
-                                  ]
+                                  id: :container
                                 ],
                                 required_system_models: [
                                   id: :system_model
                                 ]
                               ]
       end
+
+      create Container, :create_container, :create_with_nested do
+        description "Create a new container"
+
+        relay_id_translations input: [
+                                image: [image_credentials_id: :image_credentials],
+                                networks: [
+                                  id: :network
+                                ],
+                                volumes: [
+                                  id: :volume
+                                ]
+                              ]
+      end
+
+      update Container, :update_container, :update
 
       create ImageCredentials, :create_image_credentials, :create do
         description "Create image credentials."

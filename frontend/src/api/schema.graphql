@@ -4,27 +4,6 @@ schema {
   query: RootQueryType
 }
 
-input ContainerCreateWithNestedImageInput {
-  id: ID
-  imageCredentialsId: ID
-  reference: String
-}
-
-input ContainerCreateWithNestedNetworksInput {
-  id: ID
-}
-
-input ContainerCreateWithNestedVolumesInput {
-  id: ID
-  target: String
-}
-
-input ContainerCreateWithNestedDeviceMappingsInput {
-  cgroupPermissions: String!
-  pathInContainer: String!
-  pathOnHost: String!
-}
-
 input CampaignCampaignMechanismFileDownloadInput {
   """
   Optional compression type for the file (e.g., "tar.gz").
@@ -1640,34 +1619,29 @@ input ApplicationCreateInitialReleaseInput {
   version: String!
 }
 
-input ReleaseCreateContainersInput {
-  binds: [String!]
-  capAdd: [String!]
-  capDrop: [String!]
-  cpuPeriod: Int
-  cpuQuota: Int
-  cpuRealtimePeriod: Int
-  cpuRealtimeRuntime: Int
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  env: [ContainerEnvVarInput!]
-  extraHosts: [String!]
-  hostname: String
+input ContainerCreateWithNestedImageInput {
   id: ID
-  image: ContainerCreateWithNestedImageInput
-  memory: Int
-  memoryReservation: Int
-  memorySwap: Int
-  memorySwappiness: Int
-  networkMode: String
-  networks: [ContainerCreateWithNestedNetworksInput!]
-  portBindings: [String!]
-  privileged: Boolean
-  readOnlyRootfs: Boolean
-  restartPolicy: String
-  storageOpt: [String!]
-  tmpfs: [String!]
-  volumeDriver: String
-  volumes: [ContainerCreateWithNestedVolumesInput!]
+  imageCredentialsId: ID
+  reference: String
+}
+
+input ContainerCreateWithNestedNetworksInput {
+  id: ID
+}
+
+input ContainerCreateWithNestedVolumesInput {
+  id: ID
+  target: String
+}
+
+input ContainerCreateWithNestedDeviceMappingsInput {
+  cgroupPermissions: String!
+  pathInContainer: String!
+  pathOnHost: String!
+}
+
+input ReleaseCreateContainersInput {
+  id: ID
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -3707,8 +3681,61 @@ type container_result {
   destroyed: ID
 }
 
+"The result of the :update_container mutation"
+type UpdateContainerResult {
+  "The successful result of the mutation"
+  result: Container
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateContainerInput {
+  name: String
+}
+
+"The result of the :create_container mutation"
+type CreateContainerResult {
+  "The successful result of the mutation"
+  result: Container
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateContainerInput {
+  name: String!
+  restartPolicy: String
+  portBindings: [String!]
+  hostname: String
+  env: [ContainerEnvVarInput!]
+  privileged: Boolean
+  networkMode: String
+  extraHosts: [String!]
+  capAdd: [String!]
+  capDrop: [String!]
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  memory: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
+  volumeDriver: String
+  storageOpt: [String!]
+  readOnlyRootfs: Boolean
+  tmpfs: [String!]
+  binds: [String!]
+  image: ContainerCreateWithNestedImageInput
+  networks: [ContainerCreateWithNestedNetworksInput!]
+  volumes: [ContainerCreateWithNestedVolumesInput!]
+  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+}
+
 enum ContainerSortField {
   ID
+  NAME
   RESTART_POLICY
   HOSTNAME
   PRIVILEGED
@@ -3957,6 +3984,24 @@ input ContainerFilterRestartPolicy {
   isNotDistinctFrom: String
 }
 
+input ContainerFilterName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
 input ContainerFilterId {
   isNil: Boolean
   eq: ID
@@ -3975,6 +4020,7 @@ input ContainerFilterInput {
   or: [ContainerFilterInput!]
   not: [ContainerFilterInput!]
   id: ContainerFilterId
+  name: ContainerFilterName
   restartPolicy: ContainerFilterRestartPolicy
   hostname: ContainerFilterHostname
   privileged: ContainerFilterPrivileged
@@ -4003,8 +4049,9 @@ input ContainerSortInput {
   field: ContainerSortField!
 }
 
-type Container {
+type Container implements Node {
   id: ID!
+  name: String!
   restartPolicy: String
   portBindings: [String!]!
   hostname: String!
@@ -8591,6 +8638,30 @@ type RootQueryType {
   "Returns the desired application."
   application("The id of the record" id: ID!): Application
 
+  "Returns all available containers"
+  containers(
+    "How to sort the records in the response"
+    sort: [ContainerSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerConnection
+
+  "Returns the desired container"
+  container("The id of the record" id: ID!): Container
+
   "Returns all available deployments."
   deployments(
     "How to sort the records in the response"
@@ -8850,6 +8921,12 @@ type RootMutationType {
   createApplication(input: CreateApplicationInput!): CreateApplicationResult
 
   deleteApplication(id: ID!): DeleteApplicationResult
+
+  "Create a new container"
+  createContainer(input: CreateContainerInput!): CreateContainerResult
+
+  "Updates a container."
+  updateContainer(id: ID!, input: UpdateContainerInput): UpdateContainerResult
 
   "Deploy the application on a device"
   deployRelease(input: DeployReleaseInput!): DeployReleaseResult

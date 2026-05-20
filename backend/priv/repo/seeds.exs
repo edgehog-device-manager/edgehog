@@ -18,11 +18,13 @@
 
 alias Edgehog.Astarte
 alias Edgehog.Containers.Application
+alias Edgehog.Containers.Container
 alias Edgehog.Containers.Deployment
+alias Edgehog.Containers.DeviceMapping
+alias Edgehog.Containers.Image
 alias Edgehog.Containers.ImageCredentials
 alias Edgehog.Containers.Network
 alias Edgehog.Containers.Release
-alias Edgehog.Containers.Volume
 alias Edgehog.Devices.Device
 alias Edgehog.Devices.HardwareType
 alias Edgehog.Devices.SystemModel
@@ -191,6 +193,36 @@ Ash.create!(
   tenant: tenant
 )
 
+create_image = fn attrs ->
+  Ash.create!(Image, attrs, tenant: tenant)
+end
+
+create_container = fn attrs ->
+  Container
+  |> Ash.Changeset.for_create(:create_fixture, attrs, tenant: tenant)
+  |> Ash.create!()
+end
+
+create_device_mapping = fn attrs ->
+  Ash.create!(DeviceMapping, attrs, tenant: tenant)
+end
+
+nginx_image = create_image.(%{reference: "nginx:latest"})
+httpd_image = create_image.(%{reference: "httpd:latest"})
+redis_image = create_image.(%{reference: "redis:7"})
+
+app_nginx_container =
+  create_container.(%{
+    env: [],
+    hostname: "",
+    image_id: nginx_image.id,
+    name: "nginx",
+    network_mode: "bridge",
+    port_bindings: [],
+    privileged: false,
+    restart_policy: :unless_stopped
+  })
+
 app_nginx =
   Ash.create!(
     Application,
@@ -198,23 +230,22 @@ app_nginx =
       name: "Nginx",
       description:
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            restart_policy: :unless_stopped,
-            hostname: "",
-            env: %{},
-            privileged: false,
-            network_mode: "bridge",
-            port_bindings: []
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: app_nginx_container.id}]}
     },
     tenant: tenant
   )
+
+app_nginx_8080_container =
+  create_container.(%{
+    env: [],
+    hostname: "",
+    image_id: nginx_image.id,
+    name: "nginx-8080",
+    network_mode: "bridge",
+    port_bindings: ["8080:80"],
+    privileged: false,
+    restart_policy: :unless_stopped
+  })
 
 _app_nginx_8080 =
   Ash.create!(
@@ -223,23 +254,22 @@ _app_nginx_8080 =
       name: "Nginx bound on port 8080",
       description:
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            restart_policy: :unless_stopped,
-            hostname: "",
-            env: %{},
-            privileged: false,
-            network_mode: "bridge",
-            port_bindings: ["8080:80"]
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: app_nginx_8080_container.id}]}
     },
     tenant: tenant
   )
+
+app_nginx_8081_container =
+  create_container.(%{
+    env: [],
+    hostname: "",
+    image_id: nginx_image.id,
+    name: "nginx-8081",
+    network_mode: "bridge",
+    port_bindings: ["8081:80"],
+    privileged: false,
+    restart_policy: :unless_stopped
+  })
 
 _app_nginx_8081 =
   Ash.create!(
@@ -248,20 +278,7 @@ _app_nginx_8081 =
       name: "Nginx bound on port 8081",
       description:
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            restart_policy: :unless_stopped,
-            hostname: "",
-            env: %{},
-            privileged: false,
-            network_mode: "bridge",
-            port_bindings: ["8081:80"]
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: app_nginx_8081_container.id}]}
     },
     tenant: tenant
   )
@@ -273,28 +290,30 @@ self_hosted_credentials =
     tenant: tenant
   )
 
+self_hosted_image =
+  create_image.(%{
+    image_credentials_id: self_hosted_credentials.id,
+    reference: "registry.edgehog.localhost/test/http-echo:latest"
+  })
+
+self_hosted_container =
+  create_container.(%{
+    env: [],
+    hostname: "",
+    image_id: self_hosted_image.id,
+    name: "self-hosted-http-echo",
+    port_bindings: ["5678:5678"],
+    privileged: false,
+    restart_policy: :unless_stopped
+  })
+
 _app_test_dev_self_hosted =
   Ash.create!(
     Application,
     %{
       name: "Self-hosted app",
       description: "It was sample for self-hosted deployments.",
-      initial_release: %{
-        version: "0.0.1",
-        containers: [
-          %{
-            image: %{
-              reference: "registry.edgehog.localhost/test/http-echo:latest",
-              image_credentials_id: self_hosted_credentials.id
-            },
-            restart_policy: :unless_stopped,
-            hostname: "",
-            env: %{},
-            privileged: false,
-            port_bindings: ["5678:5678"]
-          }
-        ]
-      }
+      initial_release: %{version: "0.0.1", containers: [%{id: self_hosted_container.id}]}
     },
     tenant: tenant
   )
@@ -306,6 +325,24 @@ image_credentials =
     tenant: tenant
   )
 
+credentials_image =
+  create_image.(%{
+    image_credentials_id: image_credentials.id,
+    reference: "httpd:latest"
+  })
+
+credentials_container =
+  create_container.(%{
+    env: [],
+    hostname: "",
+    image_id: credentials_image.id,
+    name: "web-with-httpd-auth",
+    network_mode: "bridge",
+    port_bindings: [],
+    privileged: false,
+    restart_policy: :unless_stopped
+  })
+
 _app_with_credentials =
   Ash.create!(
     Application,
@@ -313,23 +350,18 @@ _app_with_credentials =
       name: "App with credentials",
       description:
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "httpd:latest", image_credentials_id: image_credentials.id},
-            restart_policy: :unless_stopped,
-            hostname: "",
-            env: %{},
-            privileged: false,
-            network_mode: "bridge",
-            port_bindings: []
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: credentials_container.id}]}
     },
     tenant: tenant
   )
+
+app_with_capabilities_container =
+  create_container.(%{
+    cap_add: ["CAP_SYS_ADMIN", "CAP_NET_ADMIN"],
+    cap_drop: ["CAP_CHOWN"],
+    image_id: nginx_image.id,
+    name: "capability-demo"
+  })
 
 _app_with_capabilities =
   Ash.create!(
@@ -339,17 +371,21 @@ _app_with_capabilities =
       description: "Demonstrates capability add/drop settings.",
       initial_release: %{
         version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            cap_add: ["CAP_SYS_ADMIN", "CAP_NET_ADMIN"],
-            cap_drop: ["CAP_CHOWN"]
-          }
-        ]
+        containers: [%{id: app_with_capabilities_container.id}]
       }
     },
     tenant: tenant
   )
+
+app_with_cpu_limits_container =
+  create_container.(%{
+    cpu_period: 100_000,
+    cpu_quota: 200_000,
+    cpu_realtime_period: 1_500,
+    cpu_realtime_runtime: 1_000,
+    image_id: nginx_image.id,
+    name: "cpu-limited-web"
+  })
 
 _app_with_cpu_limits =
   Ash.create!(
@@ -357,21 +393,24 @@ _app_with_cpu_limits =
     %{
       name: "App with CPU Limits",
       description: "Demonstrates containers with CPU quota and period settings.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            cpu_period: 100_000,
-            cpu_quota: 200_000,
-            cpu_realtime_period: 1500,
-            cpu_realtime_runtime: 1000
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: app_with_cpu_limits_container.id}]}
     },
     tenant: tenant
   )
+
+device_mapping =
+  create_device_mapping.(%{
+    cgroup_permissions: "mrw",
+    path_in_container: "/dev/myzero",
+    path_on_host: "/dev/zero"
+  })
+
+app_with_device_mappings_container =
+  create_container.(%{
+    device_mappings: [device_mapping.id],
+    image_id: nginx_image.id,
+    name: "device-mapped-web"
+  })
 
 _app_with_device_mappings =
   Ash.create!(
@@ -381,18 +420,7 @@ _app_with_device_mappings =
       description: "Demonstrates mapping of host devices into containers.",
       initial_release: %{
         version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            device_mappings: [
-              %{
-                path_on_host: "/dev/zero",
-                path_in_container: "/dev/myzero",
-                cgroup_permissions: "mrw"
-              }
-            ]
-          }
-        ]
+        containers: [%{id: app_with_device_mappings_container.id}]
       }
     },
     tenant: tenant
@@ -421,15 +449,15 @@ system_model =
     tenant: tenant
   )
 
-_application_with_system_model =
+__application_with_system_model =
   Ash.create!(
     Application,
     %{
       name: "App with System Model",
       description:
-        "Application that specifies a required system model for deployment. \
-This ensures the app can only be installed on compatible hardware configurations \
-matching the associated system model, improving deployment reliability and hardware compatibility validation.",
+        "Application that specifies a required system model for deployment. " <>
+          "This ensures the app can only be installed on compatible hardware configurations " <>
+          "matching the associated system model, improving deployment reliability and hardware compatibility validation.",
       initial_release: %{
         version: "1.0.0",
         required_system_models: [%{id: system_model.id}]
@@ -438,24 +466,15 @@ matching the associated system model, improving deployment reliability and hardw
     tenant: tenant
   )
 
-volume1 =
-  Ash.create!(
-    Volume,
-    %{
-      label: "volume1",
-      options: %{device: "tmpfs", o: "size=100m", type: "tmpfs"}
-    },
-    tenant: tenant
-  )
-
-volume2 =
-  Ash.create!(
-    Volume,
-    %{
-      label: "volume2"
-    },
-    tenant: tenant
-  )
+container_with_volumes =
+  create_container.(%{
+    image_id: nginx_image.id,
+    name: "web-with-volumes",
+    volumes: [
+      %{label: "volume1", target: "test/volume1"},
+      %{label: "volume2", target: "test/volume2"}
+    ]
+  })
 
 _app_with_volumes =
   Ash.create!(
@@ -463,32 +482,22 @@ _app_with_volumes =
     %{
       name: "App with Volumes",
       description:
-        "Application demonstrating how to attach multiple volumes to a single container. \
-Each volume is mounted inside the container at a specific target path, allowing data persistence \
-and shared storage between containers or across deployments.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            volumes: [
-              %{
-                id: volume1.id,
-                target: "test/volume1"
-              },
-              %{
-                id: volume2.id,
-                target: "test/volume2"
-              }
-            ]
-          }
-        ]
-      }
+        "Application demonstrating how to attach multiple volumes to a single container. " <>
+          "Each volume is mounted inside the container at a specific target path, allowing data persistence " <>
+          "and shared storage between containers or across deployments.",
+      initial_release: %{version: "1.0.0", containers: [%{id: container_with_volumes.id}]}
     },
     tenant: tenant
   )
 
 network1 = Ash.create!(Network, %{label: "network1"}, tenant: tenant)
+
+app_with_networks_container =
+  create_container.(%{
+    image_id: nginx_image.id,
+    name: "web-with-network",
+    networks: [network1.id]
+  })
 
 _app_with_networks =
   Ash.create!(
@@ -496,20 +505,22 @@ _app_with_networks =
     %{
       name: "App with Networks",
       description:
-        "Application demonstrating how to connect a container to one or more user-defined networks. \
-This setup allows fine-grained control over container communication, network isolation, and service discovery.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            networks: [%{id: network1.id}]
-          }
-        ]
-      }
+        "Application demonstrating how to connect a container to one or more user-defined networks. " <>
+          "This setup allows fine-grained control over container communication, network isolation, and service discovery.",
+      initial_release: %{version: "1.0.0", containers: [%{id: app_with_networks_container.id}]}
     },
     tenant: tenant
   )
+
+app_with_memory_limits_container =
+  create_container.(%{
+    image_id: nginx_image.id,
+    memory: 512 * 1024 * 1024,
+    memory_reservation: 256 * 1024 * 1024,
+    memory_swap: 1024 * 1024 * 1024,
+    memory_swappiness: 60,
+    name: "web-with-memory-limits"
+  })
 
 _app_with_memory_limits =
   Ash.create!(
@@ -519,19 +530,21 @@ _app_with_memory_limits =
       description: "Demonstrates memory and swap configuration options.",
       initial_release: %{
         version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            memory: 512 * 1024 * 1024,
-            memory_reservation: 256 * 1024 * 1024,
-            memory_swap: 1024 * 1024 * 1024,
-            memory_swappiness: 60
-          }
-        ]
+        containers: [%{id: app_with_memory_limits_container.id}]
       }
     },
     tenant: tenant
   )
+
+app_with_env_vars_container =
+  create_container.(%{
+    env: [
+      %{key: "MODE", value: "production"},
+      %{key: "DEBUG", value: "false"}
+    ],
+    image_id: httpd_image.id,
+    name: "web-with-env"
+  })
 
 _app_with_env_vars =
   Ash.create!(
@@ -539,18 +552,31 @@ _app_with_env_vars =
     %{
       name: "App with Environment Variables",
       description: "Demonstrates passing environment variables to containers.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "httpd:latest"},
-            env: [%{key: "MODE", value: "production"}, %{key: "DEBUG", value: "false"}]
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: app_with_env_vars_container.id}]}
     },
     tenant: tenant
   )
+
+app_with_multiple_containers_frontend =
+  create_container.(%{
+    hostname: "frontend",
+    image_id: nginx_image.id,
+    name: "frontend",
+    network_mode: "bridge",
+    port_bindings: ["8080:80"],
+    privileged: false,
+    restart_policy: :unless_stopped
+  })
+
+app_with_multiple_containers_cache =
+  create_container.(%{
+    hostname: "cache",
+    image_id: redis_image.id,
+    name: "cache",
+    network_mode: "bridge",
+    privileged: false,
+    restart_policy: :always
+  })
 
 _app_with_multiple_containers =
   Ash.create!(
@@ -561,26 +587,20 @@ _app_with_multiple_containers =
       initial_release: %{
         version: "1.0.0",
         containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            hostname: "frontend",
-            port_bindings: ["8080:80"],
-            restart_policy: :unless_stopped,
-            privileged: false,
-            network_mode: "bridge"
-          },
-          %{
-            image: %{reference: "redis:7"},
-            hostname: "cache",
-            restart_policy: :always,
-            privileged: false,
-            network_mode: "bridge"
-          }
+          %{id: app_with_multiple_containers_frontend.id},
+          %{id: app_with_multiple_containers_cache.id}
         ]
       }
     },
     tenant: tenant
   )
+
+app_with_tmpfs_container =
+  create_container.(%{
+    image_id: nginx_image.id,
+    name: "web-with-tmpfs",
+    tmpfs: ["/tmp=rw,size=64m"]
+  })
 
 _app_with_tmpfs =
   Ash.create!(
@@ -588,18 +608,17 @@ _app_with_tmpfs =
     %{
       name: "App with Tmpfs Mount",
       description: "Container configured with tmpfs options.",
-      initial_release: %{
-        version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            tmpfs: ["/tmp=rw,size=64m"]
-          }
-        ]
-      }
+      initial_release: %{version: "1.0.0", containers: [%{id: app_with_tmpfs_container.id}]}
     },
     tenant: tenant
   )
+
+app_with_readonly_rootfs_container =
+  create_container.(%{
+    image_id: nginx_image.id,
+    name: "web-readonly",
+    read_only_rootfs: true
+  })
 
 _app_with_readonly_rootfs =
   Ash.create!(
@@ -609,12 +628,7 @@ _app_with_readonly_rootfs =
       description: "Demonstrates container with read-only root filesystem.",
       initial_release: %{
         version: "1.0.0",
-        containers: [
-          %{
-            image: %{reference: "nginx:latest"},
-            read_only_rootfs: true
-          }
-        ]
+        containers: [%{id: app_with_readonly_rootfs_container.id}]
       }
     },
     tenant: tenant

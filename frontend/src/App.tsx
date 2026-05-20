@@ -64,6 +64,9 @@ import VolumeCreatePage from "@/pages/VolumeCreate";
 import Networks from "@/pages/Networks";
 import Network from "@/pages/Network";
 import NetworkCreatePage from "@/pages/NetworkCreate";
+import Containers from "@/pages/Containers";
+import ContainerCreatePage from "@/pages/ContainerCreate";
+import Container from "@/pages/Container";
 import DeploymentsPage from "@/pages/Deployments";
 import DeploymentCampaignsPage from "@/pages/DeploymentCampaigns";
 import DeploymentCampaign from "@/pages/DeploymentCampaign";
@@ -125,6 +128,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.application, element: <Application /> },
   { path: Route.release, element: <Release /> },
   { path: Route.releaseNew, element: <ReleaseCreatePage /> },
+  { path: Route.containers, element: <Containers /> },
+  { path: Route.containersEdit, element: <Container /> },
+  { path: Route.containersNew, element: <ContainerCreatePage /> },
   { path: Route.volumes, element: <Volumes /> },
   { path: Route.volumeEdit, element: <Volume /> },
   { path: Route.volumesNew, element: <VolumeCreatePage /> },

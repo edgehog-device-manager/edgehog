@@ -306,6 +306,20 @@ const Sidebar = () => (
       <SidebarItem
         label={
           <FormattedMessage
+            id="components.Sidebar.applications.containersLabel"
+            defaultMessage="Containers"
+          />
+        }
+        route={Route.containers}
+        activeRoutes={[
+          Route.containers,
+          Route.containersEdit,
+          Route.containersNew,
+        ]}
+      />
+      <SidebarItem
+        label={
+          <FormattedMessage
             id="components.Sidebar.applications.deploymentsLabel"
             defaultMessage="Deployments"
           />

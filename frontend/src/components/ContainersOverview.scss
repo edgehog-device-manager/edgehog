@@ -1,0 +1,63 @@
+/*
+ * This file is part of Edgehog.
+ *
+ * Copyright 2026 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+.containerLayout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+}
+
+.containerListCard {
+  background: #ffffff;
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  padding: 10px;
+  overflow-y: auto;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.containerListItem {
+  width: 100%;
+  text-align: left !important;
+  padding: 10px 12px !important;
+  margin-bottom: 6px;
+  border: none !important;
+  background: transparent !important;
+  color: #212529 !important;
+  box-shadow: none !important;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f8f9fa !important;
+  }
+
+  &.active {
+    background: #ffffff !important;
+    border-left: 3px solid #0d6efd !important;
+    border-radius: 0%;
+    color: #0d6efd !important;
+    font-weight: 500;
+  }
+
+  &:focus,
+  &:active {
+    box-shadow: none !important;
+  }
+}

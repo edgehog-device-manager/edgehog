@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2022-2025 SECO Mind Srl
+ * Copyright 2022-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ interface Props {
   onConfirm: () => void;
   size?: ModalProps["size"];
   title: React.ReactNode;
+  show?: boolean;
 }
 
 const ConfirmModal = ({
@@ -64,6 +65,7 @@ const ConfirmModal = ({
   onConfirm,
   size = "lg",
   title,
+  show = true,
   ...restProps
 }: Props): React.ReactElement => {
   const handleKeyDown = useCallback(
@@ -95,7 +97,7 @@ const ConfirmModal = ({
 
   return (
     <div onKeyDown={handleKeyDown} {...restProps}>
-      <Modal show centered size={size} onHide={handleHide}>
+      <Modal show={show} centered size={size} onHide={handleHide}>
         <Modal.Header closeButton onClick={onCancel}>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
