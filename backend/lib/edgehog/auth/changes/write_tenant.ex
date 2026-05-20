@@ -48,10 +48,15 @@ defmodule Edgehog.Auth.Changes.WriteTenant do
 
   @impl Ash.Resource.Change
   def change(changeset, opts, context) do
-    Ash.Changeset.after_transaction(changeset, &write_tenant_tuple(&1, &2, opts, context))
+    Ash.Changeset.after_action(changeset, &write_tenant_tuple(&1, &2, opts, context))
   end
 
-  defp write_tenant_tuple(_changeset, {:ok, result}, opts, %{tenant: tenant}) do
+  @impl Ash.Resource.Change
+  def atomic(changeset, opts, context) do
+    {:ok, Ash.Changeset.after_action(changeset, &write_tenant_tuple(&1, &2, opts, context))}
+  end
+
+  defp write_tenant_tuple(_changeset, result, opts, %{tenant: tenant}) do
     # Writes the tuple
     # {"tenant:slug", "tenant", "obj:obj_id"}
 
@@ -78,15 +83,5 @@ defmodule Edgehog.Auth.Changes.WriteTenant do
     with {:ok, _res} <- FGAService.write(subj, rel, obj) do
       {:ok, result}
     end
-  end
-
-  defp write_tenant_tuple(_changeset, error, opts, context) do
-    Logger.debug("Error while executing DB transaction. Skipping writing tuple on the provider.",
-      error: error,
-      opts: opts,
-      context: context
-    )
-
-    error
   end
 end
