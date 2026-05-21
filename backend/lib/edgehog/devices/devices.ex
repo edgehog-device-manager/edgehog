@@ -23,8 +23,7 @@ defmodule Edgehog.Devices do
 
   use Ash.Domain,
     extensions: [
-      AshGraphql.Domain,
-      Ash.Authorizer
+      AshGraphql.Domain
     ]
 
   alias Edgehog.Devices.Device
@@ -33,6 +32,7 @@ defmodule Edgehog.Devices do
 
   authorization do
     authorize :when_requested
+    require_actor? false
   end
 
   graphql do

@@ -80,7 +80,10 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
       user: subj
     }
 
-    Stub.list_objects(channel, request)
+    with {:ok, %Openfga.V1.ListObjectsResponse{objects: ids}} <-
+           Stub.list_objects(channel, request) do
+      {:ok, Enum.map(ids, &remove_type/1)}
+    end
   end
 
   @impl Behaviour
@@ -145,5 +148,10 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
     }
 
     Stub.write(channel, request)
+  end
+
+  defp remove_type(id) do
+    [_type, id] = String.split(id, ":")
+    id
   end
 end

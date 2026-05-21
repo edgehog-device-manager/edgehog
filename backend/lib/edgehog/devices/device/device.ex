@@ -26,7 +26,8 @@ defmodule Edgehog.Devices.Device do
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
-    ]
+    ],
+    authorizers: [Ash.Policy.Authorizer]
 
   alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Containers.Deployment
@@ -55,6 +56,18 @@ defmodule Edgehog.Devices.Device do
     A Device also exposes info about its connection status and some sets of \
     data read by its operating system.
     """
+  end
+
+  policies do
+    # Filter davices the user can see on reads
+    policy action_type(:read) do
+      authorize_if {Edgehog.Auth.Policies.Filter,
+                    rel: :can_view, obj: :device, obj_id: :device_id}
+    end
+
+    policy action_type(:update) do
+      authorize_if always()
+    end
   end
 
   graphql do

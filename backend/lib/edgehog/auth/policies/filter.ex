@@ -38,27 +38,27 @@ defmodule Edgehog.Auth.Policies.Filter do
   @subject_type "user"
 
   @impl FilterCheck
-  def filter(nil, _context, _opts), do: expr(nil)
+  def filter(nil, _authorizer, _opts), do: expr(nil)
 
   @impl FilterCheck
-  def filter(actor, _context, opts) do
-    subj = Map.get(actor, :sub, "anon")
+  def filter(actor, _authorizer, opts) do
+    subj = Map.get(actor, :sub) || "anon"
 
     rel = opts |> Keyword.fetch!(:rel) |> to_string()
     obj_type = opts |> Keyword.fetch!(:obj) |> to_string()
-    obj_id = Keyword.get(opts, :obj_id, :id)
+    obj_id_attr = Keyword.get(opts, :obj_id, :id)
 
     log_context = [
       subj: subj,
       obj_type: obj_type,
-      obj_id: obj_id
+      obj_id_attr: obj_id_attr
     ]
 
     subject = "#{@subject_type}:#{subj}"
 
     subject
     |> FGAService.list_objects(rel, obj_type)
-    |> to_ash_expr(obj_id, log_context)
+    |> to_ash_expr(obj_id_attr, log_context)
   end
 
   @impl Ash.Policy.Check
@@ -70,11 +70,7 @@ defmodule Edgehog.Auth.Policies.Filter do
 
   defp to_ash_expr({:ok, :all}, _id_attribute, _log_context), do: expr(true)
 
-  defp to_ash_expr(
-         {:ok, %Openfga.V1.ListObjectsResponse{objects: ids}},
-         id_attribute,
-         _log_context
-       ) do
+  defp to_ash_expr({:ok, ids}, id_attribute, _log_context) do
     expr(^ref(id_attribute) in ^ids)
   end
 

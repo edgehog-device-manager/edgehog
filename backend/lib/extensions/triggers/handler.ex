@@ -77,9 +77,7 @@ defmodule Ash.Astarte.Triggers.Handler do
       function = :handle_event
       args = [event, [], context]
 
-      map_handling(handlers, function, args, tenant, realm.id)
-
-      :ok
+      with {:ok, _} <- map_handling(handlers, function, args, tenant, realm.id), do: :ok
     end
   end
 
@@ -92,6 +90,8 @@ defmodule Ash.Astarte.Triggers.Handler do
     with {:error, error} <- handled do
       opts = [error: error, trigger: event, tenant: tenant, realm_id: realm_id]
       Logger.error("Error handling a trigger", opts)
+
+      handled
     end
   end
 
