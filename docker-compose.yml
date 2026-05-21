@@ -188,6 +188,7 @@ services:
       RUSTFS_ACCESS_KEY: "rustfsadmin"
       RUSTFS_SECRET_KEY: "rustfsadmin"
       RUSTFS_CONSOLE_ENABLE: true
+      RUSTFS_ALLOW_INSECURE_DEFAULT_CREDENTIALS: "true"
     command: /data
     healthcheck:
       test: ["CMD-SHELL", "curl -so /dev/null http://localhost:9000/ || exit 1"]
