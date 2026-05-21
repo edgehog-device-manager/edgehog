@@ -266,7 +266,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
     document = Keyword.get(opts, :document, default_mutation())
     variables = %{"input" => input}
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   defp default_mutation do

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2024 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ defmodule EdgehogWeb.Schema.Query.TenantInfoTest do
                    "defaultLocale" => ^default_locale
                  }
                }
-             } = Absinthe.run!(doc, EdgehogWeb.Schema, context: %{tenant: tenant})
+             } = Absinthe.run!(doc, EdgehogWeb.Schema, context: %{tenant: tenant, actor: %{}})
 
       assert {:ok, %{type: :tenant_info, id: decoded_id}} =
                AshGraphql.Resource.decode_relay_id(graphql_id)

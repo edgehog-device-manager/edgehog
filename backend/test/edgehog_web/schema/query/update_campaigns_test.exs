@@ -199,7 +199,7 @@ defmodule EdgehogWeb.Schema.Query.UpdateCampaignsTest do
     tenant = Keyword.fetch!(opts, :tenant)
     document = Keyword.get(opts, :document, default_document)
 
-    Absinthe.run!(document, EdgehogWeb.Schema, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema, context: %{tenant: tenant, actor: %{}})
   end
 
   defp extract_result!(result) do

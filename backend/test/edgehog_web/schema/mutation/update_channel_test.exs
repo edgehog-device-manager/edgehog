@@ -218,7 +218,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateChannelTest do
 
     document = Keyword.get(opts, :document, default_document)
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   defp extract_error!(result) do

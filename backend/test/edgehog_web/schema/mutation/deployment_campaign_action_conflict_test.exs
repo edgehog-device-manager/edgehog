@@ -396,6 +396,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeploymentCampaignActionConflictTest do
         extra_variables
       )
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 end

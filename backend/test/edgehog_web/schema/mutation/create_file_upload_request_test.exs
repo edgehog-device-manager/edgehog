@@ -238,7 +238,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
     {input_overrides, opts} = Keyword.pop(opts, :input, %{})
     input = Map.merge(default_input, input_overrides)
 
-    context = %{tenant: tenant}
+    context = %{tenant: tenant, actor: %{}}
     variables = %{"input" => input}
     document = Keyword.get(opts, :document, default_document)
 

@@ -75,10 +75,10 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
       tenant = tenant_fixture()
       realm = realm_fixture(tenant: tenant)
 
-      assert {:ok, %{objects: [object]}} =
+      assert {:ok, [object]} =
                OpenFGA.list_objects({"tenant:#{tenant.slug}", "tenant", "realm"}, context)
 
-      assert "realm:#{realm.name}" == object
+      assert "#{realm.name}" == object
     end
   end
 
@@ -111,14 +111,14 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
       tenant_fga_id = "tenant:#{tenant.slug}"
       realm = realm_fixture(tenant: tenant)
 
-      assert {:ok, %{objects: [object]}} =
+      assert {:ok, [object]} =
                OpenFGA.list_objects({tenant_fga_id, "tenant", "realm"}, context)
 
-      assert "realm:#{realm.name}" == object
+      assert "#{realm.name}" == object
 
       Ash.destroy!(realm, tenant: tenant)
 
-      assert {:ok, %{objects: []}} =
+      assert {:ok, []} =
                OpenFGA.list_objects({tenant_fga_id, "tenant", "realm"}, context)
     end
   end

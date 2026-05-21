@@ -399,7 +399,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     {input_overrides, opts} = Keyword.pop(opts, :input, %{})
     input = Map.merge(default_input, input_overrides)
 
-    context = add_upload(%{tenant: tenant}, "file", file)
+    context = add_upload(%{tenant: tenant, actor: %{}}, "file", file)
 
     variables = %{"input" => input}
 
@@ -472,7 +472,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     {input_overrides, opts} = Keyword.pop(opts, :input, %{})
     input = Map.merge(default_input, input_overrides)
 
-    context = %{tenant: tenant}
+    context = %{tenant: tenant, actor: %{}}
 
     variables = %{"input" => input}
 

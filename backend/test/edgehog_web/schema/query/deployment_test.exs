@@ -174,7 +174,10 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
     id = Keyword.fetch!(opts, :id)
     variables = %{"id" => id}
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   def extract_result!(result) do

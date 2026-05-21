@@ -214,7 +214,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateManualOTAOperationTest do
       end)
 
     input = %{"deviceId" => device_id}
-    context = %{tenant: tenant}
+    context = %{tenant: tenant, actor: %{}}
     {sources, opts} = Keyword.pop(opts, :sources, [])
 
     {input, opts, context} = add_sources(sources, input, opts, context)

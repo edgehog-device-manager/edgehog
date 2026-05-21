@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -104,7 +104,7 @@ defmodule EdgehogWeb.Schema.Mutation.RemoveDeviceTagsTest do
 
     variables = %{"id" => id, "input" => input}
     document = Keyword.get(opts, :document, default_document)
-    context = %{tenant: tenant}
+    context = %{tenant: tenant, actor: %{}}
 
     Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: context)
   end

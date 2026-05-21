@@ -307,7 +307,10 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     document = Keyword.get(opts, :document, default_document)
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   defp extract_result!(result) do

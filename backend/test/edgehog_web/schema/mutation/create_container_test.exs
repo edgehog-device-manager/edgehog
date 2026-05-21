@@ -334,7 +334,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
     document = Keyword.get(opts, :document, _default_mutation())
     variables = %{"input" => input}
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   defp _default_mutation do

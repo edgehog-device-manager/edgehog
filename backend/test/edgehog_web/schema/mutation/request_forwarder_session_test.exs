@@ -147,7 +147,10 @@ defmodule EdgehogWeb.Schema.Mutation.RequestForwarderSessionTest do
 
     variables = %{"input" => %{"deviceId" => device_id}}
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   defp extract_errors!(result, amount) when is_integer(amount) and amount > 0 do

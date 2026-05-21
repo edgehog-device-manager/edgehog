@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -167,7 +167,10 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
     id = Keyword.get(opts, :id)
     variables = Keyword.get(opts, :variables, %{"id" => id})
 
-    Absinthe.run!(document, EdgehogWeb.Schema, variables: variables, context: %{tenant: tenant})
+    Absinthe.run!(document, EdgehogWeb.Schema,
+      variables: variables,
+      context: %{tenant: tenant, actor: %{}}
+    )
   end
 
   def extract_result!(result) do
