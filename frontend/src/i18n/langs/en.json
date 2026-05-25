@@ -1039,6 +1039,9 @@
   "components.FileDownloadRequestsTable.progress": {
     "defaultMessage": "Progress"
   },
+  "components.FileDownloadRequestsTable.requestName": {
+    "defaultMessage": "Request Name"
+  },
   "components.FileDownloadRequestsTable.responseMessage": {
     "defaultMessage": "Response Message"
   },
@@ -2312,6 +2315,9 @@
   "forms.ManualFileDownloadRequestForm.progressLabel": {
     "defaultMessage": "Report Progress"
   },
+  "forms.ManualFileDownloadRequestForm.requestNameLabel": {
+    "defaultMessage": "Request Name"
+  },
   "forms.ManualFileDownloadRequestForm.ttlHint": {
     "defaultMessage": "Set to 0 for no expiry."
   },
@@ -2359,6 +2365,9 @@
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryOption": {
     "defaultMessage": "Search or select a repository..."
+  },
+  "forms.ManualFileDownloadRequestFromRepositoryForm.requestNameLabel": {
+    "defaultMessage": "Request Name"
   },
   "forms.ManualFileDownloadRequestFromRepositoryForm.selectRepositoryHint": {
     "defaultMessage": "Select a repository before selecting a file..."

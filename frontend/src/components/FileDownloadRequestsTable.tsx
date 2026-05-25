@@ -35,6 +35,15 @@ type FileDownloadRequestNode = NonNullable<
 
 const columnHelper = createColumnHelper<FileDownloadRequestNode>();
 const columns = [
+  columnHelper.accessor("requestName", {
+    header: () => (
+      <FormattedMessage
+        id="components.FileDownloadRequestsTable.requestName"
+        defaultMessage="Request Name"
+      />
+    ),
+    cell: ({ getValue }) => getValue(),
+  }),
   columnHelper.accessor("fileName", {
     header: () => (
       <FormattedMessage

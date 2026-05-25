@@ -382,6 +382,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
     {encoding, opts} = Keyword.pop(opts, :encoding, "")
 
     default_input = %{
+      "requestName" => "manual_test_request",
       "deviceId" => device_id,
       "file" => file && "file",
       "destinationType" => "STORAGE",
@@ -457,6 +458,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDownloadRequestTest do
       end)
 
     default_input = %{
+      "requestName" => "managed_test_request",
       "deviceId" => device_id,
       "fileId" => file_id,
       "destinationType" => "STORAGE",

@@ -200,6 +200,7 @@ defmodule Edgehog.StorageTest do
         |> Ash.Changeset.for_create(
           :manual,
           [
+            request_name: "request-#{System.unique_integer([:positive])}",
             device_id: device_id,
             file: file,
             destination_type: :storage,

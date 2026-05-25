@@ -5976,6 +5976,9 @@ type CreateManagedFileDownloadRequestResult {
 }
 
 input CreateManagedFileDownloadRequestInput {
+  "An unique name for the file download request, useful for tracking and identification purposes."
+  requestName: String!
+
   "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
   ttlSeconds: Int
 
@@ -6014,6 +6017,9 @@ type CreateManualFileDownloadRequestResult {
 }
 
 input CreateManualFileDownloadRequestInput {
+  "An unique name for the file download request, useful for tracking and identification purposes."
+  requestName: String!
+
   "The name of the file being downloaded."
   fileName: String
 
@@ -6054,6 +6060,7 @@ input CreateManualFileDownloadRequestInput {
 enum FileDownloadRequestSortField {
   ID
   URL
+  REQUEST_NAME
   FILE_NAME
   UNCOMPRESSED_FILE_SIZE_BYTES
   DIGEST
@@ -6345,6 +6352,24 @@ input FileDownloadRequestFilterFileName {
   ilike: String
 }
 
+input FileDownloadRequestFilterRequestName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
 input FileDownloadRequestFilterUrl {
   isNil: Boolean
   eq: String
@@ -6387,6 +6412,9 @@ input FileDownloadRequestFilterInput {
 
   "The URL from which the file can be downloaded."
   url: FileDownloadRequestFilterUrl
+
+  "An unique name for the file download request, useful for tracking and identification purposes."
+  requestName: FileDownloadRequestFilterRequestName
 
   "The name of the file being downloaded."
   fileName: FileDownloadRequestFilterFileName
@@ -6461,6 +6489,9 @@ type FileDownloadRequest {
 
   "The URL from which the file can be downloaded."
   url: String!
+
+  "An unique name for the file download request, useful for tracking and identification purposes."
+  requestName: String!
 
   "The name of the file being downloaded."
   fileName: String

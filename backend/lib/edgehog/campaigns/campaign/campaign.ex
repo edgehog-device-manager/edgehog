@@ -275,6 +275,10 @@ defmodule Edgehog.Campaigns.Campaign do
     end
   end
 
+  identities do
+    identity :name, [:name]
+  end
+
   pub_sub do
     prefix "campaigns"
     module EdgehogWeb.Endpoint

@@ -156,6 +156,7 @@ defmodule Edgehog.FilesFixtures do
     params =
       Enum.into(opts, %{
         url: "https://example.com/ephemeral/#{System.unique_integer([:positive])}.bin",
+        request_name: "request-#{System.unique_integer([:positive])}",
         file_name: unique_file_name(),
         uncompressed_file_size_bytes: :rand.uniform(1_000_000),
         digest: unique_file_digest(),
@@ -199,6 +200,7 @@ defmodule Edgehog.FilesFixtures do
     params =
       Enum.into(opts, %{
         url: file.base_file.url,
+        request_name: "request-#{System.unique_integer([:positive])}",
         file_name: filename,
         uncompressed_file_size_bytes: file.size,
         digest: file.base_file.digest,

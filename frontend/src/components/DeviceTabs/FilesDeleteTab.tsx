@@ -77,7 +77,7 @@ const DEVICE_FILES_FRAGMENT = graphql`
       edges {
         node {
           id
-          pathOnDevice
+          requestName
           fileName
         }
       }
@@ -282,24 +282,41 @@ const FilesDeleteTab = ({
     [data.fileDeleteRequests],
   );
 
-  const deleteOptions: StorageSourceOption[] = useMemo(
-    () =>
-      data.storageFileDownloadRequests?.edges?.flatMap((edge) => {
-        const request = edge?.node;
+  const deleteOptions: StorageSourceOption[] = useMemo(() => {
+    const edges = data.storageFileDownloadRequests?.edges;
+    if (!edges) return [];
 
-        if (!request?.id) {
-          return [];
-        }
+    const validRequests: Array<{
+      id: string;
+      fileName: string;
+      requestName: string | null;
+    }> = [];
+    const fileNameCounts: Record<string, number> = {};
 
-        return [
-          {
-            value: request.id,
-            label: request.fileName || request.pathOnDevice || request.id,
-          },
-        ];
-      }) ?? [],
-    [data.storageFileDownloadRequests],
-  );
+    for (const edge of edges) {
+      const node = edge?.node;
+      if (node?.id) {
+        const fileName = node.fileName ?? node.id;
+        fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
+        validRequests.push({
+          id: node.id,
+          fileName,
+          requestName: node.requestName ?? null,
+        });
+      }
+    }
+
+    return validRequests.map(({ id, fileName, requestName }) => {
+      const isDuplicate = fileNameCounts[fileName] > 1;
+      return {
+        value: id,
+        label:
+          isDuplicate && requestName
+            ? `${fileName} (${requestName})`
+            : fileName,
+      };
+    });
+  }, [data.storageFileDownloadRequests]);
 
   if (!data.capabilities.includes("FILE_TRANSFER_DELETE")) {
     return null;

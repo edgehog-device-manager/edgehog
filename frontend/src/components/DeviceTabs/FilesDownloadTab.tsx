@@ -98,7 +98,7 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
       edges {
         node {
           id
-          pathOnDevice
+          requestName
           fileName
         }
       }
@@ -342,20 +342,41 @@ const FilesDownloadTab = ({
     return options;
   }, [data.fileTransferCapabilities?.deviceToServer, intl]);
 
-  const storageSourceOptions: StorageSourceOption[] = useMemo(
-    () =>
-      data.storageFileDownloadRequests?.edges?.flatMap((edge) => {
-        const request = edge?.node;
-        if (!request?.id) return [];
-        return [
-          {
-            value: request.id,
-            label: request.fileName || request.id,
-          },
-        ];
-      }) ?? [],
-    [data.storageFileDownloadRequests],
-  );
+  const storageSourceOptions = useMemo<StorageSourceOption[]>(() => {
+    const edges = data.storageFileDownloadRequests?.edges;
+    if (!edges) return [];
+
+    const validRequests: Array<{
+      id: string;
+      fileName: string;
+      requestName: string | null;
+    }> = [];
+    const fileNameCounts: Record<string, number> = {};
+
+    for (const edge of edges) {
+      const node = edge?.node;
+      if (node?.id) {
+        const fileName = node.fileName ?? node.id;
+        fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
+        validRequests.push({
+          id: node.id,
+          fileName,
+          requestName: node.requestName ?? null,
+        });
+      }
+    }
+
+    return validRequests.map(({ id, fileName, requestName }) => {
+      const isDuplicate = fileNameCounts[fileName] > 1;
+      return {
+        value: id,
+        label:
+          isDuplicate && requestName
+            ? `${fileName} (${requestName})`
+            : fileName,
+      };
+    });
+  }, [data.storageFileDownloadRequests]);
 
   const supportedEncodingsBySourceType = useMemo<
     Record<FileSourceType, string[]>
