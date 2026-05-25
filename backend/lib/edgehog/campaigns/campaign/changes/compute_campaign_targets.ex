@@ -91,8 +91,25 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargets do
     end
   end
 
+  defp calculate_scheduled_at(nil, _now), do: nil
+
+  defp calculate_scheduled_at(current_scheduled_at, now) do
+    case DateTime.compare(current_scheduled_at, now) do
+      :gt -> now
+      _ -> current_scheduled_at
+    end
+  end
+
   defp apply_targets(changeset, [], _tenant) do
+    now = DateTime.utc_now()
+    current_scheduled_at = Ash.Changeset.get_attribute(changeset, :scheduled_at_timestamp)
+
     changeset
+    |> Ash.Changeset.change_attribute(
+      :scheduled_at_timestamp,
+      calculate_scheduled_at(current_scheduled_at, now)
+    )
+    |> Ash.Changeset.change_attribute(:completion_timestamp, now)
     |> Ash.Changeset.change_attribute(:status, :finished)
     |> Ash.Changeset.change_attribute(:outcome, :success)
   end

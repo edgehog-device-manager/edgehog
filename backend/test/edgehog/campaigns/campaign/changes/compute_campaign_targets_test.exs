@@ -196,6 +196,29 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargetsTest do
       campaign = Ash.load!(campaign, :campaign_targets, tenant: tenant)
       assert campaign.campaign_targets == []
     end
+
+    test "finishes immediately when no devices match a scheduled campaign", %{
+      tenant: tenant,
+      release: release,
+      channel: channel
+    } do
+      future_scheduled_at = DateTime.add(DateTime.utc_now(), 3600, :second)
+
+      campaign =
+        campaign_fixture(
+          name: "Test Scheduled Start Campaign",
+          mechanism_type: :deployment_start,
+          release_id: release.id,
+          channel_id: channel.id,
+          scheduled_at_timestamp: future_scheduled_at,
+          tenant: tenant
+        )
+
+      assert campaign.status == :finished
+      assert campaign.outcome == :success
+      assert campaign.completion_timestamp != nil
+      assert DateTime.compare(campaign.scheduled_at_timestamp, future_scheduled_at) == :lt
+    end
   end
 
   describe "compute_campaign_targets for deployment_stop operation" do
