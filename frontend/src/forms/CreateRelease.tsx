@@ -17,12 +17,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useMemo } from "react";
+import { Col, Container, Row } from "react-bootstrap";
+import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
 import { hooks_ContainersOptionsFragment$key } from "@/api/__generated__/hooks_ContainersOptionsFragment.graphql";
 import { hooks_SystemModelsOptionsFragment$key } from "@/api/__generated__/hooks_SystemModelsOptionsFragment.graphql";
 import {
+  ReleaseCreateContainerDependenciesInput,
   ReleaseCreateContainersInput,
   ReleaseCreateRequiredSystemModelsInput,
 } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
@@ -30,6 +33,7 @@ import {
 import Button from "@/components/Button";
 import Form from "@/components/Form";
 import { FormRow } from "@/components/FormRow";
+import Icon from "@/components/Icon";
 import {
   useContainerOptions,
   useSystemModelOptions,
@@ -38,17 +42,21 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import MultiSelectFormField from "@/forms/MultiSelectFormField";
+import SelectFormField from "@/forms/SelectFormFIeld";
 import { ReleaseFormData, releaseSchema } from "@/forms/validation";
 
 type ReleaseSubmitData = {
   version: string;
   containers?: ReleaseCreateContainersInput[];
+  containerDependencies?: ReleaseCreateContainerDependenciesInput[];
   requiredSystemModels?: ReleaseCreateRequiredSystemModelsInput[];
 };
 
 const initialData: ReleaseFormData = {
   version: "",
+  requiredSystemModels: [],
   containers: [],
+  containerDependencies: [],
 };
 
 type CreateReleaseProps = {
@@ -81,8 +89,73 @@ const CreateRelease = ({
 
   const containerOptions = useContainerOptions(containersOptionsRef);
 
+  const selectedContainers =
+    useWatch({
+      control,
+      name: "containers",
+    }) ?? [];
+
+  const dependencyFieldArray = useFieldArray({
+    control,
+    name: "containerDependencies",
+    keyName: "key",
+  });
+
+  const watchedDependencies =
+    useWatch({
+      control,
+      name: "containerDependencies",
+    }) ?? [];
+
+  const containerDependenciesOptions = useMemo(() => {
+    const selectedContainerIds = new Set(selectedContainers.map((c) => c.id));
+
+    return containerOptions.filter((option) =>
+      selectedContainerIds.has(option.value),
+    );
+  }, [selectedContainers, containerOptions]);
+
+  const selectedDependencyContainerIds = watchedDependencies
+    .map((d) => d?.containerId)
+    .filter(Boolean);
+
+  const canAddDependencies =
+    selectedContainers.length > 1 &&
+    watchedDependencies.every(
+      (v) => v?.containerId?.trim() && v?.dependencies?.length > 0,
+    );
+
+  const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
+    const containers = data.containers.map((container) => ({
+      id: container.id,
+      dependencies:
+        data.containerDependencies?.find(
+          (contDep) => contDep.containerId === container.id,
+        )?.dependencies ?? [],
+    }));
+
+    const releaseContainers = containers.flatMap((container) =>
+      container.dependencies.map((dependencyId) => ({
+        containerId: container.id,
+        dependencyId: dependencyId,
+      })),
+    );
+
+    const release: ReleaseSubmitData = {
+      version: data.version,
+      containers: data.containers,
+      containerDependencies: releaseContainers,
+      requiredSystemModels: data.requiredSystemModels,
+    };
+
+    return release;
+  };
+
+  const onFormSubmit = (data: ReleaseFormData) =>
+    onSubmit(transformOutputData(data));
+
   return (
-    <Form onSubmit={handleSubmit(onSubmit)}>
+    <Form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
         <FormRow
           id="version"
@@ -131,6 +204,111 @@ const CreateRelease = ({
             name="containers"
             options={containerOptions}
           />
+        </FormRow>
+
+        <FormRow
+          id="container-dependencies"
+          label={
+            <FormattedMessage
+              id="forms.CreateRelease.containerDependenciesLabel"
+              defaultMessage="Container Dependencies"
+            />
+          }
+        >
+          <div className="p-3 border rounded">
+            <Container fluid>
+              {dependencyFieldArray.fields.length > 0 && (
+                <Row className="mb-3 align-items-center">
+                  <Col md={5}>
+                    <FormattedMessage
+                      id="forms.CreateRelease.containerLabel"
+                      defaultMessage="Container"
+                    />
+                  </Col>
+
+                  <Col md={6}>
+                    <FormattedMessage
+                      id="forms.CreateRelease.dependsOnLabel"
+                      defaultMessage="Depends on"
+                    />
+                  </Col>
+
+                  <Col md={1} />
+                </Row>
+              )}
+
+              {dependencyFieldArray.fields.map((field, i) => {
+                const error = errors.containerDependencies?.[i];
+                const currentContainerId = watchedDependencies[i]?.containerId;
+
+                const availableContainers = containerDependenciesOptions.filter(
+                  (c) =>
+                    c.value === currentContainerId ||
+                    !selectedDependencyContainerIds.includes(c.value),
+                );
+
+                const availableDependencies = containerDependenciesOptions
+                  .filter((c) => c.value !== currentContainerId)
+                  .map((c) => ({
+                    value: c.value,
+                    label: c.label,
+                  }));
+
+                return (
+                  <Row className="mb-3 align-items-start" key={field.key}>
+                    <Col md={5} xs={5}>
+                      <SelectFormField
+                        control={control}
+                        options={availableContainers}
+                        name={`containerDependencies.${i}.containerId`}
+                      />
+                      <FormFeedback feedback={error?.containerId?.message} />
+                    </Col>
+
+                    <Col md={6} xs={6}>
+                      <MultiSelectFormField
+                        control={control}
+                        name={`containerDependencies.${i}.dependencies`}
+                        options={availableDependencies}
+                        transformValue={(selected) =>
+                          selected.map((s) => s.value)
+                        }
+                      />
+                      <FormFeedback feedback={error?.dependencies?.message} />
+                    </Col>
+
+                    <Col md={1} xs={1} className="d-flex p-0 pt-1">
+                      <Button
+                        variant="shadow-danger"
+                        type="button"
+                        onClick={() => dependencyFieldArray.remove(i)}
+                      >
+                        <Icon className="text-danger" icon="delete" />
+                      </Button>
+                    </Col>
+                  </Row>
+                );
+              })}
+            </Container>
+
+            <Button
+              className="mt-2"
+              variant="outline-primary"
+              type="button"
+              disabled={!canAddDependencies}
+              onClick={() =>
+                dependencyFieldArray.append({
+                  containerId: "",
+                  dependencies: [],
+                })
+              }
+            >
+              <FormattedMessage
+                id="forms.CreateRelease.addDependenciesButton"
+                defaultMessage="Add Dependencies"
+              />
+            </Button>
+          </div>
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">

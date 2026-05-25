@@ -182,6 +182,70 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
 
       assert volumes != []
     end
+
+    test "links a container that already has dependencies", %{tenant: tenant} do
+      application =
+        application_fixture(tenant: tenant)
+
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      c1 = container_fixture(tenant: tenant, name: "service-a")
+      c2 = container_fixture(tenant: tenant, name: "service-b")
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            containers {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
+            containerDependencies {
+              edges {
+                node {
+                  container {
+                    name
+                  }
+                  dependency {
+                    name
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      response =
+        create_release(
+          tenant: tenant,
+          application_id: application_id,
+          containers: [
+            %{"id" => AshGraphql.Resource.encode_relay_id(c1)},
+            %{"id" => AshGraphql.Resource.encode_relay_id(c2)}
+          ],
+          container_dependencies: [
+            %{
+              "container_id" => AshGraphql.Resource.encode_relay_id(c1),
+              "dependency_id" => AshGraphql.Resource.encode_relay_id(c2)
+            }
+          ],
+          document: document
+        )
+
+      result = extract_result!(response)
+
+      dependencies = extract_relay_nodes(result, "containerDependencies")
+
+      assert Enum.any?(dependencies, fn dep ->
+               dep["dependency"]["name"] == "service-b" and
+                 dep["container"]["name"] == "service-a"
+             end)
+    end
   end
 
   defp create_release(opts) do
@@ -194,7 +258,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
         %{
           "version" => Keyword.get(opts, :version, unique_release_version()),
           "application_id" => Keyword.get(opts, :application_id),
-          "containers" => Keyword.get(opts, :containers, [])
+          "containers" => Keyword.get(opts, :containers, []),
+          "container_dependencies" => Keyword.get(opts, :container_dependencies, [])
         }
       end
 

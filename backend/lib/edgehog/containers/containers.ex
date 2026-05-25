@@ -140,6 +140,10 @@ defmodule Edgehog.Containers do
                                 containers: [
                                   id: :container
                                 ],
+                                container_dependencies: [
+                                  container_id: :container,
+                                  dependency_id: :container
+                                ],
                                 required_system_models: [
                                   id: :system_model
                                 ]
@@ -351,5 +355,6 @@ defmodule Edgehog.Containers do
 
     resource Upgrade
     resource DeploymentContainerDeployment
+    resource Edgehog.Containers.ReleaseContainerDependencies
   end
 end

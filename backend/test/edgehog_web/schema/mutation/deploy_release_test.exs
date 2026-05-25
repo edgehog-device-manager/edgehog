@@ -106,6 +106,102 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     |> extract_result!()
   end
 
+  test "deployRelease sends containers in order depending on their dependencies", %{
+    tenant: tenant
+  } do
+    container_1 = container_fixture(tenant: tenant)
+    container_2 = container_fixture(tenant: tenant)
+    container_3 = container_fixture(tenant: tenant)
+
+    container_dependencies = [
+      %{
+        "container_id" => container_2.id,
+        "dependency_id" => container_3.id
+      },
+      %{
+        "container_id" => container_3.id,
+        "dependency_id" => container_1.id
+      }
+    ]
+
+    device = device_fixture(tenant: tenant)
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        container_ids: [container_1.id, container_2.id, container_3.id],
+        container_dependencies: container_dependencies
+      )
+
+    ordered_containers = [container_1.id, container_3.id, container_2.id]
+
+    expect(CreateImageRequestMock, :send_create_image_request, 3, fn _, _, _ -> :ok end)
+
+    expect(CreateContainerRequestMock, :send_create_container_request, 3, fn _, _, _ ->
+      :ok
+    end)
+
+    expect(CreateDeploymentRequestMock, :send_create_deployment_request, 1, fn _, _, data ->
+      assert data.containers == ordered_containers
+      :ok
+    end)
+
+    [
+      tenant: tenant,
+      release_id: AshGraphql.Resource.encode_relay_id(release),
+      device_id: AshGraphql.Resource.encode_relay_id(device)
+    ]
+    |> deploy_release_mutation()
+    |> extract_result!()
+  end
+
+  test "deployRelease returns an error if the release has a circular dependency", %{
+    tenant: tenant
+  } do
+    container_1 = container_fixture(tenant: tenant)
+    container_2 = container_fixture(tenant: tenant)
+
+    container_dependencies = [
+      %{
+        "container_id" => container_1.id,
+        "dependency_id" => container_2.id
+      },
+      %{
+        "container_id" => container_2.id,
+        "dependency_id" => container_1.id
+      }
+    ]
+
+    device = device_fixture(tenant: tenant)
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        container_ids: [container_1.id, container_2.id],
+        container_dependencies: container_dependencies
+      )
+
+    expect(CreateImageRequestMock, :send_create_image_request, 2, fn _, _, _ -> :ok end)
+
+    expect(CreateContainerRequestMock, :send_create_container_request, 2, fn _, _, _ ->
+      :ok
+    end)
+
+    error =
+      [
+        tenant: tenant,
+        release_id: AshGraphql.Resource.encode_relay_id(release),
+        device_id: AshGraphql.Resource.encode_relay_id(device)
+      ]
+      |> deploy_release_mutation()
+      |> extract_error!()
+
+    assert %{
+             code: "invalid_changes",
+             message: "Invalid deployment: circular dependencies detected"
+           } = error
+  end
+
   test "deployRelease returns an error if the application's release system model does not match the device's system model",
        %{tenant: tenant} do
     part_number =

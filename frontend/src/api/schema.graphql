@@ -1614,6 +1614,7 @@ type MutationError {
 }
 
 input ApplicationCreateInitialReleaseInput {
+  containerDependencies: [ReleaseCreateContainerDependenciesInput!]
   containers: [ReleaseCreateContainersInput!]
   requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
   version: String!
@@ -1642,6 +1643,11 @@ input ContainerCreateWithNestedDeviceMappingsInput {
 
 input ReleaseCreateContainersInput {
   id: ID
+}
+
+input ReleaseCreateContainerDependenciesInput {
+  containerId: ID!
+  dependencyId: ID!
 }
 
 input ReleaseCreateRequiredSystemModelsInput {
@@ -2637,6 +2643,7 @@ input CreateReleaseInput {
   version: String!
   applicationId: ID
   containers: [ReleaseCreateContainersInput!]
+  containerDependencies: [ReleaseCreateContainerDependenciesInput!]
   requiredSystemModels: [ReleaseCreateRequiredSystemModelsInput!]
 }
 
