@@ -27,6 +27,7 @@ defmodule Edgehog.Files.FileDeleteRequest do
   alias Edgehog.Files.FileDeleteRequest.Changes
   alias Edgehog.Files.FileDeleteRequest.ManualActions
   alias Edgehog.Files.FileDeleteRequest.Status
+  alias Edgehog.Files.FileDeleteRequest.Validations
 
   graphql do
     type :file_delete_request
@@ -69,15 +70,19 @@ defmodule Edgehog.Files.FileDeleteRequest do
       # Manually generate the ID since it's needed by SendFileDeleteRequest before we hit the DB
       change set_attribute(:id, &Ash.UUIDv7.generate/0)
 
+      validate Validations.SameDevice
+
       change manage_relationship(:device_id, :device,
                type: :append,
                eager_validate_with: Edgehog.Devices
-             )
+             ),
+             only_when_valid?: true
 
       change manage_relationship(:file_download_request_id, :file_download_request,
                type: :append,
                eager_validate_with: Edgehog.Files
-             )
+             ),
+             only_when_valid?: true
 
       change Changes.SendFileDeleteRequest
     end

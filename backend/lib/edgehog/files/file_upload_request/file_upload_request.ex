@@ -120,53 +120,64 @@ defmodule Edgehog.Files.FileUploadRequest do
     uuid_v7_primary_key :id
 
     attribute :url, :string do
-      allow_nil? false
+      description "The presigned URL to which the file should be uploaded."
       public? true
+
+      allow_nil? false
     end
 
     attribute :source, :string do
+      description "The value depends on the selected source_type: for 'storage' is the ID of an 'io.edgehog.devicemanager.storage.File' property, for 'streaming' it's an empty string, and for 'filesystem' is a path of a file on the device."
       public? true
     end
 
     attribute :source_type, FileSource do
+      description "Source from which the file should be read from, with allowed values: [storage, streaming, filesystem]."
       public? true
 
       allow_nil? false
     end
 
     attribute :encoding, :string do
+      description "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
       public? true
 
       default ""
     end
 
     attribute :progress_tracked, :boolean do
+      description "Flag to enable the progress reporting of the upload."
       public? true
 
       default false
     end
 
     attribute :status, Status do
+      description "The status of the file upload (e.g., 'pending', 'sent', 'in_progress', 'completed', 'failed')."
       public? true
 
       default :pending
     end
 
     attribute :progress_percentage, :integer do
+      description "The progress of the file upload as a percentage (0-100)."
       public? true
 
       constraints min: 0, max: 100
     end
 
     attribute :response_code, :integer do
+      description "A 0 code is a success, errors are POSIX error numbers."
       public? true
     end
 
     attribute :response_message, :string do
+      description "Optional message for the response sent by the device."
       public? true
     end
 
     attribute :http_headers, :map do
+      description "Optional HTTP headers to include in the upload request. The value is a map where keys are header names and values are header values."
       public? true
 
       default %{}

@@ -68,7 +68,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
           sources: [:file]
         )
 
-      assert %{message: "could not be found"} = extract_error!(result)
+      assert %{message: "does not belong to device"} = extract_error!(result)
     end
 
     test "fails with non-existing file download request id", %{tenant: tenant} do
@@ -83,6 +83,43 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
 
       assert %{message: "could not be found"} = extract_error!(result)
     end
+
+    test "fails when file download request belongs to a different device", %{tenant: tenant} do
+      device_a = device_fixture(tenant: tenant)
+      device_b = device_fixture(tenant: tenant)
+
+      file_download_request =
+        manual_file_download_request_fixture(tenant: tenant, device_id: device_a.id)
+
+      result =
+        create_file_delete_request_mutation(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device_b),
+          file_download_request_id: AshGraphql.Resource.encode_relay_id(file_download_request)
+        )
+
+      assert %{message: "does not belong to device"} = extract_error!(result)
+    end
+
+    test "fails when file download request is not storage", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+
+      file_download_request =
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          destination_type: "filesystem"
+        )
+
+      result =
+        create_file_delete_request_mutation(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device),
+          file_download_request_id: AshGraphql.Resource.encode_relay_id(file_download_request)
+        )
+
+      assert %{message: "must be storage"} = extract_error!(result)
+    end
   end
 
   test "fails if an API error is returned", %{tenant: tenant} do
@@ -90,7 +127,17 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
       {:error, api_error(status: 418, message: "I'm a teapot")}
     end)
 
-    result = create_file_delete_request_mutation(tenant: tenant)
+    device = device_fixture(tenant: tenant)
+
+    file_download_request =
+      manual_file_download_request_fixture(tenant: tenant, device_id: device.id)
+
+    result =
+      create_file_delete_request_mutation(
+        tenant: tenant,
+        device_id: AshGraphql.Resource.encode_relay_id(device),
+        file_download_request_id: AshGraphql.Resource.encode_relay_id(file_download_request)
+      )
 
     assert %{code: "astarte_api_error", message: message} = extract_error!(result)
     assert message =~ "418"
