@@ -20,7 +20,7 @@
 
 import { FormattedMessage } from "react-intl";
 
-import type { FilesUploadTab_fileDownloadRequests$data } from "@/api/__generated__/FilesUploadTab_fileDownloadRequests.graphql";
+import type { FilesServerToDeviceTab_fileDownloadRequests$data } from "@/api/__generated__/FilesServerToDeviceTab_fileDownloadRequests.graphql";
 
 import RequestStatus from "@/components/RequestStatus";
 import Table, { createColumnHelper } from "@/components/Table";
@@ -29,7 +29,7 @@ import { Link, Route } from "@/Navigation";
 
 type FileDownloadRequestNode = NonNullable<
   NonNullable<
-    FilesUploadTab_fileDownloadRequests$data["fileDownloadRequests"]
+    FilesServerToDeviceTab_fileDownloadRequests$data["fileDownloadRequests"]
   >["edges"]
 >[number]["node"];
 
@@ -38,7 +38,7 @@ const columns = [
   columnHelper.accessor("requestName", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.requestName"
+        id="components.FilesServerToDeviceTable.requestName"
         defaultMessage="Request Name"
       />
     ),
@@ -47,7 +47,7 @@ const columns = [
   columnHelper.accessor("fileName", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.fileName"
+        id="components.FilesServerToDeviceTable.fileName"
         defaultMessage="File Name"
       />
     ),
@@ -57,7 +57,7 @@ const columns = [
     id: "fileDownloadCampaignName",
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.campaignName"
+        id="components.FilesServerToDeviceTable.campaignName"
         defaultMessage="File Download Campaign"
       />
     ),
@@ -76,7 +76,7 @@ const columns = [
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.status"
+        id="components.FilesServerToDeviceTable.status"
         defaultMessage="Status"
       />
     ),
@@ -88,7 +88,7 @@ const columns = [
   columnHelper.accessor("progressPercentage", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.progress"
+        id="components.FilesServerToDeviceTable.progress"
         defaultMessage="Progress"
       />
     ),
@@ -99,7 +99,7 @@ const columns = [
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FileDownloadRequestsTable.status.notTracked"
+              id="components.FilesServerToDeviceTable.status.notTracked"
               defaultMessage="Not Tracked"
             />
           </span>
@@ -113,7 +113,7 @@ const columns = [
   columnHelper.accessor("destinationType", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.destination"
+        id="components.FilesServerToDeviceTable.destination"
         defaultMessage="Destination"
       />
     ),
@@ -123,7 +123,7 @@ const columns = [
       if (destinationType == "FILESYSTEM") {
         return (
           <FormattedMessage
-            id="components.FileDownloadRequestsTable.destination.filesystem"
+            id="components.FilesServerToDeviceTable.destination.filesystem"
             defaultMessage="FILESYSTEM: {destination}"
             values={{ destination: row.original.destination ?? "" }}
           />
@@ -133,7 +133,7 @@ const columns = [
       if (destinationType == "STORAGE") {
         return (
           <FormattedMessage
-            id="components.FileDownloadRequestsTable.destination.storage"
+            id="components.FilesServerToDeviceTable.destination.storage"
             defaultMessage="STORAGE: {path}"
             values={{ path: row.original.pathOnDevice ?? "" }}
           />
@@ -146,7 +146,7 @@ const columns = [
   columnHelper.accessor("uncompressedFileSizeBytes", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.fileSize"
+        id="components.FilesServerToDeviceTable.fileSize"
         defaultMessage="Uncompressed File Size"
       />
     ),
@@ -158,7 +158,7 @@ const columns = [
   columnHelper.accessor("ttlSeconds", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.ttl"
+        id="components.FilesServerToDeviceTable.ttl"
         defaultMessage="TTL (s)"
       />
     ),
@@ -169,7 +169,7 @@ const columns = [
         return (
           <p>
             <FormattedMessage
-              id="components.FileDownloadRequestsTable.ttl.infinite"
+              id="components.FilesServerToDeviceTable.ttl.infinite"
               defaultMessage="Infinite"
             />
           </p>
@@ -182,7 +182,7 @@ const columns = [
   columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadRequestsTable.responseMessage"
+        id="components.FilesServerToDeviceTable.responseMessage"
         defaultMessage="Response Message"
       />
     ),
@@ -200,18 +200,18 @@ const columns = [
   }),
 ];
 
-type FileDownloadRequestsTableProps = {
+type FilesServerToDeviceTableProps = {
   requests: FileDownloadRequestNode[];
 };
 
-const FileDownloadRequestsTable = ({
+const FilesServerToDeviceTable = ({
   requests,
-}: FileDownloadRequestsTableProps) => {
+}: FilesServerToDeviceTableProps) => {
   if (requests.length === 0) {
     return (
       <p className="text-muted">
         <FormattedMessage
-          id="components.FileDownloadRequestsTable.noRequests"
+          id="components.FilesServerToDeviceTable.noRequests"
           defaultMessage="No file download requests have been sent yet."
         />
       </p>
@@ -221,4 +221,4 @@ const FileDownloadRequestsTable = ({
   return <Table columns={columns} data={requests} hideSearch />;
 };
 
-export default FileDownloadRequestsTable;
+export default FilesServerToDeviceTable;

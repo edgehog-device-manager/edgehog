@@ -40,25 +40,25 @@ import {
 import { useParams } from "react-router-dom";
 import { PayloadError } from "relay-runtime";
 
-import type { FilesUploadTab_PaginationQuery } from "@/api/__generated__/FilesUploadTab_PaginationQuery.graphql";
-import type { FilesUploadTab_createManagedFileDownloadRequest_Mutation } from "@/api/__generated__/FilesUploadTab_createManagedFileDownloadRequest_Mutation.graphql";
+import type { FilesServerToDeviceTab_PaginationQuery } from "@/api/__generated__/FilesServerToDeviceTab_PaginationQuery.graphql";
+import type { FilesServerToDeviceTab_createManagedFileDownloadRequest_Mutation } from "@/api/__generated__/FilesServerToDeviceTab_createManagedFileDownloadRequest_Mutation.graphql";
 import type {
   CreateManualFileDownloadRequestInput,
-  FilesUploadTab_createManualFileDownloadRequest_Mutation,
-  FilesUploadTab_createManualFileDownloadRequest_Mutation$data,
-} from "@/api/__generated__/FilesUploadTab_createManualFileDownloadRequest_Mutation.graphql";
-import type { FilesUploadTab_fileDownloadRequests$key } from "@/api/__generated__/FilesUploadTab_fileDownloadRequests.graphql";
-import type { FilesUploadTab_getRepositories_Query } from "@/api/__generated__/FilesUploadTab_getRepositories_Query.graphql";
+  FilesServerToDeviceTab_createManualFileDownloadRequest_Mutation,
+  FilesServerToDeviceTab_createManualFileDownloadRequest_Mutation$data,
+} from "@/api/__generated__/FilesServerToDeviceTab_createManualFileDownloadRequest_Mutation.graphql";
+import type { FilesServerToDeviceTab_fileDownloadRequests$key } from "@/api/__generated__/FilesServerToDeviceTab_fileDownloadRequests.graphql";
+import type { FilesServerToDeviceTab_getRepositories_Query } from "@/api/__generated__/FilesServerToDeviceTab_getRepositories_Query.graphql";
 
 import Alert from "@/components/Alert";
-import FileDownloadRequestsTable from "@/components/FileDownloadRequestsTable";
+import FilesServerToDeviceTable from "@/components/FilesServerToDeviceTable";
 import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
-import type { FileDownloadRequestFormValues } from "@/forms/ManualFileDownloadRequestForm";
-import ManualFileDownloadRequestForm from "@/forms/ManualFileDownloadRequestForm";
-import ManualFileDownloadRequestFromRepositoryForm from "@/forms/ManualFileDownloadRequestFromRepositoryForm";
+import type { FileDownloadRequestFormValues } from "@/forms/ManualFilesServerToDeviceFileForm";
+import ManualFileDownloadRequestForm from "@/forms/ManualFilesServerToDeviceFileForm";
+import ManualFilesServerToDeviceRepositoryForm from "@/forms/ManualFilesServerToDeviceRepositoryForm";
 import type {
   FileDestinationType,
   ManualFileDownloadRequestFromRepositoryData,
@@ -68,8 +68,8 @@ import { prepareUploadFile } from "@/lib/files";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
-  fragment FilesUploadTab_fileDownloadRequests on Device
-  @refetchable(queryName: "FilesUploadTab_PaginationQuery") {
+  fragment FilesServerToDeviceTab_fileDownloadRequests on Device
+  @refetchable(queryName: "FilesServerToDeviceTab_PaginationQuery") {
     fileTransferCapabilities {
       unixPermissions
       serverToDevice {
@@ -79,7 +79,7 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
       }
     }
     fileDownloadRequests(first: $first, after: $after)
-      @connection(key: "FilesUploadTab_fileDownloadRequests") {
+      @connection(key: "FilesServerToDeviceTab_fileDownloadRequests") {
       edges {
         node {
           id
@@ -108,18 +108,18 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
 `;
 
 const GET_REPOSITORIES_QUERY = graphql`
-  query FilesUploadTab_getRepositories_Query(
+  query FilesServerToDeviceTab_getRepositories_Query(
     $first: Int
     $after: String
     $filterRepositories: RepositoryFilterInput = {}
   ) {
-    ...ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment
+    ...ManualFilesServerToDeviceRepositoryForm_repositories_Fragment
       @arguments(filter: $filterRepositories)
   }
 `;
 
 const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
-  mutation FilesUploadTab_createManualFileDownloadRequest_Mutation(
+  mutation FilesServerToDeviceTab_createManualFileDownloadRequest_Mutation(
     $input: CreateManualFileDownloadRequestInput!
   ) {
     createManualFileDownloadRequest(input: $input) {
@@ -144,7 +144,7 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
 `;
 
 const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
-  mutation FilesUploadTab_createManagedFileDownloadRequest_Mutation(
+  mutation FilesServerToDeviceTab_createManagedFileDownloadRequest_Mutation(
     $input: CreateManagedFileDownloadRequestInput!
   ) {
     createManagedFileDownloadRequest(input: $input) {
@@ -169,7 +169,7 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
 `;
 
 const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
-  subscription FilesUploadTab_fileDownloadRequest_updated_Subscription(
+  subscription FilesServerToDeviceTab_fileDownloadRequest_updated_Subscription(
     $deviceId: ID!
   ) {
     fileDownloadRequestsByDevice(deviceId: $deviceId) {
@@ -186,7 +186,7 @@ const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
 `;
 
 type FileDownloadRequest = NonNullable<
-  FilesUploadTab_createManualFileDownloadRequest_Mutation$data["createManualFileDownloadRequest"]
+  FilesServerToDeviceTab_createManualFileDownloadRequest_Mutation$data["createManualFileDownloadRequest"]
 >["result"];
 
 type DestinationTypeOption = {
@@ -241,7 +241,7 @@ const ManualFileDownloadRequestFormWrapper = ({
   const [isUploading, setIsUploading] = useState(false);
 
   const [createFileDownloadRequest] =
-    useMutation<FilesUploadTab_createManualFileDownloadRequest_Mutation>(
+    useMutation<FilesServerToDeviceTab_createManualFileDownloadRequest_Mutation>(
       DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION,
     );
 
@@ -288,7 +288,7 @@ const ManualFileDownloadRequestFormWrapper = ({
 
             const connection = ConnectionHandler.getConnection(
               storedDevice,
-              "FilesUploadTab_fileDownloadRequests",
+              "FilesServerToDeviceTab_fileDownloadRequests",
             );
 
             if (connection) {
@@ -311,7 +311,7 @@ const ManualFileDownloadRequestFormWrapper = ({
       if (!isOnline) {
         setErrorFeedback(
           <FormattedMessage
-            id="components.DeviceTabs.FilesUploadTab.deviceOfflineError"
+            id="components.DeviceTabs.FilesServerToDeviceTab.deviceOfflineError"
             defaultMessage="The device is disconnected. You cannot transfer files while it is offline."
           />,
         );
@@ -347,7 +347,7 @@ const ManualFileDownloadRequestFormWrapper = ({
         } else {
           setErrorFeedback(
             <FormattedMessage
-              id="components.DeviceTabs.FilesUploadTab.uploadErrorFeedback"
+              id="components.DeviceTabs.FilesServerToDeviceTab.uploadErrorFeedback"
               defaultMessage="Upload failed. Please check your connection."
             />,
           );
@@ -369,23 +369,23 @@ const ManualFileDownloadRequestFormWrapper = ({
   );
 };
 
-type ManualFileDownloadRequestFromRepositoryFormWrapperProps = {
+type ManualFilesServerToDeviceRepositoryFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
-  repositoriesQueryRef: PreloadedQuery<FilesUploadTab_getRepositories_Query>;
+  repositoriesQueryRef: PreloadedQuery<FilesServerToDeviceTab_getRepositories_Query>;
   deviceId: string;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
   isOnline: boolean;
 };
 
-const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
+const ManualFilesServerToDeviceRepositoryFormWrapper = ({
   setErrorFeedback,
   repositoriesQueryRef,
   deviceId,
   showAdvancedOptions,
   destinationTypeOptions,
   isOnline,
-}: ManualFileDownloadRequestFromRepositoryFormWrapperProps) => {
+}: ManualFilesServerToDeviceRepositoryFormWrapperProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
   const repositoriesData = usePreloadedQuery(
@@ -394,7 +394,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   );
 
   const [createFileDownloadRequest] =
-    useMutation<FilesUploadTab_createManagedFileDownloadRequest_Mutation>(
+    useMutation<FilesServerToDeviceTab_createManagedFileDownloadRequest_Mutation>(
       DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION,
     );
 
@@ -403,7 +403,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
       if (!isOnline) {
         setErrorFeedback(
           <FormattedMessage
-            id="components.DeviceTabs.FilesUploadTab.deviceOfflineError"
+            id="components.DeviceTabs.FilesServerToDeviceTab.deviceOfflineError"
             defaultMessage="The device is disconnected. You cannot transfer files while it is offline."
           />,
         );
@@ -450,7 +450,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
           setIsUploading(false);
           setErrorFeedback(
             <FormattedMessage
-              id="components.DeviceTabs.FilesUploadTab.creationErrorFeedback"
+              id="components.DeviceTabs.FilesServerToDeviceTab.creationErrorFeedback"
               defaultMessage="Could not create file download request, please try again."
             />,
           );
@@ -466,7 +466,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
 
           const connection = ConnectionHandler.getConnection(
             storedDevice,
-            "FilesUploadTab_fileDownloadRequests",
+            "FilesServerToDeviceTab_fileDownloadRequests",
           );
 
           if (connection) {
@@ -485,7 +485,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   );
 
   return (
-    <ManualFileDownloadRequestFromRepositoryForm
+    <ManualFilesServerToDeviceRepositoryForm
       repositoriesData={repositoriesData}
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
@@ -495,19 +495,19 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
   );
 };
 
-type FilesUploadTabProps = {
-  deviceRef: FilesUploadTab_fileDownloadRequests$key;
+type FilesServerToDeviceTabProps = {
+  deviceRef: FilesServerToDeviceTab_fileDownloadRequests$key;
   embedded?: boolean;
   embeddedMode?: "file" | "repository";
   isOnline?: boolean;
 };
 
-const FilesUploadTab = ({
+const FilesServerToDeviceTab = ({
   deviceRef,
   embedded = false,
   embeddedMode,
   isOnline = false,
-}: FilesUploadTabProps) => {
+}: FilesServerToDeviceTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
 
@@ -517,8 +517,8 @@ const FilesUploadTab = ({
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const { data } = usePaginationFragment<
-    FilesUploadTab_PaginationQuery,
-    FilesUploadTab_fileDownloadRequests$key
+    FilesServerToDeviceTab_PaginationQuery,
+    FilesServerToDeviceTab_fileDownloadRequests$key
   >(DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
 
   useSubscription(
@@ -540,7 +540,7 @@ const FilesUploadTab = ({
   );
 
   const [getRepositoriesQuery, getRepositories] =
-    useQueryLoader<FilesUploadTab_getRepositories_Query>(
+    useQueryLoader<FilesServerToDeviceTab_getRepositories_Query>(
       GET_REPOSITORIES_QUERY,
     );
 
@@ -570,7 +570,7 @@ const FilesUploadTab = ({
       options.push({
         value: "STORAGE",
         label: intl.formatMessage({
-          id: "components.DeviceTabs.FilesUploadTab.destinationType.storage",
+          id: "components.DeviceTabs.FilesServerToDeviceTab.destinationType.storage",
           defaultMessage: "Storage",
         }),
       });
@@ -580,7 +580,7 @@ const FilesUploadTab = ({
       options.push({
         value: "STREAMING",
         label: intl.formatMessage({
-          id: "components.DeviceTabs.FilesUploadTab.destinationType.streaming",
+          id: "components.DeviceTabs.FilesServerToDeviceTab.destinationType.streaming",
           defaultMessage: "Streaming",
         }),
       });
@@ -590,7 +590,7 @@ const FilesUploadTab = ({
       options.push({
         value: "FILESYSTEM",
         label: intl.formatMessage({
-          id: "components.DeviceTabs.FilesUploadTab.destinationType.filesystem",
+          id: "components.DeviceTabs.FilesServerToDeviceTab.destinationType.filesystem",
           defaultMessage: "File System",
         }),
       });
@@ -663,7 +663,7 @@ const FilesUploadTab = ({
                     className="fw-medium px-3"
                   >
                     <FormattedMessage
-                      id="components.DeviceTabs.FilesUploadTab.modeFile"
+                      id="components.DeviceTabs.FilesServerToDeviceTab.modeFile"
                       defaultMessage="Direct File"
                     />
                   </ToggleButton>
@@ -679,7 +679,7 @@ const FilesUploadTab = ({
                     className="fw-medium px-3"
                   >
                     <FormattedMessage
-                      id="components.DeviceTabs.FilesUploadTab.modeRepository"
+                      id="components.DeviceTabs.FilesServerToDeviceTab.modeRepository"
                       defaultMessage="Repository"
                     />
                   </ToggleButton>
@@ -701,7 +701,7 @@ const FilesUploadTab = ({
               />
             ) : (
               getRepositoriesQuery && (
-                <ManualFileDownloadRequestFromRepositoryFormWrapper
+                <ManualFilesServerToDeviceRepositoryFormWrapper
                   repositoriesQueryRef={getRepositoriesQuery}
                   setErrorFeedback={setErrorFeedback}
                   deviceId={deviceId}
@@ -720,12 +720,12 @@ const FilesUploadTab = ({
       <div className="mt-4">
         <h5>
           <FormattedMessage
-            id="components.DeviceTabs.FilesUploadTab.requestHistory"
+            id="components.DeviceTabs.FilesServerToDeviceTab.requestHistory"
             defaultMessage="Request History"
           />
         </h5>
 
-        <FileDownloadRequestsTable requests={fileDownloadRequests} />
+        <FilesServerToDeviceTable requests={fileDownloadRequests} />
       </div>
     </>
   );
@@ -738,14 +738,14 @@ const FilesUploadTab = ({
     <Tab
       eventKey="device-files-upload-tab"
       title={intl.formatMessage({
-        id: "components.DeviceTabs.FilesUploadTab.title",
+        id: "components.DeviceTabs.FilesServerToDeviceTab.title",
         defaultMessage: "Files Upload",
       })}
     >
       <div className="mt-3">
         <h5>
           <FormattedMessage
-            id="components.DeviceTabs.FilesUploadTab.uploadLocation"
+            id="components.DeviceTabs.FilesServerToDeviceTab.uploadLocation"
             defaultMessage="Upload Location"
           />
         </h5>
@@ -757,4 +757,4 @@ const FilesUploadTab = ({
 
 export type { DestinationTypeOption };
 
-export default FilesUploadTab;
+export default FilesServerToDeviceTab;

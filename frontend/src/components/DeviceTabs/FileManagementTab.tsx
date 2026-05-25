@@ -26,8 +26,8 @@ import Select from "react-select";
 import type { FileManagementTab_fileManagement$key } from "@/api/__generated__/FileManagementTab_fileManagement.graphql";
 
 import FilesDeleteTab from "@/components/DeviceTabs/FilesDeleteTab";
-import FilesDownloadTab from "@/components/DeviceTabs/FilesDownloadTab";
-import FilesUploadTab from "@/components/DeviceTabs/FilesUploadTab";
+import FilesDownloadTab from "@/components/DeviceTabs/FilesDeviceToServerTab";
+import FilesServerToDeviceTab from "@/components/DeviceTabs/FilesServerToDeviceTab";
 import Form from "@/components/Form";
 import { Tab } from "@/components/Tabs";
 
@@ -59,8 +59,8 @@ const FILE_MANAGEMENT_FRAGMENT = graphql`
         filesystem
       }
     }
-    ...FilesUploadTab_fileDownloadRequests
-    ...FilesDownloadTab_fileUploadRequests
+    ...FilesServerToDeviceTab_fileDownloadRequests
+    ...FilesDeviceToServerTab_fileUploadRequests
     ...FilesDeleteTab_fileManagement
   }
 `;
@@ -157,7 +157,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
     switch (effectiveMode) {
       case "download-to-device-file":
         return (
-          <FilesUploadTab
+          <FilesServerToDeviceTab
             deviceRef={data}
             embedded
             embeddedMode="file"
@@ -166,7 +166,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
         );
       case "download-to-device-repository":
         return (
-          <FilesUploadTab
+          <FilesServerToDeviceTab
             deviceRef={data}
             embedded
             embeddedMode="repository"

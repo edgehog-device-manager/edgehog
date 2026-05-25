@@ -771,58 +771,58 @@
   "components.DeviceTabs.FilesDeleteTab.unknownError": {
     "defaultMessage": "Unknown error."
   },
-  "components.DeviceTabs.FilesDownloadTab.deviceOfflineError": {
+  "components.DeviceTabs.FilesDeviceToServerTab.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
   },
-  "components.DeviceTabs.FilesDownloadTab.error.unknownError": {
+  "components.DeviceTabs.FilesDeviceToServerTab.error.unknownError": {
     "defaultMessage": "An unknown error occurred."
   },
-  "components.DeviceTabs.FilesDownloadTab.requestHistory": {
+  "components.DeviceTabs.FilesDeviceToServerTab.requestHistory": {
     "defaultMessage": "Request History"
   },
-  "components.DeviceTabs.FilesDownloadTab.sourceType.filesystem": {
+  "components.DeviceTabs.FilesDeviceToServerTab.sourceType.filesystem": {
     "defaultMessage": "File System"
   },
-  "components.DeviceTabs.FilesDownloadTab.sourceType.storage": {
+  "components.DeviceTabs.FilesDeviceToServerTab.sourceType.storage": {
     "defaultMessage": "Storage"
   },
-  "components.DeviceTabs.FilesDownloadTab.title": {
+  "components.DeviceTabs.FilesDeviceToServerTab.title": {
     "defaultMessage": "Files Download"
   },
-  "components.DeviceTabs.FilesDownloadTab.uploadSource": {
+  "components.DeviceTabs.FilesDeviceToServerTab.uploadSource": {
     "defaultMessage": "Upload Source"
   },
-  "components.DeviceTabs.FilesUploadTab.creationErrorFeedback": {
+  "components.DeviceTabs.FilesServerToDeviceTab.creationErrorFeedback": {
     "defaultMessage": "Could not create file download request, please try again."
   },
-  "components.DeviceTabs.FilesUploadTab.destinationType.filesystem": {
+  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.filesystem": {
     "defaultMessage": "File System"
   },
-  "components.DeviceTabs.FilesUploadTab.destinationType.storage": {
+  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.storage": {
     "defaultMessage": "Storage"
   },
-  "components.DeviceTabs.FilesUploadTab.destinationType.streaming": {
+  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.streaming": {
     "defaultMessage": "Streaming"
   },
-  "components.DeviceTabs.FilesUploadTab.deviceOfflineError": {
+  "components.DeviceTabs.FilesServerToDeviceTab.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
   },
-  "components.DeviceTabs.FilesUploadTab.modeFile": {
+  "components.DeviceTabs.FilesServerToDeviceTab.modeFile": {
     "defaultMessage": "Direct File"
   },
-  "components.DeviceTabs.FilesUploadTab.modeRepository": {
+  "components.DeviceTabs.FilesServerToDeviceTab.modeRepository": {
     "defaultMessage": "Repository"
   },
-  "components.DeviceTabs.FilesUploadTab.requestHistory": {
+  "components.DeviceTabs.FilesServerToDeviceTab.requestHistory": {
     "defaultMessage": "Request History"
   },
-  "components.DeviceTabs.FilesUploadTab.title": {
+  "components.DeviceTabs.FilesServerToDeviceTab.title": {
     "defaultMessage": "Files Upload"
   },
-  "components.DeviceTabs.FilesUploadTab.uploadErrorFeedback": {
+  "components.DeviceTabs.FilesServerToDeviceTab.uploadErrorFeedback": {
     "defaultMessage": "Upload failed. Please check your connection."
   },
-  "components.DeviceTabs.FilesUploadTab.uploadLocation": {
+  "components.DeviceTabs.FilesServerToDeviceTab.uploadLocation": {
     "defaultMessage": "Upload Location"
   },
   "components.DeviceTabs.HardwareInfoTab.cpuArchitecture": {
@@ -1012,48 +1012,6 @@
   "components.FileDownloadCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.FileDownloadRequestsTable.campaignName": {
-    "defaultMessage": "File Download Campaign"
-  },
-  "components.FileDownloadRequestsTable.destination": {
-    "defaultMessage": "Destination"
-  },
-  "components.FileDownloadRequestsTable.destination.filesystem": {
-    "defaultMessage": "FILESYSTEM: {destination}"
-  },
-  "components.FileDownloadRequestsTable.destination.storage": {
-    "defaultMessage": "STORAGE: {path}"
-  },
-  "components.FileDownloadRequestsTable.fileName": {
-    "defaultMessage": "File Name"
-  },
-  "components.FileDownloadRequestsTable.fileSize": {
-    "defaultMessage": "Uncompressed File Size"
-  },
-  "components.FileDownloadRequestsTable.noRequests": {
-    "defaultMessage": "No file download requests have been sent yet."
-  },
-  "components.FileDownloadRequestsTable.progress": {
-    "defaultMessage": "Progress"
-  },
-  "components.FileDownloadRequestsTable.requestName": {
-    "defaultMessage": "Request Name"
-  },
-  "components.FileDownloadRequestsTable.responseMessage": {
-    "defaultMessage": "Response Message"
-  },
-  "components.FileDownloadRequestsTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FileDownloadRequestsTable.status.notTracked": {
-    "defaultMessage": "Not Tracked"
-  },
-  "components.FileDownloadRequestsTable.ttl": {
-    "defaultMessage": "TTL (s)"
-  },
-  "components.FileDownloadRequestsTable.ttl.infinite": {
-    "defaultMessage": "Infinite"
-  },
   "components.FileDownloadTargetsTable.completionTimestampTitle": {
     "defaultMessage": "Completed at"
   },
@@ -1135,41 +1093,83 @@
   "components.FileSelect.noFilesFoundMatching": {
     "defaultMessage": "No files found matching \"{inputValue}\""
   },
-  "components.FileUploadRequestsTable.actions": {
+  "components.FilesDeviceToServerTable.actions": {
     "defaultMessage": "Actions"
   },
-  "components.FileUploadRequestsTable.actions.notAvailableYet": {
+  "components.FilesDeviceToServerTable.actions.notAvailableYet": {
     "defaultMessage": "Not available yet"
   },
-  "components.FileUploadRequestsTable.encoding": {
+  "components.FilesDeviceToServerTable.encoding": {
     "defaultMessage": "Encoding"
   },
-  "components.FileUploadRequestsTable.encoding.none": {
+  "components.FilesDeviceToServerTable.encoding.none": {
     "defaultMessage": "None"
   },
-  "components.FileUploadRequestsTable.noRequests": {
+  "components.FilesDeviceToServerTable.noRequests": {
     "defaultMessage": "No file upload requests have been sent yet."
   },
-  "components.FileUploadRequestsTable.progress": {
+  "components.FilesDeviceToServerTable.progress": {
     "defaultMessage": "Progress"
   },
-  "components.FileUploadRequestsTable.responseMessage": {
+  "components.FilesDeviceToServerTable.responseMessage": {
     "defaultMessage": "Response Message"
   },
-  "components.FileUploadRequestsTable.source": {
+  "components.FilesDeviceToServerTable.source": {
     "defaultMessage": "Source"
   },
-  "components.FileUploadRequestsTable.source.filesystem": {
+  "components.FilesDeviceToServerTable.source.filesystem": {
     "defaultMessage": "FILESYSTEM: {source}"
   },
-  "components.FileUploadRequestsTable.source.storage": {
+  "components.FilesDeviceToServerTable.source.storage": {
     "defaultMessage": "STORAGE: {source}"
   },
-  "components.FileUploadRequestsTable.status": {
+  "components.FilesDeviceToServerTable.status": {
     "defaultMessage": "Status"
   },
-  "components.FileUploadRequestsTable.status.notTracked": {
+  "components.FilesDeviceToServerTable.status.notTracked": {
     "defaultMessage": "Not Tracked"
+  },
+  "components.FilesServerToDeviceTable.campaignName": {
+    "defaultMessage": "File Download Campaign"
+  },
+  "components.FilesServerToDeviceTable.destination": {
+    "defaultMessage": "Destination"
+  },
+  "components.FilesServerToDeviceTable.destination.filesystem": {
+    "defaultMessage": "FILESYSTEM: {destination}"
+  },
+  "components.FilesServerToDeviceTable.destination.storage": {
+    "defaultMessage": "STORAGE: {path}"
+  },
+  "components.FilesServerToDeviceTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.FilesServerToDeviceTable.fileSize": {
+    "defaultMessage": "Uncompressed File Size"
+  },
+  "components.FilesServerToDeviceTable.noRequests": {
+    "defaultMessage": "No file download requests have been sent yet."
+  },
+  "components.FilesServerToDeviceTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.FilesServerToDeviceTable.requestName": {
+    "defaultMessage": "Request Name"
+  },
+  "components.FilesServerToDeviceTable.responseMessage": {
+    "defaultMessage": "Response Message"
+  },
+  "components.FilesServerToDeviceTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.FilesServerToDeviceTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.FilesServerToDeviceTable.ttl": {
+    "defaultMessage": "TTL (s)"
+  },
+  "components.FilesServerToDeviceTable.ttl.infinite": {
+    "defaultMessage": "Infinite"
   },
   "components.FilesTable.actionsTitle": {
     "defaultMessage": "Actions"
@@ -2255,158 +2255,158 @@
   "forms.ManualFileDeleteRequestForm.forceLabel": {
     "defaultMessage": "Force delete"
   },
-  "forms.ManualFileDownloadRequestForm.advancedOptionsTitle": {
-    "defaultMessage": "Advanced Options"
-  },
-  "forms.ManualFileDownloadRequestForm.archiveNameLabel": {
-    "defaultMessage": "Archive Name"
-  },
-  "forms.ManualFileDownloadRequestForm.destinationLabel": {
-    "defaultMessage": "Destination"
-  },
-  "forms.ManualFileDownloadRequestForm.destinationPathHint": {
-    "defaultMessage": "Absolute path on the target device where the file should be written."
-  },
-  "forms.ManualFileDownloadRequestForm.destinationPathLabel": {
-    "defaultMessage": "Destination Path"
-  },
-  "forms.ManualFileDownloadRequestForm.downloadButton": {
-    "defaultMessage": "Request download"
-  },
-  "forms.ManualFileDownloadRequestForm.encodingHint": {
+  "forms.ManualFilesDeviceToServerForm.encodingHint": {
     "defaultMessage": "Optional encoding format, based on device capabilities. Leave empty for no encoding."
   },
-  "forms.ManualFileDownloadRequestForm.encodingLabel": {
+  "forms.ManualFilesDeviceToServerForm.encodingLabel": {
     "defaultMessage": "Encoding"
   },
-  "forms.ManualFileDownloadRequestForm.encodingNone": {
+  "forms.ManualFilesDeviceToServerForm.encodingNone": {
     "defaultMessage": "None"
   },
-  "forms.ManualFileDownloadRequestForm.encodingNoneDisabled": {
-    "defaultMessage": "None (disabled for multiple files, select an archive encoding instead)"
-  },
-  "forms.ManualFileDownloadRequestForm.fileHint": {
-    "defaultMessage": "Select files or a folder. Multiple items will be encoded."
-  },
-  "forms.ManualFileDownloadRequestForm.fileHintSingle": {
-    "defaultMessage": "Select a single file. Archive uploads are not supported by this device."
-  },
-  "forms.ManualFileDownloadRequestForm.fileLabel": {
-    "defaultMessage": "Files"
-  },
-  "forms.ManualFileDownloadRequestForm.fileModeLabel": {
-    "defaultMessage": "File Mode"
-  },
-  "forms.ManualFileDownloadRequestForm.fileNameHint": {
-    "defaultMessage": "You can customize the name before upload."
-  },
-  "forms.ManualFileDownloadRequestForm.fileNameLabel": {
-    "defaultMessage": "File Name"
-  },
-  "forms.ManualFileDownloadRequestForm.groupIdLabel": {
-    "defaultMessage": "Group ID"
-  },
-  "forms.ManualFileDownloadRequestForm.progressLabel": {
+  "forms.ManualFilesDeviceToServerForm.progressLabel": {
     "defaultMessage": "Report Progress"
   },
-  "forms.ManualFileDownloadRequestForm.requestNameLabel": {
-    "defaultMessage": "Request Name"
-  },
-  "forms.ManualFileDownloadRequestForm.ttlHint": {
-    "defaultMessage": "Set to 0 for no expiry."
-  },
-  "forms.ManualFileDownloadRequestForm.ttlLabel": {
-    "defaultMessage": "TTL (seconds)"
-  },
-  "forms.ManualFileDownloadRequestForm.userIdLabel": {
-    "defaultMessage": "User ID"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.advancedOptionsTitle": {
-    "defaultMessage": "Advanced Options"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.destinationLabel": {
-    "defaultMessage": "Destination"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathHint": {
-    "defaultMessage": "Absolute path on the target device where the file should be written."
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathLabel": {
-    "defaultMessage": "Destination Path"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.downloadButton": {
-    "defaultMessage": "Request download"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.fileLabel": {
-    "defaultMessage": "File"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.fileModeLabel": {
-    "defaultMessage": "File Mode"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.groupIdLabel": {
-    "defaultMessage": "Group ID"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesAvailable": {
-    "defaultMessage": "No repositories available"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesFoundMatching": {
-    "defaultMessage": "No repositories found matching \"{inputValue}\""
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.progressLabel": {
-    "defaultMessage": "Report Progress"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryLabel": {
-    "defaultMessage": "Repository"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryOption": {
-    "defaultMessage": "Search or select a repository..."
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.requestNameLabel": {
-    "defaultMessage": "Request Name"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.selectRepositoryHint": {
-    "defaultMessage": "Select a repository before selecting a file..."
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.ttlHint": {
-    "defaultMessage": "Set to 0 for no expiry."
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.ttlLabel": {
-    "defaultMessage": "TTL (seconds)"
-  },
-  "forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel": {
-    "defaultMessage": "User ID"
-  },
-  "forms.ManualFileUploadRequestForm.encodingHint": {
-    "defaultMessage": "Optional encoding format, based on device capabilities. Leave empty for no encoding."
-  },
-  "forms.ManualFileUploadRequestForm.encodingLabel": {
-    "defaultMessage": "Encoding"
-  },
-  "forms.ManualFileUploadRequestForm.encodingNone": {
-    "defaultMessage": "None"
-  },
-  "forms.ManualFileUploadRequestForm.progressLabel": {
-    "defaultMessage": "Report Progress"
-  },
-  "forms.ManualFileUploadRequestForm.sourceLabel": {
+  "forms.ManualFilesDeviceToServerForm.sourceLabel": {
     "defaultMessage": "Source"
   },
-  "forms.ManualFileUploadRequestForm.sourcePathHint": {
+  "forms.ManualFilesDeviceToServerForm.sourcePathHint": {
     "defaultMessage": "Absolute path to the file on the device that should be uploaded."
   },
-  "forms.ManualFileUploadRequestForm.sourceStorageEmpty": {
+  "forms.ManualFilesDeviceToServerForm.sourceStorageEmpty": {
     "defaultMessage": "No known storage file names for this device yet."
   },
-  "forms.ManualFileUploadRequestForm.sourceStorageNoMatch": {
+  "forms.ManualFilesDeviceToServerForm.sourceStorageNoMatch": {
     "defaultMessage": "No file found with name \"{value}\""
   },
-  "forms.ManualFileUploadRequestForm.sourceStoragePlaceholder": {
+  "forms.ManualFilesDeviceToServerForm.sourceStoragePlaceholder": {
     "defaultMessage": "Select storage file by its name..."
   },
-  "forms.ManualFileUploadRequestForm.sourceTypeLabel": {
+  "forms.ManualFilesDeviceToServerForm.sourceTypeLabel": {
     "defaultMessage": "Source Type"
   },
-  "forms.ManualFileUploadRequestForm.uploadButton": {
+  "forms.ManualFilesDeviceToServerForm.uploadButton": {
     "defaultMessage": "Request Upload"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.archiveNameLabel": {
+    "defaultMessage": "Archive Name"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.destinationPathHint": {
+    "defaultMessage": "Absolute path on the target device where the file should be written."
+  },
+  "forms.ManualFilesServerToDeviceFileForm.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.downloadButton": {
+    "defaultMessage": "Request download"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.encodingHint": {
+    "defaultMessage": "Optional encoding format, based on device capabilities. Leave empty for no encoding."
+  },
+  "forms.ManualFilesServerToDeviceFileForm.encodingLabel": {
+    "defaultMessage": "Encoding"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.encodingNone": {
+    "defaultMessage": "None"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.encodingNoneDisabled": {
+    "defaultMessage": "None (disabled for multiple files, select an archive encoding instead)"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.fileHint": {
+    "defaultMessage": "Select files or a folder. Multiple items will be encoded."
+  },
+  "forms.ManualFilesServerToDeviceFileForm.fileHintSingle": {
+    "defaultMessage": "Select a single file. Archive uploads are not supported by this device."
+  },
+  "forms.ManualFilesServerToDeviceFileForm.fileLabel": {
+    "defaultMessage": "Files"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.fileNameHint": {
+    "defaultMessage": "You can customize the name before upload."
+  },
+  "forms.ManualFilesServerToDeviceFileForm.fileNameLabel": {
+    "defaultMessage": "File Name"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.requestNameLabel": {
+    "defaultMessage": "Request Name"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "forms.ManualFilesServerToDeviceFileForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "forms.ManualFilesServerToDeviceFileForm.userIdLabel": {
+    "defaultMessage": "User ID"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.destinationPathHint": {
+    "defaultMessage": "Absolute path on the target device where the file should be written."
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.downloadButton": {
+    "defaultMessage": "Request download"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.noRepositoriesAvailable": {
+    "defaultMessage": "No repositories available"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.noRepositoriesFoundMatching": {
+    "defaultMessage": "No repositories found matching \"{inputValue}\""
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.progressLabel": {
+    "defaultMessage": "Report Progress"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.repositoryOption": {
+    "defaultMessage": "Search or select a repository..."
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.requestNameLabel": {
+    "defaultMessage": "Request Name"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.selectRepositoryHint": {
+    "defaultMessage": "Select a repository before selecting a file..."
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.ttlHint": {
+    "defaultMessage": "Set to 0 for no expiry."
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.ttlLabel": {
+    "defaultMessage": "TTL (seconds)"
+  },
+  "forms.ManualFilesServerToDeviceRepositoryForm.userIdLabel": {
+    "defaultMessage": "User ID"
   },
   "forms.ManualOtaFromCollectionForm.baseImageCollectionOption": {
     "defaultMessage": "Search or select a base image collection..."

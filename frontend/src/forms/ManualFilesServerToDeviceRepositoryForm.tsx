@@ -25,16 +25,16 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay";
 import Select from "react-select";
 
-import type { ManualFileDownloadRequestFromRepositoryForm_RepositoriesPagination_Query } from "@/api/__generated__/ManualFileDownloadRequestFromRepositoryForm_RepositoriesPagination_Query.graphql";
+import type { ManualFilesServerToDeviceRepositoryForm_RepositoriesPagination_Query } from "@/api/__generated__/ManualFilesServerToDeviceRepositoryForm_RepositoriesPagination_Query.graphql";
 import type {
-  ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$data,
-  ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$key,
-} from "@/api/__generated__/ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment.graphql";
+  ManualFilesServerToDeviceRepositoryForm_repositories_Fragment$data,
+  ManualFilesServerToDeviceRepositoryForm_repositories_Fragment$key,
+} from "@/api/__generated__/ManualFilesServerToDeviceRepositoryForm_repositories_Fragment.graphql";
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
 import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
-import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesUploadTab";
+import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesServerToDeviceTab";
 import FileSelect from "@/components/FileSelect";
 import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
@@ -48,15 +48,13 @@ import {
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const REPOSITORIES_FRAGMENT = graphql`
-  fragment ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment on RootQueryType
+  fragment ManualFilesServerToDeviceRepositoryForm_repositories_Fragment on RootQueryType
   @refetchable(
-    queryName: "ManualFileDownloadRequestFromRepositoryForm_RepositoriesPagination_Query"
+    queryName: "ManualFilesServerToDeviceRepositoryForm_RepositoriesPagination_Query"
   )
   @argumentDefinitions(filter: { type: "RepositoryFilterInput" }) {
     repositories(first: $first, after: $after, filter: $filter)
-      @connection(
-        key: "ManualFileDownloadRequestFromRepositoryForm_repositories"
-      ) {
+      @connection(key: "ManualFilesServerToDeviceRepositoryForm_repositories") {
       edges {
         node {
           id
@@ -69,7 +67,7 @@ const REPOSITORIES_FRAGMENT = graphql`
 
 export type RepositoryRecord = NonNullable<
   NonNullable<
-    ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$data["repositories"]
+    ManualFilesServerToDeviceRepositoryForm_repositories_Fragment$data["repositories"]
   >["edges"]
 >[number]["node"];
 
@@ -93,33 +91,33 @@ const getNoRepositoryOptionsMessage = (
   inputValue
     ? intl.formatMessage(
         {
-          id: "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesFoundMatching",
+          id: "forms.ManualFilesServerToDeviceRepositoryForm.noRepositoriesFoundMatching",
           defaultMessage: 'No repositories found matching "{inputValue}"',
         },
         { inputValue },
       )
     : intl.formatMessage({
-        id: "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesAvailable",
+        id: "forms.ManualFilesServerToDeviceRepositoryForm.noRepositoriesAvailable",
         defaultMessage: "No repositories available",
       });
 
-type ManualFileDownloadRequestFromRepositoryFormProps = {
+type ManualFilesServerToDeviceRepositoryFormProps = {
   className?: string;
-  repositoriesData?: ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$key;
+  repositoriesData?: ManualFilesServerToDeviceRepositoryForm_repositories_Fragment$key;
   isLoading: boolean;
   onFileSubmit: (values: ManualFileDownloadRequestFromRepositoryData) => void;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
 };
 
-const ManualFileDownloadRequestFromRepositoryForm = ({
+const ManualFilesServerToDeviceRepositoryForm = ({
   repositoriesData,
   className,
   isLoading,
   onFileSubmit,
   showAdvancedOptions,
   destinationTypeOptions,
-}: ManualFileDownloadRequestFromRepositoryFormProps) => {
+}: ManualFilesServerToDeviceRepositoryFormProps) => {
   const intl = useIntl();
   const { open: advancedOptionsOpen, toggle: toggleAdvancedOptions } =
     useCollapseToggle();
@@ -151,8 +149,8 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
     isLoadingNext: isLoadingNextRepository,
     refetch: refetchRepositories,
   } = usePaginationFragment<
-    ManualFileDownloadRequestFromRepositoryForm_RepositoriesPagination_Query,
-    ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$key
+    ManualFilesServerToDeviceRepositoryForm_RepositoriesPagination_Query,
+    ManualFilesServerToDeviceRepositoryForm_repositories_Fragment$key
   >(REPOSITORIES_FRAGMENT, repositoriesData);
 
   const [searchRepositoryText, setSearchRepositoryText] = useState<
@@ -203,7 +201,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="requestName"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestFromRepositoryForm.requestNameLabel"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.requestNameLabel"
             defaultMessage="Request Name"
           />
         }
@@ -221,7 +219,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="repository"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestFromRepositoryForm.repositoryLabel"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.repositoryLabel"
             defaultMessage="Repository"
           />
         }
@@ -238,7 +236,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
               }}
               className={invalid ? "is-invalid" : ""}
               placeholder={intl.formatMessage({
-                id: "forms.ManualFileDownloadRequestFromRepositoryForm.repositoryOption",
+                id: "forms.ManualFilesServerToDeviceRepositoryForm.repositoryOption",
                 defaultMessage: "Search or select a repository...",
               })}
               options={repositories}
@@ -261,7 +259,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="file"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestFromRepositoryForm.fileLabel"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.fileLabel"
             defaultMessage="File"
           />
         }
@@ -290,7 +288,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         ) : (
           <div className="d-flex align-content-center fst-italic text-muted">
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestFromRepositoryForm.selectRepositoryHint"
+              id="forms.ManualFilesServerToDeviceRepositoryForm.selectRepositoryHint"
               defaultMessage="Select a repository before selecting a file..."
             />
           </div>
@@ -301,7 +299,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="destinationType"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestFromRepositoryForm.destinationLabel"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.destinationLabel"
             defaultMessage="Destination"
           />
         }
@@ -327,7 +325,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           id="destination"
           label={
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathLabel"
+              id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathLabel"
               defaultMessage="Destination Path"
             />
           }
@@ -344,7 +342,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           ) : (
             <Form.Text muted>
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestFromRepositoryForm.destinationPathHint"
+                id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathHint"
                 defaultMessage="Absolute path on the target device where the file should be written."
               />
             </Form.Text>
@@ -356,7 +354,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="ttlSeconds"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestFromRepositoryForm.ttlLabel"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.ttlLabel"
             defaultMessage="TTL (seconds)"
           />
         }
@@ -374,7 +372,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestFromRepositoryForm.ttlHint"
+              id="forms.ManualFilesServerToDeviceRepositoryForm.ttlHint"
               defaultMessage="Set to 0 for no expiry."
             />
           </Form.Text>
@@ -385,7 +383,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         id="progress"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestFromRepositoryForm.progressLabel"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.progressLabel"
             defaultMessage="Report Progress"
           />
         }
@@ -408,7 +406,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
             caretPosition="right"
             title={
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestFromRepositoryForm.advancedOptionsTitle"
+                id="forms.ManualFilesServerToDeviceRepositoryForm.advancedOptionsTitle"
                 defaultMessage="Advanced Options"
               />
             }
@@ -417,7 +415,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
               id="userId"
               label={
                 <FormattedMessage
-                  id="forms.ManualFileDownloadRequestFromRepositoryForm.userIdLabel"
+                  id="forms.ManualFilesServerToDeviceRepositoryForm.userIdLabel"
                   defaultMessage="User ID"
                 />
               }
@@ -436,7 +434,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
               id="groupId"
               label={
                 <FormattedMessage
-                  id="forms.ManualFileDownloadRequestFromRepositoryForm.groupIdLabel"
+                  id="forms.ManualFilesServerToDeviceRepositoryForm.groupIdLabel"
                   defaultMessage="Group ID"
                 />
               }
@@ -455,7 +453,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
               id="fileMode"
               label={
                 <FormattedMessage
-                  id="forms.ManualFileDownloadRequestFromRepositoryForm.fileModeLabel"
+                  id="forms.ManualFilesServerToDeviceRepositoryForm.fileModeLabel"
                   defaultMessage="File Mode"
                 />
               }
@@ -478,7 +476,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestFromRepositoryForm.downloadButton"
+              id="forms.ManualFilesServerToDeviceRepositoryForm.downloadButton"
               defaultMessage="Request download"
             />
           </Button>
@@ -488,4 +486,4 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
   );
 };
 
-export default ManualFileDownloadRequestFromRepositoryForm;
+export default ManualFilesServerToDeviceRepositoryForm;

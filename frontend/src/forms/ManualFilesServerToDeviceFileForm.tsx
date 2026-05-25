@@ -27,7 +27,7 @@ import Select from "react-select";
 import Button from "@/components/Button";
 import Col from "@/components/Col";
 import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
-import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesUploadTab";
+import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesServerToDeviceTab";
 import FileDropzone from "@/components/FileDropzone";
 import Form from "@/components/Form";
 import { FormRowWithMargin as FormRow } from "@/components/FormRow";
@@ -66,7 +66,7 @@ type FileDownloadRequestFormValues = {
   groupId?: number;
 };
 
-type ManualFileDownloadRequestFormProps = {
+type ManualFilesServerToDeviceFileFormProps = {
   className?: string;
   isLoading: boolean;
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
@@ -84,7 +84,7 @@ const ARCHIVE_ENCODING_VALUES = new Set([
   "tar.lz4",
 ]);
 
-const ManualFileDownloadRequestForm = ({
+const ManualFilesServerToDeviceFileForm = ({
   className,
   isLoading,
   onFileSubmit,
@@ -92,7 +92,7 @@ const ManualFileDownloadRequestForm = ({
   allowArchiveUpload,
   showAdvancedOptions = false,
   destinationTypeOptions,
-}: ManualFileDownloadRequestFormProps) => {
+}: ManualFilesServerToDeviceFileFormProps) => {
   const intl = useIntl();
 
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -138,12 +138,12 @@ const ManualFileDownloadRequestForm = ({
 
   const noneEncodingLabel = hasMultipleFilesSelected
     ? intl.formatMessage({
-        id: "forms.ManualFileDownloadRequestForm.encodingNoneDisabled",
+        id: "forms.ManualFilesServerToDeviceFileForm.encodingNoneDisabled",
         defaultMessage:
           "None (disabled for multiple files, select an archive encoding instead)",
       })
     : intl.formatMessage({
-        id: "forms.ManualFileDownloadRequestForm.encodingNone",
+        id: "forms.ManualFilesServerToDeviceFileForm.encodingNone",
         defaultMessage: "None",
       });
 
@@ -312,7 +312,7 @@ const ManualFileDownloadRequestForm = ({
         id="requestName"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestForm.requestNameLabel"
+            id="forms.ManualFilesServerToDeviceFileForm.requestNameLabel"
             defaultMessage="Request Name"
           />
         }
@@ -330,7 +330,7 @@ const ManualFileDownloadRequestForm = ({
         id="file"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestForm.fileLabel"
+            id="forms.ManualFilesServerToDeviceFileForm.fileLabel"
             defaultMessage="Files"
           />
         }
@@ -347,12 +347,12 @@ const ManualFileDownloadRequestForm = ({
           <Form.Text muted>
             {allowArchiveUpload ? (
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestForm.fileHint"
+                id="forms.ManualFilesServerToDeviceFileForm.fileHint"
                 defaultMessage="Select files or a folder. Multiple items will be encoded."
               />
             ) : (
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestForm.fileHintSingle"
+                id="forms.ManualFilesServerToDeviceFileForm.fileHintSingle"
                 defaultMessage="Select a single file. Archive uploads are not supported by this device."
               />
             )}
@@ -366,12 +366,12 @@ const ManualFileDownloadRequestForm = ({
           label={
             needsArchive ? (
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestForm.archiveNameLabel"
+                id="forms.ManualFilesServerToDeviceFileForm.archiveNameLabel"
                 defaultMessage="Archive Name"
               />
             ) : (
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestForm.fileNameLabel"
+                id="forms.ManualFilesServerToDeviceFileForm.fileNameLabel"
                 defaultMessage="File Name"
               />
             )
@@ -385,7 +385,7 @@ const ManualFileDownloadRequestForm = ({
           </div>
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.fileNameHint"
+              id="forms.ManualFilesServerToDeviceFileForm.fileNameHint"
               defaultMessage="You can customize the name before upload."
             />
           </Form.Text>
@@ -396,7 +396,7 @@ const ManualFileDownloadRequestForm = ({
         id="encoding"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestForm.encodingLabel"
+            id="forms.ManualFilesServerToDeviceFileForm.encodingLabel"
             defaultMessage="Encoding"
           />
         }
@@ -427,7 +427,7 @@ const ManualFileDownloadRequestForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.encodingHint"
+              id="forms.ManualFilesServerToDeviceFileForm.encodingHint"
               defaultMessage="Optional encoding format, based on device capabilities. Leave empty for no encoding."
             />
           </Form.Text>
@@ -438,7 +438,7 @@ const ManualFileDownloadRequestForm = ({
         id="destinationType"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestForm.destinationLabel"
+            id="forms.ManualFilesServerToDeviceFileForm.destinationLabel"
             defaultMessage="Destination"
           />
         }
@@ -469,7 +469,7 @@ const ManualFileDownloadRequestForm = ({
           id="destination"
           label={
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.destinationPathLabel"
+              id="forms.ManualFilesServerToDeviceFileForm.destinationPathLabel"
               defaultMessage="Destination Path"
             />
           }
@@ -486,7 +486,7 @@ const ManualFileDownloadRequestForm = ({
           ) : (
             <Form.Text muted>
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestForm.destinationPathHint"
+                id="forms.ManualFilesServerToDeviceFileForm.destinationPathHint"
                 defaultMessage="Absolute path on the target device where the file should be written."
               />
             </Form.Text>
@@ -498,7 +498,7 @@ const ManualFileDownloadRequestForm = ({
         id="ttlSeconds"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestForm.ttlLabel"
+            id="forms.ManualFilesServerToDeviceFileForm.ttlLabel"
             defaultMessage="TTL (seconds)"
           />
         }
@@ -516,7 +516,7 @@ const ManualFileDownloadRequestForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.ttlHint"
+              id="forms.ManualFilesServerToDeviceFileForm.ttlHint"
               defaultMessage="Set to 0 for no expiry."
             />
           </Form.Text>
@@ -527,7 +527,7 @@ const ManualFileDownloadRequestForm = ({
         id="progress"
         label={
           <FormattedMessage
-            id="forms.ManualFileDownloadRequestForm.progressLabel"
+            id="forms.ManualFilesServerToDeviceFileForm.progressLabel"
             defaultMessage="Report Progress"
           />
         }
@@ -550,7 +550,7 @@ const ManualFileDownloadRequestForm = ({
             caretPosition="right"
             title={
               <FormattedMessage
-                id="forms.ManualFileDownloadRequestForm.advancedOptionsTitle"
+                id="forms.ManualFilesServerToDeviceFileForm.advancedOptionsTitle"
                 defaultMessage="Advanced Options"
               />
             }
@@ -559,7 +559,7 @@ const ManualFileDownloadRequestForm = ({
               id="userId"
               label={
                 <FormattedMessage
-                  id="forms.ManualFileDownloadRequestForm.userIdLabel"
+                  id="forms.ManualFilesServerToDeviceFileForm.userIdLabel"
                   defaultMessage="User ID"
                 />
               }
@@ -578,7 +578,7 @@ const ManualFileDownloadRequestForm = ({
               id="groupId"
               label={
                 <FormattedMessage
-                  id="forms.ManualFileDownloadRequestForm.groupIdLabel"
+                  id="forms.ManualFilesServerToDeviceFileForm.groupIdLabel"
                   defaultMessage="Group ID"
                 />
               }
@@ -597,7 +597,7 @@ const ManualFileDownloadRequestForm = ({
               id="fileMode"
               label={
                 <FormattedMessage
-                  id="forms.ManualFileDownloadRequestForm.fileModeLabel"
+                  id="forms.ManualFilesServerToDeviceFileForm.fileModeLabel"
                   defaultMessage="File Mode"
                 />
               }
@@ -620,7 +620,7 @@ const ManualFileDownloadRequestForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.ManualFileDownloadRequestForm.downloadButton"
+              id="forms.ManualFilesServerToDeviceFileForm.downloadButton"
               defaultMessage="Request download"
             />
           </Button>
@@ -632,4 +632,4 @@ const ManualFileDownloadRequestForm = ({
 
 export type { FileDownloadRequestFormValues };
 
-export default ManualFileDownloadRequestForm;
+export default ManualFilesServerToDeviceFileForm;

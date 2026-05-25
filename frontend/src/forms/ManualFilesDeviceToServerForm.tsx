@@ -52,7 +52,7 @@ type StorageSourceOption = {
   label: string;
 };
 
-type ManualFileUploadRequestFormProps = {
+type ManualFilesDeviceToServerFormProps = {
   className?: string;
   isLoading: boolean;
   onSubmit: (values: ManualFileUploadRequestData) => void;
@@ -61,14 +61,14 @@ type ManualFileUploadRequestFormProps = {
   storageSourceOptions: StorageSourceOption[];
 };
 
-const ManualFileUploadRequestForm = ({
+const ManualFilesDeviceToServerForm = ({
   className,
   isLoading,
   onSubmit,
   supportedEncodingsBySourceType,
   sourceTypeOptions,
   storageSourceOptions,
-}: ManualFileUploadRequestFormProps) => {
+}: ManualFilesDeviceToServerFormProps) => {
   const intl = useIntl();
 
   const {
@@ -99,7 +99,7 @@ const ManualFileUploadRequestForm = ({
   const sourcePlaceholderByType = useMemo<Record<FileSourceType, string>>(
     () => ({
       STORAGE: intl.formatMessage({
-        id: "forms.ManualFileUploadRequestForm.sourceStoragePlaceholder",
+        id: "forms.ManualFilesDeviceToServerForm.sourceStoragePlaceholder",
         defaultMessage: "Select storage file by its name...",
       }),
       FILESYSTEM: "/tmp/file.bin",
@@ -113,7 +113,7 @@ const ManualFileUploadRequestForm = ({
       {
         value: "",
         label: intl.formatMessage({
-          id: "forms.ManualFileUploadRequestForm.encodingNone",
+          id: "forms.ManualFilesDeviceToServerForm.encodingNone",
           defaultMessage: "None",
         }),
       },
@@ -132,7 +132,7 @@ const ManualFileUploadRequestForm = ({
         id="sourceType"
         label={
           <FormattedMessage
-            id="forms.ManualFileUploadRequestForm.sourceTypeLabel"
+            id="forms.ManualFilesDeviceToServerForm.sourceTypeLabel"
             defaultMessage="Source Type"
           />
         }
@@ -160,7 +160,7 @@ const ManualFileUploadRequestForm = ({
         id="source"
         label={
           <FormattedMessage
-            id="forms.ManualFileUploadRequestForm.sourceLabel"
+            id="forms.ManualFilesDeviceToServerForm.sourceLabel"
             defaultMessage="Source"
           />
         }
@@ -199,14 +199,14 @@ const ManualFileUploadRequestForm = ({
                       inputValue
                         ? intl.formatMessage(
                             {
-                              id: "forms.ManualFileUploadRequestForm.sourceStorageNoMatch",
+                              id: "forms.ManualFilesDeviceToServerForm.sourceStorageNoMatch",
                               defaultMessage:
                                 'No file found with name "{value}"',
                             },
                             { value: inputValue },
                           )
                         : intl.formatMessage({
-                            id: "forms.ManualFileUploadRequestForm.sourceStorageEmpty",
+                            id: "forms.ManualFilesDeviceToServerForm.sourceStorageEmpty",
                             defaultMessage:
                               "No known storage file names for this device yet.",
                           })
@@ -238,7 +238,7 @@ const ManualFileUploadRequestForm = ({
                 ) : (
                   <Form.Text muted>
                     <FormattedMessage
-                      id="forms.ManualFileUploadRequestForm.sourcePathHint"
+                      id="forms.ManualFilesDeviceToServerForm.sourcePathHint"
                       defaultMessage="Absolute path to the file on the device that should be uploaded."
                     />
                   </Form.Text>
@@ -253,7 +253,7 @@ const ManualFileUploadRequestForm = ({
         id="encoding"
         label={
           <FormattedMessage
-            id="forms.ManualFileUploadRequestForm.encodingLabel"
+            id="forms.ManualFilesDeviceToServerForm.encodingLabel"
             defaultMessage="Encoding"
           />
         }
@@ -284,7 +284,7 @@ const ManualFileUploadRequestForm = ({
         ) : (
           <Form.Text muted>
             <FormattedMessage
-              id="forms.ManualFileUploadRequestForm.encodingHint"
+              id="forms.ManualFilesDeviceToServerForm.encodingHint"
               defaultMessage="Optional encoding format, based on device capabilities. Leave empty for no encoding."
             />
           </Form.Text>
@@ -295,7 +295,7 @@ const ManualFileUploadRequestForm = ({
         id="progressTracked"
         label={
           <FormattedMessage
-            id="forms.ManualFileUploadRequestForm.progressLabel"
+            id="forms.ManualFilesDeviceToServerForm.progressLabel"
             defaultMessage="Report Progress"
           />
         }
@@ -313,7 +313,7 @@ const ManualFileUploadRequestForm = ({
           <Button variant="primary" type="submit" disabled={isLoading}>
             {isLoading && <Spinner size="sm" className="me-2" />}
             <FormattedMessage
-              id="forms.ManualFileUploadRequestForm.uploadButton"
+              id="forms.ManualFilesDeviceToServerForm.uploadButton"
               defaultMessage="Request Upload"
             />
           </Button>
@@ -325,4 +325,4 @@ const ManualFileUploadRequestForm = ({
 
 export type { SourceTypeOption, StorageSourceOption };
 
-export default ManualFileUploadRequestForm;
+export default ManualFilesDeviceToServerForm;
