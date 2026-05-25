@@ -21,7 +21,7 @@ defmodule Edgehog.Labeling do
   The Labeling context, containing all functionalities regarding tags and attributes assignment
   """
 
-  use Ash.Domain, extensions: [AshGraphql.Domain, Ash.Authorizer]
+  use Ash.Domain, extensions: [AshGraphql.Domain, Ash.Policy.Authorizer]
 
   alias Edgehog.Labeling.Tag
 
