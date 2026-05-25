@@ -41,11 +41,11 @@ import { FormRowWithMargin as FormRow } from "@/components/FormRow";
 import Row from "@/components/Row";
 import Spinner from "@/components/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
-import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   ManualFileDownloadRequestFromRepositoryData,
   manualFileDownloadRequestFromRepositorySchema,
 } from "@/forms/validation";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const REPOSITORIES_FRAGMENT = graphql`
   fragment ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment on RootQueryType
@@ -86,6 +86,23 @@ const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
   groupId: undefined,
 };
 
+const getNoRepositoryOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesFoundMatching",
+          defaultMessage: 'No repositories found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesAvailable",
+        defaultMessage: "No repositories available",
+      });
+
 type ManualFileDownloadRequestFromRepositoryFormProps = {
   className?: string;
   repositoriesData?: ManualFileDownloadRequestFromRepositoryForm_repositories_Fragment$key;
@@ -113,6 +130,8 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
     handleSubmit,
     register,
     resetField,
+    setValue,
+    reset,
   } = useForm({
     mode: "onTouched",
     defaultValues: fromRepositoryInitialData,
@@ -162,31 +181,20 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
 
   const repositories = useMemo(
     () =>
-      repositoryPaginationData?.repositories?.edges?.map(
-        (edge) => edge?.node,
-      ) ?? [],
+      repositoryPaginationData?.repositories?.edges
+        ?.map((edge) => edge?.node)
+        .filter(Boolean) ?? [],
     [repositoryPaginationData],
   );
 
-  const noRepositoryOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesFoundMatching",
-            defaultMessage: 'No repositories found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.ManualFileDownloadRequestFromRepositoryForm.noRepositoriesAvailable",
-          defaultMessage: "No repositories available",
-        });
-
-  const { onChange: onRepositoryChange } = register("repository");
-  const { onChange: onFileChange } = register("file");
+  const destinationOptionsMap = useMemo(
+    () => new Map(destinationTypeOptions.map((opt) => [opt.value, opt])),
+    [destinationTypeOptions],
+  );
 
   const onSubmit = handleSubmit((data) => {
     onFileSubmit(data);
+    reset();
   });
 
   return (
@@ -223,10 +231,9 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
           control={control}
           render={({ field: { value, onChange }, fieldState: { invalid } }) => (
             <Select
-              value={value}
-              onChange={(e) => {
-                onChange(e);
-                onRepositoryChange({ target: e });
+              value={value?.id ? value : null}
+              onChange={(selectedOpt) => {
+                onChange(selectedOpt);
                 resetField("file");
               }}
               className={invalid ? "is-invalid" : ""}
@@ -238,7 +245,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
               getOptionLabel={(opt) => opt.name}
               getOptionValue={(opt) => opt.id}
               noOptionsMessage={({ inputValue }) =>
-                noRepositoryOptionsMessage(inputValue)
+                getNoRepositoryOptionsMessage(intl, inputValue)
               }
               isLoading={isLoadingNextRepository}
               onMenuScrollToBottom={onLoadMoreRepositoryOptions}
@@ -273,10 +280,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
                   controllerProps={{
                     value: value,
                     invalid: invalid,
-                    onChange: (e) => {
-                      onChange(e);
-                      onFileChange(e);
-                    },
+                    onChange,
                   }}
                 />
               )}
@@ -305,21 +309,16 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
         <Controller
           control={control}
           name="destinationType"
-          render={({ field }) => {
-            const selectedOption =
-              destinationTypeOptions.find((opt) => opt.value === field.value) ||
-              null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => {
-                  field.onChange(option ? option.value : null);
-                }}
-                options={destinationTypeOptions}
-              />
-            );
-          }}
+          render={({ field }) => (
+            <Select
+              value={destinationOptionsMap.get(field.value) ?? null}
+              onChange={(option) => {
+                field.onChange(option?.value ?? null);
+                setValue("destination", null);
+              }}
+              options={destinationTypeOptions}
+            />
+          )}
         />
       </FormRow>
 
@@ -425,7 +424,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
             >
               <Form.Control
                 type="text"
-                {...register(`userId` as const, {
+                {...register("userId", {
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
                 isInvalid={!!errors.userId}
@@ -444,7 +443,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
             >
               <Form.Control
                 type="text"
-                {...register(`groupId` as const, {
+                {...register("groupId", {
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
                 isInvalid={!!errors.groupId}
@@ -463,7 +462,7 @@ const ManualFileDownloadRequestFromRepositoryForm = ({
             >
               <Form.Control
                 type="text"
-                {...register(`fileMode` as const, {
+                {...register("fileMode", {
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
                 isInvalid={!!errors.fileMode}

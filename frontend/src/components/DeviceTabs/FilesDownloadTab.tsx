@@ -39,8 +39,8 @@ import FileUploadRequestsTable from "@/components/FileUploadRequestsTable";
 import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
 import ManualFileUploadRequestForm, {
-  type StorageSourceOption,
   type SourceTypeOption,
+  type StorageSourceOption,
 } from "@/forms/ManualFileUploadRequestForm";
 import type {
   FileSourceType,
@@ -52,15 +52,9 @@ import type {
 const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
   fragment FilesDownloadTab_fileUploadRequests on Device
   @refetchable(queryName: "FilesDownloadTab_PaginationQuery") {
-    id
     capabilities
     fileTransferCapabilities {
       unixPermissions
-      serverToDevice {
-        storage
-        streaming
-        filesystem
-      }
       deviceToServer {
         storage
         streaming
@@ -71,8 +65,6 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
       @connection(key: "FilesDownloadTab_fileUploadRequests") {
       edges {
         node {
-          id
-          url
           getPresignedUrl
           source
           sourceType
@@ -82,13 +74,10 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
           progressPercentage
           responseCode
           responseMessage
-          httpHeaders
         }
       }
     }
     storageFileDownloadRequests: fileDownloadRequests(
-      first: $first
-      after: $after
       filter: {
         destinationType: { eq: STORAGE }
         status: { eq: COMPLETED }
@@ -113,7 +102,6 @@ const DEVICE_CREATE_FILE_UPLOAD_REQUEST_MUTATION = graphql`
     createFileUploadRequest(input: $input) {
       result {
         id
-        url
         getPresignedUrl
         source
         sourceType
@@ -123,7 +111,6 @@ const DEVICE_CREATE_FILE_UPLOAD_REQUEST_MUTATION = graphql`
         progressPercentage
         responseCode
         responseMessage
-        httpHeaders
       }
     }
   }
@@ -144,6 +131,15 @@ const FILE_UPLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
     }
   }
 `;
+
+const normalizeEncodings = (
+  encodings: readonly (string | null)[] | null | undefined,
+): string[] => {
+  if (!encodings) return [];
+  return encodings
+    .map((e) => e?.trim())
+    .filter((e): e is string => e != null && e.length > 0);
+};
 
 type ManualFileUploadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
@@ -303,7 +299,10 @@ const FilesDownloadTab = ({
   );
 
   const fileUploadRequests = useMemo(
-    () => data.fileUploadRequests?.edges?.map((edge) => edge.node) ?? [],
+    () =>
+      data.fileUploadRequests?.edges
+        ?.map((edge) => edge?.node)
+        .filter(Boolean) ?? [],
     [data.fileUploadRequests],
   );
 
@@ -387,15 +386,6 @@ const FilesDownloadTab = ({
       return { STORAGE: [], FILESYSTEM: [] };
     }
 
-    const normalizeEncodings = (
-      encodings: readonly (string | null)[] | null,
-    ) => {
-      if (!encodings) return [];
-      return encodings
-        .map((e) => e?.trim())
-        .filter((e): e is string => e != null && e.length > 0);
-    };
-
     return {
       STORAGE: normalizeEncodings(capabilities.storage),
       FILESYSTEM: normalizeEncodings(capabilities.filesystem),
@@ -443,10 +433,7 @@ const FilesDownloadTab = ({
           />
         </h5>
 
-        <FileUploadRequestsTable
-          requests={fileUploadRequests}
-          setErrorFeedback={setErrorFeedback}
-        />
+        <FileUploadRequestsTable requests={fileUploadRequests} />
       </div>
     </>
   );

@@ -28,6 +28,7 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { PayloadError } from "relay-runtime";
 
 import type { FilesDeleteTab_PaginationQuery } from "@/api/__generated__/FilesDeleteTab_PaginationQuery.graphql";
 import type { FilesDeleteTab_createFileDeleteRequest_Mutation } from "@/api/__generated__/FilesDeleteTab_createFileDeleteRequest_Mutation.graphql";
@@ -35,39 +36,35 @@ import type { FilesDeleteTab_fileDeleteRequest_Subscription } from "@/api/__gene
 import type { FilesDeleteTab_fileManagement$key } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
 
 import Alert from "@/components/Alert";
+import FileDeleteRequestsTable from "@/components/FileDeleteRequestsTable";
 import Stack from "@/components/Stack";
 import { Tab } from "@/components/Tabs";
 import ManualFileDeleteRequestForm, {
   type ManualFileDeleteRequestFormValues,
   type StorageSourceOption,
 } from "@/forms/ManualFileDeleteRequestForm";
-import FileDeleteRequestsTable from "@/components/FileDeleteRequestsTable";
 
+// We use graphql fields below in table columns configuration
+/* eslint-disable relay/unused-fields */
 const DEVICE_FILES_FRAGMENT = graphql`
   fragment FilesDeleteTab_fileManagement on Device
   @refetchable(queryName: "FilesDeleteTab_PaginationQuery") {
-    id
     capabilities
     fileDeleteRequests(first: $first, after: $after)
       @connection(key: "FilesDeleteTab_fileDeleteRequests") {
       edges {
         node {
-          id
           force
           status
           responseCode
           responseMessages
           fileDownloadRequest {
-            id
             fileName
           }
         }
       }
     }
-
     storageFileDownloadRequests: fileDownloadRequests(
-      first: $first
-      after: $after
       filter: {
         destinationType: { eq: STORAGE }
         status: { eq: COMPLETED }
@@ -97,7 +94,6 @@ const DEVICE_CREATE_FILE_DELETE_REQUEST_MUTATION = graphql`
         responseCode
         responseMessages
         fileDownloadRequest {
-          id
           fileName
         }
       }
@@ -115,13 +111,20 @@ const FILE_DELETE_REQUEST_UPDATED_SUBSCRIPTION = graphql`
         responseCode
         responseMessages
         fileDownloadRequest {
-          id
           fileName
         }
       }
     }
   }
 `;
+
+const formatPayloadErrors = (errors: readonly PayloadError[]): string => {
+  return errors
+    .map(({ fields, message }) =>
+      fields?.length ? `${fields.join(", ")}: ${message}` : message,
+    )
+    .join(". \n");
+};
 
 type ManualFileDeleteRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
@@ -152,7 +155,6 @@ const ManualFileDeleteRequestFormWrapper = ({
             defaultMessage="The device is offline."
           />,
         );
-
         return;
       }
 
@@ -168,29 +170,17 @@ const ManualFileDeleteRequestFormWrapper = ({
                 force: values.force,
               },
             },
-
             onCompleted(_responseData, errors) {
               if (errors && errors.length > 0) {
-                reject(
-                  new Error(
-                    errors
-                      .map(({ fields, message }) =>
-                        fields?.length
-                          ? `${fields.join(" ")} ${message}`
-                          : message,
-                      )
-                      .join(". \n"),
-                  ),
-                );
-
+                reject(new Error(formatPayloadErrors(errors)));
                 return;
               }
-
               resolve();
             },
             updater(store, data) {
               const newRequestId = data?.createFileDeleteRequest?.result?.id;
               if (!newRequestId) return;
+
               const newRequest = store.get(newRequestId);
               const storedDevice = store.get(deviceId);
               if (!storedDevice || !newRequest) return;
@@ -204,7 +194,7 @@ const ManualFileDeleteRequestFormWrapper = ({
               const edges = connection.getLinkedRecords("edges") ?? [];
               const alreadyPresent = edges.some(
                 (edge) =>
-                  edge.getLinkedRecord("node")?.getDataID() === newRequestId,
+                  edge?.getLinkedRecord("node")?.getDataID() === newRequestId,
               );
               if (alreadyPresent) return;
 
@@ -216,7 +206,6 @@ const ManualFileDeleteRequestFormWrapper = ({
               );
               ConnectionHandler.insertEdgeBefore(connection, edge);
             },
-
             onError(error) {
               reject(error);
             },
@@ -257,7 +246,6 @@ const FilesDeleteTab = ({
   isOnline = false,
 }: FilesDeleteTabProps) => {
   const intl = useIntl();
-
   const { deviceId = "" } = useParams();
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
@@ -278,7 +266,10 @@ const FilesDeleteTab = ({
   );
 
   const fileDeleteRequests = useMemo(
-    () => data.fileDeleteRequests?.edges?.map((edge) => edge.node) ?? [],
+    () =>
+      data.fileDeleteRequests?.edges
+        ?.map((edge) => edge?.node)
+        .filter(Boolean) ?? [],
     [data.fileDeleteRequests],
   );
 
@@ -345,6 +336,7 @@ const FilesDeleteTab = ({
       </div>
 
       <hr />
+
       <div className="mt-4">
         <h5>
           <FormattedMessage

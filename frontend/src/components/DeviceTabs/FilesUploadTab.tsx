@@ -26,7 +26,7 @@ import React, {
   useState,
 } from "react";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
-import { defineMessages, FormattedMessage, useIntl } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
   ConnectionHandler,
@@ -70,15 +70,9 @@ import { prepareUploadFile } from "@/lib/files";
 const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
   fragment FilesUploadTab_fileDownloadRequests on Device
   @refetchable(queryName: "FilesUploadTab_PaginationQuery") {
-    id
     fileTransferCapabilities {
       unixPermissions
       serverToDevice {
-        storage
-        streaming
-        filesystem
-      }
-      deviceToServer {
         storage
         streaming
         filesystem
@@ -89,7 +83,6 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
       edges {
         node {
           id
-          url
           fileName
           requestName
           status
@@ -101,10 +94,6 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
           pathOnDevice
           progressTracked
           ttlSeconds
-          digest
-          fileMode
-          userId
-          groupId
           uncompressedFileSizeBytes
           campaignTarget {
             campaign {
@@ -148,19 +137,11 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         pathOnDevice
         progressTracked
         ttlSeconds
-        digest
-        fileMode
-        userId
-        groupId
         uncompressedFileSizeBytes
       }
     }
   }
 `;
-
-type FileDownloadRequest = NonNullable<
-  FilesUploadTab_createManualFileDownloadRequest_Mutation$data["createManualFileDownloadRequest"]
->["result"];
 
 const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
   mutation FilesUploadTab_createManagedFileDownloadRequest_Mutation(
@@ -181,10 +162,6 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         pathOnDevice
         progressTracked
         ttlSeconds
-        digest
-        fileMode
-        userId
-        groupId
         uncompressedFileSizeBytes
       }
     }
@@ -208,27 +185,39 @@ const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
   }
 `;
 
-class APIValidationError extends Error {
-  constructor(public errors: PayloadError[]) {
-    super("API Validation Error");
-  }
-}
+type FileDownloadRequest = NonNullable<
+  FilesUploadTab_createManualFileDownloadRequest_Mutation$data["createManualFileDownloadRequest"]
+>["result"];
 
 type DestinationTypeOption = {
   value: FileDestinationType;
   label: string;
 };
 
-const messages = defineMessages({
-  archiveError: {
-    id: "components.DeviceTabs.FilesUploadTab.archivationErrorFeedback",
-    defaultMessage: "Could not process files locally. Please try again.",
-  },
-  uploadError: {
-    id: "components.DeviceTabs.FilesUploadTab.uploadErrorFeedback",
-    defaultMessage: "Upload failed. Please check your connection.",
-  },
-});
+class APIValidationError extends Error {
+  constructor(public errors: PayloadError[]) {
+    super("API Validation Error");
+  }
+}
+
+const ARCHIVE_EXTENSIONS = new Set(["tar", "gz", "lz4", "tar.gz", "tar.lz4"]);
+
+const formatPayloadErrors = (errors: readonly PayloadError[]): string => {
+  return errors
+    .map(({ fields, message }) =>
+      fields?.length ? `${fields.join(", ")}: ${message}` : message,
+    )
+    .join(". ");
+};
+
+const normalizeEncodings = (
+  encodings: readonly (string | null)[] | null | undefined,
+): string[] => {
+  if (!encodings) return [];
+  return encodings
+    .map((e) => e?.trim())
+    .filter((e): e is string => e != null && e.length > 0);
+};
 
 type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
@@ -277,12 +266,10 @@ const ManualFileDownloadRequestFormWrapper = ({
         createFileDownloadRequest({
           variables: { input },
           onCompleted: (data, errors) => {
-            if (errors && errors.length > 0) {
+            if (errors?.length) {
               return reject(new APIValidationError(errors));
             }
-
             const result = data?.createManualFileDownloadRequest?.result;
-
             if (result) {
               resolve(result);
             } else {
@@ -355,27 +342,21 @@ const ManualFileDownloadRequestFormWrapper = ({
         setIsUploading(false);
       } catch (err) {
         setIsUploading(false);
-
         if (err instanceof APIValidationError) {
-          const message = err.errors
-            .map(({ fields, message }) =>
-              fields?.length ? `${fields.join(", ")}: ${message}` : message,
-            )
-            .join(". ");
-          setErrorFeedback(message);
+          setErrorFeedback(formatPayloadErrors(err.errors));
         } else {
-          setErrorFeedback(<FormattedMessage {...messages.uploadError} />);
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.DeviceTabs.FilesUploadTab.uploadErrorFeedback"
+              defaultMessage="Upload failed. Please check your connection."
+            />,
+          );
         }
       }
     },
-    [
-      deviceId,
-      commitDownloadRequest,
-      setIsUploading,
-      setErrorFeedback,
-      isOnline,
-    ],
+    [deviceId, commitDownloadRequest, setErrorFeedback, isOnline],
   );
+
   return (
     <ManualFileDownloadRequestForm
       isLoading={isUploading}
@@ -462,12 +443,7 @@ const ManualFileDownloadRequestFromRepositoryFormWrapper = ({
         onCompleted: (_data, errors) => {
           setIsUploading(false);
           if (errors?.length) {
-            const message = errors
-              .map(({ fields, message }) =>
-                fields?.length ? `${fields.join(", ")}: ${message}` : message,
-              )
-              .join(". ");
-            setErrorFeedback(message);
+            setErrorFeedback(formatPayloadErrors(errors));
           }
         },
         onError: () => {
@@ -556,7 +532,10 @@ const FilesUploadTab = ({
   );
 
   const fileDownloadRequests = useMemo(
-    () => data.fileDownloadRequests?.edges?.map((edge) => edge.node) ?? [],
+    () =>
+      data.fileDownloadRequests?.edges
+        ?.map((edge) => edge?.node)
+        .filter(Boolean) ?? [],
     [data.fileDownloadRequests],
   );
 
@@ -624,19 +603,9 @@ const FilesUploadTab = ({
     Record<FileDestinationType, string[]>
   >(() => {
     const capabilities = data.fileTransferCapabilities?.serverToDevice;
-
     if (!capabilities) {
       return { STORAGE: [], STREAMING: [], FILESYSTEM: [] };
     }
-
-    const normalizeEncodings = (
-      encodings: readonly (string | null)[] | null,
-    ) => {
-      if (!encodings) return [];
-      return encodings
-        .map((e) => e?.trim())
-        .filter((e): e is string => e != null && e.length > 0);
-    };
 
     return {
       STORAGE: normalizeEncodings(capabilities.storage),
@@ -645,22 +614,20 @@ const FilesUploadTab = ({
     };
   }, [data.fileTransferCapabilities?.serverToDevice]);
 
-  const allowArchiveUpload = useMemo(
-    () =>
-      Object.values(supportedEncodingsByDestination).some((encodings) =>
-        encodings.some((encoding) => {
-          const normalizedEncoding = encoding.trim().toLowerCase();
-          return (
-            normalizedEncoding === "tar" ||
-            normalizedEncoding === "tar.gz" ||
-            normalizedEncoding === "tar.lz4"
-          );
-        }),
-      ),
-    [supportedEncodingsByDestination],
-  );
+  const allowArchiveUpload = useMemo(() => {
+    for (const key in supportedEncodingsByDestination) {
+      const encodings =
+        supportedEncodingsByDestination[key as FileDestinationType];
+      for (const encoding of encodings) {
+        if (ARCHIVE_EXTENSIONS.has(encoding.toLowerCase())) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }, [supportedEncodingsByDestination]);
 
-  if (destinationTypeOptions?.length === 0) {
+  if (destinationTypeOptions.length === 0) {
     return null;
   }
 

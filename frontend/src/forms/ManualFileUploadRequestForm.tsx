@@ -123,12 +123,7 @@ const ManualFileUploadRequestForm = ({
 
   const onFormSubmit = handleSubmit((data) => {
     onSubmit(data);
-    reset({
-      sourceType: data.sourceType,
-      source: data.source,
-      encoding: data.encoding ?? "",
-      progressTracked: data.progressTracked,
-    });
+    reset();
   });
 
   return (
@@ -328,7 +323,6 @@ const ManualFileUploadRequestForm = ({
   );
 };
 
-export type { SourceTypeOption };
-export type { StorageSourceOption };
+export type { SourceTypeOption, StorageSourceOption };
 
 export default ManualFileUploadRequestForm;

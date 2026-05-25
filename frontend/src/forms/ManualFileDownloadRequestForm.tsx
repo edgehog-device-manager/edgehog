@@ -19,7 +19,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import Select from "react-select";
@@ -76,6 +76,14 @@ type ManualFileDownloadRequestFormProps = {
   destinationTypeOptions: DestinationTypeOption[];
 };
 
+const ARCHIVE_ENCODING_VALUES = new Set([
+  "tar",
+  "gz",
+  "lz4",
+  "tar.gz",
+  "tar.lz4",
+]);
+
 const ManualFileDownloadRequestForm = ({
   className,
   isLoading,
@@ -121,33 +129,12 @@ const ManualFileDownloadRequestForm = ({
 
   const hasMultipleFilesSelected = selectedFiles.length > 1;
 
-  const archiveEncodingValues = new Set(["tar", "tar.gz", "tar.lz4"]);
-
   const selectedDestinationType = useWatch({
     control,
     name: "destinationType",
   }) as FileDestinationType | undefined;
 
   const effectiveDestinationType = selectedDestinationType ?? "STORAGE";
-
-  const supportedEncodingsForDestination =
-    supportedEncodingsByDestination[effectiveDestinationType] ?? [];
-
-  const supportedArchiveEncodings = supportedEncodingsForDestination.filter(
-    (encoding) => archiveEncodingValues.has(encoding.trim().toLowerCase()),
-  );
-
-  const supportedArchiveEncodingsNormalized = new Set(
-    supportedArchiveEncodings.map((encoding) => encoding.trim().toLowerCase()),
-  );
-
-  const firstSupportedArchiveEncoding = supportedArchiveEncodings[0] ?? "";
-
-  const availableEncodings = hasMultipleFilesSelected
-    ? supportedArchiveEncodings
-    : supportedEncodingsForDestination.filter(
-        (encoding) => encoding.trim().length > 0,
-      );
 
   const noneEncodingLabel = hasMultipleFilesSelected
     ? intl.formatMessage({
@@ -160,17 +147,60 @@ const ManualFileDownloadRequestForm = ({
         defaultMessage: "None",
       });
 
-  const encodingOptions: EncodingOption[] = [
-    {
-      value: "",
-      label: noneEncodingLabel,
-      isDisabled: hasMultipleFilesSelected,
-    },
-    ...availableEncodings.map((encoding) => ({
-      value: encoding,
-      label: encoding,
-    })),
-  ];
+  const {
+    encodingOptions,
+    encodingOptionsMap,
+    supportedArchiveEncodingsNormalized,
+    firstSupportedArchiveEncoding,
+  } = useMemo(() => {
+    const encodingsForDestination =
+      supportedEncodingsByDestination[effectiveDestinationType] ?? [];
+
+    const archiveEncodings = encodingsForDestination.filter((encoding) =>
+      ARCHIVE_ENCODING_VALUES.has(encoding.trim().toLowerCase()),
+    );
+
+    const archiveEncodingsNormalized = new Set(
+      archiveEncodings.map((encoding) => encoding.trim().toLowerCase()),
+    );
+
+    const availableEncodings = hasMultipleFilesSelected
+      ? archiveEncodings
+      : encodingsForDestination.filter(
+          (encoding) => encoding.trim().length > 0,
+        );
+
+    const encodingOptions: EncodingOption[] = [
+      {
+        value: "",
+        label: noneEncodingLabel,
+        isDisabled: hasMultipleFilesSelected,
+      },
+      ...availableEncodings.map((encoding) => ({
+        value: encoding,
+        label: encoding,
+      })),
+    ];
+
+    return {
+      encodingOptions: encodingOptions,
+      encodingOptionsMap: new Map(
+        encodingOptions.map((opt) => [opt.value, opt]),
+      ),
+      supportedArchiveEncodingsNormalized: archiveEncodingsNormalized,
+      firstSupportedArchiveEncoding: archiveEncodings[0] ?? "",
+    };
+  }, [
+    supportedEncodingsByDestination,
+    effectiveDestinationType,
+    hasMultipleFilesSelected,
+    noneEncodingLabel,
+  ]);
+
+  const destinationOptionsMap = useMemo(
+    () => new Map(destinationTypeOptions.map((opt) => [opt.value, opt])),
+    [destinationTypeOptions],
+  );
 
   const selectedEncoding = useWatch({
     control,
@@ -187,7 +217,7 @@ const ManualFileDownloadRequestForm = ({
     setValue("file", dt.files as any, { shouldValidate: true });
 
     const hasMultipleFiles = files.length > 1;
-    const selectedEncoding = getValues("encoding")?.trim().toLowerCase() ?? "";
+    const currentEncoding = getValues("encoding")?.trim().toLowerCase() ?? "";
 
     if (files.length === 0) {
       setValue("customFileName", "");
@@ -205,7 +235,7 @@ const ManualFileDownloadRequestForm = ({
     setValue("customFileName", generatedName, { shouldValidate: true });
 
     if (hasMultipleFiles) {
-      if (!supportedArchiveEncodingsNormalized.has(selectedEncoding)) {
+      if (!supportedArchiveEncodingsNormalized.has(currentEncoding)) {
         if (firstSupportedArchiveEncoding) {
           setValue("encoding", firstSupportedArchiveEncoding, {
             shouldValidate: true,
@@ -218,7 +248,6 @@ const ManualFileDownloadRequestForm = ({
           });
         }
       }
-
       return;
     }
 
@@ -227,14 +256,13 @@ const ManualFileDownloadRequestForm = ({
 
   const onSubmit = handleSubmit((data) => {
     if (selectedFiles.length > 1) {
-      const selectedEncoding = data.encoding?.trim().toLowerCase() ?? "";
+      const encodingToValidate = data.encoding?.trim().toLowerCase() ?? "";
 
-      if (!supportedArchiveEncodingsNormalized.has(selectedEncoding)) {
+      if (!supportedArchiveEncodingsNormalized.has(encodingToValidate)) {
         setError("encoding", {
           type: "manual",
           message: "validation.required",
         });
-
         return;
       }
     }
@@ -261,13 +289,20 @@ const ManualFileDownloadRequestForm = ({
   const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
   const hasFiles = selectedFiles.length > 0;
   const isArchiveSelected = isArchiveEncoding(selectedEncodingValue);
+  const selectedFileExtension = hasFiles
+    ? getFileExtension(selectedFiles[0].name)
+    : "";
   const needsArchive =
     selectedFiles.length > 1 || hasRelativePaths || isArchiveSelected;
+  const cleanEncoding = selectedEncodingValue.toLowerCase();
+
   const fileExtension = needsArchive
-    ? selectedArchiveExtension || ".tar"
-    : hasFiles
-      ? getFileExtension(selectedFiles[0].name)
-      : "";
+    ? selectedFiles.length === 1 &&
+      !hasRelativePaths &&
+      (cleanEncoding === "gz" || cleanEncoding === "lz4")
+      ? `${selectedFileExtension}${selectedArchiveExtension || ".tar"}`
+      : selectedArchiveExtension || ".tar"
+    : selectedFileExtension;
 
   const showArchiveName = hasFiles;
 
@@ -371,7 +406,7 @@ const ManualFileDownloadRequestForm = ({
           name="encoding"
           render={({ field }) => {
             const selectedOption =
-              encodingOptions.find((opt) => opt.value === field.value) ??
+              encodingOptionsMap.get(field.value ?? "") ??
               encodingOptions[0] ??
               null;
 
@@ -410,18 +445,16 @@ const ManualFileDownloadRequestForm = ({
       >
         <Controller
           control={control}
-          name={`destinationType`}
+          name="destinationType"
           render={({ field }) => {
             const selectedOption =
-              destinationTypeOptions.find((opt) => opt.value === field.value) ||
-              null;
+              destinationOptionsMap.get(field.value ?? "") ?? null;
 
             return (
               <Select
                 value={selectedOption}
                 onChange={(option) => {
                   field.onChange(option ? option.value : null);
-                  // Reset encoding when destination type changes
                   setValue("encoding", "");
                 }}
                 options={destinationTypeOptions}
@@ -472,7 +505,7 @@ const ManualFileDownloadRequestForm = ({
       >
         <Form.Control
           type="text"
-          {...register(`ttlSeconds`, {
+          {...register("ttlSeconds", {
             setValueAs: (v) => (v === "" ? undefined : Number(v)),
           })}
           isInvalid={!!errors.ttlSeconds}
@@ -533,7 +566,7 @@ const ManualFileDownloadRequestForm = ({
             >
               <Form.Control
                 type="text"
-                {...register(`userId` as const, {
+                {...register("userId", {
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
                 isInvalid={!!errors.userId}
@@ -552,7 +585,7 @@ const ManualFileDownloadRequestForm = ({
             >
               <Form.Control
                 type="text"
-                {...register(`groupId` as const, {
+                {...register("groupId", {
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
                 isInvalid={!!errors.groupId}
@@ -571,7 +604,7 @@ const ManualFileDownloadRequestForm = ({
             >
               <Form.Control
                 type="text"
-                {...register(`fileMode` as const, {
+                {...register("fileMode", {
                   setValueAs: (v) => (v === "" ? undefined : Number(v)),
                 })}
                 isInvalid={!!errors.fileMode}

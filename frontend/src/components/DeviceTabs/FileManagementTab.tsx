@@ -19,26 +19,22 @@
  */
 
 import { useMemo, useState } from "react";
-import { graphql, useFragment } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 import Select from "react-select";
 
 import type { FileManagementTab_fileManagement$key } from "@/api/__generated__/FileManagementTab_fileManagement.graphql";
 
+import FilesDeleteTab from "@/components/DeviceTabs/FilesDeleteTab";
 import FilesDownloadTab from "@/components/DeviceTabs/FilesDownloadTab";
 import FilesUploadTab from "@/components/DeviceTabs/FilesUploadTab";
 import Form from "@/components/Form";
 import { Tab } from "@/components/Tabs";
-import FilesDeleteTab from "@/components/DeviceTabs/FilesDeleteTab";
-
-type FileManagementTabProps = {
-  deviceRef: FileManagementTab_fileManagement$key;
-};
 
 type FileManagementMode =
-  | "to-device-file"
-  | "to-device-repository"
-  | "from-device"
+  | "download-to-device-file"
+  | "download-to-device-repository"
+  | "upload-from-device"
   | "delete-from-device";
 
 type FileManagementModeOption = {
@@ -69,9 +65,19 @@ const FILE_MANAGEMENT_FRAGMENT = graphql`
   }
 `;
 
+type FileManagementTabProps = {
+  deviceRef: FileManagementTab_fileManagement$key;
+};
+
 const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const intl = useIntl();
   const data = useFragment(FILE_MANAGEMENT_FRAGMENT, deviceRef);
+
+  const isOnline = useMemo(() => data?.online ?? false, [data]);
+
+  const [selectedMode, setSelectedMode] = useState<FileManagementMode>(
+    "download-to-device-file",
+  );
 
   const supportsServerToDevice = Object.values(
     data.fileTransferCapabilities?.serverToDevice ?? {},
@@ -91,14 +97,14 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
     if (supportsServerToDevice) {
       options.push(
         {
-          value: "to-device-file",
+          value: "download-to-device-file",
           label: intl.formatMessage({
             id: "components.DeviceTabs.FileManagementTab.toDeviceDirect",
             defaultMessage: "Download to Device - Direct File",
           }),
         },
         {
-          value: "to-device-repository",
+          value: "download-to-device-repository",
           label: intl.formatMessage({
             id: "components.DeviceTabs.FileManagementTab.toDeviceRepository",
             defaultMessage: "Download to Device - Repository",
@@ -109,9 +115,9 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
 
     if (supportsDeviceToServer) {
       options.push({
-        value: "from-device",
+        value: "upload-from-device",
         label: intl.formatMessage({
-          id: "components.DeviceTabs.FileManagementTab.fromDevice",
+          id: "components.DeviceTabs.FileManagementTab.uploadFromDevice",
           defaultMessage: "Upload from Device",
         }),
       });
@@ -135,23 +141,48 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
     supportsDeleteFromDevice,
   ]);
 
-  const [selectedMode, setSelectedMode] =
-    useState<FileManagementMode>("to-device-file");
-
-  const fallbackMode = modeOptions[0]?.value ?? "to-device-file";
-
-  const effectiveMode = modeOptions.some((m) => m.value === selectedMode)
-    ? selectedMode
-    : fallbackMode;
-
-  const selectedModeOption =
-    modeOptions.find((option) => option.value === effectiveMode) ?? null;
-
-  const isOnline = useMemo(() => data?.online ?? false, [data]);
-
   if (modeOptions.length === 0) {
     return null;
   }
+
+  const isSelectedModeValid = modeOptions.some((m) => m.value === selectedMode);
+  const effectiveMode = isSelectedModeValid
+    ? selectedMode
+    : modeOptions[0].value;
+  const selectedModeOption = modeOptions.find(
+    (option) => option.value === effectiveMode,
+  );
+
+  const renderTabContent = () => {
+    switch (effectiveMode) {
+      case "download-to-device-file":
+        return (
+          <FilesUploadTab
+            deviceRef={data}
+            embedded
+            embeddedMode="file"
+            isOnline={isOnline}
+          />
+        );
+      case "download-to-device-repository":
+        return (
+          <FilesUploadTab
+            deviceRef={data}
+            embedded
+            embeddedMode="repository"
+            isOnline={isOnline}
+          />
+        );
+      case "upload-from-device":
+        return (
+          <FilesDownloadTab deviceRef={data} embedded isOnline={isOnline} />
+        );
+      case "delete-from-device":
+        return <FilesDeleteTab deviceRef={data} embedded isOnline={isOnline} />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <Tab eventKey="device-file-management-tab" title="File Management">
@@ -167,7 +198,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
             <Select<FileManagementModeOption, false>
               value={selectedModeOption}
               onChange={(option) => {
-                setSelectedMode(option?.value ?? fallbackMode);
+                if (option) setSelectedMode(option.value);
               }}
               options={modeOptions}
               isSearchable={false}
@@ -183,25 +214,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
         </div>
       )}
 
-      {effectiveMode === "from-device" ? (
-        <FilesDownloadTab deviceRef={data} embedded isOnline={isOnline} />
-      ) : effectiveMode === "delete-from-device" ? (
-        <FilesDeleteTab deviceRef={data} embedded isOnline={isOnline} />
-      ) : effectiveMode === "to-device-repository" ? (
-        <FilesUploadTab
-          deviceRef={data}
-          embedded
-          embeddedMode="repository"
-          isOnline={isOnline}
-        />
-      ) : (
-        <FilesUploadTab
-          deviceRef={data}
-          embedded
-          embeddedMode="file"
-          isOnline={isOnline}
-        />
-      )}
+      {renderTabContent()}
     </Tab>
   );
 };

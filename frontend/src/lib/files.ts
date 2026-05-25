@@ -165,16 +165,8 @@ const getBaseName = (filename: string): string => {
 };
 
 const getArchiveExtension = (encoding?: string | null): string => {
-  switch (encoding?.trim().toLowerCase()) {
-    case "tar.gz":
-      return ".tar.gz";
-    case "tar.lz4":
-      return ".tar.lz4";
-    case "tar":
-      return ".tar";
-    default:
-      return "";
-  }
+  const cleanEncoding = encoding?.trim().toLowerCase();
+  return cleanEncoding ? `.${cleanEncoding}` : "";
 };
 
 const isArchiveEncoding = (encoding?: string | null): boolean =>
@@ -206,12 +198,24 @@ const prepareUploadFile = async ({
 
   if (shouldArchive) {
     const tarBlob = await createTarArchive(files);
+    const originalExtension =
+      files.length === 1 ? getFileExtension(files[0].name) : "";
     const fallbackName =
       files.length > 1 || hasRelativePaths
         ? getDefaultArchiveName()
         : getBaseName(files[0].name);
     const baseName = customFileName?.trim() || fallbackName;
-    const suffix = archiveExtension.length > 0 ? archiveExtension : ".tar";
+    const normalizedEncoding = (encoding ?? "").trim().toLowerCase();
+    let suffix: string;
+    if (archiveExtension.length > 0) {
+      if (normalizedEncoding === "gz" || normalizedEncoding === "lz4") {
+        suffix = `${originalExtension}${archiveExtension}`;
+      } else {
+        suffix = archiveExtension;
+      }
+    } else {
+      suffix = ".tar";
+    }
     const fileName = baseName.endsWith(suffix)
       ? baseName
       : `${baseName}${suffix}`;

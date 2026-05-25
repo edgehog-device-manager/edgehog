@@ -747,14 +747,14 @@
   "components.DeviceTabs.FileManagementTab.fileManagementLabel": {
     "defaultMessage": "File Management Mode"
   },
-  "components.DeviceTabs.FileManagementTab.fromDevice": {
-    "defaultMessage": "Upload from Device"
-  },
   "components.DeviceTabs.FileManagementTab.toDeviceDirect": {
     "defaultMessage": "Download to Device - Direct File"
   },
   "components.DeviceTabs.FileManagementTab.toDeviceRepository": {
     "defaultMessage": "Download to Device - Repository"
+  },
+  "components.DeviceTabs.FileManagementTab.uploadFromDevice": {
+    "defaultMessage": "Upload from Device"
   },
   "components.DeviceTabs.FilesDeleteTab.deleteSource": {
     "defaultMessage": "Delete Source"
@@ -791,9 +791,6 @@
   },
   "components.DeviceTabs.FilesDownloadTab.uploadSource": {
     "defaultMessage": "Upload Source"
-  },
-  "components.DeviceTabs.FilesUploadTab.archivationErrorFeedback": {
-    "defaultMessage": "Could not process files locally. Please try again."
   },
   "components.DeviceTabs.FilesUploadTab.creationErrorFeedback": {
     "defaultMessage": "Could not create file download request, please try again."
@@ -1143,9 +1140,6 @@
   },
   "components.FileUploadRequestsTable.actions.notAvailableYet": {
     "defaultMessage": "Not available yet"
-  },
-  "components.FileUploadRequestsTable.downloadError": {
-    "defaultMessage": "Failed to download file"
   },
   "components.FileUploadRequestsTable.encoding": {
     "defaultMessage": "Encoding"

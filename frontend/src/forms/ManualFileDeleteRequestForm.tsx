@@ -19,6 +19,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import Select from "react-select";
@@ -72,6 +73,11 @@ const ManualFileDeleteRequestForm = ({
     },
   });
 
+  const deleteOptionsMap = useMemo(
+    () => new Map(deleteOptions.map((opt) => [opt.value, opt])),
+    [deleteOptions],
+  );
+
   const submitHandler = handleSubmit((data) => {
     onSubmit(data);
     reset();
@@ -92,8 +98,7 @@ const ManualFileDeleteRequestForm = ({
           control={control}
           name="fileDownloadRequestId"
           render={({ field, fieldState }) => {
-            const selectedOption =
-              deleteOptions.find((opt) => opt.value === field.value) || null;
+            const selectedOption = deleteOptionsMap.get(field.value) ?? null;
 
             return (
               <Select

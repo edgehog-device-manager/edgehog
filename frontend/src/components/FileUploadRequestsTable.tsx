@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, type ReactNode } from "react";
+import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 
 import type { FilesDownloadTab_fileUploadRequests$data } from "@/api/__generated__/FilesDownloadTab_fileUploadRequests.graphql";
@@ -35,9 +35,7 @@ type FileUploadRequestNode = NonNullable<
 >[number]["node"];
 
 const columnHelper = createColumnHelper<FileUploadRequestNode>();
-const getColumnsDefinition = (
-  setErrorFeedback: (feedback: ReactNode) => void,
-) => [
+const getColumnsDefinition = () => [
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
@@ -179,34 +177,17 @@ const getColumnsDefinition = (
       return (
         <Button
           className="btn p-0 border-0 bg-transparent ms-4"
-          onClick={async () => {
-            try {
-              const resp = await fetch(downloadUrl);
+          onClick={() => {
+            const anchor = document.createElement("a");
 
-              if (!resp.ok) {
-                throw new Error(`Network response was not ok: ${resp.status}`);
-              }
+            anchor.href = downloadUrl;
+            anchor.download = row.original.source || "file";
+            anchor.target = "_blank";
+            anchor.rel = "noreferrer";
 
-              const blob = await resp.blob();
-              const objectUrl = URL.createObjectURL(blob);
-              const anchor = document.createElement("a");
-
-              anchor.href = objectUrl;
-              anchor.download = row.original.source || "file";
-
-              document.body.appendChild(anchor);
-              anchor.click();
-              anchor.remove();
-
-              URL.revokeObjectURL(objectUrl);
-            } catch {
-              setErrorFeedback(
-                <FormattedMessage
-                  id="components.FileUploadRequestsTable.downloadError"
-                  defaultMessage="Failed to download file"
-                />,
-              );
-            }
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
           }}
         >
           <Icon className="text-primary" icon={"arrowDown"} />
@@ -218,17 +199,12 @@ const getColumnsDefinition = (
 
 type FileUploadRequestsTableProps = {
   requests: FileUploadRequestNode[];
-  setErrorFeedback: (feedback: ReactNode) => void;
 };
 
 const FileUploadRequestsTable = ({
   requests,
-  setErrorFeedback,
 }: FileUploadRequestsTableProps) => {
-  const columns = useMemo(
-    () => getColumnsDefinition(setErrorFeedback),
-    [setErrorFeedback],
-  );
+  const columns = useMemo(() => getColumnsDefinition(), []);
 
   if (requests.length === 0) {
     return (
