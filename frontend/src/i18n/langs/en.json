@@ -2030,8 +2030,20 @@
   "forms.CreateNetwork.submitButton": {
     "defaultMessage": "Create"
   },
+  "forms.CreateRelease.addDependenciesButton": {
+    "defaultMessage": "Add Dependencies"
+  },
+  "forms.CreateRelease.containerDependenciesLabel": {
+    "defaultMessage": "Container Dependencies"
+  },
+  "forms.CreateRelease.containerLabel": {
+    "defaultMessage": "Container"
+  },
   "forms.CreateRelease.containersLabel": {
     "defaultMessage": "Containers"
+  },
+  "forms.CreateRelease.dependsOnLabel": {
+    "defaultMessage": "Depends on"
   },
   "forms.CreateRelease.submitButton": {
     "defaultMessage": "Create"
@@ -2874,8 +2886,14 @@
   "forms.validation.binds.format": {
     "defaultMessage": "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'."
   },
+  "forms.validation.circularDependency": {
+    "defaultMessage": "Circular dependency detected."
+  },
   "forms.validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
+  },
+  "forms.validation.duplicateContainer": {
+    "defaultMessage": "Duplicate container in dependencies."
   },
   "forms.validation.extraHosts.format": {
     "defaultMessage": "Invalid extra host format. Use 'hostname:IP' or 'hostname:host-gateway'."
@@ -2918,6 +2936,9 @@
   },
   "forms.validation.required": {
     "defaultMessage": "Required."
+  },
+  "forms.validation.selfDependency": {
+    "defaultMessage": "Container cannot depend on itself."
   },
   "forms.validation.storage.format": {
     "defaultMessage": "Invalid storage option format. Use 'key=value'."

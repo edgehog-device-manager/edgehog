@@ -17,6 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
+import { MultiValue } from "react-select";
 
 import MultiSelect from "@/components/MultiSelect";
 import type { Option } from "@/components/options/hooks";
@@ -29,30 +30,47 @@ type GenericMultiSelectProps<T extends FieldValues> = {
   control: Control<T>;
   name: Path<T>;
   options: Option[];
+  transformValue?: (selected: MultiValue<Option>) => unknown;
 };
 
 const MultiSelectFormField = <T extends FieldValues>({
   control,
   name,
   options,
+  transformValue,
 }: GenericMultiSelectProps<T>) => {
   return (
     <Controller
       name={name}
       control={control}
       render={({ field, fieldState }) => {
-        const value = (field.value ?? []) as MultiSelectValue[];
+        const value = field.value ?? [];
 
-        const mappedValue = value.map((v) => {
-          const found = options.find((o) => o.value === v.id);
+        const mappedValue = value.map((v: MultiSelectValue | string) => {
+          const id = typeof v === "string" ? v : v.id;
+
+          const found = options.find((o) => o.value === id);
 
           return (
             found ?? {
-              value: v.id,
-              label: v.id,
+              value: id,
+              label: id,
             }
           );
         });
+
+        const handleChange = (selected: MultiValue<Option>) => {
+          if (transformValue) {
+            field.onChange(transformValue(selected));
+            return;
+          }
+
+          field.onChange(
+            selected.map((s) => ({
+              id: s.value,
+            })),
+          );
+        };
 
         return (
           <MultiSelect
@@ -60,13 +78,7 @@ const MultiSelectFormField = <T extends FieldValues>({
             value={mappedValue}
             options={options}
             onBlur={field.onBlur}
-            onChange={(selected) => {
-              field.onChange(
-                selected.map((s) => ({
-                  id: s.value,
-                })),
-              );
-            }}
+            onChange={handleChange}
             getOptionValue={(o) => o.value}
             getOptionLabel={(o) => o.label}
           />

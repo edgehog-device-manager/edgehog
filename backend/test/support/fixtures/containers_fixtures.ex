@@ -261,11 +261,20 @@ defmodule Edgehog.ContainersFixtures do
     {container_params, opts} = Keyword.pop(opts, :container_params, [])
     container_params = Keyword.put(container_params, :tenant, tenant)
 
+    {container_ids, opts} = Keyword.pop(opts, :container_ids, nil)
+
     containers =
-      Enum.map(1..containers//1, fn _ ->
-        container = container_fixture(container_params)
-        %{id: container.id}
-      end)
+      if container_ids do
+        Enum.map(container_ids, fn
+          %{id: id} -> %{id: id}
+          id -> %{id: id}
+        end)
+      else
+        Enum.map(1..containers//1, fn _ ->
+          container = container_fixture(container_params)
+          %{id: container.id}
+        end)
+      end
 
     # number of system models to associate with the release
     {system_models, opts} = Keyword.pop(opts, :system_models, 0)
@@ -292,6 +301,7 @@ defmodule Edgehog.ContainersFixtures do
       Enum.into(opts, %{
         application_id: application_id,
         containers: containers,
+        container_dependencies: Keyword.get(opts, :container_dependencies, []),
         version: version,
         required_system_models: required_system_models ++ system_models
       })

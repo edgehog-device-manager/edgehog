@@ -43,11 +43,12 @@ const SelectFormField = <T extends FieldValues>({
     <Controller
       control={control}
       name={name}
-      render={({ field }) => {
+      render={({ field, fieldState }) => {
         const selected = options.find((o) => o.value === field.value) ?? null;
 
         return (
           <Select
+            className={fieldState.invalid ? "is-invalid" : ""}
             value={selected}
             options={availableOptions}
             isClearable={isClearable}

@@ -39,7 +39,9 @@ defmodule Edgehog.Containers.Release do
       end
     end
 
-    paginate_relationship_with containers: :relay, deployments: :relay
+    paginate_relationship_with containers: :relay,
+                               deployments: :relay,
+                               container_dependencies: :relay
   end
 
   actions do
@@ -51,6 +53,8 @@ defmodule Edgehog.Containers.Release do
       accept [:application_id, :version]
 
       argument :containers, {:array, :map}
+      argument :container_dependencies, {:array, :map}
+
       argument :required_system_models, {:array, :map}
 
       change manage_relationship(:containers,
@@ -60,6 +64,8 @@ defmodule Edgehog.Containers.Release do
              )
 
       change manage_relationship(:required_system_models, :system_models, type: :append)
+
+      change manage_relationship(:container_dependencies, type: :create)
     end
 
     destroy :destroy do
@@ -105,6 +111,18 @@ defmodule Edgehog.Containers.Release do
 
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ReleaseContainers
+
+      source_attribute_on_join_resource :release_id
+      destination_attribute_on_join_resource :container_id
+
+      public? true
+    end
+
+    has_many :container_dependencies,
+             Edgehog.Containers.ReleaseContainerDependencies do
+      source_attribute :id
+      destination_attribute :release_id
+
       public? true
     end
 
