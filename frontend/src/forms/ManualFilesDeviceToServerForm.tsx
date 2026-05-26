@@ -59,6 +59,7 @@ type ManualFilesDeviceToServerFormProps = {
   supportedEncodingsBySourceType: Record<FileSourceType, string[]>;
   sourceTypeOptions: SourceTypeOption[];
   storageSourceOptions: StorageSourceOption[];
+  onLoadMoreStorageOptions?: () => void;
 };
 
 const ManualFilesDeviceToServerForm = ({
@@ -68,6 +69,7 @@ const ManualFilesDeviceToServerForm = ({
   supportedEncodingsBySourceType,
   sourceTypeOptions,
   storageSourceOptions,
+  onLoadMoreStorageOptions,
 }: ManualFilesDeviceToServerFormProps) => {
   const intl = useIntl();
 
@@ -194,6 +196,7 @@ const ManualFilesDeviceToServerForm = ({
                         .toLowerCase()
                         .includes(inputValue.toLowerCase());
                     }}
+                    onMenuScrollToBottom={onLoadMoreStorageOptions}
                     placeholder={sourcePlaceholderByType[effectiveSourceType]}
                     noOptionsMessage={({ inputValue }) =>
                       inputValue

@@ -201,6 +201,17 @@ class APIValidationError extends Error {
 }
 
 const ARCHIVE_EXTENSIONS = new Set(["tar", "gz", "lz4", "tar.gz", "tar.lz4"]);
+const STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS = [
+  "FilesDeviceToServerTab_storageFileDownloadRequests",
+  "FilesDeleteTab_storageFileDownloadRequests",
+] as const;
+const STORAGE_FILE_DOWNLOAD_REQUEST_FILTERS = {
+  filter: {
+    destinationType: { eq: "STORAGE" },
+    status: { eq: "COMPLETED" },
+    deleted: { eq: false },
+  },
+} as const;
 
 const formatPayloadErrors = (errors: readonly PayloadError[]): string => {
   return errors
@@ -299,6 +310,35 @@ const ManualFileDownloadRequestFormWrapper = ({
                 "FileDownloadRequestEdge",
               );
               ConnectionHandler.insertEdgeBefore(connection, edge);
+            }
+
+            const destinationType = newRequest.getValue("destinationType");
+            if (destinationType === "STORAGE") {
+              const newRequestId = newRequest.getDataID();
+
+              for (const connectionKey of STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS) {
+                const storageConnection = ConnectionHandler.getConnection(
+                  storedDevice,
+                  connectionKey,
+                  STORAGE_FILE_DOWNLOAD_REQUEST_FILTERS,
+                );
+                if (!storageConnection) continue;
+
+                const edges = storageConnection.getLinkedRecords("edges") ?? [];
+                const alreadyPresent = edges.some(
+                  (edge) =>
+                    edge?.getLinkedRecord("node")?.getDataID() === newRequestId,
+                );
+                if (alreadyPresent) continue;
+
+                const edge = ConnectionHandler.createEdge(
+                  store,
+                  storageConnection,
+                  newRequest,
+                  "FileDownloadRequestEdge",
+                );
+                ConnectionHandler.insertEdgeBefore(storageConnection, edge);
+              }
             }
           },
         });
@@ -477,6 +517,35 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
               "FileDownloadRequestEdge",
             );
             ConnectionHandler.insertEdgeBefore(connection, edge);
+          }
+
+          const destinationType = newRequest.getValue("destinationType");
+          if (destinationType === "STORAGE") {
+            const newRequestId = newRequest.getDataID();
+
+            for (const connectionKey of STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS) {
+              const storageConnection = ConnectionHandler.getConnection(
+                storedDevice,
+                connectionKey,
+                STORAGE_FILE_DOWNLOAD_REQUEST_FILTERS,
+              );
+              if (!storageConnection) continue;
+
+              const edges = storageConnection.getLinkedRecords("edges") ?? [];
+              const alreadyPresent = edges.some(
+                (edge) =>
+                  edge?.getLinkedRecord("node")?.getDataID() === newRequestId,
+              );
+              if (alreadyPresent) continue;
+
+              const edge = ConnectionHandler.createEdge(
+                store,
+                storageConnection,
+                newRequest,
+                "FileDownloadRequestEdge",
+              );
+              ConnectionHandler.insertEdgeBefore(storageConnection, edge);
+            }
           }
         },
       });

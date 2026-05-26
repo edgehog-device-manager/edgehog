@@ -49,6 +49,7 @@ type ManualFileDeleteRequestFormProps = {
   isLoading: boolean;
   onSubmit: (values: ManualFileDeleteRequestFormValues) => void;
   deleteOptions: StorageSourceOption[];
+  onLoadMoreDeleteOptions?: () => void;
 };
 
 const ManualFileDeleteRequestForm = ({
@@ -56,6 +57,7 @@ const ManualFileDeleteRequestForm = ({
   isLoading,
   onSubmit,
   deleteOptions,
+  onLoadMoreDeleteOptions,
 }: ManualFileDeleteRequestFormProps) => {
   const intl = useIntl();
   const {
@@ -105,6 +107,7 @@ const ManualFileDeleteRequestForm = ({
                 value={selectedOption}
                 onChange={(option) => field.onChange(option?.value ?? "")}
                 options={deleteOptions}
+                onMenuScrollToBottom={onLoadMoreDeleteOptions}
                 placeholder={intl.formatMessage({
                   id: "forms.ManualFileDeleteRequestForm.filePlaceholder",
                   defaultMessage: "Select a file to delete...",

@@ -43,7 +43,11 @@ type FileManagementModeOption = {
 };
 
 const FILE_MANAGEMENT_FRAGMENT = graphql`
-  fragment FileManagementTab_fileManagement on Device {
+  fragment FileManagementTab_fileManagement on Device
+  @argumentDefinitions(
+    storageFirst: { type: "Int" }
+    storageAfter: { type: "String" }
+  ) {
     online
     capabilities
     fileTransferCapabilities {
@@ -61,7 +65,11 @@ const FILE_MANAGEMENT_FRAGMENT = graphql`
     }
     ...FilesServerToDeviceTab_fileDownloadRequests
     ...FilesDeviceToServerTab_fileUploadRequests
+    ...FilesDeviceToServerTab_storageFileDownloadRequests
+      @arguments(first: $storageFirst, after: $storageAfter)
     ...FilesDeleteTab_fileManagement
+    ...FilesDeleteTab_storageFileDownloadRequests
+      @arguments(first: $storageFirst, after: $storageAfter)
   }
 `;
 

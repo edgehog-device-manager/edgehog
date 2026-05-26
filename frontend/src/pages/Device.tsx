@@ -136,6 +136,7 @@ const GET_DEVICE_QUERY = graphql`
       ...CellularConnectionTab_cellularConnection
       ...NetworkInterfacesTab_networkInterfaces
       ...FileManagementTab_fileManagement
+        @arguments(storageFirst: $first, storageAfter: $after)
       ...Device_connectionStatus
     }
     ...ApplicationsTab_deployedApplications

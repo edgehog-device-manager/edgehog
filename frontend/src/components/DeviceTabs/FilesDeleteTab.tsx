@@ -29,11 +29,14 @@ import {
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 import { PayloadError } from "relay-runtime";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 import type { FilesDeleteTab_PaginationQuery } from "@/api/__generated__/FilesDeleteTab_PaginationQuery.graphql";
 import type { FilesDeleteTab_createFileDeleteRequest_Mutation } from "@/api/__generated__/FilesDeleteTab_createFileDeleteRequest_Mutation.graphql";
 import type { FilesDeleteTab_fileDeleteRequest_Subscription } from "@/api/__generated__/FilesDeleteTab_fileDeleteRequest_Subscription.graphql";
 import type { FilesDeleteTab_fileManagement$key } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
+import type { FilesDeleteTab_storageFileDownloadRequests_PaginationQuery } from "@/api/__generated__/FilesDeleteTab_storageFileDownloadRequests_PaginationQuery.graphql";
+import type { FilesDeleteTab_storageFileDownloadRequests$key } from "@/api/__generated__/FilesDeleteTab_storageFileDownloadRequests.graphql";
 
 import Alert from "@/components/Alert";
 import FileDeleteRequestsTable from "@/components/FileDeleteRequestsTable";
@@ -64,13 +67,24 @@ const DEVICE_FILES_FRAGMENT = graphql`
         }
       }
     }
+  }
+`;
+
+const DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
+  fragment FilesDeleteTab_storageFileDownloadRequests on Device
+  @refetchable(
+    queryName: "FilesDeleteTab_storageFileDownloadRequests_PaginationQuery"
+  )
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
     storageFileDownloadRequests: fileDownloadRequests(
+      first: $first
+      after: $after
       filter: {
         destinationType: { eq: STORAGE }
         status: { eq: COMPLETED }
         deleted: { eq: false }
       }
-    ) {
+    ) @connection(key: "FilesDeleteTab_storageFileDownloadRequests") {
       edges {
         node {
           id
@@ -130,6 +144,7 @@ type ManualFileDeleteRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
   deleteOptions: StorageSourceOption[];
+  onLoadMoreDeleteOptions?: () => void;
   isOnline: boolean;
 };
 
@@ -137,6 +152,7 @@ const ManualFileDeleteRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
   deleteOptions,
+  onLoadMoreDeleteOptions,
   isOnline,
 }: ManualFileDeleteRequestFormWrapperProps) => {
   const intl = useIntl();
@@ -230,12 +246,14 @@ const ManualFileDeleteRequestFormWrapper = ({
       isLoading={isCreating}
       onSubmit={handleSubmit}
       deleteOptions={deleteOptions}
+      onLoadMoreDeleteOptions={onLoadMoreDeleteOptions}
     />
   );
 };
 
 type FilesDeleteTabProps = {
-  deviceRef: FilesDeleteTab_fileManagement$key;
+  deviceRef: FilesDeleteTab_fileManagement$key &
+    FilesDeleteTab_storageFileDownloadRequests$key;
   embedded?: boolean;
   isOnline?: boolean;
 };
@@ -254,6 +272,22 @@ const FilesDeleteTab = ({
     FilesDeleteTab_PaginationQuery,
     FilesDeleteTab_fileManagement$key
   >(DEVICE_FILES_FRAGMENT, deviceRef);
+
+  const {
+    data: storageData,
+    loadNext: loadNextStorage,
+    hasNext: hasNextStorage,
+    isLoadingNext: isLoadingStorageNext,
+  } = usePaginationFragment<
+    FilesDeleteTab_storageFileDownloadRequests_PaginationQuery,
+    FilesDeleteTab_storageFileDownloadRequests$key
+  >(DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
+
+  const { onLoadMore: onLoadMoreDeleteOptions } = useRelayConnectionPagination({
+    hasNext: hasNextStorage,
+    isLoadingNext: isLoadingStorageNext,
+    loadNext: loadNextStorage,
+  });
 
   useSubscription<FilesDeleteTab_fileDeleteRequest_Subscription>(
     useMemo(
@@ -274,7 +308,7 @@ const FilesDeleteTab = ({
   );
 
   const deleteOptions: StorageSourceOption[] = useMemo(() => {
-    const edges = data.storageFileDownloadRequests?.edges;
+    const edges = storageData.storageFileDownloadRequests?.edges;
     if (!edges) return [];
 
     const validRequests: Array<{
@@ -307,7 +341,7 @@ const FilesDeleteTab = ({
             : fileName,
       };
     });
-  }, [data.storageFileDownloadRequests]);
+  }, [storageData.storageFileDownloadRequests]);
 
   if (!data.capabilities.includes("FILE_TRANSFER_DELETE")) {
     return null;
@@ -330,6 +364,7 @@ const FilesDeleteTab = ({
             setErrorFeedback={setErrorFeedback}
             deviceId={deviceId}
             deleteOptions={deleteOptions}
+            onLoadMoreDeleteOptions={onLoadMoreDeleteOptions}
             isOnline={isOnline}
           />
         </Stack>
