@@ -100,7 +100,7 @@ defmodule Edgehog.Files do
 
     resource FileUploadRequest do
       define :fetch_file_upload_request, action: :read, get_by: [:id]
-      define :set_file_upload_request_status, action: :update_status, args: [:status]
+      define :set_file_upload_request_status, action: :update_status
       define :send_file_upload_request, args: [:file_upload_request]
       define :set_file_upload_progress
       define :set_file_upload_response
