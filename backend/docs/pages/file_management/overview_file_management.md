@@ -79,6 +79,9 @@ A File Download Request instructs a Device to fetch a File and deliver it to one
 
 Requests can target a single Device (manual request) or be created in bulk as part of a campaign.
 
+File Download Requests include a **Request Name** field, a user-provided name to identify the request. When
+requests are created as part of a File Download Campaign, the Campaign Name is used as the Request Name.
+
 ### Encoding Support
 
 File Download Requests support different encoding options to optimize transfer bandwidth and device processing:
