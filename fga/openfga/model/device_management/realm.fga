@@ -24,35 +24,28 @@ type realm
   relations
     define tenant:          [tenant]
     define alias:           [realm]
+    define blocklisted:     [user, group#member]
 
-    define owner:           [user]
-    define admin:           [user]
-    define viewer:          [user]
-    define editor:          [user]
-    define updater:         [user]
-    define identifier:      [user]
-    define blacklisted:     [user]
+    define computed_can_view_devices: can_edit_device_tags or can_rename_devices or can_access_terminals or can_identify_devices or can_update_devices or can_view_devices_in_all_realms from tenant
 
-    define can_view_devices:      (viewer or editor or admin or updater or identifier or can_view_realm from tenant) but not blacklisted
-    define can_edit_device_tags:  (editor or admin or can_edit from tenant) but not blacklisted
-    define can_rename_devices:    (editor or admin or can_edit_realm from tenant) but not blacklisted
-    define can_access_terminals:  (admin or is_admin from tenant) but not blacklisted
-    define can_identify_devices:  (identifier or editor or admin or is_admin from tenant) but not blacklisted
-    define can_update_devices:    (updater or admin or can_update_in_realms from tenant) but not blacklisted
-    define can_delete_devices:    (admin or is_admin from tenant) but not blacklisted
+    define can_view_devices:      ([user, group#member] or computed_can_view_devices) but not blocklisted
+    define can_edit_device_tags:  ([user, group#member] or can_edit_device_tags_in_all_realms from tenant) but not blocklisted
+    define can_rename_devices:    ([user, group#member] or can_rename_devices_in_all_realms from tenant) but not blocklisted
+    define can_access_terminals:  ([user, group#member] or can_access_terminals_in_all_realms from tenant) but not blocklisted
+    define can_identify_devices:  ([user, group#member] or can_identify_devices_in_all_realms from tenant) but not blocklisted
+    define can_update_devices:    ([user, group#member] or can_update_devices_in_all_realms from tenant) but not blocklisted
+    define can_delete_devices:    ([user, group#member] or can_delete_devices_in_all_realms from tenant) but not blocklisted
 
 extend type tenant
   relations
-    define realm_blacklisted: [user]
+    define realm_blocklisted:                   [user, group#member] or blocklisted
 
-    define realm_owner:      [user]
-    define realm_admin:      [user]
-    define realm_editor:     [user]
-    define realm_viewer:     [user]
-    define realm_updater:    [user]
-    define realm_identifier: [user]
+    define computed_can_view_all_devices: can_edit_device_tags_in_all_realms or can_rename_devices_in_all_realms or can_access_terminals_in_all_realms or can_update_devices_in_all_realms or can_identify_devices_in_all_realms or can_delete_devices_in_all_realms
 
-    define can_view_realm:       (realm_viewer or realm_editor or realm_admin or realm_owner or can_view) but not realm_blacklisted
-    define can_edit_realm:       (realm_editor or realm_admin or realm_owner or can_edit) but not realm_blacklisted
-    define can_update_in_realms: (realm_updater or is_admin) but not realm_blacklisted
-    define can_delete_realm:     (realm_owner or is_admin) but not realm_blacklisted
+    define can_view_devices_in_all_realms:      ([user, group#member] or computed_can_view_all_devices) but not realm_blocklisted
+    define can_edit_device_tags_in_all_realms:  ([user, group#member]) but not realm_blocklisted
+    define can_rename_devices_in_all_realms:    ([user, group#member]) but not realm_blocklisted
+    define can_access_terminals_in_all_realms:  ([user, group#member]) but not realm_blocklisted
+    define can_update_devices_in_all_realms:    ([user, group#member]) but not realm_blocklisted
+    define can_identify_devices_in_all_realms:  ([user, group#member]) but not realm_blocklisted
+    define can_delete_devices_in_all_realms:    ([user, group#member]) but not realm_blocklisted

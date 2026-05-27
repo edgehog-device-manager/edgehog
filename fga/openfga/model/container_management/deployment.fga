@@ -40,15 +40,13 @@ type deployment
     define device:  [device]
     define release: [release]
 
-    ## Assignable roles
-    define owner:   [user]
-    define admin:   [user]
-    define manager: [user] # basically editor
-    define viewer:  [user]
-    define blacklisted: [user] but not (blacklisted from release or blacklisted from device)
+    define owner: [user]
 
-    ## Computed permissions
-    define can_view:      (viewer or manager or admin or owner or (can_view from device and can_view from release) or can_view from tenant) but not blacklisted
-    define can_start_stop: (manager or admin or owner or (can_view from device and can_deploy from release) or can_edit from tenant) but not blacklisted
-    define can_upgrade:    (manager or admin or owner or (can_view from device and can_deploy from release) or can_edit from tenant) but not blacklisted
-    define can_delete:     (manager or admin or owner or (can_view from device and can_deploy from release) or can_edit from tenant) but not blacklisted
+    define blocklisted: [user, group#member] but not (blocklisted from release or blocklisted from device)
+
+    define computed_can_view: can_start_and_stop or can_upgrade or can_delete
+
+    define can_view:            ([user, group#member] or computed_can_view) but not blocklisted
+    define can_start_and_stop:  ([user, group#member]) but not blocklisted
+    define can_upgrade:         ([user, group#member]) but not blocklisted
+    define can_delete:          ([user, group#member]) but not blocklisted

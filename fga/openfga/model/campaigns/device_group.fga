@@ -29,31 +29,21 @@ type device_group
   relations
     define tenant: [tenant]
 
-    ## Assignable roles
     define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or device_group_blacklisted from tenant
+    define blocklisted: [user] or device_group_blocklisted from tenant
 
-    ## Computed permissions
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
+    define computed_can_view: can_edit or can_delete or can_view_all_device_groups from tenant
 
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member]) but not blocklisted
+    define can_delete:  ([user, group#member]) but not blocklisted
 
 extend type tenant
   relations
-    define device_group_blacklisted: [user]
+    define device_group_blocklisted: [user, group#member] or blocklisted
 
-    define device_group_creator: [user]
-    define device_group_viewer:  [user]
-    define device_group_editor:  [user]
-    define device_group_deleter: [user]
-
-    define can_create_device_group:  (device_group_creator or device_group_editor or is_admin) but not device_group_blacklisted
-    define can_view_all_device_groups:   (device_group_viewer or device_group_editor or device_group_creator or device_group_deleter) but not device_group_blacklisted
-    define can_edit_all_device_groups: device_group_editor but not device_group_blacklisted
-    define can_delete_all_device_groups: device_group_deleter but not device_group_blacklisted
+    define can_create_device_groups:     ([user, group#member]) but not device_group_blocklisted
+    define can_view_all_device_groups:   ([user, group#member]) but not device_group_blocklisted
+    define can_edit_all_device_groups:   ([user, group#member]) but not device_group_blocklisted
+    define can_delete_all_device_groups: ([user, group#member]) but not device_group_blocklisted
 

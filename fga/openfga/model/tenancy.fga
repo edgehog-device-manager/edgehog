@@ -17,7 +17,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
-  
+
 module tenancy
 
 ## ---------------------------------------------------------------------------
@@ -33,17 +33,10 @@ module tenancy
 ##   … etc.
 ##
 ## Individual resource objects still carry their own relations for per-resource
-## grants (whitelist / blacklist patterns).
+## grants (whitelist / blocklist patterns).
 ## ---------------------------------------------------------------------------
 
 type tenant
   relations
-    define owner:       [user]
-    define alias:       [tenant]
-    define admin:       [user]
-    define editor:      [user]
-    define viewer:      [user]
-    define can_view:    viewer or editor or admin or owner
-    define can_edit:    editor or admin or owner
-    define is_admin:    admin or owner
-    define is_owner:    owner
+    define alias:           [tenant]
+    define blocklisted:     [user, group#member]

@@ -27,6 +27,16 @@ contents:
   - model/device_management/system_model.fga
   - model/os_management/base_image.fga
   - model/os_management/base_image_collection.fga
+  - model/campaigns/device_group.fga
+  - model/campaigns/channel.fga
+  - model/campaigns/campaign.fga
+  - model/campaigns/firmware_update_campaigns.fga
+  - model/campaigns/deployment_campaigns.fga
+  - model/campaigns/deployment_campaigns/provision.fga
+  - model/campaigns/deployment_campaigns/start.fga
+  - model/campaigns/deployment_campaigns/stop.fga
+  - model/campaigns/deployment_campaigns/update.fga
+  - model/campaigns/deployment_campaigns/delete.fga
   - model/container_management/image_credentials.fga
   - model/container_management/network.fga
   - model/container_management/volume.fga
@@ -34,6 +44,3 @@ contents:
   - model/container_management/release.fga
   - model/container_management/application.fga
   - model/container_management/deployment.fga
-  - model/campaigns/device_group.fga
-  - model/campaigns/channel.fga
-  - model/campaigns/campaign.fga

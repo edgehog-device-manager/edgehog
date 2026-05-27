@@ -25,17 +25,20 @@ tuple_files:
 tuples:
   # Alice viewer in realm
   - user: "user:alice"
-    relation: "viewer"
+    relation: "can_view"
     object: "device:1"
   - user: "user:bob"
-    relation: "viewer"
+    relation: "can_view_devices"
     object: "realm:test"
   - user: "user:cindy"
-    relation: "realm_viewer"
+    relation: "can_view_devices_in_all_realms"
+    object: "tenant:test"
+  - user: "group:realm_viewers#member"
+    relation: "can_view_devices_in_all_realms"
     object: "tenant:test"
   - user: "user:daniel"
-    relation: "viewer"
-    object: "tenant:test"
+    relation: "member"
+    object: "group:realm_viewers"
 
 tests:
   - name: Device can be viewed by viewer user
@@ -46,37 +49,37 @@ tests:
           can_view: true
           can_edit_tags: false
           can_rename: false
-          can_update: false
+          can_access_terminal: false
           can_identify: false
-          can_edit: false
           can_delete: false
+          can_update: false
       - user: "user:bob"
         object: "device:1"
         assertions:
           can_view: true
           can_edit_tags: false
           can_rename: false
-          can_update: false
+          can_access_terminal: false
           can_identify: false
-          can_edit: false
           can_delete: false
+          can_update: false
       - user: "user:cindy"
         object: "device:1"
         assertions:
           can_view: true
           can_edit_tags: false
           can_rename: false
-          can_update: false
+          can_access_terminal: false
           can_identify: false
-          can_edit: false
           can_delete: false
+          can_update: false
       - user: "user:daniel"
         object: "device:1"
         assertions:
           can_view: true
           can_edit_tags: false
           can_rename: false
-          can_update: false
+          can_access_terminal: false
           can_identify: false
-          can_edit: false
           can_delete: false
+          can_update: false

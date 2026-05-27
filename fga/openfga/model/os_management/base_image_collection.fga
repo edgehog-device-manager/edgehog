@@ -31,36 +31,29 @@ type base_image_collection
     define tenant: [tenant]
     define alias:   [base_image_collection]
 
-    define owner:        [user]
-    define admin:        [user]
-    define viewer:       [user]
-    define editor:       [user]           ## update collection metadata
-    define image_adder:  [user]           ## can add base images to this collection
-    define image_remover:[user]           ## can remove base images from this collection
-    define deleter:      [user]
-    define blacklisted:  [user]           ## users that cannot perform actions in this collection
+    define blocklisted:  [user, group#member] or base_image_collection_blocklisted from tenant
 
-    define can_view:          (viewer or editor or image_adder or image_remover or deleter or can_view from tenant) but not base_image_collection_blacklisted from tenant
-    define can_edit:        (editor or can_edit from tenant) but not base_image_collection_blacklisted from tenant
-    define can_add_image:     (image_adder or editor or admin or owner or can_edit from tenant) but not base_image_collection_blacklisted from tenant
-    define can_remove_image:  (image_remover or editor or admin or owner or can_edit from tenant) but not base_image_collection_blacklisted from tenant
-    define can_manage_images: (image_adder or image_remover) but not base_image_collection_blacklisted from tenant
-    define can_delete:        (deleter or admin or owner or is_admin from tenant) but not base_image_collection_blacklisted from tenant
+    define computed_can_view: can_edit or can_delete or can_view_images or can_add_images or can_remove_images or can_edit_images or can_view_all_base_image_collections from tenant
+
+    define can_view:            ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:            ([user, group#member] or can_edit_all_base_image_collections from tenant) but not blocklisted
+    define can_delete:          ([user, group#member] or can_delete_all_base_image_collections from tenant) but not blocklisted
+    define can_view_images:     ([user, group#member] or can_view_base_images_in_all_collections from tenant) but not blocklisted
+    define can_add_images:      ([user, group#member] or can_add_base_images_in_all_collections from tenant) but not blocklisted
+    define can_remove_images:   ([user, group#member] or can_remove_base_images_in_all_collections from tenant) but not blocklisted
+    define can_edit_images:     ([user, group#member] or can_edit_base_images_in_all_collections from tenant) but not blocklisted
 
 extend type tenant
   relations
-    define base_image_collection_blacklisted: [user]
+    define base_image_collection_blocklisted: [user, group#member] or blocklisted
 
-    define base_image_collection_creator:      [user]
-    define base_image_collection_viewer:       [user]
-    define base_image_collection_editor:       [user]
-    define base_image_collection_deleter:      [user]
-    define base_image_collection_image_adder:  [user]
-    define base_image_collection_image_remover:[user]
+    define computed_can_view_all_base_image_collections:  can_edit_all_base_image_collections or can_delete_all_base_image_collections
 
-    define can_create_base_image_collection:      (base_image_collection_creator or base_image_collection_creator or base_image_collection_editor) but not base_image_collection_blacklisted
-    define can_view_all_base_image_collections:   (base_image_collection_viewer or base_image_collection_editor or base_image_collection_creator or base_image_collection_deleter) but not base_image_collection_blacklisted
-    define can_edit_all_base_image_collections: base_image_collection_editor but not base_image_collection_blacklisted
-    define can_delete_all_base_image_collections: base_image_collection_deleter but not base_image_collection_blacklisted
-    define can_add_image_to_all_collections:      (base_image_collection_image_adder or base_image_collection_editor) but not base_image_collection_blacklisted
-    define can_remove_image_from_all_collections: (base_image_collection_image_remover or base_image_collection_editor) but not base_image_collection_blacklisted
+    define can_create_base_image_collections:           ([user, group#member]) but not base_image_collection_blocklisted
+    define can_view_all_base_image_collections:         ([user, group#member] or computed_can_view_all_base_image_collections) but not base_image_collection_blocklisted
+    define can_edit_all_base_image_collections:         ([user, group#member]) but not base_image_collection_blocklisted
+    define can_delete_all_base_image_collections:       ([user, group#member]) but not base_image_collection_blocklisted
+    define can_view_base_images_in_all_collections:     ([user, group#member]) but not base_image_collection_blocklisted
+    define can_add_base_images_in_all_collections:      ([user, group#member]) but not base_image_collection_blocklisted
+    define can_remove_base_images_in_all_collections:   ([user, group#member]) but not base_image_collection_blocklisted
+    define can_edit_base_images_in_all_collections:     ([user, group#member]) but not base_image_collection_blocklisted

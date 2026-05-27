@@ -28,29 +28,20 @@ type channel
   relations
     define tenant: [tenant]
 
-    ## Assignable roles
     define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or channel_blacklisted from tenant
+    define blocklisted: [user] or channel_blocklisted from tenant
 
-    ## Computed permissions
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
+    define computed_can_view: can_edit or can_delete or can_view_all_channels from tenant
+
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member]) but not blocklisted
+    define can_delete:  ([user, group#member]) but not blocklisted
 
 extend type tenant
   relations
-    define channel_blacklisted: [user]
+    define channel_blocklisted: [user, group#member] or blocklisted
 
-    define channel_viewer:  [user]
-    define channel_editor:  [user]
-    define channel_creator: [user]
-    define channel_deleter: [user]
-
-    define can_create_channel:  (channel_creator or channel_editor or is_admin) but not channel_blacklisted
-    define can_view_all_channels:   (channel_viewer or channel_editor or channel_creator or channel_deleter) but not channel_blacklisted
-    define can_edit_all_channels: channel_editor but not channel_blacklisted
-    define can_delete_all_channels: channel_deleter but not channel_blacklisted
+    define can_create_channels:     ([user, group#member]) but not channel_blocklisted
+    define can_view_all_channels:   ([user, group#member]) but not channel_blocklisted
+    define can_edit_all_channels:   ([user, group#member]) but not channel_blocklisted
+    define can_delete_all_channels: ([user, group#member]) but not channel_blocklisted

@@ -26,29 +26,24 @@ module hardware_type
 
 type hardware_type
   relations
-    define tenant:  [tenant]
-    define alias:   [hardware_type]
-    define owner:   [user]
-    define admin:   [user]
-    define viewer:  [user]
-    define editor:  [user]
-    define deleter: [user]
+    define tenant:      [tenant]
+    define alias:       [hardware_type]
 
-    define blacklisted: [user] or hardware_type_blacklisted from tenant
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or editor or admin or owner or can_edit from tenant) but not blacklisted
+    define blocklisted: [user, group#member] or hardware_type_blocklisted from tenant
+
+    define computed_can_view: can_edit or can_delete or can_view_system_models from tenant
+
+    define can_view:    ([user, group#member] or can_view_hardware_types from tenant) but not blocklisted
+    define can_edit:    ([user, group#member] or can_edit_hardware_types from tenant) but not blocklisted
+    define can_delete:  ([user, group#member] or can_delete_hardware_types from tenant) but not blocklisted
 
 extend type tenant
   relations
-    define hardware_type_blacklisted: [user]
+    define hardware_type_blocklisted:    ([user, group#member]) or blocklisted
 
-    define hardware_type_creator: [user]
-    define hardware_type_viewer:  [user]
-    define hardware_type_editor:  [user]
-    define hardware_type_deleter: [user]
+    define computed_can_view_hardware_types: can_edit_hardware_types or can_delete_hardware_types
 
-    define can_create_hardware_type:      (hardware_type_creator or hardware_type_editor) but not hardware_type_blacklisted
-    define can_view_all_hardware_types:   (hardware_type_viewer or hardware_type_editor or hardware_type_creator or hardware_type_deleter) but not hardware_type_blacklisted
-    define can_edit_all_hardware_types: hardware_type_editor but not hardware_type_blacklisted
-    define can_delete_all_hardware_types: hardware_type_deleter but not hardware_type_blacklisted
+    define can_create_hardware_types:    ([user, group#member]) but not hardware_type_blocklisted
+    define can_view_hardware_types:      ([user, group#member] or computed_can_view_hardware_types) but not hardware_type_blocklisted
+    define can_edit_hardware_types:      ([user, group#member]) but not hardware_type_blocklisted
+    define can_delete_hardware_types:    ([user, group#member]) but not hardware_type_blocklisted

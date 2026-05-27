@@ -29,28 +29,23 @@ type volume
     define tenant: [tenant]
     define alias:   [volume]
 
-    define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or volume_blacklisted from tenant
+    define blocklisted: [user, group#member] or volume_blocklisted from tenant
+    define owner:  [user, group#member]
 
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
+    define computed_can_view: can_edit or can_delete or can_view_all_volumes from tenant
+
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member]) but not blocklisted
+    define can_delete:  ([user, group#member]) but not blocklisted
 
 
 extend type tenant
   relations
-    define volume_blacklisted: [user]
+    define volume_blocklisted: [user, group#member]
 
-    define volume_creator: [user]
-    define volume_viewer:  [user]
-    define volume_editor:  [user]
-    define volume_deleter: [user]
+    define computed_can_view_all_volumes: can_edit_all_volumes or can_delete_all_volumes
 
-    define can_create_volume:  (volume_creator or volume_editor or is_admin) but not volume_blacklisted
-    define can_view_all_volumes:   (volume_viewer or volume_editor or volume_deleter) but not volume_blacklisted
-    define can_edit_all_volumes: volume_editor but not volume_blacklisted
-    define can_delete_all_volumes: volume_deleter but not volume_blacklisted
+    define can_create_volume:       ([user, group#member]) but not blocklisted
+    define can_view_all_volumes:    ([user, group#member] or computed_can_view_all_volumes) but not blocklisted
+    define can_edit_all_volumes:    ([user, group#member]) but not blocklisted
+    define can_delete_all_volumes:  ([user, group#member]) but not blocklisted

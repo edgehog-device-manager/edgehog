@@ -24,23 +24,18 @@ module release
 ## RELEASE  (child of application)
 ##
 ## Parent-child with application. Creator becomes owner.
-## Whitelist/blacklist pattern for per-release overrides.
+## Whitelist/blocklist pattern for per-release overrides.
 ## ---------------------------------------------------------------------------
 
 type release
   relations
-    define tenant: [tenant]
     define application: [application]
+    define owner:       [user]
+    define blocklisted: [user, group#member] or release_blocklisted from application
 
-    define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or blacklisted from application
+    define computed_can_view: can_edit or can_deploy or can_delete or can_view_all_releases from application
 
-    ## Computed permissions
-    define can_view:   (viewer or editor or admin or owner or can_view from application or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from application or can_edit from tenant) but not blacklisted
-    define can_deploy: (editor or admin or owner or can_edit from application or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or can_delete from application or is_admin from tenant) but not blacklisted
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member] or can_edit_all_releases from application) but not blocklisted
+    define can_deploy:  ([user, group#member] or can_deploy_all_releases from application) but not blocklisted
+    define can_delete:  ([user, group#member] or can_delete_all_releases from application) but not blocklisted

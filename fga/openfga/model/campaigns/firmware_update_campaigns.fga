@@ -1,0 +1,50 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+module firmware_update_campaign
+
+type firmware_update_campaign
+  relations
+    define tenant:      [tenant]
+    define alias:       [firmware_update_campaign]
+
+    define blocklisted: [user, group#member] or firmware_update_campaigns_blocklisted from tenant
+
+    define computed_can_view: can_edit_params or can_pause_resume or can_delete or can_view_all_firmware_update_campaigns from tenant
+
+    define can_view:          ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit_params:   ([user, group#member] or can_edit_all_firmware_update_campaigns_params from tenant) but not blocklisted
+    define can_pause_resume:  ([user, group#member] or can_pause_resume_all_firmware_update_campaigns from tenant) but not blocklisted
+    define can_delete:        ([user, group#member] or can_delete_all_firmware_update_campaigns from tenant) but not blocklisted
+
+
+extend type tenant
+  relations
+    define firmware_update_campaigns_blocklisted:    [user, group#member] or campaigns_blocklisted
+
+    define computed_can_view_all_firmware_update_campaigns:     can_view_all_campaigns or can_launch_all_firmware_update_campaigns or can_schedule_all_firmware_update_campaigns or can_edit_all_firmware_update_campaigns_params or can_pause_resume_all_firmware_update_campaigns
+
+    define can_view_all_firmware_update_campaigns:         ([user, group#member] or computed_can_view_all_firmware_update_campaigns) but not firmware_update_campaigns_blocklisted
+    define can_launch_all_firmware_update_campaigns:       ([user, group#member] or can_launch_all_campaigns) but not firmware_update_campaigns_blocklisted
+    define can_schedule_all_firmware_update_campaigns:     ([user, group#member] or can_schedule_all_campaigns) but not firmware_update_campaigns_blocklisted
+    define can_edit_all_firmware_update_campaigns_params:  ([user, group#member] or can_edit_all_campaigns_params) but not firmware_update_campaigns_blocklisted
+    define can_pause_resume_all_firmware_update_campaigns: ([user, group#member] or can_pause_resume_all_campaigns) but not firmware_update_campaigns_blocklisted
+    define can_delete_all_firmware_update_campaigns:       ([user, group#member] or can_delete_all_campaigns) but not firmware_update_campaigns_blocklisted
+

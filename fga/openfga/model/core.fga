@@ -23,3 +23,10 @@
 module core
 
 type user
+
+type org
+
+type group
+  relations
+    define org: [org]
+    define member: [user]
