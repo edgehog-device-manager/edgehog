@@ -1,5 +1,5 @@
 {
-    "name": "edgehog-file-transfer-completion",
+    "name": "edgehog-storage-file",
     "action": {
         "http_url": "<%= @trigger_url %>",
         "http_method": "post",
