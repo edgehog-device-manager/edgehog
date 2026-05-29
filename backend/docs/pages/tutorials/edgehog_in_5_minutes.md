@@ -29,7 +29,7 @@ If you get "Astarte is unreachable", make sure your running astarte version is >
 To setup edgehog, you must first clone a copy of edgehog locally
 
 ```sh
-$ git clone https://github.com/edgehog-device-manager/edgehog && cd edgehog
+$ git clone --recurse-submodules git@github.com:edgehog-device-manager/edgehog.git && cd edgehog
 ```
 
 > If you just want to try out Edgehog without interacting with the device, run it without the Astarte instance:
