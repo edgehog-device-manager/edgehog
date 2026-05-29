@@ -112,5 +112,7 @@ defmodule Edgehog.Files do
       define :set_file_deletion_status, action: :set_status
       define :set_file_delete_response, action: :set_response
     end
+
+    resource Edgehog.Files.DeviceFile
   end
 end
