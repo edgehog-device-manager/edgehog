@@ -79,7 +79,7 @@ defmodule Edgehog.Campaigns.Channel do
     end
 
     update :update do
-      description "Updates an channel."
+      description "Updates a channel."
       primary? true
 
       accept [:name, :handle]

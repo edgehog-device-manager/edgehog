@@ -43,6 +43,7 @@ defmodule Edgehog.Devices.SystemModel do
   fga do
     type :system_model
     id(:handle)
+    exclude([:hardware_type])
   end
 
   graphql do
