@@ -26,7 +26,7 @@ defmodule Edgehog.Auth.Changes.WriteRelation do
 
   { destination_type:destination_id_field(value), relationship, source_type:source_id(value) }
 
-  - `destination_type`  :: (optional) is the fga type of the model
+  - `destination_type`  :: (optional) is the fga type in the model
   - `destination_id`    :: is the realtaionship's destination field to query to get the id of the tuple
 
   - `relationship`      :: is the ash relationship to query to get the destination fields
@@ -50,7 +50,7 @@ defmodule Edgehog.Auth.Changes.WriteRelation do
   Hence:
 
   ```elixir
-    change {Edgehog.Auth.Changes.WriteRelation destination_id: name, relationship: realm, source_type: :device, source_id: :device_id}
+    change {Edgehog.Auth.Changes.WriteRelation destination_id: :name, relationship: :realm, source_type: :device, source_id: :device_id}
   ```
 
   With realm "test" and device_id "Simpl3D3vice1d" will write the tuple
