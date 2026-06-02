@@ -18,51 +18,32 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage } from "react-intl";
-import Navbar from "react-bootstrap/Navbar";
+import Image from "react-bootstrap/Image";
 
 import assets from "@/assets";
-import Dropdown from "@/components/Dropdown";
+import Button from "@/components/Button";
 import Icon from "@/components/Icon";
-import { Link, Route } from "@/Navigation";
-import "./Topbar.scss";
+import "@/components/Topbar.scss";
 
-interface UserMenuProps {
-  className?: string;
+interface TopbarProps {
+  onToggle?: () => void;
 }
 
-const UserMenu = ({ className }: UserMenuProps) => {
+const Topbar = ({ onToggle }: TopbarProps) => {
   return (
-    <Dropdown
-      align="end"
-      className={className}
-      toggle={
-        <div className="btn">
-          <Icon icon="profile" className="me-2" />
-          <Icon icon="caretDown" />
-        </div>
-      }
-    >
-      <Dropdown.Item as={Link} route={Route.logout}>
-        <FormattedMessage
-          id="components.Topbar.userMenu.logoutLabel"
-          defaultMessage="Logout"
-        />
-      </Dropdown.Item>
-    </Dropdown>
-  );
-};
-
-const Topbar = () => {
-  return (
-    <div className="pb-3">
-      <Navbar className="Topbar navbar navbar-light shadow">
-        <Navbar.Brand className="h-100 px-4">
-          <img alt="Logo" src={assets.images.brand} className="h-100" />
-        </Navbar.Brand>
-        <UserMenu className="ms-auto pe-2" />
-      </Navbar>
-    </div>
+    <header className="Topbar d-md-none border-bottom p-3 d-flex align-items-center shadow-sm gap-3">
+      <Button
+        className="btn-light bg-transparent border-0 d-flex align-items-center justify-content-center flex-shrink-0"
+        onClick={onToggle}
+      >
+        <Icon icon="menu" />
+      </Button>
+      <Image
+        src={assets.images.brand}
+        alt="Clea Edgehog Logo"
+        className="Topbar-brand"
+      />
+    </header>
   );
 };
 

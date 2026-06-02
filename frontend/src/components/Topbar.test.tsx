@@ -18,29 +18,46 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { it, expect } from "vitest";
-
-import { screen, queryByAttribute } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders } from "@/setupTests";
-import Topbar from "./Topbar";
+import Topbar from "@/components/Topbar";
 
-it("renders correctly", async () => {
-  renderWithProviders(<Topbar />);
-  const navbar = screen.getByRole("navigation");
-  expect(navbar).toBeInTheDocument();
+describe("Topbar Component", () => {
+  it("renders the topbar with logo and toggle button", () => {
+    renderWithProviders(<Topbar />);
 
-  expect(screen.getByRole("img", { name: "Logo" })).toBeVisible();
+    const header = screen.getByRole("banner");
+    expect(header).toBeInTheDocument();
 
-  expect(
-    screen.queryByRole("link", { name: "Logout" }),
-  ).not.toBeInTheDocument();
+    const logo = screen.getByRole("img", { name: "Clea Edgehog Logo" });
+    expect(logo).toBeVisible();
 
-  const dropdown = queryByAttribute("data-icon", navbar, "angle-down");
-  expect(dropdown).not.toBeNull();
-  expect(dropdown).toBeVisible();
-  await userEvent.click(dropdown!);
+    const button = screen.getByRole("button");
+    expect(button).toBeVisible();
+  });
 
-  expect(screen.getByRole("link", { name: "Logout" })).toBeVisible();
+  it("calls onToggle when the menu button is clicked", async () => {
+    const user = userEvent.setup();
+    const onToggleMock = vi.fn();
+
+    renderWithProviders(<Topbar onToggle={onToggleMock} />);
+
+    const button = screen.getByRole("button");
+    await user.click(button);
+
+    expect(onToggleMock).toHaveBeenCalledOnce();
+  });
+
+  it("does not crash if onToggle is not provided", async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<Topbar />);
+
+    const button = screen.getByRole("button");
+
+    await expect(user.click(button)).resolves.not.toThrow();
+  });
 });

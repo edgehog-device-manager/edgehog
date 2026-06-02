@@ -1191,18 +1191,6 @@
     "defaultMessage": "File Size",
     "description": "Title for the File Size column of the files table"
   },
-  "components.Footer.edgehogHomeLinkLabel": {
-    "defaultMessage": "Edgehog Homepage Link"
-  },
-  "components.Footer.issuesLinkLabel": {
-    "defaultMessage": "GitHub-Issues"
-  },
-  "components.Footer.logo": {
-    "defaultMessage": "Logo"
-  },
-  "components.Footer.repositoryLinkLabel": {
-    "defaultMessage": "GitHub"
-  },
   "components.HardwareTypesTable.handleTitle": {
     "defaultMessage": "Handle"
   },
@@ -1409,14 +1397,17 @@
   "components.Sidebar.applications.containersLabel": {
     "defaultMessage": "Containers"
   },
-  "components.Sidebar.applications.credentialsLabel": {
-    "defaultMessage": "Image Credentials"
-  },
   "components.Sidebar.applications.deploymentsLabel": {
     "defaultMessage": "Deployments"
   },
+  "components.Sidebar.applications.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
   "components.Sidebar.applications.networksLabel": {
     "defaultMessage": "Networks"
+  },
+  "components.Sidebar.applications.volumesLabel": {
+    "defaultMessage": "Volumes"
   },
   "components.Sidebar.baseImageCollectionsLabel": {
     "defaultMessage": "Base Image Collections"
@@ -1436,6 +1427,9 @@
   "components.Sidebar.hardwareTypesLabel": {
     "defaultMessage": "Hardware Types"
   },
+  "components.Sidebar.logoutLabel": {
+    "defaultMessage": "Logout"
+  },
   "components.Sidebar.modelsGroupLabel": {
     "defaultMessage": "Models"
   },
@@ -1450,9 +1444,6 @@
   },
   "components.Sidebar.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
-  },
-  "components.Sidebar.volumes.volumesLabel": {
-    "defaultMessage": "Volumes"
   },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
@@ -1483,9 +1474,6 @@
   },
   "components.SystemModelsTable.partNumbersTitle": {
     "defaultMessage": "Part Numbers"
-  },
-  "components.Topbar.userMenu.logoutLabel": {
-    "defaultMessage": "Logout"
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",

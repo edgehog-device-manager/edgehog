@@ -30,7 +30,9 @@ import {
   faArrowDown,
   faArrowUp,
   faArrowRight,
-  faBug,
+  faAnglesLeft,
+  faAnglesRight,
+  faBook,
   faPenToSquare,
   faXmark,
   faCheck,
@@ -59,6 +61,8 @@ import {
   faRotate,
   faCircleInfo,
   faArrowUpRightFromSquare,
+  faSignOutAlt,
+  faBars,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
@@ -66,8 +70,10 @@ const icons = {
   arrowDown: faArrowDown,
   arrowUp: faArrowUp,
   arrowRight: faArrowRight,
+  anglesLeft: faAnglesLeft,
+  anglesRight: faAnglesRight,
   arrowUpRightFromSquare: faArrowUpRightFromSquare,
-  bug: faBug,
+  documentation: faBook,
   caretDown: faAngleDown,
   caretUp: faAngleUp,
   circle: faCircle,
@@ -101,6 +107,8 @@ const icons = {
   faCircleQuestion: faCircleQuestion,
   rotate: faRotate,
   faCircleInfo: faCircleInfo,
+  logout: faSignOutAlt,
+  menu: faBars,
 } as const;
 
 type FontAwesomeIconProps = React.ComponentProps<typeof FontAwesomeIcon>;
