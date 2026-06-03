@@ -87,7 +87,25 @@ const transformOutputData = (
   return baseImageCollection;
 };
 
-type Props = {
+const getSystemModelValue = (systemModel: SystemModelRecord) => systemModel.id;
+const noSystemModelOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.CreateBaseImageCollection.noSystemModelsFoundMatching",
+          defaultMessage: 'No system models found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.CreateBaseImageCollection.noSystemModelsAvailable",
+        defaultMessage: "No system models available",
+      });
+
+type CreateBaseImageCollectionFormProps = {
   optionsRef: CreateBaseImageCollection_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: BaseImageCollectionOutputData) => void;
@@ -99,7 +117,7 @@ const CreateBaseImageCollectionForm = ({
   isLoading = false,
   onSubmit,
   baseImageCollections = [],
-}: Props) => {
+}: CreateBaseImageCollectionFormProps) => {
   const intl = useIntl();
 
   const {
@@ -198,21 +216,6 @@ const CreateBaseImageCollectionForm = ({
     },
     [intl, baseImageCollections],
   );
-  const getSystemModelValue = (systemModel: SystemModelRecord) =>
-    systemModel.id;
-  const noSystemModelOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.CreateBaseImageCollection.noSystemModelsFoundMatching",
-            defaultMessage: 'No system models found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.CreateBaseImageCollection.noSystemModelsAvailable",
-          defaultMessage: "No system models available",
-        });
 
   const onFormSubmit = (data: BaseImageCollectionFormData) =>
     onSubmit(transformOutputData(data));
@@ -272,7 +275,7 @@ const CreateBaseImageCollectionForm = ({
                 getOptionLabel={getSystemModelLabel}
                 getOptionValue={getSystemModelValue}
                 noOptionsMessage={({ inputValue }) =>
-                  noSystemModelOptionsMessage(inputValue)
+                  noSystemModelOptionsMessage(intl, inputValue)
                 }
                 isOptionDisabled={isSystemModelUsedByOtherBaseImageCollection}
                 isLoading={isLoadingNext}

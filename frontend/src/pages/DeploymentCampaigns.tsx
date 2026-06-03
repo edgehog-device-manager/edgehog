@@ -188,6 +188,14 @@ const enumStatuses = [
 ] as const;
 const enumOutcomes = ["FAILURE", "SUCCESS"] as const;
 
+const findMatches = <T extends readonly string[]>(
+  enums: T,
+  search: string,
+): T[number][] => {
+  const lower = search.toLowerCase();
+  return enums.filter((value) => value.toLowerCase().includes(lower));
+};
+
 interface DeploymentCampaignsLayoutContainerProps {
   campaignsData: DeploymentCampaigns_getCampaigns_Query["response"];
   searchText: string | null;
@@ -201,14 +209,6 @@ const DeploymentCampaignsLayoutContainer = ({
       DeploymentCampaigns_PaginationQuery,
       DeploymentCampaigns_DeploymentCampaignsFragment$key
     >(CAMPAIGNS_FRAGMENT, campaignsData);
-
-  const findMatches = <T extends readonly string[]>(
-    enums: T,
-    search: string,
-  ): T[number][] => {
-    const lower = search.toLowerCase();
-    return enums.filter((value) => value.toLowerCase().includes(lower));
-  };
 
   const normalizedSearchText = useMemo(
     () => (searchText ?? "").trim(),

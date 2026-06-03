@@ -59,6 +59,32 @@ const initialData: ReleaseFormData = {
   containerDependencies: [],
 };
 
+const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
+  const containers = data.containers.map((container) => ({
+    id: container.id,
+    dependencies:
+      data.containerDependencies?.find(
+        (contDep) => contDep.containerId === container.id,
+      )?.dependencies ?? [],
+  }));
+
+  const releaseContainers = containers.flatMap((container) =>
+    container.dependencies.map((dependencyId) => ({
+      containerId: container.id,
+      dependencyId: dependencyId,
+    })),
+  );
+
+  const release: ReleaseSubmitData = {
+    version: data.version,
+    containers: data.containers,
+    containerDependencies: releaseContainers,
+    requiredSystemModels: data.requiredSystemModels,
+  };
+
+  return release;
+};
+
 type CreateReleaseProps = {
   requiredSystemModelsOptionsRef: hooks_SystemModelsOptionsFragment$key;
   containersOptionsRef: hooks_ContainersOptionsFragment$key;
@@ -124,32 +150,6 @@ const CreateRelease = ({
     watchedDependencies.every(
       (v) => v?.containerId?.trim() && v?.dependencies?.length > 0,
     );
-
-  const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
-    const containers = data.containers.map((container) => ({
-      id: container.id,
-      dependencies:
-        data.containerDependencies?.find(
-          (contDep) => contDep.containerId === container.id,
-        )?.dependencies ?? [],
-    }));
-
-    const releaseContainers = containers.flatMap((container) =>
-      container.dependencies.map((dependencyId) => ({
-        containerId: container.id,
-        dependencyId: dependencyId,
-      })),
-    );
-
-    const release: ReleaseSubmitData = {
-      version: data.version,
-      containers: data.containers,
-      containerDependencies: releaseContainers,
-      requiredSystemModels: data.requiredSystemModels,
-    };
-
-    return release;
-  };
 
   const onFormSubmit = (data: ReleaseFormData) =>
     onSubmit(transformOutputData(data));
