@@ -39,6 +39,7 @@ module system_model
 type system_model
   relations
     define tenant:  [tenant]
+    define alias:   [system_model]
 
     define owner:   [user]
     define admin:   [user]

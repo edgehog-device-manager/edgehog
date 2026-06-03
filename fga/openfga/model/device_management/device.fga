@@ -47,6 +47,7 @@ module device
 type device
   relations
     ## Parent realm (object-to-object)
+    define alias:   [device]
     define realm: [realm]
 
     ## General per-device roles

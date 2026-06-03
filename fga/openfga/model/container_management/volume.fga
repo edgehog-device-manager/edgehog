@@ -27,6 +27,7 @@ module volume
 type volume
   relations
     define tenant: [tenant]
+    define alias:   [volume]
 
     define owner:  [user]
     define admin:  [user]
