@@ -195,7 +195,7 @@ const UpdateChannel = ({
 
   const targetGroupOptions = useMemo(() => {
     // move disabled options to the end
-    return [...(targetGroups?.edges?.map((edge) => edge.node) || [])].sort(
+    return (targetGroups?.edges?.map((edge) => edge.node) || []).toSorted(
       (group1, group2) => {
         const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
         const group2Disabled = isTargetGroupUsedByOtherChannel(group2);

@@ -84,7 +84,8 @@ const createTarArchive = (files: File[]): Blob => {
     }
   }
 
-  for (const dirPath of [...directories].sort()) {
+  // Convert the Set to an array, then use the modern immutable sort
+  for (const dirPath of Array.from(directories).toSorted()) {
     writeTarDirectoryEntry(dirPath, chunks);
   }
 

@@ -179,7 +179,7 @@ const CreateChannelForm = ({
 
   const targetGroupOptions = useMemo(() => {
     // move disabled options to the end
-    return [...targetGroups].sort((group1, group2) => {
+    return targetGroups.toSorted((group1, group2) => {
       const group1Disabled = isTargetGroupUsedByOtherChannel(group1);
       const group2Disabled = isTargetGroupUsedByOtherChannel(group2);
 
@@ -192,7 +192,6 @@ const CreateChannelForm = ({
       return -1;
     });
   }, [targetGroups]);
-
   const onFormSubmit = (data: ChannelFormData) => {
     const payload: ChannelOutputData = {
       name: data.name,
