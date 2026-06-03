@@ -416,30 +416,6 @@
   "components.ContainerDetails.volumesLabel": {
     "defaultMessage": "Volumes"
   },
-  "components.ContainerStatus.created": {
-    "defaultMessage": "Created"
-  },
-  "components.ContainerStatus.dead": {
-    "defaultMessage": "Dead"
-  },
-  "components.ContainerStatus.exited": {
-    "defaultMessage": "Exited"
-  },
-  "components.ContainerStatus.paused": {
-    "defaultMessage": "Paused"
-  },
-  "components.ContainerStatus.removing": {
-    "defaultMessage": "Removing"
-  },
-  "components.ContainerStatus.restarting": {
-    "defaultMessage": "Restarting"
-  },
-  "components.ContainerStatus.running": {
-    "defaultMessage": "Running"
-  },
-  "components.ContainerStatus.unknown": {
-    "defaultMessage": "Unknown"
-  },
   "components.ContainersOverview.noContainers": {
     "defaultMessage": "No containers available."
   },
