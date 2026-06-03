@@ -20,7 +20,6 @@
     "@fortawesome/react-fontawesome": "^3.3.1",
     "@hookform/resolvers": "^5.2.2",
     "@monaco-editor/react": "^4.7.0",
-    "@noble/hashes": "^2.2.0",
     "@tanstack/react-table": "^8.21.3",
     "@types/js-cookie": "^3.0.6",
     "@types/leaflet": "^1.9.21",
