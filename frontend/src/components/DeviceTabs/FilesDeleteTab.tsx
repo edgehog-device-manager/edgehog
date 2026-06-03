@@ -301,9 +301,9 @@ const FilesDeleteTab = ({
 
   const fileDeleteRequests = useMemo(
     () =>
-      data.fileDeleteRequests?.edges
-        ?.map((edge) => edge?.node)
-        .filter(Boolean) ?? [],
+      data.fileDeleteRequests?.edges?.flatMap((edge) =>
+        edge?.node ? [edge.node] : [],
+      ) ?? [],
     [data.fileDeleteRequests],
   );
 

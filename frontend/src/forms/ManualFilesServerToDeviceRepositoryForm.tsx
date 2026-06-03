@@ -179,9 +179,9 @@ const ManualFilesServerToDeviceRepositoryForm = ({
 
   const repositories = useMemo(
     () =>
-      repositoryPaginationData?.repositories?.edges
-        ?.map((edge) => edge?.node)
-        .filter(Boolean) ?? [],
+      repositoryPaginationData?.repositories?.edges?.flatMap((edge) =>
+        edge?.node ? [edge.node] : [],
+      ) ?? [],
     [repositoryPaginationData],
   );
 

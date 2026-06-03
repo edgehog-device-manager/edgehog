@@ -115,9 +115,9 @@ const CreateRelease = ({
     );
   }, [selectedContainers, containerOptions]);
 
-  const selectedDependencyContainerIds = watchedDependencies
-    .map((d) => d?.containerId)
-    .filter(Boolean);
+  const selectedDependencyContainerIds = watchedDependencies.flatMap((d) =>
+    d?.containerId ? [d.containerId] : [],
+  );
 
   const canAddDependencies =
     selectedContainers.length > 1 &&

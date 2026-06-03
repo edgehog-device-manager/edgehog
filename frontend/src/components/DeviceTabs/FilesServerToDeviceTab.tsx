@@ -602,9 +602,9 @@ const FilesServerToDeviceTab = ({
 
   const fileDownloadRequests = useMemo(
     () =>
-      data.fileDownloadRequests?.edges
-        ?.map((edge) => edge?.node)
-        .filter(Boolean) ?? [],
+      data.fileDownloadRequests?.edges?.flatMap((edge) =>
+        edge?.node ? [edge.node] : [],
+      ) ?? [],
     [data.fileDownloadRequests],
   );
 
