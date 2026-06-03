@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import React, { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -119,7 +119,7 @@ const HardwareTypesTable = ({
   );
 
   const hardwareTypes = useMemo<TableRecord[]>(() => {
-    return _.compact(hardwareTypesFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(hardwareTypesFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [hardwareTypesFragment]);
 
   return (

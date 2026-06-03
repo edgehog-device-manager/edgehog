@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
+import debounce from "lodash/debounce";
 import { useCallback, useEffect, useRef } from "react";
 
 import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
@@ -72,9 +72,7 @@ const useRelayConnectionPagination = <TFilter>({
   const recordsToLoadFirstRef = useRef(recordsToLoadFirst);
   const refetchPolicyRef = useRef(refetchPolicy);
 
-  const debouncedRefetchRef = useRef<ReturnType<typeof _.debounce> | null>(
-    null,
-  );
+  const debouncedRefetchRef = useRef<ReturnType<typeof debounce> | null>(null);
 
   useEffect(() => {
     buildFilterRef.current = buildFilter;
@@ -93,7 +91,7 @@ const useRelayConnectionPagination = <TFilter>({
   }, [refetchPolicy]);
 
   useEffect(() => {
-    const debouncedFn = _.debounce((text: string) => {
+    const debouncedFn = debounce((text: string) => {
       const currentRefetch = refetchRef.current;
 
       if (!currentRefetch) {

@@ -18,12 +18,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import pick from "lodash/pick";
 import { useCallback, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLocation, useNavigate } from "react-router-dom";
 import Alert from "react-bootstrap/Alert";
 import Form from "react-bootstrap/Form";
-import _ from "lodash";
 
 import AuthPage from "@/components/AuthPage";
 import Button from "@/components/Button";
@@ -61,7 +61,7 @@ const LoginPage = () => {
 
   const handleLogin = useCallback(
     (formData: FormData) => {
-      const session = _.pick(formData, ["tenantSlug", "authToken"]);
+      const session = pick(formData, ["tenantSlug", "authToken"]);
       const persistConfig = formData.keepMeLoggedIn;
       auth.login(session, persistConfig).then((success) => {
         if (success) {

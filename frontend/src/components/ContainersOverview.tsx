@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -61,7 +61,7 @@ const ContainersOverview = ({
   );
 
   const containers = useMemo<ContainerRecord[]>(() => {
-    return _.compact(containersFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(containersFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [containersFragment]);
 
   const [selectedIndex, setSelectedIndex] = useState(0);

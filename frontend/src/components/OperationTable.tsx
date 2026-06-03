@@ -18,6 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import compact from "lodash/compact";
+import { useMemo } from "react";
 import { FormattedDate, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
@@ -28,8 +30,6 @@ import type {
 
 import Table, { createColumnHelper } from "@/components/Table";
 import { Link, Route } from "@/Navigation";
-import _ from "lodash";
-import { useMemo } from "react";
 import {
   OperationStatus,
   operationStatusCodeMessages,
@@ -191,7 +191,7 @@ const OperationTable = ({
   );
 
   const otaOperations = useMemo<TableRecord[]>(() => {
-    return _.compact(otaOperationsFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(otaOperationsFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [otaOperationsFragment]);
 
   if (!otaOperations) {

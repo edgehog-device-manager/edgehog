@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -161,7 +161,7 @@ const FilesTable = ({
 }: Props) => {
   const filesFragment = useFragment(FILES_TABLE_FRAGMENT, filesRef || null);
   const files = useMemo<TableRecord[]>(() => {
-    return _.compact(filesFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(filesFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [filesFragment]);
 
   const [fileToDelete, setFileToDelete] = useState<TableRecord | null>(null);

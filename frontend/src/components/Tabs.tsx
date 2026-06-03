@@ -16,6 +16,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
+import intersection from "lodash/intersection";
+import keyBy from "lodash/keyBy";
+import keys from "lodash/keys";
+import union from "lodash/union";
+import uniqBy from "lodash/uniqBy";
 import {
   createContext,
   useCallback,
@@ -27,7 +32,6 @@ import {
 import Nav from "react-bootstrap/Nav";
 import NavItem from "react-bootstrap/NavItem";
 import NavLink from "react-bootstrap/NavLink";
-import _ from "lodash";
 
 type EventKey = string;
 
@@ -69,7 +73,7 @@ const Tabs = ({
   const [tabRefs, setTabRefs] = useState<TabRef[]>([]);
 
   const registerTab = useCallback((tabRef: TabRef) => {
-    setTabRefs((refs) => _.uniqBy([...refs, tabRef], "eventKey"));
+    setTabRefs((refs) => uniqBy([...refs, tabRef], "eventKey"));
   }, []);
 
   const unregisterTab = useCallback((eventKey: EventKey) => {
@@ -81,12 +85,12 @@ const Tabs = ({
   }, []);
 
   const sortedTabRefs = useMemo(() => {
-    const tabRefsByEventKey = _.keyBy(tabRefs, "eventKey");
-    const eventKeys = _.keys(tabRefsByEventKey);
+    const tabRefsByEventKey = keyBy(tabRefs, "eventKey");
+    const eventKeys = keys(tabRefsByEventKey);
     // 1. intersect tabsOrder with eventKeys to pick eventKeys in the correct order
     // 2. union the result with eventKeys to pick the remaining eventKeys
-    const sortedEventKeys = _.union(
-      _.intersection(tabsOrder, eventKeys),
+    const sortedEventKeys = union(
+      intersection(tabsOrder, eventKeys),
       eventKeys,
     );
     return sortedEventKeys.map((eventKey) => tabRefsByEventKey[eventKey]);

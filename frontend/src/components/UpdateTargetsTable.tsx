@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useMemo } from "react";
 import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -338,7 +338,7 @@ const UpdateTargetsTable = ({
   );
 
   const campaignTargets = useMemo<TableRecord[]>(() => {
-    return _.compact(campaignTargetsFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(campaignTargetsFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [campaignTargetsFragment]);
 
   return (
