@@ -506,48 +506,46 @@ const DeploymentDetails = ({
       return [];
     }
 
-    return releaseEdges
-      .flatMap((edge) => (edge?.node ? [edge.node] : []))
-      .filter((release) => {
-        if (release.version === currentVersion) {
-          return false;
+    return releaseEdges.reduce<SelectOption[]>((options, edge) => {
+      const release = edge?.node;
+
+      if (!release || release.version === currentVersion) {
+        return options;
+      }
+
+      const parsedCurrentVersion = semver.valid(currentVersion);
+      const parsedTargetVersion = semver.valid(release.version);
+
+      if (parsedCurrentVersion && parsedTargetVersion) {
+        if (!semver.gt(parsedTargetVersion, parsedCurrentVersion)) {
+          return options;
         }
+      }
 
-        const parsedCurrentVersion = semver.valid(currentVersion);
-        const parsedTargetVersion = semver.valid(release.version);
+      const systemModelNames = release.systemModels?.map((sm) => sm.name) ?? [];
+      const appliesToAll = systemModelNames.length === 0;
+      const matchesSystemModel =
+        appliesToAll ||
+        (systemModelName && systemModelNames.includes(systemModelName));
 
-        if (!parsedCurrentVersion || !parsedTargetVersion) {
-          return true;
-        }
+      const label = !matchesSystemModel
+        ? intl.formatMessage(
+            {
+              id: "components.DeploymentDetails.incompatibleVersion",
+              defaultMessage: "{version} (Incompatible system model)",
+            },
+            { version: release.version },
+          )
+        : release.version;
 
-        return semver.gt(parsedTargetVersion, parsedCurrentVersion);
-      })
-      .map((release) => {
-        const systemModelNames =
-          release.systemModels?.map((sm) => sm.name) ?? [];
-
-        const appliesToAll = systemModelNames.length === 0;
-
-        const matchesSystemModel =
-          appliesToAll ||
-          (systemModelName && systemModelNames.includes(systemModelName));
-
-        const label = !matchesSystemModel
-          ? intl.formatMessage(
-              {
-                id: "components.DeploymentDetails.incompatibleVersion",
-                defaultMessage: "{version} (Incompatible system model)",
-              },
-              { version: release.version },
-            )
-          : release.version;
-
-        return {
-          value: release.id,
-          label: label,
-          disabled: !(appliesToAll || matchesSystemModel),
-        };
+      options.push({
+        value: release.id,
+        label: label,
+        disabled: !(appliesToAll || matchesSystemModel),
       });
+
+      return options;
+    }, []);
   }, [
     deploymentRef?.release?.application?.releases?.edges,
     deploymentRef?.release?.version,

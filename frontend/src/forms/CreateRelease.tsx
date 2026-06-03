@@ -247,12 +247,19 @@ const CreateRelease = ({
                     !selectedDependencyContainerIds.includes(c.value),
                 );
 
-                const availableDependencies = containerDependenciesOptions
-                  .filter((c) => c.value !== currentContainerId)
-                  .map((c) => ({
-                    value: c.value,
-                    label: c.label,
-                  }));
+                const availableDependencies =
+                  containerDependenciesOptions.reduce<
+                    { value: string; label: string }[]
+                  >((dependencies, c) => {
+                    if (c.value !== currentContainerId) {
+                      dependencies.push({
+                        value: c.value,
+                        label: c.label,
+                      });
+                    }
+
+                    return dependencies;
+                  }, []);
 
                 return (
                   <Row className="mb-3 align-items-start" key={field.key}>

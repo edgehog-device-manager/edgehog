@@ -200,24 +200,41 @@ const ReuseContainerModal = ({
                 : undefined,
               hostname: c.hostname ?? undefined,
               networkMode: c.networkMode ?? undefined,
-              networks:
-                c.networks?.edges
-                  ?.map((n) => n?.node)
-                  .filter(Boolean)
-                  .map((node) => ({
-                    id: node.id,
-                  })) ?? undefined,
+              networks: c.networks?.edges
+                ? c.networks.edges.reduce<{ id: string }[]>(
+                    (networks, edge) => {
+                      const node = edge?.node;
+
+                      if (node) {
+                        networks.push({
+                          id: node.id,
+                        });
+                      }
+
+                      return networks;
+                    },
+                    [],
+                  )
+                : undefined,
               extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
               portBindings: c.portBindings ? [...c.portBindings] : undefined,
               binds: c.binds ? [...c.binds] : undefined,
-              volumes:
-                c.containerVolumes?.edges
-                  ?.map((v) => v?.node)
-                  .filter(Boolean)
-                  .map((v) => ({
-                    id: v.volume.id,
-                    target: v.target,
-                  })) ?? undefined,
+              volumes: c.containerVolumes?.edges
+                ? c.containerVolumes.edges.reduce<
+                    { id: string; target: string }[]
+                  >((volumes, edge) => {
+                    const node = edge?.node;
+
+                    if (node) {
+                      volumes.push({
+                        id: node.volume.id,
+                        target: node.target,
+                      });
+                    }
+
+                    return volumes;
+                  }, [])
+                : undefined,
               volumeDriver: c.volumeDriver ?? undefined,
               storageOpt: c.storageOpt ? [...c.storageOpt] : undefined,
               tmpfs: c.tmpfs ? [...c.tmpfs] : undefined,
@@ -244,15 +261,27 @@ const ReuseContainerModal = ({
                     value: item?.value ?? "",
                   }))
                 : undefined,
-              deviceMappings:
-                c.deviceMappings?.edges
-                  ?.map((dm) => dm?.node)
-                  .filter(Boolean)
-                  .map((dm) => ({
-                    pathInContainer: dm.pathInContainer,
-                    pathOnHost: dm.pathOnHost,
-                    cgroupPermissions: dm.cgroupPermissions,
-                  })) ?? undefined,
+              deviceMappings: c.deviceMappings?.edges
+                ? c.deviceMappings.edges.reduce<
+                    {
+                      pathInContainer: string;
+                      pathOnHost: string;
+                      cgroupPermissions: string;
+                    }[]
+                  >((deviceMappings, edge) => {
+                    const node = edge?.node;
+
+                    if (node) {
+                      deviceMappings.push({
+                        pathInContainer: node.pathInContainer,
+                        pathOnHost: node.pathOnHost,
+                        cgroupPermissions: node.cgroupPermissions,
+                      });
+                    }
+
+                    return deviceMappings;
+                  }, [])
+                : undefined,
             };
 
             setInitialData(initialData);
