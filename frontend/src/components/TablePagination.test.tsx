@@ -18,9 +18,21 @@
 
 import { it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-
-import TablePagination from "./TablePagination";
 import userEvent from "@testing-library/user-event";
+
+import TablePagination from "@/components/TablePagination";
+
+it("returns null when totalPages is less than 2", () => {
+  const pageChangeHandler = vi.fn();
+  const { container } = render(
+    <TablePagination
+      activePage={0}
+      totalPages={1}
+      onPageChange={pageChangeHandler}
+    />,
+  );
+  expect(container).toBeEmptyDOMElement();
+});
 
 it("renders correctly", () => {
   const pageChangeHandler = vi.fn();
@@ -37,12 +49,14 @@ it("renders correctly", () => {
   expect(screen.getByTestId("pagination-item-3")).toBeVisible();
   expect(screen.getByTestId("pagination-item-4")).toBeVisible();
   expect(screen.queryByTestId("pagination-item-5")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
+
+  const items = screen.getAllByRole("listitem");
+  expect(items[0]).toHaveClass("disabled");
+  expect(items[items.length - 1]).not.toHaveClass("disabled");
 
   rerender(
     <TablePagination
-      activePage={5}
+      activePage={4}
       totalPages={5}
       onPageChange={pageChangeHandler}
     />,
@@ -53,8 +67,20 @@ it("renders correctly", () => {
   expect(screen.getByTestId("pagination-item-3")).toBeVisible();
   expect(screen.getByTestId("pagination-item-4")).toBeVisible();
   expect(screen.queryByTestId("pagination-item-5")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
+
+  const itemsAfter = screen.getAllByRole("listitem");
+  expect(itemsAfter[0]).not.toHaveClass("disabled");
+  expect(itemsAfter[itemsAfter.length - 1]).toHaveClass("disabled");
+});
+
+it("marks the active page item correctly", () => {
+  render(
+    <TablePagination activePage={2} totalPages={5} onPageChange={vi.fn()} />,
+  );
+
+  const items = screen.getAllByRole("listitem");
+  expect(items[4]).toHaveClass("active");
+  expect(items[3]).not.toHaveClass("active");
 });
 
 it("shows only available pages", () => {
@@ -70,8 +96,10 @@ it("shows only available pages", () => {
   expect(screen.getByTestId("pagination-item-1")).toBeVisible();
   expect(screen.getByTestId("pagination-item-2")).toBeVisible();
   expect(screen.queryByTestId("pagination-item-3")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
+
+  const items = screen.getAllByRole("listitem");
+  expect(items[0]).not.toHaveClass("disabled");
+  expect(items[items.length - 1]).toHaveClass("disabled");
 });
 
 it("shows there are more pages available", () => {
@@ -89,7 +117,9 @@ it("shows there are more pages available", () => {
   expect(screen.getByTestId("pagination-item-3")).toBeVisible();
   expect(screen.getByTestId("pagination-item-4")).toBeVisible();
   expect(screen.queryByTestId("pagination-item-5")).not.toBeInTheDocument();
-  expect(screen.queryByTestId("pagination-first")).not.toBeInTheDocument();
+
+  const items1 = screen.getAllByRole("listitem");
+  expect(items1[0]).toHaveClass("disabled");
   expect(screen.getByTestId("pagination-last")).toBeVisible();
 
   rerender(
@@ -111,7 +141,7 @@ it("shows there are more pages available", () => {
 
   rerender(
     <TablePagination
-      activePage={30}
+      activePage={29}
       totalPages={30}
       onPageChange={pageChangeHandler}
     />,
@@ -123,8 +153,30 @@ it("shows there are more pages available", () => {
   expect(screen.getByTestId("pagination-item-28")).toBeVisible();
   expect(screen.getByTestId("pagination-item-29")).toBeVisible();
   expect(screen.queryByTestId("pagination-item-30")).not.toBeInTheDocument();
+
+  const items3 = screen.getAllByRole("listitem");
   expect(screen.getByTestId("pagination-first")).toBeVisible();
-  expect(screen.queryByTestId("pagination-last")).not.toBeInTheDocument();
+  expect(items3[items3.length - 1]).toHaveClass("disabled");
+});
+
+it("manages disabled states for boundary navigation buttons", () => {
+  const { rerender } = render(
+    <TablePagination activePage={0} totalPages={5} onPageChange={vi.fn()} />,
+  );
+
+  const items1 = screen.getAllByRole("listitem");
+  expect(items1[1]).toHaveClass("disabled");
+  expect(items1[0]).toHaveClass("disabled");
+  expect(items1[items1.length - 2]).not.toHaveClass("disabled");
+
+  rerender(
+    <TablePagination activePage={4} totalPages={5} onPageChange={vi.fn()} />,
+  );
+
+  const items2 = screen.getAllByRole("listitem");
+  expect(items2[1]).not.toHaveClass("disabled");
+  expect(items2[items2.length - 2]).toHaveClass("disabled");
+  expect(items2[items2.length - 1]).toHaveClass("disabled");
 });
 
 it("correctly notifies page index on change", async () => {
@@ -147,23 +199,34 @@ it("correctly notifies page index on change", async () => {
 
   await user.click(screen.getByTestId("pagination-last"));
   expect(pageChangeHandler).toHaveBeenCalledWith(29);
+
+  await user.click(screen.getByText("‹"));
+  expect(pageChangeHandler).toHaveBeenCalledWith(14);
+
+  await user.click(screen.getByText("›"));
+  expect(pageChangeHandler).toHaveBeenCalledWith(16);
 });
 
-it("shows that more pages can be loaded", () => {
+it("shows that more pages can be loaded and triggers onLoadMore", async () => {
   const pageChangeHandler = vi.fn();
   const onLoadMoreHandler = vi.fn();
+  const user = userEvent.setup();
+
   render(
     <TablePagination
-      activePage={0}
+      activePage={1}
       totalPages={2}
       canLoadMorePages
       onLoadMore={onLoadMoreHandler}
       onPageChange={pageChangeHandler}
     />,
   );
-  const paginationLast = screen.queryByTestId("pagination-last");
+
+  const paginationLast = screen.getByTestId("pagination-last");
   expect(paginationLast).toBeInTheDocument();
   expect(onLoadMoreHandler).toHaveBeenCalledTimes(0);
-  paginationLast?.click();
+
+  await user.click(paginationLast);
   expect(onLoadMoreHandler).toHaveBeenCalledTimes(1);
+  expect(pageChangeHandler).not.toHaveBeenCalled();
 });

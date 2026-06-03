@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,10 +18,48 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-.pagination .page-item .page-link {
-  border: none;
-}
+.custom-pagination {
+  gap: 4px;
 
-.pagination .page-item.active .page-link {
-  border-radius: 0.25rem;
+  .page-item {
+    .page-link {
+      color: var(--bs-secondary-color);
+      font-weight: 500;
+      font-size: 0.85rem;
+      min-width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.375rem !important;
+      transition: all 0.15s ease-in-out;
+      border: 1px groove;
+
+      &:hover {
+        background-color: var(--bs-light);
+        color: var(--bs-dark);
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+    }
+
+    &.active {
+      .page-link {
+        background-color: var(--bs-primary) !important;
+        color: #fff !important;
+        font-weight: 600;
+      }
+    }
+
+    &.disabled {
+      .page-link {
+        color: var(--bs-tertiary-color);
+        background-color: transparent;
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
 }

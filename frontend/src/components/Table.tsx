@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -37,10 +37,12 @@ import type {
   SortingState,
 } from "@tanstack/react-table";
 import RBTable from "react-bootstrap/Table";
+import { FormattedMessage } from "react-intl";
 
 import Icon from "@/components/Icon";
 import SearchBox from "@/components/SearchBox";
 import TablePagination from "@/components/TablePagination";
+import "@/components/Table.scss";
 
 type SortDirectionIndicatorProps = {
   className?: string;
@@ -48,16 +50,19 @@ type SortDirectionIndicatorProps = {
 };
 
 const SortDirectionIndicator = ({
-  className,
+  className = "",
   descending,
 }: SortDirectionIndicatorProps) => (
-  <span className={className}>
+  <span className={`${className} sort-direction-indicator`}>
     {descending ? <Icon icon="arrowDown" /> : <Icon icon="arrowUp" />}
   </span>
 );
 
+const HIDDEN_COLUMN_IDS: string[] = [];
+const SORT_BY_DEFAULT: SortingState = [];
+
 export type TableProps<T extends RowData> = {
-  columns: ColumnDef<T, any>[];
+  columns: ColumnDef<T, unknown>[];
   data: readonly T[];
   className?: string;
   headerStyle?: React.CSSProperties;
@@ -72,20 +77,29 @@ export type TableProps<T extends RowData> = {
 const Table = <T extends RowData>({
   columns,
   data,
-  className,
+  className = "",
   headerStyle,
-  hiddenColumns = [],
-  sortBy = [],
+  hiddenColumns = HIDDEN_COLUMN_IDS,
+  sortBy = SORT_BY_DEFAULT,
   maxPageRows = 10,
   searchFunction,
   hideSearch = false,
   getRowProps,
 }: TableProps<T>) => {
-  const [pagination, setPagination] = useState<PaginationState>({
-    pageIndex: 0,
-    pageSize: maxPageRows,
-  });
+  const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>(sortBy);
+
+  const pagination = useMemo<PaginationState>(() => {
+    const totalPages = Math.ceil(data.length / maxPageRows);
+    const safePageIndex =
+      totalPages > 0 ? Math.min(pageIndex, totalPages - 1) : 0;
+
+    return {
+      pageIndex: safePageIndex,
+      pageSize: maxPageRows,
+    };
+  }, [pageIndex, maxPageRows, data.length]);
+
   const columnVisibility = useMemo(
     () =>
       hiddenColumns.reduce(
@@ -94,18 +108,6 @@ const Table = <T extends RowData>({
       ),
     [hiddenColumns],
   );
-
-  useEffect(() => {
-    setPagination((prev) => {
-      const totalPages = Math.ceil(data.length / maxPageRows);
-      return {
-        ...prev,
-        pageSize: maxPageRows,
-        pageIndex:
-          totalPages > 0 ? Math.min(prev.pageIndex, totalPages - 1) : 0,
-      };
-    });
-  }, [maxPageRows, data.length]);
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable<T>({
@@ -117,81 +119,133 @@ const Table = <T extends RowData>({
       sorting,
     },
     globalFilterFn: searchFunction ?? "auto",
-    onPaginationChange: (newPagination) => {
-      setPagination((prev) => ({
-        ...prev,
-        ...newPagination,
-      }));
+    onPaginationChange: (updater) => {
+      const nextPagination =
+        typeof updater === "function" ? updater(pagination) : updater;
+      setPageIndex(nextPagination.pageIndex);
     },
     onSortingChange: setSorting,
-
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  const totalRows = table.getFilteredRowModel().rows.length;
+  const startRow =
+    totalRows === 0 ? 0 : pagination.pageIndex * pagination.pageSize + 1;
+  const endRow = Math.min(
+    (pagination.pageIndex + 1) * pagination.pageSize,
+    totalRows,
+  );
+
   return (
-    <div className={className}>
-      {hideSearch || (
-        <div className="py-2 mb-3">
+    <div className={`${className}`}>
+      {!hideSearch && (
+        <div className="mb-4 w-100">
           <SearchBox onChange={table.setGlobalFilter} />
         </div>
       )}
-      <RBTable responsive hover>
+
+      <RBTable responsive hover className="mb-0">
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  style={headerStyle}
-                  key={header.id}
-                  colSpan={header.colSpan}
-                  onClick={header.column.getToggleSortingHandler()}
-                >
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
+            <tr
+              key={headerGroup.id}
+              className="border-bottom border-light-subtle"
+            >
+              {headerGroup.headers.map((header) => {
+                const isSortable = header.column.getCanSort();
+                const isSorted = header.column.getIsSorted();
+
+                return (
+                  <th
+                    key={header.id}
+                    colSpan={header.colSpan}
+                    style={headerStyle}
+                    className={`py-3 fw-bold table-header ${isSortable ? "is-sortable" : ""}`}
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
+                    <div className="d-flex align-items-center text-nowrap">
+                      <span>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                      </span>
+                      {isSorted && (
+                        <SortDirectionIndicator
+                          className="ms-2"
+                          descending={isSorted === "desc"}
+                        />
                       )}
-                  {header.column.getIsSorted() && (
-                    <SortDirectionIndicator
-                      className="ms-2"
-                      descending={header.column.getIsSorted() === "desc"}
-                    />
-                  )}
-                </th>
-              ))}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           ))}
         </thead>
+
         <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr {...(getRowProps ? getRowProps(row) : {})} key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} style={headerStyle}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
+          {table.getRowModel().rows.length > 0 ? (
+            table.getRowModel().rows.map((row) => (
+              <Fragment key={row.id}>
+                <tr {...(getRowProps ? getRowProps(row) : {})}>
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="table-cell">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              </Fragment>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={table.getVisibleFlatColumns().length}
+                className="text-center py-4 text-muted small"
+              >
+                <FormattedMessage
+                  id="components.Table.noRecords"
+                  defaultMessage="No records to display."
+                />
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </RBTable>
-      <TablePagination
-        totalPages={table.getPageCount()}
-        activePage={pagination.pageIndex}
-        onPageChange={(page) =>
-          setPagination((prev) => ({
-            ...prev,
-            pageIndex: page,
-          }))
-        }
-      />
+
+      <div className="d-flex flex-column flex-sm-row justify-content-between align-items-center gap-3 pt-3">
+        <div className="text-muted small">
+          <FormattedMessage
+            id="components.Table.showing"
+            defaultMessage="Showing {start} to {end} of {total} entries"
+            values={{
+              start: <span className="fw-semibold text-dark">{startRow}</span>,
+              end: <span className="fw-semibold text-dark">{endRow}</span>,
+              total: <span className="fw-semibold text-dark">{totalRows}</span>,
+            }}
+          />
+        </div>
+
+        <TablePagination
+          totalPages={table.getPageCount()}
+          activePage={pagination.pageIndex}
+          onPageChange={setPageIndex}
+        />
+      </div>
     </div>
   );
 };
 
-export default Table;
-export { createColumnHelper };
 export type { Row };
+
+export { createColumnHelper, SortDirectionIndicator };
+
+export default Table;

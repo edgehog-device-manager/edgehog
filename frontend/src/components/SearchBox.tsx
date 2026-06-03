@@ -24,6 +24,7 @@ import InputGroup from "react-bootstrap/InputGroup";
 import { useIntl } from "react-intl";
 
 import Icon from "@/components/Icon";
+import "@/components/SearchBox.scss";
 
 interface Props {
   className?: string;
@@ -45,22 +46,22 @@ const SearchBox = ({ className = "", onChange, value }: Props) => {
   );
 
   return (
-    <Form className={`justify-content-end ${className}`}>
-      <InputGroup>
+    <Form className={`w-100 ${className}`}>
+      <InputGroup className="custom-search-group">
+        <InputGroup.Text className="search-icon-addon px-3">
+          <Icon icon="search" />
+        </InputGroup.Text>
         <Form.Control
-          className="border-end-0"
+          className="search-input"
           type="search"
           placeholder={intl.formatMessage({
             id: "components.SearchBox.searchPlaceholder",
-            defaultMessage: "Search",
+            defaultMessage: "Search...",
             description: "Placeholder for the search input of the SearchBox",
           })}
           value={value}
           onChange={handleChange}
         />
-        <InputGroup.Text className="bg-transparent">
-          <Icon icon="search" />
-        </InputGroup.Text>
       </InputGroup>
     </Form>
   );

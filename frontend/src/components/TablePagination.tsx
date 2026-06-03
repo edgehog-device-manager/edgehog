@@ -19,17 +19,17 @@
 import React from "react";
 import Pagination from "react-bootstrap/Pagination";
 
-import "./TablePagination.scss";
+import "@/components/TablePagination.scss";
 
 const MAX_SHOWN_PAGES = 5;
 
-interface Props {
+type TablePaginationProps = {
   activePage: number;
   canLoadMorePages?: boolean;
   onLoadMore?: () => void;
   onPageChange: (pageIndex: number) => void;
   totalPages: number;
-}
+};
 
 const TablePagination = ({
   activePage,
@@ -37,7 +37,7 @@ const TablePagination = ({
   onLoadMore,
   onPageChange,
   totalPages,
-}: Props): React.ReactElement | null => {
+}: TablePaginationProps): React.ReactElement | null => {
   if (totalPages < 2) {
     return null;
   }
@@ -55,46 +55,48 @@ const TablePagination = ({
     startPage = 0;
   }
 
-  const items = [];
-  // eslint-disable-next-line react-hooks/immutability
-  for (let pageIndex = startPage; pageIndex <= endPage; pageIndex += 1) {
-    items.push(
+  const items = Array.from({ length: endPage - startPage + 1 }, (_, index) => {
+    const pageIndex = startPage + index;
+    return (
       <Pagination.Item
         data-testid={`pagination-item-${pageIndex}`}
-        className="border-0"
         key={pageIndex}
         active={pageIndex === activePage}
-        onClick={() => {
-          onPageChange(pageIndex);
-        }}
+        onClick={() => onPageChange(pageIndex)}
       >
         {pageIndex + 1}
-      </Pagination.Item>,
+      </Pagination.Item>
     );
-  }
+  });
 
   return (
-    <Pagination className="justify-content-center border-0">
-      {startPage > 0 && (
-        <Pagination.First
-          data-testid="pagination-first"
-          onClick={() => {
-            onPageChange(0);
-          }}
-        />
-      )}
+    <Pagination className="custom-pagination mb-0" size="sm">
+      <Pagination.First
+        data-testid="pagination-first"
+        disabled={activePage === 0}
+        onClick={() => onPageChange(0)}
+      />
+      <Pagination.Prev
+        disabled={activePage === 0}
+        onClick={() => onPageChange(activePage - 1)}
+      />
+
       {items}
-      {(endPage < totalPages - 1 || canLoadMorePages) && (
-        <Pagination.Last
-          data-testid="pagination-last"
-          onClick={() => {
-            if (endPage === totalPages - 1) {
-              return onLoadMore && onLoadMore();
-            }
-            return onPageChange(totalPages - 1);
-          }}
-        />
-      )}
+
+      <Pagination.Next
+        disabled={activePage === totalPages - 1}
+        onClick={() => onPageChange(activePage + 1)}
+      />
+      <Pagination.Last
+        data-testid="pagination-last"
+        disabled={activePage === totalPages - 1}
+        onClick={() => {
+          if (endPage === totalPages - 1 && canLoadMorePages) {
+            return onLoadMore && onLoadMore();
+          }
+          return onPageChange(totalPages - 1);
+        }}
+      />
     </Pagination>
   );
 };
