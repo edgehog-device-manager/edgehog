@@ -22,21 +22,21 @@ defmodule Ash.Astarte.Triggers.Handler do
   @moduledoc """
   Processes incoming Astarte trigger payloads and dispatches them to configured handlers.
 
-  This module acts as the orchestration layer for Astarte events within the Ash/Edgehog 
-  ecosystem. It performs payload validation, realm lookups, and identifies which 
+  This module acts as the orchestration layer for Astarte events within the Ash/Edgehog
+  ecosystem. It performs payload validation, realm lookups, and identifies which
   resource-specific or fallback handlers should process a given event.
 
   ## Processing Flow
 
   1.  **Validation**: Ensures the realm name is valid.
   2.  **Payload Casting**: Attempts to cast the raw data into an `Ash.Astarte.Triggers.Payload`.
-  3.  **Realm Lookup**: Fetches the associated `Edgehog.Astarte.Realm` record to provide 
+  3.  **Realm Lookup**: Fetches the associated `Edgehog.Astarte.Realm` record to provide
       context for the handler.
-  4.  **Handler Discovery**: 
+  4.  **Handler Discovery**:
       * Identifies handlers registered on the specific resource associated with the event.
-      * Applies attribute-based filters (configured via the handler definition) to 
+      * Applies attribute-based filters (configured via the handler definition) to
           ensure only relevant events are processed.
-      * If no specific handlers are found or the data is unstructured, it defaults to 
+      * If no specific handlers are found or the data is unstructured, it defaults to
           **Fallback Handlers** defined in the domain configuration.
   5.  **Dispatch**: Calls `handle_event/3` on each identified handler module.
 
@@ -74,42 +74,42 @@ defmodule Ash.Astarte.Triggers.Handler do
         timestamp: timestamp
       }
 
-      function = :handle_event
-      args = [event, [], context]
-
-      with {:ok, _} <- map_handling(handlers, function, args, tenant, realm.id), do: :ok
+      map_handling(handlers, :handle_event, [event, [], context], tenant, realm.id)
     end
   end
 
-  defp map_handling(ms, f, a, tenant, realm_id) do
-    [event | _] = a
-    [m | _] = ms
+  defp map_handling([module | _], function, [event | _] = args, tenant, realm_id) do
+    case apply(module, function, args) do
+      {:error, error} = handled ->
+        Logger.error("Error handling a trigger",
+          error: error,
+          trigger: event,
+          tenant: tenant,
+          realm_id: realm_id
+        )
 
-    handled = apply(m, f, a)
+        handled
 
-    with {:error, error} <- handled do
-      opts = [error: error, trigger: event, tenant: tenant, realm_id: realm_id]
-      Logger.error("Error handling a trigger", opts)
-
-      handled
+      other ->
+        other
     end
   end
 
-  defp unpack_payload(%Payload{device_id: device_id, timestamp: timestamp, event: event}) do
-    %Ash.Union{
-      value: event
-    } = event
+  defp map_handling([], _function, _args, _tenant, _realm_id), do: {:ok, :no_handlers}
 
-    {event, device_id, timestamp}
+  defp unpack_payload(%Payload{
+         device_id: device_id,
+         timestamp: timestamp,
+         event: %Ash.Union{value: event_value}
+       }) do
+    {event_value, device_id, timestamp}
   end
 
-  defp unpack_payload(raw_data) do
-    %{
-      "device_id" => device_id,
-      "timestamp" => timestamp,
-      "event" => event
-    } = raw_data
-
+  defp unpack_payload(%{
+         "device_id" => device_id,
+         "timestamp" => timestamp,
+         "event" => event
+       }) do
     {event, device_id, timestamp}
   end
 
@@ -122,10 +122,9 @@ defmodule Ash.Astarte.Triggers.Handler do
 
   defp handlers_from_payload(%Payload{event: %Ash.Union{value: event}} = payload) do
     handlers =
-      event.__struct__
-      |> Ash.Astarte.Triggers.Resource.Info.handlers()
-      |> Enum.filter(&against_handler_filter(&1, event))
-      |> Enum.map(& &1.module)
+      for handler <- Ash.Astarte.Triggers.Resource.Info.handlers(event.__struct__),
+          against_handler_filter(handler, event),
+          do: handler.module
 
     {:ok, payload, handlers}
   end
@@ -143,33 +142,23 @@ defmodule Ash.Astarte.Triggers.Handler do
     |> Enum.map(& &1.module)
   end
 
-  defp valid_data?(data) do
-    %{
-      "device_id" => device_id,
-      "timestamp" => timestamp,
-      "event" => event
-    } = data
-
-    valid_timestamp = match?({:error, _}, DateTime.from_unix(timestamp))
-
-    is_binary(device_id) && valid_timestamp && is_map(event)
+  defp valid_data?(%{"device_id" => device_id, "timestamp" => timestamp, "event" => event})
+       when is_binary(device_id) and is_map(event) do
+    match?({:error, _}, DateTime.from_unix(timestamp))
   end
 
-  defp valid_realm?(realm_name) do
-    if is_nil(realm_name),
-      do: {:error, :invalid_realm_name},
-      else: {:ok, realm_name}
+  defp valid_data?(_data), do: false
+
+  defp valid_realm?(nil), do: {:error, :invalid_realm_name}
+  defp valid_realm?(realm_name), do: {:ok, realm_name}
+
+  defp against_handler_filter(%{filter: nil}, _event), do: true
+
+  defp against_handler_filter(%{filter: filters}, event) do
+    Enum.all?(filters, fn {attribute, value} ->
+      Map.get(event, attribute) == value
+    end)
   end
 
-  defp against_handler_filter(handler, event) do
-    case Map.get(handler, :filter) do
-      nil ->
-        true
-
-      filters ->
-        Enum.all?(filters, fn {attribute, value} ->
-          Map.get(event, attribute) == value
-        end)
-    end
-  end
+  defp against_handler_filter(_handler, _event), do: true
 end

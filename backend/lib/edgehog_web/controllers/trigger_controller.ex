@@ -27,8 +27,12 @@ defmodule EdgehogWeb.AstarteTriggerController do
     tenant = Ash.PlugHelpers.get_tenant(conn)
     realm = get_realm_name(conn)
 
-    with :ok <- Handler.handle_trigger(tenant, realm, conn.body_params) do
-      send_resp(conn, :ok, "")
+    case Handler.handle_trigger(tenant, realm, conn.body_params) do
+      {:error, _reason} = error ->
+        error
+
+      _success ->
+        send_resp(conn, :ok, "")
     end
   end
 

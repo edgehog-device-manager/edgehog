@@ -85,6 +85,25 @@ type FileNode = NonNullable<
   NonNullable<FileSelect_FilesFragment$data["files"]>["edges"]
 >[number]["node"];
 
+const getFileLabel = (file: FileNode) => file.name;
+const getFileValue = (file: FileNode) => file.id;
+const noFileOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "components.FileSelect.noFilesFoundMatching",
+          defaultMessage: 'No files found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "components.FileSelect.noFilesAvailable",
+        defaultMessage: "No files available",
+      });
+
 type ControllerProps = {
   value: FileNode;
   invalid: boolean;
@@ -139,22 +158,6 @@ const FileSelect = ({ filesFragmentRef, controllerProps }: FileSelectProps) => {
     );
   }, [paginationData]);
 
-  const getFileLabel = (file: FileNode) => file.name;
-  const getFileValue = (file: FileNode) => file.id;
-  const noFileOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "components.FileSelect.noFilesFoundMatching",
-            defaultMessage: 'No files found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "components.FileSelect.noFilesAvailable",
-          defaultMessage: "No files available",
-        });
-
   return (
     <Select
       value={controllerProps.value}
@@ -167,7 +170,9 @@ const FileSelect = ({ filesFragmentRef, controllerProps }: FileSelectProps) => {
       options={files}
       getOptionLabel={getFileLabel}
       getOptionValue={getFileValue}
-      noOptionsMessage={({ inputValue }) => noFileOptionsMessage(inputValue)}
+      noOptionsMessage={({ inputValue }) =>
+        noFileOptionsMessage(intl, inputValue)
+      }
       isLoading={isLoadingNext}
       onMenuScrollToBottom={onLoadMore}
       onInputChange={(text) => setSearchText(text)}

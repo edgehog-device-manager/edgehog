@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useMemo } from "react";
 import { Button } from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
@@ -75,7 +75,7 @@ const ReleasesTable = ({
   );
 
   const releases = useMemo<ReleaseTableRecord[]>(() => {
-    return _.compact(releasesFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(releasesFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [releasesFragment]);
 
   const columnHelper = createColumnHelper<ReleaseTableRecord>();

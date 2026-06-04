@@ -1,5 +1,5 @@
 <!---
-  Copyright 2025 SECO Mind Srl
+  Copyright 2025-2026 SECO Mind Srl
 
   SPDX-License-Identifier: Apache-2.0
 -->
@@ -26,7 +26,7 @@ Before we get started, make sure you have the following tools installed:
 First, clone the Edgehog repository and navigate into it:
 
 ```sh
-$ git clone https://github.com/edgehog-device-manager/edgehog && cd edgehog
+$ git clone --recurse-submodules git@github.com:edgehog-device-manager/edgehog.git && cd edgehog
 ```
 
 ## Discover Available Commands

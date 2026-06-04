@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -121,7 +121,7 @@ const ChannelsTable = ({
   );
 
   const channels = useMemo<TableRecord[]>(() => {
-    return _.compact(channelsFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(channelsFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [channelsFragment]);
   return (
     <InfiniteTable

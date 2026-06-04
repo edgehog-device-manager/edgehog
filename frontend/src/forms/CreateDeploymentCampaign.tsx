@@ -187,7 +187,54 @@ const transformOutputData = (
   };
 };
 
-type Props = {
+const operationTypesOptions: SelectOption[] = [
+  { value: "Deploy", label: "Deploy" },
+  { value: "Start", label: "Start" },
+  { value: "Stop", label: "Stop" },
+  { value: "Upgrade", label: "Upgrade" },
+  { value: "Delete", label: "Delete" },
+];
+
+const getApplicationLabel = (application: ApplicationRecord) =>
+  application.name;
+const getApplicationValue = (application: ApplicationRecord) => application.id;
+const noApplicationOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.CreateDeploymentCampaign.noApplicationsFoundMatching",
+          defaultMessage: 'No applications found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.CreateDeploymentCampaign.noApplicationsAvailable",
+        defaultMessage: "No applications available",
+      });
+
+const getChannelLabel = (channel: ChannelRecord) => channel.name;
+const getChannelValue = (channel: ChannelRecord) => channel.id;
+const noChannelOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.CreateDeploymentCampaign.noChannelsFoundMatching",
+          defaultMessage: 'No channels found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.CreateDeploymentCampaign.noChannelsAvailable",
+        defaultMessage: "No channels available",
+      });
+
+type CreateDeploymentCampaignFormProps = {
   campaignOptionsRef: CreateDeploymentCampaign_ApplicationOptionsFragment$key &
     CreateDeploymentCampaign_ChannelOptionsFragment$key;
   isLoading?: boolean;
@@ -198,7 +245,7 @@ const CreateDeploymentCampaignForm = ({
   campaignOptionsRef,
   isLoading = false,
   onSubmit,
-}: Props) => {
+}: CreateDeploymentCampaignFormProps) => {
   const intl = useIntl();
 
   const {
@@ -264,24 +311,6 @@ const CreateDeploymentCampaignForm = ({
     );
   }, [applicationPaginationData]);
 
-  const getApplicationLabel = (application: ApplicationRecord) =>
-    application.name;
-  const getApplicationValue = (application: ApplicationRecord) =>
-    application.id;
-  const noApplicationOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.CreateDeploymentCampaign.noApplicationsFoundMatching",
-            defaultMessage: 'No applications found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.CreateDeploymentCampaign.noApplicationsAvailable",
-          defaultMessage: "No applications available",
-        });
-
   const { onChange: onApplicationChange } = register("application");
 
   const {
@@ -327,30 +356,6 @@ const CreateDeploymentCampaignForm = ({
         .filter((node): node is ChannelRecord => node != null) ?? []
     );
   }, [channelPaginationData]);
-
-  const getChannelLabel = (channel: ChannelRecord) => channel.name;
-  const getChannelValue = (channel: ChannelRecord) => channel.id;
-  const noChannelOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.CreateDeploymentCampaign.noChannelsFoundMatching",
-            defaultMessage: 'No channels found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.CreateDeploymentCampaign.noChannelsAvailable",
-          defaultMessage: "No channels available",
-        });
-
-  const operationTypesOptions: SelectOption[] = [
-    { value: "Deploy", label: "Deploy" },
-    { value: "Start", label: "Start" },
-    { value: "Stop", label: "Stop" },
-    { value: "Upgrade", label: "Upgrade" },
-    { value: "Delete", label: "Delete" },
-  ];
 
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
@@ -477,7 +482,7 @@ const CreateDeploymentCampaignForm = ({
                 getOptionLabel={getApplicationLabel}
                 getOptionValue={getApplicationValue}
                 noOptionsMessage={({ inputValue }) =>
-                  noApplicationOptionsMessage(inputValue)
+                  noApplicationOptionsMessage(intl, inputValue)
                 }
                 isLoading={isLoadingNextApplication}
                 onMenuScrollToBottom={onLoadMoreApplicationOptions}
@@ -600,7 +605,7 @@ const CreateDeploymentCampaignForm = ({
                 getOptionLabel={getChannelLabel}
                 getOptionValue={getChannelValue}
                 noOptionsMessage={({ inputValue }) =>
-                  noChannelOptionsMessage(inputValue)
+                  noChannelOptionsMessage(intl, inputValue)
                 }
                 isLoading={isLoadingNextChannel}
                 onMenuScrollToBottom={onLoadMoreChannelOptions}

@@ -59,6 +59,32 @@ const initialData: ReleaseFormData = {
   containerDependencies: [],
 };
 
+const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
+  const containers = data.containers.map((container) => ({
+    id: container.id,
+    dependencies:
+      data.containerDependencies?.find(
+        (contDep) => contDep.containerId === container.id,
+      )?.dependencies ?? [],
+  }));
+
+  const releaseContainers = containers.flatMap((container) =>
+    container.dependencies.map((dependencyId) => ({
+      containerId: container.id,
+      dependencyId: dependencyId,
+    })),
+  );
+
+  const release: ReleaseSubmitData = {
+    version: data.version,
+    containers: data.containers,
+    containerDependencies: releaseContainers,
+    requiredSystemModels: data.requiredSystemModels,
+  };
+
+  return release;
+};
+
 type CreateReleaseProps = {
   requiredSystemModelsOptionsRef: hooks_SystemModelsOptionsFragment$key;
   containersOptionsRef: hooks_ContainersOptionsFragment$key;
@@ -115,41 +141,15 @@ const CreateRelease = ({
     );
   }, [selectedContainers, containerOptions]);
 
-  const selectedDependencyContainerIds = watchedDependencies
-    .map((d) => d?.containerId)
-    .filter(Boolean);
+  const selectedDependencyContainerIds = watchedDependencies.flatMap((d) =>
+    d?.containerId ? [d.containerId] : [],
+  );
 
   const canAddDependencies =
     selectedContainers.length > 1 &&
     watchedDependencies.every(
       (v) => v?.containerId?.trim() && v?.dependencies?.length > 0,
     );
-
-  const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
-    const containers = data.containers.map((container) => ({
-      id: container.id,
-      dependencies:
-        data.containerDependencies?.find(
-          (contDep) => contDep.containerId === container.id,
-        )?.dependencies ?? [],
-    }));
-
-    const releaseContainers = containers.flatMap((container) =>
-      container.dependencies.map((dependencyId) => ({
-        containerId: container.id,
-        dependencyId: dependencyId,
-      })),
-    );
-
-    const release: ReleaseSubmitData = {
-      version: data.version,
-      containers: data.containers,
-      containerDependencies: releaseContainers,
-      requiredSystemModels: data.requiredSystemModels,
-    };
-
-    return release;
-  };
 
   const onFormSubmit = (data: ReleaseFormData) =>
     onSubmit(transformOutputData(data));
@@ -247,12 +247,19 @@ const CreateRelease = ({
                     !selectedDependencyContainerIds.includes(c.value),
                 );
 
-                const availableDependencies = containerDependenciesOptions
-                  .filter((c) => c.value !== currentContainerId)
-                  .map((c) => ({
-                    value: c.value,
-                    label: c.label,
-                  }));
+                const availableDependencies =
+                  containerDependenciesOptions.reduce<
+                    { value: string; label: string }[]
+                  >((dependencies, c) => {
+                    if (c.value !== currentContainerId) {
+                      dependencies.push({
+                        value: c.value,
+                        label: c.label,
+                      });
+                    }
+
+                    return dependencies;
+                  }, []);
 
                 return (
                   <Row className="mb-3 align-items-start" key={field.key}>

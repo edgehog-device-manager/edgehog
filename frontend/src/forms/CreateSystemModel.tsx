@@ -115,7 +115,28 @@ const initialData: SystemModelFormData = {
   pictureFile: null,
 };
 
-type Props = {
+const getHardwareTypeLabel = (hardwareType: HardwareTypeRecord) =>
+  hardwareType.name;
+const getHardwareTypeValue = (hardwareType: HardwareTypeRecord) =>
+  hardwareType.id;
+const noHardwareTypeOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.CreateSystemModel.noHardwareTypesFoundMatching",
+          defaultMessage: 'No hardware types found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.CreateSystemModel.noHardwareTypesAvailable",
+        defaultMessage: "No hardware types available",
+      });
+
+type CreateSystemModelFormProps = {
   optionsRef: CreateSystemModel_OptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: SystemModelOutputData) => void;
@@ -125,7 +146,7 @@ const CreateSystemModelForm = ({
   optionsRef,
   isLoading = false,
   onSubmit,
-}: Props) => {
+}: CreateSystemModelFormProps) => {
   const intl = useIntl();
 
   const {
@@ -167,22 +188,6 @@ const CreateSystemModelForm = ({
         .filter((node): node is HardwareTypeRecord => node != null) ?? []
     );
   }, [paginationData]);
-
-  const getHardwareTypeLabel = (ht: HardwareTypeRecord) => ht.name;
-  const getHardwareTypeValue = (ht: HardwareTypeRecord) => ht.id;
-  const noHardwareTypeOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.CreateSystemModel.noHardwareTypesFoundMatching",
-            defaultMessage: 'No hardware types found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.CreateSystemModel.noHardwareTypesAvailable",
-          defaultMessage: "No hardware types available",
-        });
 
   const { defaultLocale: locale } = paginationData.tenantInfo;
 
@@ -330,7 +335,7 @@ const CreateSystemModelForm = ({
                       getOptionLabel={getHardwareTypeLabel}
                       getOptionValue={getHardwareTypeValue}
                       noOptionsMessage={({ inputValue }) =>
-                        noHardwareTypeOptionsMessage(inputValue)
+                        noHardwareTypeOptionsMessage(intl, inputValue)
                       }
                       isLoading={isLoadingNext}
                       onMenuScrollToBottom={onLoadMore}

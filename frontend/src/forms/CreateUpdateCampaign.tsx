@@ -158,7 +158,50 @@ const transformOutputData = (
   };
 };
 
-type Props = {
+const getBaseImageCollLabel = (
+  baseImageCollection: BaseImageCollectionRecord,
+) => baseImageCollection.name;
+const getBaseImageCollValue = (
+  baseImageCollection: BaseImageCollectionRecord,
+) => baseImageCollection.id;
+const noBaseImageCollOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.CreateUpdateCampaign.noBaseImageCollsFoundMatching",
+          defaultMessage:
+            'No base image collections found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.CreateUpdateCampaign.noBaseImageCollsAvailable",
+        defaultMessage: "No base image collections available",
+      });
+
+const getChannelLabel = (channel: ChannelRecord) => channel.name;
+const getChannelValue = (channel: ChannelRecord) => channel.id;
+const noChannelOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "forms.CreateUpdateCampaign.noChannelsFoundMatching",
+          defaultMessage: 'No channels found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "forms.CreateUpdateCampaign.noChannelsAvailable",
+        defaultMessage: "No channels available",
+      });
+
+type CreateUpdateCampaignFormProps = {
   campaignOptionsRef: CreateUpdateCampaign_BaseImageCollOptionsFragment$key &
     CreateUpdateCampaign_ChannelOptionsFragment$key;
   isLoading?: boolean;
@@ -169,7 +212,7 @@ const CreateUpdateCampaignForm = ({
   campaignOptionsRef,
   isLoading = false,
   onSubmit,
-}: Props) => {
+}: CreateUpdateCampaignFormProps) => {
   const intl = useIntl();
 
   const {
@@ -232,27 +275,6 @@ const CreateUpdateCampaignForm = ({
     );
   }, [baseImageCollPaginationData]);
 
-  const getBaseImageCollLabel = (
-    baseImageCollection: BaseImageCollectionRecord,
-  ) => baseImageCollection.name;
-  const getBaseImageCollValue = (
-    baseImageCollection: BaseImageCollectionRecord,
-  ) => baseImageCollection.id;
-  const noBaseImageCollOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.CreateUpdateCampaign.noBaseImageCollsFoundMatching",
-            defaultMessage:
-              'No base image collections found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.CreateUpdateCampaign.noBaseImageCollsAvailable",
-          defaultMessage: "No base image collections available",
-        });
-
   const {
     data: channelPaginationData,
     loadNext: loadNextChannels,
@@ -296,22 +318,6 @@ const CreateUpdateCampaignForm = ({
         .filter((node): node is ChannelRecord => node != null) ?? []
     );
   }, [channelPaginationData]);
-
-  const getChannelLabel = (channel: ChannelRecord) => channel.name;
-  const getChannelValue = (channel: ChannelRecord) => channel.id;
-  const noChannelOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "forms.CreateUpdateCampaign.noChannelsFoundMatching",
-            defaultMessage: 'No channels found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "forms.CreateUpdateCampaign.noChannelsAvailable",
-          defaultMessage: "No channels available",
-        });
 
   const onFormSubmit = (data: UpdateCampaignFormData) =>
     onSubmit(transformOutputData(data));
@@ -402,7 +408,7 @@ const CreateUpdateCampaignForm = ({
                 getOptionLabel={getBaseImageCollLabel}
                 getOptionValue={getBaseImageCollValue}
                 noOptionsMessage={({ inputValue }) =>
-                  noBaseImageCollOptionsMessage(inputValue)
+                  noBaseImageCollOptionsMessage(intl, inputValue)
                 }
                 isLoading={isLoadingNextBaseImageColl}
                 onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
@@ -480,7 +486,7 @@ const CreateUpdateCampaignForm = ({
                 getOptionLabel={getChannelLabel}
                 getOptionValue={getChannelValue}
                 noOptionsMessage={({ inputValue }) =>
-                  noChannelOptionsMessage(inputValue)
+                  noChannelOptionsMessage(intl, inputValue)
                 }
                 isLoading={isLoadingNextChannel}
                 onMenuScrollToBottom={onLoadMoreChannelOptions}

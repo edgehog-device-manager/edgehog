@@ -56,14 +56,14 @@ const getCurrentTime = () => {
   return now.toTimeString().slice(0, 5); // "HH:MM"
 };
 
+const openPicker = (input: HTMLInputElement | null) => {
+  input?.showPicker?.();
+};
+
 const CustomTimeInput = forwardRef<HTMLInputElement, CustomTimeInputProps>(
   ({ value, onChange }, ref) => {
     const defaultTime = getCurrentTime();
     const timeValue = value || defaultTime;
-
-    const openPicker = (input: HTMLInputElement | null) => {
-      input?.showPicker?.();
-    };
 
     return (
       <Form.Control

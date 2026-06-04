@@ -72,7 +72,7 @@ To run Edgehog locally for development:
 
 ```bash
 # Clone the repository
-git clone https://github.com/edgehog-device-manager/edgehog.git
+git clone --recurse-submodules git@github.com:edgehog-device-manager/edgehog.git
 cd edgehog
 
 # requires `just` command runner. Takes care of running astarte and postgres trough docker.

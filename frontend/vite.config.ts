@@ -13,6 +13,13 @@ export default defineConfig((env) => {
     build: {
       outDir: "build",
     },
+    css: {
+      preprocessorOptions: {
+        scss: {
+          quietDeps: true,
+        },
+      },
+    },
     plugins: [
       react(),
       viteTsconfigPaths(),

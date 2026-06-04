@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import debounce from "lodash/debounce";
 import React, {
   Suspense,
   useCallback,
@@ -39,7 +40,6 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { PayloadError } from "relay-runtime";
 import { FormattedMessage } from "react-intl";
-import _ from "lodash";
 
 import type { Device_connectionStatus$key } from "@/api/__generated__/Device_connectionStatus.graphql";
 import type { Device_getDevice_Query } from "@/api/__generated__/Device_getDevice_Query.graphql";
@@ -483,7 +483,7 @@ const DeviceContent = ({
 
   const handleUpdateDeviceName = useMemo(
     () =>
-      _.debounce(
+      debounce(
         (newDeviceName: string) => {
           updateDevice({
             variables: { deviceId, input: { name: newDeviceName } },

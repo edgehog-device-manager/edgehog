@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -107,7 +107,7 @@ const DeviceGroupsTable = ({
   );
 
   const deviceGroups = useMemo<TableRecord[]>(() => {
-    return _.compact(deviceGroupsFragment?.edges?.map((e) => e?.node)) ?? [];
+    return compact(deviceGroupsFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [deviceGroupsFragment]);
 
   return (

@@ -425,9 +425,9 @@ const StorageSection = ({
               {volumes.fields.map((volume, i) => {
                 const error = errors.volumes?.[i];
 
-                const excludedIds = watched
-                  .map((v, idx) => (idx !== i ? v.id : null))
-                  .filter(Boolean) as string[];
+                const excludedIds = watched.flatMap((v, idx) =>
+                  idx !== i && v.id ? [v.id] : [],
+                );
 
                 return (
                   <Stack

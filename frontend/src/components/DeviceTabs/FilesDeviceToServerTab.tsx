@@ -336,9 +336,9 @@ const FilesDeviceToServerTab = ({
 
   const fileUploadRequests = useMemo(
     () =>
-      data.fileUploadRequests?.edges
-        ?.map((edge) => edge?.node)
-        .filter(Boolean) ?? [],
+      data.fileUploadRequests?.edges?.flatMap((edge) =>
+        edge?.node ? [edge.node] : [],
+      ) ?? [],
     [data.fileUploadRequests],
   );
 

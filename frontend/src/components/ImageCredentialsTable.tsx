@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import _ from "lodash";
+import compact from "lodash/compact";
 import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -100,9 +100,7 @@ const ImageCredentialsTable = ({
   );
 
   const imageCredentials = useMemo<TableRecord[]>(() => {
-    return (
-      _.compact(imageCredentialsFragment?.edges?.map((e) => e?.node)) ?? []
-    );
+    return compact(imageCredentialsFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [imageCredentialsFragment]);
   return (
     <InfiniteTable

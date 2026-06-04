@@ -77,6 +77,25 @@ export type ReleaseRecord = NonNullable<
   NonNullable<ReleaseSelect_ReleasesFragment$data["releases"]>["edges"]
 >[number]["node"];
 
+const getReleaseLabel = (release: ReleaseRecord) => release.version;
+const getReleaseValue = (release: ReleaseRecord) => release.id;
+const noReleaseOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "components.ReleaseSelect.noReleasesFoundMatching",
+          defaultMessage: 'No releases found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "components.ReleaseSelect.noReleasesAvailable",
+        defaultMessage: "No releases available",
+      });
+
 type ReleaseSelectProps = {
   isTarget: boolean;
   selectedApp: ApplicationRecord;
@@ -143,22 +162,6 @@ const ReleaseSelect = ({
     return releases;
   }, [paginationData, isTarget, selectedApp, selectedRelease]);
 
-  const getReleaseLabel = (release: ReleaseRecord) => release.version;
-  const getReleaseValue = (release: ReleaseRecord) => release.id;
-  const noReleaseOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "components.ReleaseSelect.noReleasesFoundMatching",
-            defaultMessage: 'No releases found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "components.ReleaseSelect.noReleasesAvailable",
-          defaultMessage: "No releases available",
-        });
-
   return (
     <Select
       value={controllerProps.value}
@@ -172,7 +175,9 @@ const ReleaseSelect = ({
       options={releaseOptions}
       getOptionLabel={getReleaseLabel}
       getOptionValue={getReleaseValue}
-      noOptionsMessage={({ inputValue }) => noReleaseOptionsMessage(inputValue)}
+      noOptionsMessage={({ inputValue }) =>
+        noReleaseOptionsMessage(intl, inputValue)
+      }
       isLoading={isLoadingNext}
       onMenuScrollToBottom={onLoadMore}
       onInputChange={(text) => setSearchText(text)}

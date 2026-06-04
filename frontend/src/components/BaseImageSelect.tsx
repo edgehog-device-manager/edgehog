@@ -87,6 +87,26 @@ type BaseImageNode = NonNullable<
 type OmitUrl = Omit<BaseImageNode, "url">;
 export type BaseImageRecord = OmitUrl & { readonly url?: string };
 
+const getBaseImageLabel = (baseImage: BaseImageRecord) =>
+  baseImage.name || baseImage.version;
+const getBaseImageValue = (baseImage: BaseImageRecord) => baseImage.id;
+const noBaseImageOptionsMessage = (
+  intl: ReturnType<typeof useIntl>,
+  inputValue: string,
+) =>
+  inputValue
+    ? intl.formatMessage(
+        {
+          id: "components.BaseImageSelect.noBaseImagesFoundMatching",
+          defaultMessage: 'No base images found matching "{inputValue}"',
+        },
+        { inputValue },
+      )
+    : intl.formatMessage({
+        id: "components.BaseImageSelect.noBaseImagesAvailable",
+        defaultMessage: "No base images available",
+      });
+
 type BaseImageSelectProps = {
   updateCampaignBaseImageOptionsRef: BaseImageSelect_BaseImagesFragment$key | null;
   controllerProps: ControllerProps;
@@ -138,23 +158,6 @@ const BaseImageSelect = ({
     );
   }, [paginationData]);
 
-  const getBaseImageLabel = (baseImage: BaseImageRecord) =>
-    baseImage.name || baseImage.version;
-  const getBaseImageValue = (baseImage: BaseImageRecord) => baseImage.id;
-  const noBaseImageOptionsMessage = (inputValue: string) =>
-    inputValue
-      ? intl.formatMessage(
-          {
-            id: "components.BaseImageSelect.noBaseImagesFoundMatching",
-            defaultMessage: 'No base images found matching "{inputValue}"',
-          },
-          { inputValue },
-        )
-      : intl.formatMessage({
-          id: "components.BaseImageSelect.noBaseImagesAvailable",
-          defaultMessage: "No base images available",
-        });
-
   return (
     <Select
       value={controllerProps.value}
@@ -168,7 +171,7 @@ const BaseImageSelect = ({
       getOptionLabel={getBaseImageLabel}
       getOptionValue={getBaseImageValue}
       noOptionsMessage={({ inputValue }) =>
-        noBaseImageOptionsMessage(inputValue)
+        noBaseImageOptionsMessage(intl, inputValue)
       }
       isLoading={isLoadingNext}
       onMenuScrollToBottom={onLoadMore}

@@ -1,0 +1,6 @@
+# SPDX-FileCopyrightText: 2026 SECO Mind Srl
+# SPDX-License-Identifier: CC0-1.0
+
+[submodule "astarte-interfaces"]
+	path = backend/priv/astarte_resources/interfaces
+	url = git@github.com:edgehog-device-manager/edgehog-astarte-interfaces.git
