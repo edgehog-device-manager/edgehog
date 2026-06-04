@@ -104,6 +104,36 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
   end
 
   @impl Behaviour
+  def list_users({subj, rel, type}, %{
+        channel: channel,
+        store_id: store_id,
+        auth_model_id: auth_model_id
+      }) do
+    [subj_type, subj_id] = String.split(subj, ":")
+
+    request = %Openfga.V1.ListUsersRequest{
+      store_id: store_id,
+      authorization_model_id: auth_model_id,
+      user_filters: [%Openfga.V1.UserTypeFilter{type: type}],
+      relation: rel,
+      object: %Openfga.V1.Object{
+        type: subj_type,
+        id: subj_id
+      }
+    }
+
+    with {:ok, %Openfga.V1.ListUsersResponse{users: users}} <-
+           Stub.list_users(channel, request) do
+      users =
+        users
+        |> Enum.map(&extract_user_id/1)
+        |> collapse_wildcard()
+
+      {:ok, users}
+    end
+  end
+
+  @impl Behaviour
   def write({subj, rel, obj}, %{
         channel: channel,
         store_id: store_id,
@@ -153,5 +183,17 @@ defmodule Edgehog.Auth.Providers.OpenFGA do
   defp remove_type(id) do
     [_type, id] = String.split(id, ":")
     id
+  end
+
+  defp extract_user_id(%Openfga.V1.User{user: user}) do
+    case user do
+      {:wildcard, %Openfga.V1.TypedWildcard{}} -> :wildcard
+      {:object, %Openfga.V1.Object{id: id}} -> id
+      {:userset, %Openfga.V1.UsersetUser{id: id, relation: rel}} -> "#{id}##{rel}"
+    end
+  end
+
+  defp collapse_wildcard(users) do
+    if :wildcard in users, do: :all, else: users
   end
 end

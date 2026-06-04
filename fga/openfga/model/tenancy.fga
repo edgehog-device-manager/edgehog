@@ -39,6 +39,7 @@ module tenancy
 type tenant
   relations
     define owner:       [user]
+    define alias:       [tenant]
     define admin:       [user]
     define editor:      [user]
     define viewer:      [user]

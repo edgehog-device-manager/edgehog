@@ -23,6 +23,7 @@ module realm
 type realm
   relations
     define tenant:          [tenant]
+    define alias:           [realm]
 
     define owner:           [user]
     define admin:           [user]

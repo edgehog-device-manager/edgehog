@@ -29,6 +29,13 @@ defmodule Edgehog.Auth.Flows.DeviceCreationTest do
   test "device creation writes the correct tuples on FGA", %{tenant: tenant, realm: realm} do
     test_pid = self()
 
+    expect(FGAService, :write, 2, fn "device:" <> first, "alias", "device:" <> second ->
+      # Send alias and id, in both orders
+      send(test_pid, {first, second})
+
+      {:ok, :dontcare}
+    end)
+
     expect(FGAService, :write, 1, fn "tenant:" <> tenant_slug, rel, obj ->
       "device:" <> device_id = obj
 
@@ -54,6 +61,16 @@ defmodule Edgehog.Auth.Flows.DeviceCreationTest do
     end)
 
     device = device_fixture(tenant: tenant, realm_id: realm.id)
+
+    {device_alias, device_id} =
+      receive do
+        aliased -> aliased
+      end
+
+    {^device_id, ^device_alias} =
+      receive do
+        aliased -> aliased
+      end
 
     device_id1 =
       receive do

@@ -57,6 +57,13 @@ defmodule Edgehog.Auth.Providers.None do
   end
 
   @impl Behaviour
+  def list_users({subj, rel, type}, _context) do
+    Logger.debug("Listing users for: {#{subj}, #{rel}, #{type}}")
+
+    {:ok, :all}
+  end
+
+  @impl Behaviour
   def write(tuple, _context) do
     Logger.debug("Writing tuple onto the service", tuple: tuple)
 

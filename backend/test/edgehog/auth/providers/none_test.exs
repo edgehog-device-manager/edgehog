@@ -77,4 +77,19 @@ defmodule Edgehog.Auth.Providers.NoneTest do
       assert {:ok, :all} = None.stream_list_objects(tuple, context)
     end
   end
+
+  describe "list_users/2" do
+    setup do
+      ctx = None.init_context(nil)
+
+      {:ok, %{context: ctx}}
+    end
+
+    test "lists all users", %{context: context} do
+      # Actual tuple should not even matter, it should just answer: {:ok, :all}
+      tuple = TupleFixtures.tuple()
+
+      assert {:ok, :all} = None.list_users(tuple, context)
+    end
+  end
 end

@@ -35,6 +35,7 @@ defmodule Ash.FGA.Transformers.WriteRels do
   alias Ash.Resource.Relationships.BelongsTo
   alias Edgehog.Auth.Changes
 
+  @impl Spark.Dsl.Transformer
   def transform(dsl_state) do
     exclusions =
       dsl_state

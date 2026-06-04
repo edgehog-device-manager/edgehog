@@ -26,8 +26,9 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   @type context() :: term()
   @type fga_tuple() :: {subj :: String.t(), rel :: String.t(), obj :: String.t()}
   @type fga_access_tuple() :: {subj :: String.t(), rel :: String.t(), type :: String.t()}
-  @type objects() :: %{objects: term()}
+  @type objects() :: %{objects: [term()]}
   @type obj_stream() :: term()
+  @type users() :: %{users: [term()]}
 
   @doc """
   The context initialization function. The context can carry useful information for subsequent actions.
@@ -117,4 +118,24 @@ defmodule Edgehog.Auth.Providers.Behaviour do
   """
   @callback stream_list_objects(tuple :: fga_access_tuple(), context :: context()) ::
               {:ok, obj_stream()} | {:ok, :all} | {:error, term()}
+
+  @doc """
+  A list_users call lists all users of the selected type for the given object.
+
+  - subj :: is some id of the object for which the users are needed
+  - rel  :: is the requested access to the resource (object) the users should have
+  - type :: is the type of user resources we want to fetch
+
+  The context should also be provided.
+
+  NOTICE: Unlike it's opposite counterpart (`list_objects`), this does not provide a streamed version of the same function
+
+  The call can return
+  - `{:ok, users()}` :: meaning that the object has access to the %{objects: list()} list of objects of type `type`
+  - `{:error, error}`  :: meaning that there was some error in the request.
+
+  For successful returns the new `context` should be provided.
+  """
+  @callback list_users(tuple :: fga_access_tuple(), context :: context()) ::
+              {:ok, users()} | {:ok, :all} | {:error, term()}
 end

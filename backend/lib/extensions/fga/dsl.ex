@@ -34,11 +34,13 @@ defmodule Ash.FGA do
 
   fga do
     type :device                            # The FGA provider will use `device` as type for this resource in tuples
-    id: :device_id                          # The `device_id` atrtibute will be used as `id` in tuples
+    id  :device_id                          # The `device_id` atrtibute will be used as `id` in tuples
     exclude [:system_model_part_number]     # The `system_model_part_number` relationship will not be considered when writing tuples
   end
   ```
   """
+
+  alias Ash.FGA.Transformers
 
   @exclude %Spark.Dsl.Entity{
     name: :exclude,
@@ -74,7 +76,7 @@ defmodule Ash.FGA do
 
   # credo:disable-for-next-line
   use Spark.Dsl.Extension,
-    transformers: [Ash.FGA.Transformers.WriteRels],
+    transformers: [Transformers.Alias, Transformers.UserOwner, Transformers.WriteRels],
     sections: [@fga]
 end
 
