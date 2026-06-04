@@ -76,13 +76,7 @@ type ManualFilesServerToDeviceFileFormProps = {
   destinationTypeOptions: DestinationTypeOption[];
 };
 
-const ARCHIVE_ENCODING_VALUES = new Set([
-  "tar",
-  "gz",
-  "lz4",
-  "tar.gz",
-  "tar.lz4",
-]);
+const MULTI_FILE_ARCHIVE_ENCODINGS = new Set(["tar", "tar.gz", "tar.lz4"]);
 
 const ManualFilesServerToDeviceFileForm = ({
   className,
@@ -157,7 +151,7 @@ const ManualFilesServerToDeviceFileForm = ({
       supportedEncodingsByDestination[effectiveDestinationType] ?? [];
 
     const archiveEncodings = encodingsForDestination.filter((encoding) =>
-      ARCHIVE_ENCODING_VALUES.has(encoding.trim().toLowerCase()),
+      MULTI_FILE_ARCHIVE_ENCODINGS.has(encoding.trim().toLowerCase()),
     );
 
     const archiveEncodingsNormalized = new Set(
@@ -393,48 +387,6 @@ const ManualFilesServerToDeviceFileForm = ({
       )}
 
       <FormRow
-        id="encoding"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceFileForm.encodingLabel"
-            defaultMessage="Encoding"
-          />
-        }
-      >
-        <Controller
-          control={control}
-          name="encoding"
-          render={({ field }) => {
-            const selectedOption =
-              encodingOptionsMap.get(field.value ?? "") ??
-              encodingOptions[0] ??
-              null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => {
-                  field.onChange(option?.value ?? "");
-                }}
-                options={encodingOptions}
-              />
-            );
-          }}
-        />
-
-        {errors.encoding ? (
-          <FormFeedback feedback={errors.encoding.message} />
-        ) : (
-          <Form.Text muted>
-            <FormattedMessage
-              id="forms.ManualFilesServerToDeviceFileForm.encodingHint"
-              defaultMessage="Optional encoding format, based on device capabilities. Leave empty for no encoding."
-            />
-          </Form.Text>
-        )}
-      </FormRow>
-
-      <FormRow
         id="destinationType"
         label={
           <FormattedMessage
@@ -493,6 +445,49 @@ const ManualFilesServerToDeviceFileForm = ({
           )}
         </FormRow>
       )}
+
+      <FormRow
+        id="encoding"
+        label={
+          <FormattedMessage
+            id="forms.ManualFilesServerToDeviceFileForm.encodingLabel"
+            defaultMessage="Encoding"
+          />
+        }
+      >
+        <Controller
+          control={control}
+          name="encoding"
+          render={({ field }) => {
+            const selectedOption =
+              encodingOptionsMap.get(field.value ?? "") ??
+              encodingOptions[0] ??
+              null;
+
+            return (
+              <Select
+                value={selectedOption}
+                onChange={(option) => {
+                  field.onChange(option?.value ?? "");
+                }}
+                options={encodingOptions}
+                isDisabled={selectedFiles.length === 0}
+              />
+            );
+          }}
+        />
+
+        {errors.encoding ? (
+          <FormFeedback feedback={errors.encoding.message} />
+        ) : (
+          <Form.Text muted>
+            <FormattedMessage
+              id="forms.ManualFilesServerToDeviceFileForm.encodingHint"
+              defaultMessage="Optional encoding format, based on device capabilities. Leave empty for no encoding."
+            />
+          </Form.Text>
+        )}
+      </FormRow>
 
       <FormRow
         id="ttlSeconds"
