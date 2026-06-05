@@ -489,34 +489,36 @@ const ManualFilesServerToDeviceFileForm = ({
         )}
       </FormRow>
 
-      <FormRow
-        id="ttlSeconds"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceFileForm.ttlLabel"
-            defaultMessage="TTL (seconds)"
-          />
-        }
-      >
-        <Form.Control
-          type="text"
-          {...register("ttlSeconds", {
-            setValueAs: (v) => (v === "" ? undefined : Number(v)),
-          })}
-          isInvalid={!!errors.ttlSeconds}
-        />
-
-        {errors.ttlSeconds ? (
-          <FormFeedback feedback={errors.ttlSeconds.message} />
-        ) : (
-          <Form.Text muted>
+      {selectedDestinationType === "STORAGE" && (
+        <FormRow
+          id="ttlSeconds"
+          label={
             <FormattedMessage
-              id="forms.ManualFilesServerToDeviceFileForm.ttlHint"
-              defaultMessage="Set to 0 for no expiry."
+              id="forms.ManualFilesServerToDeviceFileForm.ttlLabel"
+              defaultMessage="TTL (seconds)"
             />
-          </Form.Text>
-        )}
-      </FormRow>
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("ttlSeconds", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.ttlSeconds}
+          />
+
+          {errors.ttlSeconds ? (
+            <FormFeedback feedback={errors.ttlSeconds.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.ManualFilesServerToDeviceFileForm.ttlHint"
+                defaultMessage="Set to 0 for no expiry."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
 
       <FormRow
         id="progress"
