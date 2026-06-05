@@ -355,7 +355,9 @@ defmodule Edgehog.Files.FileDownloadRequest do
       default false
     end
 
-    timestamps()
+    timestamps do
+      public? true
+    end
   end
 
   relationships do

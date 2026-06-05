@@ -64,8 +64,11 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
         filesystem
       }
     }
-    fileUploadRequests(first: $first, after: $after)
-      @connection(key: "FilesDeviceToServerTab_fileUploadRequests") {
+    fileUploadRequests(
+      first: $first
+      after: $after
+      sort: [{ field: UPDATED_AT, order: DESC }]
+    ) @connection(key: "FilesDeviceToServerTab_fileUploadRequests") {
       edges {
         node {
           getPresignedUrl
@@ -236,6 +239,7 @@ const ManualFilesDeviceToServerFormWrapper = ({
               const connection = ConnectionHandler.getConnection(
                 storedDevice,
                 "FilesDeviceToServerTab_fileUploadRequests",
+                { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
               );
               if (!connection) return;
 

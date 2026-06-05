@@ -78,8 +78,11 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
         filesystem
       }
     }
-    fileDownloadRequests(first: $first, after: $after)
-      @connection(key: "FilesServerToDeviceTab_fileDownloadRequests") {
+    fileDownloadRequests(
+      first: $first
+      after: $after
+      sort: [{ field: UPDATED_AT, order: DESC }]
+    ) @connection(key: "FilesServerToDeviceTab_fileDownloadRequests") {
       edges {
         node {
           id
@@ -300,6 +303,7 @@ const ManualFileDownloadRequestFormWrapper = ({
             const connection = ConnectionHandler.getConnection(
               storedDevice,
               "FilesServerToDeviceTab_fileDownloadRequests",
+              { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
             );
 
             if (connection) {
@@ -507,6 +511,7 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
           const connection = ConnectionHandler.getConnection(
             storedDevice,
             "FilesServerToDeviceTab_fileDownloadRequests",
+            { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
           );
 
           if (connection) {

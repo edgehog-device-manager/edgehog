@@ -53,8 +53,11 @@ const DEVICE_FILES_FRAGMENT = graphql`
   fragment FilesDeleteTab_fileManagement on Device
   @refetchable(queryName: "FilesDeleteTab_PaginationQuery") {
     capabilities
-    fileDeleteRequests(first: $first, after: $after)
-      @connection(key: "FilesDeleteTab_fileDeleteRequests") {
+    fileDeleteRequests(
+      first: $first
+      after: $after
+      sort: [{ field: UPDATED_AT, order: DESC }]
+    ) @connection(key: "FilesDeleteTab_fileDeleteRequests") {
       edges {
         node {
           force
@@ -204,6 +207,7 @@ const ManualFileDeleteRequestFormWrapper = ({
               const connection = ConnectionHandler.getConnection(
                 storedDevice,
                 "FilesDeleteTab_fileDeleteRequests",
+                { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
               );
               if (!connection) return;
 
