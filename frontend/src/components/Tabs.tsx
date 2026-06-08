@@ -16,12 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import intersection from "lodash/intersection";
-import keyBy from "lodash/keyBy";
-import keys from "lodash/keys";
-import union from "lodash/union";
-import uniqBy from "lodash/uniqBy";
-import {
+import React, {
   createContext,
   useCallback,
   useContext,
@@ -29,15 +24,16 @@ import {
   useMemo,
   useState,
 } from "react";
-import Nav from "react-bootstrap/Nav";
-import NavItem from "react-bootstrap/NavItem";
-import NavLink from "react-bootstrap/NavLink";
+
+import Button from "@/components/Button";
+import SegmentedControl from "@/components/SegmentedControl";
+import "@/components/Tabs.scss";
 
 type EventKey = string;
 
 type TabRef = {
   eventKey: EventKey;
-  title: React.ReactNode;
+  title?: React.ReactNode;
 };
 
 type TabsContextValue = {
@@ -46,19 +42,35 @@ type TabsContextValue = {
   unregisterTab: (eventKey: EventKey) => void;
 };
 
-const defaultContextValue: TabsContextValue = {
+const TabsContext = createContext<TabsContextValue>({
   activeKey: undefined,
   registerTab: () => {},
   unregisterTab: () => {},
+});
+
+type TabButtonProps = {
+  isActive: boolean;
+  tabRef: TabRef;
 };
 
-const TabsContext = createContext<TabsContextValue>(defaultContextValue);
+const TabButton = ({ isActive, tabRef }: TabButtonProps) => {
+  const dynamicClasses = isActive
+    ? "px-4 py-3 fw-bold active"
+    : "px-4 py-2 text-muted";
+
+  return (
+    <Button variant="text" className={`tab-button border-0 ${dynamicClasses}`}>
+      {tabRef.title}
+    </Button>
+  );
+};
 
 type TabsProps = {
   children?: React.ReactNode;
   className?: string;
   defaultActiveKey?: EventKey;
   tabsOrder?: EventKey[];
+  onChange?: (tabKey: string) => void;
 };
 
 const Tabs = ({
@@ -66,88 +78,97 @@ const Tabs = ({
   className,
   defaultActiveKey,
   tabsOrder = [],
+  onChange = () => {},
 }: TabsProps) => {
-  const [activeKey, setActiveKey] = useState<EventKey | undefined>(
+  const [selectedKey, setSelectedKey] = useState<EventKey | undefined>(
     defaultActiveKey,
   );
   const [tabRefs, setTabRefs] = useState<TabRef[]>([]);
 
   const registerTab = useCallback((tabRef: TabRef) => {
-    setTabRefs((refs) => uniqBy([...refs, tabRef], "eventKey"));
+    setTabRefs((prev) => {
+      if (prev.some((ref) => ref.eventKey === tabRef.eventKey)) return prev;
+      return [...prev, tabRef];
+    });
   }, []);
 
   const unregisterTab = useCallback((eventKey: EventKey) => {
-    setTabRefs((tabRefs) =>
-      tabRefs.filter((tabRef) => tabRef.eventKey !== eventKey),
-    );
-    // If the active tab is removed, clear the state so it falls back to the sorted default
-    setActiveKey((prevKey) => (prevKey === eventKey ? undefined : prevKey));
+    setTabRefs((prev) => prev.filter((tabRef) => tabRef.eventKey !== eventKey));
   }, []);
 
-  const sortedTabRefs = useMemo(() => {
-    const tabRefsByEventKey = keyBy(tabRefs, "eventKey");
-    const eventKeys = keys(tabRefsByEventKey);
-    // 1. intersect tabsOrder with eventKeys to pick eventKeys in the correct order
-    // 2. union the result with eventKeys to pick the remaining eventKeys
-    const sortedEventKeys = union(
-      intersection(tabsOrder, eventKeys),
-      eventKeys,
-    );
-    return sortedEventKeys.map((eventKey) => tabRefsByEventKey[eventKey]);
-  }, [tabRefs, tabsOrder]);
-
-  const effectiveActiveKey =
-    activeKey ?? defaultActiveKey ?? sortedTabRefs[0]?.eventKey;
+  const activeKey = useMemo(
+    () =>
+      tabRefs.some((tabRef) => tabRef.eventKey === selectedKey)
+        ? selectedKey
+        : tabRefs[0]?.eventKey,
+    [tabRefs, selectedKey],
+  );
 
   const contextValue = useMemo(
     () => ({
-      activeKey: effectiveActiveKey,
+      activeKey,
       registerTab,
       unregisterTab,
     }),
-    [effectiveActiveKey, registerTab, unregisterTab],
+    [activeKey, registerTab, unregisterTab],
+  );
+
+  const sortedTabRefs = useMemo(() => {
+    const refMap = new Map(tabRefs.map((ref) => [ref.eventKey, ref]));
+
+    const orderedKeys = tabsOrder.filter((key) => refMap.has(key));
+
+    const remainingKeys = tabRefs
+      .map((ref) => ref.eventKey)
+      .filter((key) => !tabsOrder.includes(key));
+
+    return [...orderedKeys, ...remainingKeys].map((key) => refMap.get(key)!);
+  }, [tabRefs, tabsOrder]);
+
+  const handleOnChange = useCallback(
+    (key: string) => {
+      setSelectedKey(key);
+      onChange(key);
+    },
+    [onChange],
   );
 
   return (
     <TabsContext.Provider value={contextValue}>
       <div className={className}>
         {sortedTabRefs.length > 0 && (
-          <Nav role="tablist" as="ul" className="nav-tabs">
-            {sortedTabRefs.map((tabRef) => (
-              <NavItem key={tabRef.eventKey} as="li" role="presentation">
-                <NavLink
-                  as="button"
-                  type="button"
-                  active={effectiveActiveKey === tabRef.eventKey}
-                  onClick={() => setActiveKey(tabRef.eventKey)}
-                >
-                  {tabRef.title}
-                </NavLink>
-              </NavItem>
-            ))}
-          </Nav>
+          <SegmentedControl
+            activeId={activeKey}
+            items={sortedTabRefs}
+            getItemId={(tabRef) => tabRef.eventKey}
+            onChange={handleOnChange}
+            showControls
+          >
+            {(tabRef, isActive) => (
+              <TabButton tabRef={tabRef} isActive={isActive} />
+            )}
+          </SegmentedControl>
         )}
         {children}
       </div>
     </TabsContext.Provider>
   );
 };
+
 const useTabs = (): TabsContextValue => {
   const tabsContextValue = useContext(TabsContext);
-  if (tabsContextValue == null) {
-    throw new Error("TabsContext has not been Provided");
+  if (!tabsContextValue) {
+    throw new Error("useTabs must be used within a <Tabs /> provider");
   }
   return tabsContextValue;
 };
 
-type TabProps = {
-  children?: React.ReactNode;
-  className?: string;
+type TabProps = React.ComponentPropsWithoutRef<"div"> & {
   eventKey: EventKey;
-  title?: string;
+  title?: React.ReactNode;
 };
 
-const Tab = ({ children, className, eventKey, title }: TabProps) => {
+const Tab = ({ eventKey, title, ...restProps }: TabProps) => {
   const { registerTab, unregisterTab, activeKey } = useTabs();
 
   useEffect(() => {
@@ -155,13 +176,11 @@ const Tab = ({ children, className, eventKey, title }: TabProps) => {
     return () => unregisterTab(eventKey);
   }, [registerTab, unregisterTab, eventKey, title]);
 
-  const isActive = activeKey === eventKey;
-
-  if (!isActive) {
+  if (activeKey !== eventKey) {
     return null;
   }
 
-  return <div className={className}>{children}</div>;
+  return <div {...restProps} />;
 };
 
 export { Tab };

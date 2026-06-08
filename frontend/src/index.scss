@@ -26,3 +26,8 @@
   --campaign-target-status_color_successful: var(--bs-success);
   --campaign-target-status_color_failed: var(--bs-danger);
 }
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d0d5dd transparent;
+}
