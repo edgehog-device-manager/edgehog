@@ -224,7 +224,8 @@ const prepareUploadFile = async ({
     const fileName = baseName.endsWith(suffix)
       ? baseName
       : `${baseName}${suffix}`;
-    const uncompressedSize = files.reduce((sum, file) => sum + file.size, 0);
+
+    const uncompressedSize = tarBlob.size;
 
     return {
       file: new File([tarBlob], fileName, { type: "application/x-tar" }),
