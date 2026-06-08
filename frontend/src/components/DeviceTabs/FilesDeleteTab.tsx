@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import split from "lodash/split";
 import React, { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -91,8 +92,8 @@ const DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
       edges {
         node {
           id
-          requestName
           fileName
+          pathOnDevice
         }
       }
     }
@@ -318,7 +319,7 @@ const FilesDeleteTab = ({
     const validRequests: Array<{
       id: string;
       fileName: string;
-      requestName: string | null;
+      pathOnDevice: string | null;
     }> = [];
     const fileNameCounts: Record<string, number> = {};
 
@@ -330,18 +331,20 @@ const FilesDeleteTab = ({
         validRequests.push({
           id: node.id,
           fileName,
-          requestName: node.requestName ?? null,
+          pathOnDevice: node.pathOnDevice ?? null,
         });
       }
     }
 
-    return validRequests.map(({ id, fileName, requestName }) => {
+    return validRequests.map(({ id, fileName, pathOnDevice }) => {
+      const requestUuid = split(pathOnDevice ?? "", "/").at(-1);
+
       const isDuplicate = fileNameCounts[fileName] > 1;
       return {
         value: id,
         label:
-          isDuplicate && requestName
-            ? `${fileName} (${requestName})`
+          isDuplicate && requestUuid
+            ? `${fileName} (${requestUuid})`
             : fileName,
       };
     });

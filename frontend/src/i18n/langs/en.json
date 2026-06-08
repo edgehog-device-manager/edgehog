@@ -1129,9 +1129,6 @@
   "components.FilesServerToDeviceTable.progress": {
     "defaultMessage": "Progress"
   },
-  "components.FilesServerToDeviceTable.requestName": {
-    "defaultMessage": "Request Name"
-  },
   "components.FilesServerToDeviceTable.responseMessage": {
     "defaultMessage": "Response Message"
   },
@@ -2330,9 +2327,6 @@
   "forms.ManualFilesServerToDeviceFileForm.progressLabel": {
     "defaultMessage": "Report Progress"
   },
-  "forms.ManualFilesServerToDeviceFileForm.requestNameLabel": {
-    "defaultMessage": "Request Name"
-  },
   "forms.ManualFilesServerToDeviceFileForm.ttlHint": {
     "defaultMessage": "Set to 0 for no expiry."
   },
@@ -2380,9 +2374,6 @@
   },
   "forms.ManualFilesServerToDeviceRepositoryForm.repositoryOption": {
     "defaultMessage": "Search or select a repository..."
-  },
-  "forms.ManualFilesServerToDeviceRepositoryForm.requestNameLabel": {
-    "defaultMessage": "Request Name"
   },
   "forms.ManualFilesServerToDeviceRepositoryForm.selectRepositoryHint": {
     "defaultMessage": "Select a repository before selecting a file..."

@@ -72,7 +72,6 @@ export type RepositoryRecord = NonNullable<
 >[number]["node"];
 
 const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
-  requestName: "",
   repository: { id: "", name: "" },
   file: { id: "", name: "" },
   destinationType: "STORAGE",
@@ -197,24 +196,6 @@ const ManualFilesServerToDeviceRepositoryForm = ({
 
   return (
     <form className={className} onSubmit={onSubmit}>
-      <FormRow
-        id="requestName"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceRepositoryForm.requestNameLabel"
-            defaultMessage="Request Name"
-          />
-        }
-      >
-        <Form.Control
-          as="textarea"
-          rows={1}
-          {...register("requestName")}
-          isInvalid={!!errors.requestName}
-        />
-        <FormFeedback feedback={errors.requestName?.message} />
-      </FormRow>
-
       <FormRow
         id="repository"
         label={

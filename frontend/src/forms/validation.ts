@@ -572,7 +572,6 @@ type ManualOtaFromFileData = z.infer<typeof manualOtaFromFileSchema>;
 
 const fileDownloadRequestFormSchema = z
   .object({
-    requestName: z.string().min(1),
     file: z.custom<FileList>(
       (files) => files instanceof FileList && files.length > 0,
       {
@@ -645,7 +644,6 @@ const manualFileDownloadRequestFromRepositorySchema = z
       id: z.string().min(1),
       name: z.string().min(1),
     }),
-    requestName: z.string().min(1),
     destinationType: fileDestinationTypeSchema,
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),

@@ -68,7 +68,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     create :managed do
       accept [
-        :request_name,
         :ttl_seconds,
         :file_mode,
         :user_id,
@@ -109,7 +108,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
       """
 
       accept [
-        :request_name,
         :file_name,
         :uncompressed_file_size_bytes,
         :encoding,
@@ -146,7 +144,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     create :create_fixture do
       accept [
-        :request_name,
         :url,
         :file_name,
         :uncompressed_file_size_bytes,
@@ -231,13 +228,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     attribute :url, :string do
       description "The URL from which the file can be downloaded."
-      public? true
-
-      allow_nil? false
-    end
-
-    attribute :request_name, :string do
-      description "An unique name for the file download request, useful for tracking and identification purposes."
       public? true
 
       allow_nil? false
@@ -375,10 +365,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
       public? true
     end
-  end
-
-  identities do
-    identity :request_name, [:request_name, :device_id]
   end
 
   pub_sub do

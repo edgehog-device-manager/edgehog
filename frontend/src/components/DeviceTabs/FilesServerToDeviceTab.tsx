@@ -87,7 +87,6 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
         node {
           id
           fileName
-          requestName
           status
           progressPercentage
           responseCode
@@ -128,7 +127,6 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
     createManualFileDownloadRequest(input: $input) {
       result {
         id
-        requestName
         url
         fileName
         status
@@ -155,7 +153,6 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         id
         url
         fileName
-        requestName
         status
         progressPercentage
         responseCode
@@ -455,7 +452,6 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
       }
 
       const {
-        requestName,
         file,
         destinationType,
         destination,
@@ -472,7 +468,6 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
       createFileDownloadRequest({
         variables: {
           input: {
-            requestName,
             deviceId,
             fileId: file.id,
             fileMode,

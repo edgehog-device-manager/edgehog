@@ -53,7 +53,6 @@ type EncodingOption = {
 };
 
 type FileDownloadRequestFormValues = {
-  requestName: string;
   files: File[];
   customFileName?: string;
   encoding?: string;
@@ -106,7 +105,6 @@ const ManualFilesServerToDeviceFileForm = ({
   } = useForm({
     mode: "onTouched",
     defaultValues: {
-      requestName: "",
       file: undefined,
       customFileName: "",
       encoding: "",
@@ -263,7 +261,6 @@ const ManualFilesServerToDeviceFileForm = ({
 
     if (selectedFiles.length > 0) {
       onFileSubmit({
-        requestName: data.requestName.trim(),
         files: selectedFiles,
         customFileName: data.customFileName?.trim() || undefined,
         destinationType: data.destinationType,
@@ -302,24 +299,6 @@ const ManualFilesServerToDeviceFileForm = ({
 
   return (
     <form className={className} onSubmit={onSubmit} autoComplete="off">
-      <FormRow
-        id="requestName"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceFileForm.requestNameLabel"
-            defaultMessage="Request Name"
-          />
-        }
-      >
-        <Form.Control
-          as="textarea"
-          rows={1}
-          {...register("requestName")}
-          isInvalid={!!errors.requestName}
-        />
-        <FormFeedback feedback={errors.requestName?.message} />
-      </FormRow>
-
       <FormRow
         id="file"
         label={
