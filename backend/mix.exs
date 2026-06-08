@@ -150,7 +150,8 @@ defmodule Edgehog.MixProject do
       # Do not upgrade this dependency unless the underlying block size behavior is verified and updated.
       {:nimble_lz4, "1.1.0"},
       {:grpc, "~> 0.11"},
-      {:libgraph, "~> 0.16"}
+      {:libgraph, "~> 0.16"},
+      {:gcs_signed_url, "~> 0.4"}
     ]
   end
 
