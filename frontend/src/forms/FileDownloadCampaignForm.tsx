@@ -120,6 +120,30 @@ const FileDownloadCampaignForm = ({
           </Link>
         </FormRow>
 
+        <FormRow
+          label={
+            <FormattedMessage
+              id="forms.FileDownloadCampaignForm.destinationTypeLabel"
+              defaultMessage="Destination"
+            />
+          }
+        >
+          {campaignMechanism.destinationType}
+        </FormRow>
+
+        {campaignMechanism.destinationType === "FILESYSTEM" && (
+          <FormRow
+            label={
+              <FormattedMessage
+                id="forms.FileDownloadCampaignForm.destinationLabel"
+                defaultMessage="Destination Path"
+              />
+            }
+          >
+            {campaignMechanism.destination}
+          </FormRow>
+        )}
+
         {file?.repository && (
           <FormRow
             label={
@@ -164,30 +188,6 @@ const FileDownloadCampaignForm = ({
                 defaultMessage="The file has been deleted"
               />
             </div>
-          </FormRow>
-        )}
-
-        <FormRow
-          label={
-            <FormattedMessage
-              id="forms.FileDownloadCampaignForm.destinationTypeLabel"
-              defaultMessage="Destination"
-            />
-          }
-        >
-          {campaignMechanism.destinationType}
-        </FormRow>
-
-        {campaignMechanism.destinationType === "FILESYSTEM" && (
-          <FormRow
-            label={
-              <FormattedMessage
-                id="forms.FileDownloadCampaignForm.destinationLabel"
-                defaultMessage="Destination Path"
-              />
-            }
-          >
-            {campaignMechanism.destination}
           </FormRow>
         )}
 

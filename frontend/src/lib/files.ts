@@ -284,4 +284,5 @@ export {
   getFileExtension,
   isArchiveEncoding,
   prepareUploadFile,
+  ARCHIVE_ENCODINGS,
 };

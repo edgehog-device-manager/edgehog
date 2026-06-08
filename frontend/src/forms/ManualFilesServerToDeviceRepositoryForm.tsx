@@ -197,6 +197,61 @@ const ManualFilesServerToDeviceRepositoryForm = ({
   return (
     <form className={className} onSubmit={onSubmit}>
       <FormRow
+        id="destinationType"
+        label={
+          <FormattedMessage
+            id="forms.ManualFilesServerToDeviceRepositoryForm.destinationLabel"
+            defaultMessage="Destination"
+          />
+        }
+      >
+        <Controller
+          control={control}
+          name="destinationType"
+          render={({ field }) => (
+            <Select
+              value={destinationOptionsMap.get(field.value) ?? null}
+              onChange={(option) => {
+                field.onChange(option?.value ?? null);
+                setValue("destination", null);
+              }}
+              options={destinationTypeOptions}
+            />
+          )}
+        />
+      </FormRow>
+
+      {selectedDestinationType === "FILESYSTEM" && (
+        <FormRow
+          id="destination"
+          label={
+            <FormattedMessage
+              id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathLabel"
+              defaultMessage="Destination Path"
+            />
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("destination")}
+            placeholder="/tmp/file.bin"
+            isInvalid={!!errors.destination}
+          />
+
+          {errors.destination ? (
+            <FormFeedback feedback={errors.destination.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathHint"
+                defaultMessage="Absolute path on the target device where the file should be written."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
+
+      <FormRow
         id="repository"
         label={
           <FormattedMessage
@@ -275,61 +330,6 @@ const ManualFilesServerToDeviceRepositoryForm = ({
           </div>
         )}
       </FormRow>
-
-      <FormRow
-        id="destinationType"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceRepositoryForm.destinationLabel"
-            defaultMessage="Destination"
-          />
-        }
-      >
-        <Controller
-          control={control}
-          name="destinationType"
-          render={({ field }) => (
-            <Select
-              value={destinationOptionsMap.get(field.value) ?? null}
-              onChange={(option) => {
-                field.onChange(option?.value ?? null);
-                setValue("destination", null);
-              }}
-              options={destinationTypeOptions}
-            />
-          )}
-        />
-      </FormRow>
-
-      {selectedDestinationType === "FILESYSTEM" && (
-        <FormRow
-          id="destination"
-          label={
-            <FormattedMessage
-              id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathLabel"
-              defaultMessage="Destination Path"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            {...register("destination")}
-            placeholder="/tmp/file.bin"
-            isInvalid={!!errors.destination}
-          />
-
-          {errors.destination ? (
-            <FormFeedback feedback={errors.destination.message} />
-          ) : (
-            <Form.Text muted>
-              <FormattedMessage
-                id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathHint"
-                defaultMessage="Absolute path on the target device where the file should be written."
-              />
-            </Form.Text>
-          )}
-        </FormRow>
-      )}
 
       {selectedDestinationType === "STORAGE" && (
         <FormRow

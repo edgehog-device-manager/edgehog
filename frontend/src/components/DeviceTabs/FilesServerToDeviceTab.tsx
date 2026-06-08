@@ -63,7 +63,7 @@ import type {
   FileDestinationType,
   ManualFileDownloadRequestFromRepositoryData,
 } from "@/forms/validation";
-import { prepareUploadFile } from "@/lib/files";
+import { ARCHIVE_ENCODINGS, prepareUploadFile } from "@/lib/files";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -200,7 +200,6 @@ class APIValidationError extends Error {
   }
 }
 
-const ARCHIVE_EXTENSIONS = new Set(["tar", "gz", "lz4", "tar.gz", "tar.lz4"]);
 const STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS = [
   "FilesDeviceToServerTab_storageFileDownloadRequests",
   "FilesDeleteTab_storageFileDownloadRequests",
@@ -234,7 +233,7 @@ type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
   supportedEncodingsByDestination: Record<FileDestinationType, string[]>;
-  allowArchiveUpload: boolean;
+  archiveCapabilities: Record<FileDestinationType, boolean>;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
   isOnline: boolean;
@@ -244,7 +243,7 @@ const ManualFileDownloadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
   supportedEncodingsByDestination,
-  allowArchiveUpload,
+  archiveCapabilities,
   showAdvancedOptions,
   destinationTypeOptions,
   isOnline,
@@ -403,7 +402,7 @@ const ManualFileDownloadRequestFormWrapper = ({
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
       supportedEncodingsByDestination={supportedEncodingsByDestination}
-      allowArchiveUpload={allowArchiveUpload}
+      archiveCapabilities={archiveCapabilities}
       showAdvancedOptions={showAdvancedOptions}
       destinationTypeOptions={destinationTypeOptions}
     />
@@ -683,17 +682,21 @@ const FilesServerToDeviceTab = ({
     };
   }, [data.fileTransferCapabilities?.serverToDevice]);
 
-  const allowArchiveUpload = useMemo(() => {
-    for (const key in supportedEncodingsByDestination) {
+  const archiveCapabilities = useMemo(() => {
+    const map: Record<FileDestinationType, boolean> = {
+      STORAGE: false,
+      STREAMING: false,
+      FILESYSTEM: false,
+    };
+
+    for (const type in supportedEncodingsByDestination) {
       const encodings =
-        supportedEncodingsByDestination[key as FileDestinationType];
-      for (const encoding of encodings) {
-        if (ARCHIVE_EXTENSIONS.has(encoding.toLowerCase())) {
-          return true;
-        }
-      }
+        supportedEncodingsByDestination[type as FileDestinationType];
+      map[type as FileDestinationType] = encodings.some((enc) =>
+        ARCHIVE_ENCODINGS.has(enc.toLowerCase()),
+      );
     }
-    return false;
+    return map;
   }, [supportedEncodingsByDestination]);
 
   if (destinationTypeOptions.length === 0) {
@@ -763,7 +766,7 @@ const FilesServerToDeviceTab = ({
                 supportedEncodingsByDestination={
                   supportedEncodingsByDestination
                 }
-                allowArchiveUpload={allowArchiveUpload}
+                archiveCapabilities={archiveCapabilities}
                 showAdvancedOptions={showAdvancedOptions}
                 destinationTypeOptions={destinationTypeOptions}
                 isOnline={isOnline}
