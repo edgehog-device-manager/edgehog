@@ -24,9 +24,10 @@ defmodule Ash.FGA do
 
   This extension adds an entry for fga types and relations:
 
-  - type               :: instructs the extension about the FGA type of the resource (the corresponding type for resource that is defined in the model used by the provider)
-  - id      (optional) :: instructs the extension on which attribute to use as resource id in the provider.
-  - exclude (optional) :: sometimes we don't want to expose some relationships. These can be excluded from the provider flow trough this option
+  - type                  :: instructs the extension about the FGA type of the resource (the corresponding type for resource that is defined in the model used by the provider)
+  - id         (optional) :: instructs the extension on which attribute to use as resource id in the provider.
+  - exclude    (optional) :: sometimes we don't want to expose some relationships. These can be excluded from the provider flow trough this option
+  - ownership? (optional) :: resource has a `owner` relationship with the user. Default: `true`
 
   ## Example 
 
@@ -36,6 +37,7 @@ defmodule Ash.FGA do
     type :device                            # The FGA provider will use `device` as type for this resource in tuples
     id  :device_id                          # The `device_id` atrtibute will be used as `id` in tuples
     exclude [:system_model_part_number]     # The `system_model_part_number` relationship will not be considered when writing tuples
+    ownership? true                         # Creating a device is an operation performed by a user, so it has an owner
   end
   ```
   """
@@ -69,6 +71,12 @@ defmodule Ash.FGA do
       id: [
         type: :atom,
         doc: "The FGA id that represents elements of this resource."
+      ],
+      ownership?: [
+        type: :boolean,
+        doc:
+          "Whether or not the resource has a `owner` relationship with the `user` type in the model.",
+        default: true
       ]
     ],
     entities: [@exclude]
@@ -100,6 +108,10 @@ defmodule Ash.FGA.Info do
 
   def exclude(dsl_state) do
     Extension.get_entities(dsl_state, [:fga])
+  end
+
+  def ownership?(dsl_state) do
+    Extension.get_opt(dsl_state, [:fga], :ownership?, true)
   end
 end
 

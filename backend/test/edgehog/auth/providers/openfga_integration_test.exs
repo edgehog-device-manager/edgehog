@@ -59,9 +59,9 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
 
     test "Writes correct tuples", %{context: context} do
       opts = [
-        subj_type: "user",
+        subj_type: "tenant",
         subj_id: System.unique_integer([:positive]),
-        rel: "owner",
+        rel: "alias",
         obj_type: "tenant",
         obj_id: "test"
       ]
@@ -93,14 +93,13 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
 
     test "Deletes correct tuples", %{context: context} do
       opts = [
-        subj_type: "user",
+        subj_type: "tenant",
         subj_id: System.unique_integer([:positive]),
-        rel: "owner",
+        rel: "alias",
         obj_type: "tenant",
         obj_id: "test"
       ]
 
-      # WriteOwner is not called because `actor` is nil
       tuple = TupleFixtures.tuple(opts)
       {:ok, _} = OpenFGA.write(tuple, context)
 
@@ -111,20 +110,6 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
       tenant = tenant_fixture()
       tenant_fga_id = "tenant:#{tenant.slug}"
       realm = realm_fixture(tenant: tenant)
-
-      opts = [
-        subj_type: "user",
-        subj_id: System.unique_integer([:positive]),
-        rel: "owner",
-        obj_type: "realm",
-        obj_id: realm.id
-      ]
-
-      # WriteOwner is not called because `actor` is nil
-      realm_tuple =
-        TupleFixtures.tuple(opts)
-
-      {:ok, _} = OpenFGA.write(realm_tuple, context)
 
       assert {:ok, [object]} =
                OpenFGA.list_objects({tenant_fga_id, "tenant", "realm"}, context)
@@ -149,9 +134,9 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
 
     test "false on invalid tuples", %{context: context} do
       opts = [
-        subj_type: "user",
+        subj_type: "tenant",
         subj_id: System.unique_integer([:positive]),
-        rel: "owner",
+        rel: "alias",
         obj_type: "tenant",
         obj_id: "test"
       ]

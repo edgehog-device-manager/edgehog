@@ -68,6 +68,7 @@ defmodule Edgehog.Tenants.Tenant do
   fga do
     type :tenant
     id(:slug)
+    ownership?(false)
   end
 
   actions do

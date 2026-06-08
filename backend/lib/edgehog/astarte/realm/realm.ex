@@ -31,6 +31,7 @@ defmodule Edgehog.Astarte.Realm do
     type :realm
     id(:name)
     exclude([:cluster])
+    ownership?(false)
   end
 
   actions do
