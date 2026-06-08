@@ -150,6 +150,7 @@ type ManualFileDeleteRequestFormWrapperProps = {
   deleteOptions: StorageSourceOption[];
   onLoadMoreDeleteOptions?: () => void;
   isOnline: boolean;
+  onDeleteSuccess: (fileDownloadRequestId: string) => void;
 };
 
 const ManualFileDeleteRequestFormWrapper = ({
@@ -158,6 +159,7 @@ const ManualFileDeleteRequestFormWrapper = ({
   deleteOptions,
   onLoadMoreDeleteOptions,
   isOnline,
+  onDeleteSuccess,
 }: ManualFileDeleteRequestFormWrapperProps) => {
   const intl = useIntl();
 
@@ -232,6 +234,8 @@ const ManualFileDeleteRequestFormWrapper = ({
             },
           });
         });
+
+        onDeleteSuccess(values.fileDownloadRequestId);
       } catch (error) {
         setErrorFeedback(
           error instanceof Error
@@ -243,7 +247,14 @@ const ManualFileDeleteRequestFormWrapper = ({
         );
       }
     },
-    [createFileDeleteRequest, deviceId, intl, isOnline, setErrorFeedback],
+    [
+      createFileDeleteRequest,
+      deviceId,
+      intl,
+      isOnline,
+      setErrorFeedback,
+      onDeleteSuccess,
+    ],
   );
 
   return (
@@ -261,12 +272,16 @@ type FilesDeleteTabProps = {
     FilesDeleteTab_storageFileDownloadRequests$key;
   embedded?: boolean;
   isOnline?: boolean;
+  removedOptionIds: Set<string>;
+  onDeleteSuccess: (id: string) => void;
 };
 
 const FilesDeleteTab = ({
   deviceRef,
   embedded = false,
   isOnline = false,
+  removedOptionIds,
+  onDeleteSuccess,
 }: FilesDeleteTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -325,7 +340,8 @@ const FilesDeleteTab = ({
 
     for (const edge of edges) {
       const node = edge?.node;
-      if (node?.id) {
+
+      if (node?.id && !removedOptionIds.has(node.id)) {
         const fileName = node.fileName ?? node.id;
         fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
         validRequests.push({
@@ -348,7 +364,7 @@ const FilesDeleteTab = ({
             : fileName,
       };
     });
-  }, [storageData.storageFileDownloadRequests]);
+  }, [storageData.storageFileDownloadRequests, removedOptionIds]);
 
   if (!data.capabilities.includes("FILE_TRANSFER_DELETE")) {
     return null;
@@ -373,6 +389,7 @@ const FilesDeleteTab = ({
             deleteOptions={deleteOptions}
             onLoadMoreDeleteOptions={onLoadMoreDeleteOptions}
             isOnline={isOnline}
+            onDeleteSuccess={onDeleteSuccess}
           />
         </Stack>
       </div>

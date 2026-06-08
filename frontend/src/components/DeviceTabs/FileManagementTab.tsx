@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import Select from "react-select";
@@ -86,6 +86,14 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const [selectedMode, setSelectedMode] = useState<FileManagementMode>(
     "download-to-device-file",
   );
+
+  const [removedOptionIds, setRemovedOptionIds] = useState<Set<string>>(
+    new Set(),
+  );
+
+  const handleOptionDeleted = useCallback((id: string) => {
+    setRemovedOptionIds((prev) => new Set(prev).add(id));
+  }, []);
 
   const supportsServerToDevice = Object.values(
     data.fileTransferCapabilities?.serverToDevice ?? {},
@@ -183,10 +191,23 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
         );
       case "upload-from-device":
         return (
-          <FilesDownloadTab deviceRef={data} embedded isOnline={isOnline} />
+          <FilesDownloadTab
+            deviceRef={data}
+            embedded
+            isOnline={isOnline}
+            removedOptionIds={removedOptionIds}
+          />
         );
       case "delete-from-device":
-        return <FilesDeleteTab deviceRef={data} embedded isOnline={isOnline} />;
+        return (
+          <FilesDeleteTab
+            deviceRef={data}
+            embedded
+            isOnline={isOnline}
+            removedOptionIds={removedOptionIds}
+            onDeleteSuccess={handleOptionDeleted}
+          />
+        );
       default:
         return null;
     }

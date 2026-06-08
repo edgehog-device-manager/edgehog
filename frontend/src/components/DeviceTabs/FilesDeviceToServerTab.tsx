@@ -294,12 +294,14 @@ type FilesDeviceToServerTabProps = {
     FilesDeviceToServerTab_storageFileDownloadRequests$key;
   embedded?: boolean;
   isOnline?: boolean;
+  removedOptionIds?: Set<string>;
 };
 
 const FilesDeviceToServerTab = ({
   deviceRef,
   embedded = false,
   isOnline = false,
+  removedOptionIds = new Set(),
 }: FilesDeviceToServerTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -395,7 +397,8 @@ const FilesDeviceToServerTab = ({
 
     for (const edge of edges) {
       const node = edge?.node;
-      if (node?.id) {
+
+      if (node?.id && !removedOptionIds.has(node.id)) {
         const fileName = node.fileName ?? node.id;
         fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
         validRequests.push({
@@ -418,7 +421,7 @@ const FilesDeviceToServerTab = ({
             : fileName,
       };
     });
-  }, [storageData.storageFileDownloadRequests]);
+  }, [storageData.storageFileDownloadRequests, removedOptionIds]);
 
   const supportedEncodingsBySourceType = useMemo<
     Record<FileSourceType, string[]>
