@@ -53,6 +53,8 @@ jobs:
           - 8081:8081
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          submodules: recursive
       - name: "Setup jq"
         uses: dcarbone/install-jq-action@b7ef57d46ece78760b4019dbc4080a1ba2a40b45 # v3
       - name: Install OpenFGA cli

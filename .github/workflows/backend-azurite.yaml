@@ -58,6 +58,8 @@ jobs:
       #     --health-retries 5
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          submodules: recursive
       # NOTE: this does not check for the service to be up and running. the
       # tradeoff of not using the service is a custom health check logic, which
       # I don't want to implement.
