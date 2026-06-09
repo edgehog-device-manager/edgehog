@@ -281,23 +281,28 @@ const ManualFilesServerToDeviceFileForm = ({
     }
   });
 
-  const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
   const hasFiles = selectedFiles.length > 0;
+  const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
+  const cleanEncoding = selectedEncodingValue.toLowerCase();
   const isArchiveSelected = isArchiveEncoding(selectedEncodingValue);
+
+  const isSingleCompressedFile =
+    selectedFiles.length === 1 &&
+    !hasRelativePaths &&
+    (cleanEncoding === "gz" || cleanEncoding === "lz4");
+
+  const needsArchive =
+    hasMultipleFilesSelected || hasRelativePaths || isArchiveSelected;
+
   const selectedFileExtension = hasFiles
     ? getFileExtension(selectedFiles[0].name)
     : "";
-  const needsArchive =
-    selectedFiles.length > 1 || hasRelativePaths || isArchiveSelected;
-  const cleanEncoding = selectedEncodingValue.toLowerCase();
 
   const fileExtension = needsArchive
-    ? selectedFiles.length === 1 &&
-      !hasRelativePaths &&
-      (cleanEncoding === "gz" || cleanEncoding === "lz4")
-      ? `${selectedFileExtension}${selectedArchiveExtension || ".tar"}`
-      : selectedArchiveExtension || ".tar"
-    : selectedFileExtension;
+    ? selectedArchiveExtension || ".tar"
+    : isSingleCompressedFile
+      ? `${selectedFileExtension}.${cleanEncoding}`
+      : selectedFileExtension;
 
   const showArchiveName = hasFiles;
 
