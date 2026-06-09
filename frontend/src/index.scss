@@ -18,9 +18,12 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-@use "bootstrap/scss/bootstrap.scss" as *;
+@use "bootstrap/scss/bootstrap.scss" as * with (
+  $primary: #312f73
+);
 
 :root {
+  --cp-color-accent: #056cee;
   --campaign-target-status_color_idle: var(--bs-gray);
   --campaign-target-status_color_in-progress: var(--bs-warning);
   --campaign-target-status_color_successful: var(--bs-success);
@@ -30,4 +33,14 @@
 .custom-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #d0d5dd transparent;
+}
+
+.text-bg-accent {
+  color: var(--bs-light);
+  background: var(--cp-color-accent);
+}
+
+.form-check-input:checked {
+  background-color: var(--cp-color-accent);
+  border-color: var(--cp-color-accent);
 }
