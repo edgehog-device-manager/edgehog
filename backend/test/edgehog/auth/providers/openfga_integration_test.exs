@@ -39,6 +39,7 @@ defmodule Edgehog.Auth.Providers.OpenFGAIntegrationTests do
   alias Edgehog.TupleFixtures
 
   @moduletag :integration_openfga
+  @moduletag skip: "FGA feature is still WIP."
 
   test "init_context/1 properly inits a connection with OpenFGA" do
     config = Edgehog.Config.authz_config!()[:config]

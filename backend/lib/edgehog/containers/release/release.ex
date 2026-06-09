@@ -22,15 +22,11 @@ defmodule Edgehog.Containers.Release do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource, Ash.FGA]
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Release.Changes
   alias Edgehog.Validations
-
-  fga do
-    type :release
-  end
 
   graphql do
     type :release

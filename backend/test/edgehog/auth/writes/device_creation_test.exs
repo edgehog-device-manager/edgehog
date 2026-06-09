@@ -26,6 +26,8 @@ defmodule Edgehog.Auth.Flows.DeviceCreationTest do
 
   alias Edgehog.Auth.FGAService
 
+  @moduletag skip: "FGA feature is still WIP."
+
   test "device creation writes the correct tuples on FGA", %{tenant: tenant, realm: realm} do
     test_pid = self()
 
