@@ -129,7 +129,7 @@ defmodule EdgehogWeb.AdminAPI.AuthTest do
       path: path,
       admin_private_key: admin_private_key
     } do
-      stub(ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
+      stub(ReconcilerMock, :reconcile, fn _tenant -> :ok end)
 
       conn =
         conn

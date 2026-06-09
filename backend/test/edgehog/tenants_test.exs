@@ -50,6 +50,12 @@ defmodule Edgehog.TenantsTest do
                          |> String.trim()
 
   describe "Tenants.create_tenant/1" do
+    setup do
+      stub(ReconcilerMock, :reconcile, fn _tenant -> :ok end)
+
+      :ok
+    end
+
     test "with valid data creates a tenant" do
       name = unique_tenant_name()
       slug = unique_tenant_slug()
@@ -138,7 +144,7 @@ defmodule Edgehog.TenantsTest do
     test "triggers tenant reconciliation" do
       fixture = tenant_fixture()
 
-      expect(ReconcilerMock, :reconcile_tenant, fn %Tenant{} = tenant ->
+      expect(ReconcilerMock, :reconcile, fn %Tenant{} = tenant ->
         assert tenant.slug == fixture.slug
 
         :ok
@@ -150,7 +156,7 @@ defmodule Edgehog.TenantsTest do
 
   describe "Tenants.provision_tenant/1" do
     setup do
-      stub(ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
+      stub(ReconcilerMock, :reconcile, fn _tenant -> :ok end)
       stub(Edgehog.Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
       stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
       stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
@@ -218,7 +224,7 @@ defmodule Edgehog.TenantsTest do
     end
 
     test "triggers tenant reconciliation" do
-      expect(ReconcilerMock, :reconcile_tenant, fn %Tenant{} = tenant ->
+      expect(ReconcilerMock, :reconcile, fn %Tenant{} = tenant ->
         assert tenant.slug == "test"
 
         :ok
@@ -298,12 +304,14 @@ defmodule Edgehog.TenantsTest do
     import Edgehog.GroupsFixtures
     import Edgehog.OSManagementFixtures
 
-    alias Edgehog.Containers.ReconcilerMock
+    alias Edgehog.Containers
+    alias Edgehog.Tenants
 
     setup do
-      stub(ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
-      stub(ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
-      stub(ReconcilerMock, :start_link, fn _opts -> :ok end)
+      stub(Tenants.ReconcilerMock, :reconcile, fn _tenant -> :ok end)
+      stub(Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
+      stub(Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
+      stub(Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
       %{tenant: tenant_fixture()}
     end
 

@@ -38,6 +38,7 @@ defmodule EdgehogWeb.AdminAPI.Tenants.TenantTest do
 
   setup do
     stub(Edgehog.Tenants.ReconcilerMock, :reconcile_tenant, fn _tenant -> :ok end)
+    stub(Edgehog.Tenants.ReconcilerMock, :reconcile, fn _tenant -> :ok end)
     stub(Edgehog.Containers.ReconcilerMock, :register_device, fn _device, _tenant -> :ok end)
     stub(Edgehog.Containers.ReconcilerMock, :stop_device, fn _device, _tenant -> :ok end)
     stub(Edgehog.Containers.ReconcilerMock, :start_link, fn _opts -> :ok end)
