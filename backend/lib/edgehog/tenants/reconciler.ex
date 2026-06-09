@@ -1,6 +1,7 @@
+#
 # This file is part of Edgehog.
 #
-# Copyright 2023-2026 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,127 +16,146 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
+#
 
 defmodule Edgehog.Tenants.Reconciler do
-  @moduledoc false
-  @behaviour Edgehog.Tenants.Reconciler.Behaviour
+  @moduledoc """
+  The tenant reconciler.
 
-  use GenServer
+  This service is responsible for keeping interfaces, triggers and delivery
+  policies up to date and running on astarte, handling different astarte
+  versions.
+  """
 
+  use GenServer, restart: :transient
+
+  alias Edgehog.Config
   alias Edgehog.Tenants.Reconciler.Core
-  alias Edgehog.Tenants.Reconciler.TaskSupervisor
-  alias Edgehog.Tenants.Tenant
 
   require Logger
 
-  @reconcile_interval to_timeout(minute: 10)
-  @minimum_astarte_version_with_policies_support "1.1.1"
+  # =============== API
 
-  def start_link(opts) do
-    GenServer.start_link(__MODULE__, opts, name: __MODULE__)
+  @doc deprecated: """
+       Tenant reconciliation should happen through the new API.
+
+       see `reconcile/1`
+       """
+  def reconcile_tenant(tenant), do: reconcile(tenant)
+
+  @doc """
+  Reconciles a tenant.
+
+  Sends a new message to the tenant reconciler casting a `:reconcile` message.
+
+  The reconciler server for that tenant proceeds with reconciliation in a separate process.
+  """
+  def reconcile(tenant) do
+    tenant
+    |> name()
+    |> GenServer.cast(:reconcile)
   end
 
-  @impl Edgehog.Tenants.Reconciler.Behaviour
-  def reconcile_tenant(%Tenant{} = tenant) do
-    GenServer.cast(__MODULE__, {:reconcile_tenant, tenant})
+  def start_reconciler(tenant, opts \\ []) do
+    opts
+    |> Keyword.put(:tenant, tenant)
+    |> start_link()
   end
+
+  def start_link(args) do
+    tenant = Keyword.fetch!(args, :tenant)
+
+    GenServer.start_link(__MODULE__, args, name: name(tenant))
+  end
+
+  # =============== Init
 
   @impl GenServer
   def init(opts) do
-    tenant_to_trigger_url_fun = Keyword.fetch!(opts, :tenant_to_trigger_url_fun)
+    tenant = Keyword.fetch!(opts, :tenant)
 
-    state = %{tenant_to_trigger_url_fun: tenant_to_trigger_url_fun}
+    timeout = Keyword.get(opts, :timeout, Config.tenant_reconciler_timeout!())
 
-    case Keyword.get(opts, :mode, :periodic) do
-      :manual ->
-        {:ok, Map.put(state, :mode, :manual)}
+    default_mode = if timeout > 0, do: :auto, else: :manual
+    mode = Keyword.get(opts, :mode, default_mode)
 
-      :periodic ->
-        schedule_reconciliation(0)
+    state = %{
+      tenant: tenant,
+      mode: mode,
+      timeout: timeout
+    }
 
-        {:ok, Map.put(state, :mode, :periodic)}
-    end
+    {:ok, state, {:continue, :maybe_start_timeout}}
+  end
+
+  # =============== Callbacks
+
+  @impl GenServer
+  def handle_continue(:maybe_start_timeout, %{mode: :auto, timeout: timeout} = state) do
+    do_reconcile(state)
+
+    # We're in auto mode, reply with a timeout
+    {:noreply, state, timeout}
   end
 
   @impl GenServer
-  def handle_info(:reconcile_all, state) do
+  def handle_continue(:maybe_start_timeout, %{mode: :manual} = state) do
+    # In manual mode, just don't
+    {:noreply, state}
+  end
+
+  @impl GenServer
+  def handle_info(:timeout, state) do
+    do_reconcile(state)
+  end
+
+  @impl GenServer
+  def handle_cast(:reconcile, state) do
+    do_reconcile(state)
+  end
+
+  # =============== Helpers
+
+  defp do_reconcile(state) do
     %{
       mode: mode,
-      tenant_to_trigger_url_fun: tenant_to_trigger_url_fun
+      tenant: tenant,
+      timeout: timeout
     } = state
 
-    if mode == :periodic do
-      schedule_reconciliation(@reconcile_interval)
-    end
+    to_return =
+      case mode do
+        :auto -> {:noreply, state, timeout}
+        :manual -> {:noreply, state}
+      end
 
-    Tenant
-    |> Ash.read!()
-    |> Enum.each(&start_reconciliation_task(&1, tenant_to_trigger_url_fun))
-
-    {:noreply, state}
-  end
-
-  @impl GenServer
-  def handle_cast({:reconcile_tenant, tenant}, state) do
-    %{
-      tenant_to_trigger_url_fun: tenant_to_trigger_url_fun
-    } = state
-
-    start_reconciliation_task(tenant, tenant_to_trigger_url_fun)
-    {:noreply, state}
-  end
-
-  defp start_reconciliation_task(%Tenant{} = tenant, tenant_to_trigger_url_fun) do
-    tenant = Ash.load!(tenant, [realm: [:realm_management_client]], tenant: tenant)
-
-    Task.Supervisor.start_child(TaskSupervisor, fn ->
-      rm_client = tenant.realm.realm_management_client
-
-      Enum.each(Core.list_required_interfaces(), &Core.reconcile_interface!(rm_client, &1))
-      trigger_url = tenant_to_trigger_url_fun.(tenant)
-
-      reconcile_policies_and_triggers(rm_client, trigger_url, tenant)
-    end)
-  end
-
-  defp reconcile_policies_and_triggers(rm_client, trigger_url, tenant) do
-    with {:ok, version} <- Core.fetch_astarte_version(rm_client) do
-      supports_policies? =
-        Core.min_version_matches(version, @minimum_astarte_version_with_policies_support)
-
-      # optionally reconcile policies
-      if supports_policies?,
-        do: reconcile_policies(rm_client),
-        else:
-          Logger.warning(
-            "Skipping trigger delivery policies reconciliation for tenant #{tenant.tenant_id}. Astarte version does not support policies."
-          )
-
-      # reconcile triggers, pass down policies support and astarte version
-      reconcile_triggers(rm_client, trigger_url, supports_policies?, version, tenant)
+    case Core.reconcile(tenant) do
+      :ok -> to_return
+      {:error, error} -> log_and_stop(error, state)
     end
   end
 
-  defp reconcile_policies(rm_client) do
-    Enum.each(
-      Core.list_required_delivery_policies(),
-      &Core.reconcile_delivery_policy!(rm_client, &1)
-    )
+  defp log_and_stop(error, state) do
+    %{tenant: tenant} = state
+
+    slug = tenant.slug
+
+    Logger.error("""
+    An error occurred while reconciling the tenant `#{slug}`: #{inspect(error)}
+
+    To prevent log poison the reconciler will now be stopped. To resume it when the problem is fixed run:
+
+    ```elixir
+    Edgehog.Tenants.Reconciler.start_reconciler(tenant, opts)
+    ```
+
+    tip: refer to the edgehog doc for valid opts.
+    """)
+
+    {:stop, error, state}
   end
 
-  defp reconcile_triggers(rm_client, trigger_url, policies_support, astarte_version, tenant) do
-    trigger_url
-    |> Core.list_required_triggers(policies_support)
-    |> Enum.each(&reconcile_trigger!(rm_client, &1, astarte_version, tenant))
-  end
-
-  defp reconcile_trigger!(rm_client, trigger, astarte_version, tenant) do
-    Task.start(fn -> Core.reconcile_trigger!(rm_client, trigger, astarte_version, tenant) end)
-  end
-
-  defp schedule_reconciliation(time) do
-    Process.send_after(self(), :reconcile_all, time)
-
-    :ok
+  def name(tenant) do
+    {:via, Registry, {Edgehog.Tenants.Reconciler.Registry, tenant.tenant_id}}
   end
 end

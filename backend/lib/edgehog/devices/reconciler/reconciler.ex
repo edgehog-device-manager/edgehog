@@ -81,7 +81,7 @@ defmodule Edgehog.Devices.Reconciler do
 
   defp spawn_reconciliation_task(tenant) do
     Task.Supervisor.async(Reconciler.Supervisor, fn ->
-      Logger.info("Reconciling tenant #{tenant.slug}")
+      Logger.info("Reconciling tenant #{tenant.slug} devices.")
       Reconciler.Core.reconcile(tenant)
     end)
   end

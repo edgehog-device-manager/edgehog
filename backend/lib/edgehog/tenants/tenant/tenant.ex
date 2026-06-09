@@ -173,6 +173,10 @@ defmodule Edgehog.Tenants.Tenant do
     identity :slug, [:slug]
   end
 
+  changes do
+    change Changes.StartReconciliation, on: :create
+  end
+
   pub_sub do
     prefix "tenants"
     module EdgehogWeb.Endpoint

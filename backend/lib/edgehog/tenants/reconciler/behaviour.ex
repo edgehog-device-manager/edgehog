@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2023-2024 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,11 +15,11 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Tenants.Reconciler.Behaviour do
   @moduledoc false
   alias Edgehog.Tenants.Tenant
 
   @callback reconcile_tenant(tenant :: Tenant.record()) :: :ok
+  @callback reconcile(tenant :: Tenant.record()) :: :ok
 end

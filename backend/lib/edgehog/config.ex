@@ -130,6 +130,16 @@ defmodule Edgehog.Config do
     os_env: "EDGEHOG_OPENFGA_AUTH_MODEL_ID",
     type: :binary
 
+  @envdoc """
+  Edgehog tenant reconciliation timeout (seconds).
+
+  This environment variable sets the default reconciliation timeout for all tenants. Set it to 0 to set manual reconciliation only.
+  """
+  app_env :tenant_reconciler_timeout, :edgehog, :tenant_reconciler_timeout,
+    os_env: "EDGEHOG_TENANT_RECONCILER_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(minute: 10)
+
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
   """

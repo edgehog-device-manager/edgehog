@@ -38,10 +38,12 @@ defmodule Edgehog.Application do
 
     Config.validate_admin_authentication!()
 
-    # We inject this here so that the non-web part of the application doesn't depend on the web part
     tenant_to_trigger_url_fun = fn %Edgehog.Tenants.Tenant{slug: slug} ->
       Router.Helpers.astarte_trigger_url(Endpoint, :process_event, slug)
     end
+
+    # We inject this here so that the non-web part of the application doesn't depend on the web part
+    Application.put_env(:edgehog, :tenant_to_trigger_url_fun, tenant_to_trigger_url_fun)
 
     children = [
       # Prometheus metrics
@@ -63,8 +65,9 @@ defmodule Edgehog.Application do
       # Start the Campaigns supervisor
       Edgehog.Campaigns.Supervisor,
       # Start the Tenant Reconciler Supervisor
-      {Edgehog.Tenants.Reconciler.Supervisor,
-       tenant_to_trigger_url_fun: tenant_to_trigger_url_fun},
+      {Registry, keys: :unique, name: Edgehog.Tenants.Reconciler.Registry},
+      # Reconciler init
+      Edgehog.Tenants.Reconciler.Starter,
       # Start Containers reconciler
       {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
       # Start the Endpoint (http/https)

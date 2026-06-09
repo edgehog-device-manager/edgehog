@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Tenants.Tenant.ManualActions.ReconcilerAction do
   @moduledoc false
@@ -31,7 +29,7 @@ defmodule Edgehog.Tenants.Tenant.ManualActions.ReconcilerAction do
     tenant = input.arguments.tenant
 
     :reconcile = input.action.name
-    result = @reconciler_module.reconcile_tenant(tenant)
+    result = @reconciler_module.reconcile(tenant)
     {:ok, result}
   end
 end
