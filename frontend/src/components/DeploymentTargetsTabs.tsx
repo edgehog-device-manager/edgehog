@@ -21,6 +21,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useParams } from "react-router-dom";
 
 import { DeploymentCampaign_getCampaign_Query$data } from "@/api/__generated__/DeploymentCampaign_getCampaign_Query.graphql";
 import { DeploymentTargets_PaginationQuery } from "@/api/__generated__/DeploymentTargets_PaginationQuery.graphql";
@@ -38,6 +39,7 @@ import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Button from "@/components/Button";
 import SegmentedControl from "@/components/SegmentedControl";
 import Spinner from "@/components/Spinner";
+import { useNavigate, Route } from "@/Navigation";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_TARGETS_FRAGMENT = graphql`
@@ -90,8 +92,11 @@ type Props = {
 };
 
 const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
-  const [activeTab, setActiveTab] =
-    useState<CampaignTargetStatusType>("SUCCESSFUL");
+  const { deploymentCampaignId = "", activeTab: urlTab } = useParams();
+  const navigate = useNavigate();
+
+  const activeTab = (urlTab as CampaignTargetStatusType) || "SUCCESSFUL";
+
   const [committedTab, setCommittedTab] = useState(activeTab);
 
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -103,11 +108,6 @@ const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
   const isTabDataLoading = activeTab !== committedTab;
 
   useEffect(() => {
-    // Only refetch if the tab has actually changed
-    if (activeTab === committedTab) {
-      return;
-    }
-
     refetch(
       {
         first: RECORDS_TO_LOAD_FIRST,
@@ -120,7 +120,7 @@ const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
         },
       },
     );
-  }, [activeTab, committedTab, refetch]);
+  }, [activeTab, refetch]);
 
   const { onLoadMore } = useRelayConnectionPagination({
     hasNext,
@@ -153,7 +153,15 @@ const DeploymentTargetsTabs = ({ campaignRef }: Props) => {
           activeId={activeTab}
           items={campaignTargetTabs}
           getItemId={(tab) => tab}
-          onChange={(tab) => setActiveTab(tab)}
+          onChange={(tab) =>
+            navigate(
+              {
+                route: Route.deploymentCampaignsEdit,
+                params: { deploymentCampaignId, activeTab: tab },
+              },
+              { replace: true },
+            )
+          }
           showControls
         >
           {(tab, isActive) => (

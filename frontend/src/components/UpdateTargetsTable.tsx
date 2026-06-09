@@ -193,7 +193,10 @@ const columns = [
     cell: ({ row, getValue }) => (
       <Link
         route={Route.devicesEdit}
-        params={{ deviceId: row.original.device.id }}
+        params={{
+          deviceId: row.original.device.id,
+          activeTab: "device-software-update-tab",
+        }}
       >
         {getValue()}
       </Link>

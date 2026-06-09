@@ -40,7 +40,7 @@ import type {
 } from "@/api/__generated__/Application_getApplication_Query.graphql";
 import { Releases_PaginationQuery } from "@/api/__generated__/Releases_PaginationQuery.graphql";
 
-import { Link, Route } from "@/Navigation";
+import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/Alert";
 import ApplicationDevicesTable from "@/components/ApplicationDevicesTable";
 import Button from "@/components/Button";
@@ -107,6 +107,8 @@ const RELEASE_SUBSCRIPTION = graphql`
     }
   }
 `;
+
+const TAB_KEYS = ["releases-tab", "devices-tab"];
 
 type SelectedRelease = ReleaseTableRecord;
 
@@ -289,7 +291,11 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
   const [releaseToDelete, setReleaseToDelete] =
     useState<SelectedRelease | null>(null);
-  const { applicationId = "" } = useParams();
+
+  const { applicationId = "", activeTab } = useParams();
+  const navigate = useNavigate();
+
+  const currentTabKey = activeTab || TAB_KEYS[0];
 
   return (
     <Page>
@@ -333,8 +339,17 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
         </Form.Group>
 
         <Tabs
-          defaultActiveKey="releases-tab"
-          tabsOrder={["releases-tab", "devices-tab"]}
+          activeKey={currentTabKey}
+          tabsOrder={TAB_KEYS}
+          onChange={(tabKey) =>
+            navigate(
+              {
+                route: Route.application,
+                params: { applicationId, activeTab: tabKey },
+              },
+              { replace: true },
+            )
+          }
         >
           <Tab
             eventKey="releases-tab"

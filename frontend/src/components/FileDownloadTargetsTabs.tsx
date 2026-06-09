@@ -21,6 +21,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useParams } from "react-router-dom";
 
 import type { FileDownloadCampaign_getCampaign_Query$data } from "@/api/__generated__/FileDownloadCampaign_getCampaign_Query.graphql";
 import type { FileDownloadTargetsTabs_FileDownloadTargetsFragment$key } from "@/api/__generated__/FileDownloadTargetsTabs_FileDownloadTargetsFragment.graphql";
@@ -38,6 +39,7 @@ import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Button from "@/components/Button";
 import SegmentedControl from "@/components/SegmentedControl";
 import Spinner from "@/components/Spinner";
+import { useNavigate, Route } from "@/Navigation";
 
 const FILE_DOWNLOAD_TARGETS_FRAGMENT = graphql`
   fragment FileDownloadTargetsTabs_FileDownloadTargetsFragment on Campaign
@@ -94,8 +96,11 @@ type FileDownloadTargetsTabsProps = {
 const FileDownloadTargetsTabs = ({
   campaignRef,
 }: FileDownloadTargetsTabsProps) => {
-  const [activeTab, setActiveTab] =
-    useState<CampaignTargetStatusType>("SUCCESSFUL");
+  const { fileDownloadCampaignId = "", activeTab: urlTab } = useParams();
+  const navigate = useNavigate();
+
+  const activeTab = (urlTab as CampaignTargetStatusType) || "SUCCESSFUL";
+
   const [committedTab, setCommittedTab] = useState(activeTab);
 
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -107,10 +112,6 @@ const FileDownloadTargetsTabs = ({
   const isTabDataLoading = activeTab !== committedTab;
 
   useEffect(() => {
-    if (activeTab === committedTab) {
-      return;
-    }
-
     refetch(
       {
         first: RECORDS_TO_LOAD_FIRST,
@@ -123,7 +124,7 @@ const FileDownloadTargetsTabs = ({
         },
       },
     );
-  }, [activeTab, committedTab, refetch]);
+  }, [activeTab, refetch]);
 
   const { onLoadMore } = useRelayConnectionPagination({
     hasNext,
@@ -169,7 +170,15 @@ const FileDownloadTargetsTabs = ({
           activeId={activeTab}
           items={campaignTargetTabs}
           getItemId={(tab) => tab}
-          onChange={(tab) => setActiveTab(tab)}
+          onChange={(tab) =>
+            navigate(
+              {
+                route: Route.fileDownloadCampaignsEdit,
+                params: { fileDownloadCampaignId, activeTab: tab },
+              },
+              { replace: true },
+            )
+          }
           showControls
         >
           {(tab, isActive) => (

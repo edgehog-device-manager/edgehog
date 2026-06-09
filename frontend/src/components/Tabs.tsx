@@ -68,6 +68,7 @@ const TabButton = ({ isActive, tabRef }: TabButtonProps) => {
 type TabsProps = {
   children?: React.ReactNode;
   className?: string;
+  activeKey?: EventKey;
   defaultActiveKey?: EventKey;
   tabsOrder?: EventKey[];
   onChange?: (tabKey: string) => void;
@@ -76,6 +77,7 @@ type TabsProps = {
 const Tabs = ({
   children,
   className,
+  activeKey: controlledActiveKey,
   defaultActiveKey,
   tabsOrder = [],
   onChange = () => {},
@@ -84,6 +86,9 @@ const Tabs = ({
     defaultActiveKey,
   );
   const [tabRefs, setTabRefs] = useState<TabRef[]>([]);
+
+  const currentSelectedKey =
+    controlledActiveKey !== undefined ? controlledActiveKey : selectedKey;
 
   const registerTab = useCallback((tabRef: TabRef) => {
     setTabRefs((prev) => {
@@ -98,10 +103,10 @@ const Tabs = ({
 
   const activeKey = useMemo(
     () =>
-      tabRefs.some((tabRef) => tabRef.eventKey === selectedKey)
-        ? selectedKey
+      tabRefs.some((tabRef) => tabRef.eventKey === currentSelectedKey)
+        ? currentSelectedKey
         : tabRefs[0]?.eventKey,
-    [tabRefs, selectedKey],
+    [tabRefs, currentSelectedKey],
   );
 
   const contextValue = useMemo(
@@ -127,10 +132,12 @@ const Tabs = ({
 
   const handleOnChange = useCallback(
     (key: string) => {
-      setSelectedKey(key);
+      if (controlledActiveKey === undefined) {
+        setSelectedKey(key);
+      }
       onChange(key);
     },
-    [onChange],
+    [onChange, controlledActiveKey],
   );
 
   return (
