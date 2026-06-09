@@ -19,7 +19,7 @@
  */
 
 .tab-button.active {
-  color: var(--bs-primary) !important;
+  color: var(--cp-color-accent) !important;
   position: relative;
 
   &::after {
@@ -29,7 +29,7 @@
     left: 0;
     right: 0;
     height: 3px;
-    background: var(--bs-primary);
+    background: var(--cp-color-accent);
     border-top-right-radius: 3px;
     border-top-left-radius: 3px;
   }
