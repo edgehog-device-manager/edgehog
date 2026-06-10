@@ -57,6 +57,12 @@ defmodule Edgehog.Auth.FGAService do
     end)
   end
 
+  def list_users(subj, rel, type) do
+    with_provider_context(fn provider, context ->
+      provider.list_users({subj, rel, type}, context)
+    end)
+  end
+
   defp with_provider_context(function) do
     provider = Keyword.fetch!(Config.authz_config!(), :provider)
     config = Keyword.fetch!(Config.authz_config!(), :config)

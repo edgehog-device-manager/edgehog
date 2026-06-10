@@ -22,7 +22,7 @@ defmodule Edgehog.Containers.ImageCredentials do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource, Ash.FGA]
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.ImageCredentials.Base64JsonEncoding
 
@@ -34,11 +34,6 @@ defmodule Edgehog.Containers.ImageCredentials do
     `name` field is also provided. The module stores `username` and
     `password`
     """
-  end
-
-  fga do
-    type :image_credentials
-    id(:label)
   end
 
   graphql do

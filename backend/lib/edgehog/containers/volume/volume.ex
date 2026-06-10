@@ -22,14 +22,9 @@ defmodule Edgehog.Containers.Volume do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource, Ash.FGA]
+    extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Validations
-
-  fga do
-    type :volume
-    id(:label)
-  end
 
   graphql do
     type :volume

@@ -1654,6 +1654,44 @@ input ReleaseCreateRequiredSystemModelsInput {
   id: ID
 }
 
+":release_container_dependencies connection"
+type ReleaseContainerDependenciesConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":release_container_dependencies edges"
+  edges: [ReleaseContainerDependenciesEdge!]
+}
+
+":release_container_dependencies edge"
+type ReleaseContainerDependenciesEdge {
+  "Cursor"
+  cursor: String!
+
+  ":release_container_dependencies node"
+  node: ReleaseContainerDependencies!
+}
+
+input ReleaseContainerDependenciesFilterInput {
+  and: [ReleaseContainerDependenciesFilterInput!]
+  or: [ReleaseContainerDependenciesFilterInput!]
+  not: [ReleaseContainerDependenciesFilterInput!]
+  container: ContainerFilterInput
+  dependency: ContainerFilterInput
+}
+
+type ReleaseContainerDependencies {
+  "A unique identifier"
+  id: ID!
+
+  container: Container!
+
+  dependency: Container!
+}
+
 enum ContainerVolumeSortField {
   TARGET
   VOLUME_ID
@@ -2728,6 +2766,7 @@ input ReleaseFilterInput {
   application: ApplicationFilterInput
   deployments: DeploymentFilterInput
   containers: ContainerFilterInput
+  containerDependencies: ReleaseContainerDependenciesFilterInput
   systemModels: SystemModelFilterInput
 }
 
@@ -2779,6 +2818,22 @@ type Release implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerConnection!
+  containerDependencies(
+    "A filter to limit the results"
+    filter: ReleaseContainerDependenciesFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ReleaseContainerDependenciesConnection!
   systemModels(
     "How to sort the records in the response"
     sort: [SystemModelSortInput]
@@ -5560,6 +5615,8 @@ enum FileDeleteRequestSortField {
   FORCE
   STATUS
   RESPONSE_CODE
+  INSERTED_AT
+  UPDATED_AT
 }
 
 ":file_delete_request connection"
@@ -5581,6 +5638,32 @@ type FileDeleteRequestEdge {
 
   ":file_delete_request node"
   node: FileDeleteRequest!
+}
+
+input FileDeleteRequestFilterUpdatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
+}
+
+input FileDeleteRequestFilterInsertedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input FileDeleteRequestFilterResponseCode {
@@ -5652,6 +5735,10 @@ input FileDeleteRequestFilterInput {
   "Success or error code for the transfer. A 0 code is a success, errors are POSIX errno."
   responseCode: FileDeleteRequestFilterResponseCode
 
+  insertedAt: FileDeleteRequestFilterInsertedAt
+
+  updatedAt: FileDeleteRequestFilterUpdatedAt
+
   "The device associated with this file delete request."
   device: DeviceFilterInput
 
@@ -5677,6 +5764,10 @@ type FileDeleteRequest {
 
   "Optional messages for the response"
   responseMessages: [String!]
+
+  insertedAt: DateTime!
+
+  updatedAt: DateTime!
 
   "The device associated with this file delete request."
   device: Device!
@@ -5705,11 +5796,21 @@ type CreateFileUploadRequestResult {
 }
 
 input CreateFileUploadRequestInput {
+  "The value depends on the selected source_type: for 'storage' is the ID of an 'io.edgehog.devicemanager.storage.File' property, for 'streaming' it's an empty string, and for 'filesystem' is a path of a file on the device."
   source: String
+
+  "Source from which the file should be read from, with allowed values: [storage, streaming, filesystem]."
   sourceType: FileSource!
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
   encoding: String
+
+  "Flag to enable the progress reporting of the upload."
   progressTracked: Boolean
+
+  "Optional HTTP headers to include in the upload request. The value is a map where keys are header names and values are header values."
   httpHeaders: JsonString
+
   deviceId: ID!
 }
 
@@ -5725,6 +5826,8 @@ enum FileUploadRequestSortField {
   RESPONSE_CODE
   RESPONSE_MESSAGE
   HTTP_HEADERS
+  INSERTED_AT
+  UPDATED_AT
 }
 
 ":file_upload_request connection"
@@ -5746,6 +5849,32 @@ type FileUploadRequestEdge {
 
   ":file_upload_request node"
   node: FileUploadRequest!
+}
+
+input FileUploadRequestFilterUpdatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
+}
+
+input FileUploadRequestFilterInsertedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input FileUploadRequestFilterHttpHeaders {
@@ -5913,19 +6042,47 @@ input FileUploadRequestFilterId {
 
 input FileUploadRequestFilterInput {
   and: [FileUploadRequestFilterInput!]
+
   or: [FileUploadRequestFilterInput!]
+
   not: [FileUploadRequestFilterInput!]
+
   id: FileUploadRequestFilterId
+
+  "The presigned URL to which the file should be uploaded."
   url: FileUploadRequestFilterUrl
+
+  "The value depends on the selected source_type: for 'storage' is the ID of an 'io.edgehog.devicemanager.storage.File' property, for 'streaming' it's an empty string, and for 'filesystem' is a path of a file on the device."
   source: FileUploadRequestFilterSource
+
+  "Source from which the file should be read from, with allowed values: [storage, streaming, filesystem]."
   sourceType: FileUploadRequestFilterSourceType
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
   encoding: FileUploadRequestFilterEncoding
+
+  "Flag to enable the progress reporting of the upload."
   progressTracked: FileUploadRequestFilterProgressTracked
+
+  "The status of the file upload (e.g., 'pending', 'sent', 'in_progress', 'completed', 'failed')."
   status: FileUploadRequestFilterStatus
+
+  "The progress of the file upload as a percentage (0-100)."
   progressPercentage: FileUploadRequestFilterProgressPercentage
+
+  "A 0 code is a success, errors are POSIX error numbers."
   responseCode: FileUploadRequestFilterResponseCode
+
+  "Optional message for the response sent by the device."
   responseMessage: FileUploadRequestFilterResponseMessage
+
+  "Optional HTTP headers to include in the upload request. The value is a map where keys are header names and values are header values."
   httpHeaders: FileUploadRequestFilterHttpHeaders
+
+  insertedAt: FileUploadRequestFilterInsertedAt
+
+  updatedAt: FileUploadRequestFilterUpdatedAt
+
   device: DeviceFilterInput
 }
 
@@ -5937,25 +6094,39 @@ input FileUploadRequestSortInput {
 type FileUploadRequest {
   id: ID!
 
+  "The presigned URL to which the file should be uploaded."
   url: String!
 
+  "The value depends on the selected source_type: for 'storage' is the ID of an 'io.edgehog.devicemanager.storage.File' property, for 'streaming' it's an empty string, and for 'filesystem' is a path of a file on the device."
   source: String
 
+  "Source from which the file should be read from, with allowed values: [storage, streaming, filesystem]."
   sourceType: FileSource!
 
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
   encoding: String
 
+  "Flag to enable the progress reporting of the upload."
   progressTracked: Boolean
 
+  "The status of the file upload (e.g., 'pending', 'sent', 'in_progress', 'completed', 'failed')."
   status: FileUploadRequestStatus
 
+  "The progress of the file upload as a percentage (0-100)."
   progressPercentage: Int
 
+  "A 0 code is a success, errors are POSIX error numbers."
   responseCode: Int
 
+  "Optional message for the response sent by the device."
   responseMessage: String
 
+  "Optional HTTP headers to include in the upload request. The value is a map where keys are header names and values are header values."
   httpHeaders: JsonString
+
+  insertedAt: DateTime!
+
+  updatedAt: DateTime!
 
   device: Device!
 
@@ -5983,9 +6154,6 @@ type CreateManagedFileDownloadRequestResult {
 }
 
 input CreateManagedFileDownloadRequestInput {
-  "An unique name for the file download request, useful for tracking and identification purposes."
-  requestName: String!
-
   "Optional ttl for how long to keep the file for, if 0 is forever, default value is 0."
   ttlSeconds: Int
 
@@ -6024,9 +6192,6 @@ type CreateManualFileDownloadRequestResult {
 }
 
 input CreateManualFileDownloadRequestInput {
-  "An unique name for the file download request, useful for tracking and identification purposes."
-  requestName: String!
-
   "The name of the file being downloaded."
   fileName: String
 
@@ -6067,7 +6232,6 @@ input CreateManualFileDownloadRequestInput {
 enum FileDownloadRequestSortField {
   ID
   URL
-  REQUEST_NAME
   FILE_NAME
   UNCOMPRESSED_FILE_SIZE_BYTES
   DIGEST
@@ -6085,6 +6249,8 @@ enum FileDownloadRequestSortField {
   RESPONSE_CODE
   RESPONSE_MESSAGE
   DELETED
+  INSERTED_AT
+  UPDATED_AT
 }
 
 ":file_download_request connection"
@@ -6106,6 +6272,32 @@ type FileDownloadRequestEdge {
 
   ":file_download_request node"
   node: FileDownloadRequest!
+}
+
+input FileDownloadRequestFilterUpdatedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
+}
+
+input FileDownloadRequestFilterInsertedAt {
+  isNil: Boolean
+  eq: DateTime
+  notEq: DateTime
+  in: [DateTime!]
+  lessThan: DateTime
+  greaterThan: DateTime
+  lessThanOrEqual: DateTime
+  greaterThanOrEqual: DateTime
+  isDistinctFrom: DateTime
+  isNotDistinctFrom: DateTime
 }
 
 input FileDownloadRequestFilterDeleted {
@@ -6359,24 +6551,6 @@ input FileDownloadRequestFilterFileName {
   ilike: String
 }
 
-input FileDownloadRequestFilterRequestName {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String!]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  contains: String
-  isDistinctFrom: String
-  isNotDistinctFrom: String
-  stringEndsWith: String
-  stringStartsWith: String
-  like: String
-  ilike: String
-}
-
 input FileDownloadRequestFilterUrl {
   isNil: Boolean
   eq: String
@@ -6419,9 +6593,6 @@ input FileDownloadRequestFilterInput {
 
   "The URL from which the file can be downloaded."
   url: FileDownloadRequestFilterUrl
-
-  "An unique name for the file download request, useful for tracking and identification purposes."
-  requestName: FileDownloadRequestFilterRequestName
 
   "The name of the file being downloaded."
   fileName: FileDownloadRequestFilterFileName
@@ -6474,6 +6645,10 @@ input FileDownloadRequestFilterInput {
   "Whether the file transferred with this request was deleted from the device"
   deleted: FileDownloadRequestFilterDeleted
 
+  insertedAt: FileDownloadRequestFilterInsertedAt
+
+  updatedAt: FileDownloadRequestFilterUpdatedAt
+
   "The device associated with this file download request."
   device: DeviceFilterInput
 
@@ -6496,9 +6671,6 @@ type FileDownloadRequest {
 
   "The URL from which the file can be downloaded."
   url: String!
-
-  "An unique name for the file download request, useful for tracking and identification purposes."
-  requestName: String!
 
   "The name of the file being downloaded."
   fileName: String
@@ -6550,6 +6722,10 @@ type FileDownloadRequest {
 
   "Whether the file transferred with this request was deleted from the device"
   deleted: Boolean
+
+  insertedAt: DateTime!
+
+  updatedAt: DateTime!
 
   "The device associated with this file download request."
   device: Device!
@@ -8843,7 +9019,7 @@ type RootMutationType {
   "Creates a new channel."
   createChannel(input: CreateChannelInput!): CreateChannelResult
 
-  "Updates an channel."
+  "Updates a channel."
   updateChannel(id: ID!, input: UpdateChannelInput): UpdateChannelResult
 
   "Deletes an channel."

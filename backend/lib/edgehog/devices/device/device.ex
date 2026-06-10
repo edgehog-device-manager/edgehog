@@ -25,10 +25,8 @@ defmodule Edgehog.Devices.Device do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
     extensions: [
-      AshGraphql.Resource,
-      Ash.FGA
-    ],
-    authorizers: [Ash.Policy.Authorizer]
+      AshGraphql.Resource
+    ]
 
   alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Containers.Deployment
@@ -55,24 +53,6 @@ defmodule Edgehog.Devices.Device do
     A Device also exposes info about its connection status and some sets of \
     data read by its operating system.
     """
-  end
-
-  fga do
-    type :device
-    id(:device_id)
-    exclude([:system_model_part_number])
-  end
-
-  policies do
-    # Filter davices the user can see on reads
-    policy action_type(:read) do
-      authorize_if {Edgehog.Auth.Policies.Filter,
-                    rel: :can_view, obj: :device, obj_id: :device_id}
-    end
-
-    policy action_type(:update) do
-      authorize_if always()
-    end
   end
 
   graphql do

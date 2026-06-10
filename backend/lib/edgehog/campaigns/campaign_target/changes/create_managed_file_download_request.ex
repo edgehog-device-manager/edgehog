@@ -33,18 +33,11 @@ defmodule Edgehog.Campaigns.CampaignTarget.Changes.CreateManagedFileDownloadRequ
           Ash.Changeset.fetch_argument(changeset, :mechanism)} do
       {{:ok, file}, {:ok, mechanism}} ->
         device_id = Ash.Changeset.get_attribute(changeset, :device_id)
-        campaign_id = Ash.Changeset.get_attribute(changeset, :campaign_id)
-
-        campaign_name =
-          Edgehog.Campaigns.Campaign
-          |> Ash.get!(campaign_id, tenant: changeset.tenant)
-          |> Map.get(:name)
 
         file_download_request_params = %{
           device_id: device_id,
           file_id: file.id,
           file_download_request_id: Ash.UUIDv7.generate(),
-          request_name: campaign_name,
           compression: mechanism.compression,
           ttl_seconds: mechanism.ttl_seconds,
           file_mode: mechanism.file_mode,

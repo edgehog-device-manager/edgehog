@@ -53,7 +53,6 @@ type EncodingOption = {
 };
 
 type FileDownloadRequestFormValues = {
-  requestName: string;
   files: File[];
   customFileName?: string;
   encoding?: string;
@@ -71,7 +70,7 @@ type ManualFilesServerToDeviceFileFormProps = {
   isLoading: boolean;
   onFileSubmit: (values: FileDownloadRequestFormValues) => void;
   supportedEncodingsByDestination: Record<FileDestinationType, string[]>;
-  allowArchiveUpload: boolean;
+  archiveCapabilities: Record<FileDestinationType, boolean>;
   showAdvancedOptions?: boolean;
   destinationTypeOptions: DestinationTypeOption[];
 };
@@ -83,7 +82,7 @@ const ManualFilesServerToDeviceFileForm = ({
   isLoading,
   onFileSubmit,
   supportedEncodingsByDestination,
-  allowArchiveUpload,
+  archiveCapabilities,
   showAdvancedOptions = false,
   destinationTypeOptions,
 }: ManualFilesServerToDeviceFileFormProps) => {
@@ -106,7 +105,6 @@ const ManualFilesServerToDeviceFileForm = ({
   } = useForm({
     mode: "onTouched",
     defaultValues: {
-      requestName: "",
       file: undefined,
       customFileName: "",
       encoding: "",
@@ -129,6 +127,10 @@ const ManualFilesServerToDeviceFileForm = ({
   }) as FileDestinationType | undefined;
 
   const effectiveDestinationType = selectedDestinationType ?? "STORAGE";
+
+  const canUploadMultiple = useMemo(() => {
+    return archiveCapabilities[effectiveDestinationType] ?? false;
+  }, [archiveCapabilities, effectiveDestinationType]);
 
   const noneEncodingLabel = hasMultipleFilesSelected
     ? intl.formatMessage({
@@ -263,7 +265,6 @@ const ManualFilesServerToDeviceFileForm = ({
 
     if (selectedFiles.length > 0) {
       onFileSubmit({
-        requestName: data.requestName.trim(),
         files: selectedFiles,
         customFileName: data.customFileName?.trim() || undefined,
         destinationType: data.destinationType,
@@ -280,45 +281,96 @@ const ManualFilesServerToDeviceFileForm = ({
     }
   });
 
-  const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
   const hasFiles = selectedFiles.length > 0;
+  const hasRelativePaths = selectedFiles.some((f) => f.webkitRelativePath);
+  const cleanEncoding = selectedEncodingValue.toLowerCase();
   const isArchiveSelected = isArchiveEncoding(selectedEncodingValue);
+
+  const isSingleCompressedFile =
+    selectedFiles.length === 1 &&
+    !hasRelativePaths &&
+    (cleanEncoding === "gz" || cleanEncoding === "lz4");
+
+  const needsArchive =
+    hasMultipleFilesSelected || hasRelativePaths || isArchiveSelected;
+
   const selectedFileExtension = hasFiles
     ? getFileExtension(selectedFiles[0].name)
     : "";
-  const needsArchive =
-    selectedFiles.length > 1 || hasRelativePaths || isArchiveSelected;
-  const cleanEncoding = selectedEncodingValue.toLowerCase();
 
   const fileExtension = needsArchive
-    ? selectedFiles.length === 1 &&
-      !hasRelativePaths &&
-      (cleanEncoding === "gz" || cleanEncoding === "lz4")
-      ? `${selectedFileExtension}${selectedArchiveExtension || ".tar"}`
-      : selectedArchiveExtension || ".tar"
-    : selectedFileExtension;
+    ? selectedArchiveExtension || ".tar"
+    : isSingleCompressedFile
+      ? `${selectedFileExtension}.${cleanEncoding}`
+      : selectedFileExtension;
 
   const showArchiveName = hasFiles;
 
   return (
     <form className={className} onSubmit={onSubmit} autoComplete="off">
       <FormRow
-        id="requestName"
+        id="destinationType"
         label={
           <FormattedMessage
-            id="forms.ManualFilesServerToDeviceFileForm.requestNameLabel"
-            defaultMessage="Request Name"
+            id="forms.ManualFilesServerToDeviceFileForm.destinationLabel"
+            defaultMessage="Destination"
           />
         }
       >
-        <Form.Control
-          as="textarea"
-          rows={1}
-          {...register("requestName")}
-          isInvalid={!!errors.requestName}
+        <Controller
+          control={control}
+          name="destinationType"
+          render={({ field }) => {
+            const selectedOption =
+              destinationOptionsMap.get(field.value ?? "") ?? null;
+
+            return (
+              <Select
+                value={selectedOption}
+                onChange={(option) => {
+                  field.onChange(option ? option.value : null);
+
+                  setSelectedFiles([]);
+                  setValue("encoding", "");
+                  setValue("customFileName", "");
+                  setValue("destination", null);
+                }}
+                options={destinationTypeOptions}
+              />
+            );
+          }}
         />
-        <FormFeedback feedback={errors.requestName?.message} />
       </FormRow>
+
+      {selectedDestinationType === "FILESYSTEM" && (
+        <FormRow
+          id="destination"
+          label={
+            <FormattedMessage
+              id="forms.ManualFilesServerToDeviceFileForm.destinationPathLabel"
+              defaultMessage="Destination Path"
+            />
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("destination")}
+            placeholder="/tmp/file.bin"
+            isInvalid={!!errors.destination}
+          />
+
+          {errors.destination ? (
+            <FormFeedback feedback={errors.destination.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.ManualFilesServerToDeviceFileForm.destinationPathHint"
+                defaultMessage="Absolute path on the target device where the file should be written."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
 
       <FormRow
         id="file"
@@ -333,13 +385,13 @@ const ManualFilesServerToDeviceFileForm = ({
           files={selectedFiles}
           onChange={handleFilesChanged}
           isInvalid={!!errors.file}
-          allowMultiple={allowArchiveUpload}
+          allowMultiple={canUploadMultiple}
         />
         {errors.file ? (
           <FormFeedback feedback={errors.file.message} />
         ) : (
           <Form.Text muted>
-            {allowArchiveUpload ? (
+            {canUploadMultiple ? (
               <FormattedMessage
                 id="forms.ManualFilesServerToDeviceFileForm.fileHint"
                 defaultMessage="Select files or a folder. Multiple items will be encoded."
@@ -387,66 +439,6 @@ const ManualFilesServerToDeviceFileForm = ({
       )}
 
       <FormRow
-        id="destinationType"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceFileForm.destinationLabel"
-            defaultMessage="Destination"
-          />
-        }
-      >
-        <Controller
-          control={control}
-          name="destinationType"
-          render={({ field }) => {
-            const selectedOption =
-              destinationOptionsMap.get(field.value ?? "") ?? null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => {
-                  field.onChange(option ? option.value : null);
-                  setValue("encoding", "");
-                }}
-                options={destinationTypeOptions}
-              />
-            );
-          }}
-        />
-      </FormRow>
-
-      {selectedDestinationType === "FILESYSTEM" && (
-        <FormRow
-          id="destination"
-          label={
-            <FormattedMessage
-              id="forms.ManualFilesServerToDeviceFileForm.destinationPathLabel"
-              defaultMessage="Destination Path"
-            />
-          }
-        >
-          <Form.Control
-            type="text"
-            {...register("destination")}
-            placeholder="/tmp/file.bin"
-            isInvalid={!!errors.destination}
-          />
-
-          {errors.destination ? (
-            <FormFeedback feedback={errors.destination.message} />
-          ) : (
-            <Form.Text muted>
-              <FormattedMessage
-                id="forms.ManualFilesServerToDeviceFileForm.destinationPathHint"
-                defaultMessage="Absolute path on the target device where the file should be written."
-              />
-            </Form.Text>
-          )}
-        </FormRow>
-      )}
-
-      <FormRow
         id="encoding"
         label={
           <FormattedMessage
@@ -489,34 +481,36 @@ const ManualFilesServerToDeviceFileForm = ({
         )}
       </FormRow>
 
-      <FormRow
-        id="ttlSeconds"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceFileForm.ttlLabel"
-            defaultMessage="TTL (seconds)"
-          />
-        }
-      >
-        <Form.Control
-          type="text"
-          {...register("ttlSeconds", {
-            setValueAs: (v) => (v === "" ? undefined : Number(v)),
-          })}
-          isInvalid={!!errors.ttlSeconds}
-        />
-
-        {errors.ttlSeconds ? (
-          <FormFeedback feedback={errors.ttlSeconds.message} />
-        ) : (
-          <Form.Text muted>
+      {selectedDestinationType === "STORAGE" && (
+        <FormRow
+          id="ttlSeconds"
+          label={
             <FormattedMessage
-              id="forms.ManualFilesServerToDeviceFileForm.ttlHint"
-              defaultMessage="Set to 0 for no expiry."
+              id="forms.ManualFilesServerToDeviceFileForm.ttlLabel"
+              defaultMessage="TTL (seconds)"
             />
-          </Form.Text>
-        )}
-      </FormRow>
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("ttlSeconds", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.ttlSeconds}
+          />
+
+          {errors.ttlSeconds ? (
+            <FormFeedback feedback={errors.ttlSeconds.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.ManualFilesServerToDeviceFileForm.ttlHint"
+                defaultMessage="Set to 0 for no expiry."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
 
       <FormRow
         id="progress"

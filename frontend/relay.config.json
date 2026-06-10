@@ -9,5 +9,6 @@
   "typescriptExcludeUndefinedFromNullableUnion": true,
   "noFutureProofEnums": true,
   "schema": "./src/api/schema.graphql",
-  "src": "./src"
+  "src": "./src",
+  "excludes": ["**/__generated__/**"]
 }

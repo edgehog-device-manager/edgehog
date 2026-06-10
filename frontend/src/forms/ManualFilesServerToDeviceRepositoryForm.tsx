@@ -72,7 +72,6 @@ export type RepositoryRecord = NonNullable<
 >[number]["node"];
 
 const fromRepositoryInitialData: ManualFileDownloadRequestFromRepositoryData = {
-  requestName: "",
   repository: { id: "", name: "" },
   file: { id: "", name: "" },
   destinationType: "STORAGE",
@@ -198,22 +197,59 @@ const ManualFilesServerToDeviceRepositoryForm = ({
   return (
     <form className={className} onSubmit={onSubmit}>
       <FormRow
-        id="requestName"
+        id="destinationType"
         label={
           <FormattedMessage
-            id="forms.ManualFilesServerToDeviceRepositoryForm.requestNameLabel"
-            defaultMessage="Request Name"
+            id="forms.ManualFilesServerToDeviceRepositoryForm.destinationLabel"
+            defaultMessage="Destination"
           />
         }
       >
-        <Form.Control
-          as="textarea"
-          rows={1}
-          {...register("requestName")}
-          isInvalid={!!errors.requestName}
+        <Controller
+          control={control}
+          name="destinationType"
+          render={({ field }) => (
+            <Select
+              value={destinationOptionsMap.get(field.value) ?? null}
+              onChange={(option) => {
+                field.onChange(option?.value ?? null);
+                setValue("destination", null);
+              }}
+              options={destinationTypeOptions}
+            />
+          )}
         />
-        <FormFeedback feedback={errors.requestName?.message} />
       </FormRow>
+
+      {selectedDestinationType === "FILESYSTEM" && (
+        <FormRow
+          id="destination"
+          label={
+            <FormattedMessage
+              id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathLabel"
+              defaultMessage="Destination Path"
+            />
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("destination")}
+            placeholder="/tmp/file.bin"
+            isInvalid={!!errors.destination}
+          />
+
+          {errors.destination ? (
+            <FormFeedback feedback={errors.destination.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathHint"
+                defaultMessage="Absolute path on the target device where the file should be written."
+              />
+            </Form.Text>
+          )}
+        </FormRow>
+      )}
 
       <FormRow
         id="repository"
@@ -295,89 +331,36 @@ const ManualFilesServerToDeviceRepositoryForm = ({
         )}
       </FormRow>
 
-      <FormRow
-        id="destinationType"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceRepositoryForm.destinationLabel"
-            defaultMessage="Destination"
-          />
-        }
-      >
-        <Controller
-          control={control}
-          name="destinationType"
-          render={({ field }) => (
-            <Select
-              value={destinationOptionsMap.get(field.value) ?? null}
-              onChange={(option) => {
-                field.onChange(option?.value ?? null);
-                setValue("destination", null);
-              }}
-              options={destinationTypeOptions}
-            />
-          )}
-        />
-      </FormRow>
-
-      {selectedDestinationType === "FILESYSTEM" && (
+      {selectedDestinationType === "STORAGE" && (
         <FormRow
-          id="destination"
+          id="ttlSeconds"
           label={
             <FormattedMessage
-              id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathLabel"
-              defaultMessage="Destination Path"
+              id="forms.ManualFilesServerToDeviceRepositoryForm.ttlLabel"
+              defaultMessage="TTL (seconds)"
             />
           }
         >
           <Form.Control
             type="text"
-            {...register("destination")}
-            placeholder="/tmp/file.bin"
-            isInvalid={!!errors.destination}
+            {...register("ttlSeconds", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.ttlSeconds}
           />
 
-          {errors.destination ? (
-            <FormFeedback feedback={errors.destination.message} />
+          {errors.ttlSeconds ? (
+            <FormFeedback feedback={errors.ttlSeconds.message} />
           ) : (
             <Form.Text muted>
               <FormattedMessage
-                id="forms.ManualFilesServerToDeviceRepositoryForm.destinationPathHint"
-                defaultMessage="Absolute path on the target device where the file should be written."
+                id="forms.ManualFilesServerToDeviceRepositoryForm.ttlHint"
+                defaultMessage="Set to 0 for no expiry."
               />
             </Form.Text>
           )}
         </FormRow>
       )}
-
-      <FormRow
-        id="ttlSeconds"
-        label={
-          <FormattedMessage
-            id="forms.ManualFilesServerToDeviceRepositoryForm.ttlLabel"
-            defaultMessage="TTL (seconds)"
-          />
-        }
-      >
-        <Form.Control
-          type="text"
-          {...register("ttlSeconds", {
-            setValueAs: (v) => (v === "" ? undefined : Number(v)),
-          })}
-          isInvalid={!!errors.ttlSeconds}
-        />
-
-        {errors.ttlSeconds ? (
-          <FormFeedback feedback={errors.ttlSeconds.message} />
-        ) : (
-          <Form.Text muted>
-            <FormattedMessage
-              id="forms.ManualFilesServerToDeviceRepositoryForm.ttlHint"
-              defaultMessage="Set to 0 for no expiry."
-            />
-          </Form.Text>
-        )}
-      </FormRow>
 
       <FormRow
         id="progress"

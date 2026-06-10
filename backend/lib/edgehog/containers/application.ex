@@ -23,13 +23,8 @@ defmodule Edgehog.Containers.Application do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [
-      AshGraphql.Resource,
-      Ash.FGA
+      AshGraphql.Resource
     ]
-
-  fga do
-    type :application
-  end
 
   graphql do
     type :application

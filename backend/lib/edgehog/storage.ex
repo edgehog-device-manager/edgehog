@@ -84,40 +84,111 @@ defmodule Edgehog.Storage do
 
   defp s3_create_presigned_urls(file_path) do
     bucket = bucket!()
-    config = s3_presign_config()
 
-    with {:ok, get_url} <-
-           ExAws.S3.presigned_url(config, :get, bucket, file_path,
-             expires_in: @presign_expiration_seconds
-           ),
-         {:ok, put_url} <-
-           ExAws.S3.presigned_url(config, :put, bucket, file_path,
-             expires_in: @presign_expiration_seconds
-           ) do
-      {:ok, %{get_url: get_url, put_url: put_url}}
+    case s3_presign_config() do
+      {:s3, config} -> s3_aws_gen_presigned_urls(config, [:get, :put], bucket, file_path)
+      {:gcs, client} -> s3_gcs_gen_presigned_urls(client, [:get, :put], bucket, file_path)
     end
   end
 
   defp s3_read_presigned_url(file_path) do
     bucket = bucket!()
-    config = s3_presign_config()
 
-    with {:ok, get_url} <-
-           ExAws.S3.presigned_url(config, :get, bucket, file_path,
+    case s3_presign_config() do
+      {:s3, config} -> s3_aws_gen_presigned_urls(config, [:get], bucket, file_path)
+      {:gcs, client} -> s3_gcs_gen_presigned_urls(client, [:get], bucket, file_path)
+    end
+  end
+
+  defp s3_aws_gen_presigned_urls(config, verbs, bucket, file_path) do
+    results =
+      verbs
+      |> Enum.map(&gen_aws_signed_url(config, bucket, file_path, &1))
+      |> Enum.split_with(&match?({:error, _}, &1))
+
+    case results do
+      {[], result} -> {:ok, Enum.into(result, %{})}
+      {errors, _} -> {:error, extract_errors(errors)}
+    end
+  end
+
+  defp s3_gcs_gen_presigned_urls(client, verbs, bucket, file_path) do
+    results =
+      verbs
+      |> Enum.map(&gen_gcs_signed_url(client, bucket, file_path, &1))
+      |> Enum.split_with(&match?({:error, _}, &1))
+
+    case results do
+      {[], result} -> {:ok, Enum.into(result, %{})}
+      {errors, _} -> {:error, extract_errors(errors)}
+    end
+  end
+
+  defp gen_aws_signed_url(config, bucket, file_path, verb) do
+    # We're not generating an uncontrolled amount of atoms. At most 2: :get_url
+    # and :put_url. This should be fine.
+
+    # credo:disable-for-next-line
+    key = :"#{verb}_url"
+
+    with {:ok, url} <-
+           ExAws.S3.presigned_url(config, verb, bucket, file_path,
              expires_in: @presign_expiration_seconds
            ) do
-      {:ok, %{get_url: get_url}}
+      {key, url}
     end
+  end
+
+  defp gen_gcs_signed_url(client, bucket, file_path, verb) do
+    # We're not generating an uncontrolled amount of atoms. At most 2: :get_url
+    # and :put_url. This should be fine.
+
+    # credo:disable-for-next-line
+    key = :"#{verb}_url"
+
+    verb = verb |> to_string |> String.upcase()
+
+    url =
+      GcsSignedUrl.generate_v4(client, bucket, file_path,
+        expires: @presign_expiration_seconds,
+        verb: verb
+      )
+
+    {key, url}
+  end
+
+  defp extract_errors(errors) do
+    Enum.map(errors, fn {:error, error} -> error end)
   end
 
   # Builds an ExAws S3 config that points to the *external* (public) S3 host so
   # that presigned URLs are reachable by clients outside the cluster.
   defp s3_presign_config do
     overrides = Application.get_env(:edgehog, :s3_presign_host_config, %{})
+    host = Map.get(overrides, :host)
 
+    # S3 does not play well with Google storage service, hence if the host is
+    # google we need an ad-hoc service to create urls.
+    case host do
+      "storage.googleapis.com" -> {:gcs, gcs_client()}
+      _ -> {:s3, s3_config(overrides)}
+    end
+  end
+
+  defp s3_config(overrides) do
     :s3
     |> ExAws.Config.new()
     |> Map.merge(overrides)
+  end
+
+  defp gcs_client do
+    # If `:s3_presign_host_config` has a `storage.googleapis.com` host, then
+    # goth is enabled, and `gcp_credentials` should be provided. In this case we
+    # can assume the environment `gcp_credentials` is filled.
+    :goth
+    |> Application.get_env(:gcp_credentials)
+    |> Jason.decode!()
+    |> GcsSignedUrl.Client.load()
   end
 
   defp s3_delete(file_path) do

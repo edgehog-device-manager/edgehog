@@ -170,8 +170,12 @@ const getArchiveExtension = (encoding?: string | null): string => {
   return cleanEncoding ? `.${cleanEncoding}` : "";
 };
 
-const isArchiveEncoding = (encoding?: string | null): boolean =>
-  getArchiveExtension(encoding).length > 0;
+const ARCHIVE_ENCODINGS = new Set(["tar.gz", "tar.lz4", "tar"]);
+
+const isArchiveEncoding = (encoding?: string | null): boolean => {
+  const cleanEncoding = encoding?.trim().toLowerCase();
+  return cleanEncoding ? ARCHIVE_ENCODINGS.has(cleanEncoding) : false;
+};
 
 type PreparedUploadFile = {
   file: File;
@@ -193,72 +197,64 @@ const prepareUploadFile = async ({
   }
 
   const hasRelativePaths = files.some((file) => !!file.webkitRelativePath);
+  const normalizedEncoding = (encoding ?? "").trim().toLowerCase();
   const archiveExtension = getArchiveExtension(encoding);
+
+  const isSingleCompressedFile =
+    files.length === 1 &&
+    !hasRelativePaths &&
+    (normalizedEncoding === "gz" || normalizedEncoding === "lz4");
+
   const shouldArchive =
-    files.length > 1 || hasRelativePaths || archiveExtension.length > 0;
+    files.length > 1 || hasRelativePaths || isArchiveEncoding(encoding);
 
   if (shouldArchive) {
     const tarBlob = await createTarArchive(files);
-    const originalExtension =
-      files.length === 1 ? getFileExtension(files[0].name) : "";
     const fallbackName =
       files.length > 1 || hasRelativePaths
         ? getDefaultArchiveName()
         : getBaseName(files[0].name);
+
     const baseName = customFileName?.trim() || fallbackName;
-    const normalizedEncoding = (encoding ?? "").trim().toLowerCase();
-    let suffix: string;
-    if (archiveExtension.length > 0) {
-      if (normalizedEncoding === "gz" || normalizedEncoding === "lz4") {
-        suffix = `${originalExtension}${archiveExtension}`;
-      } else {
-        suffix = archiveExtension;
-      }
-    } else {
-      suffix = ".tar";
-    }
+    const suffix = archiveExtension || ".tar";
     const fileName = baseName.endsWith(suffix)
       ? baseName
       : `${baseName}${suffix}`;
-    const uncompressedSize = files.reduce((sum, file) => sum + file.size, 0);
 
     return {
       file: new File([tarBlob], fileName, { type: "application/x-tar" }),
       fileName,
-      uncompressedSize,
+      uncompressedSize: tarBlob.size,
     };
   }
 
   const originalFile = files[0];
-  const desiredNameBase = customFileName?.trim();
-  if (desiredNameBase && files.length === 1) {
-    const originalExt = getFileExtension(originalFile.name);
-    const hasExt = /\.[^./\\]+$/.test(desiredNameBase);
-    const desiredName =
-      hasExt || !originalExt
-        ? desiredNameBase
-        : `${desiredNameBase}${originalExt}`;
-    const file =
-      desiredName !== originalFile.name
-        ? new File([originalFile], desiredName, { type: originalFile.type })
-        : originalFile;
+  const originalExt = getFileExtension(originalFile.name);
+  const desiredNameBase =
+    customFileName?.trim() || getBaseName(originalFile.name);
 
-    return {
-      file,
-      fileName: desiredName,
-      uncompressedSize: originalFile.size,
-    };
+  let fileName = desiredNameBase;
+
+  if (isSingleCompressedFile) {
+    const suffix = `${originalExt}.${normalizedEncoding}`;
+    if (!fileName.endsWith(suffix)) {
+      fileName = `${fileName}${suffix}`;
+    }
+  } else {
+    const hasExt = /\.[^./\\]+$/.test(desiredNameBase);
+    if (!hasExt && originalExt) {
+      fileName = `${fileName}${originalExt}`;
+    }
   }
 
-  const desiredName = desiredNameBase || originalFile.name;
   const file =
-    desiredName !== originalFile.name
-      ? new File([originalFile], desiredName, { type: originalFile.type })
+    fileName !== originalFile.name
+      ? new File([originalFile], fileName, { type: originalFile.type })
       : originalFile;
 
   return {
     file,
-    fileName: desiredName,
+    fileName,
     uncompressedSize: originalFile.size,
   };
 };
@@ -280,4 +276,5 @@ export {
   getFileExtension,
   isArchiveEncoding,
   prepareUploadFile,
+  ARCHIVE_ENCODINGS,
 };

@@ -37,8 +37,6 @@ following information:
 - **Advanced Options**: encoding, file mode, UID/GID, retries, and request timeout.
 - **[Roll-out Mechanism](#roll-out-mechanism)** properties.
 
-> **Note**: the Campaign Name is used as the `Request Name` for the requests created by the campaign
-
 Press "Create" to save the Campaign. When started, Edgehog snapshots the Channel membership and targets only those
 Devices for the campaign run.
 

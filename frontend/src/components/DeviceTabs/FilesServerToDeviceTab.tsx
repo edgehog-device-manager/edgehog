@@ -63,7 +63,7 @@ import type {
   FileDestinationType,
   ManualFileDownloadRequestFromRepositoryData,
 } from "@/forms/validation";
-import { prepareUploadFile } from "@/lib/files";
+import { ARCHIVE_ENCODINGS, prepareUploadFile } from "@/lib/files";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
@@ -78,13 +78,15 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
         filesystem
       }
     }
-    fileDownloadRequests(first: $first, after: $after)
-      @connection(key: "FilesServerToDeviceTab_fileDownloadRequests") {
+    fileDownloadRequests(
+      first: $first
+      after: $after
+      sort: [{ field: UPDATED_AT, order: DESC }]
+    ) @connection(key: "FilesServerToDeviceTab_fileDownloadRequests") {
       edges {
         node {
           id
           fileName
-          requestName
           status
           progressPercentage
           responseCode
@@ -125,7 +127,6 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
     createManualFileDownloadRequest(input: $input) {
       result {
         id
-        requestName
         url
         fileName
         status
@@ -152,7 +153,6 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         id
         url
         fileName
-        requestName
         status
         progressPercentage
         responseCode
@@ -200,7 +200,6 @@ class APIValidationError extends Error {
   }
 }
 
-const ARCHIVE_EXTENSIONS = new Set(["tar", "gz", "lz4", "tar.gz", "tar.lz4"]);
 const STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS = [
   "FilesDeviceToServerTab_storageFileDownloadRequests",
   "FilesDeleteTab_storageFileDownloadRequests",
@@ -234,7 +233,7 @@ type ManualFileDownloadRequestFormWrapperProps = {
   setErrorFeedback: (feedback: React.ReactNode) => void;
   deviceId: string;
   supportedEncodingsByDestination: Record<FileDestinationType, string[]>;
-  allowArchiveUpload: boolean;
+  archiveCapabilities: Record<FileDestinationType, boolean>;
   showAdvancedOptions: boolean;
   destinationTypeOptions: DestinationTypeOption[];
   isOnline: boolean;
@@ -244,7 +243,7 @@ const ManualFileDownloadRequestFormWrapper = ({
   setErrorFeedback,
   deviceId,
   supportedEncodingsByDestination,
-  allowArchiveUpload,
+  archiveCapabilities,
   showAdvancedOptions,
   destinationTypeOptions,
   isOnline,
@@ -300,6 +299,7 @@ const ManualFileDownloadRequestFormWrapper = ({
             const connection = ConnectionHandler.getConnection(
               storedDevice,
               "FilesServerToDeviceTab_fileDownloadRequests",
+              { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
             );
 
             if (connection) {
@@ -402,7 +402,7 @@ const ManualFileDownloadRequestFormWrapper = ({
       isLoading={isUploading}
       onFileSubmit={handleFileUpload}
       supportedEncodingsByDestination={supportedEncodingsByDestination}
-      allowArchiveUpload={allowArchiveUpload}
+      archiveCapabilities={archiveCapabilities}
       showAdvancedOptions={showAdvancedOptions}
       destinationTypeOptions={destinationTypeOptions}
     />
@@ -451,7 +451,6 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
       }
 
       const {
-        requestName,
         file,
         destinationType,
         destination,
@@ -468,7 +467,6 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
       createFileDownloadRequest({
         variables: {
           input: {
-            requestName,
             deviceId,
             fileId: file.id,
             fileMode,
@@ -507,6 +505,7 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
           const connection = ConnectionHandler.getConnection(
             storedDevice,
             "FilesServerToDeviceTab_fileDownloadRequests",
+            { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
           );
 
           if (connection) {
@@ -683,17 +682,21 @@ const FilesServerToDeviceTab = ({
     };
   }, [data.fileTransferCapabilities?.serverToDevice]);
 
-  const allowArchiveUpload = useMemo(() => {
-    for (const key in supportedEncodingsByDestination) {
+  const archiveCapabilities = useMemo(() => {
+    const map: Record<FileDestinationType, boolean> = {
+      STORAGE: false,
+      STREAMING: false,
+      FILESYSTEM: false,
+    };
+
+    for (const type in supportedEncodingsByDestination) {
       const encodings =
-        supportedEncodingsByDestination[key as FileDestinationType];
-      for (const encoding of encodings) {
-        if (ARCHIVE_EXTENSIONS.has(encoding.toLowerCase())) {
-          return true;
-        }
-      }
+        supportedEncodingsByDestination[type as FileDestinationType];
+      map[type as FileDestinationType] = encodings.some((enc) =>
+        ARCHIVE_ENCODINGS.has(enc.toLowerCase()),
+      );
     }
-    return false;
+    return map;
   }, [supportedEncodingsByDestination]);
 
   if (destinationTypeOptions.length === 0) {
@@ -763,7 +766,7 @@ const FilesServerToDeviceTab = ({
                 supportedEncodingsByDestination={
                   supportedEncodingsByDestination
                 }
-                allowArchiveUpload={allowArchiveUpload}
+                archiveCapabilities={archiveCapabilities}
                 showAdvancedOptions={showAdvancedOptions}
                 destinationTypeOptions={destinationTypeOptions}
                 isOnline={isOnline}

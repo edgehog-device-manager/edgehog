@@ -29,6 +29,7 @@ module base_image_collection
 type base_image_collection
   relations
     define tenant: [tenant]
+    define alias:   [base_image_collection]
 
     define owner:        [user]
     define admin:        [user]

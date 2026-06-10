@@ -20,18 +20,11 @@ defmodule Edgehog.Astarte.Realm do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Astarte,
-    extensions: [Ash.FGA],
     fga_type: :realm,
     fga_id_attribute: :name
 
   alias Edgehog.Astarte.Realm
   alias Edgehog.Validations
-
-  fga do
-    type :realm
-    id(:name)
-    exclude([:cluster])
-  end
 
   actions do
     defaults [:read, :destroy]

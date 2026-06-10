@@ -142,7 +142,9 @@ defmodule Edgehog.Files.FileDeleteRequest do
       public? true
     end
 
-    timestamps()
+    timestamps do
+      public? true
+    end
   end
 
   relationships do

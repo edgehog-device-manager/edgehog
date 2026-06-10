@@ -425,6 +425,55 @@ const CreateFileDownloadCampaignForm = ({
         </FormRow>
 
         <FormRow
+          id="destinationType"
+          label={
+            <FormattedMessage
+              id="forms.CreateFileDownloadCampaign.destinationLabel"
+              defaultMessage="Destination"
+            />
+          }
+        >
+          <Controller
+            control={control}
+            name="destinationType"
+            render={({ field }) => {
+              const selectedOption =
+                destinationOptions.find((opt) => opt.value === field.value) ||
+                null;
+
+              return (
+                <Select
+                  value={selectedOption}
+                  onChange={(option) => {
+                    field.onChange(option ? option.value : null);
+                  }}
+                  options={destinationOptions}
+                />
+              );
+            }}
+          />
+        </FormRow>
+
+        {selectedDestinationType === "FILESYSTEM" && (
+          <FormRow
+            id="destination"
+            label={
+              <FormattedMessage
+                id="forms.CreateFileDownloadCampaign.destinationPathLabel"
+                defaultMessage="Destination Path"
+              />
+            }
+          >
+            <Form.Control
+              type="text"
+              {...register("destination")}
+              isInvalid={!!errors.destination}
+            />
+            <FormFeedback feedback={errors.destination?.message} />
+          </FormRow>
+        )}
+
+        <FormRow
           id="repository"
           label={
             <FormattedMessage
@@ -551,55 +600,6 @@ const CreateFileDownloadCampaignForm = ({
           />
           <FormFeedback feedback={errors.channel?.id?.message} />
         </FormRow>
-
-        <FormRow
-          id="destinationType"
-          label={
-            <FormattedMessage
-              id="forms.CreateFileDownloadCampaign.destinationLabel"
-              defaultMessage="Destination"
-            />
-          }
-        >
-          <Controller
-            control={control}
-            name="destinationType"
-            render={({ field }) => {
-              const selectedOption =
-                destinationOptions.find((opt) => opt.value === field.value) ||
-                null;
-
-              return (
-                <Select
-                  value={selectedOption}
-                  onChange={(option) => {
-                    field.onChange(option ? option.value : null);
-                  }}
-                  options={destinationOptions}
-                />
-              );
-            }}
-          />
-        </FormRow>
-
-        {selectedDestinationType === "FILESYSTEM" && (
-          <FormRow
-            id="destination"
-            label={
-              <FormattedMessage
-                id="forms.CreateFileDownloadCampaign.destinationPathLabel"
-                defaultMessage="Destination Path"
-              />
-            }
-          >
-            <Form.Control
-              type="text"
-              {...register("destination")}
-              isInvalid={!!errors.destination}
-            />
-            <FormFeedback feedback={errors.destination?.message} />
-          </FormRow>
-        )}
 
         <FormRow
           id="maxInProgressOperations"

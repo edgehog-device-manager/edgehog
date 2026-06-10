@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import split from "lodash/split";
 import React, { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -53,8 +54,11 @@ const DEVICE_FILES_FRAGMENT = graphql`
   fragment FilesDeleteTab_fileManagement on Device
   @refetchable(queryName: "FilesDeleteTab_PaginationQuery") {
     capabilities
-    fileDeleteRequests(first: $first, after: $after)
-      @connection(key: "FilesDeleteTab_fileDeleteRequests") {
+    fileDeleteRequests(
+      first: $first
+      after: $after
+      sort: [{ field: UPDATED_AT, order: DESC }]
+    ) @connection(key: "FilesDeleteTab_fileDeleteRequests") {
       edges {
         node {
           force
@@ -88,8 +92,8 @@ const DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
       edges {
         node {
           id
-          requestName
           fileName
+          pathOnDevice
         }
       }
     }
@@ -146,6 +150,7 @@ type ManualFileDeleteRequestFormWrapperProps = {
   deleteOptions: StorageSourceOption[];
   onLoadMoreDeleteOptions?: () => void;
   isOnline: boolean;
+  onDeleteSuccess: (fileDownloadRequestId: string) => void;
 };
 
 const ManualFileDeleteRequestFormWrapper = ({
@@ -154,6 +159,7 @@ const ManualFileDeleteRequestFormWrapper = ({
   deleteOptions,
   onLoadMoreDeleteOptions,
   isOnline,
+  onDeleteSuccess,
 }: ManualFileDeleteRequestFormWrapperProps) => {
   const intl = useIntl();
 
@@ -204,6 +210,7 @@ const ManualFileDeleteRequestFormWrapper = ({
               const connection = ConnectionHandler.getConnection(
                 storedDevice,
                 "FilesDeleteTab_fileDeleteRequests",
+                { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
               );
               if (!connection) return;
 
@@ -227,6 +234,8 @@ const ManualFileDeleteRequestFormWrapper = ({
             },
           });
         });
+
+        onDeleteSuccess(values.fileDownloadRequestId);
       } catch (error) {
         setErrorFeedback(
           error instanceof Error
@@ -238,7 +247,14 @@ const ManualFileDeleteRequestFormWrapper = ({
         );
       }
     },
-    [createFileDeleteRequest, deviceId, intl, isOnline, setErrorFeedback],
+    [
+      createFileDeleteRequest,
+      deviceId,
+      intl,
+      isOnline,
+      setErrorFeedback,
+      onDeleteSuccess,
+    ],
   );
 
   return (
@@ -256,12 +272,16 @@ type FilesDeleteTabProps = {
     FilesDeleteTab_storageFileDownloadRequests$key;
   embedded?: boolean;
   isOnline?: boolean;
+  removedOptionIds: Set<string>;
+  onDeleteSuccess: (id: string) => void;
 };
 
 const FilesDeleteTab = ({
   deviceRef,
   embedded = false,
   isOnline = false,
+  removedOptionIds,
+  onDeleteSuccess,
 }: FilesDeleteTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -314,34 +334,37 @@ const FilesDeleteTab = ({
     const validRequests: Array<{
       id: string;
       fileName: string;
-      requestName: string | null;
+      pathOnDevice: string | null;
     }> = [];
     const fileNameCounts: Record<string, number> = {};
 
     for (const edge of edges) {
       const node = edge?.node;
-      if (node?.id) {
+
+      if (node?.id && !removedOptionIds.has(node.id)) {
         const fileName = node.fileName ?? node.id;
         fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
         validRequests.push({
           id: node.id,
           fileName,
-          requestName: node.requestName ?? null,
+          pathOnDevice: node.pathOnDevice ?? null,
         });
       }
     }
 
-    return validRequests.map(({ id, fileName, requestName }) => {
+    return validRequests.map(({ id, fileName, pathOnDevice }) => {
+      const requestUuid = split(pathOnDevice ?? "", "/").at(-1);
+
       const isDuplicate = fileNameCounts[fileName] > 1;
       return {
         value: id,
         label:
-          isDuplicate && requestName
-            ? `${fileName} (${requestName})`
+          isDuplicate && requestUuid
+            ? `${fileName} (${requestUuid})`
             : fileName,
       };
     });
-  }, [storageData.storageFileDownloadRequests]);
+  }, [storageData.storageFileDownloadRequests, removedOptionIds]);
 
   if (!data.capabilities.includes("FILE_TRANSFER_DELETE")) {
     return null;
@@ -366,6 +389,7 @@ const FilesDeleteTab = ({
             deleteOptions={deleteOptions}
             onLoadMoreDeleteOptions={onLoadMoreDeleteOptions}
             isOnline={isOnline}
+            onDeleteSuccess={onDeleteSuccess}
           />
         </Stack>
       </div>

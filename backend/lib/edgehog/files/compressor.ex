@@ -42,10 +42,17 @@ defmodule Edgehog.Files.Compressor do
     :zlib.close(z)
     File.close(output)
 
+    filename =
+      if String.ends_with?(upload.filename, ".gz") do
+        upload.filename
+      else
+        upload.filename <> ".gz"
+      end
+
     {:ok,
      %Plug.Upload{
        path: compressed_path,
-       filename: upload.filename <> ".gz",
+       filename: filename,
        content_type: "application/gzip"
      }}
   rescue
@@ -61,10 +68,17 @@ defmodule Edgehog.Files.Compressor do
     |> NimbleLZ4.compress_frame()
     |> then(&File.write!(compressed_path, &1))
 
+    filename =
+      if String.ends_with?(upload.filename, ".lz4") do
+        upload.filename
+      else
+        upload.filename <> ".lz4"
+      end
+
     {:ok,
      %Plug.Upload{
        path: compressed_path,
-       filename: upload.filename <> ".lz4",
+       filename: filename,
        content_type: "application/x-lz4"
      }}
   rescue

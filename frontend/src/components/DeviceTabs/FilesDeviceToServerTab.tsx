@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import split from "lodash/split";
 import React, { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -64,8 +65,11 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
         filesystem
       }
     }
-    fileUploadRequests(first: $first, after: $after)
-      @connection(key: "FilesDeviceToServerTab_fileUploadRequests") {
+    fileUploadRequests(
+      first: $first
+      after: $after
+      sort: [{ field: UPDATED_AT, order: DESC }]
+    ) @connection(key: "FilesDeviceToServerTab_fileUploadRequests") {
       edges {
         node {
           getPresignedUrl
@@ -101,8 +105,8 @@ const DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
       edges {
         node {
           id
-          requestName
           fileName
+          pathOnDevice
         }
       }
     }
@@ -236,6 +240,7 @@ const ManualFilesDeviceToServerFormWrapper = ({
               const connection = ConnectionHandler.getConnection(
                 storedDevice,
                 "FilesDeviceToServerTab_fileUploadRequests",
+                { sort: [{ field: "UPDATED_AT", order: "DESC" }] },
               );
               if (!connection) return;
 
@@ -289,12 +294,14 @@ type FilesDeviceToServerTabProps = {
     FilesDeviceToServerTab_storageFileDownloadRequests$key;
   embedded?: boolean;
   isOnline?: boolean;
+  removedOptionIds?: Set<string>;
 };
 
 const FilesDeviceToServerTab = ({
   deviceRef,
   embedded = false,
   isOnline = false,
+  removedOptionIds = new Set(),
 }: FilesDeviceToServerTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -384,34 +391,37 @@ const FilesDeviceToServerTab = ({
     const validRequests: Array<{
       id: string;
       fileName: string;
-      requestName: string | null;
+      pathOnDevice: string | null;
     }> = [];
     const fileNameCounts: Record<string, number> = {};
 
     for (const edge of edges) {
       const node = edge?.node;
-      if (node?.id) {
+
+      if (node?.id && !removedOptionIds.has(node.id)) {
         const fileName = node.fileName ?? node.id;
         fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
         validRequests.push({
           id: node.id,
           fileName,
-          requestName: node.requestName ?? null,
+          pathOnDevice: node.pathOnDevice ?? null,
         });
       }
     }
 
-    return validRequests.map(({ id, fileName, requestName }) => {
+    return validRequests.map(({ id, fileName, pathOnDevice }) => {
+      const requestUuid = split(pathOnDevice ?? "", "/").at(-1);
+
       const isDuplicate = fileNameCounts[fileName] > 1;
       return {
         value: id,
         label:
-          isDuplicate && requestName
-            ? `${fileName} (${requestName})`
+          isDuplicate && requestUuid
+            ? `${fileName} (${requestUuid})`
             : fileName,
       };
     });
-  }, [storageData.storageFileDownloadRequests]);
+  }, [storageData.storageFileDownloadRequests, removedOptionIds]);
 
   const supportedEncodingsBySourceType = useMemo<
     Record<FileSourceType, string[]>

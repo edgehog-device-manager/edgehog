@@ -27,6 +27,7 @@ module hardware_type
 type hardware_type
   relations
     define tenant:  [tenant]
+    define alias:   [hardware_type]
     define owner:   [user]
     define admin:   [user]
     define viewer:  [user]

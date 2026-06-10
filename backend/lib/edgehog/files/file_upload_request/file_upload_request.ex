@@ -183,7 +183,9 @@ defmodule Edgehog.Files.FileUploadRequest do
       default %{}
     end
 
-    timestamps()
+    timestamps do
+      public? true
+    end
   end
 
   relationships do

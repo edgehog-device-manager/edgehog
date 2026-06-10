@@ -21,8 +21,7 @@ defmodule Edgehog.BaseImages.BaseImage do
   use Edgehog.MultitenantResource,
     domain: Edgehog.BaseImages,
     extensions: [
-      AshGraphql.Resource,
-      Ash.FGA
+      AshGraphql.Resource
     ]
 
   alias Edgehog.BaseImages.BaseImage.Changes
@@ -37,10 +36,6 @@ defmodule Edgehog.BaseImages.BaseImage do
 
     A base image represents a downloadable base image that can be installed on a device
     """
-  end
-
-  fga do
-    type :base_image
   end
 
   graphql do
