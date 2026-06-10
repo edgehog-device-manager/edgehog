@@ -49,7 +49,7 @@ import type { Device_removeDeviceTags_Mutation } from "@/api/__generated__/Devic
 import type { Device_requestForwarderSession_Mutation } from "@/api/__generated__/Device_requestForwarderSession_Mutation.graphql";
 import type { Device_getForwarderSession_Query } from "@/api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "@/api/__generated__/Device_getExistingDeviceTags_Query.graphql";
-import { Link, Route } from "@/Navigation";
+import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import Center from "@/components/Center";
@@ -243,6 +243,23 @@ const GET_FORWARDER_SESSION_QUERY = graphql`
 
 const TTYD_PORT = 7681;
 
+const TAB_KEYS = [
+  "device-hardware-info-tab",
+  "device-os-info-tab",
+  "device-runtime-info-tab",
+  "device-base-image-tab",
+  "device-system-status-tab",
+  "device-storage-usage-tab",
+  "device-battery-tab",
+  "device-location-tab",
+  "device-cellular-connection-tab",
+  "device-network-interfaces-tab",
+  "device-wifi-scan-results-tab",
+  "device-software-update-tab",
+  "device-file-management-tab",
+  "device-applications-tab",
+];
+
 const FormRow = (props: FormRowProps) => (
   <BaseFormRow {...props} labelCol={4} valueCol={8} />
 );
@@ -351,7 +368,8 @@ const DeviceContent = ({
   getTagsQuery,
   refreshTags,
 }: DeviceContentProps) => {
-  const { deviceId = "" } = useParams();
+  const { deviceId = "", activeTab } = useParams();
+  const navigate = useNavigate();
   const relayEnvironment = useRelayEnvironment();
   const deviceData = usePreloadedQuery(GET_DEVICE_QUERY, getDeviceQuery);
   const tagsData = usePreloadedQuery(GET_TAGS_QUERY, getTagsQuery);
@@ -660,6 +678,8 @@ const DeviceContent = ({
     [deviceTags, handleAddDeviceTags, handleRemoveDeviceTags],
   );
 
+  const currentTabKey = activeTab || TAB_KEYS[0];
+
   if (!device) {
     return (
       <Result.NotFound
@@ -914,22 +934,17 @@ const DeviceContent = ({
             </Col>
           </Row>
           <Tabs
-            tabsOrder={[
-              "device-hardware-info-tab",
-              "device-os-info-tab",
-              "device-runtime-info-tab",
-              "device-base-image-tab",
-              "device-system-status-tab",
-              "device-storage-usage-tab",
-              "device-battery-tab",
-              "device-location-tab",
-              "device-cellular-connection-tab",
-              "device-network-interfaces-tab",
-              "device-wifi-scan-results-tab",
-              "device-software-update-tab",
-              "device-file-management-tab",
-              "applications-tab",
-            ]}
+            activeKey={currentTabKey}
+            tabsOrder={TAB_KEYS}
+            onChange={(tabKey) =>
+              navigate(
+                {
+                  route: Route.devicesEdit,
+                  params: { deviceId, activeTab: tabKey },
+                },
+                { replace: true },
+              )
+            }
           >
             <DeviceHardwareInfoTab deviceRef={device} />
             <DeviceOSInfoTab deviceRef={device} />

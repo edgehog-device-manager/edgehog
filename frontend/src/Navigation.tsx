@@ -27,12 +27,15 @@ import {
   generatePath as routerGeneratePath,
   useNavigate as useRouterNavigate,
 } from "react-router";
-import type { LinkProps as RouterLinkProps } from "react-router-dom";
+import type {
+  LinkProps as RouterLinkProps,
+  NavigateOptions,
+} from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 
 enum Route {
   devices = "/devices",
-  devicesEdit = "/devices/:deviceId/edit",
+  devicesEdit = "/devices/:deviceId/edit/:activeTab?",
   deviceGroups = "/device-groups",
   deviceGroupsEdit = "/device-groups/:deviceGroupId/edit",
   deviceGroupsNew = "/device-groups/new",
@@ -52,11 +55,11 @@ enum Route {
   channelsNew = "/channels/new",
   updateCampaigns = "/update-campaigns",
   updateCampaignsNew = "/update-campaigns/new",
-  updateCampaignsEdit = "/update-campaigns/:updateCampaignId",
+  updateCampaignsEdit = "/update-campaigns/:updateCampaignId/:activeTab?",
   applications = "/applications",
   applicationNew = "/applications/new",
-  application = "/applications/:applicationId",
-  release = "/applications/:applicationId/release/:releaseId",
+  application = "/applications/:applicationId/:activeTab?",
+  release = "/applications/:applicationId/release/:releaseId/:activeTab?",
   releaseNew = "/applications/:applicationId/release/new",
   containers = "/containers",
   containersEdit = "/containers/:containerId",
@@ -74,14 +77,14 @@ enum Route {
   deploymentEdit = "/devices/:deviceId/deployment/:deploymentId",
   deploymentCampaigns = "/deployment-campaigns",
   deploymentCampaignsNew = "/deployment-campaigns/new",
-  deploymentCampaignsEdit = "/deployment-campaigns/:deploymentCampaignId",
+  deploymentCampaignsEdit = "/deployment-campaigns/:deploymentCampaignId/:activeTab?",
   repositories = "/repositories",
   repositoryNew = "/repositories/new",
   repositoryEdit = "/repositories/:repositoryId/edit",
   filesNew = "/repositories/:repositoryId/files/new",
   fileDownloadCampaigns = "/file-download-campaigns",
   fileDownloadCampaignsNew = "/file-download-campaigns/new",
-  fileDownloadCampaignsEdit = "/file-download-campaigns/:fileDownloadCampaignId",
+  fileDownloadCampaignsEdit = "/file-download-campaigns/:fileDownloadCampaignId/:activeTab?",
   login = "/login",
   logout = "/logout",
 }
@@ -99,7 +102,7 @@ type RouteKeys = keyof typeof Route;
 type RouteWithParams<T extends string> =
   T extends ParamParseKey<T>
     ? { route: T }
-    : { route: T; params: { [P in ParamParseKey<T>]: string } };
+    : { route: T; params: { [P in ParamParseKey<T>]?: string } };
 
 type ParametricRoute = {
   [K in RouteKeys]: RouteWithParams<(typeof Route)[K]>;
@@ -161,9 +164,10 @@ const matchingParametricRoute = (
       return params && typeof params["deviceId"] === "string"
         ? {
             route,
-            params: { deviceId: params.deviceId },
+            params: { deviceId: params.deviceId, activeTab: params.activeTab },
           }
         : null;
+
     case Route.deploymentEdit:
       return params &&
         typeof params["deploymentId"] === "string" &&
@@ -242,7 +246,10 @@ const matchingParametricRoute = (
       return params && typeof params["updateCampaignId"] === "string"
         ? {
             route,
-            params: { updateCampaignId: params.updateCampaignId },
+            params: {
+              updateCampaignId: params.updateCampaignId,
+              activeTab: params.activeTab,
+            },
           }
         : null;
 
@@ -250,7 +257,10 @@ const matchingParametricRoute = (
       return params && typeof params["applicationId"] === "string"
         ? {
             route,
-            params: { applicationId: params.applicationId },
+            params: {
+              applicationId: params.applicationId,
+              activeTab: params.activeTab,
+            },
           }
         : null;
 
@@ -263,6 +273,7 @@ const matchingParametricRoute = (
             params: {
               applicationId: params.applicationId,
               releaseId: params.releaseId,
+              activeTab: params.activeTab,
             },
           }
         : null;
@@ -311,7 +322,10 @@ const matchingParametricRoute = (
       return params && typeof params["deploymentCampaignId"] === "string"
         ? {
             route,
-            params: { deploymentCampaignId: params.deploymentCampaignId },
+            params: {
+              deploymentCampaignId: params.deploymentCampaignId,
+              activeTab: params.activeTab,
+            },
           }
         : null;
 
@@ -335,7 +349,10 @@ const matchingParametricRoute = (
       return params && typeof params["fileDownloadCampaignId"] === "string"
         ? {
             route,
-            params: { fileDownloadCampaignId: params.fileDownloadCampaignId },
+            params: {
+              fileDownloadCampaignId: params.fileDownloadCampaignId,
+              activeTab: params.activeTab,
+            },
           }
         : null;
   }
@@ -370,9 +387,9 @@ const Link = (props: LinkProps) => {
 const useNavigate = () => {
   const routerNavigate = useRouterNavigate();
   const navigate = useCallback(
-    (route: ParametricRoute | `${Route}`) => {
+    (route: ParametricRoute | `${Route}`, options?: NavigateOptions) => {
       const path = typeof route === "string" ? route : generatePath(route);
-      routerNavigate(path);
+      routerNavigate(path, options);
     },
     [routerNavigate],
   );

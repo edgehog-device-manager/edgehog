@@ -21,6 +21,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useParams } from "react-router-dom";
 
 import { UpdateCampaign_getCampaign_Query$data } from "@/api/__generated__/UpdateCampaign_getCampaign_Query.graphql";
 import { UpdateTargets_PaginationQuery } from "@/api/__generated__/UpdateTargets_PaginationQuery.graphql";
@@ -33,10 +34,10 @@ import type { ColumnId } from "@/components/UpdateTargetsTable";
 import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import Nav from "react-bootstrap/Nav";
-import NavItem from "react-bootstrap/NavItem";
-import NavLink from "react-bootstrap/NavLink";
-import Spinner from "./Spinner";
+import Button from "@/components/Button";
+import SegmentedControl from "@/components/SegmentedControl";
+import Spinner from "@/components/Spinner";
+import { useNavigate, Route } from "@/Navigation";
 
 /* eslint-disable relay/unused-fields */
 const UPDATE_TARGETS_FRAGMENT = graphql`
@@ -87,8 +88,11 @@ type Props = {
 };
 
 const UpdateTargetsTabs = ({ campaignRef }: Props) => {
-  const [activeTab, setActiveTab] =
-    useState<CampaignTargetStatusType>("SUCCESSFUL");
+  const { updateCampaignId = "", activeTab: urlTab } = useParams();
+  const navigate = useNavigate();
+
+  const activeTab = (urlTab as CampaignTargetStatusType) || "SUCCESSFUL";
+
   const [committedTab, setCommittedTab] = useState(activeTab);
 
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -100,11 +104,6 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
   const isTabDataLoading = activeTab !== committedTab;
 
   useEffect(() => {
-    // Only refetch if the tab has actually changed
-    if (activeTab === committedTab) {
-      return;
-    }
-
     refetch(
       {
         first: RECORDS_TO_LOAD_FIRST,
@@ -117,7 +116,7 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
         },
       },
     );
-  }, [activeTab, committedTab, refetch]);
+  }, [activeTab, refetch]);
 
   const { onLoadMore } = useRelayConnectionPagination({
     hasNext,
@@ -135,6 +134,7 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
   if (!updateTargetsRef) {
     return null;
   }
+
   return (
     <div>
       <h3>
@@ -143,23 +143,36 @@ const UpdateTargetsTabs = ({ campaignRef }: Props) => {
           defaultMessage="Devices"
         />
       </h3>
-      <div>
-        <Nav role="tablist" as="ul" className="nav-tabs">
-          {campaignTargetTabs.map((tab) => (
-            <NavItem key={tab} as="li" role="presentation">
-              <NavLink
-                as="button"
-                type="button"
-                active={activeTab === tab}
-                onClick={() => setActiveTab(tab)}
-              >
-                <CampaignTargetStatus status={tab} />
-              </NavLink>
-            </NavItem>
-          ))}
-        </Nav>
 
-        <div>
+      <div>
+        <SegmentedControl
+          activeId={activeTab}
+          items={campaignTargetTabs}
+          getItemId={(tab) => tab}
+          onChange={(tab) =>
+            navigate(
+              {
+                route: Route.updateCampaignsEdit,
+                params: { updateCampaignId, activeTab: tab },
+              },
+              { replace: true },
+            )
+          }
+          showControls
+        >
+          {(tab, isActive) => (
+            <Button
+              variant="text"
+              className={`tab-button border-0 ${
+                isActive ? "px-4 py-3 fw-bold active" : "px-4 py-2 text-muted"
+              }`}
+            >
+              <CampaignTargetStatus status={tab} />
+            </Button>
+          )}
+        </SegmentedControl>
+
+        <div className="mt-3">
           {isTabDataLoading ? (
             <Spinner />
           ) : (

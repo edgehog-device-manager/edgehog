@@ -50,7 +50,7 @@ import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import { Link, Route } from "@/Navigation";
+import { Link, Route, useNavigate } from "@/Navigation";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -97,6 +97,8 @@ const CONTAINERS_FRAGMENT = graphql`
     }
   }
 `;
+
+const TAB_KEYS = ["containers-tab", "system-models-tab", "devices-tab"];
 
 type Release = NonNullable<Release_getRelease_Query$data["release"]>;
 
@@ -190,6 +192,11 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
   const intl = useIntl();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
+  const { applicationId = "", releaseId = "", activeTab } = useParams();
+  const navigate = useNavigate();
+
+  const currentTabKey = activeTab || TAB_KEYS[0];
+
   return (
     <Page>
       <Page.Header
@@ -206,8 +213,17 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         </Alert>
 
         <Tabs
-          defaultActiveKey="containers-tab"
-          tabsOrder={["containers-tab", "system-models-tab", "devices-tab"]}
+          activeKey={currentTabKey}
+          tabsOrder={TAB_KEYS}
+          onChange={(tabKey) =>
+            navigate(
+              {
+                route: Route.release,
+                params: { applicationId, releaseId, activeTab: tabKey },
+              },
+              { replace: true },
+            )
+          }
         >
           <Tab
             eventKey="containers-tab"
