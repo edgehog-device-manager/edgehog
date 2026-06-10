@@ -184,9 +184,9 @@ defmodule Edgehog.Storage do
   defp gcs_client do
     # If `:s3_presign_host_config` has a `storage.googleapis.com` host, then
     # goth is enabled, and `gcp_credentials` should be provided. In this case we
-    # can assume the environment `gcp_credentials` is filled.
+    # can assume the environment `json` is filled.
     :goth
-    |> Application.get_env(:gcp_credentials)
+    |> Application.get_env(:json)
     |> Jason.decode!()
     |> GcsSignedUrl.Client.load()
   end
