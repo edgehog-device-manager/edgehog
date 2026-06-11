@@ -69,7 +69,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "compression",
+      "source": "encoding",
       "type": "text"
     },
     {
@@ -229,6 +229,18 @@
       "type": "boolean"
     },
     {
+      "allow_nil?": true,
+      "default": "false",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "deleted",
+      "type": "boolean"
+    },
+    {
       "allow_nil?": false,
       "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
@@ -366,7 +378,7 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "D2F5BC35E7AFA21BBCC5CD997D71EC89D521C4C58894F92E694F62BAD2AC3872",
+  "hash": "6295B62EE08769A5DC52316C2D98D0FE288D77888C2A6247DED8309EB27D2C07",
   "identities": [],
   "multitenancy": {
     "attribute": "tenant_id",

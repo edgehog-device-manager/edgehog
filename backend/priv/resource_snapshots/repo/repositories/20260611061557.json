@@ -33,11 +33,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "size",
-      "type": "bigint"
+      "source": "handle",
+      "type": "text"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -45,7 +45,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "digest",
+      "source": "description",
       "type": "text"
     },
     {
@@ -91,7 +91,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "files_tenant_id_fkey",
+        "name": "repositories_tenant_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -102,39 +102,6 @@
       "size": null,
       "source": "tenant_id",
       "type": "bigint"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": "simple",
-        "match_with": {
-          "tenant_id": "tenant_id"
-        },
-        "multitenancy": {
-          "attribute": "tenant_id",
-          "global": false,
-          "strategy": "attribute"
-        },
-        "name": "files_repository_id_fkey",
-        "on_delete": "delete",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "repositories"
-      },
-      "scale": null,
-      "size": null,
-      "source": "repository_id",
-      "type": "uuid"
     }
   ],
   "base_filter": null,
@@ -188,23 +155,33 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "4181A41EAFB0900B19DA228C2FD70149516F7C0A865218E4F28FB8FA06C69A56",
+  "hash": "0C5D7B1CD55F9942C000F37FA3604D8BEECF460EAC7B8D4D9468F00554C5D883",
   "identities": [
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "files_unique_repository_file_index",
+      "index_name": "repositories_handle_index",
+      "keys": [
+        {
+          "type": "atom",
+          "value": "handle"
+        }
+      ],
+      "name": "handle",
+      "nils_distinct?": true,
+      "where": null
+    },
+    {
+      "all_tenants?": false,
+      "base_filter": null,
+      "index_name": "repositories_name_index",
       "keys": [
         {
           "type": "atom",
           "value": "name"
-        },
-        {
-          "type": "atom",
-          "value": "repository_id"
         }
       ],
-      "name": "unique_repository_file",
+      "name": "name",
       "nils_distinct?": true,
       "where": null
     }
@@ -216,5 +193,5 @@
   },
   "repo": "Elixir.Edgehog.Repo",
   "schema": null,
-  "table": "files"
+  "table": "repositories"
 }

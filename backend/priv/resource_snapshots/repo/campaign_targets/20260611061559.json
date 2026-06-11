@@ -2,7 +2,7 @@
   "attributes": [
     {
       "allow_nil?": false,
-      "default": "fragment(\"uuid_generate_v7()\")",
+      "default": "fragment(\"gen_random_uuid()\")",
       "generated?": false,
       "precision": null,
       "primary_key?": true,
@@ -21,175 +21,19 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "url",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "file_name",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "uncompressed_file_size_bytes",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "digest",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "\"\"",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "compression",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "0",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "ttl_seconds",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "0",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "file_mode",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "-1",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "user_id",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "-1",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "group_id",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "\"storage\"",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "destination_type",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "destination",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "path_on_device",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "false",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "progress",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": true,
-      "default": "\"pending\"",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
       "source": "status",
       "type": "text"
     },
     {
-      "allow_nil?": true,
-      "default": "nil",
+      "allow_nil?": false,
+      "default": "0",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "status_progress",
+      "source": "retry_count",
       "type": "bigint"
     },
     {
@@ -201,8 +45,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "status_code",
-      "type": "bigint"
+      "source": "latest_attempt",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": true,
@@ -213,20 +57,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "message",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "is_manual",
-      "type": "boolean"
+      "source": "completion_timestamp",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
@@ -271,7 +103,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "file_download_requests_tenant_id_fkey",
+        "name": "campaign_targets_tenant_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -302,8 +134,39 @@
           "global": false,
           "strategy": "attribute"
         },
-        "name": "file_download_requests_device_id_fkey",
-        "on_delete": null,
+        "name": "campaign_targets_campaign_id_fkey",
+        "on_delete": "delete",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "campaigns"
+      },
+      "scale": null,
+      "size": null,
+      "source": "campaign_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "campaign_targets_device_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
@@ -313,6 +176,99 @@
       "size": null,
       "source": "device_id",
       "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "campaign_targets_deployment_id_fkey",
+        "on_delete": "nilify",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "application_deployments"
+      },
+      "scale": null,
+      "size": null,
+      "source": "deployment_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "campaign_targets_ota_operation_id_fkey",
+        "on_delete": "delete",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "ota_operations"
+      },
+      "scale": null,
+      "size": null,
+      "source": "ota_operation_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "campaign_targets_file_download_request_id_fkey",
+        "on_delete": "delete",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "file_download_requests"
+      },
+      "scale": null,
+      "size": null,
+      "source": "file_download_request_id",
+      "type": "uuid"
     }
   ],
   "base_filter": null,
@@ -366,7 +322,7 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "3906F5F2B5892202E584583588A7AA53416E36CBB8A81C632265D24EAA31077A",
+  "hash": "6BA24DCEF69CD5796DC4A247B63D62F6AE0203ADBE6E9FEB9EA2BFD6770A3440",
   "identities": [],
   "multitenancy": {
     "attribute": "tenant_id",
@@ -375,5 +331,5 @@
   },
   "repo": "Elixir.Edgehog.Repo",
   "schema": null,
-  "table": "file_download_requests"
+  "table": "campaign_targets"
 }

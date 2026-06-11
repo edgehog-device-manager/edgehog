@@ -2,7 +2,7 @@
   "attributes": [
     {
       "allow_nil?": false,
-      "default": "fragment(\"gen_random_uuid()\")",
+      "default": "fragment(\"uuid_generate_v7()\")",
       "generated?": false,
       "precision": null,
       "primary_key?": true,
@@ -21,23 +21,23 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "status",
+      "source": "name",
       "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "0",
+      "default": "nil",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "retry_count",
+      "source": "size",
       "type": "bigint"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -45,11 +45,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "latest_attempt",
-      "type": "utc_datetime_usec"
+      "source": "is_archive",
+      "type": "boolean"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -57,8 +57,32 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "completion_timestamp",
-      "type": "utc_datetime_usec"
+      "source": "base_file",
+      "type": "map"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "gz_file",
+      "type": "map"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "lz4_file",
+      "type": "map"
     },
     {
       "allow_nil?": false,
@@ -103,7 +127,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "campaign_targets_tenant_id_fkey",
+        "name": "files_tenant_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -127,147 +151,25 @@
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
         "index?": false,
-        "match_type": null,
-        "match_with": null,
+        "match_type": "simple",
+        "match_with": {
+          "tenant_id": "tenant_id"
+        },
         "multitenancy": {
           "attribute": "tenant_id",
           "global": false,
           "strategy": "attribute"
         },
-        "name": "campaign_targets_campaign_id_fkey",
+        "name": "files_repository_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "campaigns"
+        "table": "repositories"
       },
       "scale": null,
       "size": null,
-      "source": "campaign_id",
-      "type": "uuid"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": "tenant_id",
-          "global": false,
-          "strategy": "attribute"
-        },
-        "name": "campaign_targets_device_id_fkey",
-        "on_delete": "delete",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "devices"
-      },
-      "scale": null,
-      "size": null,
-      "source": "device_id",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": "tenant_id",
-          "global": false,
-          "strategy": "attribute"
-        },
-        "name": "campaign_targets_deployment_id_fkey",
-        "on_delete": "nilify",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "application_deployments"
-      },
-      "scale": null,
-      "size": null,
-      "source": "deployment_id",
-      "type": "uuid"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": "tenant_id",
-          "global": false,
-          "strategy": "attribute"
-        },
-        "name": "campaign_targets_ota_operation_id_fkey",
-        "on_delete": "delete",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "ota_operations"
-      },
-      "scale": null,
-      "size": null,
-      "source": "ota_operation_id",
-      "type": "uuid"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": "tenant_id",
-          "global": false,
-          "strategy": "attribute"
-        },
-        "name": "campaign_targets_file_download_request_id_fkey",
-        "on_delete": "delete",
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "file_download_requests"
-      },
-      "scale": null,
-      "size": null,
-      "source": "file_download_request_id",
+      "source": "repository_id",
       "type": "uuid"
     }
   ],
@@ -322,8 +224,27 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "D2F6856F56833A8AA511C1FB566DCF0165D65AF3D5A2228210321C2A399E428C",
-  "identities": [],
+  "hash": "7279D8CDCCDAD262F58EE6E4000AF681F10B3DF7DEE83602B6A5DCC4BC511F1C",
+  "identities": [
+    {
+      "all_tenants?": false,
+      "base_filter": null,
+      "index_name": "files_unique_repository_file_index",
+      "keys": [
+        {
+          "type": "atom",
+          "value": "name"
+        },
+        {
+          "type": "atom",
+          "value": "repository_id"
+        }
+      ],
+      "name": "unique_repository_file",
+      "nils_distinct?": true,
+      "where": null
+    }
+  ],
   "multitenancy": {
     "attribute": "tenant_id",
     "global": false,
@@ -331,5 +252,5 @@
   },
   "repo": "Elixir.Edgehog.Repo",
   "schema": null,
-  "table": "campaign_targets"
+  "table": "files"
 }

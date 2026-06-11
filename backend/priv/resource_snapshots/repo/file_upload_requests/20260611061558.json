@@ -21,19 +21,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "name",
-      "type": "text"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "handle",
+      "source": "url",
       "type": "text"
     },
     {
@@ -45,8 +33,104 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "description",
+      "source": "source",
       "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "source_type",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "\"\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "encoding",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "false",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "progress_tracked",
+      "type": "boolean"
+    },
+    {
+      "allow_nil?": true,
+      "default": "\"pending\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "status",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "progress_percentage",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "response_code",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "response_message",
+      "type": "text"
+    },
+    {
+      "allow_nil?": true,
+      "default": "%{}",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "http_headers",
+      "type": "map"
     },
     {
       "allow_nil?": false,
@@ -91,7 +175,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "repositories_tenant_id_fkey",
+        "name": "file_upload_requests_tenant_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -101,6 +185,37 @@
       "scale": null,
       "size": null,
       "source": "tenant_id",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
+        },
+        "name": "file_upload_requests_device_id_fkey",
+        "on_delete": null,
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "devices"
+      },
+      "scale": null,
+      "size": null,
+      "source": "device_id",
       "type": "bigint"
     }
   ],
@@ -154,38 +269,9 @@
     }
   ],
   "custom_statements": [],
-  "has_create_action": false,
-  "hash": "1F0EFD0F3F68079D2964F74F3498CA911C007BB7F0F1D33D9CF4B4CE066246FB",
-  "identities": [
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "repositories_handle_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "handle"
-        }
-      ],
-      "name": "handle",
-      "nils_distinct?": true,
-      "where": null
-    },
-    {
-      "all_tenants?": false,
-      "base_filter": null,
-      "index_name": "repositories_name_index",
-      "keys": [
-        {
-          "type": "atom",
-          "value": "name"
-        }
-      ],
-      "name": "name",
-      "nils_distinct?": true,
-      "where": null
-    }
-  ],
+  "has_create_action": true,
+  "hash": "4A1AD880874D8644950B61A0653D23914D2FD7F1D27A8F7F6CB83D8F487A31F1",
+  "identities": [],
   "multitenancy": {
     "attribute": "tenant_id",
     "global": false,
@@ -193,5 +279,5 @@
   },
   "repo": "Elixir.Edgehog.Repo",
   "schema": null,
-  "table": "repositories"
+  "table": "file_upload_requests"
 }

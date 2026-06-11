@@ -13,54 +13,6 @@
       "type": "uuid"
     },
     {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "url",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "source",
-      "type": "text"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "source_type",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "\"\"",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "compression",
-      "type": "text"
-    },
-    {
       "allow_nil?": true,
       "default": "false",
       "generated?": false,
@@ -69,7 +21,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "progress_tracked",
+      "source": "force",
       "type": "boolean"
     },
     {
@@ -93,18 +45,6 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "progress_percentage",
-      "type": "bigint"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
       "source": "response_code",
       "type": "bigint"
     },
@@ -117,20 +57,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "response_message",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "%{}",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "http_headers",
-      "type": "map"
+      "source": "response_messages",
+      "type": ["array", "text"]
     },
     {
       "allow_nil?": false,
@@ -164,27 +92,27 @@
       "primary_key?": false,
       "references": {
         "deferrable": false,
-        "destination_attribute": "tenant_id",
+        "destination_attribute": "id",
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
         "index?": false,
         "match_type": null,
         "match_with": null,
         "multitenancy": {
-          "attribute": null,
-          "global": null,
-          "strategy": null
+          "attribute": "tenant_id",
+          "global": false,
+          "strategy": "attribute"
         },
-        "name": "file_upload_requests_tenant_id_fkey",
-        "on_delete": "delete",
+        "name": "file_delete_requests_device_id_fkey",
+        "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "tenants"
+        "table": "devices"
       },
       "scale": null,
       "size": null,
-      "source": "tenant_id",
+      "source": "device_id",
       "type": "bigint"
     },
     {
@@ -206,83 +134,33 @@
           "global": false,
           "strategy": "attribute"
         },
-        "name": "file_upload_requests_device_id_fkey",
+        "name": "file_delete_requests_file_download_request_id_fkey",
         "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "devices"
+        "table": "file_download_requests"
       },
       "scale": null,
       "size": null,
-      "source": "device_id",
-      "type": "bigint"
+      "source": "file_download_request_id",
+      "type": "uuid"
     }
   ],
   "base_filter": null,
   "check_constraints": [],
   "create_table_options": null,
-  "custom_indexes": [
-    {
-      "all_tenants?": true,
-      "concurrently": false,
-      "error_fields": [
-        "id",
-        "tenant_id"
-      ],
-      "fields": [
-        {
-          "type": "atom",
-          "value": "id"
-        },
-        {
-          "type": "atom",
-          "value": "tenant_id"
-        }
-      ],
-      "include": null,
-      "message": null,
-      "name": null,
-      "nulls_distinct": true,
-      "prefix": null,
-      "table": null,
-      "unique": true,
-      "using": null,
-      "where": null
-    },
-    {
-      "all_tenants?": true,
-      "concurrently": false,
-      "error_fields": [
-        "tenant_id"
-      ],
-      "fields": [
-        {
-          "type": "atom",
-          "value": "tenant_id"
-        }
-      ],
-      "include": null,
-      "message": null,
-      "name": null,
-      "nulls_distinct": true,
-      "prefix": null,
-      "table": null,
-      "unique": false,
-      "using": null,
-      "where": null
-    }
-  ],
+  "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "0A842715A3697D65B7133E4D8BD0148759DE058AA8B4673E0995F0AD02005D6B",
+  "hash": "4CBF11DDF1FAB6038778C0750B7B2755EB230D7FE8A41EAE848AD698B5EBF9E3",
   "identities": [],
   "multitenancy": {
-    "attribute": "tenant_id",
-    "global": false,
-    "strategy": "attribute"
+    "attribute": null,
+    "global": null,
+    "strategy": null
   },
   "repo": "Elixir.Edgehog.Repo",
   "schema": null,
-  "table": "file_upload_requests"
+  "table": "file_delete_requests"
 }
