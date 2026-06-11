@@ -25,6 +25,7 @@ defmodule Edgehog.Tenants.Tenant do
   use Ash.Resource,
     domain: Edgehog.Tenants,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
       AshGraphql.Resource,
       AshJsonApi.Resource,
@@ -69,6 +70,12 @@ defmodule Edgehog.Tenants.Tenant do
     type :tenant
     id(:slug)
     ownership?(false)
+
+    capabilities do
+      view(false)
+      edit(false)
+      delete false
+    end
   end
 
   actions do

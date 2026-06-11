@@ -24,6 +24,7 @@ defmodule Edgehog.Devices.Device do
   """
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
       AshGraphql.Resource,
       Ash.FGA
@@ -61,17 +62,10 @@ defmodule Edgehog.Devices.Device do
     type :device
     id(:device_id)
     exclude([:system_model_part_number])
-  end
 
-  policies do
-    # Filter davices the user can see on reads
-    policy action_type(:read) do
-      authorize_if {Edgehog.Auth.Policies.Filter,
-                    rel: :can_view, obj: :device, obj_id: :device_id}
-    end
-
-    policy action_type(:update) do
-      authorize_if always()
+    capabilities do
+      edit(false)
+      operations([:edit_tags, :remame, :access_terminal, :identify, :update])
     end
   end
 

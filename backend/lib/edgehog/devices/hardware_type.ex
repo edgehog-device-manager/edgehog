@@ -22,6 +22,7 @@ defmodule Edgehog.Devices.HardwareType do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
       AshGraphql.Resource,
       Ash.FGA
