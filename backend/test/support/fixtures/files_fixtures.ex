@@ -24,6 +24,7 @@ defmodule Edgehog.FilesFixtures do
   entities via the `Edgehog.Files` domain.
   """
 
+  alias Edgehog.Files.DeviceFile
   alias Edgehog.Files.FileDeleteRequest
   alias Edgehog.Files.FileDownloadRequest
 
@@ -122,6 +123,25 @@ defmodule Edgehog.FilesFixtures do
   def group_id(:root), do: 0
   def group_id(:regular), do: 1000
   def group_id(:system), do: 999
+
+  def device_file_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
+      end)
+
+    params =
+      Enum.into(opts, %{
+        file_id: Ash.UUIDv7.generate(),
+        device_id: device_id
+      })
+
+    DeviceFile
+    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.create!()
+  end
 
   @doc """
   Generate a file download request fixture.
@@ -271,14 +291,14 @@ defmodule Edgehog.FilesFixtures do
         [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
       end)
 
-    {file_download_request_id, opts} =
-      Keyword.pop_lazy(opts, :file_download_request_id, fn ->
-        managed_file_download_request_fixture(tenant: tenant).id
+    {device_file_id, opts} =
+      Keyword.pop_lazy(opts, :device_file_id, fn ->
+        device_file_fixture(tenant: tenant).id
       end)
 
     params =
       Enum.into(opts, %{
-        file_download_request_id: file_download_request_id,
+        device_file_id: device_file_id,
         force: false,
         status: :pending,
         response_code: 0,

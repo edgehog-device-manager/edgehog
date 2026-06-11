@@ -26,6 +26,7 @@ defmodule Edgehog.Files do
   use Ash.Domain,
     extensions: [AshGraphql.Domain, Ash.Authorizer]
 
+  alias Edgehog.Files.DeviceFile
   alias Edgehog.Files.File
   alias Edgehog.Files.FileDeleteRequest
   alias Edgehog.Files.FileDownloadRequest
@@ -71,13 +72,13 @@ defmodule Edgehog.Files do
       end
 
       create FileUploadRequest, :create_file_upload_request, :send_request do
-        relay_id_translations input: [device_id: :device]
+        relay_id_translations input: [device_id: :device, device_file_id: :device_file]
       end
 
       create FileDeleteRequest, :create_file_delete_request, :send_request do
         relay_id_translations input: [
                                 device_id: :device,
-                                file_download_request_id: :file_download_request
+                                device_file_id: :device_file
                               ]
       end
     end
@@ -90,12 +91,9 @@ defmodule Edgehog.Files do
     resource FileDownloadRequest do
       define :fetch_file_download_request, action: :read, get_by: [:id]
       define :send_file_download_request, args: [:file_download_request]
-      define :set_path_on_device, args: [:path_on_device]
-      define :set_size_bytes, args: [:decompressed_file_size_bytes]
       define :set_file_download_response, action: :set_response
       define :set_file_download_progress, action: :set_progress
       define :set_file_download_status, action: :set_status
-      define :set_file_download_deleted_attribute, action: :set_deleted
     end
 
     resource FileUploadRequest do
@@ -113,6 +111,13 @@ defmodule Edgehog.Files do
       define :set_file_delete_response, action: :set_response
     end
 
-    resource Edgehog.Files.DeviceFile
+    resource DeviceFile do
+      define :fetch_device_file, action: :read, get_by: [:id]
+      define :fetch_device_file_by_file_id, action: :read, get_by: [:file_id]
+      define :create_device_file, action: :create
+      define :set_device_file_path_on_device, action: :set_path_on_device
+      define :set_device_file_size_bytes, action: :set_size_bytes
+      define :mark_device_file_as_deleted, action: :set_deleted
+    end
   end
 end

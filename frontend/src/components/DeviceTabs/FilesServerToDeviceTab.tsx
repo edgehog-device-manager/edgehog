@@ -93,7 +93,10 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
           responseMessage
           destinationType
           destination
-          pathOnDevice
+          deviceFile {
+            pathOnDevice
+            sizeBytes
+          }
           progressTracked
           ttlSeconds
           uncompressedFileSizeBytes
@@ -135,7 +138,10 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         responseMessage
         destinationType
         destination
-        pathOnDevice
+        deviceFile {
+          pathOnDevice
+          sizeBytes
+        }
         progressTracked
         ttlSeconds
         uncompressedFileSizeBytes
@@ -159,7 +165,10 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         responseMessage
         destinationType
         destination
-        pathOnDevice
+        deviceFile {
+          pathOnDevice
+          sizeBytes
+        }
         progressTracked
         ttlSeconds
         uncompressedFileSizeBytes
@@ -179,7 +188,10 @@ const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
         progressPercentage
         responseCode
         responseMessage
-        pathOnDevice
+        deviceFile {
+          pathOnDevice
+          sizeBytes
+        }
       }
     }
   }
@@ -199,18 +211,6 @@ class APIValidationError extends Error {
     super("API Validation Error");
   }
 }
-
-const STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS = [
-  "FilesDeviceToServerTab_storageFileDownloadRequests",
-  "FilesDeleteTab_storageFileDownloadRequests",
-] as const;
-const STORAGE_FILE_DOWNLOAD_REQUEST_FILTERS = {
-  filter: {
-    destinationType: { eq: "STORAGE" },
-    status: { eq: "COMPLETED" },
-    deleted: { eq: false },
-  },
-} as const;
 
 const formatPayloadErrors = (errors: readonly PayloadError[]): string => {
   return errors
@@ -310,35 +310,6 @@ const ManualFileDownloadRequestFormWrapper = ({
                 "FileDownloadRequestEdge",
               );
               ConnectionHandler.insertEdgeBefore(connection, edge);
-            }
-
-            const destinationType = newRequest.getValue("destinationType");
-            if (destinationType === "STORAGE") {
-              const newRequestId = newRequest.getDataID();
-
-              for (const connectionKey of STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS) {
-                const storageConnection = ConnectionHandler.getConnection(
-                  storedDevice,
-                  connectionKey,
-                  STORAGE_FILE_DOWNLOAD_REQUEST_FILTERS,
-                );
-                if (!storageConnection) continue;
-
-                const edges = storageConnection.getLinkedRecords("edges") ?? [];
-                const alreadyPresent = edges.some(
-                  (edge) =>
-                    edge?.getLinkedRecord("node")?.getDataID() === newRequestId,
-                );
-                if (alreadyPresent) continue;
-
-                const edge = ConnectionHandler.createEdge(
-                  store,
-                  storageConnection,
-                  newRequest,
-                  "FileDownloadRequestEdge",
-                );
-                ConnectionHandler.insertEdgeBefore(storageConnection, edge);
-              }
             }
           },
         });
@@ -516,35 +487,6 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
               "FileDownloadRequestEdge",
             );
             ConnectionHandler.insertEdgeBefore(connection, edge);
-          }
-
-          const destinationType = newRequest.getValue("destinationType");
-          if (destinationType === "STORAGE") {
-            const newRequestId = newRequest.getDataID();
-
-            for (const connectionKey of STORAGE_FILE_DOWNLOAD_REQUEST_CONNECTION_KEYS) {
-              const storageConnection = ConnectionHandler.getConnection(
-                storedDevice,
-                connectionKey,
-                STORAGE_FILE_DOWNLOAD_REQUEST_FILTERS,
-              );
-              if (!storageConnection) continue;
-
-              const edges = storageConnection.getLinkedRecords("edges") ?? [];
-              const alreadyPresent = edges.some(
-                (edge) =>
-                  edge?.getLinkedRecord("node")?.getDataID() === newRequestId,
-              );
-              if (alreadyPresent) continue;
-
-              const edge = ConnectionHandler.createEdge(
-                store,
-                storageConnection,
-                newRequest,
-                "FileDownloadRequestEdge",
-              );
-              ConnectionHandler.insertEdgeBefore(storageConnection, edge);
-            }
           }
         },
       });

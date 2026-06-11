@@ -18,12 +18,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { useParams } from "react-router-dom";
+import {
+  ConnectionHandler,
+  graphql,
+  useFragment,
+  useSubscription,
+} from "react-relay/hooks";
 import Select from "react-select";
 
 import type { FileManagementTab_fileManagement$key } from "@/api/__generated__/FileManagementTab_fileManagement.graphql";
+import type { FileManagementTab_DeviceFilesSubscription } from "@/api/__generated__/FileManagementTab_DeviceFilesSubscription.graphql";
 
 import FilesDeleteTab from "@/components/DeviceTabs/FilesDeleteTab";
 import FilesDownloadTab from "@/components/DeviceTabs/FilesDeviceToServerTab";
@@ -65,11 +72,37 @@ const FILE_MANAGEMENT_FRAGMENT = graphql`
     }
     ...FilesServerToDeviceTab_fileDownloadRequests
     ...FilesDeviceToServerTab_fileUploadRequests
-    ...FilesDeviceToServerTab_storageFileDownloadRequests
+    ...FilesDeviceToServerTab_deviceFiles
       @arguments(first: $storageFirst, after: $storageAfter)
     ...FilesDeleteTab_fileManagement
-    ...FilesDeleteTab_storageFileDownloadRequests
+    ...FilesDeleteTab_deviceFiles
       @arguments(first: $storageFirst, after: $storageAfter)
+  }
+`;
+
+const DEVICE_FILES_SUBSCRIPTION = graphql`
+  subscription FileManagementTab_DeviceFilesSubscription($deviceId: ID!) {
+    deviceFilesByDevice(deviceId: $deviceId) {
+      created {
+        id
+        fileId
+        pathOnDevice
+        fileDownloadRequest {
+          id
+          fileName
+        }
+      }
+      updated {
+        id
+        fileId
+        deleted
+        pathOnDevice
+        fileDownloadRequest {
+          id
+          fileName
+        }
+      }
+    }
   }
 `;
 
@@ -79,6 +112,7 @@ type FileManagementTabProps = {
 
 const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   const intl = useIntl();
+  const { deviceId = "" } = useParams();
   const data = useFragment(FILE_MANAGEMENT_FRAGMENT, deviceRef);
 
   const isOnline = useMemo(() => data?.online ?? false, [data]);
@@ -87,14 +121,83 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
     "download-to-device-file",
   );
 
-  const [removedOptionIds, setRemovedOptionIds] = useState<Set<string>>(
-    new Set(),
+  useSubscription<FileManagementTab_DeviceFilesSubscription>(
+    useMemo(
+      () => ({
+        subscription: DEVICE_FILES_SUBSCRIPTION,
+        variables: { deviceId },
+        updater: (store) => {
+          const deviceRecord = store.get(deviceId);
+          if (!deviceRecord) return;
+
+          const payload = store.getRootField("deviceFilesByDevice");
+          if (!payload) return;
+
+          const connectionKeys = [
+            "FilesDeleteTab_deviceFiles",
+            "FilesDeviceToServerTab_deviceFiles",
+          ];
+
+          const createdFile = payload.getLinkedRecord("created");
+          if (createdFile) {
+            connectionKeys.forEach((key) => {
+              const connection = ConnectionHandler.getConnection(
+                deviceRecord,
+                key,
+                { filter: { deleted: { eq: false } } },
+              );
+              if (connection) {
+                const edges = connection.getLinkedRecords("edges") ?? [];
+                const exists = edges.some(
+                  (edge) =>
+                    edge?.getLinkedRecord("node")?.getDataID() ===
+                    createdFile.getDataID(),
+                );
+
+                if (!exists) {
+                  const edge = ConnectionHandler.createEdge(
+                    store,
+                    connection,
+                    createdFile,
+                    "DeviceFileEdge",
+                  );
+                  ConnectionHandler.insertEdgeBefore(connection, edge);
+                }
+              }
+            });
+          }
+
+          const updatedFile = payload.getLinkedRecord("updated");
+
+          if (updatedFile) {
+            const isDeleted = updatedFile.getValue("deleted");
+            console.log("Checking if deleted:", isDeleted);
+
+            if (isDeleted) {
+              console.log(
+                "File marked as deleted! Removing from connections...",
+              );
+
+              const destroyedId = updatedFile.getDataID();
+
+              connectionKeys.forEach((key) => {
+                const connection = ConnectionHandler.getConnection(
+                  deviceRecord,
+                  key,
+                  { filter: { deleted: { eq: false } } },
+                );
+
+                if (connection) {
+                  ConnectionHandler.deleteNode(connection, destroyedId);
+                }
+              });
+            }
+          }
+        },
+      }),
+      [deviceId],
+    ),
   );
-
-  const handleOptionDeleted = useCallback((id: string) => {
-    setRemovedOptionIds((prev) => new Set(prev).add(id));
-  }, []);
-
   const supportsServerToDevice = Object.values(
     data.fileTransferCapabilities?.serverToDevice ?? {},
   ).some(Boolean);
@@ -191,23 +294,10 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
         );
       case "upload-from-device":
         return (
-          <FilesDownloadTab
-            deviceRef={data}
-            embedded
-            isOnline={isOnline}
-            removedOptionIds={removedOptionIds}
-          />
+          <FilesDownloadTab deviceRef={data} embedded isOnline={isOnline} />
         );
       case "delete-from-device":
-        return (
-          <FilesDeleteTab
-            deviceRef={data}
-            embedded
-            isOnline={isOnline}
-            removedOptionIds={removedOptionIds}
-            onDeleteSuccess={handleOptionDeleted}
-          />
-        );
+        return <FilesDeleteTab deviceRef={data} embedded isOnline={isOnline} />;
       default:
         return null;
     }

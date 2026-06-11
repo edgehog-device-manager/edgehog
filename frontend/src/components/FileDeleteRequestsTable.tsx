@@ -32,16 +32,22 @@ type FileDeleteRequestNode = NonNullable<
 const columnHelper = createColumnHelper<FileDeleteRequestNode>();
 
 const columns = [
-  columnHelper.accessor((row) => row.fileDownloadRequest.fileName, {
-    id: "fileName",
-    header: () => (
-      <FormattedMessage
-        id="components.FileDeleteRequestsTable.fileName"
-        defaultMessage="File Name"
-      />
-    ),
-    cell: ({ getValue }) => getValue(),
-  }),
+  columnHelper.accessor(
+    (row) => row.deviceFile?.fileDownloadRequest?.fileName,
+    {
+      id: "fileName",
+      header: () => (
+        <FormattedMessage
+          id="components.FileDeleteRequestsTable.fileName"
+          defaultMessage="File Name"
+        />
+      ),
+      cell: ({ getValue, row }) => {
+        const fileName = getValue();
+        return fileName ? fileName : row.original.deviceFile?.fileId;
+      },
+    },
+  ),
 
   columnHelper.accessor("status", {
     header: () => (

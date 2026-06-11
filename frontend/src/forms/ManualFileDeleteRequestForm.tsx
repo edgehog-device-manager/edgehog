@@ -40,7 +40,7 @@ type StorageSourceOption = {
 };
 
 type ManualFileDeleteRequestFormValues = {
-  fileDownloadRequestId: string;
+  deviceFileId: string;
   force: boolean;
 };
 
@@ -70,7 +70,7 @@ const ManualFileDeleteRequestForm = ({
     mode: "onTouched",
     resolver: zodResolver(fileDeleteRequestFormSchema),
     defaultValues: {
-      fileDownloadRequestId: "",
+      deviceFileId: "",
       force: false,
     },
   });
@@ -88,7 +88,7 @@ const ManualFileDeleteRequestForm = ({
   return (
     <form className={className} onSubmit={submitHandler} autoComplete="off">
       <FormRow
-        id="fileDownloadRequestId"
+        id="deviceFileId"
         label={
           <FormattedMessage
             id="forms.ManualFileDeleteRequestForm.fileLabel"
@@ -98,7 +98,7 @@ const ManualFileDeleteRequestForm = ({
       >
         <Controller
           control={control}
-          name="fileDownloadRequestId"
+          name="deviceFileId"
           render={({ field, fieldState }) => {
             const selectedOption = deleteOptionsMap.get(field.value) ?? null;
 
@@ -125,7 +125,7 @@ const ManualFileDeleteRequestForm = ({
           }}
         />
 
-        <FormFeedback feedback={errors.fileDownloadRequestId?.message} />
+        <FormFeedback feedback={errors.deviceFileId?.message} />
       </FormRow>
 
       <FormRow

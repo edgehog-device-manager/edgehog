@@ -24,7 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
   import Edgehog.DevicesFixtures
   import Edgehog.FilesFixtures
 
-  # alias Astarte.Client.APIError
   alias Edgehog.Astarte.Device.FileDeleteRequestMock
 
   describe "createFileDeleteRequest mutation" do
@@ -32,10 +31,8 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
       device = device_fixture(tenant: tenant)
       device_id = AshGraphql.Resource.encode_relay_id(device)
 
-      file_download_request =
-        manual_file_download_request_fixture(tenant: tenant, device_id: device.id)
-
-      file_download_request_id = AshGraphql.Resource.encode_relay_id(file_download_request)
+      device_file = device_file_fixture(tenant: tenant, device_id: device.id)
+      encoded_device_file_id = AshGraphql.Resource.encode_relay_id(device_file)
 
       expect(FileDeleteRequestMock, :request_deletion, fn _, _, _ -> :ok end)
 
@@ -43,13 +40,13 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
         create_file_delete_request_mutation(
           tenant: tenant,
           device_id: device_id,
-          file_download_request_id: file_download_request_id
+          device_file_id: device_file.id
         )
 
       file_delete_request = extract_result!(result)
 
       assert %{
-               "fileDownloadRequest" => %{"id" => ^file_download_request_id},
+               "deviceFile" => %{"id" => ^encoded_device_file_id},
                "status" => "PENDING",
                "force" => false,
                "device" => %{
@@ -60,88 +57,71 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
 
     test "fails with non-existing device id", %{tenant: tenant} do
       device_id = non_existing_device_id(tenant)
+      device_file = device_file_fixture(tenant: tenant)
 
       result =
         create_file_delete_request_mutation(
           tenant: tenant,
           device_id: device_id,
-          sources: [:file]
+          device_file_id: device_file.id
         )
 
-      assert %{message: "does not belong to device"} = extract_error!(result)
+      assert %{
+               code: "invalid_argument",
+               message: "the file does not belong to the specified device"
+             } = extract_error!(result)
     end
 
-    test "fails with non-existing file download request id", %{tenant: tenant} do
-      file_download_request_id = non_existing_file_download_request_id(tenant)
-
-      result =
-        create_file_delete_request_mutation(
-          tenant: tenant,
-          file_download_request_id: file_download_request_id,
-          sources: [:file]
-        )
-
-      assert %{message: "could not be found"} = extract_error!(result)
-    end
-
-    test "fails when file download request belongs to a different device", %{tenant: tenant} do
-      device_a = device_fixture(tenant: tenant)
-      device_b = device_fixture(tenant: tenant)
-
-      file_download_request =
-        manual_file_download_request_fixture(tenant: tenant, device_id: device_a.id)
-
-      result =
-        create_file_delete_request_mutation(
-          tenant: tenant,
-          device_id: AshGraphql.Resource.encode_relay_id(device_b),
-          file_download_request_id: AshGraphql.Resource.encode_relay_id(file_download_request)
-        )
-
-      assert %{message: "does not belong to device"} = extract_error!(result)
-    end
-
-    test "fails when file download request is not storage", %{tenant: tenant} do
+    test "fails with non-existing device file id", %{tenant: tenant} do
       device = device_fixture(tenant: tenant)
-
-      file_download_request =
-        manual_file_download_request_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          destination_type: "filesystem"
-        )
+      device_file_id = non_existing_device_file_id(tenant)
 
       result =
         create_file_delete_request_mutation(
           tenant: tenant,
           device_id: AshGraphql.Resource.encode_relay_id(device),
-          file_download_request_id: AshGraphql.Resource.encode_relay_id(file_download_request)
+          device_file_id: device_file_id
         )
 
-      assert %{message: "must be storage"} = extract_error!(result)
+      assert %{message: "could not be found"} = extract_error!(result)
     end
-  end
 
-  test "fails if an API error is returned", %{tenant: tenant} do
-    expect(FileDeleteRequestMock, :request_deletion, fn _, _, _ ->
-      {:error, api_error(status: 418, message: "I'm a teapot")}
-    end)
+    test "fails when device file belongs to a different device", %{tenant: tenant} do
+      device_a = device_fixture(tenant: tenant)
+      device_b = device_fixture(tenant: tenant)
 
-    device = device_fixture(tenant: tenant)
+      device_file = device_file_fixture(tenant: tenant, device_id: device_a.id)
 
-    file_download_request =
-      manual_file_download_request_fixture(tenant: tenant, device_id: device.id)
+      result =
+        create_file_delete_request_mutation(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device_b),
+          device_file_id: device_file.id
+        )
 
-    result =
-      create_file_delete_request_mutation(
-        tenant: tenant,
-        device_id: AshGraphql.Resource.encode_relay_id(device),
-        file_download_request_id: AshGraphql.Resource.encode_relay_id(file_download_request)
-      )
+      assert %{message: "the file does not belong to the specified device"} =
+               extract_error!(result)
+    end
 
-    assert %{code: "astarte_api_error", message: message} = extract_error!(result)
-    assert message =~ "418"
-    assert message =~ "I'm a teapot"
+    test "fails if an API error is returned", %{tenant: tenant} do
+      expect(FileDeleteRequestMock, :request_deletion, fn _, _, _ ->
+        {:error, api_error(status: 418, message: "I'm a teapot")}
+      end)
+
+      device = device_fixture(tenant: tenant)
+      device_file = device_file_fixture(tenant: tenant, device_id: device.id)
+
+      result =
+        create_file_delete_request_mutation(
+          tenant: tenant,
+          device_id: AshGraphql.Resource.encode_relay_id(device),
+          device_file_id: device_file.id
+        )
+
+      assert %{code: "astarte_api_error", message: message} = extract_error!(result)
+      assert message =~ "418"
+      assert message =~ "I'm a teapot"
+    end
   end
 
   defp create_file_delete_request_mutation(opts) do
@@ -158,7 +138,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
           status
           responseCode
           responseMessages
-          fileDownloadRequest {
+          deviceFile {
             id
           }
         }
@@ -175,18 +155,18 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
-    {file_download_request_id, opts} =
-      Keyword.pop_lazy(opts, :file_download_request_id, fn ->
+    {device_file_id, opts} =
+      Keyword.pop_lazy(opts, :device_file_id, fn ->
         [tenant: tenant]
-        |> manual_file_download_request_fixture()
-        |> AshGraphql.Resource.encode_relay_id()
+        |> device_file_fixture()
+        |> Map.get(:id)
       end)
 
     {force, opts} = Keyword.pop_lazy(opts, :force, fn -> false end)
 
     default_input = %{
       "deviceId" => device_id,
-      "fileDownloadRequestId" => file_download_request_id,
+      "deviceFileId" => device_file_id,
       "force" => force
     }
 
@@ -211,10 +191,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileDeleteRequestTest do
     id
   end
 
-  defp non_existing_file_download_request_id(tenant) do
-    fixture = manual_file_download_request_fixture(tenant: tenant)
-    id = AshGraphql.Resource.encode_relay_id(fixture)
-    :ok = Ash.destroy!(fixture, action: :destroy_fixture)
+  defp non_existing_device_file_id(tenant) do
+    fixture = device_file_fixture(tenant: tenant)
+    id = fixture.id
+    :ok = Ash.destroy!(fixture)
 
     id
   end

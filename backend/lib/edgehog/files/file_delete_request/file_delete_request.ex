@@ -63,7 +63,7 @@ defmodule Edgehog.Files.FileDeleteRequest do
         allow_nil? false
       end
 
-      argument :file_download_request_id, :uuid_v7 do
+      argument :device_file_id, :uuid_v7 do
         allow_nil? false
       end
 
@@ -78,7 +78,7 @@ defmodule Edgehog.Files.FileDeleteRequest do
              ),
              only_when_valid?: true
 
-      change manage_relationship(:file_download_request_id, :file_download_request,
+      change manage_relationship(:device_file_id, :device_file,
                type: :append,
                eager_validate_with: Edgehog.Files
              ),
@@ -89,7 +89,7 @@ defmodule Edgehog.Files.FileDeleteRequest do
 
     create :create_fixture do
       accept [
-        :file_download_request_id,
+        :device_file_id,
         :force,
         :status,
         :response_code,
@@ -155,9 +155,9 @@ defmodule Edgehog.Files.FileDeleteRequest do
       attribute_public? false
     end
 
-    belongs_to :file_download_request, Edgehog.Files.FileDownloadRequest do
-      description "The file download request that resulted in the file targeted by this delete request"
-      allow_nil? false
+    belongs_to :device_file, Edgehog.Files.DeviceFile do
+      description "The device file associated with this file delete request."
+      allow_nil? true
       public? true
       attribute_type :uuid_v7
       attribute_public? false

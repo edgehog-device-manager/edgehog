@@ -59,10 +59,20 @@ defmodule Edgehog.Files.FileUploadRequest do
     end
 
     create :send_request do
-      accept [:source, :source_type, :encoding, :progress_tracked, :http_headers]
+      accept [:source_type, :encoding, :progress_tracked, :http_headers]
 
       argument :device_id, :id do
         allow_nil? false
+      end
+
+      argument :file_system_path, :string do
+        allow_nil? true
+        public? true
+      end
+
+      argument :device_file_id, :uuid do
+        allow_nil? true
+        public? true
       end
 
       change set_attribute(:id, &Ash.UUIDv7.generate/0)
@@ -73,7 +83,7 @@ defmodule Edgehog.Files.FileUploadRequest do
                eager_validate_with: Edgehog.Devices
              )
 
-      change Changes.ValidateSource
+      change Changes.SetSource
       change Changes.SetUploadUrl
       change Changes.SendFileUploadRequest
     end

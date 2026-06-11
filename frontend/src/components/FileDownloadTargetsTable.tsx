@@ -52,7 +52,9 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
           responseCode
           responseMessage
           destinationType
-          pathOnDevice
+          deviceFile {
+            pathOnDevice
+          }
         }
       }
     }

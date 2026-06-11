@@ -126,7 +126,7 @@ const columns = [
           <FormattedMessage
             id="components.FilesServerToDeviceTable.destination.storage"
             defaultMessage="STORAGE: {path}"
-            values={{ path: row.original.pathOnDevice ?? "" }}
+            values={{ path: row.original.deviceFile?.pathOnDevice ?? "" }}
           />
         );
       }
@@ -141,9 +141,16 @@ const columns = [
         defaultMessage="Uncompressed File Size"
       />
     ),
-    cell: ({ getValue }) => {
+    cell: ({ getValue, row }) => {
+      const deviceFileSize = row.original.deviceFile?.sizeBytes;
+
       const size = getValue();
-      return size != null ? formatFileSize(size) : null;
+
+      return deviceFileSize != null
+        ? formatFileSize(deviceFileSize)
+        : size != null
+          ? formatFileSize(size)
+          : null;
     },
   }),
   columnHelper.accessor("ttlSeconds", {

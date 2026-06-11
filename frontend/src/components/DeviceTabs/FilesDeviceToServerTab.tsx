@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import split from "lodash/split";
 import React, { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -29,14 +28,13 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 import type { FilesDeviceToServerTab_PaginationQuery } from "@/api/__generated__/FilesDeviceToServerTab_PaginationQuery.graphql";
 import type { FilesDeviceToServerTab_createFileUploadRequest_Mutation } from "@/api/__generated__/FilesDeviceToServerTab_createFileUploadRequest_Mutation.graphql";
+import type { FilesDeviceToServerTab_deviceFiles$key } from "@/api/__generated__/FilesDeviceToServerTab_deviceFiles.graphql";
+import type { FilesDeviceToServerTab_deviceFiles_PaginationQuery } from "@/api/__generated__/FilesDeviceToServerTab_deviceFiles_PaginationQuery.graphql";
 import type { FilesDeviceToServerTab_fileUploadRequest_updated_Subscription } from "@/api/__generated__/FilesDeviceToServerTab_fileUploadRequest_updated_Subscription.graphql";
 import type { FilesDeviceToServerTab_fileUploadRequests$key } from "@/api/__generated__/FilesDeviceToServerTab_fileUploadRequests.graphql";
-import type { FilesDeviceToServerTab_storageFileDownloadRequests_PaginationQuery } from "@/api/__generated__/FilesDeviceToServerTab_storageFileDownloadRequests_PaginationQuery.graphql";
-import type { FilesDeviceToServerTab_storageFileDownloadRequests$key } from "@/api/__generated__/FilesDeviceToServerTab_storageFileDownloadRequests.graphql";
 
 import Alert from "@/components/Alert";
 import FilesDeviceToServerTable from "@/components/FilesDeviceToServerTable";
@@ -50,6 +48,7 @@ import type {
   FileSourceType,
   ManualFileUploadRequestData,
 } from "@/forms/validation";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 // We use graphql fields below in table columns configuration
 /* eslint-disable relay/unused-fields */
@@ -87,26 +86,24 @@ const DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT = graphql`
   }
 `;
 
-const DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
-  fragment FilesDeviceToServerTab_storageFileDownloadRequests on Device
-  @refetchable(
-    queryName: "FilesDeviceToServerTab_storageFileDownloadRequests_PaginationQuery"
-  )
+const DEVICE_FILES_FRAGMENT = graphql`
+  fragment FilesDeviceToServerTab_deviceFiles on Device
+  @refetchable(queryName: "FilesDeviceToServerTab_deviceFiles_PaginationQuery")
   @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
-    storageFileDownloadRequests: fileDownloadRequests(
+    deviceFiles(
       first: $first
       after: $after
-      filter: {
-        destinationType: { eq: STORAGE }
-        status: { eq: COMPLETED }
-        deleted: { eq: false }
-      }
-    ) @connection(key: "FilesDeviceToServerTab_storageFileDownloadRequests") {
+      filter: { deleted: { eq: false } }
+    ) @connection(key: "FilesDeviceToServerTab_deviceFiles") {
       edges {
         node {
           id
-          fileName
-          pathOnDevice
+          fileId
+          sizeBytes
+          fileDownloadRequest {
+            id
+            fileName
+          }
         }
       }
     }
@@ -207,7 +204,9 @@ const ManualFilesDeviceToServerFormWrapper = ({
               input: {
                 deviceId,
                 sourceType,
-                source,
+                deviceFileId: sourceType === "STORAGE" ? source : undefined,
+                fileSystemPath:
+                  sourceType === "FILESYSTEM" ? source : undefined,
                 encoding,
                 progressTracked,
               },
@@ -291,17 +290,15 @@ const ManualFilesDeviceToServerFormWrapper = ({
 
 type FilesDeviceToServerTabProps = {
   deviceRef: FilesDeviceToServerTab_fileUploadRequests$key &
-    FilesDeviceToServerTab_storageFileDownloadRequests$key;
+    FilesDeviceToServerTab_deviceFiles$key;
   embedded?: boolean;
   isOnline?: boolean;
-  removedOptionIds?: Set<string>;
 };
 
 const FilesDeviceToServerTab = ({
   deviceRef,
   embedded = false,
   isOnline = false,
-  removedOptionIds = new Set(),
 }: FilesDeviceToServerTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -314,20 +311,20 @@ const FilesDeviceToServerTab = ({
   >(DEVICE_FILE_UPLOAD_REQUESTS_FRAGMENT, deviceRef);
 
   const {
-    data: storageData,
-    loadNext: loadNextStorage,
-    hasNext: hasNextStorage,
-    isLoadingNext: isLoadingStorageNext,
+    data: deviceFilesData,
+    loadNext: loadNextDeviceFiles,
+    hasNext: hasNextDeviceFiles,
+    isLoadingNext: isLoadingDeviceFilesNext,
   } = usePaginationFragment<
-    FilesDeviceToServerTab_storageFileDownloadRequests_PaginationQuery,
-    FilesDeviceToServerTab_storageFileDownloadRequests$key
-  >(DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
+    FilesDeviceToServerTab_deviceFiles_PaginationQuery,
+    FilesDeviceToServerTab_deviceFiles$key
+  >(DEVICE_FILES_FRAGMENT, deviceRef);
 
   const { onLoadMore: onLoadMoreStorageOptions } = useRelayConnectionPagination(
     {
-      hasNext: hasNextStorage,
-      isLoadingNext: isLoadingStorageNext,
-      loadNext: loadNextStorage,
+      hasNext: hasNextDeviceFiles,
+      isLoadingNext: isLoadingDeviceFilesNext,
+      loadNext: loadNextDeviceFiles,
     },
   );
 
@@ -385,43 +382,42 @@ const FilesDeviceToServerTab = ({
   }, [data.fileTransferCapabilities?.deviceToServer, intl]);
 
   const storageSourceOptions = useMemo<StorageSourceOption[]>(() => {
-    const edges = storageData.storageFileDownloadRequests?.edges;
-    if (!edges) return [];
+    const edges = deviceFilesData?.deviceFiles?.edges;
+    if (!edges || edges.length === 0) return [];
 
-    const validRequests: Array<{
-      id: string;
-      fileName: string;
-      pathOnDevice: string | null;
-    }> = [];
     const fileNameCounts: Record<string, number> = {};
 
     for (const edge of edges) {
       const node = edge?.node;
+      if (!node) continue;
 
-      if (node?.id && !removedOptionIds.has(node.id)) {
-        const fileName = node.fileName ?? node.id;
+      const fileName = node.fileDownloadRequest?.fileName ?? node.fileId;
+      if (fileName) {
         fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
-        validRequests.push({
-          id: node.id,
-          fileName,
-          pathOnDevice: node.pathOnDevice ?? null,
-        });
       }
     }
 
-    return validRequests.map(({ id, fileName, pathOnDevice }) => {
-      const requestUuid = split(pathOnDevice ?? "", "/").at(-1);
+    const options: StorageSourceOption[] = [];
 
-      const isDuplicate = fileNameCounts[fileName] > 1;
-      return {
-        value: id,
+    for (const edge of edges) {
+      const node = edge?.node;
+      if (!node) continue;
+
+      const fileId = node.fileId;
+      const fileName = node.fileDownloadRequest?.fileName ?? fileId;
+      const isDuplicate = fileName ? fileNameCounts[fileName] > 1 : false;
+
+      options.push({
+        value: node.id,
         label:
-          isDuplicate && requestUuid
-            ? `${fileName} (${requestUuid})`
-            : fileName,
-      };
-    });
-  }, [storageData.storageFileDownloadRequests, removedOptionIds]);
+          isDuplicate && fileId && fileName !== fileId
+            ? `${fileName} (${fileId})`
+            : (fileName ?? fileId),
+      });
+    }
+
+    return options;
+  }, [deviceFilesData?.deviceFiles]);
 
   const supportedEncodingsBySourceType = useMemo<
     Record<FileSourceType, string[]>

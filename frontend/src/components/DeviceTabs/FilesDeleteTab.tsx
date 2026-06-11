@@ -18,7 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import split from "lodash/split";
 import React, { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
@@ -30,14 +29,13 @@ import {
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 import { PayloadError } from "relay-runtime";
-import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 import type { FilesDeleteTab_PaginationQuery } from "@/api/__generated__/FilesDeleteTab_PaginationQuery.graphql";
 import type { FilesDeleteTab_createFileDeleteRequest_Mutation } from "@/api/__generated__/FilesDeleteTab_createFileDeleteRequest_Mutation.graphql";
+import type { FilesDeleteTab_deviceFiles$key } from "@/api/__generated__/FilesDeleteTab_deviceFiles.graphql";
+import type { FilesDeleteTab_deviceFiles_PaginationQuery } from "@/api/__generated__/FilesDeleteTab_deviceFiles_PaginationQuery.graphql";
 import type { FilesDeleteTab_fileDeleteRequest_Subscription } from "@/api/__generated__/FilesDeleteTab_fileDeleteRequest_Subscription.graphql";
 import type { FilesDeleteTab_fileManagement$key } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
-import type { FilesDeleteTab_storageFileDownloadRequests_PaginationQuery } from "@/api/__generated__/FilesDeleteTab_storageFileDownloadRequests_PaginationQuery.graphql";
-import type { FilesDeleteTab_storageFileDownloadRequests$key } from "@/api/__generated__/FilesDeleteTab_storageFileDownloadRequests.graphql";
 
 import Alert from "@/components/Alert";
 import FileDeleteRequestsTable from "@/components/FileDeleteRequestsTable";
@@ -47,6 +45,7 @@ import ManualFileDeleteRequestForm, {
   type ManualFileDeleteRequestFormValues,
   type StorageSourceOption,
 } from "@/forms/ManualFileDeleteRequestForm";
+import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 // We use graphql fields below in table columns configuration
 /* eslint-disable relay/unused-fields */
@@ -65,8 +64,12 @@ const DEVICE_FILES_FRAGMENT = graphql`
           status
           responseCode
           responseMessages
-          fileDownloadRequest {
-            fileName
+          deviceFile {
+            fileId
+            pathOnDevice
+            fileDownloadRequest {
+              fileName
+            }
           }
         }
       }
@@ -74,26 +77,25 @@ const DEVICE_FILES_FRAGMENT = graphql`
   }
 `;
 
-const DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
-  fragment FilesDeleteTab_storageFileDownloadRequests on Device
-  @refetchable(
-    queryName: "FilesDeleteTab_storageFileDownloadRequests_PaginationQuery"
-  )
+const DEVICE_DEVICE_FILES_FRAGMENT = graphql`
+  fragment FilesDeleteTab_deviceFiles on Device
+  @refetchable(queryName: "FilesDeleteTab_deviceFiles_PaginationQuery")
   @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
-    storageFileDownloadRequests: fileDownloadRequests(
+    deviceFiles(
       first: $first
       after: $after
-      filter: {
-        destinationType: { eq: STORAGE }
-        status: { eq: COMPLETED }
-        deleted: { eq: false }
-      }
-    ) @connection(key: "FilesDeleteTab_storageFileDownloadRequests") {
+      filter: { deleted: { eq: false } }
+    ) @connection(key: "FilesDeleteTab_deviceFiles") {
       edges {
         node {
           id
-          fileName
+          fileId
           pathOnDevice
+          sizeBytes
+          fileDownloadRequest {
+            id
+            fileName
+          }
         }
       }
     }
@@ -111,8 +113,12 @@ const DEVICE_CREATE_FILE_DELETE_REQUEST_MUTATION = graphql`
         status
         responseCode
         responseMessages
-        fileDownloadRequest {
-          fileName
+        deviceFile {
+          fileId
+          pathOnDevice
+          fileDownloadRequest {
+            fileName
+          }
         }
       }
     }
@@ -128,8 +134,12 @@ const FILE_DELETE_REQUEST_UPDATED_SUBSCRIPTION = graphql`
         status
         responseCode
         responseMessages
-        fileDownloadRequest {
-          fileName
+        deviceFile {
+          fileId
+          pathOnDevice
+          fileDownloadRequest {
+            fileName
+          }
         }
       }
     }
@@ -150,7 +160,6 @@ type ManualFileDeleteRequestFormWrapperProps = {
   deleteOptions: StorageSourceOption[];
   onLoadMoreDeleteOptions?: () => void;
   isOnline: boolean;
-  onDeleteSuccess: (fileDownloadRequestId: string) => void;
 };
 
 const ManualFileDeleteRequestFormWrapper = ({
@@ -159,7 +168,6 @@ const ManualFileDeleteRequestFormWrapper = ({
   deleteOptions,
   onLoadMoreDeleteOptions,
   isOnline,
-  onDeleteSuccess,
 }: ManualFileDeleteRequestFormWrapperProps) => {
   const intl = useIntl();
 
@@ -188,7 +196,7 @@ const ManualFileDeleteRequestFormWrapper = ({
             variables: {
               input: {
                 deviceId,
-                fileDownloadRequestId: values.fileDownloadRequestId,
+                deviceFileId: values.deviceFileId,
                 force: values.force,
               },
             },
@@ -234,8 +242,6 @@ const ManualFileDeleteRequestFormWrapper = ({
             },
           });
         });
-
-        onDeleteSuccess(values.fileDownloadRequestId);
       } catch (error) {
         setErrorFeedback(
           error instanceof Error
@@ -247,14 +253,7 @@ const ManualFileDeleteRequestFormWrapper = ({
         );
       }
     },
-    [
-      createFileDeleteRequest,
-      deviceId,
-      intl,
-      isOnline,
-      setErrorFeedback,
-      onDeleteSuccess,
-    ],
+    [createFileDeleteRequest, deviceId, intl, isOnline, setErrorFeedback],
   );
 
   return (
@@ -268,20 +267,15 @@ const ManualFileDeleteRequestFormWrapper = ({
 };
 
 type FilesDeleteTabProps = {
-  deviceRef: FilesDeleteTab_fileManagement$key &
-    FilesDeleteTab_storageFileDownloadRequests$key;
+  deviceRef: FilesDeleteTab_fileManagement$key & FilesDeleteTab_deviceFiles$key;
   embedded?: boolean;
   isOnline?: boolean;
-  removedOptionIds: Set<string>;
-  onDeleteSuccess: (id: string) => void;
 };
 
 const FilesDeleteTab = ({
   deviceRef,
   embedded = false,
   isOnline = false,
-  removedOptionIds,
-  onDeleteSuccess,
 }: FilesDeleteTabProps) => {
   const intl = useIntl();
   const { deviceId = "" } = useParams();
@@ -294,19 +288,19 @@ const FilesDeleteTab = ({
   >(DEVICE_FILES_FRAGMENT, deviceRef);
 
   const {
-    data: storageData,
-    loadNext: loadNextStorage,
-    hasNext: hasNextStorage,
-    isLoadingNext: isLoadingStorageNext,
+    data: deviceFilesData,
+    loadNext: loadNextDeviceFiles,
+    hasNext: hasNextDeviceFiles,
+    isLoadingNext: isLoadingDeviceFilesNext,
   } = usePaginationFragment<
-    FilesDeleteTab_storageFileDownloadRequests_PaginationQuery,
-    FilesDeleteTab_storageFileDownloadRequests$key
-  >(DEVICE_STORAGE_FILE_DOWNLOAD_REQUESTS_FRAGMENT, deviceRef);
+    FilesDeleteTab_deviceFiles_PaginationQuery,
+    FilesDeleteTab_deviceFiles$key
+  >(DEVICE_DEVICE_FILES_FRAGMENT, deviceRef);
 
   const { onLoadMore: onLoadMoreDeleteOptions } = useRelayConnectionPagination({
-    hasNext: hasNextStorage,
-    isLoadingNext: isLoadingStorageNext,
-    loadNext: loadNextStorage,
+    hasNext: hasNextDeviceFiles,
+    isLoadingNext: isLoadingDeviceFilesNext,
+    loadNext: loadNextDeviceFiles,
   });
 
   useSubscription<FilesDeleteTab_fileDeleteRequest_Subscription>(
@@ -327,44 +321,43 @@ const FilesDeleteTab = ({
     [data.fileDeleteRequests],
   );
 
-  const deleteOptions: StorageSourceOption[] = useMemo(() => {
-    const edges = storageData.storageFileDownloadRequests?.edges;
-    if (!edges) return [];
+  const deleteOptions = useMemo<StorageSourceOption[]>(() => {
+    const edges = deviceFilesData?.deviceFiles?.edges;
+    if (!edges || edges.length === 0) return [];
 
-    const validRequests: Array<{
-      id: string;
-      fileName: string;
-      pathOnDevice: string | null;
-    }> = [];
     const fileNameCounts: Record<string, number> = {};
 
     for (const edge of edges) {
       const node = edge?.node;
+      if (!node) continue;
 
-      if (node?.id && !removedOptionIds.has(node.id)) {
-        const fileName = node.fileName ?? node.id;
+      const fileName = node.fileDownloadRequest?.fileName ?? node.fileId;
+      if (fileName) {
         fileNameCounts[fileName] = (fileNameCounts[fileName] ?? 0) + 1;
-        validRequests.push({
-          id: node.id,
-          fileName,
-          pathOnDevice: node.pathOnDevice ?? null,
-        });
       }
     }
 
-    return validRequests.map(({ id, fileName, pathOnDevice }) => {
-      const requestUuid = split(pathOnDevice ?? "", "/").at(-1);
+    const options: StorageSourceOption[] = [];
 
-      const isDuplicate = fileNameCounts[fileName] > 1;
-      return {
-        value: id,
+    for (const edge of edges) {
+      const node = edge?.node;
+      if (!node) continue;
+
+      const fileId = node.fileId;
+      const fileName = node.fileDownloadRequest?.fileName ?? fileId;
+      const isDuplicate = fileName ? fileNameCounts[fileName] > 1 : false;
+
+      options.push({
+        value: node.id,
         label:
-          isDuplicate && requestUuid
-            ? `${fileName} (${requestUuid})`
-            : fileName,
-      };
-    });
-  }, [storageData.storageFileDownloadRequests, removedOptionIds]);
+          isDuplicate && fileId && fileName !== fileId
+            ? `${fileName} (${fileId})`
+            : (fileName ?? fileId),
+      });
+    }
+
+    return options;
+  }, [deviceFilesData?.deviceFiles]);
 
   if (!data.capabilities.includes("FILE_TRANSFER_DELETE")) {
     return null;
@@ -389,7 +382,6 @@ const FilesDeleteTab = ({
             deleteOptions={deleteOptions}
             onLoadMoreDeleteOptions={onLoadMoreDeleteOptions}
             isOnline={isOnline}
-            onDeleteSuccess={onDeleteSuccess}
           />
         </Stack>
       </div>

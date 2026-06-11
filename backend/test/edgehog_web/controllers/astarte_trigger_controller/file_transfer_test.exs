@@ -24,11 +24,16 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
   import Edgehog.AstarteFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.FilesFixtures
+  import Edgehog.TenantsFixtures
 
+  alias Edgehog.Files.DeviceFile
   alias Edgehog.Files.EphemeralFileMock
   alias Edgehog.Files.FileDeleteRequest
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileUploadRequest
+  alias Edgehog.Triggers.IncomingData.Handlers.FileStorage
+
+  require Ash.Query
 
   describe "process_event/2 for file transfer events" do
     setup %{tenant: tenant} do
@@ -400,18 +405,13 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
          context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
-      file_download_request =
-        manual_file_download_request_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          status: :pending
-        )
+      device_file = device_file_fixture(tenant: tenant)
 
       file_delete_request =
         file_delete_request_fixture(
           tenant: tenant,
           device_id: device.id,
-          file_download_request_id: file_download_request.id,
+          device_file_id: device_file.id,
           status: :pending
         )
 
@@ -439,29 +439,24 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       file_delete_request = Ash.get!(FileDeleteRequest, file_delete_request.id, tenant: tenant)
-      file_download_request = Ash.get!(FileDownloadRequest, file_download_request, tenant: tenant)
+      device_file = Ash.get!(DeviceFile, device_file, tenant: tenant)
       assert file_delete_request.status == :completed
       assert file_delete_request.response_code == 0
       assert file_delete_request.response_messages == ["transfer complete"]
-      assert file_download_request.deleted == true
+      assert device_file.deleted == true
     end
 
     test "updates file delete request status from storage.Response to failed",
          context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
-      file_download_request =
-        manual_file_download_request_fixture(
-          tenant: tenant,
-          device_id: device.id,
-          status: :pending
-        )
+      device_file = device_file_fixture(tenant: tenant)
 
       file_delete_request =
         file_delete_request_fixture(
           tenant: tenant,
           device_id: device.id,
-          file_download_request_id: file_download_request.id,
+          device_file_id: device_file.id,
           status: :pending
         )
 
@@ -489,11 +484,117 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerControllerTest do
       |> response(200)
 
       file_delete_request = Ash.get!(FileDeleteRequest, file_delete_request.id, tenant: tenant)
-      file_download_request = Ash.get!(FileDownloadRequest, file_download_request, tenant: tenant)
+      device_file = Ash.get!(DeviceFile, device_file, tenant: tenant)
       assert file_delete_request.status == :failed
       assert file_delete_request.response_code == 22
       assert file_delete_request.response_messages == ["File doesn't exist"]
-      assert file_download_request.deleted == false
+      assert device_file.deleted == false
+    end
+  end
+
+  describe "file_storage" do
+    setup do
+      tenant = tenant_fixture()
+      cluster = cluster_fixture()
+      realm = realm_fixture(cluster_id: cluster.id, tenant: tenant)
+      device = device_fixture(realm_id: realm.id, tenant: tenant)
+
+      {:ok, tenant: tenant, cluster: cluster, realm: realm, device: device}
+    end
+
+    test "creates a device file linked to download request and sets path on device", %{
+      tenant: tenant,
+      realm: realm,
+      device: device
+    } do
+      file_download_request =
+        manual_file_download_request_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          status: :pending
+        )
+
+      event = %{
+        path: "/#{file_download_request.id}/pathOnDevice",
+        value: "/data/files/image.bin"
+      }
+
+      assert :ok =
+               FileStorage.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: realm.id,
+                 device_id: device.device_id
+               })
+
+      updated =
+        DeviceFile
+        |> Ash.Query.filter(file_id == ^file_download_request.id)
+        |> Ash.read_one!(tenant: tenant)
+
+      assert updated.path_on_device == "/data/files/image.bin"
+      assert updated.file_id == file_download_request.id
+      assert updated.file_download_request_id == file_download_request.id
+      assert updated.device_id == device.id
+    end
+
+    test "creates a device file and stores the reported size", %{
+      tenant: tenant,
+      realm: realm,
+      device: device
+    } do
+      file_id = Ash.UUIDv7.generate()
+
+      event = %{
+        path: "/#{file_id}/sizeBytes",
+        value: 2048
+      }
+
+      assert :ok =
+               FileStorage.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: realm.id,
+                 device_id: device.device_id
+               })
+
+      db_created =
+        DeviceFile
+        |> Ash.Query.filter(file_id == ^file_id)
+        |> Ash.read_one!(tenant: tenant)
+
+      assert db_created.device_id == device.id
+      assert db_created.size_bytes == 2048
+      assert is_nil(db_created.file_download_request_id)
+    end
+
+    test "ignores nil values (soft delete from Astarte) and does not unset", %{
+      tenant: tenant,
+      realm: realm,
+      device: device
+    } do
+      file_id = Ash.UUIDv7.generate()
+
+      event = %{
+        path: "/#{file_id}/sizeBytes",
+        value: nil
+      }
+
+      assert :ok =
+               FileStorage.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: realm.id,
+                 device_id: device.device_id
+               })
+
+      refute DeviceFile
+             |> Ash.Query.filter(file_id == ^file_id)
+             |> Ash.read_one!(tenant: tenant)
+    end
+
+    test "returns an error for unsupported paths", %{tenant: tenant} do
+      assert {:error, :invalid_event_path} =
+               FileStorage.handle_event(%{path: "/invalid", value: "ignored"}, [], %{
+                 tenant: tenant
+               })
     end
   end
 end

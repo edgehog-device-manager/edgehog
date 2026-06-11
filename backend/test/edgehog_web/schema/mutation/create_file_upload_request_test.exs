@@ -78,7 +78,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
       assert file_upload_request["device"]["deviceId"]
     end
 
-    test "creates storage file upload request with decoded source id", %{tenant: tenant} do
+    test "creates storage file upload request with device file id", %{tenant: tenant} do
       expect(StorageMock, :create_presigned_urls, fn path ->
         assert String.contains?(path, "uploads/tenants/#{tenant.tenant_id}/file_upload_requests/")
 
@@ -89,12 +89,11 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
          }}
       end)
 
-      file_download_request = manual_file_download_request_fixture(tenant: tenant)
-      encoded_source = AshGraphql.Resource.encode_relay_id(file_download_request)
+      device_file = device_file_fixture(tenant: tenant)
 
       expect(FileUploadRequestMock, :request_upload, fn _client, _device_id, request_data ->
         assert %RequestData{source: source, sourceType: :storage} = request_data
-        assert source == file_download_request.id
+        assert source == device_file.file_id
         :ok
       end)
 
@@ -103,7 +102,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
           tenant: tenant,
           input: %{
             "sourceType" => "STORAGE",
-            "source" => encoded_source,
+            "deviceFileId" => device_file.id,
             "encoding" => "gzip",
             "progressTracked" => true
           }
@@ -111,55 +110,36 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
 
       file_upload_request = extract_result!(result, "createFileUploadRequest")
 
-      assert file_upload_request["source"] == file_download_request.id
+      assert file_upload_request["source"] == device_file.file_id
       assert file_upload_request["sourceType"] == "STORAGE"
     end
 
-    test "creates streaming file upload request with empty source", %{tenant: tenant} do
-      expect(StorageMock, :create_presigned_urls, fn path ->
-        assert String.contains?(path, "uploads/tenants/#{tenant.tenant_id}/file_upload_requests/")
-
-        {:ok,
-         %{
-           put_url: "http://example.test/upload",
-           get_url: "http://example.test/download"
-         }}
-      end)
-
-      expect(FileUploadRequestMock, :request_upload, fn _client, _device_id, request_data ->
-        assert %RequestData{source: "", sourceType: :streaming} = request_data
-        :ok
-      end)
-
+    test "returns error for unsupported streaming source type", %{tenant: tenant} do
       result =
         create_file_upload_request_mutation(
           tenant: tenant,
           input: %{
             "sourceType" => "STREAMING",
-            "source" => "",
             "encoding" => "gzip",
             "progressTracked" => true
           }
         )
 
-      file_upload_request = extract_result!(result, "createFileUploadRequest")
-
-      assert file_upload_request["source"] == nil
-      assert file_upload_request["sourceType"] == "STREAMING"
+      error = extract_error!(result, "createFileUploadRequest")
+      assert error[:message] =~ "Invalid source_type. Must be either :storage or :filesystem."
     end
 
-    test "returns error for invalid storage source id", %{tenant: tenant} do
+    test "returns error when device file id is missing for storage", %{tenant: tenant} do
       result =
         create_file_upload_request_mutation(
           tenant: tenant,
           input: %{
-            "sourceType" => "STORAGE",
-            "source" => "not-a-relay-id"
+            "sourceType" => "STORAGE"
           }
         )
 
-      assert %{message: "invalid storage file id"} =
-               extract_error!(result, "createFileUploadRequest")
+      error = extract_error!(result, "createFileUploadRequest")
+      assert error[:message] =~ "is required when source_type is :storage"
     end
 
     test "returns error when device does not exist", %{tenant: tenant} do
@@ -228,7 +208,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateFileUploadRequestTest do
 
     default_input = %{
       "deviceId" => device_id,
-      "source" => "/var/log/messages",
+      "fileSystemPath" => "/var/log/messages",
       "sourceType" => "FILESYSTEM",
       "encoding" => "gzip",
       "progressTracked" => true,

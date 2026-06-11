@@ -34,14 +34,12 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.FileDeleteResponse do
     response_messages = event.value["messages"]
 
     file_delete_request =
-      Files.fetch_file_delete_request!(request_id, tenant: tenant, load: :file_download_request)
+      Files.fetch_file_delete_request!(request_id, tenant: tenant, load: :device_file)
 
     status =
       case response_code do
         0 ->
-          Files.set_file_download_deleted_attribute(file_delete_request.file_download_request,
-            tenant: tenant
-          )
+          Files.mark_device_file_as_deleted(file_delete_request.device_file, tenant: tenant)
 
           :completed
 

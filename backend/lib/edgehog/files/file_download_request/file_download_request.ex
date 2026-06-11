@@ -186,18 +186,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
       run ManualActions.SendFileDownloadRequest
     end
 
-    update :set_path_on_device do
-      argument :path_on_device, :string, allow_nil?: false
-
-      change set_attribute(:path_on_device, arg(:path_on_device))
-    end
-
-    update :set_size_bytes do
-      argument :decompressed_file_size_bytes, :integer, allow_nil?: false
-
-      change set_attribute(:uncompressed_file_size_bytes, arg(:decompressed_file_size_bytes))
-    end
-
     update :set_response do
       accept [:status, :progress_percentage, :response_code, :response_message]
 
@@ -216,10 +204,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
 
     update :set_status do
       accept [:status]
-    end
-
-    update :set_deleted do
-      change set_attribute(:deleted, true)
     end
   end
 
@@ -297,11 +281,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
       public? true
     end
 
-    attribute :path_on_device, :string do
-      description "Set by the device, represents the path where the file was stored when destination_type is :storage"
-      public? true
-    end
-
     attribute :progress_tracked, :boolean do
       description "Flag to enable the progress reporting of the download."
       public? true
@@ -338,13 +317,6 @@ defmodule Edgehog.Files.FileDownloadRequest do
       source :is_manual
     end
 
-    attribute :deleted, :boolean do
-      description "Whether the file transferred with this request was deleted from the device"
-      public? true
-
-      default false
-    end
-
     timestamps do
       public? true
     end
@@ -361,6 +333,14 @@ defmodule Edgehog.Files.FileDownloadRequest do
     has_one :campaign_target, Edgehog.Campaigns.CampaignTarget do
       description """
       The campaign target that created the file download request, if any.
+      """
+
+      public? true
+    end
+
+    has_one :device_file, Edgehog.Files.DeviceFile do
+      description """
+      The device file associated with the file download request, if any.
       """
 
       public? true

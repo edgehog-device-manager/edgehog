@@ -5342,6 +5342,9 @@ input DeviceFilterInput {
   "The existing file delete requests for this device"
   fileDeleteRequests: FileDeleteRequestFilterInput
 
+  "The existing files stored on the device."
+  deviceFiles: DeviceFileFilterInput
+
   applicationDeployments: DeploymentFilterInput
 }
 
@@ -5506,6 +5509,27 @@ type Device implements Node {
     last: Int
   ): FileDeleteRequestConnection!
 
+  "The existing files stored on the device."
+  deviceFiles(
+    "How to sort the records in the response"
+    sort: [DeviceFileSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceFileFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceFileConnection!
+
   applicationDeployments(
     "How to sort the records in the response"
     sort: [DeploymentSortInput]
@@ -5582,6 +5606,176 @@ type Device implements Node {
   wifiScanResults: [WifiScanResult!]
 }
 
+type device_files_by_device_result {
+  created: DeviceFile
+  updated: DeviceFile
+  destroyed: ID
+}
+
+type device_files_result {
+  created: DeviceFile
+  updated: DeviceFile
+}
+
+enum DeviceFileSortField {
+  ID
+  FILE_ID
+  PATH_ON_DEVICE
+  SIZE_BYTES
+  DELETED
+}
+
+":device_file connection"
+type DeviceFileConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_file edges"
+  edges: [DeviceFileEdge!]
+}
+
+":device_file edge"
+type DeviceFileEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_file node"
+  node: DeviceFile!
+}
+
+input DeviceFileFilterDeleted {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input DeviceFileFilterSizeBytes {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input DeviceFileFilterPathOnDevice {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input DeviceFileFilterFileId {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input DeviceFileFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input DeviceFileFilterInput {
+  and: [DeviceFileFilterInput!]
+
+  or: [DeviceFileFilterInput!]
+
+  not: [DeviceFileFilterInput!]
+
+  id: DeviceFileFilterId
+
+  "The identifier of the file stored on the device."
+  fileId: DeviceFileFilterFileId
+
+  "The path where the device stored the file."
+  pathOnDevice: DeviceFileFilterPathOnDevice
+
+  "The size of the file stored on the device, in bytes."
+  sizeBytes: DeviceFileFilterSizeBytes
+
+  "Whether the file transferred with this request was deleted from the device"
+  deleted: DeviceFileFilterDeleted
+
+  "The device the file belongs to."
+  device: DeviceFilterInput
+
+  "The file download request associated with the file, if any."
+  fileDownloadRequest: FileDownloadRequestFilterInput
+}
+
+input DeviceFileSortInput {
+  order: SortOrder
+  field: DeviceFileSortField!
+}
+
+type DeviceFile {
+  id: ID!
+
+  "The identifier of the file stored on the device."
+  fileId: String!
+
+  "The path where the device stored the file."
+  pathOnDevice: String
+
+  "The size of the file stored on the device, in bytes."
+  sizeBytes: Int
+
+  "Whether the file transferred with this request was deleted from the device"
+  deleted: Boolean
+
+  "The device the file belongs to."
+  device: Device!
+
+  "The file download request associated with the file, if any."
+  fileDownloadRequest: FileDownloadRequest
+}
+
 type file_delete_requests_by_device_result {
   created: FileDeleteRequest
   updated: FileDeleteRequest
@@ -5607,7 +5801,7 @@ input CreateFileDeleteRequestInput {
 
   deviceId: ID!
 
-  fileDownloadRequestId: ID!
+  deviceFileId: ID!
 }
 
 enum FileDeleteRequestSortField {
@@ -5742,8 +5936,8 @@ input FileDeleteRequestFilterInput {
   "The device associated with this file delete request."
   device: DeviceFilterInput
 
-  "The file download request that resulted in the file targeted by this delete request"
-  fileDownloadRequest: FileDownloadRequestFilterInput
+  "The device file associated with this file delete request."
+  deviceFile: DeviceFileFilterInput
 }
 
 input FileDeleteRequestSortInput {
@@ -5772,8 +5966,8 @@ type FileDeleteRequest {
   "The device associated with this file delete request."
   device: Device!
 
-  "The file download request that resulted in the file targeted by this delete request"
-  fileDownloadRequest: FileDownloadRequest!
+  "The device file associated with this file delete request."
+  deviceFile: DeviceFile
 }
 
 type file_upload_requests_by_device_result {
@@ -5796,9 +5990,6 @@ type CreateFileUploadRequestResult {
 }
 
 input CreateFileUploadRequestInput {
-  "The value depends on the selected source_type: for 'storage' is the ID of an 'io.edgehog.devicemanager.storage.File' property, for 'streaming' it's an empty string, and for 'filesystem' is a path of a file on the device."
-  source: String
-
   "Source from which the file should be read from, with allowed values: [storage, streaming, filesystem]."
   sourceType: FileSource!
 
@@ -5812,6 +6003,10 @@ input CreateFileUploadRequestInput {
   httpHeaders: JsonString
 
   deviceId: ID!
+
+  fileSystemPath: String
+
+  deviceFileId: ID
 }
 
 enum FileUploadRequestSortField {
@@ -6242,13 +6437,11 @@ enum FileDownloadRequestSortField {
   GROUP_ID
   DESTINATION_TYPE
   DESTINATION
-  PATH_ON_DEVICE
   PROGRESS_TRACKED
   STATUS
   PROGRESS_PERCENTAGE
   RESPONSE_CODE
   RESPONSE_MESSAGE
-  DELETED
   INSERTED_AT
   UPDATED_AT
 }
@@ -6298,19 +6491,6 @@ input FileDownloadRequestFilterInsertedAt {
   greaterThanOrEqual: DateTime
   isDistinctFrom: DateTime
   isNotDistinctFrom: DateTime
-}
-
-input FileDownloadRequestFilterDeleted {
-  isNil: Boolean
-  eq: Boolean
-  notEq: Boolean
-  in: [Boolean]
-  lessThan: Boolean
-  greaterThan: Boolean
-  lessThanOrEqual: Boolean
-  greaterThanOrEqual: Boolean
-  isDistinctFrom: Boolean
-  isNotDistinctFrom: Boolean
 }
 
 input FileDownloadRequestFilterResponseMessage {
@@ -6381,24 +6561,6 @@ input FileDownloadRequestFilterProgressTracked {
   greaterThanOrEqual: Boolean
   isDistinctFrom: Boolean
   isNotDistinctFrom: Boolean
-}
-
-input FileDownloadRequestFilterPathOnDevice {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  contains: String
-  isDistinctFrom: String
-  isNotDistinctFrom: String
-  stringEndsWith: String
-  stringStartsWith: String
-  like: String
-  ilike: String
 }
 
 input FileDownloadRequestFilterDestination {
@@ -6624,9 +6786,6 @@ input FileDownloadRequestFilterInput {
   "Destination-specific information on where to write the file to, when the destination_type is :filesystem"
   destination: FileDownloadRequestFilterDestination
 
-  "Set by the device, represents the path where the file was stored when destination_type is :storage"
-  pathOnDevice: FileDownloadRequestFilterPathOnDevice
-
   "Flag to enable the progress reporting of the download."
   progressTracked: FileDownloadRequestFilterProgressTracked
 
@@ -6642,9 +6801,6 @@ input FileDownloadRequestFilterInput {
   "Optional message for the response sent by the device."
   responseMessage: FileDownloadRequestFilterResponseMessage
 
-  "Whether the file transferred with this request was deleted from the device"
-  deleted: FileDownloadRequestFilterDeleted
-
   insertedAt: FileDownloadRequestFilterInsertedAt
 
   updatedAt: FileDownloadRequestFilterUpdatedAt
@@ -6654,6 +6810,9 @@ input FileDownloadRequestFilterInput {
 
   "The campaign target that created the file download request, if any."
   campaignTarget: CampaignTargetFilterInput
+
+  "The device file associated with the file download request, if any."
+  deviceFile: DeviceFileFilterInput
 }
 
 input FileDownloadRequestSortInput {
@@ -6702,9 +6861,6 @@ type FileDownloadRequest {
   "Destination-specific information on where to write the file to, when the destination_type is :filesystem"
   destination: String
 
-  "Set by the device, represents the path where the file was stored when destination_type is :storage"
-  pathOnDevice: String
-
   "Flag to enable the progress reporting of the download."
   progressTracked: Boolean
 
@@ -6720,9 +6876,6 @@ type FileDownloadRequest {
   "Optional message for the response sent by the device."
   responseMessage: String
 
-  "Whether the file transferred with this request was deleted from the device"
-  deleted: Boolean
-
   insertedAt: DateTime!
 
   updatedAt: DateTime!
@@ -6732,6 +6885,9 @@ type FileDownloadRequest {
 
   "The campaign target that created the file download request, if any."
   campaignTarget: CampaignTarget
+
+  "The device file associated with the file download request, if any."
+  deviceFile: DeviceFile
 }
 
 "The result of the :delete_repository mutation"
@@ -9285,6 +9441,16 @@ type RootSubscriptionType {
 
     deviceId: ID!
   ): file_delete_requests_by_device_result
+  deviceFiles(
+    "A filter to limit the results"
+    filter: DeviceFileFilterInput
+  ): device_files_result
+  deviceFilesByDevice(
+    "A filter to limit the results"
+    filter: DeviceFileFilterInput
+
+    deviceId: ID!
+  ): device_files_by_device_result
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput

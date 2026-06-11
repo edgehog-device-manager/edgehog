@@ -41,13 +41,13 @@ defmodule Edgehog.Files.FileDeleteRequest.ManualActions.SendFileDeleteRequest do
     file_delete_request =
       Ash.load!(
         input.arguments.file_delete_request,
-        [device: [:device_id, :appengine_client]],
+        [:device_file, device: [:device_id, :appengine_client]],
         reuse_values?: true
       )
 
     %{
       id: file_delete_request_id,
-      file_download_request_id: file_id,
+      device_file: %{file_id: file_id},
       force: force,
       device: %{
         device_id: device_id,

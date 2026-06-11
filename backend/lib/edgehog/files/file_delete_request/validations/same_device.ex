@@ -22,37 +22,26 @@ defmodule Edgehog.Files.FileDeleteRequest.Validations.SameDevice do
   use Ash.Resource.Validation
 
   alias Ash.Error.Changes.InvalidArgument
-  alias Edgehog.Files.FileDownloadRequest
+  alias Edgehog.Files.DeviceFile
 
   @impl Ash.Resource.Validation
   def validate(changeset, _opts, %{tenant: tenant} = _context) do
     device_id = Ash.Changeset.get_argument(changeset, :device_id)
-    file_download_request_id = Ash.Changeset.get_argument(changeset, :file_download_request_id)
+    device_file_id = Ash.Changeset.get_argument(changeset, :device_file_id)
 
-    with {:ok, file_download_request} <-
-           Ash.get(FileDownloadRequest, file_download_request_id, tenant: tenant) do
-      validate_request(file_download_request, device_id)
+    with {:ok, device_file} <-
+           Ash.get(DeviceFile, device_file_id, tenant: tenant) do
+      validate_request(device_file, device_id)
     end
   end
 
-  # Destination is storage AND device_id matches
-  defp validate_request(%{destination_type: :storage, device_id: device_id}, device_id), do: :ok
+  defp validate_request(%{device_id: device_id}, device_id), do: :ok
 
-  # Destination is storage, but the device_id does not match
-  defp validate_request(%{destination_type: :storage}, _device_id) do
+  defp validate_request(_device_file, _device_id) do
     {:error,
      InvalidArgument.exception(
-       field: :file_download_request_id,
-       message: "does not belong to device"
-     )}
-  end
-
-  # Destination type is not storage
-  defp validate_request(_file_download_request, _device_id) do
-    {:error,
-     InvalidArgument.exception(
-       field: :file_download_request_id,
-       message: "must be storage"
+       field: :device_file_id,
+       message: "the file does not belong to the specified device"
      )}
   end
 

@@ -66,7 +66,8 @@ defmodule Edgehog.Devices.Device do
                                tags: :relay,
                                file_download_requests: :relay,
                                file_upload_requests: :relay,
-                               file_delete_requests: :relay
+                               file_delete_requests: :relay,
+                               device_files: :relay
 
     subscriptions do
       pubsub EdgehogWeb.Endpoint
@@ -521,6 +522,12 @@ defmodule Edgehog.Devices.Device do
     has_many :file_delete_requests, Edgehog.Files.FileDeleteRequest do
       public? true
       description "The existing file delete requests for this device"
+      writable? false
+    end
+
+    has_many :device_files, Edgehog.Files.DeviceFile do
+      public? true
+      description "The existing files stored on the device."
       writable? false
     end
 

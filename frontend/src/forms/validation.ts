@@ -605,7 +605,7 @@ const fileDownloadRequestFormSchema = z
   }));
 
 const fileDeleteRequestFormSchema = z.object({
-  fileDownloadRequestId: z.string().min(1, {
+  deviceFileId: z.string().min(1, {
     message: messages.required.id,
   }),
   force: z.boolean(),
