@@ -67,6 +67,12 @@ defmodule Edgehog.Tenants.Tenant do
     type :tenant
     id(:slug)
     ownership?(false)
+
+    capabilities do
+      view(false)
+      edit(false)
+      delete false
+    end
   end
 
   actions do

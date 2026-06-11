@@ -129,7 +129,12 @@ defmodule Ash.FGA do
 
   # credo:disable-for-next-line
   use Spark.Dsl.Extension,
-    transformers: [Transformers.Alias, Transformers.UserOwner, Transformers.WriteRels],
+    transformers: [
+      Transformers.Alias,
+      Transformers.UserOwner,
+      Transformers.WriteRels,
+      Transformers.Policies
+    ],
     sections: [@fga]
 end
 

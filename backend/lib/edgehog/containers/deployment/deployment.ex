@@ -22,7 +22,8 @@ defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource],
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshGraphql.Resource, Ash.FGA],
     notifiers: [Ash.Notifier.PubSub]
 
   alias Edgehog.Containers.Deployment.Calculations
@@ -36,6 +37,16 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.Validations.SameApplication
 
   @testing Mix.env() == :test
+
+  fga do
+    type :deployment
+
+    capabilities do
+      edit(false)
+
+      operations([{:start_stop, [:start, :stop]}, {:upgrade, :upgrade_release}])
+    end
+  end
 
   graphql do
     type :deployment

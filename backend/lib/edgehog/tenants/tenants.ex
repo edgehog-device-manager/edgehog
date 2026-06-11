@@ -47,4 +47,8 @@ defmodule Edgehog.Tenants do
       define :destroy_tenant, action: :destroy
     end
   end
+
+  authorization do
+    authorize :when_requested
+  end
 end

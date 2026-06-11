@@ -20,8 +20,10 @@ defmodule Edgehog.BaseImages.BaseImage do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.BaseImages,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
-      AshGraphql.Resource
+      AshGraphql.Resource,
+      Ash.FGA
     ]
 
   alias Edgehog.BaseImages.BaseImage.Changes

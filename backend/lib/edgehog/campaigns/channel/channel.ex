@@ -23,10 +23,9 @@ defmodule Edgehog.Campaigns.Channel do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Campaigns,
     extensions: [
-      AshGraphql.Resource
-    ],
-    fga_type: :channel,
-    fga_id_attribute: :handle
+      AshGraphql.Resource,
+      Ash.FGA
+    ]
 
   alias Edgehog.Campaigns.Channel.Calculations
   alias Edgehog.Campaigns.Channel.Changes
@@ -40,6 +39,11 @@ defmodule Edgehog.Campaigns.Channel do
     An Channel represents a set of device groups that can be targeted in \
     an Campaign.
     """
+  end
+
+  fga do
+    type :channel
+    id(:handle)
   end
 
   graphql do
