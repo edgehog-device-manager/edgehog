@@ -57,6 +57,51 @@ defmodule Ash.FGA do
     ]
   }
 
+  @capabilities %Spark.Dsl.Entity{
+    name: :capabilities,
+    target: Ash.FGA.CapabilitiesTarget,
+    # args: [],
+    # imports: [Ash.Policy.Check.Builtins, Ash.Expr],
+    schema: [
+      view: [
+        type: :boolean,
+        required: false,
+        default: true,
+        doc: "Should be true if the resource has a `can_view` relationship defined in the model"
+      ],
+      edit: [
+        type: :boolean,
+        required: false,
+        default: true,
+        doc: "Should be true if the resource has a `can_edit` relationship defined in the model"
+      ],
+      delete: [
+        type: :boolean,
+        required: false,
+        default: true,
+        doc: "Should be true if the resource has a `can_delete` relationship defined in the model"
+      ],
+      operations: [
+        type:
+          {:list,
+           {:or,
+            [
+              :atom,
+              {:tuple,
+               [
+                 :atom,
+                 {:or, [:atom, {:list, :atom}]}
+               ]}
+            ]}},
+        required: false,
+        default: [],
+        doc:
+          "A list of the extra operations that have a corresponding relationship defined in the model.
+        For example, editing a device's tags, defined in the capability `can_edit_tags`, is represented with the atom `:edit_tags`"
+      ]
+    ]
+  }
+
   @fga %Spark.Dsl.Section{
     name: :fga,
     describe: """
@@ -79,7 +124,7 @@ defmodule Ash.FGA do
         default: true
       ]
     ],
-    entities: [@exclude]
+    entities: [@exclude, @capabilities]
   }
 
   # credo:disable-for-next-line
@@ -107,11 +152,49 @@ defmodule Ash.FGA.Info do
   end
 
   def exclude(dsl_state) do
-    Extension.get_entities(dsl_state, [:fga])
+    dsl_state
+    |> Extension.get_entities([:fga])
+    |> Enum.filter(&(&1.__struct__ == Ash.FGA.ExcludeTarget))
   end
 
   def ownership?(dsl_state) do
     Extension.get_opt(dsl_state, [:fga], :ownership?, true)
+  end
+
+  def capabilities(dsl_state) do
+    dsl_state =
+      dsl_state
+      |> Extension.get_entities([:fga])
+      |> Enum.filter(&(&1.__struct__ == Ash.FGA.CapabilitiesTarget))
+
+    case dsl_state do
+      [] -> %{}
+      [capabilities] -> capabilities
+    end
+  end
+
+  def can_view?(dsl_state) do
+    dsl_state
+    |> capabilities()
+    |> Map.get(:view, true)
+  end
+
+  def can_edit?(dsl_state) do
+    dsl_state
+    |> capabilities()
+    |> Map.get(:edit, true)
+  end
+
+  def can_delete?(dsl_state) do
+    dsl_state
+    |> capabilities()
+    |> Map.get(:delete, true)
+  end
+
+  def operations(dsl_state) do
+    dsl_state
+    |> capabilities()
+    |> Map.get(:operations, [])
   end
 end
 
@@ -123,7 +206,22 @@ defmodule Ash.FGA.ExcludeTarget do
   defstruct [:relationships, :__spark_metadata__]
 
   @type t :: %__MODULE__{
-          relationships: list(),
+          relationships: list(atom()),
+          __spark_metadata__: Spark.Dsl.Entity.spark_meta()
+        }
+end
+
+defmodule Ash.FGA.CapabilitiesTarget do
+  @moduledoc """
+  Utility module, represents the capabilities supported by the model
+  """
+  defstruct [:view, :edit, :delete, :operations, :__spark_metadata__]
+
+  @type t :: %__MODULE__{
+          view: boolean(),
+          edit: boolean(),
+          delete: boolean(),
+          operations: list(atom() | tuple()),
           __spark_metadata__: Spark.Dsl.Entity.spark_meta()
         }
 end
