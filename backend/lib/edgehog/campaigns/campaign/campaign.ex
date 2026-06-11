@@ -22,9 +22,21 @@ defmodule Edgehog.Campaigns.Campaign do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Campaigns,
-    extensions: [AshGraphql.Resource],
-    notifiers: [Ash.Notifier.PubSub],
-    fga_type: :campaign
+    authorizers: [Ash.Policy.Authorizer],
+    extensions: [AshGraphql.Resource, Ash.FGA],
+    notifiers: [Ash.Notifier.PubSub]
+
+  fga do
+    type :campaign
+    ownership?(false)
+    exclude([:channel])
+
+    capabilities do
+      view(false)
+      edit(false)
+      delete false
+    end
+  end
 
   alias Edgehog.Campaigns.Campaign.Changes
   alias Edgehog.Campaigns.Campaign.Validations

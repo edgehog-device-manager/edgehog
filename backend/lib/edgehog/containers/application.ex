@@ -22,6 +22,7 @@ defmodule Edgehog.Containers.Application do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
       AshGraphql.Resource,
       Ash.FGA
@@ -29,6 +30,8 @@ defmodule Edgehog.Containers.Application do
 
   fga do
     type :application
+
+    capabilities(operations: [:add_release])
   end
 
   graphql do

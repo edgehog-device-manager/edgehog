@@ -20,6 +20,7 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.BaseImages,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
       AshGraphql.Resource,
       Ash.FGA
@@ -39,6 +40,8 @@ defmodule Edgehog.BaseImages.BaseImageCollection do
   fga do
     type :base_image_collection
     id(:handle)
+
+    capabilities(operations: [:view_images, :add_images, :remove_images, :edit_images])
   end
 
   graphql do

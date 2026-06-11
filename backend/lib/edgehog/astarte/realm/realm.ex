@@ -20,6 +20,7 @@ defmodule Edgehog.Astarte.Realm do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Astarte,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [Ash.FGA],
     fga_type: :realm,
     fga_id_attribute: :name
@@ -32,6 +33,12 @@ defmodule Edgehog.Astarte.Realm do
     id(:name)
     exclude([:cluster])
     ownership?(false)
+
+    capabilities do
+      view(false)
+      edit(false)
+      delete false
+    end
   end
 
   actions do

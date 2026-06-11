@@ -22,6 +22,7 @@ defmodule Edgehog.Containers.Container do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
       AshGraphql.Resource,
       Ash.FGA

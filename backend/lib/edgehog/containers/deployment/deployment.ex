@@ -22,6 +22,7 @@ defmodule Edgehog.Containers.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshGraphql.Resource, Ash.FGA],
     notifiers: [Ash.Notifier.PubSub]
 
@@ -39,6 +40,12 @@ defmodule Edgehog.Containers.Deployment do
 
   fga do
     type :deployment
+
+    capabilities do
+      edit(false)
+
+      operations([:start_stop, :upgrade])
+    end
   end
 
   graphql do
