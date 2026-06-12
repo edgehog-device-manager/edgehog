@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { CellularConnectionTab_cellularConnection$key } from "@/api/__generated__/CellularConnectionTab_cellularConnection.graphql";
 
@@ -47,15 +48,16 @@ const DeviceCellularConnectionTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-cellular-connection-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.CellularConnectionTab.title",
         defaultMessage: "Cellular Connection",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <CellularConnectionTabs deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

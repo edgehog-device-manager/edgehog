@@ -18,14 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.sort-direction-indicator {
-  font-size: 0.75rem;
-}
-
-.table-header {
-  cursor: default;
-
-  &.is-sortable {
-    cursor: pointer;
-  }
+span.badge.tag {
+  background-color: var(--cp-color-accent, #2563eb) !important;
+  color: #ffffff !important;
 }

@@ -30,6 +30,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { FileDownloadCampaigns_FileDownloadCampaignsFragment$key } from "@/api/__generated__/FileDownloadCampaigns_FileDownloadCampaignsFragment.graphql";
 import type { FileDownloadCampaigns_getCampaigns_Query } from "@/api/__generated__/FileDownloadCampaigns_getCampaigns_Query.graphql";
@@ -319,16 +320,18 @@ const FileDownloadCampaignsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
 
-        <FileDownloadCampaignsLayoutContainer
-          campaignsData={campaignsData}
-          searchText={searchText}
-        />
+          <FileDownloadCampaignsLayoutContainer
+            campaignsData={campaignsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

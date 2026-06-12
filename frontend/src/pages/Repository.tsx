@@ -31,6 +31,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { Card } from "react-bootstrap";
 
 import { Files_PaginationQuery } from "@/api/__generated__/Files_PaginationQuery.graphql";
 import { Repository_FilesFragment$key } from "@/api/__generated__/Repository_FilesFragment.graphql";
@@ -286,43 +287,46 @@ const RepositoryContent = ({ repository }: RepositoryContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <div className="mb-3">
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
           <UpdateRepositoryForm
             repositoryRef={repository}
             onSubmit={handleUpdateRepository}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingRepository}
           />
-        </div>
-        <hr className="bg-secondary border-2 border-top border-secondary" />
-        <div className="d-flex justify-content-between align-items-end">
-          <h3 className="m-0">
-            <FormattedMessage
-              id="pages.Repository.filesLabel"
-              defaultMessage="Files"
-            />
-          </h3>
-          <Button
-            variant="secondary"
-            as={Link}
-            route={Route.filesNew}
-            params={{ repositoryId }}
-          >
-            <FormattedMessage
-              id="pages.Repository.createFileButton"
-              defaultMessage="Create File"
-            />
-          </Button>
-        </div>
-        <SearchBox
-          className="flex-grow-1 pt-2 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <FilesLayoutContainer
-          repositoryRef={repository}
-          searchText={searchText}
-        />
+        </Card>
+
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 pt-2">
+          <div className="d-flex justify-content-between align-items-end">
+            <h3 className="m-0">
+              <FormattedMessage
+                id="pages.Repository.filesLabel"
+                defaultMessage="Files"
+              />
+            </h3>
+            <Button
+              variant="secondary"
+              as={Link}
+              route={Route.filesNew}
+              params={{ repositoryId }}
+            >
+              <FormattedMessage
+                id="pages.Repository.createFileButton"
+                defaultMessage="Create File"
+              />
+            </Button>
+          </div>
+          <SearchBox
+            className="pt-2 pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <FilesLayoutContainer
+            repositoryRef={repository}
+            searchText={searchText}
+          />
+        </Card>
+
         {showDeleteModal && (
           <DeleteModal
             confirmText={repository.handle}

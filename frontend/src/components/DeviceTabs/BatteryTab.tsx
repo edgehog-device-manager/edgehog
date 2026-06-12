@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { BatteryTab_batteryStatus$key } from "@/api/__generated__/BatteryTab_batteryStatus.graphql";
 
@@ -44,15 +45,16 @@ const DeviceBatteryTab = ({ deviceRef }: DeviceBatteryTabProps) => {
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-battery-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.BatteryTab.title",
         defaultMessage: "Battery",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <BatteryTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

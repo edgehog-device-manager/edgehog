@@ -23,11 +23,17 @@
 );
 
 :root {
+  font-size: 0.9rem;
   --cp-color-accent: #056cee;
   --campaign-target-status_color_idle: var(--bs-gray);
   --campaign-target-status_color_in-progress: var(--bs-warning);
   --campaign-target-status_color_successful: var(--bs-success);
   --campaign-target-status_color_failed: var(--bs-danger);
+}
+
+.form-label {
+  font-weight: bold;
+  color: var(--bs-gray-700);
 }
 
 .custom-scrollbar {

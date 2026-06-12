@@ -18,14 +18,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.sort-direction-indicator {
-  font-size: 0.75rem;
-}
-
-.table-header {
-  cursor: default;
-
-  &.is-sortable {
-    cursor: pointer;
-  }
+.form-row-group {
+  margin-bottom: 0.5rem;
 }

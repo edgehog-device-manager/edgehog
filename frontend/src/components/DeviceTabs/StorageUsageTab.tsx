@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { StorageUsageTab_storageUsage$key } from "@/api/__generated__/StorageUsageTab_storageUsage.graphql";
 
@@ -43,15 +44,16 @@ const DeviceStorageUsageTab = ({ deviceRef }: DeviceStorageUsageTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-storage-usage-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.StorageUsageTab.title",
         defaultMessage: "Storage",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <StorageTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

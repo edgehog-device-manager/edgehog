@@ -28,6 +28,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import { Devices_DevicesFragment$key } from "@/api/__generated__/Devices_DevicesFragment.graphql";
 import type { Devices_getDevices_Query } from "@/api/__generated__/Devices_getDevices_Query.graphql";
@@ -261,15 +262,17 @@ const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
         }
       />
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <DevicesLayoutContainer
-          devicesData={devicesData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <DevicesLayoutContainer
+            devicesData={devicesData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

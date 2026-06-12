@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { LocationTab_location$key } from "@/api/__generated__/LocationTab_location.graphql";
 
@@ -53,13 +54,14 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-location-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.LocationTab.title",
         defaultMessage: "Geolocation",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <p>
           <FormattedMessage
             id="components.DeviceTabs.LocationTab.lastUpdateAt"
@@ -90,7 +92,7 @@ const DeviceLocationTab = ({ deviceRef }: DeviceLocationTabProps) => {
             </div>
           }
         />
-      </div>
+      </Card>
     </Tab>
   );
 };

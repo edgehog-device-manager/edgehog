@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import Page from "@/components/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateNetworkForm from "@/forms/CreateNetwork";
 import { NetworkFormData } from "@/forms/validation";
+import { Card } from "react-bootstrap";
 
 const CREATE_NETWORK_MUTATION = graphql`
   mutation NetworkCreate_networkCreate_Mutation($input: CreateNetworkInput!) {
@@ -134,10 +135,12 @@ const NetworkCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <CreateNetworkForm
-          onSubmit={handleCreateNetwork}
-          isLoading={isCreatingNetwork}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <CreateNetworkForm
+            onSubmit={handleCreateNetwork}
+            isLoading={isCreatingNetwork}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

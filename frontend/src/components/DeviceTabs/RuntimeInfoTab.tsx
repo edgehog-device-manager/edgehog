@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { RuntimeInfoTab_runtimeInfo$key } from "@/api/__generated__/RuntimeInfoTab_runtimeInfo.graphql";
 
@@ -57,13 +58,14 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-runtime-info-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.RuntimeInfoTab.title",
         defaultMessage: "Runtime",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <Stack gap={3}>
           {runtimeInfo.name !== null && (
             <FormRow
@@ -122,7 +124,7 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };

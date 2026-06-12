@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { Volumes_getVolumes_Query } from "@/api/__generated__/Volumes_getVolumes_Query.graphql";
 import { Volumes_PaginationQuery } from "@/api/__generated__/Volumes_PaginationQuery.graphql";
@@ -139,15 +140,17 @@ const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <VolumesLayoutContainer
-          volumesData={volumesData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <VolumesLayoutContainer
+            volumesData={volumesData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );
