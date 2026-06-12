@@ -9,6 +9,62 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.13.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.0...v0.13.0) (2026-06-12)
+
+
+### ⚠ BREAKING CHANGES
+
+* direct container creation
+
+### Features
+
+* Add download functionality to uploaded files ([749490a](https://github.com/edgehog-device-manager/edgehog/commit/749490a7cf47c90e3ac23caa6e6edf9efe5d2332))
+* Add file create functionality to repositories ([ef49219](https://github.com/edgehog-device-manager/edgehog/commit/ef492190cf3041e0eea3e27fe59e35a1717f43a6))
+* Add file delete UI and refine upload naming ([#1406](https://github.com/edgehog-device-manager/edgehog/issues/1406)) ([ffc914a](https://github.com/edgehog-device-manager/edgehog/commit/ffc914a123cf87edefc6d21aa2473c5bc506d3a2))
+* Add file download request subscription ([#1313](https://github.com/edgehog-device-manager/edgehog/issues/1313)) ([d097005](https://github.com/edgehog-device-manager/edgehog/commit/d097005bab9dcffe927c90d5cf6ccbd971171efd))
+* add file download request using file from repository ([7ef5086](https://github.com/edgehog-device-manager/edgehog/commit/7ef508637c798847cc1351ab1826de188cafde64))
+* Add file upload UX with advanced options ([45619de](https://github.com/edgehog-device-manager/edgehog/commit/45619de33175062ae52d0a930293f774c5897e5d))
+* Add Files Upload tab with manual file download request ([#1270](https://github.com/edgehog-device-manager/edgehog/issues/1270)) ([23f8951](https://github.com/edgehog-device-manager/edgehog/commit/23f895108d890b2f04fdd1db0f76e0724dacfe73))
+* Add option to hide navigation elements ([#1251](https://github.com/edgehog-device-manager/edgehog/issues/1251)) ([1e728ad](https://github.com/edgehog-device-manager/edgehog/commit/1e728adb15c502c4090163b576481bdab6b51788))
+* add support for container dependencies ([#1463](https://github.com/edgehog-device-manager/edgehog/issues/1463)) ([94553ee](https://github.com/edgehog-device-manager/edgehog/commit/94553ee63abe2f5e9eef60df4f59791a3ba0304c))
+* add unified file management with upload and download requests ([7e59bd7](https://github.com/edgehog-device-manager/edgehog/commit/7e59bd7ace150de3fced21491bf0763f5f8367e2))
+* Add unique file name constraint and custom file naming support ([2f2a8c9](https://github.com/edgehog-device-manager/edgehog/commit/2f2a8c981f9e1ae33267f4c35fcb434ecb1aceca))
+* direct container creation ([0a3b465](https://github.com/edgehog-device-manager/edgehog/commit/0a3b46597996c6871fc6ce828e11f90b4a8b4397))
+* expose associated FileDownloadCampaign from FileDownloadRequests ([ec8a843](https://github.com/edgehog-device-manager/edgehog/commit/ec8a843a0c56b110cddd30e4ed3b98f202e87f62))
+* Extend file management with delete option ([2272ab6](https://github.com/edgehog-device-manager/edgehog/commit/2272ab60f6835b81b0bae6e9cab86f998ef230f8))
+* **frontend:** add file download campaigns management ([7c1b12c](https://github.com/edgehog-device-manager/edgehog/commit/7c1b12c7b46d6849e25882aff39a20865f8580f3))
+* **frontend:** Add realtime subscriptions for deployment pages ([f4e8fde](https://github.com/edgehog-device-manager/edgehog/commit/f4e8fde5f566bf90fcee0ab6e4ab3f0a5f27c0d3))
+* **frontend:** Add repository management interface ([d868c7e](https://github.com/edgehog-device-manager/edgehog/commit/d868c7e1c01bb762593034ba0e1efc6958b048bf))
+* **frontend:** Enable scheduling for campaigns ([c1b6860](https://github.com/edgehog-device-manager/edgehog/commit/c1b68605335919ccbd806f62da30cace3082c3a2))
+* Implement flow for device files ([45248ce](https://github.com/edgehog-device-manager/edgehog/commit/45248ce85199fe28bfd50dbe8369005311deecea))
+* improve feedback during manual OTA operation ([7e4de5e](https://github.com/edgehog-device-manager/edgehog/commit/7e4de5e4a4cb27dc26eefd91422a9d77a73b018e))
+* Show pathOnDevice in destination of fileUploadRequest ([ea0b732](https://github.com/edgehog-device-manager/edgehog/commit/ea0b73287e4feea07414c3a7a3aa1c40ec8160eb))
+
+
+### Bug Fixes
+
+* Archived file size calculation ([962f785](https://github.com/edgehog-device-manager/edgehog/commit/962f785fd8202ebea8a09aa86b5d5f8f4621df96))
+* correct presigned URL filename encoding ([3dda9f4](https://github.com/edgehog-device-manager/edgehog/commit/3dda9f4d6d0a5d8c29011b6ba7020c554256115a))
+* Defer WebSocket creation to avoid close-before-connect warning ([6f69ea8](https://github.com/edgehog-device-manager/edgehog/commit/6f69ea8f4e528700695ef109a94fe2c78fbc53aa))
+* Exclude deleted files from both File Management dropdowns ([992e325](https://github.com/edgehog-device-manager/edgehog/commit/992e325e30435f48d283f755097d8ce2933eee68))
+* Fix route param decoding after React Router upgrade ([9ad4710](https://github.com/edgehog-device-manager/edgehog/commit/9ad4710aa7179be158d43386a525eaee7fb96d5e))
+* force expand all tree nodes on data updates ([f2d1364](https://github.com/edgehog-device-manager/edgehog/commit/f2d1364946d31fc226015ba43559923d242236af))
+* **i18n:** replace dynamic FormattedMessage ids ([883bc13](https://github.com/edgehog-device-manager/edgehog/commit/883bc13d3f4622c4fada879efa7ac60a78c7d973))
+* Prevent invalid form states for file download requests ([db24f07](https://github.com/edgehog-device-manager/edgehog/commit/db24f074c0125a35e1d7ddf57b92a10cb55fd4c0))
+* single file archiving ([b3c2aab](https://github.com/edgehog-device-manager/edgehog/commit/b3c2aab7e750b18a0d52674c5206435f3ab3c352))
+* System model image not loaded ([c9d0300](https://github.com/edgehog-device-manager/edgehog/commit/c9d0300ddd796748d7c608eb1b386805cf57fbdf))
+* use translated storage source IDs for storage uploads ([bef6c0c](https://github.com/edgehog-device-manager/edgehog/commit/bef6c0c394e9417e200860ff21cb4e004bb0b8f9))
+
+
+### Performance Improvements
+
+* Combine multi-pass array chains into single-pass iterations ([86dec24](https://github.com/edgehog-device-manager/edgehog/commit/86dec248d1881958c54c00c808ab249f8a9e0d5e))
+* Modernize array sorting and optimize async react operations ([4715c95](https://github.com/edgehog-device-manager/edgehog/commit/4715c9516bc895312c99192a8070e9618b0bc5a6))
+* Move pure helper functions to module scope ([511ae6f](https://github.com/edgehog-device-manager/edgehog/commit/511ae6fdc7ecd8d090fa7072cf50cd176a12157d))
+* Replace full lodash imports with per-function imports ([120d211](https://github.com/edgehog-device-manager/edgehog/commit/120d2116c5a901dbe3b9ea5ce4984737dbb9b0c4))
+* Replace multi-pass array iterations with single-pass loops ([b0105a2](https://github.com/edgehog-device-manager/edgehog/commit/b0105a270ea707bf93c7cfb8755008778802ab2e))
+* Scope watchman config to fix slow relay compilation ([b9e12b2](https://github.com/edgehog-device-manager/edgehog/commit/b9e12b22089ad8b352a42ed103d0859518824979))
+
 ## [0.12.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.11.0...v0.12.0) (2026-02-18)
 
 
