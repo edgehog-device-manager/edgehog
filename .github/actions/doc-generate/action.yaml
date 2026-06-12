@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         ln -s ${{ inputs.edgehog }}/.tool-versions .tool-versions
-    - uses: team-alembic/staple-actions/actions/mix-task@6ea0d8a51c3c97a530d3c34cfb8ab9c15a1de4a1 # main
+    - uses: team-alembic/staple-actions/actions/mix-task@20646fb36ffd4d4e231d4594b1e63b8b0ea60e45 # main
       with:
         working-directory: ${{ inputs.edgehog }}/backend
         mix-env: dev
