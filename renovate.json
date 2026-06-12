@@ -53,6 +53,7 @@
   "packageRules": [
     {
       "description": "Ensure security vulnerabilities are automerged immediately",
+      "matchPackageNames": ["*"],
       "isVulnerabilityAlert": true,
       "automerge": true,
       "schedule": []
