@@ -27,7 +27,7 @@
 .containerListCard {
   background: #ffffff;
   border: 1px solid #dee2e6;
-  border-radius: 12px;
+  border-radius: 0.5rem;
   padding: 10px;
   overflow-y: auto;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
@@ -40,8 +40,6 @@
   margin-bottom: 6px;
   border: none !important;
   background: transparent !important;
-  color: #212529 !important;
-  box-shadow: none !important;
   transition: all 0.15s ease;
 
   &:hover {
@@ -50,9 +48,9 @@
 
   &.active {
     background: #ffffff !important;
-    border-left: 3px solid #0d6efd !important;
+    border-left: 3px solid var(--bs-primary) !important;
     border-radius: 0%;
-    color: #0d6efd !important;
+    color: var(--bs-primary) !important;
     font-weight: 500;
   }
 

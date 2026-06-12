@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Stack } from "react-bootstrap";
+import { Card, Form, Stack } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -139,82 +139,86 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
         >
           {errorFeedback}
         </Alert>
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <FormRow
+            id="networkLabel"
+            label={
+              <FormattedMessage
+                id="pages.Network.label"
+                defaultMessage="Label"
+              />
+            }
+          >
+            <Form.Control value={network.label ?? ""} readOnly />
+          </FormRow>
 
-        <FormRow
-          id="networkLabel"
-          label={
-            <FormattedMessage id="pages.Network.label" defaultMessage="Label" />
-          }
-        >
-          <Form.Control value={network.label ?? ""} readOnly />
-        </FormRow>
+          <FormRow
+            id="networkDriver"
+            label={
+              <FormattedMessage
+                id="pages.Network.driver"
+                defaultMessage="Driver"
+              />
+            }
+          >
+            <Form.Control value={network.driver ?? ""} readOnly />
+          </FormRow>
 
-        <FormRow
-          id="networkDriver"
-          label={
-            <FormattedMessage
-              id="pages.Network.driver"
-              defaultMessage="Driver"
+          <FormRow
+            id="networkOptions"
+            label={
+              <FormattedMessage
+                id="pages.Network.options"
+                defaultMessage="Options"
+              />
+            }
+          >
+            <MonacoJsonEditor
+              value={getPrettyOptions()}
+              onChange={() => {}}
+              defaultValue={getPrettyOptions()}
+              readonly={true}
+              initialLines={1}
             />
-          }
-        >
-          <Form.Control value={network.driver ?? ""} readOnly />
-        </FormRow>
+          </FormRow>
 
-        <FormRow
-          id="networkOptions"
-          label={
-            <FormattedMessage
-              id="pages.Network.options"
-              defaultMessage="Options"
-            />
-          }
-        >
-          <MonacoJsonEditor
-            value={getPrettyOptions()}
-            onChange={() => {}}
-            defaultValue={getPrettyOptions()}
-            readonly={true}
-            initialLines={1}
-          />
-        </FormRow>
+          <FormRow
+            id="networkInternal"
+            label={
+              <FormattedMessage
+                id="pages.Network.internal"
+                defaultMessage="Internal"
+              />
+            }
+          >
+            <Form.Check type="checkbox" checked={network.internal} readOnly />
+          </FormRow>
 
-        <FormRow
-          id="networkInternal"
-          label={
-            <FormattedMessage
-              id="pages.Network.internal"
-              defaultMessage="Internal"
-            />
-          }
-        >
-          <Form.Check type="checkbox" checked={network.internal} readOnly />
-        </FormRow>
+          <FormRow
+            id="networkLabelEnableIpv6"
+            label={
+              <FormattedMessage
+                id="pages.Network.enableIpv6"
+                defaultMessage="Enable IPv6"
+              />
+            }
+          >
+            <Form.Check type="checkbox" checked={network.enableIpv6} readOnly />
+          </FormRow>
 
-        <FormRow
-          id="networkLabelEnableIpv6"
-          label={
-            <FormattedMessage
-              id="pages.Network.enableIpv6"
-              defaultMessage="Enable IPv6"
-            />
-          }
-        >
-          <Form.Check type="checkbox" checked={network.enableIpv6} readOnly />
-        </FormRow>
-
-        <Stack
-          direction="horizontal"
-          gap={3}
-          className="justify-content-end align-items-center"
-        >
-          <Button variant="danger" onClick={handleShowDeleteModal}>
-            <FormattedMessage
-              id="pages.Network.deleteButton"
-              defaultMessage="Delete"
-            />
-          </Button>
-        </Stack>
+          <Stack
+            direction="horizontal"
+            gap={3}
+            className="justify-content-end align-items-center"
+          >
+            <Button variant="danger" onClick={handleShowDeleteModal}>
+              <FormattedMessage
+                id="pages.Network.deleteButton"
+                defaultMessage="Delete"
+              />
+            </Button>
+          </Stack>
+        </Card>
 
         {showDeleteModal && (
           <DeleteModal

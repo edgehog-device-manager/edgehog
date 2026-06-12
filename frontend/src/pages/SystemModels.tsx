@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { SystemModels_getSystemModels_Query } from "@/api/__generated__/SystemModels_getSystemModels_Query.graphql";
 import { SystemModels_PaginationQuery } from "@/api/__generated__/SystemModels_PaginationQuery.graphql";
@@ -166,23 +167,25 @@ const SystemModelsContent = ({
       </Page.Header>
       <Page.Main>
         {systemModelsData.systemModels?.count === 0 ? (
-          <Result.EmptyList
-            title={
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+            <Result.EmptyList
+              title={
+                <FormattedMessage
+                  id="pages.SystemModels.noSystemModels.title"
+                  defaultMessage="This space is empty"
+                />
+              }
+            >
               <FormattedMessage
-                id="pages.SystemModels.noSystemModels.title"
-                defaultMessage="This space is empty"
+                id="pages.SystemModels.noSystemModels.message"
+                defaultMessage="You haven't created any system model yet."
               />
-            }
-          >
-            <FormattedMessage
-              id="pages.SystemModels.noSystemModels.message"
-              defaultMessage="You haven't created any system model yet."
-            />
-          </Result.EmptyList>
+            </Result.EmptyList>
+          </Card>
         ) : (
-          <>
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
             <SearchBox
-              className="flex-grow-1 pb-2"
+              className="pb-2"
               value={searchText || ""}
               onChange={setSearchText}
             />
@@ -190,7 +193,7 @@ const SystemModelsContent = ({
               systemModelsData={systemModelsData}
               searchText={searchText}
             />
-          </>
+          </Card>
         )}
       </Page.Main>
     </Page>

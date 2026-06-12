@@ -40,6 +40,7 @@ import {
 import type { PreloadedQuery } from "react-relay/hooks";
 import type { PayloadError } from "relay-runtime";
 import { FormattedMessage } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { Device_connectionStatus$key } from "@/api/__generated__/Device_connectionStatus.graphql";
 import type { Device_getDevice_Query } from "@/api/__generated__/Device_getDevice_Query.graphql";
@@ -261,7 +262,7 @@ const TAB_KEYS = [
 ];
 
 const FormRow = (props: FormRowProps) => (
-  <BaseFormRow {...props} labelCol={4} valueCol={8} />
+  <BaseFormRow {...props} labelCol={3} valueCol={9} />
 );
 
 const FormValue = (params: { children: React.ReactNode }) => {
@@ -716,224 +717,229 @@ const DeviceContent = ({
           >
             {errorFeedback}
           </Alert>
-          <Row>
-            <Col md="5" lg="4" xl="3">
-              <div>
-                <Figure
-                  alt={device.name}
-                  src={device.systemModel?.pictureUrl || assets.images.devices}
-                />
-              </div>
-            </Col>
-            <Col md="7" lg="8" xl="9">
-              <Form className="ms-3">
-                <Stack gap={3}>
-                  <FormRow
-                    id="form-device-name"
-                    label={
-                      <FormattedMessage
-                        id="pages.Device.name"
-                        defaultMessage="Name"
-                      />
+          <Card className="h-100 border-0 p-3 shadow-sm mb-2">
+            <Row>
+              <Col md="5" lg="4" xl="3">
+                <div>
+                  <Figure
+                    alt={device.name}
+                    src={
+                      device.systemModel?.pictureUrl || assets.images.devices
                     }
-                  >
-                    <Form.Control
-                      type="text"
-                      value={deviceDraftName}
-                      onChange={(e) => handleDeviceNameChange(e.target.value)}
-                    />
-                  </FormRow>
-                  <FormRow
-                    id="form-device-tags"
-                    label={
-                      <FormattedMessage
-                        id="pages.Device.tags"
-                        defaultMessage="Tags"
-                      />
-                    }
-                  >
-                    <MultiSelect
-                      creatable
-                      value={deviceTags}
-                      options={tags}
-                      onChange={(newTags) =>
-                        handleTagsChange(newTags.map(({ value }) => value))
-                      }
-                      isValidNewOption={isValidNewTag}
-                      onCreateOption={(inputValue) => {
-                        const newTag = inputValue.trim().toLowerCase();
-                        handleAddDeviceTags([newTag]);
-                      }}
-                    />
-                  </FormRow>
-                  <FormRow
-                    id="form-device-deviceId"
-                    label={
-                      <FormattedMessage
-                        id="pages.Device.deviceId"
-                        defaultMessage="Device ID"
-                      />
-                    }
-                  >
-                    <Form.Control
-                      type="text"
-                      value={device.deviceId}
-                      readOnly
-                    />
-                  </FormRow>
-                  {device.serialNumber && (
+                  />
+                </div>
+              </Col>
+              <Col md="7" lg="8" xl="9">
+                <Form className="ms-3">
+                  <Stack gap={3}>
                     <FormRow
-                      id="form-device-serialNumber"
+                      id="form-device-name"
                       label={
                         <FormattedMessage
-                          id="pages.Device.serialNumber"
-                          defaultMessage="Serial Number"
+                          id="pages.Device.name"
+                          defaultMessage="Name"
                         />
                       }
                     >
                       <Form.Control
                         type="text"
-                        value={device.serialNumber}
-                        readOnly
+                        value={deviceDraftName}
+                        onChange={(e) => handleDeviceNameChange(e.target.value)}
                       />
                     </FormRow>
-                  )}
-                  {device.partNumber && (
                     <FormRow
-                      id="device-hardware-info-part-number"
+                      id="form-device-tags"
                       label={
                         <FormattedMessage
-                          id="pages.Device.partNumber"
-                          defaultMessage="Part Number"
+                          id="pages.Device.tags"
+                          defaultMessage="Tags"
+                        />
+                      }
+                    >
+                      <MultiSelect
+                        creatable
+                        value={deviceTags}
+                        options={tags}
+                        onChange={(newTags) =>
+                          handleTagsChange(newTags.map(({ value }) => value))
+                        }
+                        isValidNewOption={isValidNewTag}
+                        onCreateOption={(inputValue) => {
+                          const newTag = inputValue.trim().toLowerCase();
+                          handleAddDeviceTags([newTag]);
+                        }}
+                      />
+                    </FormRow>
+                    <FormRow
+                      id="form-device-deviceId"
+                      label={
+                        <FormattedMessage
+                          id="pages.Device.deviceId"
+                          defaultMessage="Device ID"
                         />
                       }
                     >
                       <Form.Control
                         type="text"
-                        value={device.partNumber}
+                        value={device.deviceId}
                         readOnly
                       />
                     </FormRow>
-                  )}
-                  {device.systemModel && (
-                    <>
+                    {device.serialNumber && (
                       <FormRow
-                        id="form-device-system-model"
+                        id="form-device-serialNumber"
                         label={
                           <FormattedMessage
-                            id="pages.Device.systemModel"
-                            defaultMessage="System Model"
+                            id="pages.Device.serialNumber"
+                            defaultMessage="Serial Number"
                           />
                         }
                       >
                         <Form.Control
                           type="text"
-                          value={device.systemModel.name}
+                          value={device.serialNumber}
                           readOnly
                         />
                       </FormRow>
+                    )}
+                    {device.partNumber && (
                       <FormRow
-                        id="form-device-hardware-type"
+                        id="device-hardware-info-part-number"
                         label={
                           <FormattedMessage
-                            id="pages.Device.hardwareType"
-                            defaultMessage="Hardware Type"
+                            id="pages.Device.partNumber"
+                            defaultMessage="Part Number"
                           />
                         }
                       >
                         <Form.Control
                           type="text"
-                          value={device.systemModel.hardwareType?.name}
+                          value={device.partNumber}
                           readOnly
                         />
                       </FormRow>
-                    </>
-                  )}
-                  <FormRow
-                    id="form-device-deviceGroups"
-                    label={
-                      <FormattedMessage
-                        id="pages.Device.groups"
-                        defaultMessage="Groups"
-                      />
-                    }
-                  >
-                    <Stack direction="horizontal" gap={3}>
-                      {device.deviceGroups.map((deviceGroup) => (
-                        <Link
-                          key={`device-group-link-${deviceGroup.id}`}
-                          route={Route.deviceGroupsEdit}
-                          params={{ deviceGroupId: deviceGroup.id }}
-                        >
-                          {deviceGroup.name}
-                        </Link>
-                      ))}
-                    </Stack>
-                  </FormRow>
-                  <DeviceConnectionFormRows deviceRef={device} />
-                  {device.capabilities.includes("LED_BEHAVIORS") && (
-                    <FormRow
-                      id="form-device-check-my-device"
-                      label={
-                        <FormattedMessage
-                          id="pages.Device.checkMyDevice"
-                          defaultMessage="Check my Device"
-                        />
-                      }
-                    >
-                      <LedBehaviorDropdown
-                        deviceId={device.id}
-                        disabled={!device.online}
-                        onError={setErrorFeedback}
-                      />
-                    </FormRow>
-                  )}
-                  {isRemoteTerminalSupported && (
-                    <FormRow
-                      id="form-device-open-remote-terminal"
-                      label={
-                        <FormattedMessage
-                          id="pages.Device.remoteTerminal.label"
-                          defaultMessage="Remote Terminal"
-                        />
-                      }
-                    >
+                    )}
+                    {device.systemModel && (
                       <>
-                        <Button
-                          variant="secondary"
-                          onClick={handleRequestForwarderSession}
-                          disabled={
-                            !device.online ||
-                            isRequestingForwarderSession ||
-                            isOpeningRemoteTerminal
+                        <FormRow
+                          id="form-device-system-model"
+                          label={
+                            <FormattedMessage
+                              id="pages.Device.systemModel"
+                              defaultMessage="System Model"
+                            />
                           }
                         >
-                          {(isRequestingForwarderSession ||
-                            isOpeningRemoteTerminal) && (
-                            <Spinner size="sm" className="me-2" />
-                          )}
-                          <FormattedMessage
-                            id="pages.Device.remoteTerminal.openTerminalButton"
-                            defaultMessage="Open"
+                          <Form.Control
+                            type="text"
+                            value={device.systemModel.name}
+                            readOnly
                           />
-                        </Button>
-                        <Alert
-                          show={!!remoteTerminalErrorFeedback}
-                          variant="danger"
-                          onClose={() => setRemoteTerminalErrorFeedback(null)}
-                          dismissible
-                          className="mt-3"
+                        </FormRow>
+                        <FormRow
+                          id="form-device-hardware-type"
+                          label={
+                            <FormattedMessage
+                              id="pages.Device.hardwareType"
+                              defaultMessage="Hardware Type"
+                            />
+                          }
                         >
-                          {remoteTerminalErrorFeedback}
-                        </Alert>
+                          <Form.Control
+                            type="text"
+                            value={device.systemModel.hardwareType?.name}
+                            readOnly
+                          />
+                        </FormRow>
                       </>
+                    )}
+                    <FormRow
+                      id="form-device-deviceGroups"
+                      label={
+                        <FormattedMessage
+                          id="pages.Device.groups"
+                          defaultMessage="Groups"
+                        />
+                      }
+                    >
+                      <Stack direction="horizontal" gap={3}>
+                        {device.deviceGroups.map((deviceGroup) => (
+                          <Link
+                            key={`device-group-link-${deviceGroup.id}`}
+                            route={Route.deviceGroupsEdit}
+                            params={{ deviceGroupId: deviceGroup.id }}
+                          >
+                            {deviceGroup.name}
+                          </Link>
+                        ))}
+                      </Stack>
                     </FormRow>
-                  )}
-                </Stack>
-              </Form>
-            </Col>
-          </Row>
+                    <DeviceConnectionFormRows deviceRef={device} />
+                    {device.capabilities.includes("LED_BEHAVIORS") && (
+                      <FormRow
+                        id="form-device-check-my-device"
+                        label={
+                          <FormattedMessage
+                            id="pages.Device.checkMyDevice"
+                            defaultMessage="Check my Device"
+                          />
+                        }
+                      >
+                        <LedBehaviorDropdown
+                          deviceId={device.id}
+                          disabled={!device.online}
+                          onError={setErrorFeedback}
+                        />
+                      </FormRow>
+                    )}
+                    {isRemoteTerminalSupported && (
+                      <FormRow
+                        id="form-device-open-remote-terminal"
+                        label={
+                          <FormattedMessage
+                            id="pages.Device.remoteTerminal.label"
+                            defaultMessage="Remote Terminal"
+                          />
+                        }
+                      >
+                        <>
+                          <Button
+                            variant="secondary"
+                            onClick={handleRequestForwarderSession}
+                            disabled={
+                              !device.online ||
+                              isRequestingForwarderSession ||
+                              isOpeningRemoteTerminal
+                            }
+                          >
+                            {(isRequestingForwarderSession ||
+                              isOpeningRemoteTerminal) && (
+                              <Spinner size="sm" className="me-2" />
+                            )}
+                            <FormattedMessage
+                              id="pages.Device.remoteTerminal.openTerminalButton"
+                              defaultMessage="Open"
+                            />
+                          </Button>
+                          <Alert
+                            show={!!remoteTerminalErrorFeedback}
+                            variant="danger"
+                            onClose={() => setRemoteTerminalErrorFeedback(null)}
+                            dismissible
+                            className="mt-3"
+                          >
+                            {remoteTerminalErrorFeedback}
+                          </Alert>
+                        </>
+                      </FormRow>
+                    )}
+                  </Stack>
+                </Form>
+              </Col>
+            </Row>
+          </Card>
           <Tabs
+            className="pt-1 d-flex flex-column flex-grow-1"
             activeKey={currentTabKey}
             tabsOrder={TAB_KEYS}
             onChange={(tabKey) =>

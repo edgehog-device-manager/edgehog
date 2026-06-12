@@ -30,6 +30,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { Applications_ApplicationsFragment$key } from "@/api/__generated__/Applications_ApplicationsFragment.graphql";
 import type { Applications_ApplicationSubscription } from "@/api/__generated__/Applications_ApplicationSubscription.graphql";
@@ -267,17 +268,18 @@ const ApplicationsContent = ({
         >
           {errorFeedback}
         </Alert>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ApplicationsLayoutContainer
-          applicationsData={applicationsData}
-          searchText={searchText}
-          onDelete={setApplicationToDelete}
-        />
-
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ApplicationsLayoutContainer
+            applicationsData={applicationsData}
+            searchText={searchText}
+            onDelete={setApplicationToDelete}
+          />
+        </Card>
         {applicationToDelete && (
           <DeleteApplicationModal
             applicationToDelete={applicationToDelete}

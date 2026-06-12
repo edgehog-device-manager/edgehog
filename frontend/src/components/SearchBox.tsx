@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback } from "react";
+import React, { useCallback, useId } from "react";
 import Form from "react-bootstrap/Form";
 import InputGroup from "react-bootstrap/InputGroup";
 import { useIntl } from "react-intl";
@@ -34,6 +34,7 @@ interface Props {
 
 const SearchBox = ({ className = "", onChange, value }: Props) => {
   const intl = useIntl();
+  const searchInputId = useId();
 
   const handleChange: React.ChangeEventHandler<HTMLInputElement> = useCallback(
     (event) => {
@@ -48,10 +49,15 @@ const SearchBox = ({ className = "", onChange, value }: Props) => {
   return (
     <Form className={`w-100 ${className}`}>
       <InputGroup className="custom-search-group">
-        <InputGroup.Text className="search-icon-addon px-3">
+        <InputGroup.Text
+          as="label"
+          htmlFor={searchInputId}
+          className="search-icon-addon px-3"
+        >
           <Icon icon="search" />
         </InputGroup.Text>
         <Form.Control
+          id={searchInputId}
           className="search-input"
           type="search"
           placeholder={intl.formatMessage({

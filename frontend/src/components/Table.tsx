@@ -62,7 +62,7 @@ const HIDDEN_COLUMN_IDS: string[] = [];
 const SORT_BY_DEFAULT: SortingState = [];
 
 export type TableProps<T extends RowData> = {
-  columns: ColumnDef<T, unknown>[];
+  columns: ColumnDef<T, any>[];
   data: readonly T[];
   className?: string;
   headerStyle?: React.CSSProperties;

@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { HardwareTypes_getHardwareTypes_Query } from "@/api/__generated__/HardwareTypes_getHardwareTypes_Query.graphql";
 import { HardwareTypes_HardwareTypesFragment$key } from "@/api/__generated__/HardwareTypes_HardwareTypesFragment.graphql";
@@ -160,23 +161,25 @@ const HardwareTypesContent = ({
       </Page.Header>
       <Page.Main>
         {hardwareTypesData.hardwareTypes?.count === 0 ? (
-          <Result.EmptyList
-            title={
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+            <Result.EmptyList
+              title={
+                <FormattedMessage
+                  id="pages.HardwareTypes.noHardwareTypes.title"
+                  defaultMessage="This space is empty"
+                />
+              }
+            >
               <FormattedMessage
-                id="pages.HardwareTypes.noHardwareTypes.title"
-                defaultMessage="This space is empty"
+                id="pages.HardwareTypes.noHardwareTypes.message"
+                defaultMessage="You haven't created any hardware type yet."
               />
-            }
-          >
-            <FormattedMessage
-              id="pages.HardwareTypes.noHardwareTypes.message"
-              defaultMessage="You haven't created any hardware type yet."
-            />
-          </Result.EmptyList>
+            </Result.EmptyList>
+          </Card>
         ) : (
-          <>
+          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
             <SearchBox
-              className="flex-grow-1 pb-2"
+              className="pb-2"
               value={searchText}
               onChange={setSearchText}
             />
@@ -184,7 +187,7 @@ const HardwareTypesContent = ({
               hardwareTypesData={hardwareTypesData}
               searchText={searchText}
             />
-          </>
+          </Card>
         )}
       </Page.Main>
     </Page>

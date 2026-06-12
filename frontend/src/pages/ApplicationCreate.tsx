@@ -22,6 +22,7 @@ import { Suspense, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 import { ErrorBoundary } from "react-error-boundary";
+import { Card } from "react-bootstrap";
 
 import type { ApplicationCreate_createApplication_Mutation } from "@/api/__generated__/ApplicationCreate_createApplication_Mutation.graphql";
 
@@ -164,7 +165,9 @@ const ApplicationCreatePage = () => {
             }
           />
           <Page.Main>
-            <ApplicationWrapper />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <ApplicationWrapper />
+            </Card>
           </Page.Main>
         </Page>
       </ErrorBoundary>

@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { Networks_getNetworks_Query } from "@/api/__generated__/Networks_getNetworks_Query.graphql";
 import { Networks_NetworksFragment$key } from "@/api/__generated__/Networks_NetworksFragment.graphql";
@@ -142,15 +143,17 @@ const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <NetworksLayoutContainer
-          networksData={networksData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <NetworksLayoutContainer
+            networksData={networksData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

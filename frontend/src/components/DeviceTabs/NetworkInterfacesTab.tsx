@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { NetworkInterfacesTab_networkInterfaces$key } from "@/api/__generated__/NetworkInterfacesTab_networkInterfaces.graphql";
 
@@ -47,15 +48,16 @@ const DeviceNetworkInterfacesTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-network-interfaces-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.NetworkInterfacesTab.title",
         defaultMessage: "Network Interfaces",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <NetworkInterfacesTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

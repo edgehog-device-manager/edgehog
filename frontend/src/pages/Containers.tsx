@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import { Containers_ContainersFragment$key } from "@/api/__generated__/Containers_ContainersFragment.graphql";
 import type { Containers_getContainers_Query } from "@/api/__generated__/Containers_getContainers_Query.graphql";
@@ -146,15 +147,17 @@ const ContainersContent = ({ getContainersQuery }: ContainersContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ContainersLayoutContainer
-          containersData={containersData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ContainersLayoutContainer
+            containersData={containersData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

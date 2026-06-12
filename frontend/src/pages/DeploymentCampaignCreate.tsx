@@ -29,6 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type {
   DeploymentCampaignCreate_getOptions_Query,
@@ -279,9 +280,11 @@ const DeploymentCampaignCreatePage = () => {
               }
             />
             <Page.Main>
-              <DeploymentCampaignWrapper
-                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <DeploymentCampaignWrapper
+                  getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

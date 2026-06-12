@@ -176,7 +176,7 @@ function App() {
   // Embedded Mode (No Sidebar)
   if (auth.isAuthenticated && hideNavigationElements) {
     return (
-      <main className="vh-100 flex-grow-1 d-flex overflow-hidden">
+      <main className="vh-100 flex-grow-1 d-flex overflow-hidden bg-light">
         <section className="flex-grow-1 overflow-auto">{RouterElement}</section>
       </main>
     );
@@ -185,7 +185,7 @@ function App() {
   return (
     <div
       data-testid="app"
-      className="d-flex vh-100 flex-column overflow-hidden"
+      className="d-flex vh-100 flex-column overflow-hidden bg-light"
     >
       {showNavigation && <Topbar onToggle={toggleIsMobileMenuOpen} />}
 

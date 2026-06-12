@@ -29,6 +29,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { FileDownloadCampaignCreate_createCampaign_Mutation } from "@/api/__generated__/FileDownloadCampaignCreate_createCampaign_Mutation.graphql";
 import type {
@@ -286,9 +287,11 @@ const FileDownloadCampaignCreatePage = () => {
               }
             />
             <Page.Main>
-              <FileDownloadCampaignWrapper
-                getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <FileDownloadCampaignWrapper
+                  getCreateCampaignOptionsQuery={getCreateCampaignOptionsQuery}
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

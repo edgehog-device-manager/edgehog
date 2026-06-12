@@ -19,7 +19,7 @@
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Col, Form, Row } from "react-bootstrap";
+import { Card, Col, Form, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -321,24 +321,27 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
           {errorFeedback}
         </Alert>
 
-        <Form.Group as={Row} controlId="application" className="mt-3 mb-4">
-          <Form.Label column sm={2}>
-            <FormattedMessage
-              id="pages.Application.description"
-              defaultMessage="Description"
-            />
-          </Form.Label>
-          <Col sm={10}>
-            <Form.Control
-              as="textarea"
-              value={application.description ?? ""}
-              rows={5}
-              readOnly
-            />
-          </Col>
-        </Form.Group>
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
+          <Form.Group as={Row} controlId="application" className="mt-3 mb-4">
+            <Form.Label column sm={2}>
+              <FormattedMessage
+                id="pages.Application.description"
+                defaultMessage="Description"
+              />
+            </Form.Label>
+            <Col sm={10}>
+              <Form.Control
+                as="textarea"
+                value={application.description ?? ""}
+                rows={5}
+                readOnly
+              />
+            </Col>
+          </Form.Group>
+        </Card>
 
         <Tabs
+          className="d-flex flex-column flex-grow-1"
           activeKey={currentTabKey}
           tabsOrder={TAB_KEYS}
           onChange={(tabKey) =>
@@ -353,21 +356,24 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
         >
           <Tab
             eventKey="releases-tab"
+            className="pt-3 d-flex flex-column flex-grow-1"
             title={intl.formatMessage({
               id: "pages.Application.releases",
               defaultMessage: "Releases",
             })}
           >
-            <SearchBox
-              className="flex-grow-1 pb-2 pt-2"
-              value={searchText || ""}
-              onChange={setSearchText}
-            />
-            <ReleasesLayoutContainer
-              applicationRef={application}
-              searchText={searchText}
-              onDelete={setReleaseToDelete}
-            />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <SearchBox
+                className="pb-2"
+                value={searchText || ""}
+                onChange={setSearchText}
+              />
+              <ReleasesLayoutContainer
+                applicationRef={application}
+                searchText={searchText}
+                onDelete={setReleaseToDelete}
+              />
+            </Card>
             {releaseToDelete && (
               <DeleteReleaseModal
                 releaseToDelete={releaseToDelete}
@@ -380,12 +386,15 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
 
           <Tab
             eventKey="devices-tab"
+            className="pt-3 d-flex flex-column flex-grow-1"
             title={intl.formatMessage({
               id: "pages.Application.devices",
               defaultMessage: "Devices",
             })}
           >
-            <DevicesLayoutContainer applicationRef={application} />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <DevicesLayoutContainer applicationRef={application} />
+            </Card>
           </Tab>
         </Tabs>
       </Page.Main>

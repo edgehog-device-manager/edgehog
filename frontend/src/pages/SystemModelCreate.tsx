@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2021-2025 SECO Mind Srl
+ * Copyright 2021-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type {
   SystemModelCreate_getOptions_Query,
@@ -255,11 +256,13 @@ const SystemModelCreatePage = () => {
               }
             />
             <Page.Main>
-              <SystemModelWrapper
-                getCreateSystemModelOptionsQuery={
-                  getCreateSystemModelOptionsQuery
-                }
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <SystemModelWrapper
+                  getCreateSystemModelOptionsQuery={
+                    getCreateSystemModelOptionsQuery
+                  }
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

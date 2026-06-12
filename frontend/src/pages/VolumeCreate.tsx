@@ -21,6 +21,7 @@
 import { ReactNode, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useMutation } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { VolumeCreate_volumeCreate_Mutation } from "@/api/__generated__/VolumeCreate_volumeCreate_Mutation.graphql";
 
@@ -132,10 +133,12 @@ const VolumeCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <CreateVolumeForm
-          onSubmit={handleCreateVolume}
-          isLoading={isCreatingVolume}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <CreateVolumeForm
+            onSubmit={handleCreateVolume}
+            isLoading={isCreatingVolume}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );
