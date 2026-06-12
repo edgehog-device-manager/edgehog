@@ -18,29 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release.Changes.CheckDeployments do
+defmodule Edgehog.Containers.Release.Validations.CheckDeployments do
   @moduledoc false
 
-  use Ash.Resource.Change
+  use Ash.Resource.Validation
 
-  alias Edgehog.Containers
+  require Ash.Query
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, context) do
-    release = changeset.data
-    %{tenant: tenant} = context
+  @impl Ash.Resource.Validation
+  def validate(changeset, _opts, %{tenant: tenant}) do
+    id = Ash.Changeset.get_data(changeset, :id)
+    version = Ash.Changeset.get_data(changeset, :version)
 
-    case Containers.deployments_with_release(release.id, tenant: tenant) do
-      {:ok, []} ->
-        changeset
+    deployed? =
+      Edgehog.Containers.Deployment
+      |> Ash.Query.filter(release_id: id)
+      |> Ash.exists?(tenant: tenant)
 
-      {:ok, _deployments} ->
-        Ash.Changeset.add_error(changeset,
-          message: "Cannot delete release with active deployments"
-        )
-
-      {:error, error} ->
-        Ash.Changeset.add_error(changeset, error)
-    end
+    if deployed?,
+      do: {:error, message: "Release with version #{version} has active deployments."},
+      else: :ok
   end
 end

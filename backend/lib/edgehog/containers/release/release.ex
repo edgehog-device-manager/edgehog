@@ -25,7 +25,7 @@ defmodule Edgehog.Containers.Release do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Release.Changes
+  alias Edgehog.Containers.Release
   alias Edgehog.Validations
 
   graphql do
@@ -72,7 +72,7 @@ defmodule Edgehog.Containers.Release do
       primary? true
       require_atomic? false
 
-      change Changes.CheckDeployments
+      validate Release.Validations.CheckDeployments
     end
   end
 
