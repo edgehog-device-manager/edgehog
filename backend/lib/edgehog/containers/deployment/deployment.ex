@@ -52,6 +52,12 @@ defmodule Edgehog.Containers.Deployment do
         read_action :read_by_deployment_id
         relay_id_translations deployment_id: :deployment
       end
+
+      subscribe :deployments_by_device do
+        action_types [:create, :update, :destroy]
+        read_action :read_by_device
+        relay_id_translations device_id: :device
+      end
     end
 
     paginate_relationship_with container_deployments: :relay, events: :relay
@@ -332,6 +338,12 @@ defmodule Edgehog.Containers.Deployment do
       get? true
 
       filter expr(id == ^arg(:deployment_id))
+    end
+
+    read :read_by_device do
+      argument :device_id, :id, allow_nil?: false
+
+      get_by :device_id
     end
 
     destroy :destroy_and_gc do

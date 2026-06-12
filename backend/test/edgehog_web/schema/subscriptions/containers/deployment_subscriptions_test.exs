@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.DeploymentSubscriptionsTest
   use EdgehogWeb.SubsCase
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
 
   describe "Deployment subscriptions" do
     test "receive data on deployment creation", %{socket: socket, tenant: tenant} do
@@ -104,6 +105,90 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.DeploymentSubscriptionsTest
 
       refute_push "subscription:data", _push
     end
+
+    test "receive data on deployment update for a specific device", %{
+      socket: socket,
+      tenant: tenant
+    } do
+      deployment = deployment_fixture(tenant: tenant)
+
+      subscribe(socket,
+        query: deployments_by_device_updated_query(),
+        variables: %{"deviceId" => deployment.device_id}
+      )
+
+      deployment
+      |> Ash.Changeset.for_update(:set_state, %{state: :started})
+      |> Ash.update!(tenant: tenant)
+
+      assert_push "subscription:data", push
+      assert_updated("deploymentsByDevice", deployment_data, push)
+
+      assert deployment_data["id"] == AshGraphql.Resource.encode_relay_id(deployment)
+      assert deployment_data["state"] == "STARTED"
+    end
+
+    test "do not receive data on deployment update for a specific device if the device id does not match",
+         %{
+           socket: socket,
+           tenant: tenant
+         } do
+      deployment = deployment_fixture(tenant: tenant)
+
+      subscribe(socket,
+        query: deployments_by_device_updated_query(),
+        variables: %{"deviceId" => Ecto.UUID.generate()}
+      )
+
+      deployment
+      |> Ash.Changeset.for_update(:set_state, %{state: :started})
+      |> Ash.update!(tenant: tenant)
+
+      refute_push "subscription:data", _push
+    end
+
+    test "receive data on deployment creation for a specific device", %{
+      socket: socket,
+      tenant: tenant
+    } do
+      device = device_fixture(tenant: tenant)
+
+      subscribe(socket,
+        query: deployments_by_device_created_query(),
+        variables: %{"deviceId" => device.id}
+      )
+
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id)
+
+      assert_push "subscription:data", push
+      assert_created("deploymentsByDevice", deployment_data, push)
+
+      assert deployment_data["id"] == AshGraphql.Resource.encode_relay_id(deployment)
+      assert deployment_data["state"] == "PENDING"
+    end
+
+    test "receive data on deployment destroy for a specific device", %{
+      socket: socket,
+      tenant: tenant
+    } do
+      device = device_fixture(tenant: tenant)
+
+      deployment = deployment_fixture(tenant: tenant, device_id: device.id)
+
+      subscribe(socket,
+        query: deployments_by_device_destroyed_query(),
+        variables: %{"deviceId" => device.id}
+      )
+
+      deployment
+      |> Ash.Changeset.for_destroy(:destroy_and_gc)
+      |> Ash.destroy!(tenant: tenant)
+
+      assert_push "subscription:data", push
+      assert_destroyed("deploymentsByDevice", deployment_id, push)
+
+      assert deployment_id == AshGraphql.Resource.encode_relay_id(deployment)
+    end
   end
 
   defp subscribe(socket, opts \\ []) do
@@ -140,6 +225,42 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.DeploymentSubscriptionsTest
           id
           state
         }
+      }
+    }
+    """
+  end
+
+  defp deployments_by_device_updated_query do
+    """
+    subscription($deviceId: ID!) {
+      deploymentsByDevice(deviceId: $deviceId) {
+        updated {
+          id
+          state
+        }
+      }
+    }
+    """
+  end
+
+  defp deployments_by_device_created_query do
+    """
+    subscription($deviceId: ID!) {
+      deploymentsByDevice(deviceId: $deviceId) {
+        created {
+          id
+          state
+        }
+      }
+    }
+    """
+  end
+
+  defp deployments_by_device_destroyed_query do
+    """
+    subscription($deviceId: ID!) {
+      deploymentsByDevice(deviceId: $deviceId) {
+        destroyed
       }
     }
     """

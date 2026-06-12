@@ -25,6 +25,7 @@ import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
+  ConnectionHandler,
   graphql,
   useMutation,
   usePreloadedQuery,
@@ -361,6 +362,22 @@ const DeploymentContent = ({
               });
             }
           });
+        },
+        updater(store, response) {
+          const deletedId = response?.deleteDeployment?.result?.id;
+          if (!deletedId) return;
+
+          const deviceRecord = deviceId ? store.get(deviceId) : null;
+          if (!deviceRecord) return;
+
+          const connection = ConnectionHandler.getConnection(
+            deviceRecord,
+            "DeployedApplicationsTable_applicationDeployments",
+          );
+
+          if (!connection) return;
+
+          ConnectionHandler.deleteNode(connection, deletedId);
         },
         onError: () => {
           setErrorFeedback(

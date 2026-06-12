@@ -75,7 +75,6 @@ type AddAvailableApplicationsProps = {
   systemModelName: string | undefined;
   isOnline: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
-  onDeployComplete: () => void;
 };
 
 type SelectOption = {
@@ -89,7 +88,6 @@ const AddAvailableApplications = ({
   systemModelName,
   isOnline,
   setErrorFeedback,
-  onDeployComplete,
 }: AddAvailableApplicationsProps) => {
   const intl = useIntl();
   const navigate = useNavigate();
@@ -215,7 +213,6 @@ const AddAvailableApplications = ({
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          onDeployComplete(); // Trigger data refresh
           setSelectedApp(null); // Reset selected app
           setSelectedRelease(null); // Reset selected release
           setErrorFeedback(null);
@@ -239,14 +236,7 @@ const AddAvailableApplications = ({
         },
       });
     }
-  }, [
-    deviceId,
-    selectedRelease,
-    deployRelease,
-    setErrorFeedback,
-    onDeployComplete,
-    navigate,
-  ]);
+  }, [deviceId, selectedRelease, deployRelease, setErrorFeedback, navigate]);
 
   return (
     <Form.Group controlId="auto-deploy-group">

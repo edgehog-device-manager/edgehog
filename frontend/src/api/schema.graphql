@@ -3280,6 +3280,12 @@ type DeploymentEvent {
   updatedAt: DateTime!
 }
 
+type deployments_by_device_result {
+  created: Deployment
+  updated: Deployment
+  destroyed: ID
+}
+
 type deployment_by_id_result {
   created: Deployment
   updated: Deployment
@@ -9485,6 +9491,12 @@ type RootSubscriptionType {
 
     deploymentId: ID!
   ): deployment_by_id_result
+  deploymentsByDevice(
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    deviceId: ID!
+  ): deployments_by_device_result
   deploymentEvent(
     "A filter to limit the results"
     filter: DeploymentEventFilterInput

@@ -18,8 +18,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from "react";
-import { graphql, useRefetchableFragment } from "react-relay/hooks";
+import React, { useState, useMemo } from "react";
+import {
+  ConnectionHandler,
+  graphql,
+  useRefetchableFragment,
+  useSubscription,
+} from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
 
 import type { ApplicationsTab_deployedApplications$key } from "@/api/__generated__/ApplicationsTab_deployedApplications.graphql";
@@ -51,6 +56,28 @@ const DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT = graphql`
   }
 `;
 
+const APPLICATION_DEPLOYMENT_UPDATED_SUBSCRIPTION = graphql`
+  subscription ApplicationsTab_deploymentsUpdated_Subscription($deviceId: ID!) {
+    deploymentsByDevice(deviceId: $deviceId) {
+      updated {
+        id
+        state
+      }
+    }
+  }
+`;
+
+const APPLICATION_DEPLOYMENT_CREATED_SUBSCRIPTION = graphql`
+  subscription ApplicationsTab_deploymentsCreated_Subscription($deviceId: ID!) {
+    deploymentsByDevice(deviceId: $deviceId) {
+      created {
+        id
+        state
+      }
+    }
+  }
+`;
+
 interface DeviceApplicationsTabProps {
   deviceRef: ApplicationsTab_deployedApplications$key;
 }
@@ -59,23 +86,82 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const intl = useIntl();
 
-  const [{ device }, refetch] = useRefetchableFragment<
+  const [{ device }] = useRefetchableFragment<
     ApplicationsTab_deployedApplications_RefetchQuery,
     ApplicationsTab_deployedApplications$key
   >(DEVICE_DEPLOYED_APPLICATIONS_FRAGMENT, deviceRef);
 
+  const deviceId = device?.id || "";
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: APPLICATION_DEPLOYMENT_UPDATED_SUBSCRIPTION,
+        variables: { deviceId },
+      }),
+      [deviceId],
+    ),
+  );
+
+  useSubscription(
+    useMemo(
+      () => ({
+        subscription: APPLICATION_DEPLOYMENT_CREATED_SUBSCRIPTION,
+        variables: {
+          deviceId,
+        },
+        updater: (store) => {
+          const deploymentsByDevice = store.getRootField("deploymentsByDevice");
+
+          const newDeployment = deploymentsByDevice?.getLinkedRecord("created");
+
+          if (!newDeployment) {
+            return;
+          }
+
+          const device = store.get(deviceId);
+
+          if (!device) {
+            return;
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            device,
+            "DeployedApplicationsTable_applicationDeployments",
+          );
+
+          if (!connection) {
+            return;
+          }
+
+          const newDeploymentId = newDeployment.getDataID();
+
+          const alreadyPresent = (
+            connection.getLinkedRecords("edges") ?? []
+          ).some(
+            (edge) =>
+              edge.getLinkedRecord("node")?.getDataID() === newDeploymentId,
+          );
+
+          if (alreadyPresent) {
+            return;
+          }
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newDeployment,
+            "DeploymentEdge",
+          );
+
+          ConnectionHandler.insertEdgeBefore(connection, edge);
+        },
+      }),
+      [deviceId],
+    ),
+  );
+
   const isOnline = useMemo(() => device?.online ?? false, [device]);
-
-  const handleRefetch = useCallback(() => {
-    refetch({ id: device?.id }, { fetchPolicy: "store-and-network" });
-  }, [refetch, device?.id]);
-
-  useEffect(() => {
-    const intervalId = setInterval(handleRefetch, 5000);
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [handleRefetch]);
 
   if (!device || !device.capabilities.includes("CONTAINER_MANAGEMENT")) {
     return null;
@@ -110,7 +196,6 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
           systemModelName={device.systemModel?.name}
           isOnline={isOnline}
           setErrorFeedback={setErrorFeedback}
-          onDeployComplete={handleRefetch}
         />
         <h5 className="mt-4">
           <FormattedMessage
