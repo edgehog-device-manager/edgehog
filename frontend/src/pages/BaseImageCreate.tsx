@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import Spinner from "@/components/Spinner";
 import CreateBaseImageForm from "@/forms/CreateBaseImage";
 import type { BaseImageOutputData } from "@/forms/CreateBaseImage";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCreate_getOptions_Query($baseImageCollectionId: ID!) {
@@ -162,12 +163,14 @@ const BaseImageCreateContent = ({
         >
           {errorFeedback}
         </Alert>
-        <CreateBaseImageForm
-          baseImageCollectionRef={baseImageCollection}
-          optionsRef={queryRef}
-          onSubmit={handleCreateBaseImage}
-          isLoading={isCreatingBaseImage}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <CreateBaseImageForm
+            baseImageCollectionRef={baseImageCollection}
+            optionsRef={queryRef}
+            onSubmit={handleCreateBaseImage}
+            isLoading={isCreatingBaseImage}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

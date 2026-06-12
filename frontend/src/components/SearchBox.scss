@@ -21,15 +21,16 @@
 .custom-search-group {
   border: 1px solid var(--bs-border-color);
   border-radius: 0.5rem;
+  background-color: transparent;
 
   .search-icon-addon {
-    background-color: transparent;
     border: none;
-    color: var(--bs-secondary-color);
+    background-color: transparent;
+    cursor: text;
   }
-
   .search-input {
     border: none;
+    background-color: transparent;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     padding-left: 0.25rem;

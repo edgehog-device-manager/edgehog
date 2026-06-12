@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2023-2025 SECO Mind Srl
+ * Copyright 2023-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,6 +46,7 @@ import CreateBaseImageCollectionForm, {
   BaseImageCollectionOutputData,
 } from "@/forms/CreateBaseImageCollection";
 import { Link, Route, useNavigate } from "@/Navigation";
+import { Card } from "react-bootstrap";
 
 const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
   query BaseImageCollectionCreate_getOptions_Query(
@@ -287,11 +288,13 @@ const BaseImageCollectionCreatePage = () => {
               }
             />
             <Page.Main>
-              <BaseImageCollectionWrapper
-                getBaseImageCollectionOptionsQuery={
-                  getBaseImageCollectionOptionsQuery
-                }
-              />
+              <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+                <BaseImageCollectionWrapper
+                  getBaseImageCollectionOptionsQuery={
+                    getBaseImageCollectionOptionsQuery
+                  }
+                />
+              </Card>
             </Page.Main>
           </Page>
         )}

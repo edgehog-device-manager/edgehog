@@ -27,6 +27,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type {
   BaseImage_getBaseImage_Query,
@@ -202,13 +203,15 @@ const BaseImageContent = ({ baseImage, queryRef }: BaseImageContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <UpdateBaseImageForm
-          baseImageRef={baseImage}
-          optionsRef={queryRef}
-          onSubmit={handleUpdateBaseImage}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingBaseImage}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <UpdateBaseImageForm
+            baseImageRef={baseImage}
+            optionsRef={queryRef}
+            onSubmit={handleUpdateBaseImage}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingBaseImage}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={baseImage.version}

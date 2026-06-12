@@ -17,6 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { graphql, useFragment } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";
@@ -55,13 +56,14 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-system-status-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.SystemStatusTab.title",
         defaultMessage: "System Status",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <p className="text-muted">
           <FormattedMessage
             id="components.DeviceTabs.SystemStatusTab.lastUpdateAt"
@@ -140,7 +142,7 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };

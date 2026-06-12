@@ -29,6 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { Card } from "react-bootstrap";
 
 import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
 import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
@@ -120,11 +121,7 @@ const ContainersLayoutContainer = ({
     return null;
   }
 
-  return (
-    <div className="mt-3">
-      <ContainersOverview containersRef={containersRef} />
-    </div>
-  );
+  return <ContainersOverview containersRef={containersRef} />;
 };
 
 interface SystemModelsTabProps {
@@ -136,15 +133,16 @@ const SystemModelsTab = ({ release }: SystemModelsTabProps) => {
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="system-models-tab"
       title={intl.formatMessage({
         id: "pages.Release.systemModels",
         defaultMessage: "System Models",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <ReleaseSystemModelsTable systemModelsRef={release} />
-      </div>
+      </Card>
     </Tab>
   );
 };
@@ -174,13 +172,13 @@ const ReleaseDevicesLayoutContainer = ({
   }
 
   return (
-    <div className="mt-3">
+    <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
       <ReleaseDevicesTable
         deploymentsRef={deploymentsRef}
         loading={isLoadingNext}
         onLoadMore={onLoadMore}
       />
-    </div>
+    </Card>
   );
 };
 
@@ -213,6 +211,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         </Alert>
 
         <Tabs
+          className="pt-3 d-flex flex-column flex-grow-1"
           activeKey={currentTabKey}
           tabsOrder={TAB_KEYS}
           onChange={(tabKey) =>
@@ -226,6 +225,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           }
         >
           <Tab
+            className="pt-3 d-flex flex-column flex-grow-1"
             eventKey="containers-tab"
             title={intl.formatMessage({
               id: "pages.Release.containers",
@@ -238,6 +238,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           <SystemModelsTab release={release} />
 
           <Tab
+            className="pt-3 d-flex flex-column flex-grow-1"
             eventKey="devices-tab"
             title={intl.formatMessage({
               id: "pages.Release.devices",

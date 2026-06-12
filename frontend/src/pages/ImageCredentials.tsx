@@ -28,6 +28,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay";
+import { Card } from "react-bootstrap";
 
 import type { ImageCredentials_getImageCredentials_Query } from "@/api/__generated__/ImageCredentials_getImageCredentials_Query.graphql";
 import { ImageCredentials_ImageCredentialsFragment$key } from "@/api/__generated__/ImageCredentials_ImageCredentialsFragment.graphql";
@@ -150,15 +151,17 @@ const ImageCredentialsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ImageCredentialsLayoutContainer
-          imageCredentialsData={imageCredentialsData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <SearchBox
+            className=" pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ImageCredentialsLayoutContainer
+            imageCredentialsData={imageCredentialsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2022-2025 SECO Mind Srl
+ * Copyright 2022-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@
 import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
 import Alert from "@/components/Alert";
@@ -143,10 +144,12 @@ const DeviceGroupCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <DeviceGroupCreateForm
-          onSubmit={handleCreateDeviceGroup}
-          isLoading={isCreatingDeviceGroup}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <DeviceGroupCreateForm
+            onSubmit={handleCreateDeviceGroup}
+            isLoading={isCreatingDeviceGroup}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

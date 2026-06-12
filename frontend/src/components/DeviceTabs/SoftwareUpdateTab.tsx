@@ -25,7 +25,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Card, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
@@ -275,13 +275,14 @@ const DeviceSoftwareUpdateTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-software-update-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.SoftwareUpdateTab.title",
         defaultMessage: "Software Updates",
       })}
     >
-      <div className="mt-3">
+      <Card className="h-100 border-0 p-3 shadow-sm mb-3">
         <h5>
           <FormattedMessage
             id="components.DeviceTabs.SoftwareUpdateTab.manualOTAUpdate"
@@ -353,14 +354,17 @@ const DeviceSoftwareUpdateTab = ({
             )}
           </Stack>
         </Suspense>
+      </Card>
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <h5 className="mt-4">
           <FormattedMessage
             id="components.DeviceTabs.SoftwareUpdateTab.updatesHistory"
             defaultMessage="History"
           />
         </h5>
+
         <OperationTable otaOperationsRef={otaOperationsRef} />
-      </div>
+      </Card>
     </Tab>
   );
 };

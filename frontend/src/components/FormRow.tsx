@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2025 SECO Mind Srl
+  Copyright 2025-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,6 +21,8 @@
 import { ReactNode } from "react";
 import { Row, Col, Form } from "react-bootstrap";
 
+import "@/components/FormRow.scss";
+
 type FormRowVariant = "form-group" | "simple-row";
 
 export interface FormRowProps {
@@ -35,8 +37,11 @@ export interface FormRowProps {
   valueCol?: number;
 }
 
-export const FormRowWithMargin = (props: FormRowProps) => (
-  <FormRow {...props} className="mb-4" />
+export const FormRowWithMargin = ({ className, ...props }: FormRowProps) => (
+  <FormRow
+    {...props}
+    className={["mb-4", className].filter(Boolean).join(" ")}
+  />
 );
 
 export const SimpleFormRow = (props: FormRowProps) => (
@@ -51,8 +56,8 @@ export const FormRow = ({
   className,
   labelClassName,
   valueColClassName,
-  labelCol = 3,
-  valueCol = 9,
+  labelCol = 2,
+  valueCol = 10,
 }: FormRowProps) => {
   if (layout === "simple-row") {
     return (
@@ -68,7 +73,7 @@ export const FormRow = ({
   }
 
   return (
-    <Form.Group as={Row} controlId={id} className={className}>
+    <Form.Group as={Row} controlId={id} className={`mb-2 ${className}`}>
       <Form.Label column sm={labelCol} className={labelClassName}>
         {label}
       </Form.Label>

@@ -39,7 +39,11 @@ type PageProps = {
 
 const Page = ({ children, className = "", style }: PageProps) => {
   return (
-    <div data-testid="page" className={`p-4 ${className}`} style={style}>
+    <div
+      data-testid="page"
+      className={`p-4 flex-grow-1 d-flex flex-column gap-3 min-vh-100 ${className}`}
+      style={style}
+    >
       {children}
     </div>
   );
@@ -67,7 +71,10 @@ type PageMainProps = {
 
 const PageMain = ({ children, className = "", style }: PageMainProps) => {
   return (
-    <main className={`mt-4 ${className}`} style={style}>
+    <main
+      className={`flex-grow-1 d-flex flex-column ${className}`}
+      style={style}
+    >
       {children}
     </main>
   );
@@ -251,7 +258,7 @@ const BreadcrumbItems = ({ pageTitle }: BreadcrumbItemsProps) => {
             {...linkProps}
             key={index}
             active={active}
-            className={active ? "fw-bold" : ""}
+            className={`mb-1  ${active ? "fw-bold" : ""}`}
           >
             {label}
           </Breadcrumb.Item>

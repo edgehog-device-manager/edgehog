@@ -29,6 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { Card } from "react-bootstrap";
 
 import type {
   CreateReleaseInput,
@@ -184,7 +185,9 @@ const ReleaseWrapper = ({ getReleaseOptionsQuery }: ReleaseWrapperProps) => {
         }
       />
       <Page.Main>
-        <Release releaseOptions={releaseOptions} />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <Release releaseOptions={releaseOptions} />
+        </Card>
       </Page.Main>
     </Page>
   );

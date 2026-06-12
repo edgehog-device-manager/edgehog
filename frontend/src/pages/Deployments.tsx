@@ -28,6 +28,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import { Deployments_DeploymentsFragment$key } from "@/api/__generated__/Deployments_DeploymentsFragment.graphql";
 import type { Deployments_deployment_created_Subscription } from "@/api/__generated__/Deployments_deployment_created_Subscription.graphql";
@@ -322,15 +323,17 @@ const DeploymentsContent = ({
         }
       ></Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <DeploymentsLayoutContainer
-          deploymentsData={deploymentsData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <DeploymentsLayoutContainer
+            deploymentsData={deploymentsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

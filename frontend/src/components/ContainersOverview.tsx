@@ -29,6 +29,7 @@ import type {
 import Button from "@/components/Button";
 import ContainerDetails from "@/components/ContainerDetails";
 import "@/components/ContainersOverview.scss";
+import { Card } from "react-bootstrap";
 
 const CONTAINERS_TABLE_FRAGMENT = graphql`
   fragment ContainersOverview_ContainerEdgeFragment on ContainerConnection {
@@ -70,14 +71,14 @@ const ContainersOverview = ({
 
   if (containers.length === 0) {
     return (
-      <div className={className}>
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <p>
           <FormattedMessage
             id="components.ContainersOverview.noContainers"
             defaultMessage="No containers available."
           />
         </p>
-      </div>
+      </Card>
     );
   }
 
