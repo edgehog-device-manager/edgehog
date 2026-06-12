@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2022-2025 SECO Mind Srl
+ * Copyright 2022-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ interface AuthProviderProps {
 const AuthProvider = ({ children, fetchGraphQL }: AuthProviderProps) => {
   const { session, updateSession } = useSession();
   const [isValidatingInitialConfig, setIsValidatingInitialConfig] = useState(
-    hasRequiredValues(session),
+    () => hasRequiredValues(session),
   );
 
   const validateSession = useCallback(

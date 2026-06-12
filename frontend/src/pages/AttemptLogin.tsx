@@ -28,7 +28,7 @@ import type { Session } from "../contexts/Session";
 import { useAuth } from "../contexts/Auth";
 
 const AttemptLogin = () => {
-  const auth = useAuth();
+  const { login, logout } = useAuth();
   const { search } = useLocation();
   const searchParams = new URLSearchParams(search);
   const tenantSlug = searchParams.get("tenantSlug") || "";
@@ -45,24 +45,24 @@ const AttemptLogin = () => {
       return;
     }
     const session: Session = {
-      tenantSlug: tenantSlug,
-      authToken: authToken,
+      tenantSlug,
+      authToken,
     };
     commitLocalUpdate(relayEnvironment, (store) => store.invalidateStore());
-    auth
-      .login(session, false)
+
+    login(session, false)
       .then((isValidLogin) => {
         if (isValidLogin) {
           navigate(redirectTo, { replace: true });
         } else {
           // Logout if credentials were not valid
-          auth.logout();
+          logout();
           navigate(Route.login, { replace: true });
         }
       })
       .catch(() => {
         // Logout on generic login error
-        auth.logout();
+        logout();
         navigate(Route.login, { replace: true });
       });
   }, []);

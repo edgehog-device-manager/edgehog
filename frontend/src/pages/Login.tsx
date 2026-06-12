@@ -44,8 +44,8 @@ const getInitialFormData = (searchParams: URLSearchParams): FormData => ({
 });
 
 const LoginPage = () => {
-  const location = useLocation();
-  const urlSearchParams = new URLSearchParams(location.search);
+  const { search } = useLocation();
+  const urlSearchParams = new URLSearchParams(search);
   const initialFormData = getInitialFormData(urlSearchParams);
   const redirectTo = urlSearchParams.get("redirectTo") || "";
   const shouldAutoLogin = Boolean(
@@ -55,7 +55,7 @@ const LoginPage = () => {
   const [validated, setValidated] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const [isLoggingIn, setIsLoggingIn] = useState(shouldAutoLogin);
-  const auth = useAuth();
+  const { login } = useAuth();
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -63,7 +63,7 @@ const LoginPage = () => {
     (formData: FormData) => {
       const session = pick(formData, ["tenantSlug", "authToken"]);
       const persistConfig = formData.keepMeLoggedIn;
-      auth.login(session, persistConfig).then((success) => {
+      login(session, persistConfig).then((success) => {
         if (success) {
           navigate(redirectTo, { replace: true });
         } else {
@@ -77,7 +77,7 @@ const LoginPage = () => {
         }
       });
     },
-    [auth, navigate, redirectTo],
+    [login, navigate, redirectTo],
   );
 
   const handleSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
@@ -110,6 +110,14 @@ const LoginPage = () => {
     // Run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  if (shouldAutoLogin && isLoggingIn) {
+    return (
+      <div className="d-flex vh-100 flex-column justify-content-center align-items-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <AuthPage>

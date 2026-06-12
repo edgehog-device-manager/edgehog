@@ -20,7 +20,13 @@
 
 import get from "lodash/get";
 import omit from "lodash/omit";
-import React, { createContext, useCallback, useContext, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+} from "react";
 import Cookies from "js-cookie";
 
 type Session = {
@@ -80,8 +86,13 @@ const SessionProvider = ({ children }: { children: React.ReactNode }) => {
     [],
   );
 
+  const contextValue = useMemo(
+    () => ({ session, updateSession }),
+    [session, updateSession],
+  );
+
   return (
-    <SessionContext.Provider value={{ session, updateSession }}>
+    <SessionContext.Provider value={contextValue}>
       {children}
     </SessionContext.Provider>
   );
