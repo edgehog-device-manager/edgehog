@@ -443,8 +443,13 @@ avoid-nitpick:
     @echo "🤓 everything should be good now."
 
 test-openfga:
-    @echo "Testing the model"
-    (fga model test --tests fga/openfga/tests/*)
+    #!/usr/bin/env bash
+    echo "Testing the model"
+    files=$(find fga/openfga -type f -name '*.fga.yaml')
+    for file in $files; do
+      echo "====== Testing $file ======";
+      fga model test --tests $file
+    done
 
 # Show available recipes with descriptions
 help:

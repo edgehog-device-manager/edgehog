@@ -27,15 +27,14 @@ module hardware_type
 type hardware_type
   relations
     define tenant:      [tenant]
-    define alias:       [hardware_type]
 
-    define blocklisted: [user, group#member] or hardware_type_blocklisted from tenant or blocklisted from alias
+    define blocklisted: [user, group#member] or hardware_type_blocklisted from tenant
 
-    define computed_can_view: can_edit or can_delete or (can_view_hardware_types from tenant) or (can_view from alias)
+    define computed_can_view: can_edit or can_delete or (can_view_hardware_types from tenant)
 
     define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
-    define can_edit:    ([user, group#member] or can_edit_hardware_types from tenant or can_edit from alias) but not blocklisted
-    define can_delete:  ([user, group#member] or can_delete_hardware_types from tenant or can_delete from alias) but not blocklisted
+    define can_edit:    ([user, group#member] or can_edit_hardware_types from tenant) but not blocklisted
+    define can_delete:  ([user, group#member] or can_delete_hardware_types from tenant) but not blocklisted
 
 extend type tenant
   relations
