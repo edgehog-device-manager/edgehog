@@ -129,7 +129,6 @@ const ReleasesTable = ({
         data={releases}
         loading={loading}
         onLoadMore={onLoadMore}
-        hideSearch
       />
     </div>
   );

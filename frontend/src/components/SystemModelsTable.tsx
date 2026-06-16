@@ -142,7 +142,6 @@ const SystemModelsTable = ({
       data={systemModels}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

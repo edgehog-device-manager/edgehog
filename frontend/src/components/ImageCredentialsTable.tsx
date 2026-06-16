@@ -109,7 +109,6 @@ const ImageCredentialsTable = ({
       data={imageCredentials}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

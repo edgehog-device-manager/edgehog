@@ -129,7 +129,6 @@ const HardwareTypesTable = ({
       data={hardwareTypes}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

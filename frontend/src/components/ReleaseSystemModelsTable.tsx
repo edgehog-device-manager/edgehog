@@ -90,7 +90,6 @@ const ReleaseSystemModelsTable = ({
           className={className}
           columns={columns}
           data={systemModels}
-          hideSearch
         />
       ) : (
         <p>

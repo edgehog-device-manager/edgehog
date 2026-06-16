@@ -352,7 +352,6 @@ const UpdateTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
-      hideSearch
     />
   );
 };

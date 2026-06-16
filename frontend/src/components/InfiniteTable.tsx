@@ -37,7 +37,6 @@ import { FormattedMessage } from "react-intl";
 import RBTable from "react-bootstrap/Table";
 
 import InfiniteScroll from "@/components/InfiniteScroll";
-import SearchBox from "@/components/SearchBox";
 import { SortDirectionIndicator } from "@/components/Table";
 import "@/components/Table.scss";
 
@@ -60,9 +59,7 @@ type InfiniteTableProps<T extends RowData> = {
   hiddenColumns?: string[];
   sortBy?: SortingState;
   searchFunction?: FilterFnOption<T>;
-  hideSearch?: boolean;
   getRowProps?: (row: Row<T>) => object;
-  setSearchText?: (value: string | null) => void;
 };
 
 const InfiniteTable = <T extends RowData>({
@@ -74,9 +71,7 @@ const InfiniteTable = <T extends RowData>({
   hiddenColumns = HIDDEN_COLUMN_IDS,
   sortBy = SORT_BY_DEFAULT,
   searchFunction,
-  hideSearch = false,
   getRowProps,
-  setSearchText,
 }: InfiniteTableProps<T>) => {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
   const columnVisibility = useMemo(
@@ -105,12 +100,6 @@ const InfiniteTable = <T extends RowData>({
 
   return (
     <div className={`${className}`}>
-      {!hideSearch && (
-        <div className="mb-4 w-100">
-          <SearchBox onChange={(text) => setSearchText?.(text)} />
-        </div>
-      )}
-
       <InfiniteScroll loading={loading} onLoadMore={onLoadMore}>
         <RBTable responsive hover className="mb-0">
           <thead>

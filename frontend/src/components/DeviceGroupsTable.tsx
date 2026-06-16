@@ -117,7 +117,6 @@ const DeviceGroupsTable = ({
       data={deviceGroups}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

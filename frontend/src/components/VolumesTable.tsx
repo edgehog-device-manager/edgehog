@@ -104,7 +104,6 @@ const VolumesTable = ({
       data={volumes}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

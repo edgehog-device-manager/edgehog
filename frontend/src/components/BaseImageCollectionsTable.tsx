@@ -123,7 +123,6 @@ const BaseImageCollectionsTable = ({
       data={baseImageCollections}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

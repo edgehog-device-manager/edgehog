@@ -136,7 +136,6 @@ const BaseImagesTable = ({
       data={baseImages}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

@@ -251,7 +251,6 @@ const FileDownloadTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
-      hideSearch
     />
   );
 };

@@ -123,7 +123,6 @@ const ApplicationsTable = ({
       data={applications}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

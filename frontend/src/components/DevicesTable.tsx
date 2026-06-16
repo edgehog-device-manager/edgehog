@@ -200,7 +200,6 @@ const DevicesTable = ({
       data={devices}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

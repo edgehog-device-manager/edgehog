@@ -166,7 +166,6 @@ const UpdateCampaignsTable = ({
       data={updateCampaigns}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

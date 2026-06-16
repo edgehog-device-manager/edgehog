@@ -164,7 +164,6 @@ const ApplicationDevicesTable = ({
         data={tableData}
         loading={loading}
         onLoadMore={onLoadMore}
-        hideSearch
       />
     </div>
   );

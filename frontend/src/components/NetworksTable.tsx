@@ -125,7 +125,6 @@ const NetworksTable = ({
       data={networks}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

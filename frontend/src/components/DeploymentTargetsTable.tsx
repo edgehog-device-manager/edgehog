@@ -259,7 +259,6 @@ const DeploymentTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
-      hideSearch
     />
   );
 };

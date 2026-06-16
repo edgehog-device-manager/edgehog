@@ -130,7 +130,6 @@ const ChannelsTable = ({
       data={channels}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

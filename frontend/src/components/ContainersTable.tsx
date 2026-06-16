@@ -113,7 +113,6 @@ const ContainersTable = ({
       data={containers}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

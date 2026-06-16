@@ -136,7 +136,6 @@ const ReleaseDevicesTable = ({
           data={deployments}
           loading={loading}
           onLoadMore={onLoadMore}
-          hideSearch
         />
       ) : (
         <p>

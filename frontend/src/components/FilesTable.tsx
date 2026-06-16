@@ -219,7 +219,6 @@ const FilesTable = ({
         data={files}
         loading={loading}
         onLoadMore={onLoadMore}
-        hideSearch
       />
       {fileToDelete && (
         <DeleteModal
