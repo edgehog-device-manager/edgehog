@@ -46,7 +46,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           submodules: recursive
       - name: Start Rustfs
@@ -81,7 +81,7 @@ jobs:
           ./mc mb rustfs/edgehog;
           ./mc anonymous set download rustfs/edgehog;
 
-      - uses: team-alembic/staple-actions/actions/mix-task@6ea0d8a51c3c97a530d3c34cfb8ab9c15a1de4a1 # main
+      - uses: team-alembic/staple-actions/actions/mix-task@8b0f5a1a7cadfbc86c2d00343d4a06a45352ef13 # main
         with:
           mix-env: test
           working-directory: backend
