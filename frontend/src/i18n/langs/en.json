@@ -3534,12 +3534,6 @@
   "pages.HardwareTypes.createButton": {
     "defaultMessage": "Create Hardware Type"
   },
-  "pages.HardwareTypes.noHardwareTypes.message": {
-    "defaultMessage": "You haven't created any hardware type yet."
-  },
-  "pages.HardwareTypes.noHardwareTypes.title": {
-    "defaultMessage": "This space is empty"
-  },
   "pages.HardwareTypes.title": {
     "defaultMessage": "Hardware Types"
   },
@@ -3735,12 +3729,6 @@
   },
   "pages.SystemModels.createButton": {
     "defaultMessage": "Create System Model"
-  },
-  "pages.SystemModels.noSystemModels.message": {
-    "defaultMessage": "You haven't created any system model yet."
-  },
-  "pages.SystemModels.noSystemModels.title": {
-    "defaultMessage": "This space is empty"
   },
   "pages.SystemModels.title": {
     "defaultMessage": "System Models"

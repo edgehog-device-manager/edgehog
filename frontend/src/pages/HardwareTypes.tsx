@@ -36,7 +36,6 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import HardwareTypesTable from "@/components/HardwareTypesTable";
 import Page from "@/components/Page";
-import Result from "@/components/Result";
 import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
@@ -160,35 +159,17 @@ const HardwareTypesContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        {hardwareTypesData.hardwareTypes?.count === 0 ? (
-          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-            <Result.EmptyList
-              title={
-                <FormattedMessage
-                  id="pages.HardwareTypes.noHardwareTypes.title"
-                  defaultMessage="This space is empty"
-                />
-              }
-            >
-              <FormattedMessage
-                id="pages.HardwareTypes.noHardwareTypes.message"
-                defaultMessage="You haven't created any hardware type yet."
-              />
-            </Result.EmptyList>
-          </Card>
-        ) : (
-          <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
-            <SearchBox
-              className="pb-2"
-              value={searchText}
-              onChange={setSearchText}
-            />
-            <HardwareTypesLayoutContainer
-              hardwareTypesData={hardwareTypesData}
-              searchText={searchText}
-            />
-          </Card>
-        )}
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <SearchBox
+            className="pb-2"
+            value={searchText}
+            onChange={setSearchText}
+          />
+          <HardwareTypesLayoutContainer
+            hardwareTypesData={hardwareTypesData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );
