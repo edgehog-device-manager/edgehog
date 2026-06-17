@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021-2026 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,18 +18,25 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-Mimic.copy(Edgehog.Auth.FGAService)
-Mimic.copy(Openfga.V1.OpenFGAService.Stub)
-Mimic.copy(GRPC.Stub)
+defmodule Edgehog.Containers.Registries do
+  @moduledoc """
+  Container registries.
 
-ExUnit.start(exclude: [:integration_storage, :integration_openfga], capture_log: true)
-Ecto.Adapters.SQL.Sandbox.mode(Edgehog.Repo, :manual)
+  These registries act as points to collect and manage processes that handle the
+  provisioning of resources to the device.
+  """
+  use Supervisor
 
-Mox.defmock(Edgehog.Geolocation.GeolocationProviderMock,
-  for: Edgehog.Geolocation.GeolocationProvider
-)
+  def start_link(args) do
+    Supervisor.start_link(__MODULE__, args, name: __MODULE__)
+  end
 
-Mox.defmock(Edgehog.Geolocation.GeocodingProviderMock,
-  for: Edgehog.Geolocation.GeocodingProvider
-)
-Mimic.copy(Edgehog.Containers.Image.Deployment.Provisioner)
+  @impl Supervisor
+  def init(_args) do
+    children = [
+      {Registry, keys: :unique, name: Image.Deployment.Provisioner.Registry},
+    ]
+
+    Supervisor.init(children, strategy: :one_for_one)
+  end
+end

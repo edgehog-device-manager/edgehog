@@ -20,27 +20,18 @@ defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Devices
+  alias Edgehog.Containers.Image.Deployment.Provisioner
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
+    image_deployment = changeset.data
 
-    with {:ok, image_deployment} <-
-           Ash.load(changeset.data, [:image, :device, :state], tenant: tenant) do
-      image = image_deployment.image
-      device = image_deployment.device
+    Ash.Changeset.after_action(changeset, fn _changeset, result ->
+      Provisioner.provision(image_deployment, deployment, tenant)
 
-      with {:ok, _device} <-
-             Devices.send_create_image_request(device, image, deployment, tenant: tenant) do
-        maybe_update_state(changeset, image_deployment.state)
-      end
-    end
+      {:ok, result}
+    end)
   end
-
-  defp maybe_update_state(changeset, :created),
-    do: Ash.Changeset.change_attribute(changeset, :state, :sent)
-
-  defp maybe_update_state(changeset, _), do: changeset
 end

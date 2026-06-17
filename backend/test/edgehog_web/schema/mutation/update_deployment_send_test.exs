@@ -27,6 +27,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
   alias Edgehog.Astarte.Device.CreateContainerRequestMock
   alias Edgehog.Astarte.Device.CreateDeploymentRequestMock
   alias Edgehog.Astarte.Device.CreateImageRequestMock
+  alias Edgehog.Containers.Image.Deployment.Provisioner, as: ImageProvisioner
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do
@@ -41,7 +42,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
         :ok
       end)
 
-      expect(CreateImageRequestMock, :send_create_image_request, fn _, _, _ -> :ok end)
+      expect(ImageProvisioner, :provision, fn _, _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment]
