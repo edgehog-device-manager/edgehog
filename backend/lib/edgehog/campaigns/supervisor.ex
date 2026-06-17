@@ -25,8 +25,6 @@ defmodule Edgehog.Campaigns.Supervisor do
   alias Edgehog.Campaigns.ExecutorRegistry
   alias Edgehog.Campaigns.ExecutorSupervisor
 
-  require Ash.Query
-
   @base_children [
     {Registry, name: ExecutorRegistry, keys: :unique},
     ExecutorSupervisor

@@ -34,9 +34,6 @@ defmodule Edgehog.Auth.Policies.Check do
   alias Ash.Policy.SimpleCheck
   alias Edgehog.Auth.FGAService
 
-  require Ash.Query
-  require Logger
-
   @subject_type "user"
 
   @impl SimpleCheck

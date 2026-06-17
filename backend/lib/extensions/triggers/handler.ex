@@ -53,7 +53,6 @@ defmodule Ash.Astarte.Triggers.Handler do
   alias Edgehog.Astarte
 
   require Logger
-  require Ash.Query
 
   def handle_trigger(tenant, realm, data) do
     read_query =

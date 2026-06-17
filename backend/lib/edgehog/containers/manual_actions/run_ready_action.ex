@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Containers.ManualActions.RunReadyAction do
   @moduledoc false
@@ -24,8 +22,6 @@ defmodule Edgehog.Containers.ManualActions.RunReadyAction do
   use Ash.Resource.ManualUpdate
 
   alias Edgehog.Devices
-
-  require Ash.Query
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do

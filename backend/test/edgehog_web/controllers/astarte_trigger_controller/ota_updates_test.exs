@@ -27,8 +27,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.OtaUpdatesTest do
 
   alias Edgehog.OSManagement
 
-  require Ash.Query
-
   describe "process_event/2 for OTA updates" do
     setup %{tenant: tenant} do
       # Some events might trigger an ephemeral image deletion

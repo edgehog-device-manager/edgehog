@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 erlang 28.5
-elixir 1.20.0
+elixir 1.20.1
 nodejs 24.16.0
 postgres 18.0
 dprint 0.54.0

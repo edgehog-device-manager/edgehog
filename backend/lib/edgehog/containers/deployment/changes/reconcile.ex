@@ -28,8 +28,6 @@ defmodule Edgehog.Containers.Deployment.Changes.Reconcile do
 
   alias Edgehog.Containers.Reconciler
 
-  require Logger
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     deployment = Ash.load!(changeset.data, :device, tenant: tenant)

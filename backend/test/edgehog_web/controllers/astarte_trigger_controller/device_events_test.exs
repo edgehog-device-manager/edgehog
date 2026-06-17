@@ -29,8 +29,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
   alias Edgehog.Containers.ReconcilerMock
   alias Edgehog.Devices.Device
 
-  require Ash.Query
-
   describe "process_event for device events" do
     setup %{conn: conn, tenant: tenant} do
       cluster = cluster_fixture()

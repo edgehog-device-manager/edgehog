@@ -24,8 +24,6 @@ defmodule Edgehog.Labeling.Tag do
       AshGraphql.Resource
     ]
 
-  require Ash.Query
-
   resource do
     description """
     A Tag that can be applied to a resource.

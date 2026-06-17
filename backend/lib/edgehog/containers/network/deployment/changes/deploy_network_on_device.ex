@@ -22,8 +22,6 @@ defmodule Edgehog.Containers.Network.Deployment.Changes.DeployNetworkOnDevice do
 
   alias Edgehog.Devices
 
-  require Logger
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     network_deployment = changeset.data

@@ -39,8 +39,6 @@ defmodule Edgehog.Tenants.Tenant do
 
   require Ash.Query
 
-  @type record :: Ash.Resource.record()
-
   graphql do
     type :tenant_info
 
