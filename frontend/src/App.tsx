@@ -18,9 +18,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useState } from "react";
 import { Navigate, useRoutes } from "react-router-dom";
 
-import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
 import { useAuth } from "@/contexts/Auth";
@@ -81,7 +81,7 @@ import FileDownloadCampaignCreatePage from "@/pages/FileDownloadCampaignCreate";
 import FileDownloadCampaignPage from "@/pages/FileDownloadCampaign";
 
 import { hideNavigationElements } from "@/api";
-import { bugs, repository, version } from "../package.json";
+import { version, repository, documentation } from "../package.json";
 
 type RouterRule = {
   path: string;
@@ -164,30 +164,71 @@ function App() {
   const routes = auth.isAuthenticated ? authenticatedRoutes : publicRoutes;
   const RouterElement = useRoutes(routes);
 
-  return (
-    <div data-testid="app" className="d-flex vh-100 flex-column">
-      {auth.isAuthenticated && !hideNavigationElements && (
-        <header className="flex-grow-0">
-          <Topbar />
-        </header>
-      )}
-      <main className="vh-100 flex-grow-1 d-flex  overflow-hidden">
-        {auth.isAuthenticated && !hideNavigationElements && (
-          <aside className="flex-grow-0 flex-shrink-0 overflow-auto">
-            <Sidebar />
-          </aside>
-        )}
+  const showNavigation = auth.isAuthenticated && !hideNavigationElements;
+
+  const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const toggleDesktopCollapse = () => setIsDesktopCollapsed((prev) => !prev);
+  const toggleIsMobileMenuOpen = () => setIsMobileMenuOpen((prev) => !prev);
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  // Embedded Mode (No Sidebar)
+  if (auth.isAuthenticated && hideNavigationElements) {
+    return (
+      <main className="vh-100 flex-grow-1 d-flex overflow-hidden bg-light">
         <section className="flex-grow-1 overflow-auto">{RouterElement}</section>
       </main>
-      {auth.isAuthenticated && !hideNavigationElements && (
-        <Footer
-          appName={"Edgehog Device Manager"}
-          appVersion={version}
-          homepageUrl={repository.url}
-          repoUrl={repository.url}
-          issueTrackerUrl={bugs.url}
-        />
-      )}
+    );
+  }
+
+  return (
+    <div
+      data-testid="app"
+      className="d-flex vh-100 flex-column overflow-hidden bg-light"
+    >
+      {showNavigation && <Topbar onToggle={toggleIsMobileMenuOpen} />}
+
+      <main
+        className={`vh-100 flex-grow-1 overflow-hidden position-relative ${
+          showNavigation ? "d-flex" : "d-block"
+        }`}
+      >
+        {showNavigation && (
+          <div className="d-none d-md-block flex-shrink-0 h-100">
+            <Sidebar
+              appName="Edgehog Device Manager"
+              appVersion={version}
+              repoUrl={repository.url}
+              docsUrl={documentation.url}
+              isDesktopCollapsed={isDesktopCollapsed}
+              isMobileMenuOpen={false}
+              onToggleCollapse={toggleDesktopCollapse}
+            />
+          </div>
+        )}
+
+        {showNavigation && isMobileMenuOpen && (
+          <>
+            <div
+              className="position-absolute w-100 h-100 bg-dark opacity-50 d-md-none"
+              onClick={closeMobileMenu}
+              style={{ zIndex: 1000 }}
+            />
+
+            <div className="position-absolute d-md-none h-100">
+              <Sidebar
+                appVersion={version}
+                isDesktopCollapsed={false}
+                isMobileMenuOpen
+                onToggleCollapse={toggleDesktopCollapse}
+              />
+            </div>
+          </>
+        )}
+
+        <section className="flex-grow-1 overflow-auto">{RouterElement}</section>
+      </main>
     </div>
   );
 }

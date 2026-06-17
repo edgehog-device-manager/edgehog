@@ -29,6 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
+import { Card } from "react-bootstrap";
 
 import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
 import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
@@ -50,7 +51,7 @@ import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import { Link, Route } from "@/Navigation";
+import { Link, Route, useNavigate } from "@/Navigation";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
@@ -98,6 +99,8 @@ const CONTAINERS_FRAGMENT = graphql`
   }
 `;
 
+const TAB_KEYS = ["containers-tab", "system-models-tab", "devices-tab"];
+
 type Release = NonNullable<Release_getRelease_Query$data["release"]>;
 
 interface ContainersLayoutContainerProps {
@@ -118,11 +121,7 @@ const ContainersLayoutContainer = ({
     return null;
   }
 
-  return (
-    <div className="mt-3">
-      <ContainersOverview containersRef={containersRef} />
-    </div>
-  );
+  return <ContainersOverview containersRef={containersRef} />;
 };
 
 interface SystemModelsTabProps {
@@ -134,15 +133,16 @@ const SystemModelsTab = ({ release }: SystemModelsTabProps) => {
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="system-models-tab"
       title={intl.formatMessage({
         id: "pages.Release.systemModels",
         defaultMessage: "System Models",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <ReleaseSystemModelsTable systemModelsRef={release} />
-      </div>
+      </Card>
     </Tab>
   );
 };
@@ -172,13 +172,13 @@ const ReleaseDevicesLayoutContainer = ({
   }
 
   return (
-    <div className="mt-3">
+    <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
       <ReleaseDevicesTable
         deploymentsRef={deploymentsRef}
         loading={isLoadingNext}
         onLoadMore={onLoadMore}
       />
-    </div>
+    </Card>
   );
 };
 
@@ -189,6 +189,11 @@ interface ReleaseContentProps {
 const ReleaseContent = ({ release }: ReleaseContentProps) => {
   const intl = useIntl();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const { applicationId = "", releaseId = "", activeTab } = useParams();
+  const navigate = useNavigate();
+
+  const currentTabKey = activeTab || TAB_KEYS[0];
 
   return (
     <Page>
@@ -206,10 +211,21 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         </Alert>
 
         <Tabs
-          defaultActiveKey="containers-tab"
-          tabsOrder={["containers-tab", "system-models-tab", "devices-tab"]}
+          className="pt-3 d-flex flex-column flex-grow-1"
+          activeKey={currentTabKey}
+          tabsOrder={TAB_KEYS}
+          onChange={(tabKey) =>
+            navigate(
+              {
+                route: Route.release,
+                params: { applicationId, releaseId, activeTab: tabKey },
+              },
+              { replace: true },
+            )
+          }
         >
           <Tab
+            className="pt-3 d-flex flex-column flex-grow-1"
             eventKey="containers-tab"
             title={intl.formatMessage({
               id: "pages.Release.containers",
@@ -222,6 +238,7 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
           <SystemModelsTab release={release} />
 
           <Tab
+            className="pt-3 d-flex flex-column flex-grow-1"
             eventKey="devices-tab"
             title={intl.formatMessage({
               id: "pages.Release.devices",

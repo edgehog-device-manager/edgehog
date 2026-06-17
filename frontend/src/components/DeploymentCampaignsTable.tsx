@@ -308,7 +308,6 @@ const DeploymentCampaignsTable = ({
       data={deploymentCampaigns}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

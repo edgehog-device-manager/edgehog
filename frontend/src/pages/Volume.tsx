@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { Form, Stack } from "react-bootstrap";
+import { Card, Form, Stack } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -137,59 +137,62 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
         >
           {errorFeedback}
         </Alert>
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <FormRow
+            id="volumeLabel"
+            label={
+              <FormattedMessage
+                id="pages.Volume.label"
+                defaultMessage="Label"
+              />
+            }
+          >
+            <Form.Control value={volume.label ?? ""} readOnly />
+          </FormRow>
 
-        <FormRow
-          id="volumeLabel"
-          label={
-            <FormattedMessage id="pages.Volume.label" defaultMessage="Label" />
-          }
-        >
-          <Form.Control value={volume.label ?? ""} readOnly />
-        </FormRow>
+          <FormRow
+            id="volumeDriver"
+            label={
+              <FormattedMessage
+                id="pages.Volume.driver"
+                defaultMessage="Driver"
+              />
+            }
+          >
+            <Form.Control value={volume.driver ?? ""} readOnly />
+          </FormRow>
 
-        <FormRow
-          id="volumeDriver"
-          label={
-            <FormattedMessage
-              id="pages.Volume.driver"
-              defaultMessage="Driver"
+          <FormRow
+            id="volumeOptions"
+            label={
+              <FormattedMessage
+                id="pages.Volume.options"
+                defaultMessage="Options"
+              />
+            }
+          >
+            <MonacoJsonEditor
+              value={getPrettyOptions()}
+              onChange={() => {}}
+              defaultValue={getPrettyOptions()}
+              readonly={true}
+              initialLines={1}
             />
-          }
-        >
-          <Form.Control value={volume.driver ?? ""} readOnly />
-        </FormRow>
+          </FormRow>
 
-        <FormRow
-          id="volumeOptions"
-          label={
-            <FormattedMessage
-              id="pages.Volume.options"
-              defaultMessage="Options"
-            />
-          }
-        >
-          <MonacoJsonEditor
-            value={getPrettyOptions()}
-            onChange={() => {}}
-            defaultValue={getPrettyOptions()}
-            readonly={true}
-            initialLines={1}
-          />
-        </FormRow>
-
-        <Stack
-          direction="horizontal"
-          gap={3}
-          className="justify-content-end align-items-center"
-        >
-          <Button variant="danger" onClick={handleShowDeleteModal}>
-            <FormattedMessage
-              id="pages.Volume.deleteButton"
-              defaultMessage="Delete"
-            />
-          </Button>
-        </Stack>
-
+          <Stack
+            direction="horizontal"
+            gap={3}
+            className="justify-content-end align-items-center"
+          >
+            <Button variant="danger" onClick={handleShowDeleteModal}>
+              <FormattedMessage
+                id="pages.Volume.deleteButton"
+                defaultMessage="Delete"
+              />
+            </Button>
+          </Stack>
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={volume.label}

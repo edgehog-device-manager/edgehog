@@ -28,6 +28,7 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type {
   SystemModel_getSystemModel_Query,
@@ -229,13 +230,15 @@ const SystemModelContent = ({
         >
           {errorFeedback}
         </Alert>
-        <UpdateSystemModelForm
-          systemModelRef={systemModel}
-          optionsRef={queryRef}
-          onSubmit={handleUpdateSystemModel}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingSystemModel}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ptb-2">
+          <UpdateSystemModelForm
+            systemModelRef={systemModel}
+            optionsRef={queryRef}
+            onSubmit={handleUpdateSystemModel}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingSystemModel}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={systemModel.handle}

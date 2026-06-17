@@ -26,6 +26,7 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { ApplicationsTab_deployedApplications$key } from "@/api/__generated__/ApplicationsTab_deployedApplications.graphql";
 import type { ApplicationsTab_deployedApplications_RefetchQuery } from "@/api/__generated__/ApplicationsTab_deployedApplications_RefetchQuery.graphql";
@@ -169,7 +170,8 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
 
   return (
     <Tab
-      eventKey="applications-tab"
+      className="pt-3 d-flex flex-column flex-grow-1"
+      eventKey="device-applications-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.ApplicationsTab.title",
         defaultMessage: "Applications",
@@ -184,7 +186,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
       >
         {errorFeedback}
       </Alert>
-      <div className="mt-3">
+      <Card className="h-100 border-0 p-3 shadow-sm mb-3">
         <h5>
           <FormattedMessage
             id="components.DeviceTabs.ApplicationsTab.InstallNewApp"
@@ -197,6 +199,8 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
           isOnline={isOnline}
           setErrorFeedback={setErrorFeedback}
         />
+      </Card>
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <h5 className="mt-4">
           <FormattedMessage
             id="components.DeviceTabs.ApplicationsTab.DeployedApplications"
@@ -204,7 +208,7 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
           />
         </h5>
         <DeployedApplicationsTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

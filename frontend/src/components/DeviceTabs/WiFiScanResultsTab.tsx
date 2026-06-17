@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { WiFiScanResultsTab_wifiScanResults$key } from "@/api/__generated__/WiFiScanResultsTab_wifiScanResults.graphql";
 
@@ -46,15 +47,16 @@ const DeviceWiFiScanResultsTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-wifi-scan-results-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.WiFiScanResultsTab.title",
         defaultMessage: "WiFi APs",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <WiFiScanResultsTable deviceRef={device} />
-      </div>
+      </Card>
     </Tab>
   );
 };

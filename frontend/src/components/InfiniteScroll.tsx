@@ -1,7 +1,7 @@
 /*
  * This file is part of Edgehog.
  *
- * Copyright 2025 SECO Mind Srl
+ * Copyright 2025-2026 SECO Mind Srl
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@ type Props = {
 
 const InfiniteScroll = ({
   children,
-  className,
+  className = "",
   loading = false,
   onLoadMore,
 }: Props) => {
@@ -60,12 +60,16 @@ const InfiniteScroll = ({
   }, [sentinelRef, onLoadMore]);
 
   return (
-    <div className={`flex-grow-1 d-flex flex-column ${className}`}>
+    <div className={`flex-grow-1 d-flex flex-column w-100 ${className}`}>
       <div className="overflow-visible overflow-xl-auto" style={containerStyle}>
         {children}
         {(loading || onLoadMore) && (
-          <div className="text-center mt-3" ref={sentinelRef}>
-            <Spinner />
+          <div
+            className="d-flex justify-content-center align-items-center py-4"
+            ref={sentinelRef}
+            style={{ minHeight: "60px" }}
+          >
+            {loading && <Spinner />}
           </div>
         )}
       </div>

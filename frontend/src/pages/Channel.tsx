@@ -31,6 +31,7 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/Alert";
@@ -249,7 +250,7 @@ const ChannelContent = ({ queryRef, channel }: ChannelContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <div className="mb-3">
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
           <ChannelForm
             channelRef={channel}
             optionsRef={channelOptions}
@@ -257,7 +258,7 @@ const ChannelContent = ({ queryRef, channel }: ChannelContentProps) => {
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingChannel}
           />
-        </div>
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={channel.handle}

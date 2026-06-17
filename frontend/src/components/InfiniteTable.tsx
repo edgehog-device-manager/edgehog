@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, Fragment } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -33,11 +33,12 @@ import type {
   SortingState,
   TableOptions,
 } from "@tanstack/react-table";
+import { FormattedMessage } from "react-intl";
+import RBTable from "react-bootstrap/Table";
 
 import InfiniteScroll from "@/components/InfiniteScroll";
-import Icon from "./Icon";
-import RBTable from "react-bootstrap/Table";
-import SearchBox from "./SearchBox";
+import { SortDirectionIndicator } from "@/components/Table";
+import "@/components/Table.scss";
 
 declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -46,19 +47,8 @@ declare module "@tanstack/table-core" {
   }
 }
 
-type SortDirectionIndicatorProps = {
-  className?: string;
-  descending: boolean;
-};
-
-const SortDirectionIndicator = ({
-  className,
-  descending,
-}: SortDirectionIndicatorProps) => (
-  <span className={className}>
-    {descending ? <Icon icon="arrowDown" /> : <Icon icon="arrowUp" />}
-  </span>
-);
+const HIDDEN_COLUMN_IDS: string[] = [];
+const SORT_BY_DEFAULT: SortingState = [];
 
 type InfiniteTableProps<T extends RowData> = {
   columns: TableOptions<T>["columns"];
@@ -69,9 +59,7 @@ type InfiniteTableProps<T extends RowData> = {
   hiddenColumns?: string[];
   sortBy?: SortingState;
   searchFunction?: FilterFnOption<T>;
-  hideSearch?: boolean;
   getRowProps?: (row: Row<T>) => object;
-  setSearchText?: (value: string | null) => void;
 };
 
 const InfiniteTable = <T extends RowData>({
@@ -80,12 +68,10 @@ const InfiniteTable = <T extends RowData>({
   className = "",
   loading = false,
   onLoadMore,
-  hiddenColumns = [],
-  sortBy = [],
+  hiddenColumns = HIDDEN_COLUMN_IDS,
+  sortBy = SORT_BY_DEFAULT,
   searchFunction,
-  hideSearch = false,
   getRowProps,
-  setSearchText,
 }: InfiniteTableProps<T>) => {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
   const columnVisibility = useMemo(
@@ -107,60 +93,83 @@ const InfiniteTable = <T extends RowData>({
     },
     globalFilterFn: searchFunction ?? "auto",
     onSortingChange: setSorting,
-
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
+
   return (
-    <div className={className}>
-      {hideSearch || (
-        <div className="py-2 mb-3">
-          <SearchBox onChange={(text) => setSearchText?.(text)} />
-        </div>
-      )}
-      <InfiniteScroll
-        className={className}
-        loading={loading}
-        onLoadMore={onLoadMore}
-      >
-        <RBTable responsive hover>
+    <div className={`${className}`}>
+      <InfiniteScroll loading={loading} onLoadMore={onLoadMore}>
+        <RBTable responsive hover className="mb-0">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    onClick={header.column.getToggleSortingHandler()}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
+              <tr
+                key={headerGroup.id}
+                className="border-bottom border-light-subtle"
+              >
+                {headerGroup.headers.map((header) => {
+                  const isSortable = header.column.getCanSort();
+                  const isSorted = header.column.getIsSorted();
+
+                  return (
+                    <th
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className={`py-3 fw-bold table-header ${isSortable ? "is-sortable " : ""}`}
+                      onClick={header.column.getToggleSortingHandler()}
+                    >
+                      <div className="d-flex align-items-center text-nowrap">
+                        <span>
+                          {header.isPlaceholder
+                            ? null
+                            : flexRender(
+                                header.column.columnDef.header,
+                                header.getContext(),
+                              )}
+                        </span>
+                        {isSorted && (
+                          <SortDirectionIndicator
+                            className="ms-2"
+                            descending={isSorted === "desc"}
+                          />
                         )}
-                    {header.column.getIsSorted() && (
-                      <SortDirectionIndicator
-                        className="ms-2"
-                        descending={header.column.getIsSorted() === "desc"}
-                      />
-                    )}
-                  </th>
-                ))}
+                      </div>
+                    </th>
+                  );
+                })}
               </tr>
             ))}
           </thead>
-          <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <tr {...(getRowProps ? getRowProps(row) : {})} key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <td key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
-                ))}
+          <tbody className="border-bottom border-light-subtle">
+            {table.getRowModel().rows.length > 0 ? (
+              table.getRowModel().rows.map((row) => (
+                <Fragment key={row.id}>
+                  <tr {...(getRowProps ? getRowProps(row) : {})}>
+                    {row.getVisibleCells().map((cell) => (
+                      <td key={cell.id} className="table-cell">
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                </Fragment>
+              ))
+            ) : (
+              <tr>
+                <td
+                  colSpan={table.getVisibleFlatColumns().length}
+                  className="text-center py-4 text-muted small"
+                >
+                  <FormattedMessage
+                    id="components.InfiniteTable.noRecords"
+                    defaultMessage="No records to display."
+                  />
+                </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </RBTable>
       </InfiniteScroll>

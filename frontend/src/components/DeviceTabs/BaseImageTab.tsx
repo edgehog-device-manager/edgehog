@@ -16,8 +16,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { graphql, useFragment } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
 
 import type { BaseImageTab_baseImage$key } from "@/api/__generated__/BaseImageTab_baseImage.graphql";
 
@@ -57,13 +58,14 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-base-image-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.BaseImageTab.title",
         defaultMessage: "Base Image",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <Stack gap={3}>
           {baseImage.name !== null && (
             <FormRow
@@ -122,7 +124,7 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };

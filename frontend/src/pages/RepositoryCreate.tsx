@@ -22,6 +22,7 @@ import { Suspense, useCallback, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { RepositoryCreate_createRepository_Mutation } from "@/api/__generated__/RepositoryCreate_createRepository_Mutation.graphql";
 
@@ -129,10 +130,12 @@ const Repository = () => {
       >
         {errorFeedback}
       </Alert>
-      <CreateRepositoryForm
-        onSubmit={handleCreateRepository}
-        isLoading={isCreatingRepository}
-      />
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+        <CreateRepositoryForm
+          onSubmit={handleCreateRepository}
+          isLoading={isCreatingRepository}
+        />
+      </Card>
     </>
   );
 };

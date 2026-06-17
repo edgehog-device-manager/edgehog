@@ -358,7 +358,7 @@ const DeploymentContent = ({
             if (deviceId) {
               navigate({
                 route: Route.devicesEdit,
-                params: { deviceId },
+                params: { deviceId, activeTab: "device-applications-tab" },
               });
             }
           });

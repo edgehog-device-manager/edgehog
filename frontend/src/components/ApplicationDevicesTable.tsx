@@ -120,7 +120,10 @@ const ApplicationDevicesTable = ({
       cell: ({ row, getValue }) => (
         <Link
           route={Route.devicesEdit}
-          params={{ deviceId: row.original.device?.id || "" }}
+          params={{
+            deviceId: row.original.device?.id || "",
+            activeTab: "device-applications-tab",
+          }}
         >
           {getValue()}
         </Link>
@@ -161,7 +164,6 @@ const ApplicationDevicesTable = ({
         data={tableData}
         loading={loading}
         onLoadMore={onLoadMore}
-        hideSearch
       />
     </div>
   );

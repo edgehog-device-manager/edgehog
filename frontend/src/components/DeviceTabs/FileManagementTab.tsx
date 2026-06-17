@@ -28,6 +28,7 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import Select from "react-select";
+import { Card } from "react-bootstrap";
 
 import type { FileManagementTab_fileManagement$key } from "@/api/__generated__/FileManagementTab_fileManagement.graphql";
 import type { FileManagementTab_DeviceFilesSubscription } from "@/api/__generated__/FileManagementTab_DeviceFilesSubscription.graphql";
@@ -304,9 +305,13 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
   };
 
   return (
-    <Tab eventKey="device-file-management-tab" title="File Management">
+    <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
+      eventKey="device-file-management-tab"
+      title="File Management"
+    >
       {modeOptions.length > 1 && (
-        <div className="mt-3">
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
           <Form.Group controlId="file-management-mode" className="mb-0">
             <h5>
               <FormattedMessage
@@ -330,7 +335,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
               }}
             />
           </Form.Group>
-        </div>
+        </Card>
       )}
 
       {renderTabContent()}

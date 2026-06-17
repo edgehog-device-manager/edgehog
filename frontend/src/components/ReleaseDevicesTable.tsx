@@ -101,7 +101,10 @@ const ReleaseDevicesTable = ({
       cell: ({ row, getValue }) => (
         <Link
           route={Route.devicesEdit}
-          params={{ deviceId: row.original.device?.id || "" }}
+          params={{
+            deviceId: row.original.device?.id || "",
+            activeTab: "device-applications-tab",
+          }}
         >
           {getValue()}
         </Link>
@@ -133,7 +136,6 @@ const ReleaseDevicesTable = ({
           data={deployments}
           loading={loading}
           onLoadMore={onLoadMore}
-          hideSearch
         />
       ) : (
         <p>

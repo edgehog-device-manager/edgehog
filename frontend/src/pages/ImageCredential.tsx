@@ -19,7 +19,7 @@
  */
 
 import { ReactNode, Suspense, useCallback, useEffect, useState } from "react";
-import { Alert } from "react-bootstrap";
+import { Alert, Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import {
@@ -131,10 +131,12 @@ const ImageCredentialContent = ({
         >
           {errorFeedback}
         </Alert>
-        <UpdateImageCredentialForm
-          imageCredentialRef={imageCredential}
-          onDelete={handleShowDeleteModal}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <UpdateImageCredentialForm
+            imageCredentialRef={imageCredential}
+            onDelete={handleShowDeleteModal}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={imageCredential.label}

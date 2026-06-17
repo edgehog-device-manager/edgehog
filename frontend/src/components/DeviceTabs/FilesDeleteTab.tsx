@@ -19,6 +19,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from "react";
+import { Card } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
   ConnectionHandler,
@@ -365,7 +366,7 @@ const FilesDeleteTab = ({
 
   const content = (
     <>
-      <div className="mt-3">
+      <Card className="h-100 border-0 p-3 shadow-sm mb-3">
         <Alert
           show={!!errorFeedback}
           variant="danger"
@@ -384,11 +385,9 @@ const FilesDeleteTab = ({
             isOnline={isOnline}
           />
         </Stack>
-      </div>
+      </Card>
 
-      <hr />
-
-      <div className="mt-4">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <h5>
           <FormattedMessage
             id="components.DeviceTabs.FilesDeleteTab.requestHistory"
@@ -397,7 +396,7 @@ const FilesDeleteTab = ({
         </h5>
 
         <FileDeleteRequestsTable requests={fileDeleteRequests} />
-      </div>
+      </Card>
     </>
   );
 
@@ -407,6 +406,7 @@ const FilesDeleteTab = ({
 
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-files-delete-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.FilesDeleteTab.title",

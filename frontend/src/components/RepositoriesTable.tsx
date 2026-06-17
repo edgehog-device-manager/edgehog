@@ -107,7 +107,6 @@ const RepositoriesTable = ({
       data={repositories}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

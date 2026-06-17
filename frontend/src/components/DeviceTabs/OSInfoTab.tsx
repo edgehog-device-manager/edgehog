@@ -18,6 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type { OSInfoTab_osInfo$key } from "@/api/__generated__/OSInfoTab_osInfo.graphql";
 
@@ -55,13 +56,14 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
   }
   return (
     <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
       eventKey="device-os-info-tab"
       title={intl.formatMessage({
         id: "components.DeviceTabs.OSInfoTab.title",
         defaultMessage: "Operating System",
       })}
     >
-      <div className="mt-3">
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <Stack gap={3}>
           {osInfo.name !== null && (
             <FormRow
@@ -90,7 +92,7 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
             </FormRow>
           )}
         </Stack>
-      </div>
+      </Card>
     </Tab>
   );
 };

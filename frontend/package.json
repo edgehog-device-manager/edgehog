@@ -8,6 +8,9 @@
     "type": "git",
     "url": "https://github.com/edgehog-device-manager/edgehog"
   },
+  "documentation": {
+    "url": "https://docs.edgehog.io/"
+  },
   "license": "Apache-2.0",
   "type": "module",
   "dependencies": {

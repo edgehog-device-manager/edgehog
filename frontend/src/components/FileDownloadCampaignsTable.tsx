@@ -175,7 +175,6 @@ const FileDownloadCampaignsTable = ({
       data={campaigns}
       loading={loading}
       onLoadMore={onLoadMore}
-      hideSearch
     />
   );
 };

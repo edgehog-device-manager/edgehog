@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2022 SECO Mind Srl
+  Copyright 2022-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -21,16 +21,13 @@
 import Badge from "react-bootstrap/Badge";
 import type { BadgeProps } from "react-bootstrap/Badge";
 
+import "@/components/Tag.scss";
+
 type Props = Omit<BadgeProps, "pill" | "bg">;
 
 const Tag = ({ children, className, ...restProps }: Props) => {
   return (
-    <Badge
-      bg="primary"
-      pill
-      className={`py-1 px-3 ${className}`}
-      {...restProps}
-    >
+    <Badge pill className={`tag py-1 px-3 ${className}`} {...restProps}>
       {children}
     </Badge>
   );

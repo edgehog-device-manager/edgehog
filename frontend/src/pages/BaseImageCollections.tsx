@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import { BaseImageCollections_BaseImageCollectionsFragment$key } from "@/api/__generated__/BaseImageCollections_BaseImageCollectionsFragment.graphql";
 import type { BaseImageCollections_getBaseImageCollections_Query } from "@/api/__generated__/BaseImageCollections_getBaseImageCollections_Query.graphql";
@@ -154,15 +155,17 @@ const BaseImageCollectionsContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <BaseImageCollectionsLayoutContainer
-          baseImageCollectionsData={baseImageCollectionsData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <BaseImageCollectionsLayoutContainer
+            baseImageCollectionsData={baseImageCollectionsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

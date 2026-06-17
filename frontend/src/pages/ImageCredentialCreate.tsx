@@ -21,6 +21,7 @@
 import { ReactNode, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useMutation } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { ImageCredentialCreate_imageCredentialCreate_Mutation } from "@/api/__generated__/ImageCredentialCreate_imageCredentialCreate_Mutation.graphql";
 
@@ -103,10 +104,12 @@ const ImageCredentialCreatePage = () => {
         >
           {errorFeedback}
         </Alert>
-        <CreateImageCredentialForm
-          onSubmit={handleCreateImageCredential}
-          isLoading={isCreatingImageCredential}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <CreateImageCredentialForm
+            onSubmit={handleCreateImageCredential}
+            isLoading={isCreatingImageCredential}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

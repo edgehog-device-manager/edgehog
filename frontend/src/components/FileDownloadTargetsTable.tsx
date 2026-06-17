@@ -91,7 +91,10 @@ const columns = [
     cell: ({ row, getValue }) => (
       <Link
         route={Route.devicesEdit}
-        params={{ deviceId: row.original.device.id }}
+        params={{
+          deviceId: row.original.device.id,
+          activeTab: "device-file-management-tab",
+        }}
       >
         {getValue()}
       </Link>
@@ -250,7 +253,6 @@ const FileDownloadTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
-      hideSearch
     />
   );
 };

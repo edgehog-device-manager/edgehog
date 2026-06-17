@@ -18,23 +18,19 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.containerFormLayout {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
+.tab-button.active {
+  color: var(--cp-color-accent) !important;
+  position: relative;
 
-.containerSectionCard {
-  border-radius: 0.5rem;
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  padding: 10px;
-}
-
-.containerSectionCard:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.containerSectionCard .fw-bold {
-  font-size: 14px;
+  &::after {
+    position: absolute;
+    content: "";
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--cp-color-accent);
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+  }
 }

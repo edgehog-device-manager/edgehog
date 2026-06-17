@@ -19,7 +19,7 @@
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Col, Form, Row } from "react-bootstrap";
+import { Card, Col, Form, Row } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -40,7 +40,7 @@ import type {
 } from "@/api/__generated__/Application_getApplication_Query.graphql";
 import { Releases_PaginationQuery } from "@/api/__generated__/Releases_PaginationQuery.graphql";
 
-import { Link, Route } from "@/Navigation";
+import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/Alert";
 import ApplicationDevicesTable from "@/components/ApplicationDevicesTable";
 import Button from "@/components/Button";
@@ -107,6 +107,8 @@ const RELEASE_SUBSCRIPTION = graphql`
     }
   }
 `;
+
+const TAB_KEYS = ["releases-tab", "devices-tab"];
 
 type SelectedRelease = ReleaseTableRecord;
 
@@ -289,7 +291,11 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
   const [releaseToDelete, setReleaseToDelete] =
     useState<SelectedRelease | null>(null);
-  const { applicationId = "" } = useParams();
+
+  const { applicationId = "", activeTab } = useParams();
+  const navigate = useNavigate();
+
+  const currentTabKey = activeTab || TAB_KEYS[0];
 
   return (
     <Page>
@@ -315,44 +321,59 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
           {errorFeedback}
         </Alert>
 
-        <Form.Group as={Row} controlId="application" className="mt-3 mb-4">
-          <Form.Label column sm={2}>
-            <FormattedMessage
-              id="pages.Application.description"
-              defaultMessage="Description"
-            />
-          </Form.Label>
-          <Col sm={10}>
-            <Form.Control
-              as="textarea"
-              value={application.description ?? ""}
-              rows={5}
-              readOnly
-            />
-          </Col>
-        </Form.Group>
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
+          <Form.Group as={Row} controlId="application" className="mt-3 mb-4">
+            <Form.Label column sm={2}>
+              <FormattedMessage
+                id="pages.Application.description"
+                defaultMessage="Description"
+              />
+            </Form.Label>
+            <Col sm={10}>
+              <Form.Control
+                as="textarea"
+                value={application.description ?? ""}
+                rows={5}
+                readOnly
+              />
+            </Col>
+          </Form.Group>
+        </Card>
 
         <Tabs
-          defaultActiveKey="releases-tab"
-          tabsOrder={["releases-tab", "devices-tab"]}
+          className="d-flex flex-column flex-grow-1"
+          activeKey={currentTabKey}
+          tabsOrder={TAB_KEYS}
+          onChange={(tabKey) =>
+            navigate(
+              {
+                route: Route.application,
+                params: { applicationId, activeTab: tabKey },
+              },
+              { replace: true },
+            )
+          }
         >
           <Tab
             eventKey="releases-tab"
+            className="pt-3 d-flex flex-column flex-grow-1"
             title={intl.formatMessage({
               id: "pages.Application.releases",
               defaultMessage: "Releases",
             })}
           >
-            <SearchBox
-              className="flex-grow-1 pb-2 pt-2"
-              value={searchText || ""}
-              onChange={setSearchText}
-            />
-            <ReleasesLayoutContainer
-              applicationRef={application}
-              searchText={searchText}
-              onDelete={setReleaseToDelete}
-            />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <SearchBox
+                className="pb-2"
+                value={searchText || ""}
+                onChange={setSearchText}
+              />
+              <ReleasesLayoutContainer
+                applicationRef={application}
+                searchText={searchText}
+                onDelete={setReleaseToDelete}
+              />
+            </Card>
             {releaseToDelete && (
               <DeleteReleaseModal
                 releaseToDelete={releaseToDelete}
@@ -365,12 +386,15 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
 
           <Tab
             eventKey="devices-tab"
+            className="pt-3 d-flex flex-column flex-grow-1"
             title={intl.formatMessage({
               id: "pages.Application.devices",
               defaultMessage: "Devices",
             })}
           >
-            <DevicesLayoutContainer applicationRef={application} />
+            <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+              <DevicesLayoutContainer applicationRef={application} />
+            </Card>
           </Tab>
         </Tabs>
       </Page.Main>

@@ -170,7 +170,6 @@ const DeploymentsTable = ({
         data={deploymentCampaigns}
         loading={loading}
         onLoadMore={onLoadMore}
-        hideSearch
       />
     </div>
   );

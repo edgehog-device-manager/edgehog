@@ -26,6 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import type { Repositories_getRepositories_Query } from "@/api/__generated__/Repositories_getRepositories_Query.graphql";
 import { Repositories_PaginationQuery } from "@/api/__generated__/Repositories_PaginationQuery.graphql";
@@ -148,15 +149,17 @@ const RepositoriesContent = ({
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <RepositoriesLayoutContainer
-          repositoriesData={repositoriesData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <RepositoriesLayoutContainer
+            repositoriesData={repositoriesData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

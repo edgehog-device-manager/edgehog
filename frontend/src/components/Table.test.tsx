@@ -19,13 +19,13 @@
  */
 
 import { it, expect } from "vitest";
-import { screen, within } from "@testing-library/react";
+import { screen, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type { ComponentProps } from "react";
-
 import { renderWithProviders } from "@/setupTests";
-import Table from "./Table";
-import type { Row } from "./Table";
+
+import Table from "@/components/Table";
+import type { Row } from "@/components/Table";
 
 type Data = { id: string; name: string };
 
@@ -63,7 +63,10 @@ it("correctly renders empty list", () => {
   expect(within(thead).getAllByRole("columnheader")).toHaveLength(
     columns.length,
   );
-  expect(within(tbody).queryByRole("row")).not.toBeInTheDocument();
+
+  const emptyRow = within(tbody).getByRole("row");
+  expect(emptyRow).toBeVisible();
+  expect(emptyRow).toHaveTextContent("No records to display.");
 });
 
 it.each(columns)("correctly hides $header column", (hiddenColumn) => {
@@ -96,10 +99,13 @@ it("correctly renders list of data", () => {
 it("can search data", async () => {
   const [, tbody] = renderTable({ data, columns });
 
-  await userEvent.type(screen.getByPlaceholderText("Search"), "Name 42");
-  const dataRow = within(tbody).getByRole("row");
-  expect(dataRow).toBeVisible();
-  expect(dataRow).toHaveTextContent("Name 42");
+  await userEvent.type(screen.getByPlaceholderText(/search/i), "Name 42");
+
+  await waitFor(() => {
+    const dataRows = within(tbody).getAllByRole("row");
+    expect(dataRows).toHaveLength(1);
+    expect(dataRows[0]).toHaveTextContent("Name 42");
+  });
 });
 
 it("correctly paginates a long list", async () => {

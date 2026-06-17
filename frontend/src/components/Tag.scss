@@ -18,23 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-.containerFormLayout {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.containerSectionCard {
-  border-radius: 0.5rem;
-  background: #ffffff;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
-  padding: 10px;
-}
-
-.containerSectionCard:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
-}
-
-.containerSectionCard .fw-bold {
-  font-size: 14px;
+span.badge.tag {
+  background-color: var(--cp-color-accent, #2563eb) !important;
+  color: #ffffff !important;
 }

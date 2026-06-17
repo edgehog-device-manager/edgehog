@@ -28,6 +28,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
+import { Card } from "react-bootstrap";
 
 import { Channels_ChannelsFragment$key } from "@/api/__generated__/Channels_ChannelsFragment.graphql";
 import type { Channels_getChannels_Query } from "@/api/__generated__/Channels_getChannels_Query.graphql";
@@ -286,15 +287,17 @@ const ChannelsContent = ({ getChannelsQuery }: ChannelsContentProps) => {
         </Button>
       </Page.Header>
       <Page.Main>
-        <SearchBox
-          className="flex-grow-1 pb-2"
-          value={searchText || ""}
-          onChange={setSearchText}
-        />
-        <ChannelsLayoutContainer
-          channelsData={channelsData}
-          searchText={searchText}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <SearchBox
+            className="pb-2"
+            value={searchText || ""}
+            onChange={setSearchText}
+          />
+          <ChannelsLayoutContainer
+            channelsData={channelsData}
+            searchText={searchText}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );

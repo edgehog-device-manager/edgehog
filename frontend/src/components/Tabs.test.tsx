@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2023-2024 SECO Mind Srl
+  Copyright 2023-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,18 +18,22 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { it, expect, describe } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { it, expect, describe, beforeAll, vi } from "vitest";
+import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Tabs, { Tab } from "./Tabs";
+
+beforeAll(() => {
+  Element.prototype.scrollTo = vi.fn();
+});
 
 describe("Tabs", () => {
   it("assigns className to the Tabs component", () => {
     render(<Tabs className="custom-tabs-class">Tabs Content</Tabs>);
 
-    const tabsElement = screen.getByText("Tabs Content");
-    expect(tabsElement).toHaveClass("custom-tabs-class");
+    const tabsWrapper = screen.getByText("Tabs Content");
+    expect(tabsWrapper).toHaveClass("custom-tabs-class");
   });
 
   describe("defaultActiveKey", () => {
@@ -45,9 +49,10 @@ describe("Tabs", () => {
         </Tabs>,
       );
 
-      expect(
-        screen.getByRole("tab", { name: "Tab 1", selected: true }),
-      ).toBeVisible();
+      const tab1Button = screen.getByRole("button", { name: "Tab 1" });
+      expect(tab1Button).toBeVisible();
+      expect(tab1Button).toHaveClass("active");
+
       expect(screen.getByTestId("tab1-content")).toBeVisible();
     });
 
@@ -63,9 +68,10 @@ describe("Tabs", () => {
         </Tabs>,
       );
 
-      expect(
-        screen.getByRole("tab", { name: "Tab 2", selected: true }),
-      ).toBeVisible();
+      const tab2Button = screen.getByRole("button", { name: "Tab 2" });
+      expect(tab2Button).toBeVisible();
+      expect(tab2Button).toHaveClass("active");
+
       expect(screen.getByTestId("tab2-content")).toBeVisible();
     });
 
@@ -81,14 +87,16 @@ describe("Tabs", () => {
         </Tabs>,
       );
 
-      expect(
-        screen.getByRole("tab", { name: "Tab 2", selected: false }),
-      ).toBeVisible();
+      const tab2Button = screen.getByRole("button", { name: "Tab 2" });
+      expect(tab2Button).toBeVisible();
+      expect(tab2Button).not.toHaveClass("active");
+
       expect(screen.queryByTestId("tab2-content")).not.toBeInTheDocument();
     });
   });
 
   it("changes active tab correctly", async () => {
+    const user = userEvent.setup();
     render(
       <Tabs defaultActiveKey="tab1">
         <Tab eventKey="tab1" title="Tab 1">
@@ -100,26 +108,21 @@ describe("Tabs", () => {
       </Tabs>,
     );
 
-    expect(
-      screen.getByRole("tab", { name: "Tab 1", selected: true }),
-    ).toBeVisible();
+    const tab1Button = screen.getByRole("button", { name: "Tab 1" });
+    const tab2Button = screen.getByRole("button", { name: "Tab 2" });
+
+    expect(tab1Button).toHaveClass("active");
     expect(screen.getByTestId("tab1-content")).toBeVisible();
 
-    expect(
-      screen.getByRole("tab", { name: "Tab 2", selected: false }),
-    ).toBeVisible();
+    expect(tab2Button).not.toHaveClass("active");
     expect(screen.queryByTestId("tab2-content")).not.toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole("tab", { name: "Tab 2" }));
+    await user.click(tab2Button);
 
-    expect(
-      screen.getByRole("tab", { name: "Tab 1", selected: false }),
-    ).toBeVisible();
+    expect(tab1Button).not.toHaveClass("active");
     expect(screen.queryByTestId("tab1-content")).not.toBeInTheDocument();
 
-    expect(
-      screen.getByRole("tab", { name: "Tab 2", selected: true }),
-    ).toBeVisible();
+    expect(tab2Button).toHaveClass("active");
     expect(screen.getByTestId("tab2-content")).toBeVisible();
   });
 
@@ -132,7 +135,10 @@ describe("Tabs", () => {
           <Tab eventKey="tabThree" title="Tab 3" />
         </Tabs>,
       );
-      const tabs = screen.getAllByRole("tab");
+
+      const tablist = screen.getByRole("tablist");
+      const tabs = within(tablist).getAllByRole("button");
+
       expect(tabs[0]).toHaveTextContent("Tab 1");
       expect(tabs[1]).toHaveTextContent("Tab 2");
       expect(tabs[2]).toHaveTextContent("Tab 3");
@@ -146,7 +152,10 @@ describe("Tabs", () => {
           <Tab eventKey="tabThree" title="Tab 3" />
         </Tabs>,
       );
-      const tabs = screen.getAllByRole("tab");
+
+      const tablist = screen.getByRole("tablist");
+      const tabs = within(tablist).getAllByRole("button");
+
       expect(tabs[0]).toHaveTextContent("Tab 2");
       expect(tabs[1]).toHaveTextContent("Tab 1");
       expect(tabs[2]).toHaveTextContent("Tab 3");
@@ -161,7 +170,10 @@ describe("Tabs", () => {
           <Tab eventKey="tabFour" title="Tab 4" />
         </Tabs>,
       );
-      const tabs = screen.getAllByRole("tab");
+
+      const tablist = screen.getByRole("tablist");
+      const tabs = within(tablist).getAllByRole("button");
+
       expect(tabs[0]).toHaveTextContent("Tab 3");
       expect(tabs[1]).toHaveTextContent("Tab 1");
       expect(tabs[2]).toHaveTextContent("Tab 2");
@@ -178,7 +190,7 @@ describe("Tab", () => {
       </Tabs>,
     );
 
-    expect(screen.getByRole("tab", { name: "Tab 1" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Tab 1" })).toBeVisible();
   });
 
   it("renders tab content correctly", () => {

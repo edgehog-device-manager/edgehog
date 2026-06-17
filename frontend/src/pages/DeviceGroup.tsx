@@ -30,6 +30,7 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type {
   DeviceGroup_getDeviceGroup_Query,
@@ -308,19 +309,22 @@ const DeviceGroupContent = ({ deviceGroup }: DeviceGroupContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <div className="mb-3">
+        <Card className="h-100 border-0 p-3 shadow-sm mb-3">
           <UpdateDeviceGroupForm
             deviceGroupRef={deviceGroup}
             onSubmit={handleUpdateDeviceGroup}
             onDelete={handleShowDeleteModal}
             isLoading={isUpdatingDeviceGroup}
           />
-        </div>
+        </Card>
         {/* TODO This component is being temporarily used
             to display devices in a group. It should be removed once the
             backend returns DeviceConnection objects in the group query
             and DevicesTable should be used in its place. */}
-        <DevicesGroupsTable devicesRef={deviceGroup.devices} hideSearch />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+          <DevicesGroupsTable devicesRef={deviceGroup.devices} hideSearch />
+        </Card>
+
         {showDeleteModal && (
           <DeleteModal
             confirmText={deviceGroup.handle}

@@ -28,6 +28,7 @@ import {
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
+import { Card } from "react-bootstrap";
 
 import type {
   HardwareType_getHardwareType_Query,
@@ -196,12 +197,14 @@ const HardwareTypeContent = ({ hardwareType }: HardwareTypeContentProps) => {
         >
           {errorFeedback}
         </Alert>
-        <UpdateHardwareTypeForm
-          hardwareTypeRef={hardwareType}
-          onSubmit={handleUpdateHardwareType}
-          onDelete={handleShowDeleteModal}
-          isLoading={isUpdatingHardwareType}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <UpdateHardwareTypeForm
+            hardwareTypeRef={hardwareType}
+            onSubmit={handleUpdateHardwareType}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingHardwareType}
+          />
+        </Card>
         {showDeleteModal && (
           <DeleteModal
             confirmText={hardwareType.handle}

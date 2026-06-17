@@ -30,6 +30,7 @@ import {
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 import { PayloadError } from "relay-runtime";
+import { Card } from "react-bootstrap";
 
 import type { FileCreate_createFile_Mutation } from "@/api/__generated__/FileCreate_createFile_Mutation.graphql";
 import type {
@@ -177,12 +178,13 @@ const FileCreateContent = ({ repository }: FileCreateContentProps) => {
         >
           {errorFeedback}
         </Alert>
-
-        <CreateFileForm
-          repositoryRef={repository}
-          onSubmit={handleCreateFile}
-          isLoading={isCreatingFile || isUploading}
-        />
+        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
+          <CreateFileForm
+            repositoryRef={repository}
+            onSubmit={handleCreateFile}
+            isLoading={isCreatingFile || isUploading}
+          />
+        </Card>
       </Page.Main>
     </Page>
   );
