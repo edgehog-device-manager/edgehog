@@ -200,6 +200,10 @@ defmodule Edgehog.Campaigns.Campaign do
       change set_attribute(:status, :paused)
     end
 
+    update :mark_as_scheduled do
+      change set_attribute(:status, :scheduled)
+    end
+
     update :pause do
       require_atomic? false
 

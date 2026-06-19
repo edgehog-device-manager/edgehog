@@ -141,6 +141,7 @@ defmodule Edgehog.Campaigns do
       define :mark_campaign_paused, action: :mark_as_paused
       define :mark_campaign_failed, action: :mark_as_failed
       define :mark_campaign_successful, action: :mark_as_successful
+      define :mark_campaign_scheduled, action: :mark_as_scheduled
       define :pause_campaign, action: :pause
       define :resume_campaign, action: :resume
     end
