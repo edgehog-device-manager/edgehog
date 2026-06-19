@@ -19,7 +19,6 @@
  */
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import Countdown, { type CountdownRenderProps } from "react-countdown";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedDate, FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -31,7 +30,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import type {
   DeploymentCampaign_getCampaign_Query,
@@ -42,9 +41,11 @@ import type { DeploymentCampaign_resumeCampaign_Mutation } from "@/api/__generat
 
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import CampaignScheduledAlert from "@/components/CampaignScheduledAlert";
 import CampaignStatsChart from "@/components/CampaignStatsChart";
 import Center from "@/components/Center";
 import Col from "@/components/Col";
+import DeleteCampaignModal from "@/components/DeleteCampaignModal";
 import DeploymentTargetsTabs from "@/components/DeploymentTargetsTabs";
 import Icon from "@/components/Icon";
 import Page from "@/components/Page";
@@ -54,6 +55,7 @@ import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import DeploymentCampaignForm from "@/forms/DeploymentCampaignForm";
 import { Link, Route } from "@/Navigation";
+import EditDeploymentCampaignModal from "@/components/EditDeploymentCampaignModal";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query DeploymentCampaign_getCampaign_Query(
@@ -63,14 +65,93 @@ const GET_CAMPAIGN_QUERY = graphql`
     $filter: CampaignTargetFilterInput = { status: { eq: SUCCESSFUL } }
   ) {
     campaign(id: $deploymentCampaignId) {
+      id
       name
       status
       scheduledAtTimestamp
+      campaignMechanism {
+        __typename
+        ... on DeploymentDeploy {
+          maxFailurePercentage
+          maxInProgressOperations
+          requestRetries
+          requestTimeoutSeconds
+          release {
+            id
+            version
+            application {
+              id
+              name
+            }
+          }
+        }
+        ... on DeploymentStart {
+          maxFailurePercentage
+          maxInProgressOperations
+          requestRetries
+          requestTimeoutSeconds
+          release {
+            id
+            version
+            application {
+              id
+              name
+            }
+          }
+        }
+        ... on DeploymentStop {
+          maxFailurePercentage
+          maxInProgressOperations
+          requestRetries
+          requestTimeoutSeconds
+          release {
+            id
+            version
+            application {
+              id
+              name
+            }
+          }
+        }
+        ... on DeploymentDelete {
+          maxFailurePercentage
+          maxInProgressOperations
+          requestRetries
+          requestTimeoutSeconds
+          release {
+            id
+            version
+            application {
+              id
+              name
+            }
+          }
+        }
+        ... on DeploymentUpgrade {
+          maxFailurePercentage
+          maxInProgressOperations
+          requestRetries
+          requestTimeoutSeconds
+          release {
+            id
+            version
+            application {
+              id
+              name
+            }
+          }
+          targetRelease {
+            id
+            version
+          }
+        }
+      }
       ...DeploymentCampaignForm_CampaignFragment
       ...CampaignStatsChart_CampaignStatsChartFragment
       ...DeploymentTargetsTabs_DeploymentTargetsFragment
         @arguments(first: $first, after: $after, filter: $filter)
     }
+    ...EditDeploymentCampaignModal_ApplicationOptionsFragment
   }
 `;
 
@@ -114,6 +195,83 @@ const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
         inProgressTargetCount
         failedTargetCount
         successfulTargetCount
+        campaignMechanism {
+          __typename
+          ... on DeploymentDeploy {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentStart {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentStop {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentDelete {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+          }
+          ... on DeploymentUpgrade {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            release {
+              id
+              version
+              application {
+                id
+                name
+              }
+            }
+            targetRelease {
+              id
+              version
+            }
+          }
+        }
       }
     }
   }
@@ -280,35 +438,6 @@ type DeploymentCampaignContentProps = {
   getCampaignQuery: PreloadedQuery<DeploymentCampaign_getCampaign_Query>;
 };
 
-const renderCountdown = ({
-  completed,
-  days,
-  hours,
-  minutes,
-  seconds,
-}: CountdownRenderProps) => {
-  if (completed) {
-    return null;
-  }
-
-  const duration = [
-    days > 0 ? `${days}d` : null,
-    hours > 0 || days > 0 ? `${hours}h` : null,
-    minutes > 0 || hours > 0 || days > 0 ? `${minutes}m` : null,
-    `${seconds}s`,
-  ].filter(Boolean);
-
-  return (
-    <strong>
-      <FormattedMessage
-        id="pages.DeploymentCampaign.scheduledStartsIn"
-        defaultMessage="Starts in {duration}"
-        values={{ duration: duration.join(" ") }}
-      />
-    </strong>
-  );
-};
-
 // TODO: There is a lot of duplicate code between all the campaign pages,
 // consider refactoring to extract common components and logic
 
@@ -316,9 +445,14 @@ const DeploymentCampaignContent = ({
   deploymentCampaignId,
   getCampaignQuery,
 }: DeploymentCampaignContentProps) => {
-  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const navigate = useNavigate();
 
-  const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const queryData = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
+  const { campaign } = queryData;
 
   const scheduledDate = campaign?.scheduledAtTimestamp
     ? new Date(campaign.scheduledAtTimestamp)
@@ -327,11 +461,7 @@ const DeploymentCampaignContent = ({
   const isValidScheduledDate =
     scheduledDate && !Number.isNaN(scheduledDate.getTime());
 
-  const [now] = useState(() => Date.now());
-
-  const shouldShowScheduledAlert =
-    !!campaign?.scheduledAtTimestamp &&
-    (!isValidScheduledDate || scheduledDate.getTime() > now);
+  const shouldShowScheduledAlert = campaign?.status === "SCHEDULED";
 
   const formattedScheduledDate = isValidScheduledDate ? (
     <FormattedDate value={scheduledDate} dateStyle="medium" timeStyle="short" />
@@ -378,26 +508,14 @@ const DeploymentCampaignContent = ({
           {errorFeedback}
         </Alert>
 
-        <Alert show={shouldShowScheduledAlert} variant="warning">
-          <div>
-            <strong>
-              <FormattedMessage
-                id="pages.DeploymentCampaign.scheduledFor"
-                defaultMessage="Scheduled for: {scheduledDate}"
-                values={{ scheduledDate: formattedScheduledDate }}
-              />
-            </strong>
-          </div>
-          {isValidScheduledDate && (
-            <div>
-              <Countdown
-                date={scheduledDate.getTime()}
-                overtime
-                renderer={renderCountdown}
-              />
-            </div>
-          )}
-        </Alert>
+        <CampaignScheduledAlert
+          show={shouldShowScheduledAlert}
+          scheduledAt={campaign?.scheduledAtTimestamp}
+          isValidScheduledDate={!!isValidScheduledDate}
+          formattedScheduledDate={formattedScheduledDate}
+          onEdit={() => setShowEditModal(true)}
+          onDelete={() => setShowDeleteModal(true)}
+        />
 
         <Row>
           <Col lg={9}>
@@ -409,6 +527,30 @@ const DeploymentCampaignContent = ({
         </Row>
         <hr className="bg-secondary border-2 border-top border-secondary" />
         <DeploymentTargetsTabs campaignRef={campaign} />
+
+        {showDeleteModal && (
+          <DeleteCampaignModal
+            campaignToDelete={campaign}
+            onCancel={() => setShowDeleteModal(false)}
+            onSuccess={() => {
+              setShowDeleteModal(false);
+              navigate(Route.fileDownloadCampaigns);
+            }}
+            setErrorFeedback={setErrorFeedback}
+          />
+        )}
+
+        {showEditModal && (
+          <EditDeploymentCampaignModal
+            campaignToUpdate={campaign}
+            campaignOptionsRef={queryData}
+            onCancel={() => setShowEditModal(false)}
+            onSuccess={() => {
+              setShowEditModal(false);
+            }}
+            setErrorFeedback={setErrorFeedback}
+          />
+        )}
       </Page.Main>
     </Page>
   );

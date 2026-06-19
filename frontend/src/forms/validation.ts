@@ -707,35 +707,36 @@ type ManualFileUploadRequestData = z.infer<typeof fileUploadRequestFormSchema>;
 
 /* ----------------------------- Campaigns Schemas ----------------------------- */
 
-const deploymentCampaignSchema = z
-  .object({
+const deploymentCampaignBaseSchema = z.object({
+  name: z.string().min(1),
+  scheduledAtTimestamp: z.string().optional(),
+  application: z.object({
+    id: z.string().min(1),
     name: z.string().min(1),
-    scheduledAtTimestamp: z.string().optional(),
-    application: z.object({
-      id: z.string().min(1),
-      name: z.string().min(1),
-    }),
-    release: z.object({
+  }),
+  release: z.object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+  }),
+  targetRelease: z
+    .object({
       id: z.string().min(1),
       version: z.string().min(1),
-    }),
-    targetRelease: z
-      .object({
-        id: z.string().min(1),
-        version: z.string().min(1),
-      })
-      .optional(),
-    channel: z.object({
-      id: z.string().min(1),
-      name: z.string().min(1),
-    }),
-    operationType: z.enum(["Deploy", "Start", "Stop", "Upgrade", "Delete"]),
-    maxInProgressOperations: requiredNumber.int().positive(),
-    maxFailurePercentage: requiredNumber.min(0).max(100),
-    requestTimeoutSeconds: requiredNumber.int().positive().min(30),
-    requestRetries: requiredNumber.int().min(0),
-  })
-  .superRefine((data, ctx) => {
+    })
+    .optional(),
+  channel: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  }),
+  operationType: z.enum(["Deploy", "Start", "Stop", "Upgrade", "Delete"]),
+  maxInProgressOperations: requiredNumber.int().positive(),
+  maxFailurePercentage: requiredNumber.min(0).max(100),
+  requestTimeoutSeconds: requiredNumber.int().positive().min(30),
+  requestRetries: requiredNumber.int().min(0),
+});
+
+const deploymentCampaignSchema = deploymentCampaignBaseSchema.superRefine(
+  (data, ctx) => {
     if (data.operationType === "Upgrade" && !data.targetRelease) {
       ctx.addIssue({
         code: "custom",
@@ -743,11 +744,21 @@ const deploymentCampaignSchema = z
         path: ["targetRelease.id"],
       });
     }
-  });
+  },
+);
 
 type DeploymentCampaignFormData = z.infer<typeof deploymentCampaignSchema>;
 
-const updateCampaignSchema = z.object({
+const editDeploymentCampaignSchema = deploymentCampaignBaseSchema.omit({
+  name: true,
+  channel: true,
+});
+
+type EditDeploymentCampaignFormData = z.infer<
+  typeof editDeploymentCampaignSchema
+>;
+
+const updateCampaignBaseSchema = z.object({
   name: z.string().min(1),
   scheduledAtTimestamp: z.string().optional(),
   baseImageCollection: baseImageCollectionForBaseImageSelectSchema,
@@ -764,35 +775,45 @@ const updateCampaignSchema = z.object({
   forceDowngrade: z.boolean(),
 });
 
+const updateCampaignSchema = updateCampaignBaseSchema;
+
 type UpdateCampaignFormData = z.infer<typeof updateCampaignSchema>;
 
-const fileDownloadCampaignSchema = z
-  .object({
+const editUpdateCampaignSchema = updateCampaignBaseSchema.omit({
+  name: true,
+  channel: true,
+});
+
+type EditUpdateCampaignFormData = z.infer<typeof editUpdateCampaignSchema>;
+
+const fileDownloadCampaignBaseSchema = z.object({
+  name: z.string().min(1),
+  scheduledAtTimestamp: z.string().optional(),
+  channel: z.object({
+    id: z.string().min(1),
     name: z.string().min(1),
-    scheduledAtTimestamp: z.string().optional(),
-    channel: z.object({
-      id: z.string().min(1),
-      name: z.string().min(1),
-    }),
-    repository: z.object({
-      id: z.string().min(1),
-      name: z.string().min(1),
-    }),
-    file: z.object({
-      id: z.string().min(1),
-      name: z.string().min(1),
-    }),
-    maxInProgressOperations: requiredNumber.int().positive(),
-    maxFailurePercentage: requiredNumber.min(0).max(100),
-    requestTimeoutSeconds: requiredNumber.int().positive().min(30),
-    requestRetries: requiredNumber.int().min(0),
-    destinationType: fileDestinationTypeSchema,
-    destination: nullableDestinationSchema,
-    ttlSeconds: requiredNumber.int().min(0),
-    fileMode: z.number(messages.number.id).int().positive().optional(),
-    userId: z.number(messages.number.id).int().positive().optional(),
-    groupId: z.number(messages.number.id).int().positive().optional(),
-  })
+  }),
+  repository: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  }),
+  file: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  }),
+  maxInProgressOperations: requiredNumber.int().positive(),
+  maxFailurePercentage: requiredNumber.min(0).max(100),
+  requestTimeoutSeconds: requiredNumber.int().positive().min(30),
+  requestRetries: requiredNumber.int().min(0),
+  destinationType: fileDestinationTypeSchema,
+  destination: nullableDestinationSchema,
+  ttlSeconds: requiredNumber.int().min(0),
+  fileMode: z.number(messages.number.id).int().positive().optional(),
+  userId: z.number(messages.number.id).int().positive().optional(),
+  groupId: z.number(messages.number.id).int().positive().optional(),
+});
+
+const fileDownloadCampaignSchema = fileDownloadCampaignBaseSchema
   .superRefine((data, ctx) => {
     if (data.destinationType === "FILESYSTEM" && data.destination === null) {
       ctx.addIssue({
@@ -809,6 +830,19 @@ const fileDownloadCampaignSchema = z
   }));
 
 type FileDownloadCampaignFormData = z.infer<typeof fileDownloadCampaignSchema>;
+
+const updateFileDownloadCampaignSchema = fileDownloadCampaignBaseSchema
+  .omit({ name: true, channel: true })
+  .extend({
+    repository: z.object({ id: z.string(), name: z.string() }).optional(),
+    file: z.object({ id: z.string(), name: z.string() }).optional(),
+    destinationType: fileDestinationTypeSchema.optional(),
+    destination: z.string().nullable().optional(),
+  });
+
+type UpdateFileDownloadCampaignFormData = z.infer<
+  typeof updateFileDownloadCampaignSchema
+>;
 
 /* ----------------------------- Container Schemas ----------------------------- */
 
@@ -1203,8 +1237,11 @@ export type {
   ManualOtaFromFileData,
   ImageCredentialUpdateFormData,
   DeploymentCampaignFormData,
+  EditDeploymentCampaignFormData,
   UpdateCampaignFormData,
+  EditUpdateCampaignFormData,
   FileDownloadCampaignFormData,
+  UpdateFileDownloadCampaignFormData,
   ReleaseFormData,
   ContainerInputData,
   TargetGroup,
@@ -1239,9 +1276,12 @@ export {
   manualOtaFromCollectionSchema,
   manualOtaFromFileSchema,
   fileDownloadRequestFormSchema,
+  updateFileDownloadCampaignSchema,
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
+  editDeploymentCampaignSchema,
   updateCampaignSchema,
+  editUpdateCampaignSchema,
   fileDownloadCampaignSchema,
   releaseSchema,
   containerSchema,

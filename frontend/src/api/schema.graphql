@@ -8412,6 +8412,59 @@ type campaigns_result {
   updated: Campaign
 }
 
+"The result of the :delete_campaign mutation"
+type DeleteCampaignResult {
+  "The record that was successfully deleted"
+  result: Campaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_campaign mutation"
+type UpdateCampaignResult {
+  "The successful result of the mutation"
+  result: Campaign
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateCampaignInput {
+  "The timestamp at which the campaign is scheduled to start. Defaults to the current timestamp if not provided."
+  scheduledAtTimestamp: DateTime
+
+  maxFailurePercentage: Float
+
+  maxInProgressOperations: Int
+
+  requestRetries: Int
+
+  requestTimeoutSeconds: Int
+
+  forceDowngrade: Boolean
+
+  baseImageId: ID
+
+  releaseId: ID
+
+  targetReleaseId: ID
+
+  fileId: ID
+
+  ttlSeconds: Int
+
+  fileMode: Int
+
+  userId: Int
+
+  groupId: Int
+
+  destinationType: FileDestination
+
+  destination: String
+}
+
 "The result of the :resume_campaign mutation"
 type ResumeCampaignResult {
   "The successful result of the mutation"
@@ -9177,6 +9230,12 @@ type RootMutationType {
 
   "Resumes a paused campaign rollout."
   resumeCampaign(id: ID!): ResumeCampaignResult
+
+  "Updates a scheduled campaign that has not yet started"
+  updateCampaign(id: ID!, input: UpdateCampaignInput): UpdateCampaignResult
+
+  "Deletes a scheduled campaign that has not yet started"
+  deleteCampaign(id: ID!): DeleteCampaignResult
 
   "Creates a new channel."
   createChannel(input: CreateChannelInput!): CreateChannelResult

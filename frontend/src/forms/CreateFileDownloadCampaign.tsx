@@ -391,40 +391,6 @@ const CreateFileDownloadCampaignForm = ({
         </FormRow>
 
         <FormRow
-          id="create-file-download-campaign-form-scheduled-at-timestamp"
-          label={
-            <FormattedMessage
-              id="forms.CreateFileDownloadCampaign.scheduledAtTimestampLabel"
-              defaultMessage="Scheduled At"
-            />
-          }
-        >
-          <Controller
-            name="scheduledAtTimestamp"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <DatePicker
-                selected={value ? new Date(value) : null}
-                onChange={(date: Date | null) =>
-                  onChange(date ? date.toISOString() : "")
-                }
-                minDate={new Date()}
-              />
-            )}
-          />
-          {errors.scheduledAtTimestamp ? (
-            <FormFeedback feedback={errors.scheduledAtTimestamp.message} />
-          ) : (
-            <Form.Text muted>
-              <FormattedMessage
-                id="forms.CreateFileDownloadCampaign.scheduledAtTimestampLabelHint"
-                defaultMessage="Optional. If set, the campaign will be scheduled to start at the specified date and time. Otherwise, it will start immediately."
-              />
-            </Form.Text>
-          )}
-        </FormRow>
-
-        <FormRow
           id="destinationType"
           label={
             <FormattedMessage
@@ -709,6 +675,40 @@ const CreateFileDownloadCampaignForm = ({
             isInvalid={!!errors.ttlSeconds}
           />
           <FormFeedback feedback={errors.ttlSeconds?.message} />
+        </FormRow>
+
+        <FormRow
+          id="create-file-download-campaign-form-scheduled-at-timestamp"
+          label={
+            <FormattedMessage
+              id="forms.CreateFileDownloadCampaign.scheduledAtTimestampLabel"
+              defaultMessage="Scheduled At"
+            />
+          }
+        >
+          <Controller
+            name="scheduledAtTimestamp"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <DatePicker
+                selected={value ? new Date(value) : null}
+                onChange={(date: Date | null) =>
+                  onChange(date ? date.toISOString() : "")
+                }
+                minDate={new Date()}
+              />
+            )}
+          />
+          {errors.scheduledAtTimestamp ? (
+            <FormFeedback feedback={errors.scheduledAtTimestamp.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.CreateFileDownloadCampaign.scheduledAtTimestampLabelHint"
+                defaultMessage="Optional. If set, the campaign will be scheduled to start at the specified date and time. Otherwise, it will start immediately."
+              />
+            </Form.Text>
+          )}
         </FormRow>
 
         <CollapseItem

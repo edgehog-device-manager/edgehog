@@ -139,6 +139,24 @@
   "components.CampaignOutcome.Success": {
     "defaultMessage": "Success"
   },
+  "components.CampaignScheduledAlert.deleteCampaign": {
+    "defaultMessage": "Delete Campaign"
+  },
+  "components.CampaignScheduledAlert.editCampaign": {
+    "defaultMessage": "Edit Campaign"
+  },
+  "components.CampaignScheduledAlert.scheduledActions": {
+    "defaultMessage": "You can edit or delete it before it begins."
+  },
+  "components.CampaignScheduledAlert.scheduledFor": {
+    "defaultMessage": "Scheduled for: {scheduledDate}"
+  },
+  "components.CampaignScheduledAlert.scheduledMessage": {
+    "defaultMessage": "This campaign is scheduled and has not started yet."
+  },
+  "components.CampaignScheduledAlert.startsIn": {
+    "defaultMessage": "Starts in {duration}"
+  },
   "components.CampaignStatus.Finished": {
     "defaultMessage": "Finished"
   },
@@ -435,6 +453,15 @@
   },
   "components.DeleteApplicationModal.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the application, please try again."
+  },
+  "components.DeleteCampaignModal.error": {
+    "defaultMessage": "Could not delete campaign."
+  },
+  "components.DeleteCampaignModal.title": {
+    "defaultMessage": "Delete Campaign"
+  },
+  "components.DeleteCampaignModal.warning": {
+    "defaultMessage": "This will permanently delete the campaign."
   },
   "components.DeleteModal.confirmButton": {
     "defaultMessage": "Delete",
@@ -942,6 +969,135 @@
   "components.DevicesTable.tagsTitle": {
     "defaultMessage": "Tags",
     "description": "Title for the Tags column of the devices table"
+  },
+  "components.EditDeploymentCampaignModal.applicationLabel": {
+    "defaultMessage": "Application"
+  },
+  "components.EditDeploymentCampaignModal.applicationOption": {
+    "defaultMessage": "Search or select an application..."
+  },
+  "components.EditDeploymentCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.EditDeploymentCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.EditDeploymentCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.EditDeploymentCampaignModal.releaseLabel": {
+    "defaultMessage": "Release"
+  },
+  "components.EditDeploymentCampaignModal.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.EditDeploymentCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.EditDeploymentCampaignModal.selectApplication": {
+    "defaultMessage": "Select an application..."
+  },
+  "components.EditDeploymentCampaignModal.selectApplicationAndRelease": {
+    "defaultMessage": "Select an application and a release..."
+  },
+  "components.EditDeploymentCampaignModal.targetReleaseLabel": {
+    "defaultMessage": "Target Release"
+  },
+  "components.EditDeploymentCampaignModal.title": {
+    "defaultMessage": "Edit Deployment Campaign"
+  },
+  "components.EditFileDownloadCampaignModal.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "components.EditFileDownloadCampaignModal.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "components.EditFileDownloadCampaignModal.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "components.EditFileDownloadCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.EditFileDownloadCampaignModal.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "components.EditFileDownloadCampaignModal.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "components.EditFileDownloadCampaignModal.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "components.EditFileDownloadCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.EditFileDownloadCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.EditFileDownloadCampaignModal.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "components.EditFileDownloadCampaignModal.repositoryOption": {
+    "defaultMessage": "Search or select a repository..."
+  },
+  "components.EditFileDownloadCampaignModal.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.EditFileDownloadCampaignModal.selectRepositoryHint": {
+    "defaultMessage": "Select a repository before selecting a file..."
+  },
+  "components.EditFileDownloadCampaignModal.title": {
+    "defaultMessage": "Update Campaign"
+  },
+  "components.EditFileDownloadCampaignModal.ttlLabel": {
+    "defaultMessage": "TTL <muted>(seconds)</muted>"
+  },
+  "components.EditFileDownloadCampaignModal.userIdLabel": {
+    "defaultMessage": "User ID"
+  },
+  "components.EditModal.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "components.EditModal.save": {
+    "defaultMessage": "Save"
+  },
+  "components.EditModal.saving": {
+    "defaultMessage": "Saving..."
+  },
+  "components.EditUpdateCampaignModal.baseImageCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "components.EditUpdateCampaignModal.baseImageCollectionOption": {
+    "defaultMessage": "Search or select a base image collection..."
+  },
+  "components.EditUpdateCampaignModal.baseImageLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "components.EditUpdateCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.EditUpdateCampaignModal.forceDowngradeLabel": {
+    "defaultMessage": "Force Downgrade"
+  },
+  "components.EditUpdateCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.EditUpdateCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.EditUpdateCampaignModal.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.EditUpdateCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.EditUpdateCampaignModal.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection..."
+  },
+  "components.EditUpdateCampaignModal.title": {
+    "defaultMessage": "Edit Update Campaign"
   },
   "components.FieldHelp.exampleTitle": {
     "defaultMessage": "Example:"
@@ -3315,12 +3471,6 @@
   "pages.DeploymentCampaign.resumeErrorFeedback": {
     "defaultMessage": "Could not resume the campaign, please try again."
   },
-  "pages.DeploymentCampaign.scheduledFor": {
-    "defaultMessage": "Scheduled for: {scheduledDate}"
-  },
-  "pages.DeploymentCampaign.scheduledStartsIn": {
-    "defaultMessage": "Starts in {duration}"
-  },
   "pages.DeploymentCampaignCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Deployment Campaign, please try again."
   },
@@ -3471,12 +3621,6 @@
   },
   "pages.FileDownloadCampaign.resumeErrorFeedback": {
     "defaultMessage": "Could not resume the campaign, please try again."
-  },
-  "pages.FileDownloadCampaign.scheduledFor": {
-    "defaultMessage": "Scheduled for: {scheduledDate}"
-  },
-  "pages.FileDownloadCampaign.scheduledStartsIn": {
-    "defaultMessage": "Starts in {duration}"
   },
   "pages.FileDownloadCampaignCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the File Download Campaign, please try again."
@@ -3759,12 +3903,6 @@
   },
   "pages.UpdateCampaign.resumeErrorFeedback": {
     "defaultMessage": "Could not resume the campaign, please try again."
-  },
-  "pages.UpdateCampaign.scheduledFor": {
-    "defaultMessage": "Scheduled for: {scheduledDate}"
-  },
-  "pages.UpdateCampaign.scheduledStartsIn": {
-    "defaultMessage": "Starts in {duration}"
   },
   "pages.UpdateCampaign.updateCampaignNotFound.message": {
     "defaultMessage": "Return to the Update Campaign list."

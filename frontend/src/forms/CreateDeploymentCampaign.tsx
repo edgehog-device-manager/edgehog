@@ -417,40 +417,6 @@ const CreateDeploymentCampaignForm = ({
         </FormRow>
 
         <FormRow
-          id="create-deployment-campaign-form-scheduled-at-timestamp"
-          label={
-            <FormattedMessage
-              id="forms.CreateDeploymentCampaign.scheduledAtTimestampLabel"
-              defaultMessage="Scheduled At"
-            />
-          }
-        >
-          <Controller
-            name="scheduledAtTimestamp"
-            control={control}
-            render={({ field: { value, onChange } }) => (
-              <DatePicker
-                selected={value ? new Date(value) : null}
-                onChange={(date: Date | null) =>
-                  onChange(date ? date.toISOString() : "")
-                }
-                minDate={new Date()}
-              />
-            )}
-          />
-          {errors.scheduledAtTimestamp ? (
-            <FormFeedback feedback={errors.scheduledAtTimestamp.message} />
-          ) : (
-            <Form.Text muted>
-              <FormattedMessage
-                id="forms.CreateDeploymentCampaign.scheduledAtTimestampLabelHint"
-                defaultMessage="Optional. If set, the campaign will be scheduled to start at the specified date and time. Otherwise, it will start immediately."
-              />
-            </Form.Text>
-          )}
-        </FormRow>
-
-        <FormRow
           id="create-deployment-campaign-form-application"
           label={
             <FormattedMessage
@@ -698,6 +664,40 @@ const CreateDeploymentCampaignForm = ({
             isInvalid={!!errors.requestRetries}
           />
           <FormFeedback feedback={errors.requestRetries?.message} />
+        </FormRow>
+
+        <FormRow
+          id="create-deployment-campaign-form-scheduled-at-timestamp"
+          label={
+            <FormattedMessage
+              id="forms.CreateDeploymentCampaign.scheduledAtTimestampLabel"
+              defaultMessage="Scheduled At"
+            />
+          }
+        >
+          <Controller
+            name="scheduledAtTimestamp"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <DatePicker
+                selected={value ? new Date(value) : null}
+                onChange={(date: Date | null) =>
+                  onChange(date ? date.toISOString() : "")
+                }
+                minDate={new Date()}
+              />
+            )}
+          />
+          {errors.scheduledAtTimestamp ? (
+            <FormFeedback feedback={errors.scheduledAtTimestamp.message} />
+          ) : (
+            <Form.Text muted>
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.scheduledAtTimestampLabelHint"
+                defaultMessage="Optional. If set, the campaign will be scheduled to start at the specified date and time. Otherwise, it will start immediately."
+              />
+            </Form.Text>
+          )}
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">
