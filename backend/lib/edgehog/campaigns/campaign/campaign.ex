@@ -33,6 +33,7 @@ defmodule Edgehog.Campaigns.Campaign do
   alias Edgehog.Campaigns.Channel
   alias Edgehog.Campaigns.Outcome
   alias Edgehog.Campaigns.Status
+  alias Edgehog.Files.FileDownloadRequest.FileDestination
 
   graphql do
     type :campaign
@@ -134,6 +135,38 @@ defmodule Edgehog.Campaigns.Campaign do
       change manage_relationship(:channel_id, :channel, type: :append)
     end
 
+    update :update do
+      accept [:scheduled_at_timestamp]
+
+      # common mechanism fields
+      argument :max_failure_percentage, :float
+      argument :max_in_progress_operations, :integer
+      argument :request_retries, :integer
+      argument :request_timeout_seconds, :integer
+
+      # campaign mechanism specific fields
+      argument :force_downgrade, :boolean
+      argument :base_image_id, :id
+
+      argument :release_id, :uuid
+      argument :target_release_id, :uuid
+
+      argument :file_id, :uuid
+      argument :ttl_seconds, :integer
+      argument :file_mode, :integer
+      argument :user_id, :integer
+      argument :group_id, :integer
+      argument :destination_type, FileDestination
+      argument :destination, :string
+
+      require_atomic? false
+
+      validate one_of(:status, [:scheduled]),
+        message: "Only scheduled campaigns can be updated"
+
+      change Changes.ModifyCampaignMechanism
+    end
+
     update :mark_as_in_progress do
       argument :start_timestamp, :utc_datetime_usec do
         default &DateTime.utc_now/0
@@ -182,11 +215,18 @@ defmodule Edgehog.Campaigns.Campaign do
     end
 
     destroy :destroy do
-      description "Deletes a Campaign"
+      description "Deletes a scheduled campaign that has not yet started"
       primary? true
 
       require_atomic? false
+
+      validate one_of(:status, [:scheduled]),
+        message: "Only scheduled campaigns can be deleted"
+
+      change Changes.DeleteObanJob
     end
+
+    destroy :destroy_fixture
   end
 
   attributes do

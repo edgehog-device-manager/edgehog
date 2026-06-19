@@ -557,7 +557,7 @@ defmodule EdgehogWeb.Schema.Query.CampaignTest do
     fixture = campaign_fixture(tenant: tenant, mechanism_type: :firmware_upgrade)
     id = AshGraphql.Resource.encode_relay_id(fixture)
 
-    :ok = Ash.destroy!(fixture)
+    :ok = Ash.destroy!(fixture, action: :destroy_fixture)
 
     id
   end
