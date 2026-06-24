@@ -48,6 +48,7 @@ import {
   updateFileDownloadCampaignSchema,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import DatePicker from "./DatePicker";
 
 const CAMPAIGN_REPOSITORY_OPTIONS_FRAGMENT = graphql`
   fragment EditFileDownloadCampaignModal_RepositoryOptionsFragment on RootQueryType
@@ -97,6 +98,7 @@ const UPDATE_CAMPAIGN_MUTATION = graphql`
 
 type Campaign = {
   id: string;
+  name: string;
   campaignMechanism?: {
     __typename?: string;
     destinationType?: string | null;
@@ -159,6 +161,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
     resolver: zodResolver(updateFileDownloadCampaignSchema),
     mode: "onTouched",
     defaultValues: {
+      name: campaignToUpdate.name,
       destinationType: isFileDownload
         ? (mechanism?.destinationType as FileDestination)
         : undefined,
@@ -254,6 +257,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
         variables: {
           id: campaignToUpdate.id,
           input: {
+            name: data.name,
             destinationType:
               (data.destinationType as FileDestination) || undefined,
             destination: data.destination || undefined,
@@ -307,6 +311,22 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
       isSubmitting={isUpdating || isSubmitting}
     >
       <Stack gap={3}>
+        <FormRow
+          id="name"
+          label={
+            <FormattedMessage
+              id="components.EditFileDownloadCampaignModal.nameLabel"
+              defaultMessage="Campaign Name"
+            />
+          }
+        >
+          <Form.Control
+            type="text"
+            {...register("name")}
+            isInvalid={!!errors.name}
+          />
+          <FormFeedback feedback={errors.name?.message} />
+        </FormRow>
         <FormRow
           id="destinationType"
           label={
@@ -554,7 +574,32 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           <FormFeedback feedback={errors.ttlSeconds?.message as string} />
         </FormRow>
 
-        {/* TODO: Enable editing for scheduledAt field after backend issue is resolved */}
+        <FormRow
+          id="scheduledAt"
+          label={
+            <FormattedMessage
+              id="components.EditFileDownloadCampaignModal.scheduledAtTimestampLabel"
+              defaultMessage="Scheduled At"
+            />
+          }
+        >
+          <Controller
+            name="scheduledAtTimestamp"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <DatePicker
+                selected={value ? new Date(value) : null}
+                onChange={(date: Date | null) =>
+                  onChange(date ? date.toISOString() : "")
+                }
+                minDate={new Date()}
+              />
+            )}
+          />
+          <FormFeedback
+            feedback={errors.scheduledAtTimestamp?.message as string}
+          />
+        </FormRow>
 
         <CollapseItem
           open={advancedOptionsOpen}

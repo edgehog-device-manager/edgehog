@@ -750,7 +750,6 @@ const deploymentCampaignSchema = deploymentCampaignBaseSchema.superRefine(
 type DeploymentCampaignFormData = z.infer<typeof deploymentCampaignSchema>;
 
 const editDeploymentCampaignSchema = deploymentCampaignBaseSchema.omit({
-  name: true,
   channel: true,
 });
 
@@ -780,7 +779,6 @@ const updateCampaignSchema = updateCampaignBaseSchema;
 type UpdateCampaignFormData = z.infer<typeof updateCampaignSchema>;
 
 const editUpdateCampaignSchema = updateCampaignBaseSchema.omit({
-  name: true,
   channel: true,
 });
 
@@ -832,7 +830,7 @@ const fileDownloadCampaignSchema = fileDownloadCampaignBaseSchema
 type FileDownloadCampaignFormData = z.infer<typeof fileDownloadCampaignSchema>;
 
 const updateFileDownloadCampaignSchema = fileDownloadCampaignBaseSchema
-  .omit({ name: true, channel: true })
+  .omit({ channel: true })
   .extend({
     repository: z.object({ id: z.string(), name: z.string() }).optional(),
     file: z.object({ id: z.string(), name: z.string() }).optional(),

@@ -40,6 +40,7 @@ import {
   type EditDeploymentCampaignFormData,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import DatePicker from "./DatePicker";
 
 const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment EditDeploymentCampaignModal_ApplicationOptionsFragment on RootQueryType
@@ -88,6 +89,7 @@ const TYPENAME_TO_OPERATION: Record<string, OperationType> = {
 
 type CampaignToUpdate = {
   id: string;
+  name: string;
   campaignMechanism?: {
     __typename?: string;
     release?: {
@@ -144,6 +146,7 @@ const EditDeploymentCampaignModal = ({
     mode: "onTouched",
     resolver: zodResolver(editDeploymentCampaignSchema),
     defaultValues: {
+      name: campaignToUpdate.name,
       operationType: derivedOperationType,
       application: mechanism?.release?.application
         ? {
@@ -217,6 +220,7 @@ const EditDeploymentCampaignModal = ({
         variables: {
           id: campaignToUpdate.id,
           input: {
+            name: data.name,
             releaseId: data.release.id,
             ...(data.targetRelease && {
               targetReleaseId: data.targetRelease.id,
@@ -266,6 +270,19 @@ const EditDeploymentCampaignModal = ({
       isSubmitting={isSubmitting || isUpdating}
     >
       <Stack gap={3}>
+        <FormRow
+          id="name"
+          label={
+            <FormattedMessage
+              id="components.EditDeploymentCampaignModal.nameLabel"
+              defaultMessage="Name"
+            />
+          }
+        >
+          <Form.Control {...register("name")} isInvalid={!!errors.name} />
+          <FormFeedback feedback={errors.name?.message as string} />
+        </FormRow>
+
         <FormRow
           id="edit-deployment-campaign-form-application"
           label={
@@ -498,7 +515,32 @@ const EditDeploymentCampaignModal = ({
           <FormFeedback feedback={errors.requestRetries?.message as string} />
         </FormRow>
 
-        {/* TODO: Enable editing for scheduledAt field after backend issue is resolved */}
+        <FormRow
+          id="scheduledAt"
+          label={
+            <FormattedMessage
+              id="components.EditDeploymentCampaignModal.scheduledAtTimestampLabel"
+              defaultMessage="Scheduled At"
+            />
+          }
+        >
+          <Controller
+            name="scheduledAtTimestamp"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <DatePicker
+                selected={value ? new Date(value) : null}
+                onChange={(date: Date | null) =>
+                  onChange(date ? date.toISOString() : "")
+                }
+                minDate={new Date()}
+              />
+            )}
+          />
+          <FormFeedback
+            feedback={errors.scheduledAtTimestamp?.message as string}
+          />
+        </FormRow>
       </Stack>
     </EditModal>
   );

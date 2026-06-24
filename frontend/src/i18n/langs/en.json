@@ -985,6 +985,9 @@
   "components.EditDeploymentCampaignModal.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
+  "components.EditDeploymentCampaignModal.nameLabel": {
+    "defaultMessage": "Name"
+  },
   "components.EditDeploymentCampaignModal.releaseLabel": {
     "defaultMessage": "Release"
   },
@@ -993,6 +996,9 @@
   },
   "components.EditDeploymentCampaignModal.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.EditDeploymentCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
   },
   "components.EditDeploymentCampaignModal.selectApplication": {
     "defaultMessage": "Select an application..."
@@ -1033,6 +1039,9 @@
   "components.EditFileDownloadCampaignModal.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
+  "components.EditFileDownloadCampaignModal.nameLabel": {
+    "defaultMessage": "Campaign Name"
+  },
   "components.EditFileDownloadCampaignModal.repositoryLabel": {
     "defaultMessage": "Repository"
   },
@@ -1044,6 +1053,9 @@
   },
   "components.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.EditFileDownloadCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
   },
   "components.EditFileDownloadCampaignModal.selectRepositoryHint": {
     "defaultMessage": "Select a repository before selecting a file..."
@@ -1087,11 +1099,17 @@
   "components.EditUpdateCampaignModal.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
   },
+  "components.EditUpdateCampaignModal.nameLabel": {
+    "defaultMessage": "Name"
+  },
   "components.EditUpdateCampaignModal.otaRequestRetriesLabel": {
     "defaultMessage": "Request Retries"
   },
   "components.EditUpdateCampaignModal.requestTimeoutSecondsLabel": {
     "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.EditUpdateCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
   },
   "components.EditUpdateCampaignModal.selectBaseImageCollection": {
     "defaultMessage": "Select a base image collection..."

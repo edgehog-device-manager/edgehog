@@ -8431,6 +8431,8 @@ type UpdateCampaignResult {
 }
 
 input UpdateCampaignInput {
+  name: String
+
   "The timestamp at which the campaign is scheduled to start. Defaults to the current timestamp if not provided."
   scheduledAtTimestamp: DateTime
 

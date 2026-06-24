@@ -129,6 +129,7 @@ const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
     campaign(id: $id) {
       updated {
         id
+        name
         status
         outcome
         scheduledAtTimestamp

@@ -40,6 +40,7 @@ import {
   type EditUpdateCampaignFormData,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import DatePicker from "./DatePicker";
 
 const CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment EditUpdateCampaignModal_BaseImageCollOptionsFragment on RootQueryType
@@ -79,6 +80,7 @@ type BaseImageCollectionRecord = { id: string; name: string };
 
 type CampaignToUpdate = {
   id: string;
+  name: string;
   campaignMechanism?: {
     __typename?: string;
     baseImage?: {
@@ -129,6 +131,7 @@ const EditUpdateCampaignModal = ({
     mode: "onTouched",
     resolver: zodResolver(editUpdateCampaignSchema),
     defaultValues: {
+      name: campaignToUpdate.name,
       baseImageCollection: mechanism?.baseImage?.baseImageCollection
         ? {
             id: mechanism.baseImage.baseImageCollection.id,
@@ -203,6 +206,7 @@ const EditUpdateCampaignModal = ({
         variables: {
           id: campaignToUpdate.id,
           input: {
+            name: data.name,
             baseImageId: data.baseImage.id,
             maxInProgressOperations: data.maxInProgressOperations,
             maxFailurePercentage: data.maxFailurePercentage,
@@ -250,6 +254,19 @@ const EditUpdateCampaignModal = ({
       isSubmitting={isSubmitting || isUpdating}
     >
       <Stack gap={3}>
+        <FormRow
+          id="name"
+          label={
+            <FormattedMessage
+              id="components.EditUpdateCampaignModal.nameLabel"
+              defaultMessage="Name"
+            />
+          }
+        >
+          <Form.Control {...register("name")} isInvalid={!!errors.name} />
+          <FormFeedback feedback={errors.name?.message as string} />
+        </FormRow>
+
         <FormRow
           id="baseImageCollection"
           label={
@@ -444,7 +461,32 @@ const EditUpdateCampaignModal = ({
           <FormFeedback feedback={errors.forceDowngrade?.message as string} />
         </FormRow>
 
-        {/* TODO: Enable editing for scheduledAt field after backend issue is resolved */}
+        <FormRow
+          id="scheduledAt"
+          label={
+            <FormattedMessage
+              id="components.EditUpdateCampaignModal.scheduledAtTimestampLabel"
+              defaultMessage="Scheduled At"
+            />
+          }
+        >
+          <Controller
+            name="scheduledAtTimestamp"
+            control={control}
+            render={({ field: { value, onChange } }) => (
+              <DatePicker
+                selected={value ? new Date(value) : null}
+                onChange={(date: Date | null) =>
+                  onChange(date ? date.toISOString() : "")
+                }
+                minDate={new Date()}
+              />
+            )}
+          />
+          <FormFeedback
+            feedback={errors.scheduledAtTimestamp?.message as string}
+          />
+        </FormRow>
       </Stack>
     </EditModal>
   );
