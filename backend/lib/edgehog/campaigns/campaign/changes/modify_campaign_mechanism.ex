@@ -24,6 +24,7 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ModifyCampaignMechanism do
   use Ash.Resource.Change
 
   alias Ash.Changeset
+  alias Edgehog.Campaigns.Campaign.Workers.ScheduleCampaign
 
   @common_keys [
     :max_failure_percentage,
@@ -35,6 +36,13 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ModifyCampaignMechanism do
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     mechanism_type = changeset.data.campaign_mechanism.type
+    scheduled_at = Changeset.get_attribute(changeset, :scheduled_at_timestamp)
+
+    if Changeset.changing_attribute?(changeset, :scheduled_at_timestamp) do
+      %{id: changeset.data.id, tenant: changeset.to_tenant}
+      |> ScheduleCampaign.new(scheduled_at: scheduled_at)
+      |> Oban.insert!()
+    end
 
     if keys = keys_for_type(mechanism_type) do
       update_mechanism(changeset, keys)

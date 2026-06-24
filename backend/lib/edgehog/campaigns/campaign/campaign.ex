@@ -136,7 +136,7 @@ defmodule Edgehog.Campaigns.Campaign do
     end
 
     update :update do
-      accept [:scheduled_at_timestamp]
+      accept [:name, :scheduled_at_timestamp]
 
       # common mechanism fields
       argument :max_failure_percentage, :float
