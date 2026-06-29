@@ -219,10 +219,12 @@ type DeploymentCampaignWrapperProps = {
 const DeploymentCampaignWrapper = ({
   getCreateCampaignOptionsQuery,
 }: DeploymentCampaignWrapperProps) => {
-  const campaignOptions = usePreloadedQuery(
-    GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
-    getCreateCampaignOptionsQuery,
-  );
+  const campaignOptions =
+    usePreloadedQuery<DeploymentCampaignCreate_getOptions_Query>(
+      GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
+      getCreateCampaignOptionsQuery,
+    );
+
   const { channels, applications } = campaignOptions;
 
   if (applications?.count === 0) {

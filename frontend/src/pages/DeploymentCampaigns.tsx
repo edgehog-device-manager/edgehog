@@ -358,10 +358,12 @@ const DeploymentCampaignsContent = ({
   getCampaignsQuery,
 }: DeploymentCampaignsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const campaignsData = usePreloadedQuery(
-    GET_CAMPAIGNS_QUERY,
-    getCampaignsQuery,
-  );
+
+  const campaignsData =
+    usePreloadedQuery<DeploymentCampaigns_getCampaigns_Query>(
+      GET_CAMPAIGNS_QUERY,
+      getCampaignsQuery,
+    );
 
   return (
     <Page>

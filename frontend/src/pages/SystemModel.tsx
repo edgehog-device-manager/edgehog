@@ -278,7 +278,7 @@ type SystemModelWrapperProps = {
 const SystemModelWrapper = ({
   getSystemModelQuery,
 }: SystemModelWrapperProps) => {
-  const queryData = usePreloadedQuery(
+  const queryData = usePreloadedQuery<SystemModel_getSystemModel_Query>(
     GET_SYSTEM_MODEL_QUERY,
     getSystemModelQuery,
   );

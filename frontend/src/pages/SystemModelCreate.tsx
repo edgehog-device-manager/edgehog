@@ -201,10 +201,12 @@ type SystemModelWrapperProps = {
 const SystemModelWrapper = ({
   getCreateSystemModelOptionsQuery,
 }: SystemModelWrapperProps) => {
-  const systemModelOptions = usePreloadedQuery(
-    GET_CREATE_SYSTEM_MODEL_OPTIONS_QUERY,
-    getCreateSystemModelOptionsQuery,
-  );
+  const systemModelOptions =
+    usePreloadedQuery<SystemModelCreate_getOptions_Query>(
+      GET_CREATE_SYSTEM_MODEL_OPTIONS_QUERY,
+      getCreateSystemModelOptionsQuery,
+    );
+
   const { hardwareTypes } = systemModelOptions;
   if (hardwareTypes?.count === 0) {
     return <NoHardwareTypes />;

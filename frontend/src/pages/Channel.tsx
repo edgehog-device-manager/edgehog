@@ -296,7 +296,10 @@ type ChannelWrapperProps = {
 };
 
 const ChannelWrapper = ({ getChannelQuery }: ChannelWrapperProps) => {
-  const queryData = usePreloadedQuery(GET_CHANNEL_QUERY, getChannelQuery);
+  const queryData = usePreloadedQuery<Channel_getChannel_Query>(
+    GET_CHANNEL_QUERY,
+    getChannelQuery,
+  );
 
   if (!queryData.channel) {
     return (

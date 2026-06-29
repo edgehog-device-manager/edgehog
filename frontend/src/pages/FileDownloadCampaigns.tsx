@@ -297,10 +297,11 @@ const FileDownloadCampaignsContent = ({
 }: FileDownloadCampaignsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const campaignsData = usePreloadedQuery(
-    GET_CAMPAIGNS_QUERY,
-    getCampaignsQuery,
-  );
+  const campaignsData =
+    usePreloadedQuery<FileDownloadCampaigns_getCampaigns_Query>(
+      GET_CAMPAIGNS_QUERY,
+      getCampaignsQuery,
+    );
 
   return (
     <Page>

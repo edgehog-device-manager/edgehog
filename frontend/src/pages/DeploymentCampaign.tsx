@@ -319,7 +319,10 @@ const DeploymentCampaignContent = ({
 }: DeploymentCampaignContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
+  const { campaign } = usePreloadedQuery<DeploymentCampaign_getCampaign_Query>(
+    GET_CAMPAIGN_QUERY,
+    getCampaignQuery,
+  );
 
   const scheduledDate = campaign?.scheduledAtTimestamp
     ? new Date(campaign.scheduledAtTimestamp)

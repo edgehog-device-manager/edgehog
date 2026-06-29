@@ -409,7 +409,7 @@ type ApplicationWrapperProps = {
 const ApplicationWrapper = ({
   getApplicationQuery,
 }: ApplicationWrapperProps) => {
-  const { application } = usePreloadedQuery(
+  const { application } = usePreloadedQuery<Application_getApplication_Query>(
     GET_APPLICATION_QUERY,
     getApplicationQuery,
   );

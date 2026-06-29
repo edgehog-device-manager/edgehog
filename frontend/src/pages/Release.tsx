@@ -258,7 +258,10 @@ type ReleaseWrapperProps = {
 };
 
 const ReleaseWrapper = ({ getReleaseQuery }: ReleaseWrapperProps) => {
-  const { release } = usePreloadedQuery(GET_RELEASE_QUERY, getReleaseQuery);
+  const { release } = usePreloadedQuery<Release_getRelease_Query>(
+    GET_RELEASE_QUERY,
+    getReleaseQuery,
+  );
 
   if (!release) {
     return (

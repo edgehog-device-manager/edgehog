@@ -364,7 +364,7 @@ type RepositoryWrapperProps = {
 };
 
 const RepositoryWrapper = ({ getRepositoryQuery }: RepositoryWrapperProps) => {
-  const { repository } = usePreloadedQuery(
+  const { repository } = usePreloadedQuery<Repository_getRepository_Query>(
     GET_REPOSITORY_QUERY,
     getRepositoryQuery,
   );

@@ -299,7 +299,8 @@ const UpdateCampaignsContent = ({
   getCampaignsQuery,
 }: UpdateCampaignsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const campaignsData = usePreloadedQuery(
+
+  const campaignsData = usePreloadedQuery<UpdateCampaigns_getCampaigns_Query>(
     GET_CAMPAIGNS_QUERY,
     getCampaignsQuery,
   );

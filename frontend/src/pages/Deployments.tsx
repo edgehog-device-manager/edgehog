@@ -307,7 +307,8 @@ const DeploymentsContent = ({
   getDeploymentsQuery,
 }: DeploymentsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const deploymentsData = usePreloadedQuery(
+
+  const deploymentsData = usePreloadedQuery<Deployments_getDeployments_Query>(
     GET_DEPLOYMENTS_QUERY,
     getDeploymentsQuery,
   );

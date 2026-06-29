@@ -223,10 +223,12 @@ type UpdateCampaignWrapperProps = {
 const UpdateCampaignWrapper = ({
   getCreateCampaignOptionsQuery,
 }: UpdateCampaignWrapperProps) => {
-  const campaignOptions = usePreloadedQuery(
-    GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
-    getCreateCampaignOptionsQuery,
-  );
+  const campaignOptions =
+    usePreloadedQuery<UpdateCampaignCreate_getOptions_Query>(
+      GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
+      getCreateCampaignOptionsQuery,
+    );
+
   const { baseImageCollections, channels } = campaignOptions;
 
   if (baseImageCollections?.count === 0) {

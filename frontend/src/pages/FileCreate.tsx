@@ -195,7 +195,7 @@ type FileCreateWrapperProps = {
 };
 
 const FileCreateWrapper = ({ getRepositoryQuery }: FileCreateWrapperProps) => {
-  const { repository } = usePreloadedQuery(
+  const { repository } = usePreloadedQuery<FileCreate_getOptions_Query>(
     GET_REPOSITORY_QUERY,
     getRepositoryQuery,
   );

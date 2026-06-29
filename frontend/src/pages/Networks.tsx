@@ -123,7 +123,11 @@ interface NetworksContentProps {
 
 const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const networksData = usePreloadedQuery(GET_NETWORKS_QUERY, getNetworksQuery);
+
+  const networksData = usePreloadedQuery<Networks_getNetworks_Query>(
+    GET_NETWORKS_QUERY,
+    getNetworksQuery,
+  );
 
   return (
     <Page>

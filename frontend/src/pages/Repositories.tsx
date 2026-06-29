@@ -126,10 +126,11 @@ const RepositoriesContent = ({
 }: RepositoriesContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const repositoriesData = usePreloadedQuery(
-    GET_REPOSITORIES_QUERY,
-    getRepositoriesQuery,
-  );
+  const repositoriesData =
+    usePreloadedQuery<Repositories_getRepositories_Query>(
+      GET_REPOSITORIES_QUERY,
+      getRepositoriesQuery,
+    );
 
   return (
     <Page>

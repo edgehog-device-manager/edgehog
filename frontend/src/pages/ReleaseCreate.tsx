@@ -166,7 +166,7 @@ type ReleaseWrapperProps = {
 };
 
 const ReleaseWrapper = ({ getReleaseOptionsQuery }: ReleaseWrapperProps) => {
-  const releaseOptions = usePreloadedQuery(
+  const releaseOptions = usePreloadedQuery<ReleaseCreate_getOptions_Query>(
     CREATE_RELEASE_PAGE_QUERY,
     getReleaseOptionsQuery,
   );

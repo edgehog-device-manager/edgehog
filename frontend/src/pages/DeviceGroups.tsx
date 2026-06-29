@@ -264,10 +264,12 @@ const DeviceGroupsContent = ({
   getDeviceGroupsQuery,
 }: DeviceGroupsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const deviceGroupsData = usePreloadedQuery(
-    GET_DEVICE_GROUPS_QUERY,
-    getDeviceGroupsQuery,
-  );
+
+  const deviceGroupsData =
+    usePreloadedQuery<DeviceGroups_getDeviceGroups_Query>(
+      GET_DEVICE_GROUPS_QUERY,
+      getDeviceGroupsQuery,
+    );
 
   return (
     <Page>

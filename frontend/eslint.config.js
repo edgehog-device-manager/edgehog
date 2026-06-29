@@ -16,18 +16,19 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-const { defineConfig, globalIgnores } = require("eslint/config");
+import { fixupConfigRules, fixupPluginRules } from "@eslint/compat";
+import { FlatCompat } from "@eslint/eslintrc";
+import js from "@eslint/js";
+import tsParser from "@typescript-eslint/parser";
+import reactRefresh from "eslint-plugin-react-refresh";
+import relay from "eslint-plugin-relay";
+import globals from "globals";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-const globals = require("globals");
-
-const { fixupConfigRules, fixupPluginRules } = require("@eslint/compat");
-
-const tsParser = require("@typescript-eslint/parser");
-const relay = require("eslint-plugin-relay");
-const reactRefresh = require("eslint-plugin-react-refresh").default;
-const js = require("@eslint/js");
-
-const { FlatCompat } = require("@eslint/eslintrc");
+// Emulate __dirname for ESM
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const compat = new FlatCompat({
   baseDirectory: __dirname,
@@ -35,32 +36,31 @@ const compat = new FlatCompat({
   allConfig: js.configs.all,
 });
 
-module.exports = defineConfig([
+export default [
+  {
+    ignores: ["**/build", "**/.eslintrc.cjs"],
+  },
+  ...fixupConfigRules(
+    compat.extends(
+      "eslint:recommended",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:react-hooks/recommended",
+      "plugin:relay/recommended",
+      "prettier",
+      "plugin:testing-library/react",
+    ),
+  ),
   {
     languageOptions: {
       globals: {
         ...globals.browser,
       },
-
       parser: tsParser,
     },
-
-    extends: fixupConfigRules(
-      compat.extends(
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended",
-        "plugin:react-hooks/recommended",
-        "plugin:relay/recommended",
-        "prettier",
-        "plugin:testing-library/react",
-      ),
-    ),
-
     plugins: {
       relay: fixupPluginRules(relay),
       "react-refresh": reactRefresh,
     },
-
     rules: {
       "react-refresh/only-export-components": [
         "warn",
@@ -68,18 +68,14 @@ module.exports = defineConfig([
           allowConstantExport: true,
         },
       ],
-
-      "@typescript-eslint/no-explicit-any": ["warn"],
-
+      "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
           argsIgnorePattern: "^_",
         },
       ],
-
       "testing-library/no-manual-cleanup": "off",
     },
   },
-  globalIgnores(["**/build", "**/.eslintrc.cjs"]),
-]);
+];

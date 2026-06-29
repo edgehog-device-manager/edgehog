@@ -78,10 +78,11 @@ const Container = ({ getCreateContainerOptionsQuery }: ContainerProps) => {
     name: "",
   });
 
-  const containerCreateData = usePreloadedQuery(
-    GET_CREATE_CONTAINER_OPTIONS_QUERY,
-    getCreateContainerOptionsQuery,
-  );
+  const containerCreateData =
+    usePreloadedQuery<ContainerCreate_getOptions_Query>(
+      GET_CREATE_CONTAINER_OPTIONS_QUERY,
+      getCreateContainerOptionsQuery,
+    );
 
   const [createContainer, isCreatingContainer] =
     useMutation<ContainerCreate_createContainer_Mutation>(

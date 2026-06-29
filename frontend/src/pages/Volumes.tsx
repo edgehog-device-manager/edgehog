@@ -123,7 +123,11 @@ interface VolumesContentProps {
 
 const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const volumesData = usePreloadedQuery(GET_VOLUMES_QUERY, getVolumesQuery);
+
+  const volumesData = usePreloadedQuery<Volumes_getVolumes_Query>(
+    GET_VOLUMES_QUERY,
+    getVolumesQuery,
+  );
 
   return (
     <Page>

@@ -174,10 +174,11 @@ interface ImageCredentialWrapperProps {
 const ImageCredentialWrapper = ({
   imageCredentialQuery,
 }: ImageCredentialWrapperProps) => {
-  const { imageCredentials } = usePreloadedQuery(
-    IMAGE_CREDENTIAL_QUERY,
-    imageCredentialQuery,
-  );
+  const { imageCredentials } =
+    usePreloadedQuery<ImageCredential_imageCredential_Query>(
+      IMAGE_CREDENTIAL_QUERY,
+      imageCredentialQuery,
+    );
 
   if (!imageCredentials) {
     return (

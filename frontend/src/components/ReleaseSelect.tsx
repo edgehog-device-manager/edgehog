@@ -200,7 +200,7 @@ const ReleaseSelectContent = ({
   applicationQuery,
   controllerProps,
 }: ReleaseSelectContentProps) => {
-  const { application } = usePreloadedQuery(
+  const { application } = usePreloadedQuery<ReleaseSelect_getApplication_Query>(
     GET_APPLICATION_QUERY,
     applicationQuery,
   );

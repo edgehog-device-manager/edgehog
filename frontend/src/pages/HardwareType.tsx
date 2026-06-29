@@ -244,10 +244,11 @@ type HardwareTypeWrapperProps = {
 const HardwareTypeWrapper = ({
   getHardwareTypeQuery,
 }: HardwareTypeWrapperProps) => {
-  const { hardwareType } = usePreloadedQuery(
-    GET_HARDWARE_TYPE_QUERY,
-    getHardwareTypeQuery,
-  );
+  const { hardwareType } =
+    usePreloadedQuery<HardwareType_getHardwareType_Query>(
+      GET_HARDWARE_TYPE_QUERY,
+      getHardwareTypeQuery,
+    );
 
   if (!hardwareType) {
     return (

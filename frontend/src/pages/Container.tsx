@@ -216,7 +216,7 @@ type ContainerWrapperProps = {
 };
 
 const ContainerWrapper = ({ getContainerQuery }: ContainerWrapperProps) => {
-  const { container } = usePreloadedQuery(
+  const { container } = usePreloadedQuery<Container_getContainer_Query>(
     GET_CONTAINER_QUERY,
     getContainerQuery,
   );

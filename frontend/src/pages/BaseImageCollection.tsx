@@ -379,10 +379,11 @@ type BaseImageCollectionWrapperProps = {
 const BaseImageCollectionWrapper = ({
   getBaseImageCollectionQuery,
 }: BaseImageCollectionWrapperProps) => {
-  const { baseImageCollection } = usePreloadedQuery(
-    GET_BASE_IMAGE_COLLECTION_QUERY,
-    getBaseImageCollectionQuery,
-  );
+  const { baseImageCollection } =
+    usePreloadedQuery<BaseImageCollection_getBaseImageCollection_Query>(
+      GET_BASE_IMAGE_COLLECTION_QUERY,
+      getBaseImageCollectionQuery,
+    );
 
   if (!baseImageCollection) {
     return (

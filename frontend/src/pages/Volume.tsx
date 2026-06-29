@@ -228,7 +228,10 @@ type VolumeWrapperProps = {
 };
 
 const VolumeWrapper = ({ getVolumeQuery }: VolumeWrapperProps) => {
-  const { volume } = usePreloadedQuery(GET_VOLUME_QUERY, getVolumeQuery);
+  const { volume } = usePreloadedQuery<Volume_getVolume_Query>(
+    GET_VOLUME_QUERY,
+    getVolumeQuery,
+  );
 
   if (!volume) {
     return (

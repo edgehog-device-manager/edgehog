@@ -372,11 +372,19 @@ const DeviceContent = ({
   const { deviceId = "", activeTab } = useParams();
   const navigate = useNavigate();
   const relayEnvironment = useRelayEnvironment();
-  const deviceData = usePreloadedQuery(GET_DEVICE_QUERY, getDeviceQuery);
-  const tagsData = usePreloadedQuery(GET_TAGS_QUERY, getTagsQuery);
   const [isOpeningRemoteTerminal, setIsOpeningRemoteTerminal] = useState(false);
   const [remoteTerminalErrorFeedback, setRemoteTerminalErrorFeedback] =
     useState<React.ReactNode>(null);
+
+  const deviceData = usePreloadedQuery<Device_getDevice_Query>(
+    GET_DEVICE_QUERY,
+    getDeviceQuery,
+  );
+
+  const tagsData = usePreloadedQuery<Device_getExistingDeviceTags_Query>(
+    GET_TAGS_QUERY,
+    getTagsQuery,
+  );
 
   const isForwarderEnabled = useMemo(
     () => deviceData.forwarderConfig != null,

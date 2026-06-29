@@ -56,15 +56,20 @@ function saveSession(session: Session, persistConfig: boolean = false): void {
 }
 
 const loadSession = (): Session => {
-  let session: Session = null;
+  const session = Cookies.get("session");
+
+  if (!session) return null;
+
   try {
-    session = JSON.parse(Cookies.get("session") || "");
+    const parsedSession = JSON.parse(session);
+
+    if (get(parsedSession, "_version") === SESSION_CONFIG_VERSION) {
+      return omit(parsedSession, "_version") as Session;
+    }
   } catch {
-    session = null;
+    return null;
   }
-  if (get(session, "_version") === SESSION_CONFIG_VERSION) {
-    return omit(session, "_version") as Session;
-  }
+
   return null;
 };
 

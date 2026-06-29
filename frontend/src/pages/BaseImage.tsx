@@ -251,7 +251,10 @@ type BaseImageWrapperProps = {
 const BaseImageWrapper = ({ getBaseImageQuery }: BaseImageWrapperProps) => {
   const { baseImageCollectionId = "" } = useParams();
 
-  const queryData = usePreloadedQuery(GET_BASE_IMAGE_QUERY, getBaseImageQuery);
+  const queryData = usePreloadedQuery<BaseImage_getBaseImage_Query>(
+    GET_BASE_IMAGE_QUERY,
+    getBaseImageQuery,
+  );
 
   if (!queryData.baseImage) {
     return (

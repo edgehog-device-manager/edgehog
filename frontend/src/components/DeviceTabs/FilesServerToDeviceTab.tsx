@@ -399,10 +399,11 @@ const ManualFilesServerToDeviceRepositoryFormWrapper = ({
 }: ManualFilesServerToDeviceRepositoryFormWrapperProps) => {
   const [isUploading, setIsUploading] = useState(false);
 
-  const repositoriesData = usePreloadedQuery(
-    GET_REPOSITORIES_QUERY,
-    repositoriesQueryRef,
-  );
+  const repositoriesData =
+    usePreloadedQuery<FilesServerToDeviceTab_getRepositories_Query>(
+      GET_REPOSITORIES_QUERY,
+      repositoriesQueryRef,
+    );
 
   const [createFileDownloadRequest] =
     useMutation<FilesServerToDeviceTab_createManagedFileDownloadRequest_Mutation>(

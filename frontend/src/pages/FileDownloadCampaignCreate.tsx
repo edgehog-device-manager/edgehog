@@ -225,10 +225,11 @@ type FileDownloadCampaignWrapperProps = {
 const FileDownloadCampaignWrapper = ({
   getCreateCampaignOptionsQuery,
 }: FileDownloadCampaignWrapperProps) => {
-  const campaignOptions = usePreloadedQuery(
-    GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
-    getCreateCampaignOptionsQuery,
-  );
+  const campaignOptions =
+    usePreloadedQuery<FileDownloadCampaignCreate_getOptions_Query>(
+      GET_CREATE_CAMPAIGN_OPTIONS_QUERY,
+      getCreateCampaignOptionsQuery,
+    );
 
   const { repositories, channels } = campaignOptions;
 

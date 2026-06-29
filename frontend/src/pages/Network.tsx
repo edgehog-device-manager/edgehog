@@ -255,7 +255,10 @@ type NetworkWrapperProps = {
 };
 
 const NetworkWrapper = ({ getNetworkQuery }: NetworkWrapperProps) => {
-  const { network } = usePreloadedQuery(GET_NETWORK_QUERY, getNetworkQuery);
+  const { network } = usePreloadedQuery<Network_getNetwork_Query>(
+    GET_NETWORK_QUERY,
+    getNetworkQuery,
+  );
 
   if (!network) {
     return (

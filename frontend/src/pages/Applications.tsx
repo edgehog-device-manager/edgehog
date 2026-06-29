@@ -237,10 +237,11 @@ const ApplicationsContent = ({
   const [applicationToDelete, setApplicationToDelete] =
     useState<SelectedApplication | null>(null);
 
-  const applicationsData = usePreloadedQuery(
-    GET_APPLICATIONS_QUERY,
-    getApplicationsQuery,
-  );
+  const applicationsData =
+    usePreloadedQuery<Applications_getApplications_Query>(
+      GET_APPLICATIONS_QUERY,
+      getApplicationsQuery,
+    );
 
   return (
     <Page>

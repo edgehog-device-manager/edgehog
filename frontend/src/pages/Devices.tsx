@@ -252,7 +252,10 @@ interface DevicesContentProps {
 const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const devicesData = usePreloadedQuery(GET_DEVICES_QUERY, getDevicesQuery);
+  const devicesData = usePreloadedQuery<Devices_getDevices_Query>(
+    GET_DEVICES_QUERY,
+    getDevicesQuery,
+  );
 
   return (
     <Page>

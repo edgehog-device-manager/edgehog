@@ -308,7 +308,11 @@ const FileDownloadCampaignContent = ({
 }: FileDownloadCampaignContentProps) => {
   const [errorFeedback, setErrorFeedback] = useState<ReactNode>(null);
 
-  const { campaign } = usePreloadedQuery(GET_CAMPAIGN_QUERY, getCampaignQuery);
+  const { campaign } =
+    usePreloadedQuery<FileDownloadCampaign_getCampaign_Query>(
+      GET_CAMPAIGN_QUERY,
+      getCampaignQuery,
+    );
 
   const scheduledDate = campaign?.scheduledAtTimestamp
     ? new Date(campaign.scheduledAtTimestamp)

@@ -142,10 +142,12 @@ const SystemModelsContent = ({
   getSystemModelsQuery,
 }: SystemModelsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const systemModelsData = usePreloadedQuery(
-    GET_SYSTEM_MODELS_QUERY,
-    getSystemModelsQuery,
-  );
+
+  const systemModelsData =
+    usePreloadedQuery<SystemModels_getSystemModels_Query>(
+      GET_SYSTEM_MODELS_QUERY,
+      getSystemModelsQuery,
+    );
 
   return (
     <Page>

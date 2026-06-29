@@ -190,7 +190,7 @@ const FileSelectContent = ({
   repositoryQuery,
   controllerProps,
 }: FileSelectContentProps) => {
-  const { repository } = usePreloadedQuery(
+  const { repository } = usePreloadedQuery<FileSelect_getRepository_Query>(
     GET_REPOSITORY_QUERY,
     repositoryQuery,
   );

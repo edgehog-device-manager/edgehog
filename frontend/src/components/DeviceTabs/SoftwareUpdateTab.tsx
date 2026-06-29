@@ -137,10 +137,11 @@ const ManualOtaFromCollectionFormWrapper = ({
   isCreatingOtaOperation,
   launchManualOTAUpdate,
 }: ManualOtaFromCollectionFormWrapperProps) => {
-  const baseImageCollections = usePreloadedQuery(
-    GET_BASE_IMAGE_COLL_QUERY,
-    baseImageCollsQueryRef,
-  );
+  const baseImageCollections =
+    usePreloadedQuery<SoftwareUpdateTab_getBaseImageCollections_Query>(
+      GET_BASE_IMAGE_COLL_QUERY,
+      baseImageCollsQueryRef,
+    );
 
   return (
     <ManualOtaFromCollectionForm

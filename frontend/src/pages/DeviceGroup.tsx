@@ -364,7 +364,7 @@ type DeviceGroupWrapperProps = {
 const DeviceGroupWrapper = ({
   getDeviceGroupQuery,
 }: DeviceGroupWrapperProps) => {
-  const { deviceGroup } = usePreloadedQuery(
+  const { deviceGroup } = usePreloadedQuery<DeviceGroup_getDeviceGroup_Query>(
     GET_DEVICE_GROUP_QUERY,
     getDeviceGroupQuery,
   );

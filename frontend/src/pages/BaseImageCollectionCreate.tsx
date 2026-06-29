@@ -218,10 +218,12 @@ type BaseImageCollectionWrapperProps = {
 const BaseImageCollectionWrapper = ({
   getBaseImageCollectionOptionsQuery,
 }: BaseImageCollectionWrapperProps) => {
-  const baseImageCollectionOptions = usePreloadedQuery(
-    CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY,
-    getBaseImageCollectionOptionsQuery,
-  );
+  const baseImageCollectionOptions =
+    usePreloadedQuery<BaseImageCollectionCreate_getOptions_Query>(
+      CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY,
+      getBaseImageCollectionOptionsQuery,
+    );
+
   const { systemModels, baseImageCollections } = baseImageCollectionOptions;
   if (systemModels?.count === 0) {
     return <NoSystemModels />;

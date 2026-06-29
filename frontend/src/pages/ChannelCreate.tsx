@@ -76,10 +76,11 @@ const Channel = ({ getCreateChannelOptionsQuery }: ChannelProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
 
-  const channelCreateData = usePreloadedQuery(
-    GET_CREATE_CHANNEL_OPTIONS_QUERY,
-    getCreateChannelOptionsQuery,
-  );
+  const channelCreateData =
+    usePreloadedQuery<ChannelCreate_getDeviceGroups_Query>(
+      GET_CREATE_CHANNEL_OPTIONS_QUERY,
+      getCreateChannelOptionsQuery,
+    );
 
   const [createChannel, isCreatingChannel] =
     useMutation<ChannelCreate_createChannel_Mutation>(CREATE_CHANNEL_MUTATION);
@@ -192,7 +193,7 @@ type ChannelWrapperProps = {
 const ChannelWrapper = ({
   getCreateChannelOptionsQuery,
 }: ChannelWrapperProps) => {
-  const channelOptions = usePreloadedQuery(
+  const channelOptions = usePreloadedQuery<ChannelCreate_getDeviceGroups_Query>(
     GET_CREATE_CHANNEL_OPTIONS_QUERY,
     getCreateChannelOptionsQuery,
   );

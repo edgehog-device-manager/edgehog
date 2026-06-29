@@ -183,7 +183,7 @@ type BaseImageCreateWrapperProps = {
 const BaseImageCreateWrapper = ({
   getBaseImageCollectionQuery,
 }: BaseImageCreateWrapperProps) => {
-  const queryData = usePreloadedQuery(
+  const queryData = usePreloadedQuery<BaseImageCreate_getOptions_Query>(
     GET_BASE_IMAGE_COLLECTION_QUERY,
     getBaseImageCollectionQuery,
   );

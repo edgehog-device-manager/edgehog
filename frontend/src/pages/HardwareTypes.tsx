@@ -136,10 +136,11 @@ const HardwareTypesContent = ({
 }: HardwareTypesContentProps) => {
   const [searchText, setSearchText] = useState<string>("");
 
-  const hardwareTypesData = usePreloadedQuery(
-    GET_HARDWARE_TYPES_QUERY,
-    getHardwareTypesQuery,
-  );
+  const hardwareTypesData =
+    usePreloadedQuery<HardwareTypes_getHardwareTypes_Query>(
+      GET_HARDWARE_TYPES_QUERY,
+      getHardwareTypesQuery,
+    );
 
   return (
     <Page>

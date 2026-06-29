@@ -124,7 +124,7 @@ interface ContainersContentProps {
 const ContainersContent = ({ getContainersQuery }: ContainersContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
 
-  const containersData = usePreloadedQuery(
+  const containersData = usePreloadedQuery<Containers_getContainers_Query>(
     GET_CONTAINERS_QUERY,
     getContainersQuery,
   );

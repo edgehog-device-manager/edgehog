@@ -478,10 +478,11 @@ const DeploymentWrapper = ({
   getDeploymentQuery,
   deviceId,
 }: DeploymentWrapperProps) => {
-  const { deployment } = usePreloadedQuery(
+  const { deployment } = usePreloadedQuery<Deployment_getDeployment_Query>(
     GET_DEPLOYMENT_QUERY,
     getDeploymentQuery,
   );
+
   const isOnline = deployment?.device?.online ?? false;
 
   if (!deployment) {

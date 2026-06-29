@@ -189,10 +189,11 @@ const BaseImageSelectContent = ({
   baseImageCollectionQuery,
   controllerProps,
 }: BaseImageSelectContentProps) => {
-  const { baseImageCollection } = usePreloadedQuery(
-    GET_BASE_IMAGE_COLLECTION_QUERY,
-    baseImageCollectionQuery,
-  );
+  const { baseImageCollection } =
+    usePreloadedQuery<BaseImageSelect_getBaseImageCollection_Query>(
+      GET_BASE_IMAGE_COLLECTION_QUERY,
+      baseImageCollectionQuery,
+    );
 
   return (
     <BaseImageSelect

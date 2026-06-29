@@ -267,7 +267,11 @@ type ChannelsContentProps = {
 
 const ChannelsContent = ({ getChannelsQuery }: ChannelsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const channelsData = usePreloadedQuery(GET_CHANNELS_QUERY, getChannelsQuery);
+
+  const channelsData = usePreloadedQuery<Channels_getChannels_Query>(
+    GET_CHANNELS_QUERY,
+    getChannelsQuery,
+  );
 
   return (
     <Page>

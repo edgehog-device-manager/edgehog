@@ -132,10 +132,12 @@ const BaseImageCollectionsContent = ({
   getBaseImageCollectionsQuery,
 }: BaseImageCollectionsContentProps) => {
   const [searchText, setSearchText] = useState<string | null>(null);
-  const baseImageCollectionsData = usePreloadedQuery(
-    GET_BASE_IMAGE_COLLECTIONS_QUERY,
-    getBaseImageCollectionsQuery,
-  );
+
+  const baseImageCollectionsData =
+    usePreloadedQuery<BaseImageCollections_getBaseImageCollections_Query>(
+      GET_BASE_IMAGE_COLLECTIONS_QUERY,
+      getBaseImageCollectionsQuery,
+    );
 
   return (
     <Page>
