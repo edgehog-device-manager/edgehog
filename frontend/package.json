@@ -56,12 +56,12 @@
     "react-hyper-tree": "^0.3.12",
     "react-intl": "^7.1.14",
     "react-leaflet": "^4.2.1",
-    "react-relay": "^20.1.1",
+    "react-relay": "^21.0.1",
     "react-router-dom": "^7.17.0",
     "react-select": "^5.10.2",
-    "react-tooltip": "^5.30.1",
-    "relay-compiler": "^20.1.1",
-    "relay-runtime": "^20.1.1",
+    "react-tooltip": "^6.0.8",
+    "relay-compiler": "^21.0.1",
+    "relay-runtime": "^21.0.1",
     "sass": "^1.101.0",
     "semver": "^7.8.3",
     "shadcn": "^4.8.2",
@@ -133,7 +133,7 @@
     "jsdom": "^29.1.1",
     "prettier": "^3.8.5",
     "react-select-event": "^5.5.1",
-    "relay-test-utils": "^20.1.1",
+    "relay-test-utils": "^21.0.1",
     "vitest": "^4.1.8"
   }
 }
