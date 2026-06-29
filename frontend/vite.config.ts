@@ -1,13 +1,14 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import eslint from "vite-plugin-eslint";
-import viteTsconfigPaths from "vite-tsconfig-paths";
-import relay from "vite-plugin-relay-lite";
+import checker from "vite-plugin-checker";
 
-export default defineConfig((env) => {
+export default defineConfig(({ mode }) => {
   return {
+    resolve: {
+      tsconfigPaths: true,
+    },
     server: {
-      open: env.mode !== "test",
+      open: mode !== "test",
       port: 3000,
     },
     build: {
@@ -21,17 +22,21 @@ export default defineConfig((env) => {
       },
     },
     plugins: [
-      react(),
-      viteTsconfigPaths(),
-      relay(),
-      {
-        ...eslint({
-          failOnWarning: false,
-          failOnError: false,
-        }),
-        apply: "serve",
-        enforce: "post",
-      },
+      react({
+        babel: {
+          plugins: ["babel-plugin-relay"],
+        },
+      }),
+      checker({
+        eslint: {
+          lintCommand: 'eslint "./src/**/*.{ts,tsx}"',
+          useFlatConfig: true,
+        },
+        enableBuild: false,
+        overlay: {
+          initialIsOpen: false,
+        },
+      }),
     ],
     test: {
       environment: "jsdom",
