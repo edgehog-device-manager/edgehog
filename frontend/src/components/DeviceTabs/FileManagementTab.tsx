@@ -171,13 +171,8 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
 
           if (updatedFile) {
             const isDeleted = updatedFile.getValue("deleted");
-            console.log("Checking if deleted:", isDeleted);
 
             if (isDeleted) {
-              console.log(
-                "File marked as deleted! Removing from connections...",
-              );
-
               const destroyedId = updatedFile.getDataID();
 
               connectionKeys.forEach((key) => {
