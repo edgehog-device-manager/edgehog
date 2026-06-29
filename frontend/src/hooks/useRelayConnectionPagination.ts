@@ -25,10 +25,7 @@ import { RECORDS_TO_LOAD_FIRST, RECORDS_TO_LOAD_NEXT } from "@/constants";
 
 type RefetchOptions = {
   fetchPolicy?:
-    | "network-only"
-    | "store-and-network"
-    | "store-or-network"
-    | "store-only";
+    "network-only" | "store-and-network" | "store-or-network" | "store-only";
 };
 
 type UseRelayConnectionPaginationOptions<TFilter> = {

@@ -23,11 +23,7 @@ import { defineMessages, FormattedMessage } from "react-intl";
 import Icon from "@/components/Icon";
 
 export type FileDownloadRequestStatus =
-  | "COMPLETED"
-  | "FAILED"
-  | "IN_PROGRESS"
-  | "PENDING"
-  | "SENT";
+  "COMPLETED" | "FAILED" | "IN_PROGRESS" | "PENDING" | "SENT";
 
 const statusColors: Record<string, string> = {
   COMPLETED: "text-success",
