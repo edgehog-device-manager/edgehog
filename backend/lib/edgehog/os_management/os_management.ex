@@ -23,7 +23,7 @@ defmodule Edgehog.OSManagement do
   use Ash.Domain,
     extensions: [
       AshGraphql.Domain,
-      Ash.Authorizer
+      Ash.Policy.Authorizer
     ]
 
   alias Edgehog.OSManagement.OTAOperation
