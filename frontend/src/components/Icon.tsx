@@ -22,6 +22,7 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import {
   faCircle as faCircleRegular,
   faCircleCheck as faCircleCheckRegular,
+  faCalendar as faCalendarRegular,
 } from "@fortawesome/free-regular-svg-icons";
 import {
   faAngleDown,
@@ -77,6 +78,7 @@ const icons = {
   caretDown: faAngleDown,
   caretUp: faAngleUp,
   circle: faCircle,
+  calendar: faCalendarRegular,
   circleCheck: faCircleCheckRegular,
   circleEmpty: faCircleRegular,
   delete: faTrash,

@@ -107,6 +107,21 @@ defmodule Edgehog.Campaigns do
         description "Resumes a paused campaign rollout."
       end
 
+      update Campaign, :update_campaign, :update do
+        description "Updates a scheduled campaign that has not yet started"
+
+        relay_id_translations input: [
+                                base_image_id: :base_image,
+                                release_id: :release,
+                                target_release_id: :release,
+                                file_id: :file
+                              ]
+      end
+
+      destroy Campaign, :delete_campaign, :destroy do
+        description "Deletes a scheduled campaign that has not yet started"
+      end
+
       create Channel, :create_channel, :create do
         relay_id_translations input: [target_group_ids: :device_group]
       end
@@ -126,6 +141,7 @@ defmodule Edgehog.Campaigns do
       define :mark_campaign_paused, action: :mark_as_paused
       define :mark_campaign_failed, action: :mark_as_failed
       define :mark_campaign_successful, action: :mark_as_successful
+      define :mark_campaign_scheduled, action: :mark_as_scheduled
       define :pause_campaign, action: :pause
       define :resume_campaign, action: :resume
     end

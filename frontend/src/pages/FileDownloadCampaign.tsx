@@ -20,7 +20,6 @@
 
 import type { ReactNode } from "react";
 import { Suspense, useCallback, useEffect, useState } from "react";
-import Countdown, { type CountdownRenderProps } from "react-countdown";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedDate, FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -32,7 +31,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Card } from "react-bootstrap";
 
 import type {
@@ -44,9 +43,12 @@ import type { FileDownloadCampaign_resumeCampaign_Mutation } from "@/api/__gener
 
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import CampaignScheduledAlert from "@/components/CampaignScheduledAlert";
 import CampaignStatsChart from "@/components/CampaignStatsChart";
 import Center from "@/components/Center";
 import Col from "@/components/Col";
+import DeleteCampaignModal from "@/components/DeleteCampaignModal";
+import EditFileDownloadCampaignModal from "@/components/EditFileDownloadCampaignModal";
 import FileDownloadTargetsTabs from "@/components/FileDownloadTargetsTabs";
 import Icon from "@/components/Icon";
 import Page from "@/components/Page";
@@ -57,6 +59,8 @@ import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import FileDownloadCampaignForm from "@/forms/FileDownloadCampaignForm";
 import { Link, Route } from "@/Navigation";
 
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
 const GET_CAMPAIGN_QUERY = graphql`
   query FileDownloadCampaign_getCampaign_Query(
     $fileDownloadCampaignId: ID!
@@ -65,14 +69,39 @@ const GET_CAMPAIGN_QUERY = graphql`
     $filter: CampaignTargetFilterInput = { status: { eq: SUCCESSFUL } }
   ) {
     campaign(id: $fileDownloadCampaignId) {
+      id
       name
       status
       scheduledAtTimestamp
+      campaignMechanism {
+        __typename
+        ... on FileDownload {
+          maxFailurePercentage
+          maxInProgressOperations
+          requestRetries
+          requestTimeoutSeconds
+          destinationType
+          destination
+          ttlSeconds
+          fileMode
+          userId
+          groupId
+          file {
+            id
+            name
+            repository {
+              id
+              name
+            }
+          }
+        }
+      }
       ...FileDownloadCampaignForm_CampaignFragment
       ...CampaignStatsChart_CampaignStatsChartFragment
       ...FileDownloadTargetsTabs_FileDownloadTargetsFragment
         @arguments(first: $first, after: $after, filter: $filter)
     }
+    ...EditFileDownloadCampaignModal_RepositoryOptionsFragment
   }
 `;
 
@@ -109,6 +138,7 @@ const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
     campaign(id: $id) {
       updated {
         id
+        name
         status
         outcome
         scheduledAtTimestamp
@@ -116,6 +146,29 @@ const CAMPAIGN_UPDATE_SUBSCRIPTION = graphql`
         inProgressTargetCount
         failedTargetCount
         successfulTargetCount
+        campaignMechanism {
+          __typename
+          ... on FileDownload {
+            maxFailurePercentage
+            maxInProgressOperations
+            requestRetries
+            requestTimeoutSeconds
+            destinationType
+            destination
+            ttlSeconds
+            fileMode
+            userId
+            groupId
+            file {
+              id
+              name
+              repository {
+                id
+                name
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -146,35 +199,6 @@ const CAMPAIGN_TARGETS_UPDATED_SUBSCRIPTION = graphql`
     }
   }
 `;
-
-const renderCountdown = ({
-  completed,
-  days,
-  hours,
-  minutes,
-  seconds,
-}: CountdownRenderProps) => {
-  if (completed) {
-    return null;
-  }
-
-  const duration = [
-    days > 0 ? `${days}d` : null,
-    hours > 0 || days > 0 ? `${hours}h` : null,
-    minutes > 0 || hours > 0 || days > 0 ? `${minutes}m` : null,
-    `${seconds}s`,
-  ].filter(Boolean);
-
-  return (
-    <strong>
-      <FormattedMessage
-        id="pages.FileDownloadCampaign.scheduledStartsIn"
-        defaultMessage="Starts in {duration}"
-        values={{ duration: duration.join(" ") }}
-      />
-    </strong>
-  );
-};
 
 type CampaignActionsProps = {
   fileDownloadCampaignId: string;
@@ -306,13 +330,17 @@ const FileDownloadCampaignContent = ({
   fileDownloadCampaignId,
   getCampaignQuery,
 }: FileDownloadCampaignContentProps) => {
-  const [errorFeedback, setErrorFeedback] = useState<ReactNode>(null);
+  const navigate = useNavigate();
 
-  const { campaign } =
-    usePreloadedQuery<FileDownloadCampaign_getCampaign_Query>(
-      GET_CAMPAIGN_QUERY,
-      getCampaignQuery,
-    );
+  const [errorFeedback, setErrorFeedback] = useState<ReactNode>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+
+  const queryData = usePreloadedQuery<FileDownloadCampaign_getCampaign_Query>(
+    GET_CAMPAIGN_QUERY,
+    getCampaignQuery,
+  );
+  const { campaign } = queryData;
 
   const scheduledDate = campaign?.scheduledAtTimestamp
     ? new Date(campaign.scheduledAtTimestamp)
@@ -321,11 +349,7 @@ const FileDownloadCampaignContent = ({
   const isValidScheduledDate =
     scheduledDate && !Number.isNaN(scheduledDate.getTime());
 
-  const [now] = useState(() => Date.now());
-
-  const shouldShowScheduledAlert =
-    !!campaign?.scheduledAtTimestamp &&
-    (!isValidScheduledDate || scheduledDate.getTime() > now);
+  const shouldShowScheduledAlert = campaign?.status === "SCHEDULED";
 
   const formattedScheduledDate = isValidScheduledDate ? (
     <FormattedDate value={scheduledDate} dateStyle="medium" timeStyle="short" />
@@ -372,26 +396,14 @@ const FileDownloadCampaignContent = ({
           {errorFeedback}
         </Alert>
 
-        <Alert show={shouldShowScheduledAlert} variant="warning">
-          <div>
-            <strong>
-              <FormattedMessage
-                id="pages.FileDownloadCampaign.scheduledFor"
-                defaultMessage="Scheduled for: {scheduledDate}"
-                values={{ scheduledDate: formattedScheduledDate }}
-              />
-            </strong>
-          </div>
-          {isValidScheduledDate && (
-            <div>
-              <Countdown
-                date={scheduledDate.getTime()}
-                overtime
-                renderer={renderCountdown}
-              />
-            </div>
-          )}
-        </Alert>
+        <CampaignScheduledAlert
+          show={shouldShowScheduledAlert}
+          scheduledAt={campaign?.scheduledAtTimestamp}
+          isValidScheduledDate={!!isValidScheduledDate}
+          formattedScheduledDate={formattedScheduledDate}
+          onEdit={() => setShowEditModal(true)}
+          onDelete={() => setShowDeleteModal(true)}
+        />
         <Card className="h-100 border-0 p-3 shadow-sm mb-3">
           <Row>
             <Col lg={9}>
@@ -404,6 +416,31 @@ const FileDownloadCampaignContent = ({
         </Card>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
           <FileDownloadTargetsTabs campaignRef={campaign} />
+
+          {showDeleteModal && (
+            <DeleteCampaignModal
+              campaignToDelete={campaign}
+              onCancel={() => setShowDeleteModal(false)}
+              onSuccess={() => {
+                setShowDeleteModal(false);
+                navigate(Route.fileDownloadCampaigns);
+              }}
+              setErrorFeedback={setErrorFeedback}
+            />
+          )}
+
+          {showEditModal && (
+            <EditFileDownloadCampaignModal
+              campaignToUpdate={campaign}
+              campaignOptionsRef={queryData}
+              onCancel={() => setShowEditModal(false)}
+              onSuccess={() => {
+                setShowEditModal(false);
+                // Optional: Show a success toast/alert
+              }}
+              setErrorFeedback={setErrorFeedback}
+            />
+          )}
         </Card>
       </Page.Main>
     </Page>

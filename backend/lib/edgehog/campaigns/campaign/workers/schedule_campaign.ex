@@ -22,7 +22,17 @@ defmodule Edgehog.Campaigns.Campaign.Workers.ScheduleCampaign do
   @moduledoc """
   This module is used to start Campaigns that have been scheduled at a specific time
   """
-  use Oban.Worker, queue: :campaigns
+  use Oban.Worker,
+    queue: :campaigns,
+    unique: [
+      fields: [:worker, :queue, :args],
+      keys: [:id],
+      states: [:scheduled],
+      period: :infinity
+    ],
+    replace: [
+      scheduled: [:scheduled_at]
+    ]
 
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.ExecutorSupervisor

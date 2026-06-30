@@ -236,38 +236,16 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:state, :started)
       change set_attribute(:context, nil)
 
-      change {Edgehog.Changes.Log, message: "Deployment started successfully."}
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully provisioned."} do
-        where [data_one_of(:state, [:pending, :sent])]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully started."} do
-        where [data_one_of(:context, [:start_message_sent])]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
-        where [data_one_of(:context, [:upgrade_message_sent])]
-      end
+      change Changes.LogStarted
+      require_atomic? false
     end
 
     update :mark_as_stopped do
       change set_attribute(:state, :stopped)
       change set_attribute(:context, nil)
 
-      change {Edgehog.Changes.Log, message: "Deployment stopped successfully."}
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully provisioned."} do
-        where [data_one_of(:state, [:pending, :sent])]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully stopped."} do
-        where [data_one_of(:context, [:stop_message_sent])]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
-        where [data_one_of(:context, [:upgrade_message_sent])]
-      end
+      change Changes.LogStopped
+      require_atomic? false
     end
 
     update :mark_as_timed_out do

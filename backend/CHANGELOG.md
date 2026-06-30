@@ -9,6 +9,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.13.0-rc.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.0-rc.0...v0.13.0-rc.1) (2026-06-26)
+
+### Features
+
+* **backend:** add edit and delete to scheduled campaigns ([c41955c](https://github.com/edgehog-device-manager/edgehog/commit/c41955cb9bd88344455ca3410e10393befe7a716))
+* **backend:** expand edit for scheduled campaigns ([67bb391](https://github.com/edgehog-device-manager/edgehog/commit/67bb39104168e36babcb5ce8e994c9fde434e643))
+
+### Bug Fixes
+
+* deployment state not updating ([55b1270](https://github.com/edgehog-device-manager/edgehog/commit/55b1270f46714c8da851909bc055e939bb06d95c))
+* log only once on deployment events ([6d85ea6](https://github.com/edgehog-device-manager/edgehog/commit/6d85ea655908a0e011b1c714ab3f5dce213ba0c3))
+
 ## [0.13.0-rc.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.0...v0.13.0-rc.0) (2026-06-15)
 
 
