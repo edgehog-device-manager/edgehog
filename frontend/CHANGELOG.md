@@ -9,6 +9,94 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
 
+## [0.13.0-rc.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.0-rc.1...v0.13.0-rc.0) (2026-06-30)
+
+
+### ⚠ BREAKING CHANGES
+
+* direct container creation
+
+### Features
+
+* `chevronDown` and `chevronUp` icon ([6d5dc58](https://github.com/edgehog-device-manager/edgehog/commit/6d5dc582a37f3a1278f623d3baf3d2baf67996d3))
+* Add `Pause` and `Resume` functionality for campaigns ([#1204](https://github.com/edgehog-device-manager/edgehog/issues/1204)) ([35a9aab](https://github.com/edgehog-device-manager/edgehog/commit/35a9aab42a458358bf87a60e37453b26a7ac0228)), closes [#277](https://github.com/edgehog-device-manager/edgehog/issues/277)
+* add device group subscription ([#1198](https://github.com/edgehog-device-manager/edgehog/issues/1198)) ([adb91f4](https://github.com/edgehog-device-manager/edgehog/commit/adb91f4e5f7011cdf424b77371ebf4f8858f66d1))
+* Add download functionality to uploaded files ([749490a](https://github.com/edgehog-device-manager/edgehog/commit/749490a7cf47c90e3ac23caa6e6edf9efe5d2332))
+* Add file create functionality to repositories ([ef49219](https://github.com/edgehog-device-manager/edgehog/commit/ef492190cf3041e0eea3e27fe59e35a1717f43a6))
+* Add file delete UI and refine upload naming ([#1406](https://github.com/edgehog-device-manager/edgehog/issues/1406)) ([ffc914a](https://github.com/edgehog-device-manager/edgehog/commit/ffc914a123cf87edefc6d21aa2473c5bc506d3a2))
+* Add file download request subscription ([#1313](https://github.com/edgehog-device-manager/edgehog/issues/1313)) ([d097005](https://github.com/edgehog-device-manager/edgehog/commit/d097005bab9dcffe927c90d5cf6ccbd971171efd))
+* add file download request using file from repository ([7ef5086](https://github.com/edgehog-device-manager/edgehog/commit/7ef508637c798847cc1351ab1826de188cafde64))
+* Add file upload UX with advanced options ([45619de](https://github.com/edgehog-device-manager/edgehog/commit/45619de33175062ae52d0a930293f774c5897e5d))
+* Add Files Upload tab with manual file download request ([#1270](https://github.com/edgehog-device-manager/edgehog/issues/1270)) ([23f8951](https://github.com/edgehog-device-manager/edgehog/commit/23f895108d890b2f04fdd1db0f76e0724dacfe73))
+* add GraphQL subscription for device creation ([1d5a0ba](https://github.com/edgehog-device-manager/edgehog/commit/1d5a0ba36a7a6c3940ae61215fc03614e6817db6))
+* Add option to hide navigation elements ([#1251](https://github.com/edgehog-device-manager/edgehog/issues/1251)) ([1e728ad](https://github.com/edgehog-device-manager/edgehog/commit/1e728adb15c502c4090163b576481bdab6b51788))
+* add support for container dependencies ([#1463](https://github.com/edgehog-device-manager/edgehog/issues/1463)) ([94553ee](https://github.com/edgehog-device-manager/edgehog/commit/94553ee63abe2f5e9eef60df4f59791a3ba0304c))
+* Add UI for editing and deleting scheduled campaigns ([bf45c9d](https://github.com/edgehog-device-manager/edgehog/commit/bf45c9df24a6e1eb18244784c21a92df8a06ac11))
+* add unified file management with upload and download requests ([7e59bd7](https://github.com/edgehog-device-manager/edgehog/commit/7e59bd7ace150de3fced21491bf0763f5f8367e2))
+* Add unique file name constraint and custom file naming support ([2f2a8c9](https://github.com/edgehog-device-manager/edgehog/commit/2f2a8c981f9e1ae33267f4c35fcb434ecb1aceca))
+* **backend:** allow deletion of BaseImage used in completed campaign ([46f7aa3](https://github.com/edgehog-device-manager/edgehog/commit/46f7aa34f585aabf2a37f4baef10a8ac4a5ea33d)), closes [#598](https://github.com/edgehog-device-manager/edgehog/issues/598)
+* **backend:** manual OTA with base image from collection ([1af4b8d](https://github.com/edgehog-device-manager/edgehog/commit/1af4b8d8b9f10ca480a2aacf6073e8c2f2297b1c))
+* Collapsible headers in container form ([0ac3199](https://github.com/edgehog-device-manager/edgehog/commit/0ac3199635ce23176a01f465cd7ca57aadfa29a0))
+* direct container creation ([0a3b465](https://github.com/edgehog-device-manager/edgehog/commit/0a3b46597996c6871fc6ce828e11f90b4a8b4397))
+* expose associated FileDownloadCampaign from FileDownloadRequests ([ec8a843](https://github.com/edgehog-device-manager/edgehog/commit/ec8a843a0c56b110cddd30e4ed3b98f202e87f62))
+* Extend file management with delete option ([2272ab6](https://github.com/edgehog-device-manager/edgehog/commit/2272ab60f6835b81b0bae6e9cab86f998ef230f8))
+* extend scheduled campaign edit functionality ([1ba5ad8](https://github.com/edgehog-device-manager/edgehog/commit/1ba5ad8a8cffa7f950f520a57c7e4015e3e3dd1b))
+* **frontend:** add file download campaigns management ([7c1b12c](https://github.com/edgehog-device-manager/edgehog/commit/7c1b12c7b46d6849e25882aff39a20865f8580f3))
+* **frontend:** Add realtime subscriptions for deployment pages ([f4e8fde](https://github.com/edgehog-device-manager/edgehog/commit/f4e8fde5f566bf90fcee0ab6e4ab3f0a5f27c0d3))
+* **frontend:** Add repository management interface ([d868c7e](https://github.com/edgehog-device-manager/edgehog/commit/d868c7e1c01bb762593034ba0e1efc6958b048bf))
+* **frontend:** add retry count column to campaign targets tables ([dfe0649](https://github.com/edgehog-device-manager/edgehog/commit/dfe0649be89060cd67f44e31909892549644363e))
+* **frontend:** add subscriptions ([ec7fe9c](https://github.com/edgehog-device-manager/edgehog/commit/ec7fe9c4badcd90ba211071b6d6be513ced36f36))
+* **frontend:** add subscriptions for campaigns ([6269990](https://github.com/edgehog-device-manager/edgehog/commit/6269990e2318acf9484608e0cafff6bf6fe65462))
+* **frontend:** allow deletion of BaseImage used in completed campaign ([b182943](https://github.com/edgehog-device-manager/edgehog/commit/b182943608d7076303b8c7542035fe156779fa8a)), closes [#598](https://github.com/edgehog-device-manager/edgehog/issues/598)
+* **frontend:** Enable scheduling for campaigns ([c1b6860](https://github.com/edgehog-device-manager/edgehog/commit/c1b68605335919ccbd806f62da30cace3082c3a2))
+* **frontend:** manual OTA with base image from collection ([11f9a83](https://github.com/edgehog-device-manager/edgehog/commit/11f9a83cd08f1e2d810813dea72ac41704717e94))
+* GraphQL subscription for device updates in table ([#1118](https://github.com/edgehog-device-manager/edgehog/issues/1118)) ([be6a629](https://github.com/edgehog-device-manager/edgehog/commit/be6a6295f2767cf3ae766984aedbc29833a95a06))
+* Implement flow for device files ([45248ce](https://github.com/edgehog-device-manager/edgehog/commit/45248ce85199fe28bfd50dbe8369005311deecea))
+* improve feedback during manual OTA operation ([7e4de5e](https://github.com/edgehog-device-manager/edgehog/commit/7e4de5e4a4cb27dc26eefd91422a9d77a73b018e))
+* integrate Absinthe WebSocket ([50fd9fc](https://github.com/edgehog-device-manager/edgehog/commit/50fd9fc3319932a8bc00ce84c12d1cb396beaacd))
+* Make Hardware Type clearable in Create System Model ([becc958](https://github.com/edgehog-device-manager/edgehog/commit/becc95896919b33f056622d8e36ee239d10f1914))
+* show `partNumber` and `serialNumber` in `Device` page if available ([#1123](https://github.com/edgehog-device-manager/edgehog/issues/1123)) ([c2261bb](https://github.com/edgehog-device-manager/edgehog/commit/c2261bb7397c4ca956013d245dc16a537e308267)), closes [#226](https://github.com/edgehog-device-manager/edgehog/issues/226)
+* Show pathOnDevice in destination of fileUploadRequest ([ea0b732](https://github.com/edgehog-device-manager/edgehog/commit/ea0b73287e4feea07414c3a7a3aa1c40ec8160eb))
+* UI for deployment events' additional information ([b03f50a](https://github.com/edgehog-device-manager/edgehog/commit/b03f50aaf10b9cff00e5a782bfdbdec1c5e034ba))
+
+
+### Bug Fixes
+
+* add text reporters to coverage output for visibility ([e7c56f8](https://github.com/edgehog-device-manager/edgehog/commit/e7c56f8c5bca9d5517b67041e3537a6bf2e8abb5))
+* Archived file size calculation ([962f785](https://github.com/edgehog-device-manager/edgehog/commit/962f785fd8202ebea8a09aa86b5d5f8f4621df96))
+* Correct GraphQL field name in subscription updater ([#1134](https://github.com/edgehog-device-manager/edgehog/issues/1134)) ([f5ac89b](https://github.com/edgehog-device-manager/edgehog/commit/f5ac89b3da2dde8ef741f370c93a2a8bfbfe47b4))
+* correct presigned URL filename encoding ([3dda9f4](https://github.com/edgehog-device-manager/edgehog/commit/3dda9f4d6d0a5d8c29011b6ba7020c554256115a))
+* Defer WebSocket creation to avoid close-before-connect warning ([6f69ea8](https://github.com/edgehog-device-manager/edgehog/commit/6f69ea8f4e528700695ef109a94fe2c78fbc53aa))
+* Exclude deleted files from both File Management dropdowns ([992e325](https://github.com/edgehog-device-manager/edgehog/commit/992e325e30435f48d283f755097d8ce2933eee68))
+* Fix route param decoding after React Router upgrade ([9ad4710](https://github.com/edgehog-device-manager/edgehog/commit/9ad4710aa7179be158d43386a525eaee7fb96d5e))
+* force expand all tree nodes on data updates ([f2d1364](https://github.com/edgehog-device-manager/edgehog/commit/f2d1364946d31fc226015ba43559923d242236af))
+* **frontend:** fix Campaigns create subscription data ([898ad56](https://github.com/edgehog-device-manager/edgehog/commit/898ad56e5c2bac7413e1fdf031b5c9c6243cad6a))
+* Hide Applications tab when offline or unsupported ([004cbce](https://github.com/edgehog-device-manager/edgehog/commit/004cbce7fc9b1764469c09ff022375ddaf7f0488))
+* **i18n:** replace dynamic FormattedMessage ids ([883bc13](https://github.com/edgehog-device-manager/edgehog/commit/883bc13d3f4622c4fada879efa7ac60a78c7d973))
+* Prevent invalid form states for file download requests ([db24f07](https://github.com/edgehog-device-manager/edgehog/commit/db24f074c0125a35e1d7ddf57b92a10cb55fd4c0))
+* Restrict collapse toggle to icon click only ([eeb59e4](https://github.com/edgehog-device-manager/edgehog/commit/eeb59e48bd2d2b2948397dca333d4e5b614c9fed))
+* single file archiving ([b3c2aab](https://github.com/edgehog-device-manager/edgehog/commit/b3c2aab7e750b18a0d52674c5206435f3ab3c352))
+* Stabilize field help icon alignment across browsers ([bfda785](https://github.com/edgehog-device-manager/edgehog/commit/bfda785fa4acc3559c655fdacd8986dc388f0165))
+* System model image not loaded ([c9d0300](https://github.com/edgehog-device-manager/edgehog/commit/c9d0300ddd796748d7c608eb1b386805cf57fbdf))
+* trim JWT for websockets in frontend ([#1130](https://github.com/edgehog-device-manager/edgehog/issues/1130)) ([a633e01](https://github.com/edgehog-device-manager/edgehog/commit/a633e01d0cb41fd6f55adc609ada1298a50a4bda))
+* unify device creation and update subscriptions ([c09e7de](https://github.com/edgehog-device-manager/edgehog/commit/c09e7de8d5570cd15f158ade835e9a332c602597))
+* use translated storage source IDs for storage uploads ([bef6c0c](https://github.com/edgehog-device-manager/edgehog/commit/bef6c0c394e9417e200860ff21cb4e004bb0b8f9))
+
+
+### Performance Improvements
+
+* Combine multi-pass array chains into single-pass iterations ([86dec24](https://github.com/edgehog-device-manager/edgehog/commit/86dec248d1881958c54c00c808ab249f8a9e0d5e))
+* Modernize array sorting and optimize async react operations ([4715c95](https://github.com/edgehog-device-manager/edgehog/commit/4715c9516bc895312c99192a8070e9618b0bc5a6))
+* Move pure helper functions to module scope ([511ae6f](https://github.com/edgehog-device-manager/edgehog/commit/511ae6fdc7ecd8d090fa7072cf50cd176a12157d))
+* Replace full lodash imports with per-function imports ([120d211](https://github.com/edgehog-device-manager/edgehog/commit/120d2116c5a901dbe3b9ea5ce4984737dbb9b0c4))
+* Replace multi-pass array iterations with single-pass loops ([b0105a2](https://github.com/edgehog-device-manager/edgehog/commit/b0105a270ea707bf93c7cfb8755008778802ab2e))
+* Scope watchman config to fix slow relay compilation ([b9e12b2](https://github.com/edgehog-device-manager/edgehog/commit/b9e12b22089ad8b352a42ed103d0859518824979))
+
+
+### Miscellaneous Chores
+
+* release 0.13.0-rc.0 ([5893379](https://github.com/edgehog-device-manager/edgehog/commit/58933797f03073daf7817911a54edb65eacc71e3))
+
 ## [0.13.0-rc.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.0-rc.0...v0.13.0-rc.1) (2026-06-26)
 
 ### Features
