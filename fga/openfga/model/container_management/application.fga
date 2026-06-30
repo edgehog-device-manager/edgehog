@@ -30,29 +30,34 @@ module application
 type application
   relations
     define tenant: [tenant]
+    define blocklisted: [user, group#member] or application_blocklisted from tenant
+    define release_blocklisted: [user, group#member] or blocklisted
 
-    define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user]
+    define computed_can_view: can_edit or can_delete or can_add_release
+    define computed_can_view_all_releases: can_edit_all_releases or can_delete_all_releases
 
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not application_blacklisted from tenant
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not application_blacklisted from tenant
-    define can_delete: (deleter or admin or owner or is_admin from tenant) but not application_blacklisted from tenant
-    define can_create_release: (editor or admin or owner or is_admin from tenant) but not application_blacklisted from tenant
+    define can_view:                ([user, group#member] or computed_can_view or can_view_all_applications from tenant) but not blocklisted
+    define can_edit:                ([user, group#member] or can_edit_all_applications from tenant) but not blocklisted
+    define can_delete:              ([user, group#member] or can_delete_all_applications from tenant) but not blocklisted
+    define can_add_release:         ([user, group#member] or can_add_releases_in_all_applications from tenant) but not blocklisted
+
+    define can_view_all_releases:   ([user, group#member] or computed_can_view_all_releases) but not release_blocklisted
+    define can_edit_all_releases:   ([user, group#member] or can_edit_releases_in_all_applications from tenant) but not release_blocklisted
+    define can_delete_all_releases: ([user, group#member] or can_delete_releases_in_all_applications from tenant) but not release_blocklisted
+    define can_deploy_all_releases: ([user, group#member] or can_deploy_releases_in_all_applications from tenant) but not release_blocklisted
 
 extend type tenant
   relations
-    define application_blacklisted: [user]
- 
-    define application_creator: [user]
-    define application_viewer:  [user]
-    define application_editor:  [user]
-    define application_deleter: [user]
+    define application_blocklisted: [user, group#member] or blocklisted
 
-    define can_create_application:      (application_creator or application_editor or is_admin) but not application_blacklisted
-    define can_view_all_applications:   (application_viewer or application_editor or application_creator or application_deleter) but not application_blacklisted
-    define can_edit_all_applications: application_editor but not application_blacklisted
-    define can_delete_all_applications: application_deleter but not application_blacklisted
+    define computed_can_view_all_applications: can_edit_all_applications or can_delete_all_applications
+
+    define can_create_applications:              ([user, group#member]) but not application_blocklisted
+    define can_view_all_applications:            ([user, group#member] or computed_can_view_all_applications) but not application_blocklisted
+    define can_edit_all_applications:            ([user, group#member]) but not application_blocklisted
+    define can_delete_all_applications:          ([user, group#member]) but not application_blocklisted
+
+    define can_add_releases_in_all_applications:  ([user, group#member]) but not application_blocklisted
+    define can_edit_releases_in_all_applications: ([user, group#member]) but not application_blocklisted
+    define can_delete_releases_in_all_applications:  ([user, group#member]) but not application_blocklisted
+    define can_deploy_releases_in_all_applications:  ([user, group#member]) but not application_blocklisted

@@ -28,28 +28,23 @@ type network
   relations
     define tenant: [tenant]
     define alias:   [network]
+    define blocklisted: [user, group#member] or network_blocklisted from tenant
 
-    define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or network_blacklisted from tenant
+    define owner:  [user, group#member]
 
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
+    define computed_can_view: can_edit or can_delete or can_view_all_networks from tenant
+
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member]) but not blocklisted
+    define can_delete:  ([user, group#member]) but not blocklisted
 
 extend type tenant
   relations
-    define network_blacklisted: [user]
+    define network_blocklisted: [user, group#member]
 
-    define network_creator: [user]
-    define network_viewer:  [user]
-    define network_editor:  [user]
-    define network_deleter: [user]
+    define computed_can_view_all_networks: can_edit_all_networks or can_delete_all_networks
 
-    define can_create_network:  (network_creator or network_editor or is_admin) but not network_blacklisted
-    define can_view_all_networks:   (network_viewer or network_editor or network_deleter) but not network_blacklisted
-    define can_edit_all_networks: network_editor but not network_blacklisted
-    define can_delete_all_networks: network_deleter but not network_blacklisted
+    define can_view_all_networks:   ([user, group#member] or computed_can_view_all_networks) but not network_blocklisted
+    define can_create_network:      ([user, group#member]) but not network_blocklisted
+    define can_edit_all_networks:   ([user, group#member]) but not network_blocklisted
+    define can_delete_all_networks: ([user, group#member]) but not network_blocklisted

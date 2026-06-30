@@ -1,0 +1,48 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+module deployment_update_campaign
+
+type deployment_update_campaign
+  relations
+    define tenant:      [tenant]
+    define alias:       [deployment_update_campaign]
+
+    define blocklisted: [user, group#member] or deployment_update_campaigns_blocklisted from tenant
+
+    define computed_can_view: can_edit_params or can_pause_resume or can_delete or can_view_deployment_update_campaigns from tenant
+
+    define can_view:              ([user, group#member] or can_view_deployment_update_campaigns from tenant) but not blocklisted
+    define can_edit_params:       ([user, group#member] or can_edit_deployment_update_campaigns_params from tenant) but not blocklisted
+    define can_pause_resume:  ([user, group#member] or can_pause_resume_deployment_update_campaigns from tenant) but not blocklisted
+    define can_delete:            ([user, group#member] or can_delete_deployment_update_campaigns from tenant) but not blocklisted
+
+extend type tenant
+  relations
+    define deployment_update_campaigns_blocklisted: [user, group#member] or deployment_campaigns_blocklisted
+
+    define computed_can_view_deployment_update_campaigns:     can_view_all_campaigns or can_launch_deployment_update_campaigns or can_schedule_deployment_update_campaigns or can_edit_deployment_update_campaigns_params or can_pause_resume_deployment_update_campaigns
+
+    define can_view_deployment_update_campaigns:              ([user, group#member] or computed_can_view_deployment_update_campaigns) but not deployment_update_campaigns_blocklisted
+    define can_launch_deployment_update_campaigns:            ([user, group#member] or can_launch_deployment_campaigns) but not deployment_update_campaigns_blocklisted
+    define can_schedule_deployment_update_campaigns:          ([user, group#member] or can_schedule_deployment_campaigns) but not deployment_update_campaigns_blocklisted
+    define can_edit_deployment_update_campaigns_params:       ([user, group#member] or can_edit_deployment_campaigns_params) but not deployment_update_campaigns_blocklisted
+    define can_pause_resume_deployment_update_campaigns:  ([user, group#member] or can_pause_resume_deployment_campaigns) but not deployment_update_campaigns_blocklisted
+    define can_delete_deployment_update_campaigns:            ([user, group#member] or can_delete_deployment_campaigns) but not deployment_update_campaigns_blocklisted

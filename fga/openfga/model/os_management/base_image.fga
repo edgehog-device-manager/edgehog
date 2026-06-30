@@ -23,7 +23,7 @@ module base_image
 ## ---------------------------------------------------------------------------
 ## BASE IMAGE  (child of base_image_collection)
 ##
-## Access is inherited from the parent collection (whitelist/blacklist pattern):
+## Access is inherited from the parent collection (whitelist/blocklist pattern):
 ## direct per-image overrides are also supported.
 ## ---------------------------------------------------------------------------
 
@@ -31,16 +31,10 @@ type base_image
   relations
     define tenant:      [tenant]
     define collection:  [base_image_collection]
+    define blocklisted: [user, group#member]
 
-    ## Direct per-image grants (whitelist/blacklist overrides)
-    define owner:       [user]
-    define admin:       [user]
-    define viewer:      [user]
-    define editor:      [user]
-    define deleter:     [user]
-    define blacklisted: [user] or blacklisted from collection ## users that cannot perform actions in this collection
+    define computed_can_view: can_edit or can_delete or can_view_images from collection
 
-    ## Computed permissions
-    define can_view:   (viewer or editor or admin or owner or can_view from collection or can_view from tenant) but not blacklisted
-    define can_edit:   (editor or admin or owner or can_edit from collection or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or can_delete from collection or is_admin from tenant) but not blacklisted
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member] or can_edit_images from collection) but not blocklisted
+    define can_delete:  ([user, group#member] or can_remove_images from collection) but not blocklisted

@@ -27,7 +27,8 @@ defmodule Edgehog.Tenants.Tenant do
     data_layer: AshPostgres.DataLayer,
     extensions: [
       AshGraphql.Resource,
-      AshJsonApi.Resource
+      AshJsonApi.Resource,
+      Ash.FGA
     ],
     notifiers: [Ash.Notifier.PubSub]
 
@@ -60,6 +61,12 @@ defmodule Edgehog.Tenants.Tenant do
       post :provision
       delete :destroy, route: "/:tenant_id"
     end
+  end
+
+  fga do
+    type :tenant
+    id(:slug)
+    ownership?(false)
   end
 
   actions do

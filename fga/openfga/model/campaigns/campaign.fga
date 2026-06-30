@@ -31,36 +31,15 @@ module campaign
 ## The authorization model is the same for all types.
 ## ---------------------------------------------------------------------------
 
-type campaign
-  relations
-    define tenant: [tenant]
-    ## Assignable roles
-    define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or campaign_blacklisted from tenant
-    ## Computed permissions
-    define can_view:         (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit_params:  (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_pause_resume: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete:       (deleter or admin or owner or is_admin from tenant) but not blacklisted
-
 extend type tenant
   relations
-    define campaign_blacklisted: [user]
-    define campaign_viewer:  [user]
-    define campaign_editor:  [user]
-    define campaign_creator: [user]
-    define campaign_deleter: [user]
-    define can_create_campaign:  (campaign_creator or campaign_editor or is_admin) but not campaign_blacklisted
-    define can_view_all_campaigns:  (campaign_viewer or campaign_editor or campaign_creator or campaign_deleter) but not campaign_blacklisted
-    define can_create_firmware_upgrade_campaign: campaign_creator or campaign_editor
-    define can_create_deployment_campaign: campaign_creator or campaign_editor
-    define can_create_start_campaign: campaign_creator or campaign_editor
-    define can_create_stop_campaign: campaign_creator or campaign_editor
-    define can_create_update_campaign: campaign_creator or campaign_editor
-    define can_create_uninstall_campaign: campaign_creator or campaign_editor
-    define can_pause_resume_all_campaigns: (campaign_editor or campaign_creator) but not campaign_blacklisted
-    define can_edit_all_campaigns: campaign_editor but not campaign_blacklisted
+    define campaigns_blocklisted:               [user, group#member]
+
+    define computed_can_view_all_campaigns:     can_launch_all_campaigns or can_schedule_all_campaigns or can_edit_all_campaigns_params or can_pause_resume_all_campaigns or can_delete_all_campaigns
+
+    define can_view_all_campaigns:              ([user, group#member] or computed_can_view_all_campaigns) but not campaigns_blocklisted
+    define can_launch_all_campaigns:            ([user, group#member]) but not campaigns_blocklisted
+    define can_schedule_all_campaigns:          ([user, group#member]) but not campaigns_blocklisted
+    define can_edit_all_campaigns_params:       ([user, group#member]) but not campaigns_blocklisted
+    define can_pause_resume_all_campaigns:  ([user, group#member]) but not campaigns_blocklisted
+    define can_delete_all_campaigns:            ([user, group#member]) but not campaigns_blocklisted

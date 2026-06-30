@@ -38,30 +38,24 @@ module system_model
 
 type system_model
   relations
-    define tenant:  [tenant]
-    define alias:   [system_model]
+    define tenant:      [tenant]
+    define alias:       [system_model]
 
-    define owner:   [user]
-    define admin:   [user]
-    define viewer:  [user]
-    define editor:  [user]
-    define deleter: [user]
-    define blacklisted: [user] or system_model_blacklisted from tenant
+    define blocklisted: [user, group#member] or system_model_blocklisted from tenant
+    
+    define computed_can_view: can_edit or can_delete or can_view_system_models from tenant
 
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or can_edit from tenant) but not blacklisted
+    define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
+    define can_edit:    ([user, group#member] or can_edit_system_models from tenant) but not blocklisted
+    define can_delete:  ([user, group#member] or can_delete_system_models from tenant) but not blocklisted
 
 extend type tenant
   relations
-    define system_model_blacklisted: [user]
+    define system_model_blocklisted: [user, group#member] or blocklisted
 
-    define system_model_creator: [user]
-    define system_model_viewer:  [user]
-    define system_model_editor:  [user]
-    define system_model_deleter: [user]
+    define computed_can_view_system_models: can_edit_system_models or can_delete_system_models
 
-    define can_create_system_model:      (system_model_creator or system_model_editor) but not system_model_blacklisted
-    define can_view_all_system_models:   (system_model_viewer or system_model_editor or system_model_creator or system_model_deleter) but not system_model_blacklisted
-    define can_edit_all_system_models: system_model_editor but not system_model_blacklisted
-    define can_delete_all_system_models: system_model_deleter but not system_model_blacklisted
+    define can_create_system_models:    ([user, group#member]) but not system_model_blocklisted 
+    define can_view_system_models:      ([user, group#member] or computed_can_view_system_models) but not system_model_blocklisted 
+    define can_edit_system_models:      ([user, group#member]) but not system_model_blocklisted 
+    define can_delete_system_models:    ([user, group#member]) but not system_model_blocklisted 

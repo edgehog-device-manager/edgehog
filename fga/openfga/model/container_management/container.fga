@@ -27,28 +27,21 @@ module container
 type container
   relations
     define tenant: [tenant]
+    define blocklisted: [user, group#member] or container_blocklisted from tenant
 
-    define owner:  [user]
-    define admin:  [user]
-    define editor: [user]
-    define viewer: [user]
-    define deleter: [user]
-    define blacklisted: [user] or container_blacklisted from tenant
+    define computed_can_view: can_edit or can_delete
 
-    define can_view:   (viewer or editor or admin or owner or can_view from tenant) but not blacklisted
-    define can_edit: (editor or admin or owner or can_edit from tenant) but not blacklisted
-    define can_delete: (deleter or admin or owner or is_admin from tenant) but not blacklisted
+    define can_view:    ([user, group#member] or computed_can_view or can_view_all_containers from tenant) but not blocklisted
+    define can_edit:    ([user, group#member] or can_edit_all_containers from tenant) but not blocklisted
+    define can_delete:  ([user, group#member] or can_delete_all_containers from tenant) but not blocklisted
 
 extend type tenant
   relations
-    define container_blacklisted: [user]
+    define container_blocklisted: [user, group#member] or blocklisted
 
-    define container_creator: [user]
-    define container_viewer:  [user]
-    define container_editor:  [user]
-    define container_deleter: [user]
+    define computed_can_view_all_containers: can_edit_all_containers or can_delete_all_containers
 
-    define can_create_container:  (container_creator or container_editor or is_admin) but not container_blacklisted
-    define can_view_all_containers:   (container_viewer or container_editor or container_deleter) but not container_blacklisted
-    define can_edit_all_containers: container_editor but not container_blacklisted
-    define can_delete_all_containers: container_deleter but not container_blacklisted
+    define can_create_containers:     ([user, group#member]) but not container_blocklisted
+    define can_view_all_containers:   ([user, group#member] or computed_can_view_all_containers) but not container_blocklisted
+    define can_edit_all_containers:   ([user, group#member]) but not container_blocklisted
+    define can_delete_all_containers: ([user, group#member]) but not container_blocklisted

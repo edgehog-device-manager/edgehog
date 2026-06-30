@@ -32,27 +32,31 @@ defmodule Ash.FGA.Transformers.UserOwner do
 
   @impl Spark.Dsl.Transformer
   def transform(dsl_state) do
-    type = Info.type(dsl_state)
+    if Info.ownership?(dsl_state) do
+      type = Info.type(dsl_state)
 
-    # TODO: possible Ash bug: `Ash.Resource.Info.primary_key` returns `[]` at compile time
-    [primary_key_attr] =
-      dsl_state
-      |> Ash.Resource.Info.attributes()
-      |> Enum.filter(& &1.primary_key?)
-      |> Enum.map(& &1.name)
+      # TODO: possible Ash bug: `Ash.Resource.Info.primary_key` returns `[]` at compile time
+      [primary_key_attr] =
+        dsl_state
+        |> Ash.Resource.Info.attributes()
+        |> Enum.filter(& &1.primary_key?)
+        |> Enum.map(& &1.name)
 
-    write_change = {
-      Changes.WriteOwner,
-      fga_type: type, primary_key: primary_key_attr
-    }
+      write_change = {
+        Changes.WriteOwner,
+        fga_type: type, primary_key: primary_key_attr
+      }
 
-    erase_change = {
-      Changes.EraseOwner,
-      fga_type: type, primary_key: primary_key_attr
-    }
+      erase_change = {
+        Changes.EraseOwner,
+        fga_type: type, primary_key: primary_key_attr
+      }
 
-    with {:ok, dsl_state} <- Builder.add_change(dsl_state, write_change, on: [:create]) do
-      Builder.add_change(dsl_state, erase_change, on: [:destroy])
+      with {:ok, dsl_state} <- Builder.add_change(dsl_state, write_change, on: [:create]) do
+        Builder.add_change(dsl_state, erase_change, on: [:destroy])
+      end
+    else
+      :ok
     end
   end
 end
