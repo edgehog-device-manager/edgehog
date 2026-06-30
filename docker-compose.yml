@@ -18,7 +18,7 @@
 
 services:
   postgres:
-    image: postgres:18.3
+    image: postgres:18.4
     environment:
       POSTGRES_USER: edgehog
       POSTGRES_PASSWORD: edgehog
@@ -26,7 +26,7 @@ services:
       - postgres-data:/var/lib/postgresql
 
   pgadmin:
-    image: dpage/pgadmin4:9.14.0
+    image: dpage/pgadmin4:9.15.0
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -79,7 +79,7 @@ services:
       - "traefik.http.services.openfga-playground.loadbalancer.server.port=3000"
 
   openfga-init:
-    image: alpine:3.23
+    image: alpine:3.24
     depends_on:
       openfga:
         condition: service_healthy
@@ -249,7 +249,7 @@ services:
       - registry-auth:/auth
 
   registry-init:
-    image: docker:29.4.3-dind
+    image: docker:29.5.0-dind
     depends_on:
       - registry
     privileged: true
