@@ -33,8 +33,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Volume
 
-  require Ash.Query
-
   describe "process_event for deployment updates" do
     setup %{tenant: tenant} do
       cluster = cluster_fixture()

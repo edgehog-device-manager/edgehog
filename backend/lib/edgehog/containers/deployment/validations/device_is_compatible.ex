@@ -24,8 +24,6 @@ defmodule Edgehog.Containers.Deployment.Validations.DeviceIsCompatible do
   alias Edgehog.Containers
   alias Edgehog.Devices
 
-  require Ash.Query
-
   @impl Ash.Resource.Validation
   def validate(changeset, _opts, %{tenant: tenant}) do
     device_id = Ash.Changeset.get_argument(changeset, :device_id)

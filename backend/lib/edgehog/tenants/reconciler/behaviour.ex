@@ -18,8 +18,9 @@
 
 defmodule Edgehog.Tenants.Reconciler.Behaviour do
   @moduledoc false
-  alias Edgehog.Tenants.Tenant
 
-  @callback reconcile_tenant(tenant :: Tenant.record()) :: :ok
-  @callback reconcile(tenant :: Tenant.record()) :: :ok
+  @type tenant :: Ash.Resource.record()
+
+  @callback reconcile_tenant(tenant :: tenant()) :: :ok
+  @callback reconcile(tenant :: tenant()) :: :ok
 end

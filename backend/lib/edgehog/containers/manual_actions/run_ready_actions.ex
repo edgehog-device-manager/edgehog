@@ -23,7 +23,6 @@ defmodule Edgehog.Containers.ManualActions.RunReadyActions do
 
   alias Edgehog.Containers
 
-  require Ash.Query
   require Logger
 
   @impl Ash.Resource.ManualUpdate

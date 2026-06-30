@@ -22,8 +22,6 @@ defmodule Edgehog.Campaigns.Channel.Calculations.DownloadCapableDevices do
   @moduledoc false
   use Ash.Resource.Calculation
 
-  require Ash.Query
-
   @impl Ash.Resource.Calculation
   def calculate(channels, _opts, _context) do
     channels

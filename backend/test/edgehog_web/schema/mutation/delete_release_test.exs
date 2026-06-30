@@ -32,8 +32,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.ReleaseContainers
 
-  require Ash.Query
-
   describe "deleteRelease mutation" do
     test "deletes release without deployments", %{tenant: tenant} do
       application = application_fixture(tenant: tenant)

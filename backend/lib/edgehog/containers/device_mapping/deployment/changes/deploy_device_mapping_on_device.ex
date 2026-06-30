@@ -23,8 +23,6 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.Changes.DeployDeviceMappin
   alias Ash.Resource.Change
   alias Edgehog.Devices
 
-  require Logger
-
   @impl Change
   def change(changeset, _opts, %{tenant: tenant}) do
     device_mapping_deployment = changeset.data

@@ -27,8 +27,6 @@ defmodule Edgehog.Files.File.Changes.HandleFileDeletion do
 
   alias Edgehog.Files.File.BucketStorage
 
-  require Logger
-
   @storage_module Application.compile_env(
                     :edgehog,
                     :files_storage_module,

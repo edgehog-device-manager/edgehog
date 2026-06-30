@@ -64,7 +64,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Extract commit messages
-        run: git --no-pager log --pretty=%B origin/${{ github.base_ref }}..HEAD > commit-messages.txt
+        run: git --no-pager log --pretty=%B "origin/${{ github.base_ref }}..HEAD" > commit-messages.txt
       - name: Spellcheck Commits
         uses: crate-ci/typos@aca895bf05aec0cb7dffa6f94495e923224d9f17 # v1.46.2
         with:

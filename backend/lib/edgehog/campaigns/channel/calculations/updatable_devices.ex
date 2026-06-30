@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,13 +15,10 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.Campaigns.Channel.Calculations.UpdatableDevices do
   @moduledoc false
   use Ash.Resource.Calculation
-
-  require Ash.Query
 
   @impl Ash.Resource.Calculation
   def calculate(channels, _opts, context) do

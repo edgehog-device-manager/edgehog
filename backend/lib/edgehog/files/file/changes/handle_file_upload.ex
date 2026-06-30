@@ -86,6 +86,11 @@ defmodule Edgehog.Files.File.Changes.HandleFileUpload do
   end
 
   defp encode_and_upload_file(changeset, file_name, repo_id, file, encoding) do
+    encoding_name =
+      if encoding,
+        do: Atom.to_string(encoding),
+        else: "base"
+
     case maybe_compress(file, encoding) do
       {:ok, encoded_file} ->
         result = do_file_upload(changeset, file_name, repo_id, encoding, encoded_file)
@@ -94,7 +99,7 @@ defmodule Edgehog.Files.File.Changes.HandleFileUpload do
         result
 
       {:error, reason} ->
-        Logger.error("Failed to compress #{encoding || "base"} file: #{inspect(reason)}")
+        Logger.error("Failed to compress #{encoding_name} file: #{inspect(reason)}")
 
         {:error,
          Ash.Changeset.add_error(changeset,

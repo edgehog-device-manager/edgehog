@@ -22,8 +22,6 @@ defmodule Edgehog.Containers.Volume.Deployment.Changes.DeployVolumeOnDevice do
 
   alias Edgehog.Devices
 
-  require Logger
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     volume_deployment = changeset.data

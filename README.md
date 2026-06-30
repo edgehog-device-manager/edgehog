@@ -56,7 +56,7 @@ To run Edgehog locally for development:
 
 #### Prerequisites
 
-- Elixir 1.19.5 and OTP 28
+- Elixir and OTP specified in `.tool-versions`
   > Hint: use [asdf](https://asdf-vm.com/guide/getting-started.html) to install them
   >
   > ```sh

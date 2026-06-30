@@ -22,8 +22,6 @@ defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
 
   alias Edgehog.Devices
 
-  require Logger
-
   @impl Ash.Resource.Change
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
