@@ -151,7 +151,9 @@ defmodule Edgehog.MixProject do
       {:nimble_lz4, "1.1.0"},
       {:grpc, "~> 0.11"},
       {:libgraph, "~> 0.16"},
-      {:gcs_signed_url, "~> 0.4"}
+      {:gcs_signed_url, "~> 0.4"},
+      {:libcluster, "~> 3.5"},
+      {:horde, "~> 0.10"}
     ]
   end
 
