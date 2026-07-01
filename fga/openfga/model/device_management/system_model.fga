@@ -39,11 +39,10 @@ module system_model
 type system_model
   relations
     define tenant:      [tenant]
-    define alias:       [system_model]
 
     define blocklisted: [user, group#member] or system_model_blocklisted from tenant
     
-    define computed_can_view: can_edit or can_delete or can_view_system_models from tenant
+    define computed_can_view: can_edit or can_delete or (can_view_system_models from tenant)
 
     define can_view:    ([user, group#member] or computed_can_view) but not blocklisted
     define can_edit:    ([user, group#member] or can_edit_system_models from tenant) but not blocklisted

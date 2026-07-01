@@ -1,0 +1,278 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: "Test hardware types"
+model_file: "../../fga.mod"
+
+tuples:
+  - object: hardware_type:ht1
+    relation: tenant
+    user: tenant:t1
+
+  - object: hardware_type:ht2
+    relation: tenant
+    user: tenant:t1
+
+  - object: tenant:t1
+    relation: can_view_hardware_types
+    user: user:viewer
+
+  - object: tenant:t1
+    relation: can_edit_hardware_types
+    user: user:editor
+
+  - object: tenant:t1
+    relation: can_delete_hardware_types
+    user: user:deleter
+
+  - object: tenant:t1
+    relation: can_create_hardware_types
+    user: user:creator
+
+  # Object-level direct grants on ht1
+  - object: hardware_type:ht1
+    relation: can_view
+    user: user:direct_viewer
+
+  - object: hardware_type:ht1
+    relation: can_edit
+    user: user:direct_editor
+
+  - object: hardware_type:ht1
+    relation: can_delete
+    user: user:direct_deleter
+
+  # Blocklist setups
+  - object: tenant:t1
+    relation: hardware_type_blocklisted
+    user: user:tenant_blocklisted
+
+  - object: hardware_type:ht1
+    relation: blocklisted
+    user: user:object_blocklisted
+
+  - object: tenant:t1
+    relation: blocklisted
+    user: user:global_blocklisted
+
+  - object: tenant:t1
+    relation: can_edit_hardware_types
+    user: user:global_blocklisted
+
+  # Group setup
+  - object: group:g1
+    relation: member
+    user: user:group_member
+
+  - object: tenant:t1
+    relation: can_view_hardware_types
+    user: group:g1#member
+
+  - object: tenant:t1
+    relation: can_edit_hardware_types
+    user: group:g1#member
+
+tests:
+  # ── tenant-level viewer ───────────────────────────────────────────────────
+  - name: "tenant viewer gets can_view on ht1 via computed_can_view, but not edit or delete"
+    check:
+      - user: user:viewer
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: false
+
+  - name: "tenant viewer gets can_view on ht2 (grant is tenant-wide)"
+    check:
+      - user: user:viewer
+        object: hardware_type:ht2
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: false
+
+  # ── tenant-level editor ───────────────────────────────────────────────────
+
+  - name: "tenant editor can view and edit ht1, but not delete"
+    check:
+      - user: user:editor
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "tenant editor can view and edit ht2, but not delete"
+    check:
+      - user: user:editor
+        object: hardware_type:ht2
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  # ── tenant-level deleter ──────────────────────────────────────────────────
+
+  - name: "tenant deleter can view and delete ht1, but not edit"
+    check:
+      - user: user:deleter
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: true
+
+  - name: "tenant deleter can view and delete ht2, but not edit"
+    check:
+      - user: user:deleter
+        object: hardware_type:ht2
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: true
+
+  # ── direct object-level grants ────────────────────────────────────────────
+
+  - name: "direct_viewer on ht1 can only view — no edit or delete"
+    check:
+      - user: user:direct_viewer
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: false
+
+  - name: "direct_editor on ht1 can view and edit, but not delete"
+    check:
+      - user: user:direct_editor
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "direct_deleter on ht1 can view and delete, but not edit"
+    check:
+      - user: user:direct_deleter
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: true
+
+  - name: "direct_editor on ht1 has no access to ht2"
+    check:
+      - user: user:direct_editor
+        object: hardware_type:ht2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  # ── group membership ──────────────────────────────────────────────────────
+
+  - name: "group member with tenant view+edit grants can view and edit ht1, not delete"
+    check:
+      - user: user:group_member
+        object: hardware_type:ht1
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "group member grants are tenant-wide, same access on ht2"
+    check:
+      - user: user:group_member
+        object: hardware_type:ht2
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  # ── unrelated user ────────────────────────────────────────────────────────
+
+  - name: "unrelated user has no access to ht1"
+    check:
+      - user: user:nobody
+        object: hardware_type:ht1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  # ── object-level blocklist ────────────────────────────────────────────────
+
+  - name: "object_blocklisted user is denied all permissions on ht1"
+    check:
+      - user: user:object_blocklisted
+        object: hardware_type:ht1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "object_blocklisted only affects ht1 — no access on ht2 (no grants)"
+    check:
+      - user: user:object_blocklisted
+        object: hardware_type:ht2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  # ── tenant-level hardware_type_blocklisted ────────────────────────────────
+
+  - name: "tenant_blocklisted user is denied all permissions on ht1"
+    check:
+      - user: user:tenant_blocklisted
+        object: hardware_type:ht1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "tenant_blocklisted user is denied all permissions on ht2"
+    check:
+      - user: user:tenant_blocklisted
+        object: hardware_type:ht2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  # ── global tenant blocklist cascades into hardware_type_blocklisted ────────
+
+  - name: "global_blocklisted user denied all on ht1 despite having edit grant on tenant"
+    check:
+      - user: user:global_blocklisted
+        object: hardware_type:ht1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "global_blocklisted user denied all on ht2"
+    check:
+      - user: user:global_blocklisted
+        object: hardware_type:ht2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false

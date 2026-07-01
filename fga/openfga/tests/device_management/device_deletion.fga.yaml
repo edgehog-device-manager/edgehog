@@ -17,31 +17,35 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-name: "Test device view"
-model_file: "../fga.mod"
-tuple_files:
-  - "./tuples/device_1_in_realm_test.yaml"
+name: "Test device deletion"
+model_file: "../../fga.mod"
 
 tuples:
-  # Alice viewer in realm
+  - user: "tenant:test"
+    relation: "tenant"
+    object: "realm:test"
+  # device:1 in realm test
+  - user: "realm:test"
+    relation: "realm"
+    object: "device:1"
   - user: "user:alice"
-    relation: "can_view"
+    relation: "can_delete"
     object: "device:1"
   - user: "user:bob"
-    relation: "can_view_devices"
+    relation: "can_delete_devices"
     object: "realm:test"
   - user: "user:cindy"
-    relation: "can_view_devices_in_all_realms"
+    relation: "can_delete_devices_in_all_realms"
     object: "tenant:test"
-  - user: "group:realm_viewers#member"
-    relation: "can_view_devices_in_all_realms"
+  - user: "group:realm_prompters#member"
+    relation: "can_delete_devices_in_all_realms"
     object: "tenant:test"
   - user: "user:daniel"
     relation: "member"
-    object: "group:realm_viewers"
+    object: "group:realm_prompters"
 
 tests:
-  - name: Device can be viewed by viewer user
+  - name: Device can be deleted by users with the correct property
     check:
       - user: "user:alice"
         object: "device:1"
@@ -51,8 +55,10 @@ tests:
           can_rename: false
           can_access_terminal: false
           can_identify: false
-          can_delete: false
+          can_delete: true
           can_update: false
+  - name: Device can be deleted by users that can delete all devices in a realm
+    check:
       - user: "user:bob"
         object: "device:1"
         assertions:
@@ -61,8 +67,10 @@ tests:
           can_rename: false
           can_access_terminal: false
           can_identify: false
-          can_delete: false
+          can_delete: true
           can_update: false
+  - name: Device can be deleted by users that can delete all devices in all realms
+    check:
       - user: "user:cindy"
         object: "device:1"
         assertions:
@@ -71,8 +79,10 @@ tests:
           can_rename: false
           can_access_terminal: false
           can_identify: false
-          can_delete: false
+          can_delete: true
           can_update: false
+  - name: Device can be deleted by users that belong to a group that can delete all devices in all realms
+    check:
       - user: "user:daniel"
         object: "device:1"
         assertions:
@@ -81,5 +91,5 @@ tests:
           can_rename: false
           can_access_terminal: false
           can_identify: false
-          can_delete: false
+          can_delete: true
           can_update: false
