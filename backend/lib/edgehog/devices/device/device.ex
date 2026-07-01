@@ -24,8 +24,10 @@ defmodule Edgehog.Devices.Device do
   """
   use Edgehog.MultitenantResource,
     domain: Edgehog.Devices,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [
-      AshGraphql.Resource
+      AshGraphql.Resource,
+      Ash.FGA
     ]
 
   alias Edgehog.Changes.NormalizeTagName
@@ -53,6 +55,24 @@ defmodule Edgehog.Devices.Device do
     A Device also exposes info about its connection status and some sets of \
     data read by its operating system.
     """
+  end
+
+  fga do
+    type :device
+    id(:device_id)
+    exclude([:system_model_part_number])
+
+    capabilities do
+      edit(false)
+
+      operations([
+        {:edit_tags, [:add_tags, :remove_tags]},
+        {:remame, :named_update},
+        :access_terminal,
+        {:identify, :set_led_behaviour}#,
+        # :update # update firmware capability?
+      ])
+    end
   end
 
   graphql do

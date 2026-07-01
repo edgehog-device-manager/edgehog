@@ -33,4 +33,8 @@ defmodule Edgehog.Astarte do
       define :destroy_realm, action: :destroy
     end
   end
+
+  authorization do
+    authorize :when_requested
+  end
 end

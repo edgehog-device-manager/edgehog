@@ -90,11 +90,24 @@ defmodule Edgehog.Auth.Changes.WriteRelation do
   end
 
   @impl Ash.Resource.Change
+  def change(%{valid: false} = changeset, _opts, _context), do: changeset
+
+  @impl Ash.Resource.Change
   def change(changeset, opts, _context) do
-    Ash.Changeset.after_transaction(changeset, &write_rel_tuple(&1, &2, opts))
+    Ash.Changeset.after_action(changeset, &write_rel_tuple(&1, &2, opts))
   end
 
-  defp write_rel_tuple(_changeset, {:ok, result}, opts) do
+  @impl Ash.Resource.Change
+  def atomic(%{valid: false}, _opts, _context), do: :ok
+
+  @impl Ash.Resource.Change
+  def atomic(changeset, opts, _context) do
+    Ash.Changeset.after_action(changeset, &write_rel_tuple(&1, &2, opts))
+
+    :ok
+  end
+
+  defp write_rel_tuple(_changeset, result, opts) do
     rel = Keyword.fetch!(opts, @rel)
     rel_type = Keyword.get(opts, @rel_type, rel)
 
@@ -124,15 +137,6 @@ defmodule Edgehog.Auth.Changes.WriteRelation do
     with {:ok, _} <- FGAService.write(subj, rel, obj) do
       {:ok, result}
     end
-  end
-
-  defp write_rel_tuple(_changeset, error, opts) do
-    Logger.debug("Error while executing DB transaction. Skipping writing tuple on the provider.",
-      error: error,
-      opts: opts
-    )
-
-    error
   end
 
   defp error_if_not_present(key, {opts, errors}) do
