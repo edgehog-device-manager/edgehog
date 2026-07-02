@@ -21,7 +21,7 @@ import { Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, usePaginationFragment } from "react-relay";
-import Select, { SingleValue } from "react-select";
+import { SingleValue } from "react-select";
 import semver from "semver";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
@@ -45,6 +45,7 @@ import Icon from "@/components/Icon";
 import ResourceStateIcon from "@/components/ResourceStateIcon";
 import { Link, Route } from "@/Navigation";
 import FullHeightCard from "@/components/FullHeightCard";
+import Select from "@/components/Select";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`

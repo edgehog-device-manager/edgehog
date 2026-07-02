@@ -20,9 +20,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import Select from "react-select";
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
@@ -36,6 +35,7 @@ import {
   type FileSourceType,
   type ManualFileUploadRequestData,
 } from "@/forms/validation";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 type SourceTypeOption = {
   value: FileSourceType;
@@ -139,22 +139,11 @@ const ManualFilesDeviceToServerForm = ({
           />
         }
       >
-        <Controller
+        <SelectFormField
           control={control}
           name="sourceType"
-          render={({ field }) => (
-            <Select
-              value={
-                sourceTypeOptions.find((opt) => opt.value === field.value) ??
-                null
-              }
-              onChange={(option) => {
-                field.onChange(option?.value ?? null);
-                setValue("encoding", ""); // Cleanly resets encoding without triggering a full form rerender loop
-              }}
-              options={sourceTypeOptions}
-            />
-          )}
+          options={sourceTypeOptions}
+          onChange={() => setValue("encoding", "")}
         />
       </FormRow>
 
@@ -167,89 +156,58 @@ const ManualFilesDeviceToServerForm = ({
           />
         }
       >
-        <Controller
-          control={control}
-          name="source"
-          render={({ field, fieldState }) => {
-            if (effectiveSourceType === "STORAGE") {
-              const selectedOption =
-                storageSourceOptions.find((opt) => opt.value === field.value) ??
-                (field.value
-                  ? {
-                      value: field.value,
-                      label: field.value,
-                    }
-                  : null);
+        {effectiveSourceType === "STORAGE" ? (
+          <>
+            <SelectFormField
+              control={control}
+              name="source"
+              options={storageSourceOptions}
+              isClearable
+              placeholder={sourcePlaceholderByType[effectiveSourceType]}
+              onMenuScrollToBottom={onLoadMoreStorageOptions}
+              filterOption={(option, inputValue) =>
+                option.label.toLowerCase().includes(inputValue.toLowerCase())
+              }
+              noOptionsMessage={({ inputValue }) =>
+                inputValue
+                  ? intl.formatMessage(
+                      {
+                        id: "forms.ManualFilesDeviceToServerForm.sourceStorageNoMatch",
+                        defaultMessage: 'No file found with name "{value}"',
+                      },
+                      { value: inputValue },
+                    )
+                  : intl.formatMessage({
+                      id: "forms.ManualFilesDeviceToServerForm.sourceStorageEmpty",
+                      defaultMessage:
+                        "No known storage file names for this device yet.",
+                    })
+              }
+            />
 
-              return (
-                <>
-                  <Select
-                    value={selectedOption}
-                    onChange={(option) => {
-                      field.onChange(option?.value ?? null);
-                    }}
-                    onBlur={field.onBlur}
-                    options={storageSourceOptions}
-                    filterOption={(option, inputValue) => {
-                      // Only search by name (label), not by ID (value)
-                      return option.label
-                        .toLowerCase()
-                        .includes(inputValue.toLowerCase());
-                    }}
-                    onMenuScrollToBottom={onLoadMoreStorageOptions}
-                    placeholder={sourcePlaceholderByType[effectiveSourceType]}
-                    noOptionsMessage={({ inputValue }) =>
-                      inputValue
-                        ? intl.formatMessage(
-                            {
-                              id: "forms.ManualFilesDeviceToServerForm.sourceStorageNoMatch",
-                              defaultMessage:
-                                'No file found with name "{value}"',
-                            },
-                            { value: inputValue },
-                          )
-                        : intl.formatMessage({
-                            id: "forms.ManualFilesDeviceToServerForm.sourceStorageEmpty",
-                            defaultMessage:
-                              "No known storage file names for this device yet.",
-                          })
-                    }
-                    isClearable
-                    className={fieldState.invalid ? "is-invalid" : ""}
-                  />
+            <FormFeedback feedback={errors.source?.message} />
+          </>
+        ) : (
+          <>
+            <Form.Control
+              type="text"
+              {...register("source")}
+              placeholder={sourcePlaceholderByType[effectiveSourceType]}
+              isInvalid={!!errors.source}
+            />
 
-                  {fieldState.error && (
-                    <FormFeedback feedback={fieldState.error.message} />
-                  )}
-                </>
-              );
-            }
-
-            return (
-              <>
-                <Form.Control
-                  type="text"
-                  value={(field.value as string | null) ?? ""}
-                  onChange={(event) => field.onChange(event.target.value)}
-                  onBlur={field.onBlur}
-                  placeholder={sourcePlaceholderByType[effectiveSourceType]}
-                  isInvalid={fieldState.invalid}
+            {errors.source ? (
+              <FormFeedback feedback={errors.source.message} />
+            ) : (
+              <Form.Text muted>
+                <FormattedMessage
+                  id="forms.ManualFilesDeviceToServerForm.sourcePathHint"
+                  defaultMessage="Absolute path to the file on the device that should be uploaded."
                 />
-
-                {fieldState.error ? (
-                  <FormFeedback feedback={fieldState.error.message} />
-                ) : (
-                  <Form.Text muted>
-                    <FormattedMessage
-                      id="forms.ManualFilesDeviceToServerForm.sourcePathHint"
-                      defaultMessage="Absolute path to the file on the device that should be uploaded."
-                    />
-                  </Form.Text>
-                )}
-              </>
-            );
-          }}
-        />
+              </Form.Text>
+            )}
+          </>
+        )}
       </FormRow>
 
       <FormRow
@@ -261,25 +219,10 @@ const ManualFilesDeviceToServerForm = ({
           />
         }
       >
-        <Controller
+        <SelectFormField
           control={control}
           name="encoding"
-          render={({ field }) => {
-            const selectedOption =
-              encodingOptions.find((opt) => opt.value === field.value) ??
-              encodingOptions[0] ??
-              null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => {
-                  field.onChange(option?.value ?? "");
-                }}
-                options={encodingOptions}
-              />
-            );
-          }}
+          options={encodingOptions}
         />
 
         {errors.encoding ? (

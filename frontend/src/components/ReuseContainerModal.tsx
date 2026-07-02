@@ -20,7 +20,6 @@ import { useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useRelayEnvironment } from "react-relay";
 import { fetchQuery, graphql, useLazyLoadQuery } from "react-relay/hooks";
-import Select from "react-select";
 
 import { ReuseContainerModal_getContainerDetails_Query } from "@/api/__generated__/ReuseContainerModal_getContainerDetails_Query.graphql";
 import { ReuseContainerModal_getContainers_Query } from "@/api/__generated__/ReuseContainerModal_getContainers_Query.graphql";
@@ -32,6 +31,7 @@ import {
   CapDropList,
   ContainerInputData,
 } from "@/forms/validation";
+import Select from "@/components/Select";
 
 const GET_CONTAINERS_QUERY = graphql`
   query ReuseContainerModal_getContainers_Query {

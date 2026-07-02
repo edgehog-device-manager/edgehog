@@ -21,7 +21,6 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Select from "react-select";
 
 import type {
   CreateUpdateCampaign_BaseImageCollOptionsFragment$data,
@@ -47,6 +46,7 @@ import {
   UpdateCampaignFormData,
   updateCampaignSchema,
 } from "@/forms/validation";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment CreateUpdateCampaign_BaseImageCollOptionsFragment on RootQueryType
@@ -158,12 +158,6 @@ const transformOutputData = (
   };
 };
 
-const getBaseImageCollLabel = (
-  baseImageCollection: BaseImageCollectionRecord,
-) => baseImageCollection.name;
-const getBaseImageCollValue = (
-  baseImageCollection: BaseImageCollectionRecord,
-) => baseImageCollection.id;
 const noBaseImageCollOptionsMessage = (
   intl: ReturnType<typeof useIntl>,
   inputValue: string,
@@ -181,9 +175,6 @@ const noBaseImageCollOptionsMessage = (
         id: "forms.CreateUpdateCampaign.noBaseImageCollsAvailable",
         defaultMessage: "No base image collections available",
       });
-
-const getChannelLabel = (channel: ChannelRecord) => channel.name;
-const getChannelValue = (channel: ChannelRecord) => channel.id;
 const noChannelOptionsMessage = (
   intl: ReturnType<typeof useIntl>,
   inputValue: string,
@@ -322,10 +313,6 @@ const CreateUpdateCampaignForm = ({
   const onFormSubmit = (data: UpdateCampaignFormData) =>
     onSubmit(transformOutputData(data));
 
-  const { onChange: onBaseImageCollectionChange } = register(
-    "baseImageCollection",
-  );
-
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
@@ -351,36 +338,27 @@ const CreateUpdateCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="baseImageCollection"
+          <SelectFormField
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                  onBaseImageCollectionChange({ target: e });
-                  resetField("baseImage");
-                }}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateUpdateCampaign.baseImageCollectionOption",
-                  defaultMessage: "Search or select a base image collection...",
-                })}
-                options={baseImageCollections}
-                getOptionLabel={getBaseImageCollLabel}
-                getOptionValue={getBaseImageCollValue}
-                noOptionsMessage={({ inputValue }) =>
-                  noBaseImageCollOptionsMessage(intl, inputValue)
-                }
-                isLoading={isLoadingNextBaseImageColl}
-                onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
-                onInputChange={(text) => setSearchBaseImageCollText(text)}
-              />
-            )}
+            name="baseImageCollection"
+            valueType="object"
+            options={baseImageCollections.map((collection) => ({
+              value: collection.id,
+              label: collection.name,
+            }))}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateUpdateCampaign.baseImageCollectionOption",
+              defaultMessage: "Search or select a base image collection...",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              noBaseImageCollOptionsMessage(intl, inputValue)
+            }
+            isLoading={isLoadingNextBaseImageColl}
+            onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
+            onInputChange={(text) => setSearchBaseImageCollText(text)}
+            onChange={() => {
+              resetField("baseImage");
+            }}
           />
           <FormFeedback feedback={errors.baseImageCollection?.id?.message} />
         </FormRow>
@@ -433,32 +411,24 @@ const CreateUpdateCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="channel"
+          <SelectFormField
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={onChange}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateUpdateCampaign.channelOption",
-                  defaultMessage: "Search or select a channel...",
-                })}
-                options={channels}
-                getOptionLabel={getChannelLabel}
-                getOptionValue={getChannelValue}
-                noOptionsMessage={({ inputValue }) =>
-                  noChannelOptionsMessage(intl, inputValue)
-                }
-                isLoading={isLoadingNextChannel}
-                onMenuScrollToBottom={onLoadMoreChannelOptions}
-                onInputChange={(text) => setSearchChannelText(text)}
-              />
-            )}
+            name="channel"
+            valueType="object"
+            options={channels.map((channel) => ({
+              value: channel.id,
+              label: channel.name,
+            }))}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateUpdateCampaign.channelOption",
+              defaultMessage: "Search or select a channel...",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              noChannelOptionsMessage(intl, inputValue)
+            }
+            isLoading={isLoadingNextChannel}
+            onMenuScrollToBottom={onLoadMoreChannelOptions}
+            onInputChange={(text) => setSearchChannelText(text)}
           />
           <FormFeedback feedback={errors.channel?.id?.message} />
         </FormRow>

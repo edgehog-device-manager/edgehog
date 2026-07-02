@@ -29,7 +29,6 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import Select from "react-select";
 
 import type {
   FileSelect_FilesFragment$data,
@@ -43,6 +42,7 @@ import Spinner from "@/components/Spinner";
 import Stack from "@/components/Stack";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import Select from "@/components/Select";
 
 const GET_REPOSITORY_QUERY = graphql`
   query FileSelect_getRepository_Query(

@@ -27,7 +27,6 @@ import {
   useFragment,
   useSubscription,
 } from "react-relay/hooks";
-import Select from "react-select";
 import { Card } from "react-bootstrap";
 
 import type { FileManagementTab_fileManagement$key } from "@/api/__generated__/FileManagementTab_fileManagement.graphql";
@@ -38,6 +37,7 @@ import FilesDownloadTab from "@/components/DeviceTabs/FilesDeviceToServerTab";
 import FilesServerToDeviceTab from "@/components/DeviceTabs/FilesServerToDeviceTab";
 import Form from "@/components/Form";
 import { Tab } from "@/components/Tabs";
+import Select from "@/components/Select";
 
 type FileManagementMode =
   | "download-to-device-file"
@@ -314,7 +314,7 @@ const FileManagementTab = ({ deviceRef }: FileManagementTabProps) => {
                 defaultMessage="File Management Mode"
               />
             </h5>
-            <Select<FileManagementModeOption, false>
+            <Select<FileManagementModeOption>
               value={selectedModeOption}
               onChange={(option) => {
                 if (option) setSelectedMode(option.value);

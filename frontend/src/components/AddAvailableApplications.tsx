@@ -22,11 +22,12 @@ import React, { useCallback, useState, useMemo } from "react";
 import { Form, Button, Row, Col } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
-import Select, { SingleValue } from "react-select";
+import { SingleValue } from "react-select";
 
 import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "@/api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
 import type { AddAvailableApplications_DeployRelease_Mutation } from "@/api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
 import { useNavigate, Route } from "@/Navigation";
+import Select from "@/components/Select";
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query AddAvailableApplications_GetApplicationsWithReleases_Query(

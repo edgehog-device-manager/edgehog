@@ -27,7 +27,6 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import Select from "react-select";
 import semver from "semver";
 
 import { ReleaseSelect_getApplication_Query } from "@/api/__generated__/ReleaseSelect_getApplication_Query.graphql";
@@ -43,6 +42,7 @@ import Stack from "@/components/Stack";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import { ApplicationRecord } from "@/forms/CreateDeploymentCampaign";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import Select from "@/components/Select";
 
 const GET_APPLICATION_QUERY = graphql`
   query ReleaseSelect_getApplication_Query(

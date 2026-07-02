@@ -23,7 +23,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useMutation, usePaginationFragment } from "react-relay";
-import Select from "react-select";
 
 import type { EditDeploymentCampaignModal_ApplicationOptionsFragment$key } from "@/api/__generated__/EditDeploymentCampaignModal_ApplicationOptionsFragment.graphql";
 import type { EditDeploymentCampaignModal_ApplicationPaginationQuery } from "@/api/__generated__/EditDeploymentCampaignModal_ApplicationPaginationQuery.graphql";
@@ -40,7 +39,8 @@ import {
   type EditDeploymentCampaignFormData,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import DatePicker from "./DatePicker";
+import DatePicker from "@/components/DatePicker";
+import Select from "@/components/Select";
 
 const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment EditDeploymentCampaignModal_ApplicationOptionsFragment on RootQueryType

@@ -29,7 +29,6 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import Select from "react-select";
 
 import {
   BaseImageSelect_BaseImagesFragment$data,
@@ -44,6 +43,7 @@ import Stack from "@/components/Stack";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import { BaseImageCollectionRecord } from "@/forms/CreateUpdateCampaign";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import Select from "@/components/Select";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageSelect_getBaseImageCollection_Query(
