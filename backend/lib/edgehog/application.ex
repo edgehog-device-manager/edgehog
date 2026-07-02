@@ -70,6 +70,8 @@ defmodule Edgehog.Application do
       Edgehog.Tenants.Reconciler.Starter,
       # Start Containers reconciler
       {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
+      # Container Handlers registries
+      Edgehog.Containers.Registries,
       # Start the Endpoint (http/https)
       Endpoint,
       # Fetch Astarte devices
