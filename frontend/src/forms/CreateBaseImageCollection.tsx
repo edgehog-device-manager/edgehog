@@ -17,11 +17,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Select from "react-select";
 
 import Button from "@/components/Button";
 import Form from "@/components/Form";
@@ -41,6 +40,7 @@ import {
   baseImageCollectionSchema,
 } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment CreateBaseImageCollection_OptionsFragment on RootQueryType
@@ -87,7 +87,6 @@ const transformOutputData = (
   return baseImageCollection;
 };
 
-const getSystemModelValue = (systemModel: SystemModelRecord) => systemModel.id;
 const noSystemModelOptionsMessage = (
   intl: ReturnType<typeof useIntl>,
   inputValue: string,
@@ -256,33 +255,27 @@ const CreateBaseImageCollectionForm = ({
             />
           }
         >
-          <Controller
+          <SelectFormField
             name="systemModel"
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={onChange}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateBaseImageCollection.systemModelOption",
-                  defaultMessage: "Search or select a system model...",
-                })}
-                options={systemModelOptions}
-                getOptionLabel={getSystemModelLabel}
-                getOptionValue={getSystemModelValue}
-                noOptionsMessage={({ inputValue }) =>
-                  noSystemModelOptionsMessage(intl, inputValue)
-                }
-                isOptionDisabled={isSystemModelUsedByOtherBaseImageCollection}
-                isLoading={isLoadingNext}
-                onMenuScrollToBottom={onLoadMore}
-                onInputChange={(text) => setSearchText(text)}
-              />
-            )}
+            valueType="object"
+            options={systemModelOptions.map((systemModel) => ({
+              value: systemModel.id,
+              label: getSystemModelLabel(systemModel),
+              disabled:
+                isSystemModelUsedByOtherBaseImageCollection(systemModel),
+            }))}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateBaseImageCollection.systemModelOption",
+              defaultMessage: "Search or select a system model...",
+            })}
+            isOptionDisabled={(option) => !!option.disabled}
+            noOptionsMessage={({ inputValue }) =>
+              noSystemModelOptionsMessage(intl, inputValue)
+            }
+            isLoading={isLoadingNext}
+            onMenuScrollToBottom={onLoadMore}
+            onInputChange={setSearchText}
           />
           <FormFeedback feedback={errors.systemModel?.id?.message} />
         </FormRow>

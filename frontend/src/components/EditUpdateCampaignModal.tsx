@@ -23,7 +23,6 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useMutation, usePaginationFragment } from "react-relay";
-import Select from "react-select";
 
 import type { EditUpdateCampaignModal_BaseImageCollOptionsFragment$key } from "@/api/__generated__/EditUpdateCampaignModal_BaseImageCollOptionsFragment.graphql";
 import type { EditUpdateCampaignModal_BaseImageCollPaginationQuery } from "@/api/__generated__/EditUpdateCampaignModal_BaseImageCollPaginationQuery.graphql";
@@ -41,6 +40,7 @@ import {
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import DatePicker from "./DatePicker";
+import Select from "@/components/Select";
 
 const CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment EditUpdateCampaignModal_BaseImageCollOptionsFragment on RootQueryType

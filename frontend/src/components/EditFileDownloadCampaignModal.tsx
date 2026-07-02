@@ -24,7 +24,6 @@ import { useCallback, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useMutation, usePaginationFragment } from "react-relay";
-import Select from "react-select";
 
 import type {
   EditFileDownloadCampaignModal_RepositoryOptionsFragment$data,
@@ -48,7 +47,8 @@ import {
   updateFileDownloadCampaignSchema,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import DatePicker from "./DatePicker";
+import DatePicker from "@/components/DatePicker";
+import Select from "@/components/Select";
 
 const CAMPAIGN_REPOSITORY_OPTIONS_FRAGMENT = graphql`
   fragment EditFileDownloadCampaignModal_RepositoryOptionsFragment on RootQueryType

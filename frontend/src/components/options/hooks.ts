@@ -27,6 +27,7 @@ import { hooks_SystemModelsOptionsFragment$key } from "@/api/__generated__/hooks
 type Option = {
   value: string;
   label: string;
+  disabled?: boolean;
 };
 
 export const IMAGE_CREDENTIALS_OPTIONS_FRAGMENT = graphql`

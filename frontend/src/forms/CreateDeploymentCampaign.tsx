@@ -23,7 +23,6 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import Select from "react-select";
 
 import type {
   CreateDeploymentCampaign_ApplicationOptionsFragment$data,
@@ -50,6 +49,7 @@ import {
   DeploymentCampaignFormData,
 } from "@/forms/validation";
 import DatePicker from "@/components/DatePicker";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment CreateDeploymentCampaign_ApplicationOptionsFragment on RootQueryType
@@ -195,9 +195,6 @@ const operationTypesOptions: SelectOption[] = [
   { value: "Delete", label: "Delete" },
 ];
 
-const getApplicationLabel = (application: ApplicationRecord) =>
-  application.name;
-const getApplicationValue = (application: ApplicationRecord) => application.id;
 const noApplicationOptionsMessage = (
   intl: ReturnType<typeof useIntl>,
   inputValue: string,
@@ -215,8 +212,6 @@ const noApplicationOptionsMessage = (
         defaultMessage: "No applications available",
       });
 
-const getChannelLabel = (channel: ChannelRecord) => channel.name;
-const getChannelValue = (channel: ChannelRecord) => channel.id;
 const noChannelOptionsMessage = (
   intl: ReturnType<typeof useIntl>,
   inputValue: string,
@@ -311,8 +306,6 @@ const CreateDeploymentCampaignForm = ({
     );
   }, [applicationPaginationData]);
 
-  const { onChange: onApplicationChange } = register("application");
-
   const {
     data: channelPaginationData,
     loadNext: loadNextChannels,
@@ -369,38 +362,22 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="operationType"
+          <SelectFormField
             control={control}
-            render={({ field }) => (
-              <>
-                <Select
-                  {...field}
-                  value={
-                    operationTypesOptions.find(
-                      (opt) => opt.value === field.value,
-                    ) || null
-                  }
-                  onChange={(option) => field.onChange(option?.value || "")}
-                  options={operationTypesOptions}
-                  isClearable
-                  placeholder={intl.formatMessage({
-                    id: "forms.CreateDeploymentCampaign.operationTypeOption",
-                    defaultMessage: "Select an operation type...",
-                  })}
-                  noOptionsMessage={() =>
-                    intl.formatMessage({
-                      id: "forms.CreateDeploymentCampaign.noOperationTypesAvailable",
-                      defaultMessage: "No operation types available",
-                    })
-                  }
-                  className={errors.operationType && "is-invalid"}
-                />
-
-                <FormFeedback feedback={errors.operationType?.message} />
-              </>
-            )}
+            name="operationType"
+            options={operationTypesOptions}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateDeploymentCampaign.operationTypeOption",
+              defaultMessage: "Select an operation type...",
+            })}
+            noOptionsMessage={() =>
+              intl.formatMessage({
+                id: "forms.CreateDeploymentCampaign.noOperationTypesAvailable",
+                defaultMessage: "No operation types available",
+              })
+            }
           />
+          <FormFeedback feedback={errors.operationType?.message} />
         </FormRow>
 
         <FormRow
@@ -425,36 +402,25 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="application"
+          <SelectFormField
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                  onApplicationChange({ target: e });
-                  resetField("release");
-                }}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateDeploymentCampaign.applicationOption",
-                  defaultMessage: "Search or select an application...",
-                })}
-                options={applicationOptions}
-                getOptionLabel={getApplicationLabel}
-                getOptionValue={getApplicationValue}
-                noOptionsMessage={({ inputValue }) =>
-                  noApplicationOptionsMessage(intl, inputValue)
-                }
-                isLoading={isLoadingNextApplication}
-                onMenuScrollToBottom={onLoadMoreApplicationOptions}
-                onInputChange={(text) => setSearchApplicationText(text)}
-              />
-            )}
+            name="application"
+            valueType="object"
+            options={applicationOptions.map((application) => ({
+              value: application.id,
+              label: application.name,
+            }))}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateDeploymentCampaign.applicationOption",
+              defaultMessage: "Search or select an application...",
+            })}
+            isLoading={isLoadingNextApplication}
+            onMenuScrollToBottom={onLoadMoreApplicationOptions}
+            onInputChange={setSearchApplicationText}
+            noOptionsMessage={({ inputValue }) =>
+              noApplicationOptionsMessage(intl, inputValue)
+            }
+            onChange={() => resetField("release")}
           />
           <FormFeedback feedback={errors.application?.id?.message} />
         </FormRow>
@@ -552,32 +518,24 @@ const CreateDeploymentCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="channel"
+          <SelectFormField
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={onChange}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateDeploymentCampaign.channelOption",
-                  defaultMessage: "Search or select a channel...",
-                })}
-                options={channels}
-                getOptionLabel={getChannelLabel}
-                getOptionValue={getChannelValue}
-                noOptionsMessage={({ inputValue }) =>
-                  noChannelOptionsMessage(intl, inputValue)
-                }
-                isLoading={isLoadingNextChannel}
-                onMenuScrollToBottom={onLoadMoreChannelOptions}
-                onInputChange={(text) => setSearchChannelText(text)}
-              />
-            )}
+            name="channel"
+            valueType="object"
+            options={channels.map((channel) => ({
+              value: channel.id,
+              label: channel.name,
+            }))}
+            isLoading={isLoadingNextChannel}
+            onMenuScrollToBottom={onLoadMoreChannelOptions}
+            onInputChange={setSearchChannelText}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateDeploymentCampaign.channelOption",
+              defaultMessage: "Search or select a channel...",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              noChannelOptionsMessage(intl, inputValue)
+            }
           />
           <FormFeedback feedback={errors.channel?.id?.message} />
         </FormRow>

@@ -17,11 +17,10 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { useCallback, useMemo, useState } from "react";
-import { useForm, useFieldArray, Controller, useWatch } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import Select from "react-select";
 
 import type {
   CreateSystemModel_OptionsFragment$data,
@@ -43,6 +42,7 @@ import assets from "@/assets";
 import { SystemModelFormData, systemModelSchema } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType
@@ -115,10 +115,6 @@ const initialData: SystemModelFormData = {
   pictureFile: null,
 };
 
-const getHardwareTypeLabel = (hardwareType: HardwareTypeRecord) =>
-  hardwareType.name;
-const getHardwareTypeValue = (hardwareType: HardwareTypeRecord) =>
-  hardwareType.id;
 const noHardwareTypeOptionsMessage = (
   intl: ReturnType<typeof useIntl>,
   inputValue: string,
@@ -316,33 +312,25 @@ const CreateSystemModelForm = ({
                   />
                 }
               >
-                <Controller
-                  name="hardwareType"
+                <SelectFormField
                   control={control}
-                  render={({
-                    field: { value, onChange },
-                    fieldState: { invalid },
-                  }) => (
-                    <Select
-                      value={value}
-                      onChange={onChange}
-                      className={invalid ? "is-invalid" : ""}
-                      placeholder={intl.formatMessage({
-                        id: "forms.CreateSystemModel.hardwareTypeOption",
-                        defaultMessage: "Search or select a hardware type...",
-                      })}
-                      options={hardwareTypes}
-                      getOptionLabel={getHardwareTypeLabel}
-                      getOptionValue={getHardwareTypeValue}
-                      noOptionsMessage={({ inputValue }) =>
-                        noHardwareTypeOptionsMessage(intl, inputValue)
-                      }
-                      isLoading={isLoadingNext}
-                      onMenuScrollToBottom={onLoadMore}
-                      onInputChange={(text) => setSearchText(text)}
-                      isClearable
-                    />
-                  )}
+                  name="hardwareType"
+                  valueType="object"
+                  options={hardwareTypes.map((hardwareType) => ({
+                    value: hardwareType.id,
+                    label: hardwareType.name,
+                  }))}
+                  placeholder={intl.formatMessage({
+                    id: "forms.CreateSystemModel.hardwareTypeOption",
+                    defaultMessage: "Search or select a hardware type...",
+                  })}
+                  noOptionsMessage={({ inputValue }) =>
+                    noHardwareTypeOptionsMessage(intl, inputValue)
+                  }
+                  isLoading={isLoadingNext}
+                  onMenuScrollToBottom={onLoadMore}
+                  onInputChange={setSearchText}
+                  isClearable
                 />
                 <FormFeedback feedback={errors.hardwareType?.id?.message} />
               </FormRow>

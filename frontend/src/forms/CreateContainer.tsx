@@ -26,7 +26,6 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
-import Select from "react-select";
 import { Card } from "react-bootstrap";
 
 import type {
@@ -430,6 +429,10 @@ const StorageSection = ({
                   idx !== i && v.id ? [v.id] : [],
                 );
 
+                const availableVolumeOptions = volumeOptions.filter(
+                  (option) => !excludedIds.includes(option.value),
+                );
+
                 return (
                   <Stack
                     key={volume.key}
@@ -449,9 +452,8 @@ const StorageSection = ({
                       <div style={{ width: "250px", margin: "0 auto" }}>
                         <SelectFormField
                           control={control}
-                          options={volumeOptions}
+                          options={availableVolumeOptions}
                           name={`volumes.${i}.id`}
-                          excludedIds={excludedIds}
                         />
                       </div>
                       <FormFeedback feedback={error?.id?.message} />
@@ -937,19 +939,11 @@ const RuntimeSection = ({ form, open, onToggle }: BaseSectionProps) => {
         }
       >
         <FieldHelp id="restartPolicy">
-          <Controller
+          <SelectFormField
             control={control}
             name="restartPolicy"
-            render={({ field }) => (
-              <Select
-                value={restartPolicyOptions.find(
-                  (o) => o.value === field.value,
-                )}
-                onChange={(o) => field.onChange(o?.value ?? null)}
-                options={restartPolicyOptions}
-                isClearable
-              />
-            )}
+            options={restartPolicyOptions}
+            valueType="object"
           />
         </FieldHelp>
       </FormRow>

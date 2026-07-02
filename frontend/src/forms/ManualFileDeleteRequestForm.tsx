@@ -19,10 +19,8 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import Select from "react-select";
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
@@ -33,6 +31,7 @@ import Spinner from "@/components/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
 
 import { fileDeleteRequestFormSchema } from "./validation";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 type StorageSourceOption = {
   value: string;
@@ -75,11 +74,6 @@ const ManualFileDeleteRequestForm = ({
     },
   });
 
-  const deleteOptionsMap = useMemo(
-    () => new Map(deleteOptions.map((opt) => [opt.value, opt])),
-    [deleteOptions],
-  );
-
   const submitHandler = handleSubmit((data) => {
     onSubmit(data);
     reset();
@@ -96,33 +90,22 @@ const ManualFileDeleteRequestForm = ({
           />
         }
       >
-        <Controller
+        <SelectFormField
           control={control}
           name="deviceFileId"
-          render={({ field, fieldState }) => {
-            const selectedOption = deleteOptionsMap.get(field.value) ?? null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => field.onChange(option?.value ?? "")}
-                options={deleteOptions}
-                onMenuScrollToBottom={onLoadMoreDeleteOptions}
-                placeholder={intl.formatMessage({
-                  id: "forms.ManualFileDeleteRequestForm.filePlaceholder",
-                  defaultMessage: "Select a file to delete...",
-                })}
-                noOptionsMessage={() =>
-                  intl.formatMessage({
-                    id: "forms.ManualFileDeleteRequestForm.fileNoOptions",
-                    defaultMessage: "No files for delete.",
-                  })
-                }
-                isClearable
-                className={fieldState.invalid ? "is-invalid" : ""}
-              />
-            );
-          }}
+          options={deleteOptions}
+          onMenuScrollToBottom={onLoadMoreDeleteOptions}
+          placeholder={intl.formatMessage({
+            id: "forms.ManualFileDeleteRequestForm.filePlaceholder",
+            defaultMessage: "Select a file to delete...",
+          })}
+          noOptionsMessage={() =>
+            intl.formatMessage({
+              id: "forms.ManualFileDeleteRequestForm.fileNoOptions",
+              defaultMessage: "No files for delete.",
+            })
+          }
+          isClearable
         />
 
         <FormFeedback feedback={errors.deviceFileId?.message} />

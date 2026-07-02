@@ -23,7 +23,6 @@ import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay";
-import Select from "react-select";
 
 import type { ManualOtaFromCollectionForm_BaseImageCollectionsPagination_Query } from "@/api/__generated__/ManualOtaFromCollectionForm_BaseImageCollectionsPagination_Query.graphql";
 import type {
@@ -43,6 +42,7 @@ import {
   ManualOtaFromCollectionData,
   manualOtaFromCollectionSchema,
 } from "@/forms/validation";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const BASE_IMAGE_COLLECTIONS_FRAGMENT = graphql`
   fragment ManualOtaFromCollectionForm_baseImageCollections_Fragment on RootQueryType
@@ -166,13 +166,12 @@ const ManualOtaFromCollectionForm = ({
           defaultMessage: "No base image collections available",
         });
 
-  const { onChange: onBaseImageCollectionChange } = register(
-    "baseImageCollection",
-  );
   const { onChange: onBaseImageChange } = register("baseImage");
 
   const onSubmit = handleSubmit((data) => {
-    onManualOTAImageSubmit({ imageUrl: data.baseImage.url });
+    onManualOTAImageSubmit({
+      imageUrl: data.baseImage.url,
+    });
   });
 
   return (
@@ -186,35 +185,32 @@ const ManualOtaFromCollectionForm = ({
           />
         }
       >
-        <Controller
-          name="baseImageCollection"
+        <SelectFormField
           control={control}
-          render={({ field: { value, onChange }, fieldState: { invalid } }) => (
-            <Select
-              value={value}
-              onChange={(e) => {
-                onChange(e);
-                onBaseImageCollectionChange({ target: e });
-                resetField("baseImage");
-              }}
-              className={invalid ? "is-invalid" : ""}
-              placeholder={intl.formatMessage({
-                id: "forms.ManualOtaFromCollectionForm.baseImageCollectionOption",
-                defaultMessage: "Search or select a base image collection...",
-              })}
-              options={baseImageCollections}
-              getOptionLabel={(opt) => opt.name}
-              getOptionValue={(opt) => opt.id}
-              noOptionsMessage={({ inputValue }) =>
-                noBaseImageCollOptionsMessage(inputValue)
-              }
-              isLoading={isLoadingNextBaseImageColl}
-              onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
-              onInputChange={(text) => setSearchBaseImageCollText(text)}
-            />
-          )}
+          name="baseImageCollection"
+          valueType="object"
+          options={baseImageCollections
+            .filter(
+              (collection): collection is NonNullable<typeof collection> =>
+                collection !== null,
+            )
+            .map((collection) => ({
+              value: collection.id,
+              label: collection.name,
+            }))}
+          placeholder={intl.formatMessage({
+            id: "forms.ManualOtaFromCollectionForm.baseImageCollectionOption",
+            defaultMessage: "Search or select a base image collection...",
+          })}
+          noOptionsMessage={({ inputValue }) =>
+            noBaseImageCollOptionsMessage(inputValue)
+          }
+          isLoading={isLoadingNextBaseImageColl}
+          onMenuScrollToBottom={onLoadMoreBaseImageCollOptions}
+          onInputChange={(text) => setSearchBaseImageCollText(text)}
+          onChange={() => resetField("baseImage")}
         />
-        <FormFeedback feedback={errors.baseImageCollection?.id?.message} />
+        <FormFeedback feedback={errors.baseImageCollection?.message} />
       </FormRow>
 
       <FormRow

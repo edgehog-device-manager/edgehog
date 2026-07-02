@@ -23,7 +23,6 @@ import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay";
-import Select from "react-select";
 
 import type { ManualFilesServerToDeviceRepositoryForm_RepositoriesPagination_Query } from "@/api/__generated__/ManualFilesServerToDeviceRepositoryForm_RepositoriesPagination_Query.graphql";
 import type {
@@ -46,6 +45,7 @@ import {
   manualFileDownloadRequestFromRepositorySchema,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const REPOSITORIES_FRAGMENT = graphql`
   fragment ManualFilesServerToDeviceRepositoryForm_repositories_Fragment on RootQueryType
@@ -184,11 +184,6 @@ const ManualFilesServerToDeviceRepositoryForm = ({
     [repositoryPaginationData],
   );
 
-  const destinationOptionsMap = useMemo(
-    () => new Map(destinationTypeOptions.map((opt) => [opt.value, opt])),
-    [destinationTypeOptions],
-  );
-
   const onSubmit = handleSubmit((data) => {
     onFileSubmit(data);
     reset();
@@ -205,19 +200,11 @@ const ManualFilesServerToDeviceRepositoryForm = ({
           />
         }
       >
-        <Controller
+        <SelectFormField
           control={control}
           name="destinationType"
-          render={({ field }) => (
-            <Select
-              value={destinationOptionsMap.get(field.value) ?? null}
-              onChange={(option) => {
-                field.onChange(option?.value ?? null);
-                setValue("destination", null);
-              }}
-              options={destinationTypeOptions}
-            />
-          )}
+          options={destinationTypeOptions}
+          onChange={() => setValue("destination", null)}
         />
       </FormRow>
 
@@ -260,35 +247,28 @@ const ManualFilesServerToDeviceRepositoryForm = ({
           />
         }
       >
-        <Controller
-          name="repository"
+        <SelectFormField
           control={control}
-          render={({ field: { value, onChange }, fieldState: { invalid } }) => (
-            <Select
-              value={value?.id ? value : null}
-              onChange={(selectedOpt) => {
-                onChange(selectedOpt);
-                resetField("file");
-              }}
-              className={invalid ? "is-invalid" : ""}
-              placeholder={intl.formatMessage({
-                id: "forms.ManualFilesServerToDeviceRepositoryForm.repositoryOption",
-                defaultMessage: "Search or select a repository...",
-              })}
-              options={repositories}
-              getOptionLabel={(opt) => opt.name}
-              getOptionValue={(opt) => opt.id}
-              noOptionsMessage={({ inputValue }) =>
-                getNoRepositoryOptionsMessage(intl, inputValue)
-              }
-              isLoading={isLoadingNextRepository}
-              onMenuScrollToBottom={onLoadMoreRepositoryOptions}
-              onInputChange={(text) => setSearchRepositoryText(text)}
-              isClearable
-            />
-          )}
+          name="repository"
+          options={repositories.map((r) => ({
+            value: r.id,
+            label: r.name,
+          }))}
+          isClearable
+          placeholder={intl.formatMessage({
+            id: "forms.ManualFilesServerToDeviceRepositoryForm.repositoryOption",
+            defaultMessage: "Search or select a repository...",
+          })}
+          noOptionsMessage={({ inputValue }) =>
+            getNoRepositoryOptionsMessage(intl, inputValue)
+          }
+          isLoading={isLoadingNextRepository}
+          onMenuScrollToBottom={onLoadMoreRepositoryOptions}
+          onInputChange={(text) => setSearchRepositoryText(text)}
+          onChange={() => resetField("file")}
+          valueType="object"
         />
-        <FormFeedback feedback={errors.repository?.id?.message} />
+        <FormFeedback feedback={errors.repository?.message} />
       </FormRow>
 
       <FormRow
@@ -319,7 +299,7 @@ const ManualFilesServerToDeviceRepositoryForm = ({
                 />
               )}
             />
-            <FormFeedback feedback={errors.file?.id?.message} />
+            <FormFeedback feedback={errors.file?.message} />
           </>
         ) : (
           <div className="d-flex align-content-center fst-italic text-muted">

@@ -24,13 +24,14 @@ import type {
   ActionMeta,
   MultiValueGenericProps,
   MultiValueRemoveProps,
+  StylesConfig,
 } from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { useCallback } from "react";
 
 import Icon from "@/components/Icon";
 import Tag from "@/components/Tag";
-import "./MultiSelect.scss";
+import { createSelectStyles } from "./selectStyles";
 
 const MultiValueContainer = <Option,>(
   props: MultiValueGenericProps<Option, true>,
@@ -74,6 +75,7 @@ type MultiSelectBaseProps<Option> = {
   loading?: boolean;
   value?: readonly Option[];
   options?: readonly Option[];
+  styles?: StylesConfig<Option, true>;
   onChange?: (
     value: MultiValue<Option>,
     actionMeta: ActionMeta<Option>,
@@ -106,6 +108,7 @@ const MultiSelect = <Option,>({
   disabled = false,
   invalid = false,
   loading = false,
+  styles,
   onMenuScrollToBottom = undefined,
   onInputChange = undefined,
   ...restProps
@@ -124,12 +127,15 @@ const MultiSelect = <Option,>({
   return (
     <SelectComponent
       {...restProps}
+      styles={{
+        ...createSelectStyles<Option>(invalid),
+        ...styles,
+      }}
       isMulti
       isDisabled={disabled}
       isLoading={loading}
       components={customComponents}
-      className={`multi-select ${invalid ? "is-invalid" : ""}`}
-      classNamePrefix="multi-select"
+      className={invalid ? "is-invalid" : ""}
       onMenuScrollToBottom={onMenuScrollToBottom}
       onInputChange={handleInputChange}
     />

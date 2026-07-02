@@ -24,7 +24,6 @@ import { useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
-import Select from "react-select";
 import type { z } from "zod";
 
 import type {
@@ -52,6 +51,7 @@ import {
   FileDownloadCampaignFormData,
   fileDownloadCampaignSchema,
 } from "@/forms/validation";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const CAMPAIGN_REPOSITORY_OPTIONS_FRAGMENT = graphql`
   fragment CreateFileDownloadCampaign_RepositoryOptionsFragment on RootQueryType
@@ -307,7 +307,6 @@ const CreateFileDownloadCampaignForm = ({
           defaultMessage: "No repositories available",
         });
 
-  const { onChange: onRepositoryChange } = register("repository");
   const { onChange: onFileChange } = register("file");
 
   const {
@@ -368,8 +367,6 @@ const CreateFileDownloadCampaignForm = ({
           defaultMessage: "No channels available",
         });
 
-  const { onChange: onChannelChange } = register("channel");
-
   return (
     <form onSubmit={handleSubmit(onFormSubmit)}>
       <Stack gap={3}>
@@ -399,24 +396,10 @@ const CreateFileDownloadCampaignForm = ({
             />
           }
         >
-          <Controller
+          <SelectFormField
             control={control}
             name="destinationType"
-            render={({ field }) => {
-              const selectedOption =
-                destinationOptions.find((opt) => opt.value === field.value) ||
-                null;
-
-              return (
-                <Select
-                  value={selectedOption}
-                  onChange={(option) => {
-                    field.onChange(option ? option.value : null);
-                  }}
-                  options={destinationOptions}
-                />
-              );
-            }}
+            options={destinationOptions}
           />
         </FormRow>
 
@@ -448,37 +431,29 @@ const CreateFileDownloadCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="repository"
+          <SelectFormField
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                  onRepositoryChange({ target: e });
-                  resetField("file");
-                }}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateFileDownloadCampaign.repositoryOption",
-                  defaultMessage: "Search or select a repository...",
-                })}
-                options={repositories}
-                getOptionLabel={(opt) => opt.name}
-                getOptionValue={(opt) => opt.id}
-                noOptionsMessage={({ inputValue }) =>
-                  noRepositoryOptionsMessage(inputValue)
-                }
-                isLoading={isLoadingNextRepository}
-                onMenuScrollToBottom={onLoadMoreRepositoryOptions}
-                onInputChange={(text) => setSearchRepositoryText(text)}
-              />
-            )}
+            name="repository"
+            valueType="object"
+            options={repositories.map((repository) => ({
+              value: repository.id,
+              label: repository.name,
+            }))}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateFileDownloadCampaign.repositoryOption",
+              defaultMessage: "Search or select a repository...",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              noRepositoryOptionsMessage(inputValue)
+            }
+            isLoading={isLoadingNextRepository}
+            onMenuScrollToBottom={onLoadMoreRepositoryOptions}
+            onInputChange={setSearchRepositoryText}
+            onChange={() => {
+              resetField("file");
+            }}
           />
+
           <FormFeedback feedback={errors.repository?.id?.message} />
         </FormRow>
 
@@ -534,35 +509,24 @@ const CreateFileDownloadCampaignForm = ({
             />
           }
         >
-          <Controller
-            name="channel"
+          <SelectFormField
             control={control}
-            render={({
-              field: { value, onChange },
-              fieldState: { invalid },
-            }) => (
-              <Select
-                value={value}
-                onChange={(e) => {
-                  onChange(e);
-                  onChannelChange({ target: e });
-                }}
-                className={invalid ? "is-invalid" : ""}
-                placeholder={intl.formatMessage({
-                  id: "forms.CreateFileDownloadCampaign.channelOption",
-                  defaultMessage: "Search or select a channel...",
-                })}
-                options={channels}
-                getOptionLabel={(opt) => opt.name}
-                getOptionValue={(opt) => opt.id}
-                noOptionsMessage={({ inputValue }) =>
-                  noChannelOptionsMessage(inputValue)
-                }
-                isLoading={isLoadingNextChannel}
-                onMenuScrollToBottom={onLoadMoreChannelOptions}
-                onInputChange={(text) => setSearchChannelText(text)}
-              />
-            )}
+            name="channel"
+            valueType="object"
+            options={channels.map((channel) => ({
+              value: channel.id,
+              label: channel.name,
+            }))}
+            placeholder={intl.formatMessage({
+              id: "forms.CreateFileDownloadCampaign.channelOption",
+              defaultMessage: "Search or select a channel...",
+            })}
+            noOptionsMessage={({ inputValue }) =>
+              noChannelOptionsMessage(inputValue)
+            }
+            isLoading={isLoadingNextChannel}
+            onMenuScrollToBottom={onLoadMoreChannelOptions}
+            onInputChange={setSearchChannelText}
           />
           <FormFeedback feedback={errors.channel?.id?.message} />
         </FormRow>

@@ -20,9 +20,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
-import { Controller, useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import Select from "react-select";
 
 import Button from "@/components/Button";
 import Col from "@/components/Col";
@@ -45,6 +44,7 @@ import {
   getFileExtension,
   isArchiveEncoding,
 } from "@/lib/files";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 type EncodingOption = {
   value: string;
@@ -145,7 +145,6 @@ const ManualFilesServerToDeviceFileForm = ({
 
   const {
     encodingOptions,
-    encodingOptionsMap,
     supportedArchiveEncodingsNormalized,
     firstSupportedArchiveEncoding,
   } = useMemo(() => {
@@ -192,11 +191,6 @@ const ManualFilesServerToDeviceFileForm = ({
     hasMultipleFilesSelected,
     noneEncodingLabel,
   ]);
-
-  const destinationOptionsMap = useMemo(
-    () => new Map(destinationTypeOptions.map((opt) => [opt.value, opt])),
-    [destinationTypeOptions],
-  );
 
   const selectedEncoding = useWatch({
     control,
@@ -317,27 +311,15 @@ const ManualFilesServerToDeviceFileForm = ({
           />
         }
       >
-        <Controller
+        <SelectFormField
           control={control}
           name="destinationType"
-          render={({ field }) => {
-            const selectedOption =
-              destinationOptionsMap.get(field.value ?? "") ?? null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => {
-                  field.onChange(option ? option.value : null);
-
-                  setSelectedFiles([]);
-                  setValue("encoding", "");
-                  setValue("customFileName", "");
-                  setValue("destination", null);
-                }}
-                options={destinationTypeOptions}
-              />
-            );
+          options={destinationTypeOptions}
+          onChange={() => {
+            setSelectedFiles([]);
+            setValue("encoding", "");
+            setValue("customFileName", "");
+            setValue("destination", null);
           }}
         />
       </FormRow>
@@ -447,26 +429,12 @@ const ManualFilesServerToDeviceFileForm = ({
           />
         }
       >
-        <Controller
+        <SelectFormField
           control={control}
           name="encoding"
-          render={({ field }) => {
-            const selectedOption =
-              encodingOptionsMap.get(field.value ?? "") ??
-              encodingOptions[0] ??
-              null;
-
-            return (
-              <Select
-                value={selectedOption}
-                onChange={(option) => {
-                  field.onChange(option?.value ?? "");
-                }}
-                options={encodingOptions}
-                isDisabled={selectedFiles.length === 0}
-              />
-            );
-          }}
+          options={encodingOptions}
+          isClearable={false}
+          isDisabled={selectedFiles.length === 0}
         />
 
         {errors.encoding ? (
