@@ -1,0 +1,249 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: "Test system model"
+model_file: "../../fga.mod"
+
+tuples:
+  - object: system_model:sm1
+    relation: tenant
+    user: tenant:t1
+
+  - object: system_model:sm2
+    relation: tenant
+    user: tenant:t1
+
+  # Tenant-level grants
+  - object: tenant:t1
+    relation: can_view_system_models
+    user: user:viewer
+
+  - object: tenant:t1
+    relation: can_edit_system_models
+    user: user:editor
+
+  - object: tenant:t1
+    relation: can_delete_system_models
+    user: user:deleter
+
+  - object: tenant:t1
+    relation: can_create_system_models
+    user: user:creator
+
+  # Object-level direct grants
+  - object: system_model:sm1
+    relation: can_view
+    user: user:direct_viewer
+
+  - object: system_model:sm1
+    relation: can_edit
+    user: user:direct_editor
+
+  - object: system_model:sm1
+    relation: can_delete
+    user: user:direct_deleter
+
+  # Blocklist setups
+  - object: tenant:t1
+    relation: system_model_blocklisted
+    user: user:tenant_blocklisted
+
+  - object: system_model:sm1
+    relation: blocklisted
+    user: user:object_blocklisted
+
+  - object: tenant:t1
+    relation: blocklisted
+    user: user:global_blocklisted
+
+  - object: tenant:t1
+    relation: can_edit_system_models
+    user: user:global_blocklisted
+
+  # Group setup
+  - object: group:g1
+    relation: member
+    user: user:group_member
+
+  - object: tenant:t1
+    relation: can_view_system_models
+    user: group:g1#member
+
+  - object: tenant:t1
+    relation: can_edit_system_models
+    user: group:g1#member
+
+tests:
+  - name: "tenant viewer can view system models but not edit or delete"
+    check:
+      - user: user:viewer
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: false
+
+      - user: user:viewer
+        object: system_model:sm2
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: false
+
+  - name: "tenant editor can view and edit system models, but not delete"
+    check:
+      - user: user:editor
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+      - user: user:editor
+        object: system_model:sm2
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "tenant deleter can view and delete system models, but not edit"
+    check:
+      - user: user:deleter
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: true
+      - user: user:deleter
+        object: system_model:sm2
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: true
+
+  - name: "direct_viewer on sm1 can only view"
+    check:
+      - user: user:direct_viewer
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: false
+
+  - name: "direct_editor on sm1 can view and edit, but not delete"
+    check:
+      - user: user:direct_editor
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "direct_deleter on sm1 can view and delete, but not edit"
+    check:
+      - user: user:direct_deleter
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: false
+          can_delete: true
+
+  - name: "direct_editor on sm1 has no access to sm2 (object grant does not bleed)"
+    check:
+      - user: user:direct_editor
+        object: system_model:sm2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "direct_viewer on sm1 has no access to sm2"
+    check:
+      - user: user:direct_viewer
+        object: system_model:sm2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "group member with tenant view+edit grants can view and edit sm1, not delete"
+    check:
+      - user: user:group_member
+        object: system_model:sm1
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "group member grants are tenant-wide"
+    check:
+      - user: user:group_member
+        object: system_model:sm2
+        assertions:
+          can_view: true
+          can_edit: true
+          can_delete: false
+
+  - name: "unrelated user has no access to sm1"
+    check:
+      - user: user:nobody
+        object: system_model:sm1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "object_blocklisted user is denied all permissions on sm1"
+    check:
+      - user: user:object_blocklisted
+        object: system_model:sm1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "tenant_blocklisted user is denied all permissions"
+    check:
+      - user: user:tenant_blocklisted
+        object: system_model:sm1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+      - user: user:tenant_blocklisted
+        object: system_model:sm2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+
+  - name: "global_blocklisted user denied all on sm1 despite having edit grant on sm1"
+    check:
+      - user: user:global_blocklisted
+        object: system_model:sm1
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false
+      - user: user:global_blocklisted
+        object: system_model:sm2
+        assertions:
+          can_view: false
+          can_edit: false
+          can_delete: false

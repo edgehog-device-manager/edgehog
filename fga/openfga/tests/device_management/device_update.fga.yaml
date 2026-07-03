@@ -1,0 +1,95 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+name: "Test device view"
+model_file: "../../fga.mod"
+
+tuples:
+  - user: "tenant:test"
+    relation: "tenant"
+    object: "realm:test"
+  # device:1 in realm test
+  - user: "realm:test"
+    relation: "realm"
+    object: "device:1"
+  - user: "user:alice"
+    relation: "can_update"
+    object: "device:1"
+  - user: "user:bob"
+    relation: "can_update_devices"
+    object: "realm:test"
+  - user: "user:cindy"
+    relation: "can_update_devices_in_all_realms"
+    object: "tenant:test"
+  - user: "group:realm_prompters#member"
+    relation: "can_update_devices_in_all_realms"
+    object: "tenant:test"
+  - user: "user:daniel"
+    relation: "member"
+    object: "group:realm_prompters"
+
+tests:
+  - name: Device can be updated by users with the correct property
+    check:
+      - user: "user:alice"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_access_terminal: false
+          can_identify: false
+          can_delete: false
+          can_update: true
+  - name: Device can be updated by users that can update all devices in a realm
+    check:
+      - user: "user:bob"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_access_terminal: false
+          can_identify: false
+          can_delete: false
+          can_update: true
+  - name: Device can be updated by users that can update all devices in all realms
+    check:
+      - user: "user:cindy"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_access_terminal: false
+          can_identify: false
+          can_delete: false
+          can_update: true
+  - name: Device can be updated by users that belong to a group that can update all devices in all realms
+    check:
+      - user: "user:daniel"
+        object: "device:1"
+        assertions:
+          can_view: true
+          can_edit_tags: false
+          can_rename: false
+          can_access_terminal: false
+          can_identify: false
+          can_delete: false
+          can_update: true

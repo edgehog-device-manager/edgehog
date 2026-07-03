@@ -46,9 +46,9 @@ module device
 
 type device
   relations
-    define alias:   [device]
     define realm: [realm]
-    define blocklisted: [user, group#member]
+    define blocklisted: [user, group#member] or realm_blocklisted
+    define realm_blocklisted: blocklisted from realm
 
     define computed_can_view: can_edit_tags or can_rename or can_access_terminal or can_identify or can_update or can_delete or can_view_devices from realm
 
