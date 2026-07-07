@@ -24,10 +24,10 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
   alias Edgehog.Astarte.Device.CreateContainerRequest
   alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Astarte.Device.CreateVolumeRequest
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Volume
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
@@ -56,7 +56,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     expect(Image.Deployment.Provisioner, :provision, images, fn _, _, _ -> :ok end)
 
-    expect(CreateVolumeRequest, :send_create_volume_request, volumes, fn _, _, _ -> :ok end)
+    expect(Volume.Deployment.Provisioner, :provision, volumes, fn _, _, _ -> :ok end)
 
     expect(Network.Deployment.Provisioner, :provision, containers, fn _, _, _ -> :ok end)
 

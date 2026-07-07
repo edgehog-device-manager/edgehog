@@ -22,7 +22,8 @@ defmodule Edgehog.Containers.Volume.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
   alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
@@ -156,6 +157,16 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   identities do
     identity :volume_instance, [:volume_id, :device_id]
+  end
+
+  pub_sub do
+    prefix "volume_deployments"
+    module EdgehogWeb.Endpoint
+
+    publish :mark_as_errored, [[:id, "*"]]
+    publish :mark_as_available, [[:id, "*"]]
+    publish :mark_as_unavailable, [[:id, "*"]]
+    publish :set_state, [[:id, "*"]]
   end
 
   postgres do
