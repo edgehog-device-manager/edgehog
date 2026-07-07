@@ -22,22 +22,13 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Astarte.Device.CreateContainerRequest
   alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Containers.DeviceMapping
-  alias Edgehog.Containers.DeviceRequest
-  alias Edgehog.Containers.Image
-  alias Edgehog.Containers.Network
-  alias Edgehog.Containers.Volume
+  alias Edgehog.Containers.Container
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
-    # one image per container
-    images = containers
-
     # one volume per container
     volumes_per_container = 1
-    volumes = volumes_per_container * containers
     volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
 
     network = network_fixture(tenant: tenant)
@@ -57,37 +48,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     release =
       release_fixture(tenant: tenant, containers: containers, container_params: container_params)
 
-    expect(Image.Deployment.Provisioner, :provision, images, fn _, _, _ -> :ok end)
-
-    expect(Volume.Deployment.Provisioner, :provision, volumes, fn _, _, _ -> :ok end)
-
-    expect(Network.Deployment.Provisioner, :provision, containers, fn _, _, _ -> :ok end)
-
-    expect(DeviceMapping.Deployment.Provisioner, :provision, fn _, _, _ -> :ok end)
-
-    expect(DeviceRequest.Deployment.Provisioner, :provision, 1, fn _, _, _ -> :ok end)
-
-    expect(CreateContainerRequest, :send_create_container_request, containers, fn _, _, data ->
-      assert Enum.count(data.volumeIds) == volumes_per_container
-
-      binds_by_source =
-        data.binds
-        |> Enum.map(&String.split(&1, ":"))
-        |> Enum.group_by(&hd/1, fn bind ->
-          {target, options} =
-            case bind do
-              [_source, target] -> {target, []}
-              [_source, target, options] -> {target, options}
-            end
-
-          %{target: target, options: options}
-        end)
-
-      for id <- data.volumeIds do
-        volume_binds = Map.fetch!(binds_by_source, id)
-        assert Enum.any?(volume_binds, fn %{target: target} -> target == volume_target end)
-      end
-
+    expect(Container.Deployment.Supervisor, :supervise, containers, fn _, _, _ ->
+      # We just expect the container supervisor to be started, the container supervisor tests are separate
       :ok
     end)
 
@@ -134,9 +96,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     ordered_containers = [container_1.id, container_3.id, container_2.id]
 
-    expect(Image.Deployment.Provisioner, :provision, 3, fn _, _, _ -> :ok end)
-
-    expect(CreateContainerRequest, :send_create_container_request, 3, fn _, _, _ ->
+    expect(Container.Deployment.Supervisor, :supervise, 3, fn _, _, _ ->
+      # We just expect the container supervisor to be started, the container supervisor tests are separate
       :ok
     end)
 
@@ -180,9 +141,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
         container_dependencies: container_dependencies
       )
 
-    expect(Image.Deployment.Provisioner, :provision, 2, fn _, _, _ -> :ok end)
-
-    expect(CreateContainerRequest, :send_create_container_request, 2, fn _, _, _ ->
+    expect(Container.Deployment.Supervisor, :supervise, 2, fn _, _, _ ->
+      # We just expect the container supervisor to be started, the container supervisor tests are separate
       :ok
     end)
 

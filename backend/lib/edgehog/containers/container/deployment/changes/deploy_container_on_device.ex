@@ -20,67 +20,20 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.DeployContainerOnDevic
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers
-  alias Edgehog.Devices
+  alias Edgehog.Containers.Container.Deployment.Supervisor, as: ContainerSupervisor
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    Ash.Changeset.after_action(changeset, &send_deployment(&1, &2, tenant))
+    Ash.Changeset.after_transaction(changeset, &send_deployment(&1, &2, tenant))
   end
 
-  defp send_deployment(changeset, container_deployment, tenant) do
+  defp send_deployment(changeset, {:ok, container_deployment}, tenant) do
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    with {:ok, container_deployment} <-
-           Ash.load(container_deployment, [
-             :image_deployment,
-             :volume_deployments,
-             :network_deployments,
-             :device_mapping_deployments,
-             :device_request_deployments,
-             :device,
-             :container,
-             :state
-           ]) do
-      image_deployment = container_deployment.image_deployment
-      volume_deployments = container_deployment.volume_deployments
-      network_deployments = container_deployment.network_deployments
-      device_mapping_deployments = container_deployment.device_mapping_deployments
-      device_request_deployments = container_deployment.device_request_deployments
+    ContainerSupervisor.supervise(container_deployment, deployment, tenant)
 
-      resources = [
-        image_deployment
-        | volume_deployments ++
-            network_deployments ++
-            device_mapping_deployments ++ device_request_deployments
-      ]
-
-      Enum.each(resources, &deploy_resource(&1, deployment, tenant))
-
-      with {:ok, _device} <-
-             Devices.send_create_container_request(
-               container_deployment.device,
-               container_deployment.container,
-               deployment,
-               tenant: tenant
-             ),
-           do: maybe_update_state(container_deployment, tenant)
-    end
+    {:ok, container_deployment}
   end
 
-  defp deploy_resource(res, deployment, tenant) do
-    res
-    |> Ash.Changeset.for_update(:send_deployment, %{deployment: deployment}, tenant: tenant)
-    |> Ash.update(tenant: tenant)
-  end
-
-  defp maybe_update_state(container_deployment, tenant) do
-    case container_deployment.state do
-      :created ->
-        Containers.mark_container_deployment_as_sent(container_deployment, tenant: tenant)
-
-      _others ->
-        {:ok, container_deployment}
-    end
-  end
+  defp send_deployment(_changeset, error, _tenant), do: error
 end

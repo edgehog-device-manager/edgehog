@@ -24,9 +24,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Astarte.Device.CreateContainerRequest
   alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Containers.Image.Deployment.Provisioner, as: ImageProvisioner
+  alias Edgehog.Containers.Container.Deployment.Supervisor, as: DeploymentSupervisor
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do
@@ -37,11 +36,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
         :ok
       end)
 
-      expect(CreateContainerRequest, :send_create_container_request, fn _, _, _ ->
-        :ok
-      end)
-
-      expect(ImageProvisioner, :provision, fn _, _, _ -> :ok end)
+      expect(DeploymentSupervisor, :supervise, fn _, _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment]
