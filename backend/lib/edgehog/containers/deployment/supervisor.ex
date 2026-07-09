@@ -102,8 +102,7 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
 
     %{id: id} = deployment
 
-    Logger.info("Subscribing to events on deployment #{id}")
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "container_deployments:#{id}")
+    Logger.debug("Starting a supervisor for deployment #{id}, mode is #{inspect(mode)}")
 
     {:ok, state, {:continue, :maybe_load_resources}}
   end
@@ -126,15 +125,21 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
   def handle_continue(:load_resources, state) do
     new_state = Core.load_resources(state)
 
+    Logger.debug("Loaded resources for deployment #{state.deployment.id}")
+
     {:noreply, new_state, {:continue, :provision_deployments}}
   end
 
-  # This step of the initialization process
+  # This step of the initialization process provisions underlying resources
   @impl GenServer
   def handle_continue(:provision_deployments, state) do
     new_state = Core.provision(state)
 
     timeout = timeout(state)
+
+    Logger.debug(
+      "Provisioned resources for deployment #{state.deployment.id}, timeout set to #{timeout}"
+    )
 
     {:noreply, new_state, timeout}
   end
@@ -142,8 +147,11 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
   @impl GenServer
   def handle_continue(:maybe_ready, state) do
     timeout = timeout(state)
+    ready? = Core.ready?(state)
 
-    if Core.ready?(state),
+    Logger.debug("Deployment #{state.deployment.id} ready?: #{ready?}")
+
+    if ready?,
       do: {:stop, :normal, state},
       else: {:noreply, state, timeout}
   end
@@ -151,14 +159,22 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
   ## Infos
 
   @impl GenServer
-  def handle_info({:ready, %Deployment{}}, state) do
-    new_state = Core.deployment_ready(state)
+  def handle_info({:ready, %Deployment{} = deployment}, state) do
+    Logger.debug(
+      "Supervisor for deployment #{state.deployment.id} received a readiness event for the deployment."
+    )
+
+    new_state = Core.deployment_ready(state, deployment)
 
     {:noreply, new_state, {:continue, :maybe_ready}}
   end
 
   @impl GenServer
   def handle_info({:ready, %Container.Deployment{id: id}}, state) do
+    Logger.debug(
+      "Supervisor for deployment #{state.deployment.id} received a readiness event for the container deployment #{id}"
+    )
+
     new_state = Core.container_ready(id, state)
 
     {:noreply, new_state, {:continue, :maybe_ready}}
@@ -193,16 +209,34 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
 
     %{id: id} = deployment
 
-    # Broadcast readiness
-    Phoenix.PubSub.broadcast(
-      Edgehog.PubSub,
-      "ready:deployments:#{id}",
-      {:ready, deployment}
+    Logger.debug(
+      "Terminating deployment supervisor for deployment #{id}. The deployment is ready."
     )
 
+    readiness_topic = "ready:deployments:#{id}"
+    event = {:ready, deployment}
+
+    Logger.debug("Broadcasting readiness", topic: readiness_topic, event: event)
+
+    # Broadcast readiness
+    Phoenix.PubSub.broadcast(Edgehog.PubSub, readiness_topic, event)
+
+    # Broadcast readiness for campaigns
+    Ash.Notifier.notify(%Ash.Notifier.Notification{
+      data: deployment,
+      for: [Ash.Notifier.PubSub],
+      resource: Deployment,
+      metadata: %{custom_event: :deployment_ready}
+    })
+
+    Logger.debug("Running ready actions", deployment: deployment)
+
+    # Run ready actions
     deployment
-    |> Ash.Changeset.for_update(:run_ready_actions, %{})
+    |> Ash.Changeset.for_update(:mark_as_ready, %{})
     |> Ash.update!(tenant: tenant)
+
+    Logger.info("Deployment #{id} successfully provisioned.")
 
     :ok
   end
@@ -213,12 +247,18 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
 
     %{id: id} = deployment
 
+    Logger.debug(
+      "Shutting down provisioner for deployment #{id}, a timeout was hit and the resources were not ready."
+    )
+
     # Broadcast readiness
     Phoenix.PubSub.broadcast(
       Edgehog.PubSub,
       "ready:deployments:#{id}",
       {:failure, deployment}
     )
+
+    Logger.info("Deployment #{id} provisioning failed.")
 
     :ok
   end

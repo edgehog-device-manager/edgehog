@@ -159,7 +159,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
 
       Phoenix.PubSub.subscribe(
         Edgehog.PubSub,
-        "ready:container_deployment:#{container_deployment.id}"
+        "ready:container_deployments:#{container_deployment.id}"
       )
 
       Provisioner.start(provisioner)
@@ -171,7 +171,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
 
       Phoenix.PubSub.unsubscribe(
         Edgehog.PubSub,
-        "ready:container_deployment:#{container_deployment.id}"
+        "ready:container_deployments:#{container_deployment.id}"
       )
     end
   end

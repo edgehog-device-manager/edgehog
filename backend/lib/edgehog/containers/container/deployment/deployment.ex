@@ -121,14 +121,6 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change Changes.MaybeNotifyUpwards
-    end
-
-    update :maybe_notify_upwards do
-      require_atomic? false
-      change Changes.MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do

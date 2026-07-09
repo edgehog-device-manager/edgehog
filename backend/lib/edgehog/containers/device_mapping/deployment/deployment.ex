@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceMapping.Deployment.Changes
@@ -79,17 +78,11 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     end
 
     update :mark_as_present do
-      require_atomic? false
-
       change set_attribute(:state, :present)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_not_present do
-      require_atomic? false
-
       change set_attribute(:state, :not_present)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -103,9 +96,6 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do

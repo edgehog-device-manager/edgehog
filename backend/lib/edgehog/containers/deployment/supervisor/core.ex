@@ -61,10 +61,10 @@ defmodule Edgehog.Containers.Deployment.Supervisor.Core do
     %{id: id} = container_deployment
 
     # Subscribe to the container_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:container_deployments:#{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "provisioning:container_deployments:#{id}")
 
-    # Start the provisioner
-    Container.Deployment.Provisioner.provision(container_deployment, deployment, tenant)
+    # Start the Supervisor
+    Container.Deployment.Supervisor.supervise(container_deployment, deployment, tenant)
 
     # Append to the queue of containers to wait for readiness
     Map.update(state, :containers_waitlist, [], &[container_deployment | &1])
@@ -98,10 +98,11 @@ defmodule Edgehog.Containers.Deployment.Supervisor.Core do
     deployment_ready and containers_ready
   end
 
-  def deployment_ready(state) do
+  def deployment_ready(state, deployment) do
     %{
       state
-      | deployment_provisioning: :completed
+      | deployment_provisioning: :completed,
+        deployment: deployment
     }
   end
 

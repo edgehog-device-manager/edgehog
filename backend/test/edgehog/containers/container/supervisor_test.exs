@@ -67,6 +67,7 @@ defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
         container_deployment: original_container_deployment,
         supervisor: supervisor,
         supervisor_ref: ref,
+        deployment: og_deployment,
         tenant: tenant
       } = context
 
@@ -80,7 +81,7 @@ defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
       Image.Deployment.Provisioner
       |> allow(test_process, supervisor)
       |> expect(:provision, fn image_deployment, deployment, _tenant ->
-        assert deployment == deployment
+        assert deployment.id == og_deployment.id
         assert image_deployment == original_image_deployment
 
         %{id: id} = image_deployment
@@ -88,7 +89,7 @@ defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
         # Simulate provisioning process finishing with correct readiness
         Phoenix.PubSub.broadcast!(
           Edgehog.PubSub,
-          "ready:image_deployment:#{id}",
+          "ready:image_deployments:#{id}",
           {:ready, image_deployment}
         )
       end)
@@ -96,15 +97,15 @@ defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
       Container.Deployment.Provisioner
       |> allow(test_process, supervisor)
       |> expect(:provision, fn container_deployment, deployment, _tenant ->
-        assert deployment == deployment
-        assert container_deployment == original_container_deployment
+        assert deployment.id == og_deployment.id
+        assert container_deployment.id == original_container_deployment.id
 
         %{id: id} = container_deployment
 
         # Simulate provisioning process finishing with correct readiness
         Phoenix.PubSub.broadcast!(
           Edgehog.PubSub,
-          "ready:container_deployment:#{id}",
+          "ready:container_deployments:#{id}",
           {:ready, container_deployment}
         )
       end)

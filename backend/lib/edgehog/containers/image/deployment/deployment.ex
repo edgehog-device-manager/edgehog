@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.Image.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
@@ -81,17 +80,11 @@ defmodule Edgehog.Containers.Image.Deployment do
     end
 
     update :mark_as_unpulled do
-      require_atomic? false
-
       change set_attribute(:state, :unpulled)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_pulled do
-      require_atomic? false
-
       change set_attribute(:state, :pulled)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -105,9 +98,6 @@ defmodule Edgehog.Containers.Image.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do

@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
+defmodule Edgehog.Containers.Deployment.SupervisorTest do
   @moduledoc """
   Tests for the container deployment supervisor.
 
@@ -57,6 +57,7 @@ defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
 
     test "Calls the underlying provisioners", context do
       %{
+        deployment: og_deployment,
         supervisor: supervisor,
         supervisor_ref: ref
       } = context
@@ -66,7 +67,7 @@ defmodule Edgehog.Containers.Container.Deployment.SupervisorTest do
       Deployment.Provisioner
       |> allow(test_process, supervisor)
       |> expect(:provision, fn deployment, _tenant ->
-        assert deployment == deployment
+        assert deployment == og_deployment
 
         %{id: id} = deployment
 

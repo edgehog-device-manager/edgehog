@@ -29,8 +29,9 @@ defmodule Edgehog.Containers.Deployment.Changes.SendRequest do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    Ash.Changeset.after_action(changeset, fn _changeset, deployment ->
-      Containers.send_deployment(deployment, tenant: tenant)
+    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+      with {:ok, deployment} <- result,
+           do: Containers.send_deployment(deployment, tenant: tenant)
     end)
   end
 end

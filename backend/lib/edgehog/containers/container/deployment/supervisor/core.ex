@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
 
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.DeviceMapping
+  alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Volume
@@ -44,7 +45,8 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
       :image_deployment,
       :network_deployments,
       :volume_deployments,
-      :device_mapping_deployments
+      :device_mapping_deployments,
+      :device_request_deployments
     ]
 
     # Bang: if the database connection is not working it does not make sense to
@@ -56,15 +58,20 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     # crash
     image_deployment = Map.fetch!(container_deployment, :image_deployment)
 
+    unless image_deployment, do: raise("Porcoddioooooo")
+
     network_deployments = Map.get(container_deployment, :network_deployments, [])
     volume_deployments = Map.get(container_deployment, :volume_deployments, [])
     device_mapping_deployments = Map.get(container_deployment, :device_mapping_deployments, [])
+    device_request_deployments = Map.get(container_deployment, :device_mapping_deployments, [])
 
     state
+    |> Map.put(:container_deployment, container_deployment)
     |> Map.put(:image_deployment, image_deployment)
     |> Map.put(:network_deployments, network_deployments)
     |> Map.put(:volume_deployments, volume_deployments)
     |> Map.put(:device_mapping_deployments, device_mapping_deployments)
+    |> Map.put(:device_request_deployments, device_request_deployments)
   end
 
   @doc """
@@ -78,6 +85,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     |> provision_volumes()
     |> provision_networks()
     |> provision_device_mappings()
+    |> provision_device_requests()
     |> provision_container()
   end
 
@@ -91,7 +99,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     %{id: id} = image_deployment
 
     # Subscribe to the image_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:image_deployment:#{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:image_deployments:#{id}")
 
     # Start the provisioner
     Image.Deployment.Provisioner.provision(image_deployment, deployment, tenant)
@@ -116,7 +124,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     %{id: id} = volume_deployment
 
     # Subscribe to the volume_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:volume_deployment:#{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:volume_deployments:#{id}")
 
     # Start the provisioner
     Volume.Deployment.Provisioner.provision(volume_deployment, deployment, tenant)
@@ -142,7 +150,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     %{id: id} = network_deployment
 
     # Subscribe to the network_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:network_deployment:#{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:network_deployments:#{id}")
 
     # Start the provisioner
     Network.Deployment.Provisioner.provision(network_deployment, deployment, tenant)
@@ -168,13 +176,39 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     %{id: id} = device_mapping_deployment
 
     # Subscribe to the device_mapping_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:device_mapping_deployment:#{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:device_mapping_deployments:#{id}")
 
     # Start the provisioner
     DeviceMapping.Deployment.Provisioner.provision(device_mapping_deployment, deployment, tenant)
 
     # Append to the queue of device mappings to wait for readiness
     Map.update(state, :device_mappings_to_provision, [], &[device_mapping_deployment | &1])
+  end
+
+  def provision_device_requests(state) do
+    new_state = Map.put(state, :device_requests_to_provision, [])
+
+    new_state
+    |> Map.get(:device_request_deployments, [])
+    |> Enum.reduce(new_state, &provision_device_request/2)
+  end
+
+  defp provision_device_request(device_request_deployment, state) do
+    %{
+      deployment: deployment,
+      tenant: tenant
+    } = state
+
+    %{id: id} = device_request_deployment
+
+    # Subscribe to the device_request_deployment readiness
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:device_request_deployments:#{id}")
+
+    # Start the provisioner
+    DeviceRequest.Deployment.Provisioner.provision(device_request_deployment, deployment, tenant)
+
+    # Append to the queue of device requests to wait for readiness
+    Map.update(state, :device_requests_to_provision, [], &[device_request_deployment | &1])
   end
 
   def provision_container(state) do
@@ -187,7 +221,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor.Core do
     %{id: id} = container_deployment
 
     # Subscribe to the container_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:container_deployment:#{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:container_deployments:#{id}")
 
     # Start the provisioner
     Container.Deployment.Provisioner.provision(container_deployment, deployment, tenant)

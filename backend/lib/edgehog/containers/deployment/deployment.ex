@@ -228,8 +228,6 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_sent do
       change set_attribute(:state, :sent)
-
-      require_atomic? false
     end
 
     update :mark_as_started do
@@ -250,8 +248,6 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_timed_out do
       change set_attribute(:timed_out, true)
-
-      require_atomic? false
     end
 
     update :append_event do
@@ -297,12 +293,6 @@ defmodule Edgehog.Containers.Deployment do
       end
 
       change Changes.AppendEvent
-    end
-
-    update :maybe_run_ready_actions do
-      change Changes.MaybeHandleReadiness
-
-      require_atomic? false
     end
 
     read :filter_by_release do
@@ -420,7 +410,6 @@ defmodule Edgehog.Containers.Deployment do
     publish :mark_as_stopped, [[:id, "*"]]
     publish :mark_as_timed_out, [[:id, "*"]]
     publish :append_event, [[:id, "*"]]
-    publish :maybe_run_ready_actions, [[:id, "*"]]
     publish :destroy_and_gc, [[:id, "*"]]
   end
 

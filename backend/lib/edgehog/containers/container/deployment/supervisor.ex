@@ -108,11 +108,6 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
       retries: 0
     }
 
-    %{id: id} = container_deployment
-
-    Logger.info("Subscribing to events on container deployment #{id}")
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "container_deployments:#{id}")
-
     {:ok, state, {:continue, :maybe_load_resources}}
   end
 
@@ -132,12 +127,13 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   # them in the state
   @impl GenServer
   def handle_continue(:load_resources, state) do
+    Logger.debug("Loading resources for container deployment #{state.container_deployment.id}")
     new_state = Core.load_resources(state)
 
     {:noreply, new_state, {:continue, :provision_deployments}}
   end
 
-  # This step of the initialization process
+  # This step of the initialization process provisions all underlying resources
   @impl GenServer
   def handle_continue(:provision_deployments, state) do
     new_state = Core.provision(state)
@@ -161,7 +157,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
       # Broadcast readiness
       Phoenix.PubSub.broadcast(
         Edgehog.PubSub,
-        "ready:container_deployment:#{id}",
+        "provisioning:container_deployments:#{id}",
         {:ready, container_deployment}
       )
 
@@ -213,13 +209,15 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   def handle_info(:timeout, state) do
     state_ready? = Core.ready?(state)
 
+    %{container_deployment: %{id: id}} = state
+
     ready? =
       if state_ready?,
         do: "ready",
         else: "not ready"
 
     Logger.warning("""
-    Container supervisor for container hit a timeout, the underlying resources were #{ready?}.
+    Container supervisor for container deployment #{id} hit a timeout, the underlying resources were #{ready?}.
 
     The supervisor will now terminate, something went wrong.
     """)

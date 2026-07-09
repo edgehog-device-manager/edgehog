@@ -55,7 +55,8 @@ config :edgehog, Edgehog.Repo,
   database: database.name,
   hostname: database.hostname,
   show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  pool_size: 10,
+  log: false
 
 # Mimic production environment variables, default to phoenix defaults.
 
@@ -128,6 +129,11 @@ config :phoenix, :plug_init_mode, :runtime
 # Set a higher stacktrace during development. Avoid configuring such
 # in production as building large stacktraces may be expensive.
 config :phoenix, :stacktrace_depth, 20
+
+config :phoenix, :logger, false
+
+config :absinthe,
+  log: false
 
 config :waffle,
   storage: Waffle.Storage.S3,

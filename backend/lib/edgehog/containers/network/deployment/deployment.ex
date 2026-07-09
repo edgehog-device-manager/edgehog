@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.Network.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Network.Deployment.Changes
@@ -80,15 +79,11 @@ defmodule Edgehog.Containers.Network.Deployment do
     end
 
     update :mark_as_available do
-      require_atomic? false
       change set_attribute(:state, :available)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_unavailable do
-      require_atomic? false
       change set_attribute(:state, :unavailable)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -102,9 +97,6 @@ defmodule Edgehog.Containers.Network.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do
