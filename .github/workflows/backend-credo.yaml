@@ -37,6 +37,10 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           submodules: recursive
+
+      - name: Optimize Cache
+        uses: ./.github/actions/restore-cache-mtimes
+
       - uses: team-alembic/staple-actions/actions/mix-credo@8b0f5a1a7cadfbc86c2d00343d4a06a45352ef13 # main
         with:
           working-directory: backend
