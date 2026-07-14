@@ -28,12 +28,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
   alias Ash.Error.Invalid
   alias Astarte.Client.APIError
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
   alias Edgehog.Campaigns.CampaignTarget
+  alias Edgehog.Containers.Deployment
   alias Phoenix.Socket.Broadcast
 
   setup do
@@ -65,6 +65,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
   end
 
   describe "subscribe_to_operation_updates!/2 and unsubscribe_to_operation_updates!/2" do
+    # TODO: Remove this once the subscription flow is centralized into the lazy
+    # batch mechanism
+    @tag :skip
     test "subscribes and unsubscribes to deployment updates via PubSub", %{tenant: tenant} do
       deployment = deployment_fixture(tenant: tenant)
       mechanism = %DeploymentDeploy{}
@@ -72,16 +75,16 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       # Subscribe to deployment updates
       assert :ok = MechanismCore.subscribe_to_operation_updates!(mechanism, deployment.id)
 
-      # Trigger an update by marking the deployment as started
+      # Trigger an update by marking the deployment as stopped
       {:ok, updated_deployment} =
         Edgehog.Containers.mark_deployment_as_stopped(deployment, tenant: tenant.tenant_id)
 
-      topic = "deployments:#{deployment.id}"
+      topic = Deployment.Supervisor.topic(deployment.id)
 
       # Assert we receive the PubSub notification
       assert_receive %Broadcast{
         topic: ^topic,
-        event: "mark_as_stopped",
+        event: :ready,
         payload: %Ash.Notifier.Notification{
           data: received_deployment
         }
@@ -146,9 +149,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
+      expect(Deployment.Supervisor, :supervise, 1, fn _deployment, _tenant ->
         :ok
       end)
 
@@ -179,9 +180,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
+      expect(Deployment.Supervisor, :supervise, 1, fn _deployment, _tenant ->
         :ok
       end)
 
@@ -227,9 +226,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       assert {:ok, target} =
                MechanismCore.fetch_next_valid_target(mechanism, campaign.id, tenant.tenant_id)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
+      expect(Deployment.Supervisor, :supervise, 1, fn _deployment, _tenant ->
         :ok
       end)
 

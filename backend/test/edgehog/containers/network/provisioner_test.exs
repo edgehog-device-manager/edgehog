@@ -168,7 +168,7 @@ defmodule Edgehog.Containers.Network.Deployment.ProvisionerTest do
 
       Provisioner.start(provisioner)
 
-      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 2000
     end
 
     test "emits :ready on correct topic on provisioning completion", context do

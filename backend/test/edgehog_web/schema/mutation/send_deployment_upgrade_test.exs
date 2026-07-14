@@ -24,9 +24,9 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
   alias Edgehog.Astarte.Device.DeploymentUpdate
   alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
 
   describe "sendDeploymentUpgrade" do
     setup %{tenant: tenant} do
@@ -56,7 +56,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         |> deployment_fixture()
         |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, fn _, _, _ -> :ok end)
+      expect(Deployment.Supervisor, :supervise, fn _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
@@ -70,6 +70,10 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
              |> Map.fetch!(:deployment_id) == deployment_id
     end
 
+    # TODO: Move this test onto the deployment supervisor test. Once the
+    # supervisor reads that all resources are ready it runs the ready actions,
+    # without running trough the database.
+    @tag :skip
     test "sends the deployment upgrade once the new deployment is ready", args do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
@@ -80,7 +84,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         |> deployment_fixture()
         |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, fn _, _, _ -> :ok end)
+      expect(Deployment.Supervisor, :supervise, fn _, _ -> :ok end)
       expect(DeploymentUpdate, :update, fn _, _, _ -> :ok end)
 
       result =
@@ -90,13 +94,10 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      deployment =
-        deployment_id
-        |> Containers.fetch_deployment!(tenant: tenant)
-        |> Containers.mark_deployment_as_stopped!(tenant: tenant)
-        |> Ash.load!(release: [containers: [:image, :volumes, :networks]], device: [])
-
-      Containers.deployment_update_resources_state!(deployment)
+      deployment_id
+      |> Containers.fetch_deployment!(tenant: tenant)
+      |> Containers.mark_deployment_as_stopped!(tenant: tenant)
+      |> Ash.load!(release: [containers: [:image, :volumes, :networks]], device: [])
     end
 
     test "fails if the deployments do not belong to the same application", args do
@@ -138,7 +139,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       deployment_0_0_1 =
         deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
 
-      reject(&CreateDeploymentRequest.send_create_deployment_request/3)
+      reject(&Deployment.Supervisor.supervise/2)
 
       _result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]

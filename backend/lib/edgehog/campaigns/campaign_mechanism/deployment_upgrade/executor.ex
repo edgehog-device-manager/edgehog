@@ -43,6 +43,32 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
   ]
 
   # Common event handling
+  # 
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: "ready:deployments:" <> _,
+          event: :ready,
+          payload: deployment
+        },
+        _state,
+        data
+      ) do
+    handle_ready(deployment, data)
+  end
+
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: "ready:deployments:" <> _,
+          event: :failure,
+          payload: deployment
+        },
+        _state,
+        data
+      ) do
+    handle_failure(deployment, data)
+  end
 
   # Note that external (e.g. :info) and timeout events are always handled after the internal
   # events enqueued with the :next_event action. This means that we can be sure an :info event
@@ -62,20 +88,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
 
   defp handle_update(notification, state, data) do
     case notification.payload.action.name do
-      :maybe_run_ready_actions -> handle_maybe_run_ready_actions(notification, data)
       :mark_as_timed_out -> handle_mark_as_timed_out(notification, data)
       :pause -> handle_mark_as_paused(state, data)
       _ -> :keep_state_and_data
-    end
-  end
-
-  defp handle_maybe_run_ready_actions(notification, data) do
-    case Map.get(notification.payload.metadata || %{}, :custom_event) do
-      :deployment_ready ->
-        handle_ready(notification.payload.data, data)
-
-      _ ->
-        :keep_state_and_data
     end
   end
 
@@ -112,6 +127,19 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
 
       {:keep_state_and_data, actions}
     end
+  end
+
+  defp handle_failure(deployment, data) do
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
+
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:operation_failure, deployment})
+    ]
+
+    {:keep_state_and_data, actions}
   end
 
   defp handle_mark_as_timed_out(notification, data) do

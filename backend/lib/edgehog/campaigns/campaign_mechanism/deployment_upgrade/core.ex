@@ -79,9 +79,14 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - Raises an error on failure.
   """
   def subscribe_to_operation_updates!(_mechanism, operation_id) do
-    with {:error, reason} <-
-           Phoenix.PubSub.subscribe(Edgehog.PubSub, "deployments:#{operation_id}") do
-      raise reason
+    topics = ["deployments:#{operation_id}", Deployment.Supervisor.topic(operation_id)]
+
+    Enum.each(topics, &sub_to/1)
+  end
+
+  defp sub_to(topic) do
+    with {:error, reason} <- Phoenix.PubSub.subscribe(Edgehog.PubSub, topic) do
+      raise(reason)
     end
   end
 

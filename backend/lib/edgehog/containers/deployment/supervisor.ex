@@ -69,6 +69,9 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
     {:via, Registry, {SupervisorRegistry, id}}
   end
 
+  def topic(%Deployment{id: id}), do: "ready:deployments:#{id}"
+  def topic(id), do: "ready:deployments:#{id}"
+
   # Test additional API
   # In test environment, allow to start the process with a message, so that the
   # test process can attach and monitor it
@@ -213,27 +216,24 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
       "Terminating deployment supervisor for deployment #{id}. The deployment is ready."
     )
 
-    readiness_topic = "ready:deployments:#{id}"
-    event = {:ready, deployment}
+    readiness_topic = topic(deployment)
+
+    event = %Phoenix.Socket.Broadcast{
+      topic: readiness_topic,
+      event: :ready,
+      payload: deployment
+    }
 
     Logger.debug("Broadcasting readiness", topic: readiness_topic, event: event)
 
     # Broadcast readiness
     Phoenix.PubSub.broadcast(Edgehog.PubSub, readiness_topic, event)
 
-    # Broadcast readiness for campaigns
-    Ash.Notifier.notify(%Ash.Notifier.Notification{
-      data: deployment,
-      for: [Ash.Notifier.PubSub],
-      resource: Deployment,
-      metadata: %{custom_event: :deployment_ready}
-    })
-
     Logger.debug("Running ready actions", deployment: deployment)
 
     # Run ready actions
     deployment
-    |> Ash.Changeset.for_update(:mark_as_ready, %{})
+    |> Ash.Changeset.for_update(:run_ready_actions, %{})
     |> Ash.update!(tenant: tenant)
 
     Logger.info("Deployment #{id} successfully provisioned.")
@@ -251,12 +251,16 @@ defmodule Edgehog.Containers.Deployment.Supervisor do
       "Shutting down provisioner for deployment #{id}, a timeout was hit and the resources were not ready."
     )
 
-    # Broadcast readiness
-    Phoenix.PubSub.broadcast(
-      Edgehog.PubSub,
-      "ready:deployments:#{id}",
-      {:failure, deployment}
-    )
+    readiness_topic = topic(deployment)
+
+    event = %Phoenix.Socket.Broadcast{
+      topic: readiness_topic,
+      event: :failure,
+      payload: deployment
+    }
+
+    # Broadcast readiness failure
+    Phoenix.PubSub.broadcast!(Edgehog.PubSub, readiness_topic, event)
 
     Logger.info("Deployment #{id} provisioning failed.")
 

@@ -405,10 +405,11 @@ defmodule Edgehog.Containers.Deployment do
     publish :deploy, [[:id, "*"]]
     publish :just_create, [[:id, "*"]]
 
-    publish :mark_as_sent, [[:id, "*"]]
-    publish :mark_as_started, [[:id, "*"]]
-    publish :mark_as_stopped, [[:id, "*"]]
-    publish :mark_as_timed_out, [[:id, "*"]]
+    publish :set_state, [[:state, nil], [:id, "*"]]
+    publish :mark_as_sent, [[:state, nil], [:id, "*"]]
+    publish :mark_as_started, [[:state, nil], [:id, "*"]]
+    publish :mark_as_stopped, [[:state, nil], [:id, "*"]]
+    publish :mark_as_timed_out, [["timeout", nil], [:id, "*"]]
     publish :append_event, [[:id, "*"]]
     publish :destroy_and_gc, [[:id, "*"]]
   end

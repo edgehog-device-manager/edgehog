@@ -74,3 +74,5 @@ config :logger, level: :warning
 config :phoenix, :plug_init_mode, :runtime
 
 config :tesla, adapter: Tesla.Mock
+
+config :ash, :pub_sub, debug?: true

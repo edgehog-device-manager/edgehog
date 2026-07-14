@@ -47,58 +47,30 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStop.Executor do
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
   @impl LazyBatch
-  def handle_info(%Phoenix.Socket.Broadcast{} = notification, state, data) do
-    case notification.payload.action.type do
-      :update -> handle_update(notification, state, data)
-      _ -> :keep_state_and_data
-    end
-  end
-
-  def handle_info(_message, _state, _data) do
-    # Ignore any other messages
-    :keep_state_and_data
-  end
-
-  defp handle_update(notification, state, data) do
-    case notification.payload.action.name do
-      :maybe_run_ready_actions -> handle_maybe_run_ready_actions(notification, data)
-      :mark_as_timed_out -> handle_mark_as_timed_out(notification, data)
-      :pause -> handle_mark_as_paused(state, data)
-      _ -> :keep_state_and_data
-    end
-  end
-
-  defp handle_maybe_run_ready_actions(notification, data) do
-    case Map.get(notification.payload.metadata || %{}, :custom_event) do
-      :deployment_ready ->
-        handle_ready(notification.payload.data, data)
-
-      _ ->
-        :keep_state_and_data
-    end
-  end
-
-  defp handle_ready(deployment, data) do
-    # We always cancel the retry timeout for every kind of update we see on a Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "deployments:stopped:" <> _id} = notification,
+        _state,
+        data
+      ) do
+    # We subscribed to the `stopped:deployments:#{id}` event for the deployment
+    # we're interested in. Since we received a message, it means that the
+    # deployment was stopped.
+    deployment = notification.payload.data
 
     actions = [
       cancel_retry_timeout(data.tenant_id, deployment.id),
       {:next_event, :internal, {:operation_success, deployment}}
     ]
 
-    if deployment.state === :stopped do
-      {:keep_state_and_data, actions}
-    else
-      :keep_state_and_data
-    end
+    {:keep_state_and_data, actions}
   end
 
-  defp handle_mark_as_timed_out(notification, data) do
-    # We always cancel the retry timeout for every kind of update we see on an Deployment.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "deployments:timeout:" <> _id} = notification,
+        _state,
+        data
+      ) do
     deployment = notification.payload.data
 
     actions = [
@@ -109,11 +81,20 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStop.Executor do
     {:keep_state_and_data, actions}
   end
 
-  defp handle_mark_as_paused(state, data) when state in @pauseable_states do
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "campaigns:" <> _id, event: "pause"} = _notification,
+        state,
+        data
+      ) do
+    handle_pausing(state, data)
+  end
+
+  defp handle_pausing(state, data) when state in @pauseable_states do
     {:next_state, :wait_for_campaign_paused, data, []}
   end
 
-  defp handle_mark_as_paused(_state, _data) do
+  defp handle_pausing(_state, _data) do
     # Ignore pause requests in non-pauseable states (terminal states, already pausing, etc.)
     :keep_state_and_data
   end

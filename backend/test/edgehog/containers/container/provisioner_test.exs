@@ -187,6 +187,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
           :networks,
           :volumes,
           :device_mappings,
+          :device_requests,
           container_volumes: [:binding]
         ]
       )
@@ -207,6 +208,11 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
     device_mapping_ids =
       container
       |> Map.get(:device_mappings, [])
+      |> Enum.map(& &1.id)
+
+    device_request_ids =
+      container
+      |> Map.get(:device_requests, [])
       |> Enum.map(& &1.id)
 
     env_encoding = container.env_encoding
@@ -232,6 +238,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
       capAdd: container.cap_add,
       capDrop: container.cap_drop,
       deviceMappingIds: device_mapping_ids,
+      deviceRequestIds: device_request_ids,
       cpuPeriod: normalize(container.cpu_period),
       cpuQuota: normalize(container.cpu_quota),
       cpuRealtimePeriod: normalize(container.cpu_realtime_period),

@@ -77,7 +77,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStartCoreTest do
       {:ok, updated_deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      topic = "deployments:#{deployment.id}"
+      topic = "deployments:started:#{deployment.id}"
 
       # Assert we receive the PubSub notification
       assert_receive %Broadcast{

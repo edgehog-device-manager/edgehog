@@ -843,8 +843,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     assert {:ok, deployment} =
              deployment_id
              |> Containers.fetch_deployment!(tenant: tenant)
-             |> Containers.set_deployment_state!(%{state: state}, tenant: tenant)
-             |> Containers.deployment_update_resources_state(tenant: tenant)
+             |> Containers.set_deployment_state(%{state: state}, tenant: tenant)
 
     deployment
   end
