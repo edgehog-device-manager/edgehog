@@ -154,6 +154,9 @@ const columns = [
         description="Title for the Name column of the Deployment Campaigns table"
       />
     ),
+    meta: {
+      label: "Deployment Campaign Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.deploymentCampaignsEdit}
@@ -170,6 +173,9 @@ const columns = [
         defaultMessage="Operation type"
       />
     ),
+    meta: {
+      label: "Operation type",
+    },
     cell: ({ getValue }) => {
       const value = getValue();
       return CAMPAIGN_MECHANISM_LABELS[value] ?? value;
@@ -201,6 +207,9 @@ const columns = [
         description="Title for the Channel column of the Deployment Campaigns table"
       />
     ),
+    meta: {
+      label: "Channel",
+    },
   }),
   columnHelper.accessor("campaignMechanism.release.application.name", {
     header: () => (
@@ -210,6 +219,9 @@ const columns = [
         description="Title for the Application Name column of the Deployment Campaigns table"
       />
     ),
+    meta: {
+      label: "Application Name",
+    },
     cell: ({ row, getValue }) => {
       const mechanism = row.original.campaignMechanism;
 
@@ -238,6 +250,9 @@ const columns = [
         description="Title for the Release column of the Deployment Campaigns table"
       />
     ),
+    meta: {
+      label: "Release Version",
+    },
     cell: ({ row, getValue }) => {
       const mechanism = row.original.campaignMechanism;
 
@@ -282,6 +297,8 @@ type DeploymentCampaignsTableProps = {
   deploymentCampaignsRef: DeploymentCampaignsTable_CampaignEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const DeploymentCampaignsTable = ({
@@ -289,6 +306,8 @@ const DeploymentCampaignsTable = ({
   deploymentCampaignsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: DeploymentCampaignsTableProps) => {
   const deploymentCampaignsFragment = useFragment(
     CAMPAIGNS_TABLE_FRAGMENT,
@@ -308,6 +327,9 @@ const DeploymentCampaignsTable = ({
       data={deploymentCampaigns}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="deploymentCampaigns-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

@@ -97,6 +97,9 @@ const columns = [
         description="Title for the Device Name column of the Deployment Targets table"
       />
     ),
+    meta: {
+      label: "Device Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.devicesEdit}
@@ -120,6 +123,9 @@ const columns = [
           description="Title for the State column of the Deployment Targets table"
         />
       ),
+      meta: {
+        label: "State",
+      },
       cell: ({ row, getValue }) => {
         const state = getValue();
         const isReady = row.original.deployment?.isReady;
@@ -140,6 +146,9 @@ const columns = [
           description="Title for the Readiness column of the Deployment Targets table"
         />
       ),
+      meta: {
+        label: "Readiness",
+      },
       cell: ({ getValue }) => {
         const isReady = getValue();
         return <DeploymentReadiness isReady={isReady} />;
@@ -158,6 +167,9 @@ const columns = [
           description="Title for the Last Error Message column of the Deployment Targets table"
         />
       ),
+      meta: {
+        label: "Failure Reason",
+      },
       cell: ({ getValue }) => {
         const event = getValue();
         return event ? <DeploymentEventMessage event={event} /> : null;
@@ -172,6 +184,9 @@ const columns = [
         description="Title for the Retry Count column of the Deployment Targets table"
       />
     ),
+    meta: {
+      label: "Retry Count",
+    },
     cell: ({ getValue }) => {
       const retryCount = getValue();
       return retryCount ? retryCount : "";
@@ -185,6 +200,9 @@ const columns = [
         description="Title for the Latest attempt at column of the Deployment Targets table"
       />
     ),
+    meta: {
+      label: "Latest attempt at",
+    },
     cell: ({ getValue }) => {
       const latestAttempt = getValue();
       return (
@@ -209,6 +227,9 @@ const columns = [
         description="Title for the Completed at column of the Deployment Targets table"
       />
     ),
+    meta: {
+      label: "Completed at",
+    },
     cell: ({ getValue }) => {
       const latestAttempt = getValue();
       return (
@@ -259,6 +280,7 @@ const DeploymentTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
+      hideColumnVisibility
     />
   );
 };

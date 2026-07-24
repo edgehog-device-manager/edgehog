@@ -88,6 +88,9 @@ const columns = [
         defaultMessage="Device"
       />
     ),
+    meta: {
+      label: "Device",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.devicesEdit}
@@ -110,6 +113,9 @@ const columns = [
           defaultMessage="Request Status"
         />
       ),
+      meta: {
+        label: "Request Status",
+      },
       cell: ({ getValue }) => <RequestStatus status={getValue()} />,
     },
   ),
@@ -123,6 +129,9 @@ const columns = [
           defaultMessage="Progress"
         />
       ),
+      meta: {
+        label: "Progress",
+      },
       cell: ({ getValue }) => {
         const progress = getValue();
         return typeof progress === "number" ? `${progress}%` : "";
@@ -143,6 +152,9 @@ const columns = [
           defaultMessage="Failure Reason"
         />
       ),
+      meta: {
+        label: "Failure Reason",
+      },
     },
   ),
   columnHelper.accessor("retryCount", {
@@ -152,6 +164,9 @@ const columns = [
         defaultMessage="Retry Count"
       />
     ),
+    meta: {
+      label: "Retry Count",
+    },
     cell: ({ getValue }) => {
       const retryCount = getValue();
       return retryCount ? retryCount : "";
@@ -164,6 +179,9 @@ const columns = [
         defaultMessage="Latest attempt at"
       />
     ),
+    meta: {
+      label: "Latest attempt at",
+    },
     cell: ({ getValue }) => {
       const latestAttempt = getValue();
       return (
@@ -188,6 +206,9 @@ const columns = [
         defaultMessage="Path on device"
       />
     ),
+    meta: {
+      label: "Path on device",
+    },
     cell: ({ getValue }) => {
       const request = getValue() as {
         destinationType?: string | null;
@@ -203,6 +224,9 @@ const columns = [
         defaultMessage="Completed at"
       />
     ),
+    meta: {
+      label: "Completed at",
+    },
     cell: ({ getValue }) => {
       const completionTimestamp = getValue();
       return (
@@ -253,6 +277,7 @@ const FileDownloadTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
+      hideColumnVisibility
     />
   );
 };

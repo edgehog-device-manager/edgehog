@@ -79,6 +79,9 @@ const columns = [
         description="Title for the Status column of the devices table"
       />
     ),
+    meta: {
+      label: "Status",
+    },
     cell: ({ getValue }) => <ConnectionStatus connected={getValue()} />,
     sortingFn: "basic",
   }),
@@ -90,6 +93,9 @@ const columns = [
         description="Title for the Name column of the devices table"
       />
     ),
+    meta: {
+      label: "Device Name",
+    },
     cell: ({ row, getValue }) => (
       <Link route={Route.devicesEdit} params={{ deviceId: row.original.id }}>
         {getValue()}
@@ -104,6 +110,9 @@ const columns = [
         description="Title for the Device ID column of the devices table"
       />
     ),
+    meta: {
+      label: "Device ID",
+    },
     sortingFn: "basic",
   }),
   columnHelper.accessor((device) => device.systemModel?.name, {
@@ -114,6 +123,9 @@ const columns = [
         defaultMessage="System Model"
       />
     ),
+    meta: {
+      label: "System Model",
+    },
   }),
   columnHelper.accessor((device) => device.systemModel?.hardwareType?.name, {
     id: "hardwareType",
@@ -123,6 +135,9 @@ const columns = [
         defaultMessage="Hardware Type"
       />
     ),
+    meta: {
+      label: "Hardware Type",
+    },
   }),
   columnHelper.accessor(
     (device) => {
@@ -141,6 +156,9 @@ const columns = [
           description="Title for the Last Seen column of the devices table"
         />
       ),
+      meta: {
+        label: "Last Seen",
+      },
       cell: ({ row }) => (
         <LastSeen
           lastConnection={row.original.lastConnection}
@@ -159,6 +177,9 @@ const columns = [
         description="Title for the Tags column of the devices table"
       />
     ),
+    meta: {
+      label: "Tags",
+    },
     cell: ({ getValue }) => (
       <>
         {getValue().edges?.map(({ node: { name: tag } }) => (
@@ -176,6 +197,8 @@ type Props = {
   devicesRef: DevicesTable_DeviceEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const DevicesTable = ({
@@ -183,6 +206,8 @@ const DevicesTable = ({
   devicesRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const devicesFragment = useFragment(
     DEVICES_TABLE_FRAGMENT,
@@ -200,6 +225,9 @@ const DevicesTable = ({
       data={devices}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="devices-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

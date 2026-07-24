@@ -50,7 +50,6 @@ import Page from "@/components/Page";
 import type { ReleaseTableRecord } from "@/components/ReleasesTable";
 import ReleasesTable from "@/components/ReleasesTable";
 import Result from "@/components/Result";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import Tabs, { Tab } from "@/components/Tabs";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -123,12 +122,14 @@ interface ReleasesLayoutContainerProps {
     Application_getApplication_Query$data["application"]
   >;
   searchText: string | null;
+  onSearchChange: (text: string) => void;
   onDelete: (release: SelectedRelease) => void;
 }
 
 const ReleasesLayoutContainer = ({
   applicationRef,
   searchText,
+  onSearchChange,
   onDelete,
 }: ReleasesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -243,6 +244,8 @@ const ReleasesLayoutContainer = ({
         releasesRef={releasesRef}
         loading={isLoadingNext}
         onLoadMore={onLoadMore}
+        searchText={searchText ?? ""}
+        onSearchChange={onSearchChange}
       />
     </div>
   );
@@ -363,14 +366,10 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
             })}
           >
             <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-              <SearchBox
-                className="pb-2"
-                value={searchText || ""}
-                onChange={setSearchText}
-              />
               <ReleasesLayoutContainer
                 applicationRef={application}
                 searchText={searchText}
+                onSearchChange={setSearchText}
                 onDelete={setReleaseToDelete}
               />
             </Card>

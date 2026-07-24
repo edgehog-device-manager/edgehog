@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState, Fragment } from "react";
+import { useState, Fragment } from "react";
 import {
   flexRender,
   getCoreRowModel,
@@ -36,14 +36,18 @@ import type {
 import { FormattedMessage } from "react-intl";
 import RBTable from "react-bootstrap/Table";
 
+import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import InfiniteScroll from "@/components/InfiniteScroll";
+import SearchBox from "@/components/SearchBox";
 import { SortDirectionIndicator } from "@/components/Table";
 import "@/components/Table.scss";
+import useColumnVisibility from "@/hooks/useColumnVisibility";
 
 declare module "@tanstack/table-core" {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   interface ColumnMeta<TData extends RowData, TValue> {
     className?: string;
+    label?: string;
   }
 }
 
@@ -59,7 +63,13 @@ type InfiniteTableProps<T extends RowData> = {
   hiddenColumns?: string[];
   sortBy?: SortingState;
   searchFunction?: FilterFnOption<T>;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
+  searchBox?: React.ReactNode;
+  hideSearch?: boolean;
+  hideColumnVisibility?: boolean;
   getRowProps?: (row: Row<T>) => object;
+  columnVisibilityKey?: string;
 };
 
 const InfiniteTable = <T extends RowData>({
@@ -71,16 +81,19 @@ const InfiniteTable = <T extends RowData>({
   hiddenColumns = HIDDEN_COLUMN_IDS,
   sortBy = SORT_BY_DEFAULT,
   searchFunction,
+  onSearchChange,
+  searchText,
+  searchBox,
+  hideSearch = false,
+  hideColumnVisibility = false,
   getRowProps,
+  columnVisibilityKey,
 }: InfiniteTableProps<T>) => {
   const [sorting, setSorting] = useState<SortingState>(sortBy);
-  const columnVisibility = useMemo(
-    () =>
-      hiddenColumns.reduce(
-        (acc, columnId) => ({ ...acc, [columnId]: false }),
-        {},
-      ),
-    [hiddenColumns],
+
+  const { columnVisibility, setColumnVisibility } = useColumnVisibility(
+    columnVisibilityKey,
+    hiddenColumns,
   );
 
   // eslint-disable-next-line react-hooks/incompatible-library
@@ -92,14 +105,44 @@ const InfiniteTable = <T extends RowData>({
       sorting,
     },
     globalFilterFn: searchFunction ?? "auto",
+    onColumnVisibilityChange: setColumnVisibility,
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
   });
 
+  const leafColumns = table.getAllLeafColumns();
+  const showColumnVisibilityDropdown =
+    !hideColumnVisibility && leafColumns.some((column) => column.getCanHide());
+  const getSearchElement = () => {
+    if (hideSearch) return null;
+    if (searchBox !== undefined) return searchBox;
+    if (onSearchChange != null || searchText != null) {
+      return <SearchBox value={searchText ?? ""} onChange={onSearchChange} />;
+    }
+    if (searchFunction != null) {
+      return <SearchBox onChange={table.setGlobalFilter} />;
+    }
+    return null;
+  };
+
+  const searchElement = getSearchElement();
+
   return (
     <div className={`${className}`}>
+      {(searchElement !== null || showColumnVisibilityDropdown) && (
+        <div className="d-flex mb-4 gap-3">
+          {searchElement !== null && (
+            <div className="flex-grow-1">{searchElement}</div>
+          )}
+
+          {showColumnVisibilityDropdown && (
+            <ColumnVisibilityDropdown columns={leafColumns} />
+          )}
+        </div>
+      )}
+
       <InfiniteScroll loading={loading} onLoadMore={onLoadMore}>
         <RBTable responsive hover className="mb-0">
           <thead>

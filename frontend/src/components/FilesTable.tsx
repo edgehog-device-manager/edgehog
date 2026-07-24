@@ -115,6 +115,9 @@ const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
         description="Title for the File Name column of the files table"
       />
     ),
+    meta: {
+      label: "File Name",
+    },
     cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("size", {
@@ -125,6 +128,9 @@ const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
         description="Title for the File Size column of the files table"
       />
     ),
+    meta: {
+      label: "File Size",
+    },
     cell: ({ getValue }) => {
       const size = getValue();
       return size != null ? formatFileSize(size) : null;
@@ -138,6 +144,9 @@ const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
         defaultMessage="Actions"
       />
     ),
+    meta: {
+      label: "Actions",
+    },
     cell: ({ row }) => {
       const file = row.original;
 
@@ -219,6 +228,7 @@ const FilesTable = ({
         data={files}
         loading={loading}
         onLoadMore={onLoadMore}
+        columnVisibilityKey="files-table"
       />
       {fileToDelete && (
         <DeleteModal

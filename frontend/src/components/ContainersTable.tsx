@@ -64,6 +64,9 @@ const columns = [
         description="Title for the Name column of the containers table"
       />
     ),
+    meta: {
+      label: "Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.containersEdit}
@@ -81,6 +84,9 @@ const columns = [
         description="Title for the Image column of the containers table"
       />
     ),
+    meta: {
+      label: "Image",
+    },
   }),
 ];
 
@@ -89,6 +95,8 @@ type ContainersTableProps = {
   containersRef: ContainersTable_ContainerEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const ContainersTable = ({
@@ -96,6 +104,8 @@ const ContainersTable = ({
   containersRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: ContainersTableProps) => {
   const containersFragment = useFragment(
     CONTAINERS_TABLE_FRAGMENT,
@@ -113,6 +123,9 @@ const ContainersTable = ({
       data={containers}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="containers-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

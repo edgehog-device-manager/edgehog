@@ -37,7 +37,6 @@ import { Devices_PaginationQuery } from "@/api/__generated__/Devices_PaginationQ
 import Center from "@/components/Center";
 import DevicesTable from "@/components/DevicesTable";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -133,10 +132,12 @@ const DEVICE_UPDATED_SUBSCRIPTION = graphql`
 interface DevicesLayoutContainerProps {
   devicesData: Devices_getDevices_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const DevicesLayoutContainer = ({
   devicesData,
   searchText,
+  onSearchChange,
 }: DevicesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<Devices_PaginationQuery, Devices_DevicesFragment$key>(
@@ -241,6 +242,8 @@ const DevicesLayoutContainer = ({
       devicesRef={devicesRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -266,14 +269,10 @@ const DevicesContent = ({ getDevicesQuery }: DevicesContentProps) => {
       />
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <DevicesLayoutContainer
             devicesData={devicesData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

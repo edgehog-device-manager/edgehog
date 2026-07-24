@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState, Fragment } from "react";
+import React, { useMemo, useState, Fragment } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -39,10 +39,12 @@ import type {
 import RBTable from "react-bootstrap/Table";
 import { FormattedMessage } from "react-intl";
 
+import ColumnVisibilityDropdown from "@/components/ColumnVisibilityDropdown";
 import Icon from "@/components/Icon";
 import SearchBox from "@/components/SearchBox";
 import TablePagination from "@/components/TablePagination";
 import "@/components/Table.scss";
+import useColumnVisibility from "@/hooks/useColumnVisibility";
 
 type SortDirectionIndicatorProps = {
   className?: string;
@@ -71,7 +73,9 @@ export type TableProps<T extends RowData> = {
   sortBy?: SortingState;
   searchFunction?: FilterFnOption<T>;
   hideSearch?: boolean;
+  hideColumnVisibility?: boolean;
   getRowProps?: (row: Row<T>) => object;
+  columnVisibilityKey?: string;
 };
 
 const Table = <T extends RowData>({
@@ -84,7 +88,9 @@ const Table = <T extends RowData>({
   maxPageRows = 10,
   searchFunction,
   hideSearch = false,
+  hideColumnVisibility = false,
   getRowProps,
+  columnVisibilityKey,
 }: TableProps<T>) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>(sortBy);
@@ -100,15 +106,10 @@ const Table = <T extends RowData>({
     };
   }, [pageIndex, maxPageRows, data.length]);
 
-  const columnVisibility = useMemo(
-    () =>
-      hiddenColumns.reduce(
-        (acc, columnId) => ({ ...acc, [columnId]: false }),
-        {},
-      ),
-    [hiddenColumns],
+  const { columnVisibility, setColumnVisibility } = useColumnVisibility(
+    columnVisibilityKey,
+    hiddenColumns,
   );
-
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable<T>({
     data: data as T[], // TODO: remove when react-table narrows data type to readonly array
@@ -119,6 +120,7 @@ const Table = <T extends RowData>({
       sorting,
     },
     globalFilterFn: searchFunction ?? "auto",
+    onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: (updater) => {
       const nextPagination =
         typeof updater === "function" ? updater(pagination) : updater;
@@ -139,11 +141,23 @@ const Table = <T extends RowData>({
     totalRows,
   );
 
+  const leafColumns = table.getAllLeafColumns();
+  const showColumnVisibilityDropdown =
+    !hideColumnVisibility && leafColumns.some((column) => column.getCanHide());
+
   return (
     <div className={`${className}`}>
-      {!hideSearch && (
-        <div className="mb-4 w-100">
-          <SearchBox onChange={table.setGlobalFilter} />
+      {(!hideSearch || showColumnVisibilityDropdown) && (
+        <div className="d-flex mb-4 gap-3">
+          {!hideSearch && (
+            <div className="flex-grow-1">
+              <SearchBox onChange={table.setGlobalFilter} />
+            </div>
+          )}
+
+          {showColumnVisibilityDropdown && (
+            <ColumnVisibilityDropdown columns={leafColumns} />
+          )}
         </div>
       )}
 

@@ -74,6 +74,7 @@ import {
   Network,
   Package,
   HardDriveDownload,
+  Grid2x2Check,
   type LucideProps,
 } from "lucide-react";
 
@@ -133,6 +134,7 @@ const icons = {
   networks: Network,
   containers: Container,
   deployments: HardDriveDownload,
+  columnVisibility: Grid2x2Check,
 } as const;
 
 export type IconName = keyof typeof icons;

@@ -64,6 +64,9 @@ const columns = [
         defaultMessage="Hardware Type Name"
       />
     ),
+    meta: {
+      label: "Hardware Type Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.hardwareTypesEdit}
@@ -80,6 +83,9 @@ const columns = [
         defaultMessage="Handle"
       />
     ),
+    meta: {
+      label: "Handle",
+    },
     cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
   }),
   columnHelper.accessor("partNumbers", {
@@ -90,6 +96,9 @@ const columns = [
         defaultMessage="Part Numbers"
       />
     ),
+    meta: {
+      label: "Part Numbers",
+    },
     cell: ({ getValue }) =>
       getValue().edges?.map(({ node: { partNumber } }, index) => (
         <React.Fragment key={partNumber}>
@@ -105,6 +114,8 @@ type Props = {
   hardwareTypesRef: HardwareTypesTable_HardwareTypeEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const HardwareTypesTable = ({
@@ -112,6 +123,8 @@ const HardwareTypesTable = ({
   hardwareTypesRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const hardwareTypesFragment = useFragment(
     HARDWARE_TYPES_TABLE_FRAGMENT,
@@ -129,6 +142,9 @@ const HardwareTypesTable = ({
       data={hardwareTypes}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="hardwareTypes-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

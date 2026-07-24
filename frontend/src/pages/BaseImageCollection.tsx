@@ -48,7 +48,6 @@ import Center from "@/components/Center";
 import DeleteModal from "@/components/DeleteModal";
 import Page from "@/components/Page";
 import Result from "@/components/Result";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { BaseImageCollectionChanges } from "@/forms/UpdateBaseImageCollection";
@@ -129,10 +128,12 @@ const DELETE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
 interface BaseImagesLayoutContainerProps {
   baseImageCollectionRef: BaseImageCollection_BaseImagesFragment$key;
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const BaseImagesLayoutContainer = ({
   baseImageCollectionRef,
   searchText,
+  onSearchChange,
 }: BaseImagesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -177,6 +178,8 @@ const BaseImagesLayoutContainer = ({
       baseImageCollectionId={data?.id}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -330,14 +333,10 @@ const BaseImageCollectionContent = ({
               />
             </Button>
           </div>
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <BaseImagesLayoutContainer
             baseImageCollectionRef={baseImageCollection}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
         {showDeleteModal && (

@@ -38,7 +38,6 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import DeviceGroupsTable from "@/components/DeviceGroupsTable";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -107,10 +106,12 @@ const DEVICE_GROUP_DESTROYED_SUBSCRIPTION = graphql`
 interface DeviceGroupsLayoutContainerProps {
   deviceGroupsData: DeviceGroups_getDeviceGroups_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const DeviceGroupsLayoutContainer = ({
   deviceGroupsData,
   searchText,
+  onSearchChange,
 }: DeviceGroupsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -252,6 +253,8 @@ const DeviceGroupsLayoutContainer = ({
       deviceGroupsRef={deviceGroupsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -290,14 +293,10 @@ const DeviceGroupsContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <DeviceGroupsLayoutContainer
             deviceGroupsData={deviceGroupsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

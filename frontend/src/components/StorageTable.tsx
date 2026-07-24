@@ -133,6 +133,7 @@ const StorageTable = ({ className, deviceRef }: Props) => {
       columns={columns}
       data={storageUsage}
       hideSearch
+      columnVisibilityKey="storage-table"
     />
   );
 };

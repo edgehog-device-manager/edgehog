@@ -59,6 +59,9 @@ const columns = [
         defaultMessage="Label"
       />
     ),
+    meta: {
+      label: "Label",
+    },
     cell: ({
       row: {
         original: { id: imageCredentialId },
@@ -77,6 +80,9 @@ const columns = [
         defaultMessage="Username"
       />
     ),
+    meta: {
+      label: "Username",
+    },
     cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
   }),
 ];
@@ -86,6 +92,8 @@ type ImageCredentialsTableProps = {
   imageCredentialsRef: ImageCredentialsTable_ImageCredentialEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const ImageCredentialsTable = ({
@@ -93,6 +101,8 @@ const ImageCredentialsTable = ({
   imageCredentialsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: ImageCredentialsTableProps) => {
   const imageCredentialsFragment = useFragment(
     IMAGE_CREDENTIALS_TABLE_FRAGMENT,
@@ -109,6 +119,9 @@ const ImageCredentialsTable = ({
       data={imageCredentials}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="imageCredentials-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

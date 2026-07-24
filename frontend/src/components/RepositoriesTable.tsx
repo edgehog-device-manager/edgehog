@@ -58,6 +58,9 @@ const columns = [
         description="Title for the Name column of the repositories table"
       />
     ),
+    meta: {
+      label: "Repository Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.repositoryEdit}
@@ -75,6 +78,9 @@ const columns = [
         description="Title for the Handle column of the repositories table"
       />
     ),
+    meta: {
+      label: "Handle",
+    },
   }),
 ];
 
@@ -83,6 +89,8 @@ type Props = {
   repositoriesRef: RepositoriesTable_RepositoryEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const RepositoriesTable = ({
@@ -90,6 +98,8 @@ const RepositoriesTable = ({
   repositoriesRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const repositoriesFragment = useFragment(
     REPOSITORIES_FRAGMENT,
@@ -107,6 +117,9 @@ const RepositoriesTable = ({
       data={repositories}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="repositories-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

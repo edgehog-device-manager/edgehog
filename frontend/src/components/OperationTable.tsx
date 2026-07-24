@@ -71,6 +71,7 @@ const columns = [
         defaultMessage="Status"
       />
     ),
+    meta: { label: "Status" },
     cell: ({ getValue }) => {
       const status = getValue();
       return status && <OperationStatus status={status} />;
@@ -83,6 +84,7 @@ const columns = [
         defaultMessage="Operation progress"
       />
     ),
+    meta: { label: "Operation Progress" },
     cell: ({ getValue, row }) => {
       const status = row.original.status;
       if (status == "FAILURE") return null;
@@ -98,6 +100,7 @@ const columns = [
         defaultMessage="Failure Reason"
       />
     ),
+    meta: { label: "Failure Reason" },
     cell: ({ getValue }) => {
       const statusCode = getValue();
       return (
@@ -114,6 +117,7 @@ const columns = [
         defaultMessage="Update Campaign"
       />
     ),
+    meta: { label: "Update Campaign" },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.updateCampaignsEdit}
@@ -132,6 +136,7 @@ const columns = [
         defaultMessage="Base Image"
       />
     ),
+    meta: { label: "Base Image" },
     cell: ({ getValue }) => (
       <span className="text-nowrap">{getValue().split("/").pop()}</span>
     ),
@@ -143,6 +148,7 @@ const columns = [
         defaultMessage="Started At"
       />
     ),
+    meta: { label: "Started At" },
     cell: ({ getValue }) => (
       <FormattedDate
         value={getValue()}
@@ -161,6 +167,7 @@ const columns = [
         defaultMessage="Updated At"
       />
     ),
+    meta: { label: "Updated At" },
     cell: ({ getValue }) => (
       <FormattedDate
         value={getValue()}
@@ -211,6 +218,7 @@ const OperationTable = ({
       columns={columns}
       data={otaOperations}
       sortBy={initialSortedColumns}
+      columnVisibilityKey="operation-table"
     />
   );
 };

@@ -58,6 +58,8 @@ type ApplicationsTableProps = {
   loading?: boolean;
   onLoadMore?: () => void;
   onDelete: (application: TableRecord) => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const ApplicationsTable = ({
@@ -66,6 +68,8 @@ const ApplicationsTable = ({
   loading = false,
   onLoadMore,
   onDelete,
+  onSearchChange,
+  searchText,
 }: ApplicationsTableProps) => {
   const applicationsFragment = useFragment(
     APPLICATIONS_TABLE_FRAGMENT,
@@ -86,6 +90,9 @@ const ApplicationsTable = ({
           description="Title for the Name column of the applications table"
         />
       ),
+      meta: {
+        label: "Application Name",
+      },
       cell: ({ row, getValue }) => (
         <Link
           route={Route.application}
@@ -103,6 +110,9 @@ const ApplicationsTable = ({
           defaultMessage="Action"
         />
       ),
+      meta: {
+        label: "Action",
+      },
       cell: ({ getValue }) => (
         <Button
           className="btn p-0 border-0 bg-transparent ms-4"
@@ -123,6 +133,9 @@ const ApplicationsTable = ({
       data={applications}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="applications-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

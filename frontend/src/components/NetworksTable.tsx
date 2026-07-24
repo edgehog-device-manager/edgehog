@@ -61,6 +61,9 @@ const columns = [
         description="Title for the Label column of the networks table"
       />
     ),
+    meta: {
+      label: "Label",
+    },
     cell: ({ row, getValue }) => (
       <Link route={Route.networksEdit} params={{ networkId: row.original.id }}>
         {getValue()}
@@ -75,6 +78,9 @@ const columns = [
         description="Title for the Driver column of the networks table"
       />
     ),
+    meta: {
+      label: "Driver",
+    },
   }),
   columnHelper.accessor("internal", {
     header: () => (
@@ -84,6 +90,9 @@ const columns = [
         description="Title for the Internal column of the networks table"
       />
     ),
+    meta: {
+      label: "Internal",
+    },
   }),
   columnHelper.accessor("enableIpv6", {
     header: () => (
@@ -93,6 +102,9 @@ const columns = [
         description="Title for the Enable IPv6 column of the networks table"
       />
     ),
+    meta: {
+      label: "Enable IPv6",
+    },
   }),
 ];
 
@@ -101,6 +113,8 @@ type NetworksTableProps = {
   networksRef: NetworksTable_NetworkEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const NetworksTable = ({
@@ -108,6 +122,8 @@ const NetworksTable = ({
   networksRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: NetworksTableProps) => {
   const networksFragment = useFragment(
     NETWORKS_TABLE_FRAGMENT,
@@ -125,6 +141,9 @@ const NetworksTable = ({
       data={networks}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="networks-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

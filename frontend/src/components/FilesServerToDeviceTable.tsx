@@ -216,7 +216,14 @@ const FilesServerToDeviceTable = ({
     );
   }
 
-  return <Table columns={columns} data={requests} hideSearch />;
+  return (
+    <Table
+      columns={columns}
+      data={requests}
+      hideSearch
+      columnVisibilityKey="fileServerToDevice-table"
+    />
+  );
 };
 
 export default FilesServerToDeviceTable;

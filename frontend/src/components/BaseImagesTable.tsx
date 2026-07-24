@@ -62,6 +62,9 @@ const getColumnsDefinition = (baseImageCollectionId: string) => [
         description="Title for the Version column of the base images table"
       />
     ),
+    meta: {
+      label: "Base Image Version",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.baseImagesEdit}
@@ -79,6 +82,9 @@ const getColumnsDefinition = (baseImageCollectionId: string) => [
         description="Title for the Release Name column of the base images table"
       />
     ),
+    meta: {
+      label: "Release Name",
+    },
     cell: ({ getValue }) => {
       // TODO: for now, only one translation can be present so we take it directly.
       const localizedReleaseDisplayNames = getValue();
@@ -98,6 +104,9 @@ const getColumnsDefinition = (baseImageCollectionId: string) => [
         description="Title for the Supported Starting Versions column of the base images table"
       />
     ),
+    meta: {
+      label: "Supported Starting Versions",
+    },
   }),
 ];
 
@@ -107,6 +116,8 @@ type Props = {
   baseImageCollectionId: string;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const BaseImagesTable = ({
@@ -115,6 +126,8 @@ const BaseImagesTable = ({
   baseImageCollectionId,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const baseImagesFragment = useFragment(
     BASE_IMAGES_TABLE_FRAGMENT,
@@ -136,6 +149,9 @@ const BaseImagesTable = ({
       data={baseImages}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="baseImages-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

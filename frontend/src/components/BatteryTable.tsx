@@ -173,6 +173,7 @@ const BatteryTable = ({ className, deviceRef }: Props) => {
       columns={columns}
       data={batteryStatus}
       hideSearch
+      columnVisibilityKey="batteryStatus-table"
     />
   );
 };

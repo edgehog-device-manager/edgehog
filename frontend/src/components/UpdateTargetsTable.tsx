@@ -190,6 +190,9 @@ const columns = [
         description="Title for the Device column of the Update Targets table"
       />
     ),
+    meta: {
+      label: "Device",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.devicesEdit}
@@ -213,6 +216,9 @@ const columns = [
           description="Title for the Operation Status column of the Update Targets table"
         />
       ),
+      meta: {
+        label: "Operation",
+      },
       cell: ({ getValue }) => {
         const status = getValue();
         return status && <OperationStatus status={status} />;
@@ -230,6 +236,9 @@ const columns = [
           description="Title for the Operation Status Progress column of the Update Targets table"
         />
       ),
+      meta: {
+        label: "Operation progress",
+      },
       cell: ({ getValue }) => {
         const progress = getValue();
         return typeof progress === "number" ? `${progress}%` : "";
@@ -247,6 +256,9 @@ const columns = [
           description="Title for the Operation Status Code column of the Update Targets table"
         />
       ),
+      meta: {
+        label: "Failure Reason",
+      },
       cell: ({ getValue }) => {
         const statusCode = getValue();
         return (
@@ -265,6 +277,9 @@ const columns = [
         description="Title for the Retry Count column of the Update Targets table"
       />
     ),
+    meta: {
+      label: "Retry Count",
+    },
     cell: ({ getValue }) => {
       const retryCount = getValue();
       return retryCount ? retryCount : "";
@@ -278,6 +293,9 @@ const columns = [
         description="Title for the Latest attempt at column of the Update Targets table"
       />
     ),
+    meta: {
+      label: "Latest attempt at",
+    },
     cell: ({ getValue }) => {
       const latestAttempt = getValue();
       return (
@@ -302,6 +320,9 @@ const columns = [
         description="Title for the Completed at column of the Update Targets table"
       />
     ),
+    meta: {
+      label: "Completed at",
+    },
     cell: ({ getValue }) => {
       const latestAttempt = getValue();
       return (
@@ -352,6 +373,7 @@ const UpdateTargetsTable = ({
       loading={loading}
       onLoadMore={onLoadMore}
       hiddenColumns={hiddenColumns}
+      hideColumnVisibility
     />
   );
 };

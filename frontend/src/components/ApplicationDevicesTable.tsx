@@ -107,6 +107,9 @@ const ApplicationDevicesTable = ({
           description="Title for the Status column of the devices table"
         />
       ),
+      meta: {
+        label: "Status",
+      },
       cell: ({ getValue }) => <ConnectionStatus connected={getValue()} />,
     }),
     columnHelper.accessor("device.name", {
@@ -117,6 +120,9 @@ const ApplicationDevicesTable = ({
           description="Title for the Name column of the application devices table"
         />
       ),
+      meta: {
+        label: "Device Name",
+      },
       cell: ({ row, getValue }) => (
         <Link
           route={Route.devicesEdit}
@@ -137,6 +143,9 @@ const ApplicationDevicesTable = ({
           description="Title for the Release Version column of the application devices table"
         />
       ),
+      meta: {
+        label: "Release Version",
+      },
       cell: ({ row }) => row.original.release?.version,
     }),
     columnHelper.accessor("state", {
@@ -147,6 +156,9 @@ const ApplicationDevicesTable = ({
           description="Title for the Application State column of the application devices table"
         />
       ),
+      meta: {
+        label: "Application State",
+      },
       cell: ({ row }) => (
         <DeploymentStateComponent
           state={row.original.state as DeploymentState}
@@ -164,6 +176,7 @@ const ApplicationDevicesTable = ({
         data={tableData}
         loading={loading}
         onLoadMore={onLoadMore}
+        columnVisibilityKey="applicationDevices-table"
       />
     </div>
   );

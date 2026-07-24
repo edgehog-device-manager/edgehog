@@ -78,6 +78,9 @@ const columns = [
         description="Title for the Name column of the Update Campaigns table"
       />
     ),
+    meta: {
+      label: "Update Campaign Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.updateCampaignsEdit}
@@ -94,6 +97,9 @@ const columns = [
         defaultMessage="Status"
       />
     ),
+    meta: {
+      label: "Status",
+    },
     cell: ({ row }) => <CampaignStatus campaignRef={row.original} />,
   }),
   columnHelper.accessor("outcome", {
@@ -103,6 +109,9 @@ const columns = [
         defaultMessage="Outcome"
       />
     ),
+    meta: {
+      label: "Outcome",
+    },
     cell: ({ row }) => <CampaignOutcome campaignRef={row.original} />,
   }),
   columnHelper.accessor("channel.name", {
@@ -113,6 +122,9 @@ const columns = [
         description="Title for the Channel column of the Update Campaigns table"
       />
     ),
+    meta: {
+      label: "Channel",
+    },
   }),
   columnHelper.accessor(
     "campaignMechanism.baseImage.baseImageCollection.name",
@@ -124,6 +136,9 @@ const columns = [
           description="Title for the Base Image Collection column of the Update Campaigns table"
         />
       ),
+      meta: {
+        label: "Base Image Collection",
+      },
     },
   ),
   columnHelper.accessor("campaignMechanism.baseImage.name", {
@@ -134,6 +149,9 @@ const columns = [
         description="Title for the Base Image column of the Update Campaigns table"
       />
     ),
+    meta: {
+      label: "Base Image",
+    },
   }),
 ];
 
@@ -142,6 +160,8 @@ type UpdateCampaignsTableProps = {
   updateCampaignsRef: UpdateCampaignsTable_CampaignEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const UpdateCampaignsTable = ({
@@ -149,6 +169,8 @@ const UpdateCampaignsTable = ({
   updateCampaignsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: UpdateCampaignsTableProps) => {
   const updateCampaignsFragment = useFragment(
     CAMPAIGNS_TABLE_FRAGMENT,
@@ -166,6 +188,9 @@ const UpdateCampaignsTable = ({
       data={updateCampaigns}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="updateCampaigns-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

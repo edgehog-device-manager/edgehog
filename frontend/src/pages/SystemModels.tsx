@@ -35,7 +35,6 @@ import { SystemModels_SystemModelsFragment$key } from "@/api/__generated__/Syste
 import Button from "@/components/Button";
 import Center from "@/components/Center";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import SystemModelsTable from "@/components/SystemModelsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
@@ -74,10 +73,12 @@ const SYSTEM_MODELS_FRAGMENT = graphql`
 interface SystemModelsLayoutContainerProps {
   systemModelsData: SystemModels_getSystemModels_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const SystemModelsLayoutContainer = ({
   systemModelsData,
   searchText,
+  onSearchChange,
 }: SystemModelsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -130,6 +131,8 @@ const SystemModelsLayoutContainer = ({
       systemModelsRef={systemModelsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -168,14 +171,10 @@ const SystemModelsContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <SystemModelsLayoutContainer
             systemModelsData={systemModelsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

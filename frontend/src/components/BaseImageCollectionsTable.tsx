@@ -61,6 +61,9 @@ const columns = [
         description="Title for the Name column of the base image collections table"
       />
     ),
+    meta: {
+      label: "Base Image Collection Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.baseImageCollectionsEdit}
@@ -97,6 +100,8 @@ type Props = {
   baseImageCollectionsRef: BaseImageCollectionsTable_BaseImageCollectionEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const BaseImageCollectionsTable = ({
@@ -104,6 +109,8 @@ const BaseImageCollectionsTable = ({
   baseImageCollectionsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const baseImageCollectionsFragment = useFragment(
     BASE_IMAGE_COLLECTIONS_TABLE_FRAGMENT,
@@ -123,6 +130,9 @@ const BaseImageCollectionsTable = ({
       data={baseImageCollections}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="BaseImageCollections-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

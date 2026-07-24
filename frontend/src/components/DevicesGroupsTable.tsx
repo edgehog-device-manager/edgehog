@@ -183,6 +183,7 @@ const DevicesGroupsTable = ({
       columns={columns}
       data={devices}
       hideSearch={hideSearch}
+      columnVisibilityKey="devicesGroup-table"
     />
   );
 };

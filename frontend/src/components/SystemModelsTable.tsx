@@ -67,6 +67,9 @@ const columns = [
         defaultMessage="System Model Name"
       />
     ),
+    meta: {
+      label: "System Model Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.systemModelsEdit}
@@ -83,6 +86,9 @@ const columns = [
         defaultMessage="Handle"
       />
     ),
+    meta: {
+      label: "Handle",
+    },
     cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
   }),
   columnHelper.accessor((row) => row.hardwareType?.name, {
@@ -93,6 +99,9 @@ const columns = [
         defaultMessage="Hardware Type"
       />
     ),
+    meta: {
+      label: "Hardware Type",
+    },
     cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
   }),
   columnHelper.accessor("partNumbers", {
@@ -102,6 +111,9 @@ const columns = [
         defaultMessage="Part Numbers"
       />
     ),
+    meta: {
+      label: "Part Numbers",
+    },
     cell: ({ getValue }) =>
       getValue().edges?.map(({ node: { partNumber } }, index) => (
         <React.Fragment key={partNumber}>
@@ -118,6 +130,8 @@ type Props = {
   systemModelsRef: SystemModelsTable_SystemModelEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const SystemModelsTable = ({
@@ -125,6 +139,8 @@ const SystemModelsTable = ({
   systemModelsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const systemModelsFragment = useFragment(
     SYSTEM_MODELS_TABLE_FRAGMENT,
@@ -142,6 +158,9 @@ const SystemModelsTable = ({
       data={systemModels}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="systemModels-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

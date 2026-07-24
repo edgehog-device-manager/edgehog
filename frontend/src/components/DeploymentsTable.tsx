@@ -74,6 +74,9 @@ const columns = [
         description="Title for the Deployment on Device column of the deployments table"
       />
     ),
+    meta: {
+      label: "Deployment on Device",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.deploymentEdit}
@@ -94,6 +97,9 @@ const columns = [
         description="Title for the Application Name column of the deployments table"
       />
     ),
+    meta: {
+      label: "Application Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.application}
@@ -111,6 +117,9 @@ const columns = [
         description="Title for the Release Version column of the deployments table"
       />
     ),
+    meta: {
+      label: "Release Version",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.release}
@@ -131,6 +140,9 @@ const columns = [
         description="Title for the Application State column of the deployments table"
       />
     ),
+    meta: {
+      label: "Application State",
+    },
     cell: ({ row }) => (
       <DeploymentStateComponent
         state={row.original.state as DeploymentState}
@@ -145,6 +157,8 @@ type DeploymentsTableProps = {
   deploymentsRef: DeploymentsTable_DeploymentEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const DeploymentsTable = ({
@@ -152,6 +166,8 @@ const DeploymentsTable = ({
   deploymentsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: DeploymentsTableProps) => {
   const deploymentsFragment = useFragment(
     DEPLOYMENTS_TABLE_FRAGMENT,
@@ -163,15 +179,16 @@ const DeploymentsTable = ({
   }, [deploymentsFragment]);
 
   return (
-    <div>
-      <InfiniteTable
-        className={className}
-        columns={columns}
-        data={deploymentCampaigns}
-        loading={loading}
-        onLoadMore={onLoadMore}
-      />
-    </div>
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={deploymentCampaigns}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      columnVisibilityKey="deployments-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
+    />
   );
 };
 

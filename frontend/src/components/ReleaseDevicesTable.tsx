@@ -88,6 +88,9 @@ const ReleaseDevicesTable = ({
           description="Title for the Status column of the devices table"
         />
       ),
+      meta: {
+        label: "Status",
+      },
       cell: ({ getValue }) => <ConnectionStatus connected={getValue()} />,
     }),
     columnHelper.accessor("device.name", {
@@ -98,6 +101,9 @@ const ReleaseDevicesTable = ({
           description="Title for the Device Name column of the release devices table"
         />
       ),
+      meta: {
+        label: "Device Name",
+      },
       cell: ({ row, getValue }) => (
         <Link
           route={Route.devicesEdit}
@@ -118,6 +124,9 @@ const ReleaseDevicesTable = ({
           description="Title for the Application State column of the release devices table"
         />
       ),
+      meta: {
+        label: "Application State",
+      },
       cell: ({ row }) => (
         <DeploymentStateComponent
           state={row.original.state as DeploymentState}
@@ -136,6 +145,7 @@ const ReleaseDevicesTable = ({
           data={deployments}
           loading={loading}
           onLoadMore={onLoadMore}
+          columnVisibilityKey="releaseDevices-table"
         />
       ) : (
         <p>

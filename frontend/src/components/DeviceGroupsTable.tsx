@@ -59,6 +59,9 @@ const columns = [
         description="Title for the Name column of the device groups table"
       />
     ),
+    meta: {
+      label: "Group Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.deviceGroupsEdit}
@@ -76,6 +79,9 @@ const columns = [
         description="Title for the Handle column of the device groups table"
       />
     ),
+    meta: {
+      label: "Handle",
+    },
   }),
   columnHelper.accessor("selector", {
     header: () => (
@@ -85,6 +91,9 @@ const columns = [
         description="Title for the Selector column of the device groups table"
       />
     ),
+    meta: {
+      label: "Selector",
+    },
   }),
 ];
 
@@ -93,6 +102,8 @@ type Props = {
   deviceGroupsRef: DeviceGroupsTable_DeviceGroupEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const DeviceGroupsTable = ({
@@ -100,6 +111,8 @@ const DeviceGroupsTable = ({
   deviceGroupsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const deviceGroupsFragment = useFragment(
     DEVICE_GROUPS_TABLE_FRAGMENT,
@@ -117,6 +130,9 @@ const DeviceGroupsTable = ({
       data={deviceGroups}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="deviceGroups-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

@@ -36,7 +36,6 @@ import BaseImageCollectionsTable from "@/components/BaseImageCollectionsTable";
 import Button from "@/components/Button";
 import Center from "@/components/Center";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -71,10 +70,12 @@ const BASE_IMAGE_COLLECTIONS_FRAGMENT = graphql`
 interface BaseImageCollectionsLayoutContainerProps {
   baseImageCollectionsData: BaseImageCollections_getBaseImageCollections_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const BaseImageCollectionsLayoutContainer = ({
   baseImageCollectionsData,
   searchText,
+  onSearchChange,
 }: BaseImageCollectionsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -120,6 +121,8 @@ const BaseImageCollectionsLayoutContainer = ({
       baseImageCollectionsRef={BaseImageCollectionsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -158,14 +161,10 @@ const BaseImageCollectionsContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <BaseImageCollectionsLayoutContainer
             baseImageCollectionsData={baseImageCollectionsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

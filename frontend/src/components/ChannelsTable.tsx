@@ -66,6 +66,9 @@ const columns = [
         description="Title for the Name column of the channels table"
       />
     ),
+    meta: {
+      label: "Channel Name",
+    },
     cell: ({ row, getValue }) => (
       <Link route={Route.channelsEdit} params={{ channelId: row.original.id }}>
         {getValue()}
@@ -107,6 +110,8 @@ type Props = {
   channelsRef: ChannelsTable_ChannelEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const ChannelsTable = ({
@@ -114,6 +119,8 @@ const ChannelsTable = ({
   channelsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: Props) => {
   const channelsFragment = useFragment(
     CHANNELS_TABLE_FRAGMENT,
@@ -129,7 +136,10 @@ const ChannelsTable = ({
       columns={columns}
       data={channels}
       loading={loading}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="channels-table"
     />
   );
 };

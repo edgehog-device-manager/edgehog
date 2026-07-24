@@ -36,7 +36,6 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import NetworksTable from "@/components/NetworksTable";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -71,10 +70,12 @@ const NETWORKS_FRAGMENT = graphql`
 interface NetworksLayoutContainerProps {
   networksData: Networks_getNetworks_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const NetworksLayoutContainer = ({
   networksData,
   searchText,
+  onSearchChange,
 }: NetworksLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -113,6 +114,8 @@ const NetworksLayoutContainer = ({
       networksRef={networksRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -148,14 +151,10 @@ const NetworksContent = ({ getNetworksQuery }: NetworksContentProps) => {
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <NetworksLayoutContainer
             networksData={networksData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

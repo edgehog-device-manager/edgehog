@@ -161,6 +161,7 @@ const WiFiScanResultsTable = ({ className, deviceRef }: Props) => {
       columns={columns}
       data={wifiScanResults}
       getRowProps={getRowProps}
+      columnVisibilityKey="wifiScanResults-table"
     />
   );
 };

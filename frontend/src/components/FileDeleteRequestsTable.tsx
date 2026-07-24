@@ -143,7 +143,14 @@ const FileDeleteRequestsTable = ({
     );
   }
 
-  return <Table columns={columns} data={requests} hideSearch />;
+  return (
+    <Table
+      columns={columns}
+      data={requests}
+      hideSearch
+      columnVisibilityKey="fileDeleteRequests-table"
+    />
+  );
 };
 
 export default FileDeleteRequestsTable;

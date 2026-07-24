@@ -129,7 +129,12 @@ const NetworkInterfacesTable = ({ className, deviceRef }: Props) => {
   }
 
   return (
-    <Table className={className} columns={columns} data={networkInterfaces} />
+    <Table
+      className={className}
+      columns={columns}
+      data={networkInterfaces}
+      columnVisibilityKey="networkInterfaces-table"
+    />
   );
 };
 

@@ -72,6 +72,9 @@ const ReleaseSystemModelsTable = ({
           defaultMessage="System Model Name"
         />
       ),
+      meta: {
+        label: "System Model Name",
+      },
       cell: ({ row, getValue }) => (
         <Link
           route={Route.systemModelsEdit}
@@ -90,6 +93,7 @@ const ReleaseSystemModelsTable = ({
           className={className}
           columns={columns}
           data={systemModels}
+          columnVisibilityKey="releaseSystemModels-table"
         />
       ) : (
         <p>

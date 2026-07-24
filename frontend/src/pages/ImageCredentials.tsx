@@ -38,7 +38,6 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import ImageCredentialsTable from "@/components/ImageCredentialsTable";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -73,10 +72,12 @@ const IMAGE_CREDENTIALS_FRAGMENT = graphql`
 interface ImageCredentialsLayoutContainerProps {
   imageCredentialsData: ImageCredentials_getImageCredentials_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const ImageCredentialsLayoutContainer = ({
   imageCredentialsData,
   searchText,
+  onSearchChange,
 }: ImageCredentialsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -115,6 +116,8 @@ const ImageCredentialsLayoutContainer = ({
       imageCredentialsRef={imageCredentialsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -152,14 +155,10 @@ const ImageCredentialsContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
-          <SearchBox
-            className=" pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <ImageCredentialsLayoutContainer
             imageCredentialsData={imageCredentialsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

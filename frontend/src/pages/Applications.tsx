@@ -43,7 +43,6 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import DeleteApplicationModal from "@/components/DeleteApplicationModal";
 import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
 import Spinner from "@/components/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
@@ -98,11 +97,13 @@ type SelectedApplication = TableRecord;
 interface ApplicationsLayoutContainerProps {
   applicationsData: Applications_getApplications_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
   onDelete: (application: SelectedApplication) => void;
 }
 const ApplicationsLayoutContainer = ({
   applicationsData,
   searchText,
+  onSearchChange,
   onDelete,
 }: ApplicationsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -222,6 +223,8 @@ const ApplicationsLayoutContainer = ({
       applicationsRef={applicationsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -270,14 +273,10 @@ const ApplicationsContent = ({
           {errorFeedback}
         </Alert>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <ApplicationsLayoutContainer
             applicationsData={applicationsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
             onDelete={setApplicationToDelete}
           />
         </Card>

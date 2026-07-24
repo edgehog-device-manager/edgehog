@@ -58,6 +58,9 @@ const columns = [
         description="Title for the Label column of the volumes table"
       />
     ),
+    meta: {
+      label: "Label",
+    },
     cell: ({ row, getValue }) => (
       <Link route={Route.volumeEdit} params={{ volumeId: row.original.id }}>
         {getValue()}
@@ -72,6 +75,9 @@ const columns = [
         description="Title for the Driver column of the volumes table"
       />
     ),
+    meta: {
+      label: "Driver",
+    },
   }),
 ];
 
@@ -80,6 +86,8 @@ type VolumesTableProps = {
   volumesRef: VolumesTable_VolumeEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const VolumesTable = ({
@@ -87,6 +95,8 @@ const VolumesTable = ({
   volumesRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: VolumesTableProps) => {
   const volumesFragment = useFragment(
     VOLUMES_TABLE_FRAGMENT,
@@ -104,6 +114,9 @@ const VolumesTable = ({
       data={volumes}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="volumes-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

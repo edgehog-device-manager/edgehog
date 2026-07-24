@@ -81,6 +81,9 @@ const columns = [
         defaultMessage="File Download Campaign Name"
       />
     ),
+    meta: {
+      label: "File Download Campaign Name",
+    },
     cell: ({ row, getValue }) => (
       <Link
         route={Route.fileDownloadCampaignsEdit}
@@ -97,6 +100,9 @@ const columns = [
         defaultMessage="Destination Type"
       />
     ),
+    meta: {
+      label: "Destination Type",
+    },
   }),
   columnHelper.accessor("status", {
     header: () => (
@@ -105,6 +111,9 @@ const columns = [
         defaultMessage="Status"
       />
     ),
+    meta: {
+      label: "Status",
+    },
     cell: ({ row }) => <CampaignStatus campaignRef={row.original} />,
   }),
   columnHelper.accessor("outcome", {
@@ -114,6 +123,9 @@ const columns = [
         defaultMessage="Outcome"
       />
     ),
+    meta: {
+      label: "Outcome",
+    },
     cell: ({ row }) => <CampaignOutcome campaignRef={row.original} />,
   }),
   columnHelper.accessor("channel.name", {
@@ -123,6 +135,9 @@ const columns = [
         defaultMessage="Channel"
       />
     ),
+    meta: {
+      label: "Channel",
+    },
   }),
   columnHelper.accessor("campaignMechanism.file.repository.name", {
     header: () => (
@@ -131,6 +146,9 @@ const columns = [
         defaultMessage="Repository"
       />
     ),
+    meta: {
+      label: "Repository",
+    },
   }),
   columnHelper.accessor("campaignMechanism.file.name", {
     header: () => (
@@ -139,6 +157,9 @@ const columns = [
         defaultMessage="File"
       />
     ),
+    meta: {
+      label: "File",
+    },
   }),
 ];
 
@@ -147,6 +168,8 @@ type FileDownloadCampaignsTableProps = {
   fileDownloadCampaignsRef: FileDownloadCampaignsTable_CampaignEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const FileDownloadCampaignsTable = ({
@@ -154,6 +177,8 @@ const FileDownloadCampaignsTable = ({
   fileDownloadCampaignsRef,
   loading = false,
   onLoadMore,
+  onSearchChange,
+  searchText,
 }: FileDownloadCampaignsTableProps) => {
   const campaignsFragment = useFragment(
     CAMPAIGNS_TABLE_FRAGMENT,
@@ -175,6 +200,9 @@ const FileDownloadCampaignsTable = ({
       data={campaigns}
       loading={loading}
       onLoadMore={onLoadMore}
+      columnVisibilityKey="fileDownloadCampaigns-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
     />
   );
 };

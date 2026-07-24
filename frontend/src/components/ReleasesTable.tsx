@@ -60,6 +60,8 @@ type ReleaseTableProps = {
   loading?: boolean;
   onLoadMore?: () => void;
   onDelete: (release: ReleaseTableRecord) => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
 };
 
 const ReleasesTable = ({
@@ -68,6 +70,8 @@ const ReleasesTable = ({
   loading = false,
   onLoadMore,
   onDelete,
+  onSearchChange,
+  searchText,
 }: ReleaseTableProps) => {
   const releasesFragment = useFragment(
     RELEASES_TABLE_FRAGMENT,
@@ -88,6 +92,9 @@ const ReleasesTable = ({
           description="Title for the Release Version column of the releases table"
         />
       ),
+      meta: {
+        label: "Release Version",
+      },
       cell: ({ row, getValue }) => (
         <Link
           route={Route.release}
@@ -122,15 +129,16 @@ const ReleasesTable = ({
   ];
 
   return (
-    <div>
-      <InfiniteTable
-        className={className}
-        columns={columns}
-        data={releases}
-        loading={loading}
-        onLoadMore={onLoadMore}
-      />
-    </div>
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={releases}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      columnVisibilityKey="releases-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
+    />
   );
 };
 
