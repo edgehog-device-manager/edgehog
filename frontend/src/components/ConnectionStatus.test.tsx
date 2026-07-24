@@ -27,15 +27,17 @@ import ConnectionStatus from "./ConnectionStatus";
 it("renders connected status correctly", () => {
   renderWithProviders(<ConnectionStatus connected={true} icon />);
 
-  expect(screen.getByText("Connected")).toBeVisible();
-  expect(screen.getByRole("img", { hidden: true })).toHaveClass("text-success");
+  expect(screen.getByText("Online")).toBeVisible();
+  expect(screen.getByRole("icon", { hidden: true })).toHaveClass(
+    "text-success",
+  );
 });
 
 it("renders disconnected status correctly", () => {
   renderWithProviders(<ConnectionStatus connected={false} icon />);
 
-  expect(screen.getByText("Disconnected")).toBeVisible();
-  expect(screen.getByRole("img", { hidden: true })).toHaveClass(
+  expect(screen.getByText("Offline")).toBeVisible();
+  expect(screen.getByRole("icon", { hidden: true })).toHaveClass(
     "text-secondary",
   );
 });
@@ -43,11 +45,11 @@ it("renders disconnected status correctly", () => {
 it("renders icon if no value is specified", () => {
   renderWithProviders(<ConnectionStatus connected={true} />);
 
-  expect(screen.getByRole("img", { hidden: true })).toBeVisible();
+  expect(screen.getByRole("icon", { hidden: true })).toBeVisible();
 });
 
 it("does not render icon correctly", () => {
   renderWithProviders(<ConnectionStatus connected={true} icon={false} />);
 
-  expect(screen.queryByRole("img", { hidden: true })).not.toBeInTheDocument();
+  expect(screen.queryByRole("icon", { hidden: true })).not.toBeInTheDocument();
 });

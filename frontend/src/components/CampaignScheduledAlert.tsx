@@ -100,7 +100,7 @@ const CampaignScheduledAlert = ({
         <div className="vr d-none d-lg-block mx-4" />
 
         <div className="d-none d-lg-flex align-items-center">
-          <Icon icon="faCircleInfo" className="me-3 fs-3" />
+          <Icon icon="info" className="me-3 fs-3" />
 
           <div>
             <div>

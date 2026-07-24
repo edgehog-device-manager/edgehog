@@ -291,10 +291,10 @@
     "description": "Title for the button to cancel and dismiss a confirmation modal"
   },
   "components.ConnectionStatus.statusConnected": {
-    "defaultMessage": "Connected"
+    "defaultMessage": "Online"
   },
   "components.ConnectionStatus.statusDisconnected": {
-    "defaultMessage": "Disconnected"
+    "defaultMessage": "Offline"
   },
   "components.ContainerDetails.bindsLabel": {
     "defaultMessage": "Binds"

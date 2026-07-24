@@ -93,7 +93,7 @@ const FieldHelp = ({
         style={iconWrapperStyle}
       >
         <Icon
-          icon={"faCircleQuestion"}
+          icon={"question"}
           style={{
             color: "white",
             backgroundColor: "lightgray",

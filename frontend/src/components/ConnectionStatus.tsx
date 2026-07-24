@@ -29,21 +29,24 @@ interface Props {
 
 const ConnectionStatus = ({ connected, icon = true }: Props) => {
   const intl = useIntl();
-  let color = "text-success";
-  let label = intl.formatMessage({
-    id: "components.ConnectionStatus.statusConnected",
-    defaultMessage: "Connected",
-  });
-  if (!connected) {
-    color = "text-secondary";
-    label = intl.formatMessage({
-      id: "components.ConnectionStatus.statusDisconnected",
-      defaultMessage: "Disconnected",
-    });
-  }
+
+  const color = connected ? "text-success" : "text-secondary";
+
+  const label = connected
+    ? intl.formatMessage({
+        id: "components.ConnectionStatus.statusConnected",
+        defaultMessage: "Online",
+      })
+    : intl.formatMessage({
+        id: "components.ConnectionStatus.statusDisconnected",
+        defaultMessage: "Offline",
+      });
+
+  const showIcon = connected ? "deviceOnline" : "deviceOffline";
+
   return (
-    <div className="d-flex align-items-center">
-      {icon && <Icon icon="circle" className={`me-2 ${color}`} />}
+    <div className="d-flex align-items-left">
+      {icon && <Icon icon={showIcon} className={`me-2 ${color}`} />}
       <span>{label}</span>
     </div>
   );

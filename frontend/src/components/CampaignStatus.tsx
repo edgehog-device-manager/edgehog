@@ -81,7 +81,7 @@ const CampaignStatus = ({ campaignRef }: Props) => {
   const isPausing = status === "PAUSING";
 
   const iconName =
-    status === "SCHEDULED" ? "circleEmpty" : isPausing ? "spinner" : "circle";
+    status === "SCHEDULED" ? "empty" : isPausing ? "spinner" : "circle";
 
   const animationClass = isPausing ? "fa-spin" : "";
 

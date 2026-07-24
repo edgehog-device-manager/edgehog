@@ -42,20 +42,12 @@ const ResourceStateIcon = ({ state, isReady }: ResourceStateIconProps) => {
 
   if (normalizedState && AVAILABLE_STATES.has(normalizedState)) {
     return (
-      <Icon
-        icon="circleCheck"
-        className="text-success"
-        aria-label="Available"
-      />
+      <Icon icon="check" className="text-success" aria-label="Available" />
     );
   }
 
   return (
-    <Icon
-      icon="circleEmpty"
-      className="text-secondary"
-      aria-label="Unavailable"
-    />
+    <Icon icon="empty" className="text-secondary" aria-label="Unavailable" />
   );
 };
 
