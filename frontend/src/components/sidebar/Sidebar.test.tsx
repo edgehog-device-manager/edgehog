@@ -23,7 +23,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import assets from "@/assets";
 import { renderWithProviders } from "@/setupTests";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar/Sidebar";
 
 const defaultProps = {
   appName: "Edgehog Device Manager",
@@ -57,7 +57,7 @@ const sidebarLinks = [
   ["Networks", "/networks"],
   ["Containers", "/containers"],
   ["Deployments", "/deployments"],
-  ["Campaigns", "/deployment-campaigns"],
+  ["Application Campaigns", "/deployment-campaigns"],
   ["Logout", "/logout"],
 ];
 
