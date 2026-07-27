@@ -131,7 +131,7 @@ defmodule Edgehog.Config do
     type: :binary
 
   @envdoc """
-  Edgehog tenant reconciliation timeout (seconds).
+  Edgehog tenant reconciliation timeout (milliseconds).
 
   This environment variable sets the default reconciliation timeout for all tenants. Set it to 0 to set manual reconciliation only.
   """
@@ -139,6 +139,39 @@ defmodule Edgehog.Config do
     os_env: "EDGEHOG_TENANT_RECONCILER_TIMEOUT",
     type: :non_neg_integer,
     default: to_timeout(minute: 10)
+
+  @envdoc """
+  Edgehog message min timeout (milliseconds).
+
+  This environment variable sets the standard timeout to handle communication between a device and edgehog.
+  Defaults to 5 minutes.
+  """
+  app_env :message_min_timeout, :edgehog, :message_min_timeout,
+    os_env: "EDGEHOG_MESSAGE_MIN_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(minute: 5)
+
+  @envdoc """
+  Edgehog message max timeout (milliseconds).
+
+  This environment variable sets the standard timeout to handle communication between a device and edgehog.
+  Defaults to 2 days.
+  """
+  app_env :message_max_timeout, :edgehog, :message_max_timeout,
+    os_env: "EDGEHOG_MESSAGE_MAX_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(day: 2)
+
+  @envdoc """
+  Edgehog max retries.
+
+  This environment variable sets the maximum retires provisioners will use as a fallback if no more specific max retires variables are set.
+  Defaults to 100.
+  """
+  app_env :max_retries, :edgehog, :max_retries,
+    os_env: "EDGEHOG_PROVISIONING_MAX_RETRIES",
+    type: :non_neg_integer,
+    default: 100
 
   @doc """
   Returns true if edgehog should use an ssl connection with the database.

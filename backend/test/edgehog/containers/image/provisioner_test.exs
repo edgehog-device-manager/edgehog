@@ -29,7 +29,10 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableImages
+  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
   alias Edgehog.Astarte.Device.CreateImageRequest
+  alias Edgehog.Config
   alias Edgehog.Containers.Image.Deployment.Provisioner
 
   describe "Image deployment provisioner" do
@@ -39,7 +42,9 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
 
       [image_deployment] =
         deployment
-        |> Ash.load!([container_deployments: [image_deployment: :image]], tenant: tenant)
+        |> Ash.load!([container_deployments: [image_deployment: [:image, :device]]],
+          tenant: tenant
+        )
         |> Map.get(:container_deployments, [])
         |> Enum.map(&Map.get(&1, :image_deployment))
 
@@ -58,6 +63,8 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
         end
 
       ref = Process.monitor(provisioner)
+
+      Sandbox.allow(Edgehog.Repo, self(), provisioner)
 
       %{
         tenant: tenant,
@@ -179,8 +186,6 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
         :ok
       end)
 
-      Sandbox.allow(Edgehog.Repo, self(), provisioner)
-
       Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:image_deployments:#{image_deployment.id}")
 
       Provisioner.start(provisioner)
@@ -220,6 +225,52 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
       Provisioner.start(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
+      assert_receive {:ready, new_image_deployment}, 1000
+
+      assert new_image_deployment.id == image_deployment.id
+      assert new_image_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        image_deployment: image_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateImageRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_image_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = image_deployment.device.device_id
+
+      AvailableImages
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        images = [
+          %ImageStatus{id: image_deployment.image.id, pulled: false}
+        ]
+
+        {:ok, images}
+      end)
+
+      ready_topic = "ready:image_deployments:#{image_deployment.id}"
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_image_deployment}, 1000
 
       assert new_image_deployment.id == image_deployment.id

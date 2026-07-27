@@ -26,6 +26,8 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
   returning what the provisioner should answer to external users or itself.
   """
 
+  alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
+  alias Edgehog.Config
   alias Edgehog.Devices
 
   require Logger
@@ -45,5 +47,94 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
 
       :ok
     end
+  end
+
+  @doc """
+  Tries to reconcile the image deployment with the property set by the device.
+
+  The device publishes the available images, this function reads such property
+  and either finds a state, and sets the image deployment to that state or does
+  not find a valid state, therefore the device does not have such image
+  deployed, and the function returns :not_found
+
+  Alternatively, if something went wrong while updating the image, an 
+  `{:error, _}` is returned.
+
+  Example:
+  ```elixir
+  Core.reconcile(image_deployment, tenant: tenant)
+  > {:ok, new_image_deployment}
+
+  Core.reconcile(image_deployment, tenant: tenant)
+  > :not_found
+  ```
+  """
+  def reconcile(image_deployment, opts) do
+    tenant = Keyword.fetch!(opts, :tenant)
+
+    with {:ok, image_deployment} <-
+           Ash.load(image_deployment, [image: [], device: [:available_images]], tenant: tenant),
+         {:ok, image} <- Map.fetch(image_deployment, :image),
+         {:ok, device} <- Map.fetch(image_deployment, :device),
+         {:ok, available_images} <- Map.fetch(device, :available_images) do
+      available_images
+      |> Enum.find(:not_found, &(&1.id == image.id))
+      |> maybe_update(image_deployment, tenant)
+    end
+  end
+
+  defp maybe_update(%ImageStatus{pulled: pulled}, image_deployment, tenant) do
+    action = if pulled, do: :mark_as_pulled, else: :mark_as_unpulled
+
+    # NOTE: this will trigger a publish on the appropriate topic, the
+    # provisioner will react to it.
+    image_deployment
+    |> Ash.Changeset.for_update(action)
+    |> Ash.update(tenant: tenant)
+  end
+
+  defp maybe_update(other, _image_deployment, _tenant), do: other
+
+  @doc """
+  exponential backoff timeout.
+
+  Reads from the state; computing the retry timeout with the following formula
+
+  ```
+  timeout = pan + (2^retries) + rand(0,1000)
+  timeout = min(timeout, max_timeout)
+  ```
+
+  - pan       :: the pan component is there to ensure a minimum timeout is
+                 guaranteed. The pan is only applied when the image deployment
+                 has been sent, and therefore we're waiting for astarte triggers
+  - 2^retries :: this is the exponential component, increases at each retry to
+                 ensure we don't DDoS astarte/the device.
+  - rand      :: a random (between 0 and 1s) ensures no synchronization errors
+                 appear.
+  """
+  def timeout(state) do
+    %{
+      state: d_state,
+      retries: retries
+    } = state
+
+    pan =
+      case d_state do
+        :sent -> Config.message_min_timeout!()
+        :init -> 0
+      end
+
+    exp = :math.pow(2, retries)
+
+    rand = Enum.random(0..1000)
+
+    max_timeout = Config.message_max_timeout!()
+
+    pan
+    |> Kernel.+(exp)
+    |> Kernel.+(rand)
+    |> min(max_timeout)
+    |> round()
   end
 end
