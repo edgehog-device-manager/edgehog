@@ -46,7 +46,7 @@ const sidebarLinks = [
   ["Groups", "/device-groups"],
   ["Channels", "/channels"],
   ["Repositories", "/repositories"],
-  ["File Download Campaigns", "/file-download-campaigns"],
+  ["File Campaigns", "/file-download-campaigns"],
   ["Update Campaigns", "/update-campaigns"],
   ["Base Image Collections", "/base-image-collections"],
   ["System Models", "/system-models"],

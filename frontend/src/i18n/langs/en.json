@@ -1735,7 +1735,7 @@
     "defaultMessage": "Volumes"
   },
   "components.sidebar.groups.FilesSidebarGroup.fileDownloadCampaignsLabel": {
-    "defaultMessage": "File Download Campaigns"
+    "defaultMessage": "File Campaigns"
   },
   "components.sidebar.groups.FilesSidebarGroup.filesManagementGroupLabel": {
     "defaultMessage": "Files Management"

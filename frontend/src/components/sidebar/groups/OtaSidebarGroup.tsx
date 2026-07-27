@@ -49,6 +49,7 @@ const OtaSidebarGroup = ({ collapsed }: OtaSidebarGroupProps) => {
             defaultMessage="Base Image Collections"
           />
         }
+        icon="baseImageCollections"
         route={Route.baseImageCollections}
         activeRoutes={[
           Route.baseImageCollections,
@@ -65,6 +66,7 @@ const OtaSidebarGroup = ({ collapsed }: OtaSidebarGroupProps) => {
             defaultMessage="Update Campaigns"
           />
         }
+        icon="campaign"
         route={Route.updateCampaigns}
         activeRoutes={[Route.updateCampaigns, Route.updateCampaignsEdit]}
       />

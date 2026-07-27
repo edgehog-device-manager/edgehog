@@ -77,7 +77,7 @@ const SidebarGroup = ({
           popperConfig={{ strategy: "fixed" }}
           className="sidebar-dropdown-menu border-0 ms-2 px-2 py-3 shadow-lg"
         >
-          <div className="dropdown-header px-3 pt-1 fw-bold text-uppercase">
+          <div className="dropdown-header px-3 pt-1 fw-bold text-uppercase font-black">
             {label}
           </div>
           <div className="d-flex flex-column">
@@ -102,8 +102,7 @@ const SidebarGroup = ({
     <Accordion defaultActiveKey={eventKey} alwaysOpen className="w-100">
       <Accordion.Item eventKey={eventKey} className="border-0">
         <Accordion.Header className="m-2">
-          <div className="d-flex align-items-center w-100 py-2 rounded text-dark fw-medium">
-            <Icon icon={icon} className="sidebar-icon ms-3" />
+          <div className="d-flex align-items-center w-100 py-2 rounded text-dark fw-bold">
             <span className="sidebar-text text-truncate ms-3">{label}</span>
             <Icon icon="caretDown" className="sidebar-caret me-1 ms-auto" />
           </div>

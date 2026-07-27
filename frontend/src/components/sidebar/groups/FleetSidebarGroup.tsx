@@ -50,6 +50,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
           />
         }
         route={Route.hardwareTypes}
+        icon="hardwareTypes"
         activeRoutes={[
           Route.hardwareTypes,
           Route.hardwareTypesNew,
@@ -64,6 +65,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
           />
         }
         route={Route.systemModels}
+        icon="systemModels"
         activeRoutes={[
           Route.systemModels,
           Route.systemModelsNew,
@@ -78,6 +80,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
           />
         }
         route={Route.deviceGroups}
+        icon="deviceGroups"
         activeRoutes={[
           Route.deviceGroups,
           Route.deviceGroupsEdit,
@@ -91,6 +94,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
             defaultMessage="Channels"
           />
         }
+        icon="channels"
         route={Route.channels}
         activeRoutes={[Route.channels, Route.channelsEdit, Route.channelsNew]}
       />

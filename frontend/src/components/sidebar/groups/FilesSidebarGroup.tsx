@@ -49,6 +49,7 @@ const FilesSidebarGroup = ({ collapsed }: FilesSidebarGroupProps) => {
             defaultMessage="Repositories"
           />
         }
+        icon="repositories"
         route={Route.repositories}
         activeRoutes={[
           Route.repositories,
@@ -62,9 +63,10 @@ const FilesSidebarGroup = ({ collapsed }: FilesSidebarGroupProps) => {
         label={
           <FormattedMessage
             id="components.sidebar.groups.FilesSidebarGroup.fileDownloadCampaignsLabel"
-            defaultMessage="File Download Campaigns"
+            defaultMessage="File Campaigns"
           />
         }
+        icon="campaign"
         route={Route.fileDownloadCampaigns}
         activeRoutes={[
           Route.fileDownloadCampaigns,

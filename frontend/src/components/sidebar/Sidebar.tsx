@@ -54,7 +54,7 @@ const Sidebar = ({
 
   return (
     <aside
-      className={`custom-sidebar d-flex flex-column h-100 position-relative shadow${collapsed}${mobile}`}
+      className={`custom-sidebar d-flex flex-column h-100 position-relative${collapsed}${mobile}`}
     >
       <SidebarHeader
         isDesktopCollapsed={isDesktopCollapsed}

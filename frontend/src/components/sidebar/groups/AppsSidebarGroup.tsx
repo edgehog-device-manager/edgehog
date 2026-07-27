@@ -49,6 +49,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Image Credentials"
           />
         }
+        icon="imageCredentials"
         route={Route.imageCredentials}
         activeRoutes={[
           Route.imageCredentials,
@@ -64,6 +65,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Volumes"
           />
         }
+        icon="volumes"
         route={Route.volumes}
         activeRoutes={[Route.volumes, Route.volumeEdit, Route.volumesNew]}
       />
@@ -75,6 +77,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Networks"
           />
         }
+        icon="networks"
         route={Route.networks}
         activeRoutes={[Route.networks, Route.networksEdit, Route.networksNew]}
       />
@@ -86,6 +89,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Containers"
           />
         }
+        icon="containers"
         route={Route.containers}
         activeRoutes={[
           Route.containers,
@@ -101,6 +105,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Applications"
           />
         }
+        icon="applications"
         route={Route.applications}
         activeRoutes={[
           Route.applications,
@@ -118,6 +123,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Deployments"
           />
         }
+        icon="deployments"
         route={Route.deployments}
         activeRoutes={[Route.deployments]}
       />
@@ -129,6 +135,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
             defaultMessage="Application Campaigns"
           />
         }
+        icon="campaign"
         route={Route.deploymentCampaigns}
         activeRoutes={[
           Route.deploymentCampaigns,
