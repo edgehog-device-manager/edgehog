@@ -29,7 +29,10 @@ defmodule Edgehog.Containers.Network.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableNetworks
+  alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
   alias Edgehog.Astarte.Device.CreateNetworkRequest
+  alias Edgehog.Config
   alias Edgehog.Containers.Network.Deployment.Provisioner
 
   describe "Network deployment provisioner" do
@@ -45,7 +48,10 @@ defmodule Edgehog.Containers.Network.Deployment.ProvisionerTest do
 
       [network_deployments] =
         deployment
-        |> Ash.load!([container_deployments: [network_deployments: [network: :options_encoding]]],
+        |> Ash.load!(
+          [
+            container_deployments: [network_deployments: [network: :options_encoding, device: []]]
+          ],
           tenant: tenant
         )
         |> Map.get(:container_deployments, [])
@@ -251,6 +257,52 @@ defmodule Edgehog.Containers.Network.Deployment.ProvisionerTest do
       Provisioner.start(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
+      assert_receive {:ready, new_network_deployment}, 1000
+
+      assert new_network_deployment.id == network_deployment.id
+      assert new_network_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        network_deployment: network_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateNetworkRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_network_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = network_deployment.device.device_id
+
+      AvailableNetworks
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        networks = [
+          %NetworkStatus{id: network_deployment.network.id, created: false}
+        ]
+
+        {:ok, networks}
+      end)
+
+      ready_topic = "ready:network_deployments:#{network_deployment.id}"
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_network_deployment}, 1000
 
       assert new_network_deployment.id == network_deployment.id
