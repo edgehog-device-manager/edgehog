@@ -26,6 +26,9 @@ defmodule Edgehog.Devices.Device do
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
+    ],
+    notifiers: [
+      Ash.Notifier.PubSub
     ]
 
   alias Edgehog.Changes.NormalizeTagName
@@ -729,6 +732,25 @@ defmodule Edgehog.Devices.Device do
 
   identities do
     identity :unique_realm_device_id, [:device_id, :realm_id]
+  end
+
+  pub_sub do
+    module EdgehogWeb.Endpoint
+    prefix "devices"
+
+    publish_all "online_create", :create, ["online", :id], filter: &online_filter/1
+    publish "online_update", :from_device_status, ["online", :id], filter: &online_filter/1
+
+    publish_all "offline_create", :create, ["offline", :id], filter: &offline_filter/1
+    publish "offline_update", :from_device_status, ["offline", :id], filter: &offline_filter/1
+  end
+
+  defp online_filter(inp) do
+    Ash.Changeset.get_argument_or_attribute(inp.changeset, :online) == true
+  end
+
+  defp offline_filter(inp) do
+    Ash.Changeset.get_argument_or_attribute(inp.changeset, :online) == false
   end
 
   postgres do
