@@ -624,6 +624,11 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_mappings}
     end
 
+    calculate :available_device_requests, {:array, Types.DeviceRequestStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_requests}
+    end
+
     calculate :battery_status, {:array, BatterySlot} do
       public? true
       calculation Calculations.BatteryStatus

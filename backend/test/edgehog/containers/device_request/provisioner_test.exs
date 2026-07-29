@@ -29,7 +29,10 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableDeviceRequests
+  alias Edgehog.Astarte.Device.AvailableDeviceRequests.DeviceRequestStatus
   alias Edgehog.Astarte.Device.CreateDeviceRequestRequest
+  alias Edgehog.Config
   alias Edgehog.Containers.DeviceRequest.Deployment.Provisioner
 
   describe "DeviceRequest deployment provisioner" do
@@ -47,7 +50,9 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.ProvisionerTest do
         deployment
         |> Ash.load!(
           [
-            container_deployments: [device_request_deployments: [device_request: [:capabilities]]]
+            container_deployments: [
+              device_request_deployments: [device_request: [:capabilities], device: []]
+            ]
           ],
           tenant: tenant
         )
@@ -282,6 +287,52 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.ProvisionerTest do
       Provisioner.start(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
+      assert_receive {:ready, new_device_request_deployment}, 1000
+
+      assert new_device_request_deployment.id == device_request_deployment.id
+      assert new_device_request_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        device_request_deployment: device_request_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateDeviceRequestRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_device_request_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = device_request_deployment.device.device_id
+
+      AvailableDeviceRequests
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        device_requests = [
+          %DeviceRequestStatus{id: device_request_deployment.device_request.id, present: false}
+        ]
+
+        {:ok, device_requests}
+      end)
+
+      ready_topic = "ready:device_request_deployments:#{device_request_deployment.id}"
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_device_request_deployment}, 1000
 
       assert new_device_request_deployment.id == device_request_deployment.id
