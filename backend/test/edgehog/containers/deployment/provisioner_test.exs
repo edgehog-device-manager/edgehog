@@ -29,13 +29,20 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableDeployments
+  alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
   alias Edgehog.Astarte.Device.CreateDeploymentRequest
+  alias Edgehog.Config
   alias Edgehog.Containers.Deployment.Provisioner
 
   describe "Deployment provisioner" do
     setup do
       tenant = tenant_fixture()
-      deployment = deployment_fixture(tenant: tenant, release_opts: [containers: 1])
+
+      deployment =
+        [tenant: tenant, release_opts: [containers: 1]]
+        |> deployment_fixture()
+        |> Ash.load!(:device, tenant: tenant)
 
       provisioner =
         Provisioner.start_link(
@@ -246,6 +253,52 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
       assert_receive {:ready, new_deployment}, 1000
+
+      assert new_deployment.id == deployment.id
+      assert new_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        deployment: deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateDeploymentRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_deployment_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = deployment.device.device_id
+
+      AvailableDeployments
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        containers = [
+          %DeploymentStatus{id: deployment.id, status: :stopped}
+        ]
+
+        {:ok, containers}
+      end)
+
+      ready_topic = Provisioner.topic(deployment)
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
+      assert_receive {:ready, new_deployment}, 3000
 
       assert new_deployment.id == deployment.id
       assert new_deployment.is_ready

@@ -20,12 +20,40 @@
 
 defmodule Edgehog.Containers.Deployment.Provisioner do
   @moduledoc """
-  Service to provision a given deployment.
+  A deployment provisioner.
+
+  Each and every time a deployment should be provisioned, it can be done through
+  this Service. The provisioner sends the appropriate messages to the device and
+  emits an event on topic `deployments:provisioning:id` event whenever
+  deployment is present in the device.
+
+  The provisioning flow can be described as follows:
+
+  - start_link/1 called, init the process
+  - The server subscribes to events on 'deployments:id' (id of the deployment
+    deployment)
+  - Core.send/2 is called, sending the appropriate messages to the device (see
+    Core.send/1 docs for more info)
+
+  Nice flow (everything goes ok)
+  - Astarte triggers update the deployment deployment state, marking it as present or
+    not present and emitting an event on the correct topic
+  - The server reacts to the event, handles the message and emits an event on
+    'ready:deployment:id' when the resource is ready
+  - listening processes can react to this information
+
+  Timeouts (something goes wrong)
+  - Core.send/2 failed, maybe the device is offline, or there was some problem
+    with astarte
+  - an exponential backoff timeout is started
+  - A :timeout hits the server, it retries to send the deployment information to the
+    device
   """
 
   use GenServer, restart: :transient
 
   alias Deployment.Provisioner.Registry, as: ProvisionerRegistry
+  alias Edgehog.Config
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Deployment.Provisioner.Core
 
@@ -77,14 +105,14 @@ defmodule Edgehog.Containers.Deployment.Provisioner do
     end
   end
 
+  #### Callbacks
+
   @impl GenServer
   def init(args) do
     deployment = Keyword.fetch!(args, :deployment)
     tenant = Keyword.fetch!(args, :tenant)
 
     mode = Keyword.get(args, :mode, :auto)
-
-    %{id: id} = deployment
 
     state = %{
       deployment: deployment,
@@ -94,19 +122,21 @@ defmodule Edgehog.Containers.Deployment.Provisioner do
       retries: 0
     }
 
-    Logger.info("Starting the provisioner for deployment #{id}")
+    %{id: id} = deployment
+
+    Logger.info("Subscribing to events on deployment #{id}")
     Phoenix.PubSub.subscribe(Edgehog.PubSub, "deployments:#{id}")
 
-    {:ok, state, {:continue, :maybe_send}}
+    {:ok, state, {:continue, :maybe_start}}
   end
 
   @impl GenServer
-  def handle_continue(:maybe_send, %{mode: :auto} = state) do
+  def handle_continue(:maybe_start, %{mode: :auto} = state) do
     {:noreply, state, {:continue, :check_deployment_state}}
   end
 
   @impl GenServer
-  def handle_continue(:maybe_send, %{mode: :manual} = state) do
+  def handle_continue(:maybe_start, %{mode: :manual} = state) do
     {:noreply, state}
   end
 
@@ -127,61 +157,59 @@ defmodule Edgehog.Containers.Deployment.Provisioner do
   end
 
   @impl GenServer
-  def handle_continue(:send, old_state) do
-    %{
-      deployment: deployment,
-      tenant: tenant
-    } = old_state
-
-    sent = Core.send(deployment, tenant: tenant)
-
-    new_state = Map.put(old_state, :state, :sent)
-
-    case sent do
-      :ok -> {:noreply, new_state}
-      error -> retry_or_stop(error, old_state)
-    end
-  end
+  def handle_continue(:send, state), do: maybe_send(state)
 
   @impl GenServer
   def handle_continue(:maybe_ready, state) do
     %{deployment: deployment} = state
+
+    timeout = Core.timeout(state)
 
     # Here we have to compute readiness of the single `deployment` resource. We
     # cannot delegate this to the `is_ready` calculation as it computes global
     # readiness for the public.
     if ready?(deployment),
       do: {:stop, :normal, state},
-      else: {:noreply, state}
+      else: {:noreply, state, timeout}
   end
 
   # We were not able to send the message to the device. retry
   @impl GenServer
-  def handle_info(:timeout, %{state: :init} = old_state) do
-    %{
-      deployment: deployment,
-      tenant: tenant
-    } = old_state
+  def handle_info(:timeout, %{state: :init} = state), do: maybe_send(state)
 
-    sent = Core.send(deployment, tenant: tenant, deployment: deployment)
+  # We sent the message to the device, but no trigger came back.
+  # 1. Reconcile with astarte
+  # 2. if still nothing has come back, retry to send
+  @impl GenServer
+  def handle_info(:timeout, %{state: :sent} = state) do
+    %{deployment: deployment, tenant: tenant} = state
 
-    new_state = Map.put(old_state, :state, :sent)
+    deployment = Core.reconcile(deployment, tenant: tenant)
 
-    case sent do
-      :ok -> {:noreply, new_state}
-      error -> retry_or_stop(error, old_state)
+    case deployment do
+      :not_found ->
+        maybe_send(state)
+
+      {:ok, deployment} ->
+        # Reconciliation updated the deployment, just update the state as a new
+        # message will come in the queue
+        new_state = Map.put(state, :deployment, deployment)
+
+        # This just in case the message is not actually there, but I'd consider it a bug
+        timeout = Core.timeout(state)
+
+        {:noreply, new_state, timeout}
     end
   end
 
-  # We get the deployment from the broadcast, which is in the :payload -> :data
-  # section. This deployment is more recent, as it comes from an update in the
-  # database.
+  # We get the deployment from the broadcast, which is in the :payload ->
+  # :data section. This deployment is more recent, as it comes from an
+  # update in the database.
   @impl GenServer
   def handle_info(%Phoenix.Socket.Broadcast{payload: %{data: deployment}}, state) do
     new_state = Map.put(state, :deployment, deployment)
 
-    # Somewhere the has been marked in some state (pulled/unpulled). For
-    # now we can just shutdown gracefully
+    # check readiness, maybe terminate
     {:noreply, new_state, {:continue, :maybe_ready}}
   end
 
@@ -189,67 +217,71 @@ defmodule Edgehog.Containers.Deployment.Provisioner do
 
   @impl GenServer
   def terminate(:normal, state) do
-    %{
-      deployment: deployment,
-      retries: retries
-    } = state
+    %{deployment: deployment} = state
 
     %{id: id} = deployment
 
     topic = topic(deployment)
 
-    # Broadcast readiness
     Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, {:ready, deployment})
-
-    # Log
-    Logger.info("""
-    Deployment #{id} successfully provisioned after #{retries} retries.
-    """)
 
     # Unsubscribe from events, we're terminating
     Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "deployments:#{id}")
   end
 
-  defp retry_or_stop(error, state) do
-    %{deployment: %{id: id}} = state
+  #### Helper functions
 
-    error = with {:error, error} <- error, do: error
-
+  # Send the container if the number of retries does not exceed the max number of
+  # retries.
+  defp maybe_send(state) do
     retries = Map.fetch!(state, :retries)
-    max_retries = Application.get_env(:edgehog, :max_deployment_retries, 100)
+    max_retries = Config.max_retries!()
 
-    if retries > max_retries do
-      {:stop, {:shutdown, :max_retries}, state}
+    if retries < max_retries do
+      state
+      |> increase_retries()
+      |> send()
     else
-      timeout = timeout(state)
-      timeout_seconds = round(timeout / 1000)
-
-      Logger.error("""
-      An error occurred while sending the deployment #{id}:
-      #{inspect(error)}
-
-      Retrying in #{timeout_seconds} seconds.
-      """)
-
-      {:noreply, increase_retries(state), timeout}
+      {:stop, {:shutdown, :max_retries}, state}
     end
   end
 
-  defp increase_retries(state) do
-    Map.update!(state, :retries, &Kernel.+(&1, 1))
+  # Sends the deployment, without asking any questions. To check for
+  # retries, use `maybe_send`.
+  defp send(state) do
+    %{
+      deployment: deployment,
+      tenant: tenant
+    } = state
+
+    new_state =
+      deployment
+      |> Core.send(tenant: tenant)
+      |> maybe_update_state_on_send(state)
+
+    timeout = Core.timeout(new_state)
+
+    {:noreply, new_state, timeout}
   end
 
-  # Exponential backoff timeout
-  defp timeout(state) do
-    retries = Map.fetch!(state, :retries)
+  # if the operation was successful, update the state to sent, log the error otherwise.
+  defp maybe_update_state_on_send(:ok, state) do
+    Map.put(state, :state, :sent)
+  end
 
-    random_n = Enum.random(0..1000)
-    timeout = :math.pow(2, retries) + random_n
-    max_timeout = to_timeout(day: 1)
+  defp maybe_update_state_on_send(error, state) do
+    %{deployment: %{id: id}} = state
 
-    timeout
-    |> min(max_timeout)
-    |> round()
+    Logger.warning(
+      "Error while sending the deployment #{id}: #{inspect(error)}. The operation will be retried shortly."
+    )
+
+    state
+  end
+
+  # Update the state to increment the number of retries
+  defp increase_retries(state) do
+    Map.update!(state, :retries, &Kernel.+(&1, 1))
   end
 
   defp ready?(deployment) do
