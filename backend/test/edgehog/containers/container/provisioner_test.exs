@@ -29,8 +29,11 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableContainers
+  alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
   alias Edgehog.Astarte.Device.CreateContainerRequest
   alias Edgehog.Astarte.Device.CreateContainerRequest.RequestData
+  alias Edgehog.Config
   alias Edgehog.Containers.Container.Deployment.Provisioner
 
   describe "Container deployment provisioner" do
@@ -40,7 +43,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
 
       [container_deployment] =
         deployment
-        |> Ash.load!([container_deployments: [:container]], tenant: tenant)
+        |> Ash.load!([container_deployments: [:container, :device]], tenant: tenant)
         |> Map.get(:container_deployments, [])
 
       provisioner =
@@ -197,6 +200,52 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
       assert_receive {:ready, new_container_deployment}, 1000
+
+      assert new_container_deployment.id == container_deployment.id
+      assert new_container_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        container_deployment: container_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateContainerRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_container_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = container_deployment.device.device_id
+
+      AvailableContainers
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        containers = [
+          %ContainerStatus{id: container_deployment.container.id, status: "Created"}
+        ]
+
+        {:ok, containers}
+      end)
+
+      ready_topic = Provisioner.topic(container_deployment)
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
+      assert_receive {:ready, new_container_deployment}, 3000
 
       assert new_container_deployment.id == container_deployment.id
       assert new_container_deployment.is_ready
