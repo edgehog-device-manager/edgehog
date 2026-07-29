@@ -29,7 +29,10 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableVolumes
+  alias Edgehog.Astarte.Device.AvailableVolumes.VolumeStatus
   alias Edgehog.Astarte.Device.CreateVolumeRequest
+  alias Edgehog.Config
   alias Edgehog.Containers.Volume.Deployment.Provisioner
 
   describe "Volume deployment provisioner" do
@@ -44,7 +47,7 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
 
       volume_deployment =
         deployment
-        |> Ash.load!(container_deployments: [volume_deployments: :volume])
+        |> Ash.load!(container_deployments: [volume_deployments: [:device, :volume]])
         |> Map.get(:container_deployments, [])
         |> List.first()
         |> Map.get(:volume_deployments, [])
@@ -237,6 +240,52 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
       Provisioner.start(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
+      assert_receive {:ready, new_volume_deployment}, 1000
+
+      assert new_volume_deployment.id == volume_deployment.id
+      assert new_volume_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        volume_deployment: volume_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateVolumeRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_volume_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = volume_deployment.device.device_id
+
+      AvailableVolumes
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        volumes = [
+          %VolumeStatus{id: volume_deployment.volume.id, created: false}
+        ]
+
+        {:ok, volumes}
+      end)
+
+      ready_topic = "ready:volume_deployments:#{volume_deployment.id}"
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_volume_deployment}, 1000
 
       assert new_volume_deployment.id == volume_deployment.id
