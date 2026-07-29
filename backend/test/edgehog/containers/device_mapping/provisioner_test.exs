@@ -29,7 +29,10 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.AvailableDeviceMappings
+  alias Edgehog.Astarte.Device.AvailableDeviceMappings.DeviceMappingStatus
   alias Edgehog.Astarte.Device.CreateDeviceMappingRequest
+  alias Edgehog.Config
   alias Edgehog.Containers.DeviceMapping.Deployment.Provisioner
 
   describe "DeviceMapping deployment provisioner" do
@@ -45,7 +48,8 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
 
       [device_mapping_deployments] =
         deployment
-        |> Ash.load!([container_deployments: [device_mapping_deployments: :device_mapping]],
+        |> Ash.load!(
+          [container_deployments: [device_mapping_deployments: [:device_mapping, :device]]],
           tenant: tenant
         )
         |> Map.get(:container_deployments, [])
@@ -248,6 +252,52 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
       Provisioner.start(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
+      assert_receive {:ready, new_device_mapping_deployment}, 1000
+
+      assert new_device_mapping_deployment.id == device_mapping_deployment.id
+      assert new_device_mapping_deployment.is_ready
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
+    end
+
+    test "reconciles the state with astarte if a timeout on send is found", context do
+      %{
+        device_mapping_deployment: device_mapping_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      # Remove the Pan
+      Config
+      |> allow(test_process, provisioner)
+      |> stub(:message_min_timeout!, fn -> 0 end)
+
+      CreateDeviceMappingRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_device_mapping_request, fn _, _, _ ->
+        :ok
+      end)
+
+      device_id = device_mapping_deployment.device.device_id
+
+      AvailableDeviceMappings
+      |> allow(test_process, provisioner)
+      |> expect(:get, fn _client, ^device_id ->
+        device_mappings = [
+          %DeviceMappingStatus{id: device_mapping_deployment.device_mapping.id, present: false}
+        ]
+
+        {:ok, device_mappings}
+      end)
+
+      ready_topic = "ready:device_mapping_deployments:#{device_mapping_deployment.id}"
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
+
+      Provisioner.start(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_device_mapping_deployment}, 1000
 
       assert new_device_mapping_deployment.id == device_mapping_deployment.id
