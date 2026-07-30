@@ -47,6 +47,21 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
           release_opts: [containers: 1, container_params: [device_mappings: [device_mapping.id]]]
         )
 
+      timestamp = now()
+
+      opts = %{
+        online: true,
+        last_connection: timestamp,
+        last_disconnection: timestamp
+      }
+
+      deployment =
+        deployment
+        |> Map.get(:device)
+        |> Ash.Changeset.for_update(:from_device_status, opts)
+        |> Ash.update!(tenant: tenant)
+        |> then(&Map.put(deployment, :device, &1))
+
       [device_mapping_deployments] =
         deployment
         |> Ash.load!(
@@ -59,7 +74,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
       [device_mapping_deployment] = device_mapping_deployments
 
       provisioner =
-        Provisioner.start_link(
+        Provisioner.start(
           tenant: tenant,
           device_mapping_deployment: device_mapping_deployment,
           deployment: deployment,
@@ -122,7 +137,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
         :ok
       end)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
     end
@@ -167,7 +182,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
 
       Sandbox.allow(Edgehog.Repo, self(), provisioner)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 2000
     end
@@ -213,7 +228,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
         "ready:device_mapping_deployments:#{device_mapping_deployment.id}"
       )
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:ready, new_device_mapping_deployment}, 1000
 
@@ -250,7 +265,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
         |> Ash.Changeset.for_update(:mark_as_present, %{})
         |> Ash.update!(tenant: tenant)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
       assert_receive {:ready, new_device_mapping_deployment}, 1000
@@ -296,7 +311,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
       ready_topic = "ready:device_mapping_deployments:#{device_mapping_deployment.id}"
       Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_device_mapping_deployment}, 1000
@@ -306,5 +321,79 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
 
       Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
     end
+
+    test "stops if device goes offline", context do
+      %{
+        deployment: deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref,
+        tenant: tenant
+      } = context
+
+      test_process = self()
+
+      timestamp = now()
+
+      CreateDeviceMappingRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_device_mapping_request, fn _, _, _ -> :ok end)
+
+      Sandbox.allow(Edgehog.Repo, test_process, provisioner)
+      Provisioner.run(provisioner)
+
+      opts = %{
+        online: false,
+        last_connection: timestamp,
+        last_disconnection: timestamp
+      }
+
+      device =
+        deployment
+        |> Map.get(:device)
+        |> Ash.Changeset.for_update(:from_device_status, opts)
+        |> Ash.update!(tenant: tenant)
+
+      refute device.online
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, {:shutdown, :device_offline}}, 2000
+    end
+
+    test "immediately stops if device is offline at startup", context do
+      %{
+        deployment: deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref,
+        tenant: tenant
+      } = context
+
+      timestamp = now()
+
+      opts = %{
+        online: false,
+        last_connection: timestamp,
+        last_disconnection: timestamp
+      }
+
+      device =
+        deployment
+        |> Map.get(:device)
+        |> Ash.Changeset.for_update(:from_device_status, opts)
+        |> Ash.update!(tenant: tenant)
+
+      refute device.online
+
+      test_process = self()
+
+      Sandbox.allow(Edgehog.Repo, test_process, provisioner)
+
+      CreateDeviceMappingRequest
+      |> allow(test_process, provisioner)
+      |> reject(:send_create_device_mapping_request, 3)
+
+      Provisioner.run(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, {:shutdown, :device_offline}}, 2000
+    end
   end
+
+  defp now, do: DateTime.now!("Etc/UTC")
 end
