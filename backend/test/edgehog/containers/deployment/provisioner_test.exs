@@ -44,8 +44,23 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
         |> deployment_fixture()
         |> Ash.load!(:device, tenant: tenant)
 
+      timestamp = now()
+
+      opts = %{
+        online: true,
+        last_connection: timestamp,
+        last_disconnection: timestamp
+      }
+
+      deployment =
+        deployment
+        |> Map.get(:device)
+        |> Ash.Changeset.for_update(:from_device_status, opts)
+        |> Ash.update!(tenant: tenant)
+        |> then(&Map.put(deployment, :device, &1))
+
       provisioner =
-        Provisioner.start_link(
+        Provisioner.start(
           tenant: tenant,
           deployment: deployment,
           mode: :manual
@@ -119,7 +134,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
 
       Sandbox.allow(Edgehog.Repo, self(), provisioner)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
     end
@@ -165,7 +180,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
         :ok
       end)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       # 2000 as the retry might happen between 0 and 1 second
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 2000
@@ -215,7 +230,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
 
       Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:ready, new_deployment}, 1000
 
@@ -249,7 +264,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
         |> Ash.Changeset.for_update(:mark_as_stopped, %{})
         |> Ash.update!(tenant: tenant)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 1000
       assert_receive {:ready, new_deployment}, 1000
@@ -295,7 +310,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
       ready_topic = Provisioner.topic(deployment)
       Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
 
-      Provisioner.start(provisioner)
+      Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, :normal}, 3000
       assert_receive {:ready, new_deployment}, 3000
@@ -305,5 +320,79 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
 
       Phoenix.PubSub.unsubscribe(Edgehog.PubSub, ready_topic)
     end
+
+    test "stops if device goes offline", context do
+      %{
+        deployment: deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref,
+        tenant: tenant
+      } = context
+
+      test_process = self()
+
+      timestamp = now()
+
+      CreateDeploymentRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_deployment_request, fn _, _, _ -> :ok end)
+
+      Sandbox.allow(Edgehog.Repo, test_process, provisioner)
+      Provisioner.run(provisioner)
+
+      opts = %{
+        online: false,
+        last_connection: timestamp,
+        last_disconnection: timestamp
+      }
+
+      device =
+        deployment
+        |> Map.get(:device)
+        |> Ash.Changeset.for_update(:from_device_status, opts)
+        |> Ash.update!(tenant: tenant)
+
+      refute device.online
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, {:shutdown, :device_offline}}, 2000
+    end
+
+    test "immediately stops if device is offline at startup", context do
+      %{
+        deployment: deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref,
+        tenant: tenant
+      } = context
+
+      timestamp = now()
+
+      opts = %{
+        online: false,
+        last_connection: timestamp,
+        last_disconnection: timestamp
+      }
+
+      device =
+        deployment
+        |> Map.get(:device)
+        |> Ash.Changeset.for_update(:from_device_status, opts)
+        |> Ash.update!(tenant: tenant)
+
+      refute device.online
+
+      test_process = self()
+
+      Sandbox.allow(Edgehog.Repo, test_process, provisioner)
+
+      CreateDeploymentRequest
+      |> allow(test_process, provisioner)
+      |> reject(:send_create_deployment_request, 3)
+
+      Provisioner.run(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, {:shutdown, :device_offline}}, 2000
+    end
   end
+
+  defp now, do: DateTime.now!("Etc/UTC")
 end
