@@ -54,8 +54,8 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.Core do
   Tries to reconcile the container deployment with the property set by the device.
 
   The device publishes the available containers, this function reads such property
-  and either founds a state, and sets the container deployment to that state or does
-  not found a valid state, therefore the device does not have such container
+  and either finds a state, and sets the container deployment to that state or does
+  not find a valid state, therefore the device does not have such container
   deployed, and the function returns :not_found
 
   Alternatively, if something went wrong while updating the container, an 
