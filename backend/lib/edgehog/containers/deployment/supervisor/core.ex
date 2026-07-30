@@ -32,10 +32,13 @@ defmodule Edgehog.Containers.Deployment.Supervisor.Core do
       tenant: tenant
     } = state
 
-    deployment = Ash.load!(deployment, [:container_deployments], tenant: tenant)
+    deployment = Ash.load!(deployment, :container_deployments, tenant: tenant)
+
     container_deployments = Map.fetch!(deployment, :container_deployments)
 
-    Map.put(state, :container_deployments, container_deployments)
+    state
+    |> Map.put(:deployment, deployment)
+    |> Map.put(:container_deployments, container_deployments)
   end
 
   def provision(state) do
@@ -48,7 +51,7 @@ defmodule Edgehog.Containers.Deployment.Supervisor.Core do
     new_state = Map.put(state, :containers_waitlist, [])
 
     new_state
-    |> Map.get(:container_deployments, [])
+    |> Map.fetch!(:container_deployments)
     |> Enum.reduce(new_state, &provision_container/2)
   end
 

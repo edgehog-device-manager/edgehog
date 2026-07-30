@@ -67,6 +67,15 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     Containers.mark_deployment_as_timed_out!(deployment, tenant: tenant_id)
   end
 
+  defp topics(_mechanism, operation_id) do
+    [
+      "deployments:#{operation_id}",
+      "deployments:started:#{operation_id}",
+      "deployments:timeout:#{operation_id}",
+      Deployment.Supervisor.topic(operation_id)
+    ]
+  end
+
   @doc """
   Subscribes to deployment operation updates via PubSub.
 
@@ -78,8 +87,8 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - `:ok` on success.
     - Raises an error on failure.
   """
-  def subscribe_to_operation_updates!(_mechanism, operation_id) do
-    topics = ["deployments:#{operation_id}", Deployment.Supervisor.topic(operation_id)]
+  def subscribe_to_operation_updates!(mechanism, operation_id) do
+    topics = topics(mechanism, operation_id)
 
     Enum.each(topics, &sub_to/1)
   end
@@ -100,8 +109,14 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   ## Returns
     - `:ok`
   """
-  def unsubscribe_to_operation_updates!(_mechanism, operation_id) do
-    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "deployments:#{operation_id}")
+  def unsubscribe_to_operation_updates!(mechanism, operation_id) do
+    topics = topics(mechanism, operation_id)
+
+    Enum.each(topics, &unsub_to/1)
+  end
+
+  defp unsub_to(topic) do
+    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
   end
 
   # Target Management

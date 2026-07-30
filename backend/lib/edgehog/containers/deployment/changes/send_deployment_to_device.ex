@@ -28,7 +28,12 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
   end
 
   defp after_transaction(_changeset, {:ok, deployment}, tenant) do
-    Supervisor.supervise(deployment, tenant)
+    deployment
+    |> Ash.load!(
+      [container_deployments: [:image_deployment, :volume_deployments, :network_deployments]],
+      tenant: tenant
+    )
+    |> Supervisor.supervise(tenant)
 
     {:ok, deployment}
   end

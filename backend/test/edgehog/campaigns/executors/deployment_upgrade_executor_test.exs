@@ -335,8 +335,10 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
       ref = expect_upgrade_requests_and_send_sync()
 
       tenant
-      |> update_deployment_state!(deployment_id, :started)
+      |> update_deployment_state!(deployment_id, :stopped)
       |> broadcast_readiness()
+
+      update_deployment_state!(tenant, deployment_id, :started)
 
       wait_for_sync!(ref)
 

@@ -181,11 +181,11 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
       deployment_result =
         target
         |> Ash.load!(:deployment, tenant: target.tenant_id)
-        |> Map.get(:deployment)
-        |> Ash.Changeset.for_update(:send_deployment, %{}, tenant: target.tenant_id)
-        |> Ash.update()
+        |> Map.fetch(:deployment)
 
-      with {:ok, _deployment} <- deployment_result do
+      with {:ok, deployment} <- deployment_result do
+        Deployment.Supervisor.supervise(deployment, target.tenant_id)
+
         {:ok, target}
       end
     end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025-2026 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.SendRequest do
+defmodule Edgehog.Containers.Deployment.ManualActions.StartSupervisor do
   @moduledoc """
-  Automatically update the deployment and send the requests to the device once
-  the database transaction is clsed and all the resources are available.
+  Manual action to start a deployment supervisor without the need for a database transaction.
   """
-  use Ash.Resource.Change
 
-  alias Edgehog.Containers
+  use Ash.Resource.ManualUpdate
 
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, %{tenant: tenant}) do
-    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
-      with {:ok, deployment} <- result,
-           do: Containers.send_deployment(deployment, tenant: tenant)
-    end)
+  alias Edgehog.Containers.Deployment.Supervisor
+
+  @impl Ash.Resource.ManualUpdate
+  def update(changeset, _opts, %{tenant: tenant}) do
+    deployment = changeset.data
+
+    Supervisor.supervise(deployment, tenant)
+
+    {:ok, deployment}
   end
 end
