@@ -22,7 +22,7 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
   @moduledoc """
   A volume deployment provisioner.
 
-  Each and every time an volume should be deployed, it can be done through this
+  Each and every time a volume should be deployed, it can be done through this
   provisioner. The provisioner sends the appropriate messages to the device and
   emits a `ready:volume_deployments:id` event whenever volume is present in the
   device.
@@ -63,7 +63,7 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
   #### API
 
   @doc """
-  Starts the provisioner of an volume deployment.
+  Starts the provisioner of a volume deployment.
 
   Equivalent to starting the provisioner trough `start_link/1` with opts
   ```
@@ -85,7 +85,7 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
   end
 
   @doc """
-  Starts a provisioner for an volume deployment.
+  Starts a provisioner for a volume deployment.
 
   A provision for this resource follows the following flow:
 
@@ -104,9 +104,23 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
     + loops with a new timeout set by the `timeout/1` function.
   """
   def start_link(args) do
-    volume_deployment = Keyword.fetch!(args, :volume_deployment)
+    volume_deployment = args |> Keyword.fetch!(:volume_deployment) |> Ash.load!(:device)
+    args = Keyword.put(args, :volume_deployment, volume_deployment)
 
     GenServer.start_link(__MODULE__, args, name: name(volume_deployment))
+  end
+
+  @doc """
+  Starts a provisioner for a volume deployment, without linking it to the
+  current process.
+
+  See `start_link/1` docs for more information
+  """
+  def start(args) do
+    volume_deployment = args |> Keyword.fetch!(:volume_deployment) |> Ash.load!(:device)
+    args = Keyword.put(args, :volume_deployment, volume_deployment)
+
+    GenServer.start(__MODULE__, args, name: name(volume_deployment))
   end
 
   def name(%Deployment{id: id}) do
@@ -114,15 +128,15 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
   end
 
   # Test additional API
-  # In test environment, allow to start the process with a message, so that the
+  # In test environment, allow to run the process with a message, so that the
   # test process can attach and monitor it
   if @test do
-    def start(provisioner) do
-      GenServer.cast(provisioner, :start)
+    def run(provisioner) do
+      GenServer.cast(provisioner, :run)
     end
 
     @impl GenServer
-    def handle_cast(:start, state) do
+    def handle_cast(:run, state) do
       {:noreply, state, {:continue, :check_deployment_state}}
     end
   end
@@ -137,31 +151,42 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
 
     mode = Keyword.get(args, :mode, :auto)
 
+    %{id: id, device: %{id: device_id, online: device_online?}} =
+      volume_deployment
+
     state = %{
       volume_deployment: volume_deployment,
       deployment: deployment,
+      device_online?: device_online?,
       tenant: tenant,
       state: :init,
       mode: mode,
       retries: 0
     }
 
-    %{id: id} = volume_deployment
-
     Logger.info("Subscribing to events on volume deployment #{id}")
     Phoenix.PubSub.subscribe(Edgehog.PubSub, "volume_deployments:#{id}")
+
+    Logger.info("Subscribing to status events of device #{device_id} for volume deployment #{id}")
+    Phoenix.PubSub.subscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
+
+    Logger.debug(
+      "Device #{device_id} is currently #{if device_online?, do: "online", else: "offline"}"
+    )
 
     {:ok, state, {:continue, :maybe_start}}
   end
 
   @impl GenServer
   def handle_continue(:maybe_start, %{mode: :auto} = state) do
-    {:noreply, state, {:continue, :check_deployment_state}}
+    next_step = {:noreply, state, {:continue, :check_deployment_state}}
+    maybe_early_terminate(state, next_step)
   end
 
   @impl GenServer
   def handle_continue(:maybe_start, %{mode: :manual} = state) do
-    {:noreply, state}
+    next_step = {:noreply, state}
+    maybe_early_terminate(state, next_step)
   end
 
   @impl GenServer
@@ -213,7 +238,10 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
   # :data section. This volume deployment is more recent, as it comes from an
   # update in the database.
   @impl GenServer
-  def handle_info(%Phoenix.Socket.Broadcast{payload: %{data: volume_deployment}}, state) do
+  def handle_info(
+        %Phoenix.Socket.Broadcast{payload: %{data: %Deployment{} = volume_deployment}},
+        state
+      ) do
     # We can publish on readiness topic.
     id = volume_deployment.id
 
@@ -230,12 +258,19 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
     {:stop, :normal, new_state}
   end
 
+  @impl GenServer
+  def handle_info(%Phoenix.Socket.Broadcast{topic: "devices:offline:" <> _id}, old_state) do
+    new_state = Map.put(old_state, :device_online?, false)
+
+    {:stop, {:shutdown, :device_offline}, new_state}
+  end
+
   # NOTICE: we crash on messages that do not come from the notification system for the correct topic
 
   @impl GenServer
   def terminate(:normal, state) do
     %{
-      volume_deployment: %{id: id},
+      volume_deployment: %{id: id, device_id: device_id},
       retries: retries
     } = state
 
@@ -245,6 +280,38 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
 
     # Unsubscribe from events, we're terminating
     Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "volume_deployments:#{id}")
+    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
+  end
+
+  @impl GenServer
+  def terminate({:shutdown, :device_offline}, state) do
+    %{
+      volume_deployment: %{id: id, device_id: device_id}
+    } = state
+
+    Logger.info("""
+    Device #{device_id} went offline. Provisioner for volume deployment #{id} terminating.
+    """)
+
+    # Unsubscribe from events, we're terminating
+    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "volume_deployments:#{id}")
+    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
+  end
+
+  @impl GenServer
+  def terminate(reason, state) do
+    %{
+      volume_deployment: %{id: id, device: %{id: device_id}}
+    } = state
+
+    Logger.warning(
+      """
+      Unexpectedly terminating provisioner for volume deployment #{id} on device #{device_id}.
+      Reason: #{inspect(reason)}
+      """,
+      reason: reason,
+      provisioner_state: state
+    )
   end
 
   #### Helper functions
@@ -296,6 +363,16 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
     )
 
     state
+  end
+
+  # Returns an early stop tuple if the device is offline, otherwise continues with
+  # the given `next_step`
+  defp maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
+    if device_online? do
+      next_step
+    else
+      {:stop, {:shutdown, :device_offline}, state}
+    end
   end
 
   # Update the state to increment the number of retries
