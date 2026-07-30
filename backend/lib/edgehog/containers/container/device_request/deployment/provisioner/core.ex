@@ -60,7 +60,7 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Core do
 
   The device publishes the available device requests, this function reads such property
   and either finds a state, and sets the device request deployment to that state or does
-  not found a valid state, therefore the device does not have such device request
+  not find a valid state, therefore the device does not have such device request
   deployed, and the function returns :not_found
 
   Alternatively, if something went wrong while updating the device request, an 
