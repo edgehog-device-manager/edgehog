@@ -396,6 +396,55 @@ defmodule Edgehog.ContainersFixtures do
   end
 
   @doc """
+  Generate a %Deployment{} in a ready state.
+
+  Sets the deployment and all of its underlying container deployments (and
+  their sub-deployments) to ready states, so the deployment `is_ready`.
+  """
+  def make_deployment_ready!(deployment, tenant) do
+    deployment =
+      Ash.load!(
+        deployment,
+        [
+          container_deployments: [
+            :image_deployment,
+            :volume_deployments,
+            :network_deployments,
+            :device_mapping_deployments,
+            :device_request_deployments
+          ]
+        ],
+        tenant: tenant
+      )
+
+    Enum.each(deployment.container_deployments, fn cd ->
+      Ash.update!(cd.image_deployment, %{state: :unpulled}, action: :set_state, tenant: tenant)
+      Ash.update!(cd, %{state: :stopped}, action: :set_state, tenant: tenant)
+
+      Ash.bulk_update!(cd.volume_deployments, :set_state, %{state: :available}, tenant: tenant)
+      Ash.bulk_update!(cd.network_deployments, :set_state, %{state: :available}, tenant: tenant)
+
+      Ash.bulk_update!(
+        cd.device_mapping_deployments,
+        :set_state,
+        %{state: :present},
+        tenant: tenant
+      )
+
+      Ash.bulk_update!(
+        cd.device_request_deployments,
+        :mark_as_present,
+        %{},
+        tenant: tenant
+      )
+    end)
+
+    {:ok, deployment} = Edgehog.Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
+
+    deployment
+  end
+
+  @doc """
   Generate a %Container.Deployment{}
   """
   def container_deployment_fixture(opts \\ []) do

@@ -24,6 +24,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
   import Edgehog.CampaignsFixtures
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL
@@ -171,16 +172,46 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
     test "all target upgrade requests in parallel if there are enough available slots", %{
       tenant: tenant
     } do
+      application = application_fixture(tenant: tenant)
+      system_model = system_model_fixture(tenant: tenant)
+
+      release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "0.0.1",
+          containers: 1,
+          system_models: [system_model]
+        )
+
+      target_release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "0.0.2",
+          containers: 1,
+          system_models: [system_model]
+        )
+
       target_count = Enum.random(2..20)
 
       campaign =
         target_count
         |> campaign_with_targets_fixture(
           mechanism_type: :deployment_upgrade,
+          release_id: release.id,
+          target_release_id: target_release.id,
           campaign_mechanism: [max_in_progress_operations: target_count],
           tenant: tenant
         )
         |> Ash.load!(campaign_targets: [device: [:device_id]])
+
+      target_container_ids =
+        target_release
+        |> Ash.load!(:containers, tenant: tenant)
+        |> Map.fetch!(:containers)
+        |> Enum.map(& &1.id)
+        |> Enum.sort()
 
       parent = self()
       ref = make_ref()
@@ -191,8 +222,15 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
         Deployment.Supervisor,
         :supervise,
         target_count,
-        # TODO: assert that we' receiving the correct data!
         fn deployment, tenant ->
+          # The upgraded deployment must already have its container deployments
+          # visible to the supervisor
+          deployment = Ash.load!(deployment, :container_deployments, tenant: tenant)
+
+          assert deployment.container_deployments
+                 |> Enum.map(& &1.container_id)
+                 |> Enum.sort() == target_container_ids
+
           device_id =
             deployment
             |> Ash.load!(:device, tenant: tenant)

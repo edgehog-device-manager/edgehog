@@ -71,6 +71,66 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
              |> Map.fetch!(:deployment_id) == deployment_id
     end
 
+    test "supervises the new deployment with its container deployments loaded", args do
+      %{tenant: tenant} = args
+
+      application = application_fixture(tenant: tenant)
+
+      release_0_0_1 =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "0.0.1",
+          containers: 1
+        )
+
+      release_0_0_2 =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "0.0.2",
+          containers: 1
+        )
+
+      deployment_0_0_1 =
+        [release_id: release_0_0_1.id, tenant: tenant]
+        |> deployment_fixture()
+        |> make_deployment_ready!(tenant)
+
+      parent = self()
+      ref = make_ref()
+
+      expect(Deployment.Supervisor, :supervise, fn new_deployment, tenant ->
+        new_deployment = Ash.load!(new_deployment, :container_deployments, tenant: tenant)
+        send(parent, {ref, new_deployment})
+        :ok
+      end)
+
+      result =
+        [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
+        |> send_deployment_upgrade_mutation()
+        |> extract_result!()
+
+      {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+      assert_receive {^ref, supervised_deployment}, 1000
+
+      assert supervised_deployment.id == deployment_id
+      assert supervised_deployment.release_id == release_0_0_2.id
+
+      # The supervisor must see the container deployments of the new release
+      container_ids =
+        release_0_0_2
+        |> Ash.load!(:containers, tenant: tenant)
+        |> Map.fetch!(:containers)
+        |> Enum.map(& &1.id)
+        |> Enum.sort()
+
+      assert supervised_deployment.container_deployments
+             |> Enum.map(& &1.container_id)
+             |> Enum.sort() == container_ids
+    end
+
     test "sends the deployment upgrade once the new deployment is ready", args do
       %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
         args
