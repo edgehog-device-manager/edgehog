@@ -70,8 +70,6 @@ config :ash, :default_belongs_to_type, :integer
 # at the `config/runtime.exs`.
 config :ash_graphql, :subscriptions, true
 
-config :edgehog, Edgehog.Mailer, adapter: Swoosh.Adapters.Local
-
 # Prometheus metrics
 config :edgehog, Edgehog.PromEx,
   disabled: false,
@@ -164,9 +162,6 @@ config :spark, :formatter,
     type: Ash.Resource,
     section_order: resource_section_order
   ]
-
-# Swoosh API client is needed for adapters other than SMTP.
-config :swoosh, :api_client, false
 
 config :tesla, :adapter, {Tesla.Adapter.Finch, name: EdgehogFinch, receive_timeout: 300_000}
 
