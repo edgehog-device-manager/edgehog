@@ -640,10 +640,6 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
       assert_campaign_outcome(tenant, campaign_id, :failure)
     end
 
-    # TODO: restore once the upgrade executor emits operation failure events:
-    # handle_failure/2 currently emits {:operation_failure, deployment}, a tuple
-    # LazyBatch.handle_event/4 has no clause for (see deployment_upgrade/executor.ex)
-    @tag :skip
     test "by targets failing during the initial rollout with a non-temporary API failure", ctx do
       %{
         executor_pid: pid,
@@ -653,23 +649,45 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
         tenant: tenant
       } = ctx
 
-      # Expect failing_target_count calls to the mock and return a non-temporary error
-      expect(
-        Deployment.Supervisor,
-        :supervise,
-        failing_target_count,
-        fn deployment, _tenant ->
-          topic = Deployment.Supervisor.topic(deployment)
-          event = %Phoenix.Socket.Broadcast{topic: topic, event: :failure, payload: deployment}
-
-          Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, event)
-        end
-      )
-
       # Start the execution
       start_execution(pid)
 
-      assert_normal_exit(pid, ref, 3000)
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      {failing_targets, remaining_targets} =
+        %DeploymentUpgrade{}
+        |> MechanismCore.list_in_progress_targets(tenant.tenant_id, campaign_id)
+        |> Enum.split(failing_target_count)
+
+      # Produce failing_target_count failures
+      Enum.each(failing_targets, fn target ->
+        broadcast_failure!(tenant, target.deployment_id)
+      end)
+
+      # Now the Executor should arrive at :campaign_failure, but not terminate yet
+      wait_for_state(pid, :campaign_failure)
+
+      # Make the remaining targets reach a final state, some with success, some with failure
+      # The random count guarantees that we have at least one success and one failure
+      remaining_failing_count = Enum.random(1..(length(remaining_targets) - 1))
+
+      {remaining_failing_targets, remaining_successful_targets} =
+        Enum.split(remaining_targets, remaining_failing_count)
+
+      # For upgrade, success is :started state
+      Enum.each(remaining_successful_targets, fn target ->
+        tenant
+        |> update_deployment_state!(target.deployment_id, :started)
+        |> broadcast_readiness()
+      end)
+
+      Enum.each(remaining_failing_targets, fn target ->
+        broadcast_failure!(tenant, target.deployment_id)
+      end)
+
+      # Now the Executor should terminate
+      assert_normal_exit(pid, ref)
       assert_campaign_outcome(tenant, campaign_id, :failure)
     end
   end
@@ -979,6 +997,13 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   defp broadcast_readiness(deployment) do
     topic = Deployment.Supervisor.topic(deployment)
     message = %Phoenix.Socket.Broadcast{topic: topic, event: :ready, payload: deployment}
+    Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, message)
+  end
+
+  defp broadcast_failure!(tenant, deployment_id) do
+    deployment = Containers.fetch_deployment!(deployment_id, tenant: tenant)
+    topic = Deployment.Supervisor.topic(deployment)
+    message = %Phoenix.Socket.Broadcast{topic: topic, event: :failure, payload: deployment}
     Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, message)
   end
 
