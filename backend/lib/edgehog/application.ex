@@ -56,8 +56,6 @@ defmodule Edgehog.Application do
       {Oban, Application.fetch_env!(:edgehog, Oban)},
       # Start the PubSub system
       {Phoenix.PubSub, name: Edgehog.PubSub},
-      # gRPC connections batcher
-      {GRPC.Client.Supervisor, []},
       # Ash GraphQL subscription batcher
       AshGraphql.Subscription.Batcher,
       # Start Finch
