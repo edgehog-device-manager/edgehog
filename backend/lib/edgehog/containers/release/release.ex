@@ -66,6 +66,8 @@ defmodule Edgehog.Containers.Release do
       change manage_relationship(:required_system_models, :system_models, type: :append)
 
       change manage_relationship(:container_dependencies, type: :create)
+
+      validate Release.Validations.NoCircularDependencies
     end
 
     destroy :destroy do

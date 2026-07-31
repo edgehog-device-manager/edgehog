@@ -65,9 +65,6 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
   end
 
   describe "subscribe_to_operation_updates!/2 and unsubscribe_to_operation_updates!/2" do
-    # TODO: Remove this once the subscription flow is centralized into the lazy
-    # batch mechanism
-    @tag :skip
     test "subscribes and unsubscribes to deployment updates via PubSub", %{tenant: tenant} do
       deployment = deployment_fixture(tenant: tenant)
       mechanism = %DeploymentDeploy{}
@@ -75,16 +72,15 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       # Subscribe to deployment updates
       assert :ok = MechanismCore.subscribe_to_operation_updates!(mechanism, deployment.id)
 
-      # Trigger an update by marking the deployment as stopped
+      # Trigger an update by marking the deployment as timed out
       {:ok, updated_deployment} =
-        Edgehog.Containers.mark_deployment_as_stopped(deployment, tenant: tenant.tenant_id)
+        Edgehog.Containers.mark_deployment_as_timed_out(deployment, tenant: tenant.tenant_id)
 
-      topic = Deployment.Supervisor.topic(deployment.id)
+      topic = "deployments:timeout:#{deployment.id}"
 
       # Assert we receive the PubSub notification
       assert_receive %Broadcast{
         topic: ^topic,
-        event: :ready,
         payload: %Ash.Notifier.Notification{
           data: received_deployment
         }

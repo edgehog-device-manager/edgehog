@@ -110,49 +110,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     |> extract_result!()
   end
 
-  # TODO: this fails as circualr dependencies are checked in another process.
-  @tag :skip
-  test "deployRelease returns an error if the release has a circular dependency", %{
-    tenant: tenant
-  } do
-    container_1 = container_fixture(tenant: tenant)
-    container_2 = container_fixture(tenant: tenant)
-
-    container_dependencies = [
-      %{
-        "container_id" => container_1.id,
-        "dependency_id" => container_2.id
-      },
-      %{
-        "container_id" => container_2.id,
-        "dependency_id" => container_1.id
-      }
-    ]
-
-    device = device_fixture(tenant: tenant)
-
-    release =
-      release_fixture(
-        tenant: tenant,
-        container_ids: [container_1.id, container_2.id],
-        container_dependencies: container_dependencies
-      )
-
-    error =
-      [
-        tenant: tenant,
-        release_id: AshGraphql.Resource.encode_relay_id(release),
-        device_id: AshGraphql.Resource.encode_relay_id(device)
-      ]
-      |> deploy_release_mutation()
-      |> extract_error!()
-
-    assert %{
-             code: "invalid_changes",
-             message: "Invalid deployment: circular dependencies detected"
-           } = error
-  end
-
   test "deployRelease returns an error if the application's release system model does not match the device's system model",
        %{tenant: tenant} do
     part_number =

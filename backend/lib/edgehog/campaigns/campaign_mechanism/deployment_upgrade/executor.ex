@@ -144,7 +144,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
 
     actions = [
       cancel_retry_timeout(data.tenant_id, deployment.id),
-      internal_event({:operation_failure, deployment})
+      internal_event({:operation_failure_event, deployment})
     ]
 
     {:keep_state_and_data, actions}

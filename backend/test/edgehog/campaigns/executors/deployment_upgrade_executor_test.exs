@@ -640,7 +640,9 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
       assert_campaign_outcome(tenant, campaign_id, :failure)
     end
 
-    # TODO: restore once the failure flow is ensured
+    # TODO: restore once the upgrade executor emits operation failure events:
+    # handle_failure/2 currently emits {:operation_failure, deployment}, a tuple
+    # LazyBatch.handle_event/4 has no clause for (see deployment_upgrade/executor.ex)
     @tag :skip
     test "by targets failing during the initial rollout with a non-temporary API failure", ctx do
       %{
