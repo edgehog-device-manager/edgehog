@@ -145,8 +145,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(Deployment.Supervisor, :supervise, 1, fn _deployment, _tenant ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
@@ -176,8 +176,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(Deployment.Supervisor, :supervise, 1, fn _deployment, _tenant ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       # Now retry the operation
@@ -222,8 +222,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       assert {:ok, target} =
                MechanismCore.fetch_next_valid_target(mechanism, campaign.id, tenant.tenant_id)
 
-      expect(Deployment.Supervisor, :supervise, 1, fn _deployment, _tenant ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       # Step 2: Execute operation

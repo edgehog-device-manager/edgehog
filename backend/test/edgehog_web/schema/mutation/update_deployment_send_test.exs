@@ -24,14 +24,14 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Containers.Deployment.Supervisor, as: DeploymentSupervisor
+  alias Edgehog.Containers.Deployment.Orchestrator
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do
       # we need to set the state of deployment in one of ready states so the action validation passes
       deployment = deployment_fixture(release_opts: [containers: 1], tenant: tenant)
 
-      expect(DeploymentSupervisor, :supervise, fn _, _ -> :ok end)
+      expect(Orchestrator, :conduct, fn _, _ -> {:ok, :mock_pid} end)
 
       result =
         [tenant: tenant, deployment: deployment]

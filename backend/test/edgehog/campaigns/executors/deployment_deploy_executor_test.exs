@@ -36,9 +36,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
   alias Edgehog.Containers.Deployment
 
   setup do
-    Deployment.Supervisor
-    |> stub(:supervise, fn _deployment, _tenant, _opts -> :ok end)
-    |> stub(:supervise, fn _deployment, _tenant -> :ok end)
+    stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
 
     %{tenant: tenant_fixture()}
   end
@@ -164,8 +162,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
       # Expect target_count deployment calls and send back a message for each device
       expect(
-        Deployment.Supervisor,
-        :supervise,
+        Deployment.Orchestrator,
+        :conduct,
         target_count,
         # TODO: assert that we' receiving the correct data!
         fn deployment, tenant ->
@@ -263,8 +261,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
       parent = self()
 
       expect(
-        Deployment.Supervisor,
-        :supervise,
+        Deployment.Orchestrator,
+        :conduct,
         max_deployments,
         fn deployment, _tenant ->
           # Since we don't know _which_ target will receive the request, we send it back from here
@@ -345,7 +343,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
         } = ctx
 
         # Expect no calls to the mock
-        reject(&Deployment.Supervisor.supervise/2)
+        reject(&Deployment.Orchestrator.conduct/2)
 
         update_deployment_state!(tenant, deployment_id, unquote(status))
 
@@ -804,7 +802,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatus,
-    Deployment.Supervisor
+    Deployment.Orchestrator
   ]
 
   defp start_and_monitor_executor!(campaign, opts \\ []) do
@@ -871,8 +869,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
     # Expect count calls to the mock
     if count > 0 do
       expect(
-        Deployment.Supervisor,
-        :supervise,
+        Deployment.Orchestrator,
+        :conduct,
         count,
         fn _deployment, _tenant ->
           # Send the sync
@@ -881,8 +879,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
         end
       )
     else
-      reject(&Deployment.Supervisor.supervise/2)
-      reject(&Deployment.Supervisor.supervise/3)
+      reject(&Deployment.Orchestrator.conduct/2)
     end
 
     ref
@@ -923,14 +920,14 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
   end
 
   defp broadcast_readiness(deployment) do
-    topic = Deployment.Supervisor.topic(deployment)
+    topic = Deployment.Orchestrator.topic(deployment)
     message = %Phoenix.Socket.Broadcast{topic: topic, event: :ready, payload: deployment}
     Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, message)
   end
 
   defp broadcast_failure!(tenant, deployment_id) do
     deployment = Containers.fetch_deployment!(deployment_id, tenant: tenant)
-    topic = Deployment.Supervisor.topic(deployment)
+    topic = Deployment.Orchestrator.topic(deployment)
     message = %Phoenix.Socket.Broadcast{topic: topic, event: :failure, payload: deployment}
     Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, message)
   end

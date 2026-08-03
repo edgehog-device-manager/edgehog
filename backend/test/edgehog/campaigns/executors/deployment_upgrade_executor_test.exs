@@ -42,7 +42,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
   setup do
     # Stub the deployment request mock (for upgrade/deploy operation)
-    stub(Deployment.Supervisor, :supervise, fn _deployment, _tenant -> :ok end)
+    stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
 
     # Stub the deployment command mock (for start operation after upgrade)
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->
@@ -219,8 +219,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
       # Expect target_count deployment calls and send back a message for each device
       expect(
-        Deployment.Supervisor,
-        :supervise,
+        Deployment.Orchestrator,
+        :conduct,
         target_count,
         fn deployment, tenant ->
           # The upgraded deployment must already have its container deployments
@@ -327,8 +327,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
       parent = self()
 
       expect(
-        Deployment.Supervisor,
-        :supervise,
+        Deployment.Orchestrator,
+        :conduct,
         max_upgrades,
         fn deployment, _tenant ->
           # Since we don't know _which_ target will receive the request, we send it back from here
@@ -393,7 +393,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
       # For upgrade, :stopped means deployed but not started yet - still in progress
       # Expect no calls to the mock
-      reject(&Deployment.Supervisor.supervise/2)
+      reject(&Deployment.Orchestrator.conduct/2)
 
       update_deployment_state!(tenant, deployment_id, :stopped)
 
@@ -428,7 +428,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
         } = ctx
 
         # Expect no calls to the mock
-        reject(&Deployment.Supervisor.supervise/2)
+        reject(&Deployment.Orchestrator.conduct/2)
 
         update_deployment_state!(tenant, deployment_id, unquote(status))
 
@@ -877,7 +877,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatus,
-    Deployment.Supervisor,
+    Deployment.Orchestrator,
     DeploymentCommand,
     FileTransferCapabilities
   ]
@@ -945,14 +945,14 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
     if count > 0 do
       # Expect count calls to the mock
-      expect(Deployment.Supervisor, :supervise, count, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, count, fn _deployment, _tenant ->
         # Send the sync
         send_sync(parent, ref)
         :ok
       end)
     else
       # if count <= 0 => reject calls
-      reject(&Deployment.Supervisor.supervise/2)
+      reject(&Deployment.Orchestrator.conduct/2)
     end
 
     ref
@@ -995,14 +995,14 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   end
 
   defp broadcast_readiness(deployment) do
-    topic = Deployment.Supervisor.topic(deployment)
+    topic = Deployment.Orchestrator.topic(deployment)
     message = %Phoenix.Socket.Broadcast{topic: topic, event: :ready, payload: deployment}
     Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, message)
   end
 
   defp broadcast_failure!(tenant, deployment_id) do
     deployment = Containers.fetch_deployment!(deployment_id, tenant: tenant)
-    topic = Deployment.Supervisor.topic(deployment)
+    topic = Deployment.Orchestrator.topic(deployment)
     message = %Phoenix.Socket.Broadcast{topic: topic, event: :failure, payload: deployment}
     Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, message)
   end

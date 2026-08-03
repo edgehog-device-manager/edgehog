@@ -47,8 +47,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     release =
       release_fixture(tenant: tenant, containers: containers, container_params: container_params)
 
-    expect(Deployment.Supervisor, :supervise, fn _, _ ->
-      # We just expect the container supervisor to be started, the container supervisor tests are separate
+    expect(Deployment.Orchestrator, :conduct, fn _, _ ->
+      # We just expect the container orchestrator to be started, the container orchestrator tests are separate
       :ok
     end)
 
@@ -90,7 +90,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     ordered_containers = [container_1.id, container_3.id, container_2.id]
 
-    expect(Deployment.Supervisor, :supervise, fn deployment, _ ->
+    expect(Deployment.Orchestrator, :conduct, fn deployment, _ ->
       {:ok, ids} =
         deployment
         |> Ash.load!(release: [:containers, :container_dependencies])
@@ -166,8 +166,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
         system_models: [system_model]
       )
 
-    expect(Deployment.Supervisor, :supervise, fn _, _ ->
-      # We just expect the container supervisor to be started, the container supervisor tests are separate
+    expect(Deployment.Orchestrator, :conduct, fn _, _ ->
+      # We just expect the container orchestrator to be started, the container orchestrator tests are separate
       :ok
     end)
 

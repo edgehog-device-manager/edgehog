@@ -62,7 +62,7 @@ defmodule Edgehog.Containers.Deployment.UpgradeTest do
       parent = self()
       ref = make_ref()
 
-      expect(Deployment.Supervisor, :supervise, 1, fn new_deployment, tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn new_deployment, tenant ->
         # The supervisor receives the new deployment, whose container
         # deployments must already be visible outside the upgrade transaction.
         new_deployment = Ash.load!(new_deployment, :container_deployments, tenant: tenant)
@@ -129,7 +129,7 @@ defmodule Edgehog.Containers.Deployment.UpgradeTest do
           version: "0.0.2"
         )
 
-      expect(Deployment.Supervisor, :supervise, 1, fn _new_deployment, _tenant -> :ok end)
+      expect(Deployment.Orchestrator, :conduct, 1, fn _new_deployment, _tenant -> :ok end)
 
       assert {:ok, new_deployment} =
                deployment

@@ -24,8 +24,6 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Ecto.Adapters.SQL.Sandbox
-  alias Edgehog.Astarte.Device.DeploymentUpdate
   alias Edgehog.Containers
   alias Edgehog.Containers.Deployment
 
@@ -57,7 +55,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         |> deployment_fixture()
         |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
-      expect(Deployment.Supervisor, :supervise, fn _, _ -> :ok end)
+      expect(Deployment.Orchestrator, :conduct, fn _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
@@ -100,7 +98,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       parent = self()
       ref = make_ref()
 
-      expect(Deployment.Supervisor, :supervise, fn new_deployment, tenant ->
+      expect(Deployment.Orchestrator, :conduct, fn new_deployment, tenant ->
         new_deployment = Ash.load!(new_deployment, :container_deployments, tenant: tenant)
         send(parent, {ref, new_deployment})
         :ok
@@ -143,20 +141,13 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
       test_process = self()
+      supervisor_ref = make_ref()
 
-      expect(Deployment.Supervisor, :supervise, fn deployment, tenant ->
-        args = [
-          tenant: tenant,
-          deployment: deployment,
-          mode: :manual
-        ]
+      # The upgrade must start supervising the newly created deployment
+      expect(Deployment.Orchestrator, :conduct, fn deployment, _tenant ->
+        send(test_process, {supervisor_ref, deployment.id})
 
-        {:ok, supervisor} = Mimic.call_original(Deployment.Supervisor, :start_link, [args])
-
-        Sandbox.allow(Edgehog.Repo, test_process, supervisor)
-
-        # Send the supervisor pid to the test process
-        send(test_process, {:supervisor, supervisor})
+        {:ok, :mock_pid}
       end)
 
       result =
@@ -166,34 +157,10 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      # Receive the supervisor pid
-      assert_receive {:supervisor, sup}, 1000
+      # Receive the pid of the newly created deployment
+      assert_receive {^supervisor_ref, supervised_id}, 1000
 
-      ref = Process.monitor(sup)
-
-      # The update deploys the new version
-      Deployment.Provisioner
-      |> allow(test_process, sup)
-      |> expect(:provision, fn deployment, _ ->
-        topic = Deployment.Provisioner.topic(deployment)
-
-        # Broadcast readiness
-        Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, {:ready, deployment})
-      end)
-
-      # And sends the update command
-      DeploymentUpdate
-      |> allow(test_process, sup)
-      |> expect(:update, fn _, _, data ->
-        assert data.to == deployment_id
-
-        :ok
-      end)
-
-      Deployment.Supervisor.start(sup)
-
-      # Assert supervisor shuts down correctly
-      assert_receive {:DOWN, ^ref, :process, ^sup, :normal}, 2000
+      assert supervised_id == deployment_id
     end
 
     test "fails if the deployments do not belong to the same application", args do
@@ -235,7 +202,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       deployment_0_0_1 =
         deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
 
-      reject(&Deployment.Supervisor.supervise/2)
+      reject(&Deployment.Orchestrator.conduct/2)
 
       _result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
