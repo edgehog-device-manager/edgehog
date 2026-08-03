@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatus
+  alias Edgehog.Containers.Deployment.Starter
   alias Edgehog.Containers.Reconciler
   alias Edgehog.Devices.Device
 
@@ -47,6 +48,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
       stub(Reconciler, :register_device, fn _device, _tenant -> :ok end)
       stub(Reconciler, :stop_device, fn _device, _tenant -> :ok end)
+      stub(Starter, :cook, fn _device, _tenant -> {:ok, :mock_pid} end)
       stub(Reconciler, :start_link, fn _opts -> :ok end)
 
       {:ok, conn: conn, cluster: cluster, realm: realm, device: device, path: path}

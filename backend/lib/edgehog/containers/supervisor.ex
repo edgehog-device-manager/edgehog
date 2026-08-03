@@ -46,6 +46,7 @@ defmodule Edgehog.Containers.Supervisor do
       {Registry, keys: :unique, name: DeviceMapping.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Volume.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: DeviceRequest.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Deployment.Starter.Registry},
 
       # Supervisors
       {DynamicSupervisor,
@@ -65,7 +66,10 @@ defmodule Edgehog.Containers.Supervisor do
       {DynamicSupervisor,
        name: Containers.DeviceMapping.Provisioner.Supervisor, strategy: :one_for_one},
       {DynamicSupervisor,
-       name: Containers.DeviceRequest.Provisioner.Supervisor, strategy: :one_for_one}
+       name: Containers.DeviceRequest.Provisioner.Supervisor, strategy: :one_for_one},
+
+      # Starter supervisor
+      {DynamicSupervisor, name: Containers.Deployment.Starter.Supervisor, strategy: :one_for_one}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

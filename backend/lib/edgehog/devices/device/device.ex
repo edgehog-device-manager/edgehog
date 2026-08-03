@@ -111,6 +111,7 @@ defmodule Edgehog.Devices.Device do
 
       change Changes.InitializeFromDeviceStatus
       change Changes.SetupReconciler
+      change Changes.DeployPending
 
       # Only if created
       change set_attribute(:device_id, arg(:device_id))
