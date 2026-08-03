@@ -225,7 +225,7 @@ const FileDropzone = ({
         {files.length === 0 ? (
           <div className="py-2">
             <div className="mb-2 text-secondary">
-              <Icon icon="folder" size="3x" />
+              <Icon icon="folder" size="3em" />
             </div>
             <p className="mb-1 text-muted">
               {allowMultiple ? (
