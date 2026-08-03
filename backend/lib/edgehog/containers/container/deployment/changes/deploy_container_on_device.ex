@@ -20,7 +20,7 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.DeployContainerOnDevic
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers.Container.Deployment.Supervisor, as: ContainerSupervisor
+  alias Edgehog.Containers.Container.Deployment.Orchestrator
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
@@ -30,9 +30,9 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.DeployContainerOnDevic
   defp send_deployment(changeset, {:ok, container_deployment}, tenant) do
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    ContainerSupervisor.supervise(container_deployment, deployment, tenant)
-
-    {:ok, container_deployment}
+    with {:ok, _pid} <- Orchestrator.conduct(container_deployment, deployment, tenant) do
+      {:ok, container_deployment}
+    end
   end
 
   defp send_deployment(_changeset, error, _tenant), do: error

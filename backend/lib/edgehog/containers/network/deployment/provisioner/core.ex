@@ -20,10 +20,10 @@
 
 defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
   @moduledoc """
-  Network deployment core functions
+  Network provisioner core functions.
 
-  This module contains all functions required by the provisioner that handle the business logic
-  e.g., sending data to the device
+  This module contains all functions required by the provisioner that handle the
+  pure provisioning logic, e.g. sending data to the device.
   """
 
   alias Edgehog.Astarte.Device.AvailableNetworks.NetworkStatus
@@ -32,7 +32,49 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
 
   require Logger
 
-  def send(network_deployment, opts) do
+  @doc """
+  Sends the appropriate messages to the device.
+
+  Returns a `{:noreply, state, timeout}` tuple for the provisioner, with the
+  updated state and the timeout after which the send should be retried.
+  """
+  def send(state) do
+    %{
+      network_deployment: network_deployment,
+      deployment: deployment,
+      tenant: tenant
+    } = state
+
+    new_state =
+      network_deployment
+      |> send_to_device(tenant: tenant, deployment: deployment)
+      |> update_state_on_send(state)
+
+    {:noreply, new_state, timeout(new_state)}
+  end
+
+  def maybe_send(state) do
+    retries = Map.fetch!(state, :retries)
+    max_retries = Config.max_retries!()
+
+    if retries < max_retries do
+      state
+      |> increase_retries()
+      |> send()
+    else
+      {:stop, {:shutdown, :max_retries}, state}
+    end
+  end
+
+  def maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
+    if device_online? do
+      next_step
+    else
+      {:stop, {:shutdown, :device_offline}, state}
+    end
+  end
+
+  def send_to_device(network_deployment, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
     deployment = Keyword.fetch!(opts, :deployment)
 
@@ -49,6 +91,24 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
 
       :ok
     end
+  end
+
+  defp update_state_on_send(:ok, state) do
+    Map.put(state, :state, :sent)
+  end
+
+  defp update_state_on_send(error, state) do
+    %{network_deployment: %{id: id}} = state
+
+    Logger.warning(
+      "Error while sending the deployment #{id}: #{inspect(error)}. The operation will be retried shortly."
+    )
+
+    state
+  end
+
+  defp increase_retries(state) do
+    Map.update!(state, :retries, &Kernel.+(&1, 1))
   end
 
   @doc """
@@ -123,11 +183,7 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
       retries: retries
     } = state
 
-    pan =
-      case d_state do
-        :sent -> Config.message_min_timeout!()
-        :init -> 0
-      end
+    pan = pan(d_state)
 
     exp = :math.pow(2, retries)
 
@@ -141,4 +197,7 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
     |> min(max_timeout)
     |> round()
   end
+
+  defp pan(:sent), do: Config.message_min_timeout!()
+  defp pan(:init), do: 0
 end

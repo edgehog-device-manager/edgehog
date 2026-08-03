@@ -18,9 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Container.Deployment.Supervisor do
+defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   @moduledoc """
-  A supervisor for all provisioner processes for a container.
+  Orchestrator for all the provisioner processes of a container.
 
   A container consists of various resources.
   - an image
@@ -28,24 +28,27 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   - networks
   - ...
 
-  All these resources have their own process that supervises the communication
-  with the device, retrying when some error happens or querying astarte when
-  triggers might be missing.
+  All these resources have their own provisioner process that supervises the
+  communication with the device, retrying when some error happens or querying
+  astarte when triggers might be missing.
 
-  This supervisor is responsible for
-  - spawning such supervision processes
+  This orchestrator is responsible for
+  - spawning such provisioning processes
   - wait for readiness of the various resources
   - emit readiness of the whole container when each and every resource finishes
+  - emit a failure of the whole container when a resource reports a failure
 
-  It also handles retries and timeouts, emitting also failures when retrying did
-  not succeed.
+  Children are not supervised nor cleaned up by this orchestrator: a child that
+  crashes is ignored, and a child that gives up (e.g. the maximum number of
+  retries was hit, the device went offline, or the provisioning timeout was hit)
+  reports a failure through PubSub, which this orchestrator reacts to.
   """
 
   use GenServer, restart: :transient
 
-  alias Container.Deployment.Supervisor.Registry, as: SupervisorRegistry
+  alias Container.Deployment.Orchestrator.Registry, as: ContainerRegistry
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Container.Deployment.Supervisor.Core
+  alias Edgehog.Containers.Container.Deployment.Orchestrator.Core
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image
@@ -56,14 +59,43 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
 
   @test Mix.env() == :test
 
+  @sup Edgehog.Containers.Container.Deployment.Orchestrator.Supervisor
+
   # API
 
-  def supervise(container_deployment, deployment, tenant, opts \\ []) do
-    opts
-    |> Keyword.put(:container_deployment, container_deployment)
-    |> Keyword.put(:deployment, deployment)
-    |> Keyword.put(:tenant, tenant)
-    |> start_link()
+  @doc """
+  Conducts the provisioning of a container deployment.
+
+  Starts the orchestrator for the given container deployment under the
+  `Edgehog.Containers.Container.Deployment.Orchestrator.Supervisor` dynamic
+  supervisor, which owns the whole provisioning tree of the container (its image,
+  volumes, networks, device mappings, device requests and their provisioners).
+
+  The container orchestrator then:
+  - spawns the provisioner processes of the container deployment and its
+    resources
+  - waits for the readiness of each and every resource
+  - emits the readiness of the whole container once all the resources are ready
+  - marks the container deployment as failed if a resource reports a failure
+
+  If the container deployment is already being conducted, the pid of the running
+  orchestrator is returned and no duplicate orchestrator is started.
+
+  Returns `{:ok, pid}` where `pid` is the orchestrator process, or
+  `{:error, reason}`.
+  """
+  def conduct(container_deployment, deployment, tenant, opts \\ []) do
+    args =
+      opts
+      |> Keyword.put(:container_deployment, container_deployment)
+      |> Keyword.put(:deployment, deployment)
+      |> Keyword.put(:tenant, tenant)
+
+    child_spec = Supervisor.child_spec({__MODULE__, args}, id: container_deployment.id)
+
+    with {:error, {:already_started, pid}} <- DynamicSupervisor.start_child(@sup, child_spec) do
+      {:ok, pid}
+    end
   end
 
   def start_link(args) do
@@ -73,17 +105,17 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   end
 
   @doc """
-  Returns the readiness topic the supervisor will publish onto when the resource
-  and its children are ready.
+  Returns the readiness topic the orchestrator will publish onto when the
+  resource and its children are ready.
 
-  it accepts either an entire %Edgehog.Containers.Container.Deployment{}
+  It accepts either an entire %Edgehog.Containers.Container.Deployment{}
   resource, or just the ID.
   """
   def topic(%Container.Deployment{id: id}), do: "container_deployments:ready:#{id}"
   def topic(id), do: "container_deployments:ready:#{id}"
 
   def name(%Container.Deployment{id: id}) do
-    {:via, Registry, {SupervisorRegistry, id}}
+    {:via, Registry, {ContainerRegistry, id}}
   end
 
   # Test additional API
@@ -114,9 +146,7 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
       container_deployment: container_deployment,
       deployment: deployment,
       tenant: tenant,
-      state: :init,
-      mode: mode,
-      retries: 0
+      mode: mode
     }
 
     {:ok, state, {:continue, :maybe_load_resources}}
@@ -138,10 +168,23 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   # them in the state
   @impl GenServer
   def handle_continue(:load_resources, state) do
-    Logger.debug("Loading resources for container deployment #{state.container_deployment.id}")
-    new_state = Core.load_resources(state)
+    case Core.load_resources(state) do
+      {:ok, new_state} ->
+        Logger.debug(
+          "Loading resources for container deployment #{state.container_deployment.id}"
+        )
 
-    {:noreply, new_state, {:continue, :provision_deployments}}
+        {:noreply, new_state, {:continue, :provision_deployments}}
+
+      {:error, reason} ->
+        Logger.error("""
+        Error while loading the resources for container deployment #{state.container_deployment.id}: #{inspect(reason)}.
+
+        The container deployment will be marked as failed.
+        """)
+
+        fail_container(state)
+    end
   end
 
   # This step of the initialization process provisions all underlying resources
@@ -149,9 +192,11 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   def handle_continue(:provision_deployments, state) do
     new_state = Core.provision(state)
 
-    timeout = timeout(state)
-
-    {:noreply, new_state, timeout}
+    if Map.get(new_state, :provisioning_failed, false) do
+      fail_container(new_state)
+    else
+      {:noreply, new_state}
+    end
   end
 
   @impl GenServer
@@ -160,18 +205,22 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
       container_deployment: container_deployment
     } = state
 
-    timeout = timeout(state)
-
     if Core.ready?(state) do
       topic = topic(container_deployment)
 
+      event = %Phoenix.Socket.Broadcast{
+        topic: topic,
+        event: :ready,
+        payload: container_deployment
+      }
+
       # Broadcast readiness
-      Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, {:ready, container_deployment})
+      Phoenix.PubSub.broadcast(Edgehog.PubSub, topic, event)
 
       # Terminate normally
       {:stop, :normal, state}
     else
-      {:noreply, state, timeout}
+      {:noreply, state}
     end
   end
 
@@ -220,28 +269,36 @@ defmodule Edgehog.Containers.Container.Deployment.Supervisor do
   end
 
   @impl GenServer
-  def handle_info(:timeout, state) do
-    state_ready? = Core.ready?(state)
+  def handle_info({:failure, _deployment}, state) do
+    Logger.warning(
+      "A provisioner for container deployment #{state.container_deployment.id} gave up. Failing the container deployment."
+    )
 
-    %{container_deployment: %{id: id}} = state
-
-    ready? =
-      if state_ready?,
-        do: "ready",
-        else: "not ready"
-
-    Logger.warning("""
-    Container supervisor for container deployment #{id} hit a timeout, the underlying resources were #{ready?}.
-
-    The supervisor will now terminate, something went wrong.
-    """)
-
-    # TODO: check liveness and possibly restart processes instead of shutting
-    # down
-    {:stop, {:shutdown, :timeout_hit}, state}
+    fail_container(state)
   end
 
-  defp timeout(_state) do
-    to_timeout(minute: 10)
+  ## Terminate
+
+  defp fail_container(state) do
+    %{
+      container_deployment: container_deployment
+    } = state
+
+    %{id: id} = container_deployment
+
+    Logger.warning("Container deployment #{id} provisioning failed.")
+
+    topic = topic(container_deployment)
+
+    event = %Phoenix.Socket.Broadcast{
+      topic: topic,
+      event: :failure,
+      payload: container_deployment
+    }
+
+    # Broadcast failure
+    Phoenix.PubSub.broadcast!(Edgehog.PubSub, topic, event)
+
+    {:stop, {:shutdown, :container_failed}, state}
   end
 end

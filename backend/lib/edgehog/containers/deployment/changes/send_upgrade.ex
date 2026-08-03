@@ -60,7 +60,7 @@ defmodule Edgehog.Containers.Deployment.Changes.SendUpgrade do
   defp start_supervisor(changeset, {:ok, new_deployment}) do
     tenant = changeset.tenant
 
-    Deployment.Supervisor.supervise(new_deployment, tenant)
+    Deployment.Orchestrator.conduct(new_deployment, tenant)
 
     {:ok, new_deployment}
   end

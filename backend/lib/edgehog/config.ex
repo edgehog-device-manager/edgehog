@@ -173,6 +173,19 @@ defmodule Edgehog.Config do
     type: :non_neg_integer,
     default: 100
 
+  @envdoc """
+  Edgehog deployment provisioning timeout (milliseconds).
+
+  This environment variable sets the deadline a single provisioner has to
+  complete its provisioning. When it is hit the provisioner gives up and
+  broadcasts a failure, which the deployment orchestrator reacts to by marking
+  the deployment as timed out and broadcasting a failure. Defaults to 10 minutes.
+  """
+  app_env :deployment_provisioning_timeout, :edgehog, :deployment_provisioning_timeout,
+    os_env: "EDGEHOG_DEPLOYMENT_PROVISIONING_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(minute: 10)
+
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
   """

@@ -32,8 +32,10 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   - start_link/1 called, init the process
   - The server subscribes to events on 'device_request_deployments:id' (id of the device request
     deployment)
-  - Core.send/2 is called, sending the appropriate messages to the device (see
-    Core.send/1 docs for more info)
+  - if the device request deployment is already ready, the provisioner terminates
+    normally right away, broadcasting readiness
+  - otherwise the appropriate messages are sent to the device through the
+    `Core` module (see `Core.send/1` docs for more info)
 
   Nice flow (everything goes ok)
   - Astarte triggers update the device request deployment state, marking it as present or
@@ -43,8 +45,8 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   - listening processes can react to this information
 
   Timeouts (something goes wrong)
-  - Core.send/2 failed, maybe the device is offline, or there was some problem
-    with astarte
+  - `Core.send/1` failed, maybe the device is offline, or there was some
+    problem with astarte
   - an exponential backoff timeout is started
   - A :timeout hits the server, it retries to send the device request information to the
     device
@@ -59,29 +61,30 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   require Logger
 
   @test Mix.env() == :test
+  @sup Edgehog.Containers.DeviceRequest.Provisioner.Supervisor
 
   #### API
 
   @doc """
   Starts the provisioner of a device request deployment.
 
-  Equivalent to starting the provisioner through `start_link/1` with opts
-  ```
-  [
-    device_request_deployment: device_request_deployment,
-    deployment: deployment,
-    tenant: tenant
-  ]
-  ```
-
-  See `start_link/1` docs for more information.
+  Starts the right process trough the #{inspect(@sup)} dynamic supervisor.
+  When creating the link, the server checks a registry to know whether the
+  corresponding process is already up and running. Check `start_link/1` docs for
+  more.
   """
   def provision(device_request_deployment, deployment, tenant, opts \\ []) do
-    opts
-    |> Keyword.put(:device_request_deployment, device_request_deployment)
-    |> Keyword.put(:deployment, deployment)
-    |> Keyword.put(:tenant, tenant)
-    |> start_link()
+    args =
+      opts
+      |> Keyword.put(:device_request_deployment, device_request_deployment)
+      |> Keyword.put(:deployment, deployment)
+      |> Keyword.put(:tenant, tenant)
+
+    child_spec = Supervisor.child_spec({__MODULE__, args}, id: device_request_deployment.id)
+
+    with {:error, {:already_started, pid}} <- DynamicSupervisor.start_child(@sup, child_spec) do
+      {:ok, pid}
+    end
   end
 
   @doc """
@@ -181,19 +184,25 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
       "Device #{device_id} is currently #{if device_online?, do: "online", else: "offline"}"
     )
 
+    # If the provisioning does not complete within this deadline, the
+    # provisioner gives up and broadcasts a failure that the orchestrator reacts
+    # to
+    deadline = Config.deployment_provisioning_timeout!()
+    Process.send_after(self(), :give_up, deadline)
+
     {:ok, state, {:continue, :maybe_start}}
   end
 
   @impl GenServer
   def handle_continue(:maybe_start, %{mode: :auto} = state) do
     next_step = {:noreply, state, {:continue, :check_deployment_state}}
-    maybe_early_terminate(state, next_step)
+    Core.maybe_early_terminate(state, next_step)
   end
 
   @impl GenServer
   def handle_continue(:maybe_start, %{mode: :manual} = state) do
     next_step = {:noreply, state}
-    maybe_early_terminate(state, next_step)
+    Core.maybe_early_terminate(state, next_step)
   end
 
   @impl GenServer
@@ -213,11 +222,11 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   end
 
   @impl GenServer
-  def handle_continue(:send, state), do: send(state)
+  def handle_continue(:send, state), do: Core.send(state)
 
   # We were not able to send the message to the device. retry
   @impl GenServer
-  def handle_info(:timeout, %{state: :init} = state), do: send(state)
+  def handle_info(:timeout, %{state: :init} = state), do: Core.send(state)
 
   # We sent the message to the device, but no trigger came back.
   # 1. Reconcile with astarte
@@ -230,7 +239,7 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
 
     case device_request_deployment do
       :not_found ->
-        maybe_send(state)
+        Core.maybe_send(state)
 
       {:ok, device_request_deployment} ->
         # Reconciliation updated the device_request deployment, just update the state as a
@@ -268,6 +277,17 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
     {:stop, :normal, new_state}
   end
 
+  # The device request deployment provisioning deadline was hit, give up and
+  # broadcast a failure so that the orchestrator can react
+  @impl GenServer
+  def handle_info(:give_up, state) do
+    Logger.warning("""
+    Device request deployment #{state.device_request_deployment.id} provisioning timed out. Giving up.
+    """)
+
+    {:stop, {:shutdown, :timeout_hit}, state}
+  end
+
   @impl GenServer
   def handle_info(%Phoenix.Socket.Broadcast{topic: "devices:offline:" <> _id}, old_state) do
     new_state = Map.put(old_state, :device_online?, false)
@@ -280,7 +300,7 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   @impl GenServer
   def terminate(:normal, state) do
     %{
-      device_request_deployment: %{id: id, device_id: device_id},
+      device_request_deployment: %{id: id, device_id: device_id} = device_request_deployment,
       retries: retries
     } = state
 
@@ -288,20 +308,32 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
     Device Request deployment #{id} successfully provisioned after #{retries} retries.
     """)
 
+    Phoenix.PubSub.broadcast(
+      Edgehog.PubSub,
+      "ready:device_request_deployments:#{id}",
+      {:ready, device_request_deployment}
+    )
+
     # Unsubscribe from events, we're terminating
     Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "device_request_deployments:#{id}")
     Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
   end
 
   @impl GenServer
-  def terminate({:shutdown, :device_offline}, state) do
-    %{
-      device_request_deployment: %{id: id, device_id: device_id}
-    } = state
+  def terminate({:shutdown, reason}, %{device_request_deployment: device_request_deployment})
+      when reason in [:max_retries, :device_offline, :timeout_hit] do
+    %{id: id, device_id: device_id} = device_request_deployment
 
     Logger.info("""
-    Device #{device_id} went offline. Provisioner for device request deployment #{id} terminating.
+    Provisioner for device request deployment #{id} gave up with reason #{inspect(reason)}.
     """)
+
+    # Broadcast failure so that the orchestrator can react
+    Phoenix.PubSub.broadcast(
+      Edgehog.PubSub,
+      "ready:device_request_deployments:#{id}",
+      {:failure, device_request_deployment}
+    )
 
     # Unsubscribe from events, we're terminating
     Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "device_request_deployments:#{id}")
@@ -322,71 +354,5 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
       reason: reason,
       provisioner_state: state
     )
-  end
-
-  #### Helper functions
-
-  # Send the device request if the number of retries does not exceed the max number of
-  # retries.
-  defp maybe_send(state) do
-    retries = Map.fetch!(state, :retries)
-    max_retries = Config.max_retries!()
-
-    if retries < max_retries do
-      state
-      |> increase_retries()
-      |> send()
-    else
-      {:stop, {:shutdown, :max_retries}, state}
-    end
-  end
-
-  # Sends the device request deployment, without asking any questions. To check for
-  # retries, use `maybe_send`.
-  defp send(state) do
-    %{
-      device_request_deployment: device_request_deployment,
-      deployment: deployment,
-      tenant: tenant
-    } = state
-
-    new_state =
-      device_request_deployment
-      |> Core.send(tenant: tenant, deployment: deployment)
-      |> maybe_update_state_on_send(state)
-
-    timeout = Core.timeout(new_state)
-
-    {:noreply, new_state, timeout}
-  end
-
-  # if the operation was successful, update the state to sent, log the error otherwise.
-  defp maybe_update_state_on_send(:ok, state) do
-    Map.put(state, :state, :sent)
-  end
-
-  defp maybe_update_state_on_send(error, state) do
-    %{device_request_deployment: %{id: id}} = state
-
-    Logger.warning(
-      "Error while sending the device request deployment #{id}: #{inspect(error)}. The operation will be retried shortly."
-    )
-
-    state
-  end
-
-  # Returns an early stop tuple if the device is offline, otherwise continues with
-  # the given `next_step`
-  defp maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
-    if device_online? do
-      next_step
-    else
-      {:stop, {:shutdown, :device_offline}, state}
-    end
-  end
-
-  # Update the state to increment the number of retries
-  defp increase_retries(state) do
-    Map.update!(state, :retries, &Kernel.+(&1, 1))
   end
 end

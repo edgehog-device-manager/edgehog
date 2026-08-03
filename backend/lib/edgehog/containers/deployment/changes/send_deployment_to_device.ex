@@ -20,7 +20,7 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers.Deployment.Supervisor
+  alias Edgehog.Containers.Deployment.Orchestrator
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
       [container_deployments: [:image_deployment, :volume_deployments, :network_deployments]],
       tenant: tenant
     )
-    |> Supervisor.supervise(tenant)
+    |> Orchestrator.conduct(tenant)
 
     {:ok, deployment}
   end

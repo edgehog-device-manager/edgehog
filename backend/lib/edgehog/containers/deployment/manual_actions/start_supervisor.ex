@@ -25,14 +25,14 @@ defmodule Edgehog.Containers.Deployment.ManualActions.StartSupervisor do
 
   use Ash.Resource.ManualUpdate
 
-  alias Edgehog.Containers.Deployment.Supervisor
+  alias Edgehog.Containers.Deployment.Orchestrator
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, %{tenant: tenant}) do
     deployment = changeset.data
 
-    Supervisor.supervise(deployment, tenant)
-
-    {:ok, deployment}
+    with {:ok, _pid} <- Orchestrator.conduct(deployment, tenant) do
+      {:ok, deployment}
+    end
   end
 end

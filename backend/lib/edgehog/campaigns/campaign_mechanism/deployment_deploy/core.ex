@@ -70,7 +70,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   def topics(operation_id) do
     [
       "deployments:timeout:#{operation_id}",
-      Deployment.Supervisor.topic(operation_id)
+      Deployment.Orchestrator.topic(operation_id)
     ]
   end
 
@@ -184,7 +184,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
         |> Map.fetch(:deployment)
 
       with {:ok, deployment} <- deployment_result do
-        Deployment.Supervisor.supervise(deployment, target.tenant_id)
+        Deployment.Orchestrator.conduct(deployment, target.tenant_id)
 
         {:ok, target}
       end

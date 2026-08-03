@@ -18,7 +18,8 @@
 
 defmodule Edgehog.Containers.Reconciler.Core do
   @moduledoc """
-  Core component for the reconciler, provides `reconcile` function.
+  Core component for the reconciler, provides `reconcile/1` and
+  `reconcile_timeout/1` functions.
   """
 
   alias Edgehog.Containers
@@ -26,6 +27,16 @@ defmodule Edgehog.Containers.Reconciler.Core do
 
   require Ash.Query
   require Logger
+
+  # median time per device to setup the reconciliation timer. This is just an
+  # heuristic based on online articles about database performance (which affect
+  # task setup as the device number is read from the database).
+  @comp_time_per_device 200
+
+  # 10 minutes
+  @ten_min 10 * 60 * 1000
+  # 5 minmutes
+  @five_min 5 * 60 * 1000
 
   @spec reconcile(%{device_id: integer(), tenant: Edgehog.Tenants.Tenant.t()}) ::
           :ok | {:error, term()}
@@ -120,6 +131,24 @@ defmodule Edgehog.Containers.Reconciler.Core do
     |> Enum.map(&reconcile_deployment(&1, device, tenant))
     |> Enum.reject(&(&1 == :ok))
     |> Enum.each(&Logger.warning("Error while fetching container deployment: #{inspect(&1)}"))
+  end
+
+  # This seems to be spawning _Hawkes processes_ I wont investigate more, this
+  # seems to be uniform enough with a variable window of time for
+  # reconciliation.
+  def reconcile_timeout(tenant) do
+    {online_devices_n, _} = online_devices(tenant)
+    mean_time = online_devices_n * @comp_time_per_device
+
+    max = max(@ten_min, mean_time)
+    min = max(@five_min, mean_time / 2)
+
+    rand = :rand.uniform()
+
+    # Random number between min and max
+    timeout = min + (max - min) * rand
+
+    timeout |> Float.round(0) |> ceil()
   end
 
   defp reconcile_image(image_desc, device, tenant) do

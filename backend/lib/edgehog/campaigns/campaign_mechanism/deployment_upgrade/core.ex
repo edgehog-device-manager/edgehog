@@ -72,7 +72,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
       "deployments:#{operation_id}",
       "deployments:started:#{operation_id}",
       "deployments:timeout:#{operation_id}",
-      Deployment.Supervisor.topic(operation_id)
+      Deployment.Orchestrator.topic(operation_id)
     ]
   end
 

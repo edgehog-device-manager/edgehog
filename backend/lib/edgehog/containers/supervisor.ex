@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Registries do
+defmodule Edgehog.Containers.Supervisor do
   @moduledoc """
   Container registries.
 
@@ -27,6 +27,8 @@ defmodule Edgehog.Containers.Registries do
   """
   use Supervisor
 
+  alias Edgehog.Containers
+
   def start_link(args) do
     Supervisor.start_link(__MODULE__, args, name: __MODULE__)
   end
@@ -34,15 +36,36 @@ defmodule Edgehog.Containers.Registries do
   @impl Supervisor
   def init(_args) do
     children = [
-      {Registry, keys: :unique, name: Deployment.Supervisor.Registry},
+      # Registries
+      {Registry, keys: :unique, name: Deployment.Orchestrator.Registry},
       {Registry, keys: :unique, name: Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: Container.Deployment.Supervisor.Registry},
+      {Registry, keys: :unique, name: Container.Deployment.Orchestrator.Registry},
       {Registry, keys: :unique, name: Container.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Image.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Network.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: DeviceMapping.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Volume.Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: DeviceRequest.Deployment.Provisioner.Registry}
+      {Registry, keys: :unique, name: DeviceRequest.Deployment.Provisioner.Registry},
+
+      # Supervisors
+      {DynamicSupervisor,
+       name: Containers.Deployment.Orchestrator.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor,
+       name: Containers.Container.Deployment.Orchestrator.Supervisor, strategy: :one_for_one},
+
+      # Provisioners supervisors
+      {DynamicSupervisor,
+       name: Containers.Deployment.Provisioner.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor,
+       name: Containers.Container.Provisioner.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor, name: Containers.Image.Provisioner.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor, name: Containers.Volume.Provisioner.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor,
+       name: Containers.Network.Provisioner.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor,
+       name: Containers.DeviceMapping.Provisioner.Supervisor, strategy: :one_for_one},
+      {DynamicSupervisor,
+       name: Containers.DeviceRequest.Provisioner.Supervisor, strategy: :one_for_one}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

@@ -42,8 +42,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
 
   # Common event handling
 
-  # NOTE: The topic has to match what the deployment supervisor publishes onto!
-  # Check the Deployment.Supervisor implementation of `topic/1`
+  # NOTE: The topic has to match what the deployment orchestrator publishes onto!
+  # Check the Deployment.Orchestrator implementation of `topic/1`
   @impl LazyBatch
   def handle_info(
         %Phoenix.Socket.Broadcast{
