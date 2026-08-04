@@ -44,4 +44,10 @@ export const createSelectStyles = <Option>(
         : "rgba(var(--bs-primary-rgb), 0.5)",
     },
   }),
+  multiValueRemove: (base) => ({
+    ...base,
+    ":hover": {
+      backgroundColor: "transparent",
+    },
+  }),
 });

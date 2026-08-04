@@ -73,7 +73,7 @@ interface FieldHelpProps {
 
 const FieldHelp = ({
   id,
-  size = 16,
+  size = 17,
   children,
   itemsAlignment,
 }: FieldHelpProps) => {
@@ -95,12 +95,8 @@ const FieldHelp = ({
         <Icon
           icon={"question"}
           style={{
-            color: "white",
-            backgroundColor: "lightgray",
-            borderRadius: "50%",
-            padding: "1.2px",
+            color: "gray",
             cursor: "pointer",
-            transition: "all 0.2s",
             fontSize: `${size}px`,
           }}
           onMouseEnter={(e) => {

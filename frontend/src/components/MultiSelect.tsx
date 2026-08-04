@@ -36,7 +36,7 @@ import { createSelectStyles } from "./selectStyles";
 const MultiValueContainer = <Option,>(
   props: MultiValueGenericProps<Option, true>,
 ) => (
-  <Tag className="me-1">
+  <Tag className="me-1 pe-2">
     <components.MultiValueContainer
       {...props}
       innerProps={{ className: "d-flex" }}
@@ -58,7 +58,7 @@ const MultiValueRemove = <Option,>(
   }
   return (
     <components.MultiValueRemove {...props}>
-      <Icon icon="close" />
+      <Icon icon="xMark" size="1em" />
     </components.MultiValueRemove>
   );
 };
