@@ -268,6 +268,9 @@
   "components.CellularConnectionTabs.noModems.title": {
     "defaultMessage": "No modem"
   },
+  "components.CellularConnectionTabs.unknownValue": {
+    "defaultMessage": "Unrecognized value received from the device."
+  },
   "components.ChannelsTable.handleTitle": {
     "defaultMessage": "Handle",
     "description": "Title for the Handle column of the channels table"
