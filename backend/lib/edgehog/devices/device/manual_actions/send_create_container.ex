@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -70,6 +70,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         capAdd: container.cap_add,
         capDrop: container.cap_drop,
         deviceMappingIds: Enum.map(container.device_mappings, & &1.id),
+        deviceRequestIds: [],
         cpuPeriod: normalize(container.cpu_period),
         cpuQuota: normalize(container.cpu_quota),
         cpuRealtimePeriod: normalize(container.cpu_realtime_period),

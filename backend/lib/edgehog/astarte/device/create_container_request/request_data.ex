@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 - 2025 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
     :capAdd,
     :capDrop,
     :deviceMappingIds,
+    :deviceRequestIds,
     :cpuPeriod,
     :cpuQuota,
     :cpuRealtimePeriod,
@@ -68,6 +69,7 @@ defmodule Edgehog.Astarte.Device.CreateContainerRequest.RequestData do
           capAdd: list(String.t()),
           capDrop: list(String.t()),
           deviceMappingIds: list(String.t()),
+          deviceRequestIds: list(String.t()),
           cpuPeriod: integer(),
           cpuQuota: integer(),
           cpuRealtimePeriod: integer(),
