@@ -21,7 +21,7 @@ defmodule Edgehog.Groups do
   The Groups context.
   """
 
-  use Ash.Domain, extensions: [AshGraphql.Domain, Ash.Authorizer]
+  use Ash.Domain, extensions: [AshGraphql.Domain, Ash.Policy.Authorizer]
 
   alias Edgehog.Groups.DeviceGroup
 
