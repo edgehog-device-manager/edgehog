@@ -14,7 +14,8 @@
     "backend/CHANGELOG.md",
     "doc/CHANGELOG.md",
     "astarte/**",
-    "edgehog-device-runtime/**"
+    "edgehog-device-runtime/**",
+    "chart/**"
   ],
   "plugins": [
     "https://plugins.dprint.dev/json-0.21.0.wasm",
