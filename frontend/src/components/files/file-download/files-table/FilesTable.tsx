@@ -110,7 +110,7 @@ const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
-        id="components.FilesTable.nameTitle"
+        id="components.files.file-download.files-table.FilesTable.nameTitle"
         defaultMessage="File Name"
         description="Title for the File Name column of the files table"
       />
@@ -123,7 +123,7 @@ const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
   columnHelper.accessor("size", {
     header: () => (
       <FormattedMessage
-        id="components.FilesTable.sizeTitle"
+        id="components.files.file-download.files-table.FilesTable.sizeTitle"
         defaultMessage="File Size"
         description="Title for the File Size column of the files table"
       />
@@ -140,7 +140,7 @@ const getColumnsDefinition = (onDeleteClick: (file: TableRecord) => void) => [
     id: "action",
     header: () => (
       <FormattedMessage
-        id="components.FilesTable.actionsTitle"
+        id="components.files.file-download.files-table.FilesTable.actionsTitle"
         defaultMessage="Actions"
       />
     ),
@@ -206,7 +206,7 @@ const FilesTable = ({
       onError() {
         setErrorFeedback(
           <FormattedMessage
-            id="components.FilesTable.deletionErrorFeedback"
+            id="components.files.file-download.files-table.FilesTable.deletionErrorFeedback"
             defaultMessage="Could not delete the file, please try again."
           />,
         );
@@ -238,14 +238,14 @@ const FilesTable = ({
           isDeleting={isDeletingFile}
           title={
             <FormattedMessage
-              id="components.FilesTable.deleteModal.title"
+              id="components.files.file-download.files-table.FilesTable.deleteModal.title"
               defaultMessage="Delete File"
             />
           }
         >
           <p>
             <FormattedMessage
-              id="components.FilesTable.deleteModal.description"
+              id="components.files.file-download.files-table.FilesTable.deleteModal.description"
               defaultMessage="This action cannot be undone. This will permanently delete the file."
             />
           </p>

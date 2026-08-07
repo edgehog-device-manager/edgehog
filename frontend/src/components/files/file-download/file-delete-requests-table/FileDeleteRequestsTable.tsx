@@ -22,7 +22,7 @@ import { FormattedMessage } from "react-intl";
 
 import type { FilesDeleteTab_fileManagement$data } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
 
-import RequestStatus from "@/components/RequestStatus";
+import RequestStatus from "@/components/files/request-status/request-status/RequestStatus";
 import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
 type FileDeleteRequestNode = NonNullable<
@@ -38,7 +38,7 @@ const columns = [
       id: "fileName",
       header: () => (
         <FormattedMessage
-          id="components.FileDeleteRequestsTable.fileName"
+          id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.fileName"
           defaultMessage="File Name"
         />
       ),
@@ -52,7 +52,7 @@ const columns = [
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
-        id="components.FileDeleteRequestsTable.status"
+        id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.status"
         defaultMessage="Status"
       />
     ),
@@ -66,7 +66,7 @@ const columns = [
   columnHelper.accessor("force", {
     header: () => (
       <FormattedMessage
-        id="components.FileDeleteRequestsTable.force"
+        id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force"
         defaultMessage="Force Delete"
       />
     ),
@@ -77,14 +77,14 @@ const columns = [
       return force ? (
         <span>
           <FormattedMessage
-            id="components.FileDeleteRequestsTable.force.enabled"
+            id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force.enabled"
             defaultMessage="Yes"
           />
         </span>
       ) : (
         <span>
           <FormattedMessage
-            id="components.FileDeleteRequestsTable.force.disabled"
+            id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force.disabled"
             defaultMessage="No"
           />
         </span>
@@ -95,7 +95,7 @@ const columns = [
   columnHelper.accessor("responseMessages", {
     header: () => (
       <FormattedMessage
-        id="components.FileDeleteRequestsTable.responseMessages"
+        id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.responseMessages"
         defaultMessage="Response Messages"
       />
     ),
@@ -136,7 +136,7 @@ const FileDeleteRequestsTable = ({
     return (
       <p className="text-muted">
         <FormattedMessage
-          id="components.FileDeleteRequestsTable.noRequests"
+          id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.noRequests"
           defaultMessage="No file delete requests have been sent yet."
         />
       </p>

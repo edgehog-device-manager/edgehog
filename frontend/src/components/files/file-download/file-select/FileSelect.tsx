@@ -94,13 +94,13 @@ const noFileOptionsMessage = (
   inputValue
     ? intl.formatMessage(
         {
-          id: "components.FileSelect.noFilesFoundMatching",
+          id: "components.files.file-download.file-select.FileSelect.noFilesFoundMatching",
           defaultMessage: 'No files found matching "{inputValue}"',
         },
         { inputValue },
       )
     : intl.formatMessage({
-        id: "components.FileSelect.noFilesAvailable",
+        id: "components.files.file-download.file-select.FileSelect.noFilesAvailable",
         defaultMessage: "No files available",
       });
 
@@ -164,7 +164,7 @@ const FileSelect = ({ filesFragmentRef, controllerProps }: FileSelectProps) => {
       onChange={controllerProps.onChange}
       className={controllerProps.invalid ? "is-invalid" : ""}
       placeholder={intl.formatMessage({
-        id: "components.FileSelect.fileOption",
+        id: "components.files.file-download.file-select.FileSelect.fileOption",
         defaultMessage: "Search or select a file...",
       })}
       options={files}
@@ -207,13 +207,13 @@ const ErrorFallback = ({ resetErrorBoundary }: FallbackProps) => (
   <Stack direction="horizontal">
     <span>
       <FormattedMessage
-        id="components.FileSelect.ErrorFallback.message"
+        id="components.files.file-download.file-select.FileSelect.ErrorFallback.message"
         defaultMessage="Failed to load files list."
       />
     </span>
     <Button variant="link" onClick={resetErrorBoundary}>
       <FormattedMessage
-        id="components.FileSelect.ErrorFallback.reloadButton"
+        id="components.files.file-download.file-select.FileSelect.ErrorFallback.reloadButton"
         defaultMessage="Reload"
       />
     </Button>

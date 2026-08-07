@@ -29,7 +29,7 @@ import type {
 } from "@/api/__generated__/FileDownloadTargetsTable_CampaignTargetEdgeFragment.graphql";
 
 import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
-import RequestStatus from "@/components/RequestStatus";
+import RequestStatus from "@/components/files/request-status/request-status/RequestStatus";
 import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
 
@@ -84,7 +84,7 @@ const columns = [
     id: "deviceName",
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadTargetsTable.deviceTitle"
+        id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.deviceTitle"
         defaultMessage="Device"
       />
     ),
@@ -109,7 +109,7 @@ const columns = [
       id: "requestStatus",
       header: () => (
         <FormattedMessage
-          id="components.FileDownloadTargetsTable.requestStatusTitle"
+          id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.requestStatusTitle"
           defaultMessage="Request Status"
         />
       ),
@@ -125,7 +125,7 @@ const columns = [
       id: "requestProgress",
       header: () => (
         <FormattedMessage
-          id="components.FileDownloadTargetsTable.requestProgressTitle"
+          id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.requestProgressTitle"
           defaultMessage="Progress"
         />
       ),
@@ -148,7 +148,7 @@ const columns = [
       id: "failureReason",
       header: () => (
         <FormattedMessage
-          id="components.FileDownloadTargetsTable.failureReasonTitle"
+          id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.failureReasonTitle"
           defaultMessage="Failure Reason"
         />
       ),
@@ -160,7 +160,7 @@ const columns = [
   columnHelper.accessor("retryCount", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadTargetsTable.retryCountTitle"
+        id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.retryCountTitle"
         defaultMessage="Retry Count"
       />
     ),
@@ -175,7 +175,7 @@ const columns = [
   columnHelper.accessor("latestAttempt", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadTargetsTable.latestAttemptTitle"
+        id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.latestAttemptTitle"
         defaultMessage="Latest attempt at"
       />
     ),
@@ -202,7 +202,7 @@ const columns = [
     id: "pathOnDevice",
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadTargetsTable.pathOnDeviceTitle"
+        id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.pathOnDeviceTitle"
         defaultMessage="Path on device"
       />
     ),
@@ -220,7 +220,7 @@ const columns = [
   columnHelper.accessor("completionTimestamp", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadTargetsTable.completionTimestampTitle"
+        id="components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.completionTimestampTitle"
         defaultMessage="Completed at"
       />
     ),

@@ -51,7 +51,7 @@ import type { FilesServerToDeviceTab_fileDownloadRequests$key } from "@/api/__ge
 import type { FilesServerToDeviceTab_getRepositories_Query } from "@/api/__generated__/FilesServerToDeviceTab_getRepositories_Query.graphql";
 
 import Alert from "@/components/ui/alert/Alert";
-import FilesServerToDeviceTable from "@/components/FilesServerToDeviceTable";
+import FilesServerToDeviceTable from "@/components/files/file-download/files-server-to-device-table/FilesServerToDeviceTable";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";

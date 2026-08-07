@@ -53,7 +53,7 @@ const columns = [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
-        id="components.RepositoriesTable.nameTitle"
+        id="components.files.repositories.repositories-table.RepositoriesTable.nameTitle"
         defaultMessage="Repository Name"
         description="Title for the Name column of the repositories table"
       />
@@ -73,7 +73,7 @@ const columns = [
   columnHelper.accessor("handle", {
     header: () => (
       <FormattedMessage
-        id="components.RepositoriesTable.handleTitle"
+        id="components.files.repositories.repositories-table.RepositoriesTable.handleTitle"
         defaultMessage="Handle"
         description="Title for the Handle column of the repositories table"
       />

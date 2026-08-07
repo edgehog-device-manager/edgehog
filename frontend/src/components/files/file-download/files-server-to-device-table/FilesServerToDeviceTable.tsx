@@ -22,7 +22,7 @@ import { FormattedMessage } from "react-intl";
 
 import type { FilesServerToDeviceTab_fileDownloadRequests$data } from "@/api/__generated__/FilesServerToDeviceTab_fileDownloadRequests.graphql";
 
-import RequestStatus from "@/components/RequestStatus";
+import RequestStatus from "@/components/files/request-status/request-status/RequestStatus";
 import Table, { createColumnHelper } from "@/components/ui/table/Table";
 import { formatFileSize } from "@/lib/files";
 import { Link, Route } from "@/Navigation";
@@ -38,7 +38,7 @@ const columns = [
   columnHelper.accessor("fileName", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.fileName"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileName"
         defaultMessage="File Name"
       />
     ),
@@ -48,7 +48,7 @@ const columns = [
     id: "fileDownloadCampaignName",
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.campaignName"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.campaignName"
         defaultMessage="File Download Campaign"
       />
     ),
@@ -67,7 +67,7 @@ const columns = [
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.status"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status"
         defaultMessage="Status"
       />
     ),
@@ -79,7 +79,7 @@ const columns = [
   columnHelper.accessor("progressPercentage", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.progress"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.progress"
         defaultMessage="Progress"
       />
     ),
@@ -90,7 +90,7 @@ const columns = [
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FilesServerToDeviceTable.status.notTracked"
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status.notTracked"
               defaultMessage="Not Tracked"
             />
           </span>
@@ -104,7 +104,7 @@ const columns = [
   columnHelper.accessor("destinationType", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.destination"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination"
         defaultMessage="Destination"
       />
     ),
@@ -114,7 +114,7 @@ const columns = [
       if (destinationType == "FILESYSTEM") {
         return (
           <FormattedMessage
-            id="components.FilesServerToDeviceTable.destination.filesystem"
+            id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.filesystem"
             defaultMessage="FILESYSTEM: {destination}"
             values={{ destination: row.original.destination ?? "" }}
           />
@@ -124,7 +124,7 @@ const columns = [
       if (destinationType == "STORAGE") {
         return (
           <FormattedMessage
-            id="components.FilesServerToDeviceTable.destination.storage"
+            id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.storage"
             defaultMessage="STORAGE: {path}"
             values={{ path: row.original.deviceFile?.pathOnDevice ?? "" }}
           />
@@ -137,7 +137,7 @@ const columns = [
   columnHelper.accessor("uncompressedFileSizeBytes", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.fileSize"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileSize"
         defaultMessage="Uncompressed File Size"
       />
     ),
@@ -156,7 +156,7 @@ const columns = [
   columnHelper.accessor("ttlSeconds", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.ttl"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl"
         defaultMessage="TTL (s)"
       />
     ),
@@ -167,7 +167,7 @@ const columns = [
         return (
           <p>
             <FormattedMessage
-              id="components.FilesServerToDeviceTable.ttl.infinite"
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl.infinite"
               defaultMessage="Infinite"
             />
           </p>
@@ -180,7 +180,7 @@ const columns = [
   columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
-        id="components.FilesServerToDeviceTable.responseMessage"
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.responseMessage"
         defaultMessage="Response Message"
       />
     ),
@@ -209,7 +209,7 @@ const FilesServerToDeviceTable = ({
     return (
       <p className="text-muted">
         <FormattedMessage
-          id="components.FilesServerToDeviceTable.noRequests"
+          id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.noRequests"
           defaultMessage="No file download requests have been sent yet."
         />
       </p>

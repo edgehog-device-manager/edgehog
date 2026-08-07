@@ -35,7 +35,7 @@ import { Repositories_RepositoriesFragment$key } from "@/api/__generated__/Repos
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
-import RepositoriesTable from "@/components/RepositoriesTable";
+import RepositoriesTable from "@/components/files/repositories/repositories-table/RepositoriesTable";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";

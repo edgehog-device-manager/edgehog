@@ -230,12 +230,12 @@ const FileDropzone = ({
             <p className="mb-1 text-muted">
               {allowMultiple ? (
                 <FormattedMessage
-                  id="components.FileDropzone.dropzonePrompt"
+                  id="components.files.file-download.file-dropzone.FileDropzone.dropzonePrompt"
                   defaultMessage="Drag & drop files or folders here"
                 />
               ) : (
                 <FormattedMessage
-                  id="components.FileDropzone.dropzonePromptSingle"
+                  id="components.files.file-download.file-dropzone.FileDropzone.dropzonePromptSingle"
                   defaultMessage="Drag & drop a file here"
                 />
               )}
@@ -243,7 +243,7 @@ const FileDropzone = ({
             {allowMultiple ? (
               <p className="mb-0 text-muted small">
                 <FormattedMessage
-                  id="components.FileDropzone.dropzoneActions"
+                  id="components.files.file-download.file-dropzone.FileDropzone.dropzoneActions"
                   defaultMessage="or {browseFiles} · {browseFolder}"
                   values={{
                     browseFiles: (
@@ -255,7 +255,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.browseFiles"
+                          id="components.files.file-download.file-dropzone.FileDropzone.browseFiles"
                           defaultMessage="browse files"
                         />
                       </a>
@@ -269,7 +269,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.browseFolders"
+                          id="components.files.file-download.file-dropzone.FileDropzone.browseFolders"
                           defaultMessage="browse folders"
                         />
                       </a>
@@ -280,7 +280,7 @@ const FileDropzone = ({
             ) : (
               <p className="mb-0 text-muted small">
                 <FormattedMessage
-                  id="components.FileDropzone.dropzoneActionsSingle"
+                  id="components.files.file-download.file-dropzone.FileDropzone.dropzoneActionsSingle"
                   defaultMessage="or {browseFile}"
                   values={{
                     browseFile: (
@@ -292,7 +292,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.browseFile"
+                          id="components.files.file-download.file-dropzone.FileDropzone.browseFile"
                           defaultMessage="browse file"
                         />
                       </a>
@@ -326,7 +326,7 @@ const FileDropzone = ({
             {allowMultiple ? (
               <p className="mb-0 text-muted small">
                 <FormattedMessage
-                  id="components.FileDropzone.fileSizeSummary"
+                  id="components.files.file-download.file-dropzone.FileDropzone.fileSizeSummary"
                   defaultMessage="{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
                   values={{
                     count: files.length,
@@ -340,7 +340,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.addMore"
+                          id="components.files.file-download.file-dropzone.FileDropzone.addMore"
                           defaultMessage="add files"
                         />
                       </a>
@@ -354,7 +354,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.addFolders"
+                          id="components.files.file-download.file-dropzone.FileDropzone.addFolders"
                           defaultMessage="add folders"
                         />
                       </a>
@@ -368,7 +368,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.clearAll"
+                          id="components.files.file-download.file-dropzone.FileDropzone.clearAll"
                           defaultMessage="clear all"
                         />
                       </a>
@@ -379,7 +379,7 @@ const FileDropzone = ({
             ) : (
               <p className="mb-0 text-muted small">
                 <FormattedMessage
-                  id="components.FileDropzone.fileSizeSummarySingle"
+                  id="components.files.file-download.file-dropzone.FileDropzone.fileSizeSummarySingle"
                   defaultMessage="{count} file selected — {size} total · {replaceFile} · {clearAll}"
                   values={{
                     count: files.length,
@@ -393,7 +393,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.replaceFile"
+                          id="components.files.file-download.file-dropzone.FileDropzone.replaceFile"
                           defaultMessage="replace file"
                         />
                       </a>
@@ -407,7 +407,7 @@ const FileDropzone = ({
                         }}
                       >
                         <FormattedMessage
-                          id="components.FileDropzone.clearAll"
+                          id="components.files.file-download.file-dropzone.FileDropzone.clearAll"
                           defaultMessage="clear all"
                         />
                       </a>

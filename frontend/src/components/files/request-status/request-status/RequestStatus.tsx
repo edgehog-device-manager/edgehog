@@ -35,23 +35,23 @@ const statusColors: Record<string, string> = {
 
 const statusMessages = defineMessages({
   COMPLETED: {
-    id: "components.RequestStatus.completed",
+    id: "components.files.request-status.request-status.RequestStatus.completed",
     defaultMessage: "Completed",
   },
   FAILED: {
-    id: "components.RequestStatus.failed",
+    id: "components.files.request-status.request-status.RequestStatus.failed",
     defaultMessage: "Failed",
   },
   IN_PROGRESS: {
-    id: "components.RequestStatus.inProgress",
+    id: "components.files.request-status.request-status.RequestStatus.inProgress",
     defaultMessage: "In Progress",
   },
   PENDING: {
-    id: "components.RequestStatus.pending",
+    id: "components.files.request-status.request-status.RequestStatus.pending",
     defaultMessage: "Pending",
   },
   SENT: {
-    id: "components.RequestStatus.sent",
+    id: "components.files.request-status.request-status.RequestStatus.sent",
     defaultMessage: "Sent",
   },
 });

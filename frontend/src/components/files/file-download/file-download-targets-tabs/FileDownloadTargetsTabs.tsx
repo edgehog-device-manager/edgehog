@@ -30,10 +30,10 @@ import type { FileDownloadTargets_PaginationQuery } from "@/api/__generated__/Fi
 import CampaignTargetStatus, {
   CampaignTargetStatusType,
 } from "@/components/campaigns/campaign-target-status/CampaignTargetStatus";
-import type { ColumnId } from "@/components/FileDownloadTargetsTable";
+import type { ColumnId } from "@/components/files/file-download/file-download-targets-table/FileDownloadTargetsTable";
 import FileDownloadTargetsTable, {
   columnIds,
-} from "@/components/FileDownloadTargetsTable";
+} from "@/components/files/file-download/file-download-targets-table/FileDownloadTargetsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Button from "@/components/ui/button/Button";
@@ -160,7 +160,7 @@ const FileDownloadTargetsTabs = ({
     <div>
       <h3>
         <FormattedMessage
-          id="components.FileDownloadTargetsTabs.targetsLabel"
+          id="components.files.file-download.file-download-targets-tabs.FileDownloadTargetsTabs.targetsLabel"
           defaultMessage="Devices"
         />
       </h3>

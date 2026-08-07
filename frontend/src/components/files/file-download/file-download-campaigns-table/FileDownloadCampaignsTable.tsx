@@ -77,7 +77,7 @@ const columns = [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.nameTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.nameTitle"
         defaultMessage="File Download Campaign Name"
       />
     ),
@@ -96,7 +96,7 @@ const columns = [
   columnHelper.accessor("campaignMechanism.destinationType", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.destinationTypeTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.destinationTypeTitle"
         defaultMessage="Destination Type"
       />
     ),
@@ -107,7 +107,7 @@ const columns = [
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.statusTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.statusTitle"
         defaultMessage="Status"
       />
     ),
@@ -119,7 +119,7 @@ const columns = [
   columnHelper.accessor("outcome", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.outcomeTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.outcomeTitle"
         defaultMessage="Outcome"
       />
     ),
@@ -131,7 +131,7 @@ const columns = [
   columnHelper.accessor("channel.name", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.channelNameTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.channelNameTitle"
         defaultMessage="Channel"
       />
     ),
@@ -142,7 +142,7 @@ const columns = [
   columnHelper.accessor("campaignMechanism.file.repository.name", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.repositoryNameTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.repositoryNameTitle"
         defaultMessage="Repository"
       />
     ),
@@ -153,7 +153,7 @@ const columns = [
   columnHelper.accessor("campaignMechanism.file.name", {
     header: () => (
       <FormattedMessage
-        id="components.FileDownloadCampaignsTable.fileNameTitle"
+        id="components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.fileNameTitle"
         defaultMessage="File"
       />
     ),

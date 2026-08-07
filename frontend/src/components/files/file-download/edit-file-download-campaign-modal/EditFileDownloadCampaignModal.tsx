@@ -39,7 +39,7 @@ import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
 import EditModal from "@/components/ui/edit-modal/EditModal";
-import FileSelect from "@/components/FileSelect";
+import FileSelect from "@/components/files/file-download/file-select/FileSelect";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import Stack from "@/components/ui/stack/Stack";
@@ -290,7 +290,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
         onError() {
           setErrorFeedback(
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.error"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.error"
               defaultMessage="Could not update campaign."
             />,
           );
@@ -304,7 +304,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
     <EditModal
       title={
         <FormattedMessage
-          id="components.EditFileDownloadCampaignModal.title"
+          id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.title"
           defaultMessage="Update Campaign"
         />
       }
@@ -317,7 +317,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="name"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.nameLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.nameLabel"
               defaultMessage="Campaign Name"
             />
           }
@@ -333,7 +333,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="destinationType"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.destinationLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.destinationLabel"
               defaultMessage="Destination"
             />
           }
@@ -363,7 +363,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
             id="destination"
             label={
               <FormattedMessage
-                id="components.EditFileDownloadCampaignModal.destinationPathLabel"
+                id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.destinationPathLabel"
                 defaultMessage="Destination Path"
               />
             }
@@ -381,7 +381,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="repository"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.repositoryLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.repositoryLabel"
               defaultMessage="Repository"
             />
           }
@@ -402,7 +402,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
                 }}
                 className={invalid ? "is-invalid" : ""}
                 placeholder={intl.formatMessage({
-                  id: "components.EditFileDownloadCampaignModal.repositoryOption",
+                  id: "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.repositoryOption",
                   defaultMessage: "Search or select a repository...",
                 })}
                 options={repositories}
@@ -421,7 +421,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="file"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.fileLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.fileLabel"
               defaultMessage="File"
             />
           }
@@ -453,7 +453,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           ) : (
             <div className="d-flex align-content-center fst-italic text-muted">
               <FormattedMessage
-                id="components.EditFileDownloadCampaignModal.selectRepositoryHint"
+                id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.selectRepositoryHint"
                 defaultMessage="Select a repository before selecting a file..."
               />
             </div>
@@ -464,7 +464,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="maxFailurePercentage"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.maxFailurePercentageLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.maxFailurePercentageLabel"
               defaultMessage="Max Failures <muted>(%)</muted>"
               values={{
                 muted: (chunks: ReactNode) => (
@@ -490,7 +490,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="maxInProgressOperations"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.maxInProgressOperationsLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.maxInProgressOperationsLabel"
               defaultMessage="Max Pending Operations"
             />
           }
@@ -511,7 +511,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="requestTimeoutSeconds"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel"
               defaultMessage="Request Timeout <muted>(seconds)</muted>"
               values={{
                 muted: (chunks: ReactNode) => (
@@ -537,7 +537,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="requestRetries"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.requestRetriesLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.requestRetriesLabel"
               defaultMessage="Request Retries"
             />
           }
@@ -556,7 +556,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="ttlSeconds"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.ttlLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.ttlLabel"
               defaultMessage="TTL <muted>(seconds)</muted>"
               values={{
                 muted: (chunks: ReactNode) => (
@@ -580,7 +580,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           id="scheduledAt"
           label={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.scheduledAtTimestampLabel"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.scheduledAtTimestampLabel"
               defaultMessage="Scheduled At"
             />
           }
@@ -608,7 +608,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
           onToggle={toggleAdvancedOptions}
           title={
             <FormattedMessage
-              id="components.EditFileDownloadCampaignModal.advancedOptionsTitle"
+              id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.advancedOptionsTitle"
               defaultMessage="Advanced Options"
             />
           }
@@ -621,7 +621,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
               id="fileMode"
               label={
                 <FormattedMessage
-                  id="components.EditFileDownloadCampaignModal.fileModeLabel"
+                  id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.fileModeLabel"
                   defaultMessage="File Mode"
                 />
               }
@@ -640,7 +640,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
               id="userId"
               label={
                 <FormattedMessage
-                  id="components.EditFileDownloadCampaignModal.userIdLabel"
+                  id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.userIdLabel"
                   defaultMessage="User ID"
                 />
               }
@@ -659,7 +659,7 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
               id="groupId"
               label={
                 <FormattedMessage
-                  id="components.EditFileDownloadCampaignModal.groupIdLabel"
+                  id="components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.groupIdLabel"
                   defaultMessage="Group ID"
                 />
               }

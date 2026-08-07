@@ -48,8 +48,8 @@ import CampaignStatsChart from "@/components/campaigns/campaign-stats-chart/Camp
 import Center from "@/components/ui/center/Center";
 import Col from "@/components/ui/col/Col";
 import DeleteCampaignModal from "@/components/campaigns/delete-campaign-modal/DeleteCampaignModal";
-import EditFileDownloadCampaignModal from "@/components/EditFileDownloadCampaignModal";
-import FileDownloadTargetsTabs from "@/components/FileDownloadTargetsTabs";
+import EditFileDownloadCampaignModal from "@/components/files/file-download/edit-file-download-campaign-modal/EditFileDownloadCampaignModal";
+import FileDownloadTargetsTabs from "@/components/files/file-download/file-download-targets-tabs/FileDownloadTargetsTabs";
 import Icon from "@/components/ui/icon/Icon";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";

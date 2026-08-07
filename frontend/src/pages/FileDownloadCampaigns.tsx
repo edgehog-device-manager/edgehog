@@ -38,7 +38,7 @@ import type { FileDownloadCampaigns_PaginationQuery } from "@/api/__generated__/
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import FileDownloadCampaignsTable from "@/components/FileDownloadCampaignsTable";
+import FileDownloadCampaignsTable from "@/components/files/file-download/file-download-campaigns-table/FileDownloadCampaignsTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

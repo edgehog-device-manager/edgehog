@@ -42,7 +42,7 @@ import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
 import DatePicker from "@/components/ui/date-picker/DatePicker";
-import FileSelect from "@/components/FileSelect";
+import FileSelect from "@/components/files/file-download/file-select/FileSelect";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import Spinner from "@/components/ui/spinner/Spinner";

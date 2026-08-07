@@ -1,305 +1,4 @@
 {
-  "components.EditFileDownloadCampaignModal.advancedOptionsTitle": {
-    "defaultMessage": "Advanced Options"
-  },
-  "components.EditFileDownloadCampaignModal.destinationLabel": {
-    "defaultMessage": "Destination"
-  },
-  "components.EditFileDownloadCampaignModal.destinationPathLabel": {
-    "defaultMessage": "Destination Path"
-  },
-  "components.EditFileDownloadCampaignModal.error": {
-    "defaultMessage": "Could not update campaign."
-  },
-  "components.EditFileDownloadCampaignModal.fileLabel": {
-    "defaultMessage": "File"
-  },
-  "components.EditFileDownloadCampaignModal.fileModeLabel": {
-    "defaultMessage": "File Mode"
-  },
-  "components.EditFileDownloadCampaignModal.groupIdLabel": {
-    "defaultMessage": "Group ID"
-  },
-  "components.EditFileDownloadCampaignModal.maxFailurePercentageLabel": {
-    "defaultMessage": "Max Failures <muted>(%)</muted>"
-  },
-  "components.EditFileDownloadCampaignModal.maxInProgressOperationsLabel": {
-    "defaultMessage": "Max Pending Operations"
-  },
-  "components.EditFileDownloadCampaignModal.nameLabel": {
-    "defaultMessage": "Campaign Name"
-  },
-  "components.EditFileDownloadCampaignModal.repositoryLabel": {
-    "defaultMessage": "Repository"
-  },
-  "components.EditFileDownloadCampaignModal.repositoryOption": {
-    "defaultMessage": "Search or select a repository..."
-  },
-  "components.EditFileDownloadCampaignModal.requestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
-  "components.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel": {
-    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
-  "components.EditFileDownloadCampaignModal.scheduledAtTimestampLabel": {
-    "defaultMessage": "Scheduled At"
-  },
-  "components.EditFileDownloadCampaignModal.selectRepositoryHint": {
-    "defaultMessage": "Select a repository before selecting a file..."
-  },
-  "components.EditFileDownloadCampaignModal.title": {
-    "defaultMessage": "Update Campaign"
-  },
-  "components.EditFileDownloadCampaignModal.ttlLabel": {
-    "defaultMessage": "TTL <muted>(seconds)</muted>"
-  },
-  "components.EditFileDownloadCampaignModal.userIdLabel": {
-    "defaultMessage": "User ID"
-  },
-  "components.FileDeleteRequestsTable.fileName": {
-    "defaultMessage": "File Name"
-  },
-  "components.FileDeleteRequestsTable.force": {
-    "defaultMessage": "Force Delete"
-  },
-  "components.FileDeleteRequestsTable.force.disabled": {
-    "defaultMessage": "No"
-  },
-  "components.FileDeleteRequestsTable.force.enabled": {
-    "defaultMessage": "Yes"
-  },
-  "components.FileDeleteRequestsTable.noRequests": {
-    "defaultMessage": "No file delete requests have been sent yet."
-  },
-  "components.FileDeleteRequestsTable.responseMessages": {
-    "defaultMessage": "Response Messages"
-  },
-  "components.FileDeleteRequestsTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FileDownloadCampaignsTable.channelNameTitle": {
-    "defaultMessage": "Channel"
-  },
-  "components.FileDownloadCampaignsTable.destinationTypeTitle": {
-    "defaultMessage": "Destination Type"
-  },
-  "components.FileDownloadCampaignsTable.fileNameTitle": {
-    "defaultMessage": "File"
-  },
-  "components.FileDownloadCampaignsTable.nameTitle": {
-    "defaultMessage": "File Download Campaign Name"
-  },
-  "components.FileDownloadCampaignsTable.outcomeTitle": {
-    "defaultMessage": "Outcome"
-  },
-  "components.FileDownloadCampaignsTable.repositoryNameTitle": {
-    "defaultMessage": "Repository"
-  },
-  "components.FileDownloadCampaignsTable.statusTitle": {
-    "defaultMessage": "Status"
-  },
-  "components.FileDownloadTargetsTable.completionTimestampTitle": {
-    "defaultMessage": "Completed at"
-  },
-  "components.FileDownloadTargetsTable.deviceTitle": {
-    "defaultMessage": "Device"
-  },
-  "components.FileDownloadTargetsTable.failureReasonTitle": {
-    "defaultMessage": "Failure Reason"
-  },
-  "components.FileDownloadTargetsTable.latestAttemptTitle": {
-    "defaultMessage": "Latest attempt at"
-  },
-  "components.FileDownloadTargetsTable.pathOnDeviceTitle": {
-    "defaultMessage": "Path on device"
-  },
-  "components.FileDownloadTargetsTable.requestProgressTitle": {
-    "defaultMessage": "Progress"
-  },
-  "components.FileDownloadTargetsTable.requestStatusTitle": {
-    "defaultMessage": "Request Status"
-  },
-  "components.FileDownloadTargetsTable.retryCountTitle": {
-    "defaultMessage": "Retry Count"
-  },
-  "components.FileDownloadTargetsTabs.targetsLabel": {
-    "defaultMessage": "Devices"
-  },
-  "components.FileDropzone.addFolders": {
-    "defaultMessage": "add folders"
-  },
-  "components.FileDropzone.addMore": {
-    "defaultMessage": "add files"
-  },
-  "components.FileDropzone.browseFile": {
-    "defaultMessage": "browse file"
-  },
-  "components.FileDropzone.browseFiles": {
-    "defaultMessage": "browse files"
-  },
-  "components.FileDropzone.browseFolders": {
-    "defaultMessage": "browse folders"
-  },
-  "components.FileDropzone.clearAll": {
-    "defaultMessage": "clear all"
-  },
-  "components.FileDropzone.dropzoneActions": {
-    "defaultMessage": "or {browseFiles} · {browseFolder}"
-  },
-  "components.FileDropzone.dropzoneActionsSingle": {
-    "defaultMessage": "or {browseFile}"
-  },
-  "components.FileDropzone.dropzonePrompt": {
-    "defaultMessage": "Drag & drop files or folders here"
-  },
-  "components.FileDropzone.dropzonePromptSingle": {
-    "defaultMessage": "Drag & drop a file here"
-  },
-  "components.FileDropzone.fileSizeSummary": {
-    "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
-  },
-  "components.FileDropzone.fileSizeSummarySingle": {
-    "defaultMessage": "{count} file selected — {size} total · {replaceFile} · {clearAll}"
-  },
-  "components.FileDropzone.replaceFile": {
-    "defaultMessage": "replace file"
-  },
-  "components.FileSelect.ErrorFallback.message": {
-    "defaultMessage": "Failed to load files list."
-  },
-  "components.FileSelect.ErrorFallback.reloadButton": {
-    "defaultMessage": "Reload"
-  },
-  "components.FileSelect.fileOption": {
-    "defaultMessage": "Search or select a file..."
-  },
-  "components.FileSelect.noFilesAvailable": {
-    "defaultMessage": "No files available"
-  },
-  "components.FileSelect.noFilesFoundMatching": {
-    "defaultMessage": "No files found matching \"{inputValue}\""
-  },
-  "components.FilesDeviceToServerTable.actions": {
-    "defaultMessage": "Actions"
-  },
-  "components.FilesDeviceToServerTable.actions.notAvailableYet": {
-    "defaultMessage": "Not available yet"
-  },
-  "components.FilesDeviceToServerTable.encoding": {
-    "defaultMessage": "Encoding"
-  },
-  "components.FilesDeviceToServerTable.encoding.none": {
-    "defaultMessage": "None"
-  },
-  "components.FilesDeviceToServerTable.noRequests": {
-    "defaultMessage": "No file upload requests have been sent yet."
-  },
-  "components.FilesDeviceToServerTable.progress": {
-    "defaultMessage": "Progress"
-  },
-  "components.FilesDeviceToServerTable.responseMessage": {
-    "defaultMessage": "Response Message"
-  },
-  "components.FilesDeviceToServerTable.source": {
-    "defaultMessage": "Source"
-  },
-  "components.FilesDeviceToServerTable.source.filesystem": {
-    "defaultMessage": "FILESYSTEM: {source}"
-  },
-  "components.FilesDeviceToServerTable.source.storage": {
-    "defaultMessage": "STORAGE: {source}"
-  },
-  "components.FilesDeviceToServerTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FilesDeviceToServerTable.status.notTracked": {
-    "defaultMessage": "Not Tracked"
-  },
-  "components.FilesServerToDeviceTable.campaignName": {
-    "defaultMessage": "File Download Campaign"
-  },
-  "components.FilesServerToDeviceTable.destination": {
-    "defaultMessage": "Destination"
-  },
-  "components.FilesServerToDeviceTable.destination.filesystem": {
-    "defaultMessage": "FILESYSTEM: {destination}"
-  },
-  "components.FilesServerToDeviceTable.destination.storage": {
-    "defaultMessage": "STORAGE: {path}"
-  },
-  "components.FilesServerToDeviceTable.fileName": {
-    "defaultMessage": "File Name"
-  },
-  "components.FilesServerToDeviceTable.fileSize": {
-    "defaultMessage": "Uncompressed File Size"
-  },
-  "components.FilesServerToDeviceTable.noRequests": {
-    "defaultMessage": "No file download requests have been sent yet."
-  },
-  "components.FilesServerToDeviceTable.progress": {
-    "defaultMessage": "Progress"
-  },
-  "components.FilesServerToDeviceTable.responseMessage": {
-    "defaultMessage": "Response Message"
-  },
-  "components.FilesServerToDeviceTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FilesServerToDeviceTable.status.notTracked": {
-    "defaultMessage": "Not Tracked"
-  },
-  "components.FilesServerToDeviceTable.ttl": {
-    "defaultMessage": "TTL (s)"
-  },
-  "components.FilesServerToDeviceTable.ttl.infinite": {
-    "defaultMessage": "Infinite"
-  },
-  "components.FilesTable.actionsTitle": {
-    "defaultMessage": "Actions"
-  },
-  "components.FilesTable.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the file."
-  },
-  "components.FilesTable.deleteModal.title": {
-    "defaultMessage": "Delete File"
-  },
-  "components.FilesTable.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the file, please try again."
-  },
-  "components.FilesTable.nameTitle": {
-    "defaultMessage": "File Name",
-    "description": "Title for the File Name column of the files table"
-  },
-  "components.FilesTable.sizeTitle": {
-    "defaultMessage": "File Size",
-    "description": "Title for the File Size column of the files table"
-  },
-  "components.RepositoriesTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the repositories table"
-  },
-  "components.RepositoriesTable.nameTitle": {
-    "defaultMessage": "Repository Name",
-    "description": "Title for the Name column of the repositories table"
-  },
-  "components.RequestStatus.completed": {
-    "defaultMessage": "Completed"
-  },
-  "components.RequestStatus.failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.RequestStatus.inProgress": {
-    "defaultMessage": "In Progress"
-  },
-  "components.RequestStatus.pending": {
-    "defaultMessage": "Pending"
-  },
-  "components.RequestStatus.sent": {
-    "defaultMessage": "Sent"
-  },
-  "components.StringArrayFormInput.addButton": {
-    "defaultMessage": "Add Item"
-  },
   "components.apps.containers.container-details.ContainerDetails.bindsLabel": {
     "defaultMessage": "Binds"
   },
@@ -482,6 +181,9 @@
   },
   "components.apps.containers.reuse-container-modal.ReuseContainerModal.selectContainer": {
     "defaultMessage": "Select Container"
+  },
+  "components.apps.containers.string-array-form-input.StringArrayFormInput.addButton": {
+    "defaultMessage": "Add Item"
   },
   "components.apps.containers.volumes-table.VolumesTable.driverTitle": {
     "defaultMessage": "Driver",
@@ -964,6 +666,304 @@
   },
   "components.campaigns.delete-campaign-modal.DeleteCampaignModal.warning": {
     "defaultMessage": "This will permanently delete the campaign."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.nameLabel": {
+    "defaultMessage": "Campaign Name"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.repositoryOption": {
+    "defaultMessage": "Search or select a repository..."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.selectRepositoryHint": {
+    "defaultMessage": "Select a repository before selecting a file..."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.title": {
+    "defaultMessage": "Update Campaign"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.ttlLabel": {
+    "defaultMessage": "TTL <muted>(seconds)</muted>"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.userIdLabel": {
+    "defaultMessage": "User ID"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force": {
+    "defaultMessage": "Force Delete"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force.disabled": {
+    "defaultMessage": "No"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force.enabled": {
+    "defaultMessage": "Yes"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.noRequests": {
+    "defaultMessage": "No file delete requests have been sent yet."
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.responseMessages": {
+    "defaultMessage": "Response Messages"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.channelNameTitle": {
+    "defaultMessage": "Channel"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.destinationTypeTitle": {
+    "defaultMessage": "Destination Type"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.fileNameTitle": {
+    "defaultMessage": "File"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.nameTitle": {
+    "defaultMessage": "File Download Campaign Name"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.repositoryNameTitle": {
+    "defaultMessage": "Repository"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.deviceTitle": {
+    "defaultMessage": "Device"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.failureReasonTitle": {
+    "defaultMessage": "Failure Reason"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.pathOnDeviceTitle": {
+    "defaultMessage": "Path on device"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.requestProgressTitle": {
+    "defaultMessage": "Progress"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.requestStatusTitle": {
+    "defaultMessage": "Request Status"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count"
+  },
+  "components.files.file-download.file-download-targets-tabs.FileDownloadTargetsTabs.targetsLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.addFolders": {
+    "defaultMessage": "add folders"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.addMore": {
+    "defaultMessage": "add files"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.browseFile": {
+    "defaultMessage": "browse file"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.browseFiles": {
+    "defaultMessage": "browse files"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.browseFolders": {
+    "defaultMessage": "browse folders"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.clearAll": {
+    "defaultMessage": "clear all"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzoneActions": {
+    "defaultMessage": "or {browseFiles} · {browseFolder}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzoneActionsSingle": {
+    "defaultMessage": "or {browseFile}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzonePrompt": {
+    "defaultMessage": "Drag & drop files or folders here"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzonePromptSingle": {
+    "defaultMessage": "Drag & drop a file here"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.fileSizeSummary": {
+    "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.fileSizeSummarySingle": {
+    "defaultMessage": "{count} file selected — {size} total · {replaceFile} · {clearAll}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.replaceFile": {
+    "defaultMessage": "replace file"
+  },
+  "components.files.file-download.file-select.FileSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load files list."
+  },
+  "components.files.file-download.file-select.FileSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.files.file-download.file-select.FileSelect.fileOption": {
+    "defaultMessage": "Search or select a file..."
+  },
+  "components.files.file-download.file-select.FileSelect.noFilesAvailable": {
+    "defaultMessage": "No files available"
+  },
+  "components.files.file-download.file-select.FileSelect.noFilesFoundMatching": {
+    "defaultMessage": "No files found matching \"{inputValue}\""
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.actions": {
+    "defaultMessage": "Actions"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.actions.notAvailableYet": {
+    "defaultMessage": "Not available yet"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.encoding": {
+    "defaultMessage": "Encoding"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.encoding.none": {
+    "defaultMessage": "None"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.noRequests": {
+    "defaultMessage": "No file upload requests have been sent yet."
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.responseMessage": {
+    "defaultMessage": "Response Message"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source": {
+    "defaultMessage": "Source"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source.filesystem": {
+    "defaultMessage": "FILESYSTEM: {source}"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source.storage": {
+    "defaultMessage": "STORAGE: {source}"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.campaignName": {
+    "defaultMessage": "File Download Campaign"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination": {
+    "defaultMessage": "Destination"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.filesystem": {
+    "defaultMessage": "FILESYSTEM: {destination}"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.storage": {
+    "defaultMessage": "STORAGE: {path}"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileSize": {
+    "defaultMessage": "Uncompressed File Size"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.noRequests": {
+    "defaultMessage": "No file download requests have been sent yet."
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.responseMessage": {
+    "defaultMessage": "Response Message"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl": {
+    "defaultMessage": "TTL (s)"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl.infinite": {
+    "defaultMessage": "Infinite"
+  },
+  "components.files.file-download.files-table.FilesTable.actionsTitle": {
+    "defaultMessage": "Actions"
+  },
+  "components.files.file-download.files-table.FilesTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the file."
+  },
+  "components.files.file-download.files-table.FilesTable.deleteModal.title": {
+    "defaultMessage": "Delete File"
+  },
+  "components.files.file-download.files-table.FilesTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the file, please try again."
+  },
+  "components.files.file-download.files-table.FilesTable.nameTitle": {
+    "defaultMessage": "File Name",
+    "description": "Title for the File Name column of the files table"
+  },
+  "components.files.file-download.files-table.FilesTable.sizeTitle": {
+    "defaultMessage": "File Size",
+    "description": "Title for the File Size column of the files table"
+  },
+  "components.files.repositories.repositories-table.RepositoriesTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the repositories table"
+  },
+  "components.files.repositories.repositories-table.RepositoriesTable.nameTitle": {
+    "defaultMessage": "Repository Name",
+    "description": "Title for the Name column of the repositories table"
+  },
+  "components.files.request-status.request-status.RequestStatus.completed": {
+    "defaultMessage": "Completed"
+  },
+  "components.files.request-status.request-status.RequestStatus.failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.files.request-status.request-status.RequestStatus.inProgress": {
+    "defaultMessage": "In Progress"
+  },
+  "components.files.request-status.request-status.RequestStatus.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.files.request-status.request-status.RequestStatus.sent": {
+    "defaultMessage": "Sent"
   },
   "components.fleet.channels.channels-table.ChannelsTable.handleTitle": {
     "defaultMessage": "Handle",

@@ -47,7 +47,7 @@ import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
-import FilesTable from "@/components/FilesTable";
+import FilesTable from "@/components/files/file-download/files-table/FilesTable";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import SearchBox from "@/components/ui/search-box/SearchBox";

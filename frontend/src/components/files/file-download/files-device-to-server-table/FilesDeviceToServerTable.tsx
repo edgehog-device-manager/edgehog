@@ -25,7 +25,7 @@ import type { FilesDeviceToServerTab_fileUploadRequests$data } from "@/api/__gen
 
 import Button from "@/components/ui/button/Button";
 import Icon from "@/components/ui/icon/Icon";
-import RequestStatus from "@/components/RequestStatus";
+import RequestStatus from "@/components/files/request-status/request-status/RequestStatus";
 import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
 type FileUploadRequestNode = NonNullable<
@@ -39,7 +39,7 @@ const getColumnsDefinition = () => [
   columnHelper.accessor("status", {
     header: () => (
       <FormattedMessage
-        id="components.FilesDeviceToServerTable.status"
+        id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status"
         defaultMessage="Status"
       />
     ),
@@ -51,7 +51,7 @@ const getColumnsDefinition = () => [
   columnHelper.accessor("progressPercentage", {
     header: () => (
       <FormattedMessage
-        id="components.FilesDeviceToServerTable.progress"
+        id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.progress"
         defaultMessage="Progress"
       />
     ),
@@ -62,7 +62,7 @@ const getColumnsDefinition = () => [
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FilesDeviceToServerTable.status.notTracked"
+              id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status.notTracked"
               defaultMessage="Not Tracked"
             />
           </span>
@@ -76,7 +76,7 @@ const getColumnsDefinition = () => [
   columnHelper.accessor("sourceType", {
     header: () => (
       <FormattedMessage
-        id="components.FilesDeviceToServerTable.source"
+        id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source"
         defaultMessage="Source"
       />
     ),
@@ -86,7 +86,7 @@ const getColumnsDefinition = () => [
       if (sourceType === "FILESYSTEM") {
         return (
           <FormattedMessage
-            id="components.FilesDeviceToServerTable.source.filesystem"
+            id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source.filesystem"
             defaultMessage="FILESYSTEM: {source}"
             values={{ source: row.original.source ?? "" }}
           />
@@ -96,7 +96,7 @@ const getColumnsDefinition = () => [
       if (sourceType === "STORAGE") {
         return (
           <FormattedMessage
-            id="components.FilesDeviceToServerTable.source.storage"
+            id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source.storage"
             defaultMessage="STORAGE: {source}"
             values={{ source: row.original.source ?? "" }}
           />
@@ -109,7 +109,7 @@ const getColumnsDefinition = () => [
   columnHelper.accessor("encoding", {
     header: () => (
       <FormattedMessage
-        id="components.FilesDeviceToServerTable.encoding"
+        id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.encoding"
         defaultMessage="Encoding"
       />
     ),
@@ -120,7 +120,7 @@ const getColumnsDefinition = () => [
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FilesDeviceToServerTable.encoding.none"
+              id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.encoding.none"
               defaultMessage="None"
             />
           </span>
@@ -133,7 +133,7 @@ const getColumnsDefinition = () => [
   columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
-        id="components.FilesDeviceToServerTable.responseMessage"
+        id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.responseMessage"
         defaultMessage="Response Message"
       />
     ),
@@ -153,7 +153,7 @@ const getColumnsDefinition = () => [
     id: "actions",
     header: () => (
       <FormattedMessage
-        id="components.FilesDeviceToServerTable.actions"
+        id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.actions"
         defaultMessage="Actions"
       />
     ),
@@ -167,7 +167,7 @@ const getColumnsDefinition = () => [
         return (
           <span className="text-muted">
             <FormattedMessage
-              id="components.FilesDeviceToServerTable.actions.notAvailableYet"
+              id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.actions.notAvailableYet"
               defaultMessage="Not available yet"
             />
           </span>
@@ -210,7 +210,7 @@ const FilesDeviceToServerTable = ({
     return (
       <p className="text-muted">
         <FormattedMessage
-          id="components.FilesDeviceToServerTable.noRequests"
+          id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.noRequests"
           defaultMessage="No file upload requests have been sent yet."
         />
       </p>

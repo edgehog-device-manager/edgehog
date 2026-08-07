@@ -38,7 +38,7 @@ import type { FilesDeviceToServerTab_fileUploadRequest_updated_Subscription } fr
 import type { FilesDeviceToServerTab_fileUploadRequests$key } from "@/api/__generated__/FilesDeviceToServerTab_fileUploadRequests.graphql";
 
 import Alert from "@/components/ui/alert/Alert";
-import FilesDeviceToServerTable from "@/components/FilesDeviceToServerTable";
+import FilesDeviceToServerTable from "@/components/files/file-download/files-device-to-server-table/FilesDeviceToServerTable";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
 import ManualFilesDeviceToServerForm, {

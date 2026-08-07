@@ -39,7 +39,7 @@ import type { FilesDeleteTab_fileDeleteRequest_Subscription } from "@/api/__gene
 import type { FilesDeleteTab_fileManagement$key } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
 
 import Alert from "@/components/ui/alert/Alert";
-import FileDeleteRequestsTable from "@/components/FileDeleteRequestsTable";
+import FileDeleteRequestsTable from "@/components/files/file-download/file-delete-requests-table/FileDeleteRequestsTable";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
 import ManualFileDeleteRequestForm, {

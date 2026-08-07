@@ -29,7 +29,7 @@ import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
 import type { DestinationTypeOption } from "@/components/fleet/devices/tabs/files-server-to-device-tab/FilesServerToDeviceTab";
-import FileDropzone from "@/components/FileDropzone";
+import FileDropzone from "@/components/files/file-download/file-dropzone/FileDropzone";
 import Form from "@/components/ui/form/Form";
 import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
 import Row from "@/components/ui/row/Row";
