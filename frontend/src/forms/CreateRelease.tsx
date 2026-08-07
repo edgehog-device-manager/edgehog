@@ -34,10 +34,7 @@ import Button from "@/components/ui/button/Button";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import Icon from "@/components/ui/icon/Icon";
-import {
-  useContainerOptions,
-  useSystemModelOptions,
-} from "@/components/options/hooks";
+import { useContainerOptions, useSystemModelOptions } from "@/hooks/options";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import FormFeedback from "@/forms/FormFeedback";

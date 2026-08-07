@@ -56,7 +56,7 @@ import {
   useImageCredentialOptions,
   useNetworkOptions,
   useVolumeOptions,
-} from "@/components/options/hooks";
+} from "@/hooks/options";
 import Stack from "@/components/ui/stack/Stack";
 import StringArrayFormInput from "@/components/apps/containers/string-array-form-input/StringArrayFormInput";
 import FormFeedback from "@/forms/FormFeedback";
