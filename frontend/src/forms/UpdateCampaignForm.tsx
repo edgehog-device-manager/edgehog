@@ -26,12 +26,12 @@ import type {
   UpdateCampaignForm_CampaignFragment$key,
 } from "@/api/__generated__/UpdateCampaignForm_CampaignFragment.graphql";
 
-import Col from "@/components/Col";
-import Form from "@/components/Form";
-import Row from "@/components/Row";
-import CampaignOutcome from "@/components/CampaignOutcome";
-import CampaignStatus from "@/components/CampaignStatus";
-import { SimpleFormRow as FormRow } from "@/components/FormRow";
+import Col from "@/components/ui/col/Col";
+import Form from "@/components/ui/form/Form";
+import Row from "@/components/ui/row/Row";
+import CampaignOutcome from "@/components/campaigns/campaign-outcome/CampaignOutcome";
+import CampaignStatus from "@/components/campaigns/campaign-status/CampaignStatus";
+import { SimpleFormRow as FormRow } from "@/components/ui/form-row/FormRow";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration

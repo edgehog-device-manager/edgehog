@@ -34,14 +34,14 @@ jobs:
   security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           submodules: recursive
 
       - name: Optimize Cache
         uses: ./.github/actions/restore-cache-mtimes
 
-      - uses: team-alembic/staple-actions/actions/mix-task@8b0f5a1a7cadfbc86c2d00343d4a06a45352ef13 # main
+      - uses: team-alembic/staple-actions/actions/mix-task@488c794f93225c358bbec47152620a59c6f53e6a # main
         with:
           task: "deps.audit --ignore-advisory-ids GHSA-g2wm-735q-3f56"
           working-directory: backend

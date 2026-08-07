@@ -37,14 +37,16 @@ import type {
 } from "@/api/__generated__/CreateFileDownloadCampaign_RepositoryOptionsFragment.graphql";
 import type { CreateFileDownloadCampaign_RepositoryPaginationQuery } from "@/api/__generated__/CreateFileDownloadCampaign_RepositoryPaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
-import DatePicker from "@/components/DatePicker";
-import FileSelect from "@/components/FileSelect";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
+import Button from "@/components/ui/button/Button";
+import CollapseItem, {
+  useCollapseToggle,
+} from "@/components/ui/collapse-item/CollapseItem";
+import DatePicker from "@/components/ui/date-picker/DatePicker";
+import FileSelect from "@/components/files/file-download/file-select/FileSelect";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {

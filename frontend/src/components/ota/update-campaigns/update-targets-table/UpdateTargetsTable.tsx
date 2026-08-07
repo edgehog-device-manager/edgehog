@@ -1,0 +1,383 @@
+/*
+ * This file is part of Edgehog.
+ *
+ * Copyright 2023 - 2026 SECO Mind Srl
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *    http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
+import compact from "lodash/compact";
+import { useMemo } from "react";
+import { defineMessages, FormattedDate, FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
+
+import type {
+  OtaOperationStatus,
+  OtaOperationStatusCode,
+  UpdateTargetsTable_CampaignTargetEdgeFragment$data,
+  UpdateTargetsTable_CampaignTargetEdgeFragment$key,
+} from "@/api/__generated__/UpdateTargetsTable_CampaignTargetEdgeFragment.graphql";
+
+import Icon from "@/components/ui/icon/Icon";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import { Link, Route } from "@/Navigation";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
+  fragment UpdateTargetsTable_CampaignTargetEdgeFragment on CampaignTargetConnection {
+    edges {
+      node {
+        device {
+          id
+          name
+        }
+        retryCount
+        latestAttempt
+        completionTimestamp
+        otaOperation {
+          status
+          statusProgress
+          statusCode
+        }
+      }
+    }
+  }
+`;
+
+const getOperationStatusColor = (status: OtaOperationStatus): string => {
+  switch (status) {
+    case "PENDING":
+      return "text-muted";
+    case "SUCCESS":
+      return "text-success";
+    case "FAILURE":
+      return "text-danger";
+
+    case "ACKNOWLEDGED":
+    case "DEPLOYED":
+    case "DEPLOYING":
+    case "DOWNLOADING":
+    case "ERROR":
+    case "REBOOTING":
+      return "text-warning";
+  }
+};
+
+const operationStatusMessages = defineMessages<OtaOperationStatus>({
+  PENDING: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Pending",
+    defaultMessage: "Pending",
+  },
+  ACKNOWLEDGED: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Acknowledged",
+    defaultMessage: "Acknowledged",
+  },
+  DOWNLOADING: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Downloading",
+    defaultMessage: "Downloading",
+  },
+  DEPLOYING: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Deploying",
+    defaultMessage: "Deploying",
+  },
+  DEPLOYED: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Deployed",
+    defaultMessage: "Deployed",
+  },
+  REBOOTING: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Rebooting",
+    defaultMessage: "Rebooting",
+  },
+  SUCCESS: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Success",
+    defaultMessage: "Success",
+  },
+  ERROR: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Error",
+    defaultMessage: "Error",
+  },
+  FAILURE: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Failure",
+    defaultMessage: "Failure",
+  },
+});
+
+const OperationStatus = ({ status }: { status: OtaOperationStatus }) => (
+  <div className="d-flex align-items-center">
+    <Icon icon="circle" className={`me-2 ${getOperationStatusColor(status)}`} />
+    <span>
+      <FormattedMessage {...operationStatusMessages[status]} />
+    </span>
+  </div>
+);
+
+const operationStatusCodeMessages = defineMessages<OtaOperationStatusCode>({
+  CANCELED: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.Canceled",
+    defaultMessage: "Canceled",
+  },
+  INTERNAL_ERROR: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.InternalError",
+    defaultMessage: "Internal error",
+  },
+  INVALID_BASE_IMAGE: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.InvalidBaseImage",
+    defaultMessage: "Invalid Base Image",
+  },
+  INVALID_REQUEST: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.InvalidRequest",
+    defaultMessage: "Invalid request",
+  },
+  IO_ERROR: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.IOError",
+    defaultMessage: "IO error",
+  },
+  NETWORK_ERROR: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.NetworkError",
+    defaultMessage: "Network error",
+  },
+  REQUEST_TIMEOUT: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.RequestTimeout",
+    defaultMessage: "Request timeout",
+  },
+  SYSTEM_ROLLBACK: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.SystemRollback",
+    defaultMessage: "System rollback",
+  },
+  UPDATE_ALREADY_IN_PROGRESS: {
+    id: "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.UpdateAlreadyInProgress",
+    defaultMessage: "Update already in progress",
+  },
+});
+
+type TableRecord = NonNullable<
+  NonNullable<UpdateTargetsTable_CampaignTargetEdgeFragment$data>["edges"]
+>[number]["node"];
+
+const columnIds = [
+  "deviceName",
+  "otaOperationStatus",
+  "otaOperationStatusProgress",
+  "otaOperationStatusCode",
+  "retryCount",
+  "latestAttempt",
+  "completionTimestamp",
+] as const;
+type ColumnId = (typeof columnIds)[number];
+
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("device.name", {
+    id: "deviceName",
+    header: () => (
+      <FormattedMessage
+        id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.deviceTitle"
+        defaultMessage="Device"
+        description="Title for the Device column of the Update Targets table"
+      />
+    ),
+    meta: {
+      label: "Device",
+    },
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.devicesEdit}
+        params={{
+          deviceId: row.original.device.id,
+          activeTab: "device-software-update-tab",
+        }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
+  columnHelper.accessor(
+    (campaignTarget) => campaignTarget.otaOperation?.status ?? null,
+    {
+      id: "otaOperationStatus",
+      header: () => (
+        <FormattedMessage
+          id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusTitle"
+          defaultMessage="Operation"
+          description="Title for the Operation Status column of the Update Targets table"
+        />
+      ),
+      meta: {
+        label: "Operation",
+      },
+      cell: ({ getValue }) => {
+        const status = getValue();
+        return status && <OperationStatus status={status} />;
+      },
+    },
+  ),
+  columnHelper.accessor(
+    (campaignTarget) => campaignTarget.otaOperation?.statusProgress ?? null,
+    {
+      id: "otaOperationStatusProgress",
+      header: () => (
+        <FormattedMessage
+          id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusProgressTitle"
+          defaultMessage="Operation progress"
+          description="Title for the Operation Status Progress column of the Update Targets table"
+        />
+      ),
+      meta: {
+        label: "Operation progress",
+      },
+      cell: ({ getValue }) => {
+        const progress = getValue();
+        return typeof progress === "number" ? `${progress}%` : "";
+      },
+    },
+  ),
+  columnHelper.accessor(
+    (campaignTarget) => campaignTarget.otaOperation?.statusCode ?? null,
+    {
+      id: "otaOperationStatusCode",
+      header: () => (
+        <FormattedMessage
+          id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCodeTitle"
+          defaultMessage="Failure Reason"
+          description="Title for the Operation Status Code column of the Update Targets table"
+        />
+      ),
+      meta: {
+        label: "Failure Reason",
+      },
+      cell: ({ getValue }) => {
+        const statusCode = getValue();
+        return (
+          statusCode && (
+            <FormattedMessage {...operationStatusCodeMessages[statusCode]} />
+          )
+        );
+      },
+    },
+  ),
+  columnHelper.accessor("retryCount", {
+    header: () => (
+      <FormattedMessage
+        id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.retryCountTitle"
+        defaultMessage="Retry Count"
+        description="Title for the Retry Count column of the Update Targets table"
+      />
+    ),
+    meta: {
+      label: "Retry Count",
+    },
+    cell: ({ getValue }) => {
+      const retryCount = getValue();
+      return retryCount ? retryCount : "";
+    },
+  }),
+  columnHelper.accessor("latestAttempt", {
+    header: () => (
+      <FormattedMessage
+        id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.latestAttemptTitle"
+        defaultMessage="Latest attempt at"
+        description="Title for the Latest attempt at column of the Update Targets table"
+      />
+    ),
+    meta: {
+      label: "Latest attempt at",
+    },
+    cell: ({ getValue }) => {
+      const latestAttempt = getValue();
+      return (
+        latestAttempt && (
+          <FormattedDate
+            value={latestAttempt}
+            year="numeric"
+            month="long"
+            day="numeric"
+            hour="numeric"
+            minute="numeric"
+          />
+        )
+      );
+    },
+  }),
+  columnHelper.accessor("completionTimestamp", {
+    header: () => (
+      <FormattedMessage
+        id="components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.completionTimestampTitle"
+        defaultMessage="Completed at"
+        description="Title for the Completed at column of the Update Targets table"
+      />
+    ),
+    meta: {
+      label: "Completed at",
+    },
+    cell: ({ getValue }) => {
+      const latestAttempt = getValue();
+      return (
+        latestAttempt && (
+          <FormattedDate
+            value={latestAttempt}
+            year="numeric"
+            month="long"
+            day="numeric"
+            hour="numeric"
+            minute="numeric"
+          />
+        )
+      );
+    },
+  }),
+];
+
+type Props = {
+  className?: string;
+  hiddenColumns?: ColumnId[];
+  campaignTargetsRef: UpdateTargetsTable_CampaignTargetEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
+};
+
+const UpdateTargetsTable = ({
+  className,
+  campaignTargetsRef,
+  hiddenColumns = [],
+  loading = false,
+  onLoadMore,
+}: Props) => {
+  const campaignTargetsFragment = useFragment(
+    CAMPAIGN_TARGETS_TABLE_FRAGMENT,
+    campaignTargetsRef,
+  );
+
+  const campaignTargets = useMemo<TableRecord[]>(() => {
+    return compact(campaignTargetsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [campaignTargetsFragment]);
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={campaignTargets}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      hiddenColumns={hiddenColumns}
+      hideColumnVisibility
+    />
+  );
+};
+
+export default UpdateTargetsTable;
+export { columnIds, OperationStatus, operationStatusCodeMessages };
+export type { ColumnId };

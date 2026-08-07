@@ -24,8 +24,8 @@ import { graphql, useMutation } from "react-relay/hooks";
 
 import type { NetworkCreate_networkCreate_Mutation } from "@/api/__generated__/NetworkCreate_networkCreate_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Page from "@/components/Page";
+import Alert from "@/components/ui/alert/Alert";
+import Page from "@/components/ui/page/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateNetworkForm from "@/forms/CreateNetwork";
 import { NetworkFormData } from "@/forms/validation";

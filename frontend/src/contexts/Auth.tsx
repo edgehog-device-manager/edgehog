@@ -29,7 +29,7 @@ import React, {
 
 import { useSession, Session } from "@/contexts/Session";
 import type { FetchGraphQL } from "@/api";
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/ui/spinner/Spinner";
 
 // Use a lightweight query at startup to test if authentication is valid
 const authQuery = `

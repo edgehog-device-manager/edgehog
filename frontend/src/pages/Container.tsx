@@ -36,16 +36,16 @@ import type {
 import { Container_updateContainer_Mutation } from "@/api/__generated__/Container_updateContainer_Mutation.graphql";
 
 import { Link, Route } from "@/Navigation";
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import ContainerDetails from "@/components/ContainerDetails";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
-import Icon from "@/components/Icon";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import ContainerDetails from "@/components/apps/containers/container-details/ContainerDetails";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import Icon from "@/components/ui/icon/Icon";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 
 const GET_CONTAINER_QUERY = graphql`
   query Container_getContainer_Query($containerId: ID!) {

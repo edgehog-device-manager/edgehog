@@ -40,23 +40,23 @@ import type {
 import type { UpdateCampaign_pauseCampaign_Mutation } from "@/api/__generated__/UpdateCampaign_pauseCampaign_Mutation.graphql";
 import type { UpdateCampaign_resumeCampaign_Mutation } from "@/api/__generated__/UpdateCampaign_resumeCampaign_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import CampaignScheduledAlert from "@/components/CampaignScheduledAlert";
-import CampaignStatsChart from "@/components/CampaignStatsChart";
-import Center from "@/components/Center";
-import Col from "@/components/Col";
-import DeleteCampaignModal from "@/components/DeleteCampaignModal";
-import Icon from "@/components/Icon";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
-import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import CampaignScheduledAlert from "@/components/campaigns/campaign-scheduled-alert/CampaignScheduledAlert";
+import CampaignStatsChart from "@/components/campaigns/campaign-stats-chart/CampaignStatsChart";
+import Center from "@/components/ui/center/Center";
+import Col from "@/components/ui/col/Col";
+import DeleteCampaignModal from "@/components/campaigns/delete-campaign-modal/DeleteCampaignModal";
+import Icon from "@/components/ui/icon/Icon";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
+import UpdateTargetsTabs from "@/components/ota/update-campaigns/update-targets-tabs/UpdateTargetsTabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
 import { Link, Route } from "@/Navigation";
-import EditUpdateCampaignModal from "@/components/EditUpdateCampaignModal";
+import EditUpdateCampaignModal from "@/components/ota/update-campaigns/edit-update-campaign-modal/EditUpdateCampaignModal";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getCampaign_Query(

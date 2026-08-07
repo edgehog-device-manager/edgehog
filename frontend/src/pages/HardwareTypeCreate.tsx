@@ -23,8 +23,8 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useMutation, ConnectionHandler } from "react-relay/hooks";
 
 import type { HardwareTypeCreate_createHardwareType_Mutation } from "@/api/__generated__/HardwareTypeCreate_createHardwareType_Mutation.graphql";
-import Alert from "@/components/Alert";
-import Page from "@/components/Page";
+import Alert from "@/components/ui/alert/Alert";
+import Page from "@/components/ui/page/Page";
 import CreateHardwareTypeForm from "@/forms/CreateHardwareType";
 import type { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
 import { Route, useNavigate } from "@/Navigation";

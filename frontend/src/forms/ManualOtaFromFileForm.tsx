@@ -22,12 +22,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
-import Button from "@/components/Button";
-import Col from "@/components/Col";
-import Form from "@/components/Form";
-import { FormRowWithMargin as FormRow } from "@/components/FormRow";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Col from "@/components/ui/col/Col";
+import Form from "@/components/ui/form/Form";
+import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
 import { manualOtaFromFileSchema } from "@/forms/validation";
 

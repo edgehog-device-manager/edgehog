@@ -34,12 +34,11 @@ import type { ImageCredentials_getImageCredentials_Query } from "@/api/__generat
 import { ImageCredentials_ImageCredentialsFragment$key } from "@/api/__generated__/ImageCredentials_ImageCredentialsFragment.graphql";
 import { ImageCredentials_PaginationQuery } from "@/api/__generated__/ImageCredentials_PaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import ImageCredentialsTable from "@/components/ImageCredentialsTable";
-import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import ImageCredentialsTable from "@/components/apps/containers/image-credentials-table/ImageCredentialsTable";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
@@ -73,10 +72,12 @@ const IMAGE_CREDENTIALS_FRAGMENT = graphql`
 interface ImageCredentialsLayoutContainerProps {
   imageCredentialsData: ImageCredentials_getImageCredentials_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const ImageCredentialsLayoutContainer = ({
   imageCredentialsData,
   searchText,
+  onSearchChange,
 }: ImageCredentialsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -115,6 +116,8 @@ const ImageCredentialsLayoutContainer = ({
       imageCredentialsRef={imageCredentialsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -152,14 +155,10 @@ const ImageCredentialsContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
-          <SearchBox
-            className=" pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <ImageCredentialsLayoutContainer
             imageCredentialsData={imageCredentialsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

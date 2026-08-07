@@ -34,12 +34,11 @@ import { Channels_ChannelsFragment$key } from "@/api/__generated__/Channels_Chan
 import type { Channels_getChannels_Query } from "@/api/__generated__/Channels_getChannels_Query.graphql";
 import { Channels_PaginationQuery } from "@/api/__generated__/Channels_PaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import ChannelsTable from "@/components/ChannelsTable";
-import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import ChannelsTable from "@/components/fleet/channels/channels-table/ChannelsTable";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
@@ -111,10 +110,12 @@ const CHANNEL_CREATED_SUBSCRIPTION = graphql`
 interface ChannelsLayoutContainerProps {
   channelsData: Channels_getChannels_Query["response"];
   searchText: string | null;
+  setSearchText: (text: string) => void;
 }
 const ChannelsLayoutContainer = ({
   channelsData,
   searchText,
+  setSearchText,
 }: ChannelsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -257,6 +258,8 @@ const ChannelsLayoutContainer = ({
       channelsRef={channelsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={setSearchText}
     />
   );
 };
@@ -292,14 +295,10 @@ const ChannelsContent = ({ getChannelsQuery }: ChannelsContentProps) => {
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <ChannelsLayoutContainer
             channelsData={channelsData}
             searchText={searchText}
+            setSearchText={setSearchText}
           />
         </Card>
       </Page.Main>

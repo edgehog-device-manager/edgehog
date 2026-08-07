@@ -24,12 +24,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import Icon from "@/components/Icon";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import Icon from "@/components/ui/icon/Icon";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import {
   ImageCredentialFormData,
   imageCredentialSchema,

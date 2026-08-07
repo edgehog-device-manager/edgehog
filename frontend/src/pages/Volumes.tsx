@@ -32,12 +32,11 @@ import type { Volumes_getVolumes_Query } from "@/api/__generated__/Volumes_getVo
 import { Volumes_PaginationQuery } from "@/api/__generated__/Volumes_PaginationQuery.graphql";
 import { Volumes_VolumesFragment$key } from "@/api/__generated__/Volumes_VolumesFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
-import VolumesTable from "@/components/VolumesTable";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
+import VolumesTable from "@/components/apps/containers/volumes-table/VolumesTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
@@ -71,10 +70,12 @@ const VOLUMES_FRAGMENT = graphql`
 interface VolumesLayoutContainerProps {
   volumesData: Volumes_getVolumes_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const VolumesLayoutContainer = ({
   volumesData,
   searchText,
+  onSearchChange,
 }: VolumesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<Volumes_PaginationQuery, Volumes_VolumesFragment$key>(
@@ -113,6 +114,8 @@ const VolumesLayoutContainer = ({
       volumesRef={volumesRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -145,14 +148,10 @@ const VolumesContent = ({ getVolumesQuery }: VolumesContentProps) => {
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <VolumesLayoutContainer
             volumesData={volumesData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

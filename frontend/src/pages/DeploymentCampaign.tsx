@@ -40,23 +40,23 @@ import type {
 import type { DeploymentCampaign_pauseCampaign_Mutation } from "@/api/__generated__/DeploymentCampaign_pauseCampaign_Mutation.graphql";
 import type { DeploymentCampaign_resumeCampaign_Mutation } from "@/api/__generated__/DeploymentCampaign_resumeCampaign_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import CampaignScheduledAlert from "@/components/CampaignScheduledAlert";
-import CampaignStatsChart from "@/components/CampaignStatsChart";
-import Center from "@/components/Center";
-import Col from "@/components/Col";
-import DeleteCampaignModal from "@/components/DeleteCampaignModal";
-import DeploymentTargetsTabs from "@/components/DeploymentTargetsTabs";
-import Icon from "@/components/Icon";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import CampaignScheduledAlert from "@/components/campaigns/campaign-scheduled-alert/CampaignScheduledAlert";
+import CampaignStatsChart from "@/components/campaigns/campaign-stats-chart/CampaignStatsChart";
+import Center from "@/components/ui/center/Center";
+import Col from "@/components/ui/col/Col";
+import DeleteCampaignModal from "@/components/campaigns/delete-campaign-modal/DeleteCampaignModal";
+import DeploymentTargetsTabs from "@/components/apps/deployments/deployment-targets-tabs/DeploymentTargetsTabs";
+import Icon from "@/components/ui/icon/Icon";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import DeploymentCampaignForm from "@/forms/DeploymentCampaignForm";
 import { Link, Route } from "@/Navigation";
-import EditDeploymentCampaignModal from "@/components/EditDeploymentCampaignModal";
+import EditDeploymentCampaignModal from "@/components/apps/deployments/edit-deployment-campaign-modal/EditDeploymentCampaignModal";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query DeploymentCampaign_getCampaign_Query(

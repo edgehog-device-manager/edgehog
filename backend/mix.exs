@@ -21,7 +21,7 @@
 defmodule Edgehog.MixProject do
   use Mix.Project
 
-  @version "0.13.0-rc.1"
+  @version "0.13.1"
 
   def project do
     [
@@ -86,7 +86,6 @@ defmodule Edgehog.MixProject do
       {:phoenix_ecto, "~> 4.7"},
       {:ecto_sql, "~> 3.13"},
       {:postgrex, "~> 0.22"},
-      {:swoosh, "~> 1.25"},
       {:telemetry_metrics, "~> 1.1"},
       {:telemetry_poller, "~> 1.3"},
       {:gettext, "~> 1.0"},
@@ -148,7 +147,8 @@ defmodule Edgehog.MixProject do
       #
       # Do not upgrade this dependency unless the underlying block size behavior is verified and updated.
       {:nimble_lz4, "1.1.0"},
-      {:grpc, "~> 0.11"},
+      {:grpc, "~> 1.0"},
+      {:mint, "~> 1.5"},
       {:libgraph, "~> 0.16"},
       {:gcs_signed_url, "~> 0.4"}
     ]

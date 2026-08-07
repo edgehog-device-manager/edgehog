@@ -37,11 +37,10 @@ import type { Deployments_deployment_updated_Subscription } from "@/api/__genera
 import type { Deployments_getDeployments_Query } from "@/api/__generated__/Deployments_getDeployments_Query.graphql";
 import { Deployments_PaginationQuery } from "@/api/__generated__/Deployments_PaginationQuery.graphql";
 
-import Center from "@/components/Center";
-import DeploymentsTable from "@/components/DeploymentsTable";
-import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
+import Center from "@/components/ui/center/Center";
+import DeploymentsTable from "@/components/apps/deployments/deployments-table/DeploymentsTable";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
@@ -132,10 +131,12 @@ const DEPLOYMENTS_DESTROYED_SUBSCRIPTION = graphql`
 interface DeploymentsLayoutContainerProps {
   deploymentsData: Deployments_getDeployments_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const DeploymentsLayoutContainer = ({
   deploymentsData,
   searchText,
+  onSearchChange,
 }: DeploymentsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -295,6 +296,8 @@ const DeploymentsLayoutContainer = ({
       deploymentsRef={deploymentsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -325,14 +328,10 @@ const DeploymentsContent = ({
       ></Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <DeploymentsLayoutContainer
             deploymentsData={deploymentsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

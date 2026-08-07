@@ -36,12 +36,11 @@ import type { UpdateCampaigns_getCampaigns_Query } from "@/api/__generated__/Upd
 import { UpdateCampaigns_PaginationQuery } from "@/api/__generated__/UpdateCampaigns_PaginationQuery.graphql";
 import { UpdateCampaigns_UpdateCampaignsFragment$key } from "@/api/__generated__/UpdateCampaigns_UpdateCampaignsFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
-import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
+import UpdateCampaignsTable from "@/components/ota/update-campaigns/update-campaigns-table/UpdateCampaignsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
@@ -141,10 +140,12 @@ const findMatches = <T extends readonly string[]>(
 interface UpdateCampaignsLayoutContainerProps {
   campaignsData: UpdateCampaigns_getCampaigns_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const UpdateCampaignsLayoutContainer = ({
   campaignsData,
   searchText,
+  onSearchChange,
 }: UpdateCampaignsLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -287,6 +288,8 @@ const UpdateCampaignsLayoutContainer = ({
       updateCampaignsRef={updateCampaignsRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -324,14 +327,10 @@ const UpdateCampaignsContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <UpdateCampaignsLayoutContainer
             campaignsData={campaignsData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

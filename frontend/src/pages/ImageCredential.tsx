@@ -37,11 +37,11 @@ import {
   ImageCredential_imageCredential_Query$data,
 } from "@/api/__generated__/ImageCredential_imageCredential_Query.graphql";
 
-import Center from "@/components/Center";
-import DeleteModal from "@/components/DeleteModal";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Center from "@/components/ui/center/Center";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import UpdateImageCredentialForm from "@/forms/UpdateImageCredential";
 import { Link, Route, useNavigate } from "@/Navigation";
 
