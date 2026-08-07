@@ -20,8 +20,8 @@
 
 import { FormattedMessage } from "react-intl";
 
-import SidebarItem from "@/components/sidebar/SidebarItem";
-import SidebarGroup from "@/components/sidebar/SidebarGroup";
+import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
+import SidebarGroup from "@/components/layout/sidebar/sidebar-group/SidebarGroup";
 
 import { Route } from "@/Navigation";
 
@@ -36,7 +36,7 @@ const FilesSidebarGroup = ({ collapsed }: FilesSidebarGroupProps) => {
       isCollapsed={collapsed}
       label={
         <FormattedMessage
-          id="components.sidebar.groups.FilesSidebarGroup.filesManagementGroupLabel"
+          id="components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.filesManagementGroupLabel"
           defaultMessage="Files Management"
         />
       }
@@ -45,7 +45,7 @@ const FilesSidebarGroup = ({ collapsed }: FilesSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.FilesSidebarGroup.repositoriesLabel"
+            id="components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.repositoriesLabel"
             defaultMessage="Repositories"
           />
         }
@@ -62,7 +62,7 @@ const FilesSidebarGroup = ({ collapsed }: FilesSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.FilesSidebarGroup.fileDownloadCampaignsLabel"
+            id="components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.fileDownloadCampaignsLabel"
             defaultMessage="File Campaigns"
           />
         }

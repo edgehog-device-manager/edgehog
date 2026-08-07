@@ -23,7 +23,7 @@ import { describe, expect, it, vi } from "vitest";
 
 import assets from "@/assets";
 import { renderWithProviders } from "@/setupTests";
-import Sidebar from "@/components/sidebar/Sidebar";
+import Sidebar from "@/components/layout/sidebar/Sidebar";
 
 const defaultProps = {
   appName: "Edgehog Device Manager",

@@ -1710,65 +1710,65 @@
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
   },
-  "components.sidebar.Sidebar.devicesLabel": {
+  "components.layout.sidebar.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"
   },
-  "components.sidebar.SidebarFooter.logoutLabel": {
-    "defaultMessage": "Logout"
-  },
-  "components.sidebar.groups.AppsSidebarGroup.applicationsLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel": {
     "defaultMessage": "Applications"
   },
-  "components.sidebar.groups.AppsSidebarGroup.campaignsLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.campaignsLabel": {
     "defaultMessage": "Application Campaigns"
   },
-  "components.sidebar.groups.AppsSidebarGroup.containersLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.containersLabel": {
     "defaultMessage": "Containers"
   },
-  "components.sidebar.groups.AppsSidebarGroup.deploymentsLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.deploymentsLabel": {
     "defaultMessage": "Deployments"
   },
-  "components.sidebar.groups.AppsSidebarGroup.imageCredentialsLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.imageCredentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
-  "components.sidebar.groups.AppsSidebarGroup.networksLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.networksLabel": {
     "defaultMessage": "Networks"
   },
-  "components.sidebar.groups.AppsSidebarGroup.volumesLabel": {
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.volumesLabel": {
     "defaultMessage": "Volumes"
   },
-  "components.sidebar.groups.FilesSidebarGroup.fileDownloadCampaignsLabel": {
+  "components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.fileDownloadCampaignsLabel": {
     "defaultMessage": "File Campaigns"
   },
-  "components.sidebar.groups.FilesSidebarGroup.filesManagementGroupLabel": {
+  "components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.filesManagementGroupLabel": {
     "defaultMessage": "Files Management"
   },
-  "components.sidebar.groups.FilesSidebarGroup.repositoriesLabel": {
+  "components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.repositoriesLabel": {
     "defaultMessage": "Repositories"
   },
-  "components.sidebar.groups.FleetSidebarGroup.ChannelsLabel": {
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.ChannelsLabel": {
     "defaultMessage": "Channels"
   },
-  "components.sidebar.groups.FleetSidebarGroup.deviceGroupsLabel": {
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.deviceGroupsLabel": {
     "defaultMessage": "Groups"
   },
-  "components.sidebar.groups.FleetSidebarGroup.fleetGroupLabel": {
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.fleetGroupLabel": {
     "defaultMessage": "Fleet Management"
   },
-  "components.sidebar.groups.FleetSidebarGroup.hardwareTypesLabel": {
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.hardwareTypesLabel": {
     "defaultMessage": "Hardware Types"
   },
-  "components.sidebar.groups.FleetSidebarGroup.modelsLabel": {
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.modelsLabel": {
     "defaultMessage": "System Models"
   },
-  "components.sidebar.groups.OtaSidebarGroup.baseImageCollectionsLabel": {
+  "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.baseImageCollectionsLabel": {
     "defaultMessage": "Base Image Collections"
   },
-  "components.sidebar.groups.OtaSidebarGroup.otaUpdatesGroupLabel": {
+  "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.otaUpdatesGroupLabel": {
     "defaultMessage": "OTA Updates"
   },
-  "components.sidebar.groups.OtaSidebarGroup.updateCampaignsLabel": {
+  "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel": {
+    "defaultMessage": "Logout"
   },
   "forms.CreateApplication.descriptionLabel": {
     "defaultMessage": "Description"

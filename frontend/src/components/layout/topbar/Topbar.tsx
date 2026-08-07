@@ -23,7 +23,7 @@ import Image from "react-bootstrap/Image";
 import assets from "@/assets";
 import Button from "@/components/Button";
 import Icon from "@/components/Icon";
-import "@/components/Topbar.scss";
+import "@/components/layout/topbar/Topbar.scss";
 
 interface TopbarProps {
   onToggle?: () => void;

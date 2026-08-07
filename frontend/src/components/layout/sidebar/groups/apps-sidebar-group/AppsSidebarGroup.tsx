@@ -20,8 +20,8 @@
 
 import { FormattedMessage } from "react-intl";
 
-import SidebarItem from "@/components/sidebar/SidebarItem";
-import SidebarGroup from "@/components/sidebar/SidebarGroup";
+import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
+import SidebarGroup from "@/components/layout/sidebar/sidebar-group/SidebarGroup";
 
 import { Route } from "@/Navigation";
 
@@ -36,7 +36,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       isCollapsed={collapsed}
       label={
         <FormattedMessage
-          id="components.sidebar.groups.AppsSidebarGroup.applicationsLabel"
+          id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel"
           defaultMessage="Applications"
         />
       }
@@ -45,7 +45,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.imageCredentialsLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.imageCredentialsLabel"
             defaultMessage="Image Credentials"
           />
         }
@@ -61,7 +61,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.volumesLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.volumesLabel"
             defaultMessage="Volumes"
           />
         }
@@ -73,7 +73,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.networksLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.networksLabel"
             defaultMessage="Networks"
           />
         }
@@ -85,7 +85,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.containersLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.containersLabel"
             defaultMessage="Containers"
           />
         }
@@ -101,7 +101,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.applicationsLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel"
             defaultMessage="Applications"
           />
         }
@@ -119,7 +119,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.deploymentsLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.deploymentsLabel"
             defaultMessage="Deployments"
           />
         }
@@ -131,7 +131,7 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.AppsSidebarGroup.campaignsLabel"
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.campaignsLabel"
             defaultMessage="Application Campaigns"
           />
         }

@@ -23,7 +23,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import { renderWithProviders } from "@/setupTests";
-import Topbar from "@/components/Topbar";
+import Topbar from "@/components/layout/topbar/Topbar";
 
 describe("Topbar Component", () => {
   it("renders the topbar with logo and toggle button", () => {

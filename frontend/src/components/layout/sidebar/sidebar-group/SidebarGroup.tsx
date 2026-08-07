@@ -25,7 +25,7 @@ import { useLocation } from "react-router-dom";
 
 import Icon from "@/components/Icon";
 import { matchPaths } from "@/Navigation";
-import { type SidebarItemProps } from "@/components/sidebar/SidebarItem";
+import { type SidebarItemProps } from "@/components/layout/sidebar/sidebar-item/SidebarItem";
 
 type SidebarGroupProps = {
   children: React.ReactNode;

@@ -21,7 +21,7 @@
 import { FormattedMessage } from "react-intl";
 
 import { Route } from "@/Navigation";
-import SidebarItem from "@/components/sidebar/SidebarItem";
+import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
 import Icon from "@/components/Icon";
 
 type SidebarFooterProps = {
@@ -43,7 +43,7 @@ const SidebarFooter = ({
         <SidebarItem
           label={
             <FormattedMessage
-              id="components.sidebar.SidebarFooter.logoutLabel"
+              id="components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel"
               defaultMessage="Logout"
             />
           }

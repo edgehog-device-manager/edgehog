@@ -21,8 +21,8 @@
 import { useState } from "react";
 import { Navigate, useRoutes } from "react-router-dom";
 
-import Sidebar from "@/components/sidebar/Sidebar";
-import Topbar from "@/components/Topbar";
+import Sidebar from "@/components/layout/sidebar/Sidebar";
+import Topbar from "@/components/layout/topbar/Topbar";
 import { useAuth } from "@/contexts/Auth";
 import { Route } from "@/Navigation";
 import Application from "@/pages/Application";

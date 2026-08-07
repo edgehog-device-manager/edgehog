@@ -20,8 +20,8 @@
 
 import { FormattedMessage } from "react-intl";
 
-import SidebarItem from "@/components/sidebar/SidebarItem";
-import SidebarGroup from "@/components/sidebar/SidebarGroup";
+import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
+import SidebarGroup from "@/components/layout/sidebar/sidebar-group/SidebarGroup";
 
 import { Route } from "@/Navigation";
 
@@ -36,7 +36,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
       isCollapsed={collapsed}
       label={
         <FormattedMessage
-          id="components.sidebar.groups.FleetSidebarGroup.fleetGroupLabel"
+          id="components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.fleetGroupLabel"
           defaultMessage="Fleet Management"
         />
       }
@@ -45,7 +45,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.FleetSidebarGroup.hardwareTypesLabel"
+            id="components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.hardwareTypesLabel"
             defaultMessage="Hardware Types"
           />
         }
@@ -60,7 +60,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.FleetSidebarGroup.modelsLabel"
+            id="components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.modelsLabel"
             defaultMessage="System Models"
           />
         }
@@ -75,7 +75,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.FleetSidebarGroup.deviceGroupsLabel"
+            id="components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.deviceGroupsLabel"
             defaultMessage="Groups"
           />
         }
@@ -90,7 +90,7 @@ const FleetSidebarGroup = ({ collapsed }: FleetSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.FleetSidebarGroup.ChannelsLabel"
+            id="components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.ChannelsLabel"
             defaultMessage="Channels"
           />
         }

@@ -20,8 +20,8 @@
 
 import { FormattedMessage } from "react-intl";
 
-import SidebarItem from "@/components/sidebar/SidebarItem";
-import SidebarGroup from "@/components/sidebar/SidebarGroup";
+import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
+import SidebarGroup from "@/components/layout/sidebar/sidebar-group/SidebarGroup";
 
 import { Route } from "@/Navigation";
 
@@ -36,7 +36,7 @@ const OtaSidebarGroup = ({ collapsed }: OtaSidebarGroupProps) => {
       isCollapsed={collapsed}
       label={
         <FormattedMessage
-          id="components.sidebar.groups.OtaSidebarGroup.otaUpdatesGroupLabel"
+          id="components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.otaUpdatesGroupLabel"
           defaultMessage="OTA Updates"
         />
       }
@@ -45,7 +45,7 @@ const OtaSidebarGroup = ({ collapsed }: OtaSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.OtaSidebarGroup.baseImageCollectionsLabel"
+            id="components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.baseImageCollectionsLabel"
             defaultMessage="Base Image Collections"
           />
         }
@@ -62,7 +62,7 @@ const OtaSidebarGroup = ({ collapsed }: OtaSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.sidebar.groups.OtaSidebarGroup.updateCampaignsLabel"
+            id="components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.updateCampaignsLabel"
             defaultMessage="Update Campaigns"
           />
         }

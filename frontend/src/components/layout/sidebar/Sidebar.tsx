@@ -20,15 +20,15 @@
 
 import { FormattedMessage } from "react-intl";
 
-import "@/components/sidebar/Sidebar.scss";
+import "@/components/layout/sidebar/Sidebar.scss";
 import { Route } from "@/Navigation";
-import SidebarHeader from "@/components/sidebar/SidebarHeader";
-import SidebarItem from "@/components/sidebar/SidebarItem";
-import FleetSidebarGroup from "@/components/sidebar/groups/FleetSidebarGroup";
-import FilesSidebarGroup from "@/components/sidebar/groups/FilesSidebarGroup";
-import OtaSidebarGroup from "@/components/sidebar/groups/OtaSidebarGroup";
-import AppsSidebarGroup from "@/components/sidebar/groups/AppsSidebarGroup";
-import SidebarFooter from "@/components/sidebar/SidebarFooter";
+import SidebarHeader from "@/components/layout/sidebar/sidebar-header/SidebarHeader";
+import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
+import FleetSidebarGroup from "@/components/layout/sidebar/groups/fleet-sidebar-group/FleetSidebarGroup";
+import FilesSidebarGroup from "@/components/layout/sidebar/groups/files-sidebar-group/FilesSidebarGroup";
+import OtaSidebarGroup from "@/components/layout/sidebar/groups/ota-sidebar-group/OtaSidebarGroup";
+import AppsSidebarGroup from "@/components/layout/sidebar/groups/apps-sidebar-group/AppsSidebarGroup";
+import SidebarFooter from "@/components/layout/sidebar/sidebar-footer/SidebarFooter";
 
 type SidebarProps = {
   appName?: string;
@@ -65,7 +65,7 @@ const Sidebar = ({
         <SidebarItem
           label={
             <FormattedMessage
-              id="components.sidebar.Sidebar.devicesLabel"
+              id="components.layout.sidebar.Sidebar.devicesLabel"
               defaultMessage="Devices"
             />
           }
