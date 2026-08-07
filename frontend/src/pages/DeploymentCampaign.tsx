@@ -42,11 +42,11 @@ import type { DeploymentCampaign_resumeCampaign_Mutation } from "@/api/__generat
 
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
-import CampaignScheduledAlert from "@/components/CampaignScheduledAlert";
-import CampaignStatsChart from "@/components/CampaignStatsChart";
+import CampaignScheduledAlert from "@/components/campaigns/campaign-scheduled-alert/CampaignScheduledAlert";
+import CampaignStatsChart from "@/components/campaigns/campaign-stats-chart/CampaignStatsChart";
 import Center from "@/components/ui/center/Center";
 import Col from "@/components/ui/col/Col";
-import DeleteCampaignModal from "@/components/DeleteCampaignModal";
+import DeleteCampaignModal from "@/components/campaigns/delete-campaign-modal/DeleteCampaignModal";
 import DeploymentTargetsTabs from "@/components/DeploymentTargetsTabs";
 import Icon from "@/components/ui/icon/Icon";
 import Page from "@/components/ui/page/Page";

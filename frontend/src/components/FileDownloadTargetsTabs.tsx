@@ -29,7 +29,7 @@ import type { FileDownloadTargets_PaginationQuery } from "@/api/__generated__/Fi
 
 import CampaignTargetStatus, {
   CampaignTargetStatusType,
-} from "@/components/CampaignTargetStatus";
+} from "@/components/campaigns/campaign-target-status/CampaignTargetStatus";
 import type { ColumnId } from "@/components/FileDownloadTargetsTable";
 import FileDownloadTargetsTable, {
   columnIds,

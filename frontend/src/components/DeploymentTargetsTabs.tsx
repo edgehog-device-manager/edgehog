@@ -29,7 +29,7 @@ import { DeploymentTargetsTabs_DeploymentTargetsFragment$key } from "@/api/__gen
 
 import CampaignTargetStatus, {
   CampaignTargetStatusType,
-} from "@/components/CampaignTargetStatus";
+} from "@/components/campaigns/campaign-target-status/CampaignTargetStatus";
 import type { ColumnId } from "@/components/DeploymentTargetsTable";
 import DeploymentTargetsTable, {
   columnIds,

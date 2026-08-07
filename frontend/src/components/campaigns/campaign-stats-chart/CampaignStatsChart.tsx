@@ -25,7 +25,7 @@ import Chart from "react-apexcharts";
 
 import type { CampaignStatsChart_CampaignStatsChartFragment$key } from "@/api/__generated__/CampaignStatsChart_CampaignStatsChartFragment.graphql";
 
-import { statusMessages } from "@/components/CampaignTargetStatus";
+import { statusMessages } from "@/components/campaigns/campaign-target-status/CampaignTargetStatus";
 
 const CAMPAIGN_PROGRESS_BAR_FRAGMENT = graphql`
   fragment CampaignStatsChart_CampaignStatsChartFragment on Campaign {

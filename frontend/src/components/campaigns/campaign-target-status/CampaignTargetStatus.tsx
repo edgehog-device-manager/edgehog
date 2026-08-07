@@ -37,19 +37,19 @@ const CAMPAIGN_TARGET_STATUS_FRAGMENT = graphql`
 
 const messages = defineMessages<CampaignTargetStatusType>({
   IDLE: {
-    id: "components.CampaignTargetStatus.Idle",
+    id: "components.campaigns.campaign-target-status.CampaignTargetStatus.Idle",
     defaultMessage: "Idle",
   },
   IN_PROGRESS: {
-    id: "components.CampaignTargetStatus.InProgress",
+    id: "components.campaigns.campaign-target-status.CampaignTargetStatus.InProgress",
     defaultMessage: "In progress",
   },
   SUCCESSFUL: {
-    id: "components.CampaignTargetStatus.Successful",
+    id: "components.campaigns.campaign-target-status.CampaignTargetStatus.Successful",
     defaultMessage: "Successful",
   },
   FAILED: {
-    id: "components.CampaignTargetStatus.Failed",
+    id: "components.campaigns.campaign-target-status.CampaignTargetStatus.Failed",
     defaultMessage: "Failed",
   },
 });

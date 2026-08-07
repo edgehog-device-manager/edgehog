@@ -28,8 +28,8 @@ import type {
   DeploymentCampaignsTable_CampaignEdgeFragment$key,
 } from "@/api/__generated__/DeploymentCampaignsTable_CampaignEdgeFragment.graphql";
 
-import CampaignOutcome from "@/components/CampaignOutcome";
-import CampaignStatus from "@/components/CampaignStatus";
+import CampaignOutcome from "@/components/campaigns/campaign-outcome/CampaignOutcome";
+import CampaignStatus from "@/components/campaigns/campaign-status/CampaignStatus";
 import Icon from "@/components/ui/icon/Icon";
 import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 import { createColumnHelper } from "@/components/ui/table/Table";

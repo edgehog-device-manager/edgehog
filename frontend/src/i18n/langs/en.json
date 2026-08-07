@@ -133,60 +133,6 @@
   "components.BatteryTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.CampaignOutcome.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.CampaignOutcome.Success": {
-    "defaultMessage": "Success"
-  },
-  "components.CampaignScheduledAlert.deleteCampaign": {
-    "defaultMessage": "Delete Campaign"
-  },
-  "components.CampaignScheduledAlert.editCampaign": {
-    "defaultMessage": "Edit Campaign"
-  },
-  "components.CampaignScheduledAlert.scheduledActions": {
-    "defaultMessage": "You can edit or delete it before it begins."
-  },
-  "components.CampaignScheduledAlert.scheduledFor": {
-    "defaultMessage": "Scheduled for: {scheduledDate}"
-  },
-  "components.CampaignScheduledAlert.scheduledMessage": {
-    "defaultMessage": "This campaign is scheduled and has not started yet."
-  },
-  "components.CampaignScheduledAlert.startsIn": {
-    "defaultMessage": "Starts in {duration}"
-  },
-  "components.CampaignStatus.Finished": {
-    "defaultMessage": "Finished"
-  },
-  "components.CampaignStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.CampaignStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.CampaignStatus.Paused": {
-    "defaultMessage": "Paused"
-  },
-  "components.CampaignStatus.Pausing": {
-    "defaultMessage": "Pausing"
-  },
-  "components.CampaignStatus.Scheduled": {
-    "defaultMessage": "Scheduled"
-  },
-  "components.CampaignTargetStatus.Failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.CampaignTargetStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.CampaignTargetStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.CampaignTargetStatus.Successful": {
-    "defaultMessage": "Successful"
-  },
   "components.CellularConnectionTabs.EUTRAN": {
     "defaultMessage": "E-UTRAN"
   },
@@ -446,15 +392,6 @@
   },
   "components.DeleteApplicationModal.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the application, please try again."
-  },
-  "components.DeleteCampaignModal.error": {
-    "defaultMessage": "Could not delete campaign."
-  },
-  "components.DeleteCampaignModal.title": {
-    "defaultMessage": "Delete Campaign"
-  },
-  "components.DeleteCampaignModal.warning": {
-    "defaultMessage": "This will permanently delete the campaign."
   },
   "components.DeleteReleaseModal.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the release, please try again."
@@ -1660,6 +1597,69 @@
   },
   "components.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.campaigns.campaign-outcome.CampaignOutcome.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.campaigns.campaign-outcome.CampaignOutcome.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.deleteCampaign": {
+    "defaultMessage": "Delete Campaign"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.editCampaign": {
+    "defaultMessage": "Edit Campaign"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledActions": {
+    "defaultMessage": "You can edit or delete it before it begins."
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledFor": {
+    "defaultMessage": "Scheduled for: {scheduledDate}"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledMessage": {
+    "defaultMessage": "This campaign is scheduled and has not started yet."
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.startsIn": {
+    "defaultMessage": "Starts in {duration}"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Finished": {
+    "defaultMessage": "Finished"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Paused": {
+    "defaultMessage": "Paused"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Pausing": {
+    "defaultMessage": "Pausing"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Scheduled": {
+    "defaultMessage": "Scheduled"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.Successful": {
+    "defaultMessage": "Successful"
+  },
+  "components.campaigns.delete-campaign-modal.DeleteCampaignModal.error": {
+    "defaultMessage": "Could not delete campaign."
+  },
+  "components.campaigns.delete-campaign-modal.DeleteCampaignModal.title": {
+    "defaultMessage": "Delete Campaign"
+  },
+  "components.campaigns.delete-campaign-modal.DeleteCampaignModal.warning": {
+    "defaultMessage": "This will permanently delete the campaign."
   },
   "components.layout.sidebar.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"

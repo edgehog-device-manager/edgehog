@@ -24,8 +24,8 @@ import { graphql, useFragment } from "react-relay/hooks";
 
 import type { FileDownloadCampaignForm_CampaignFragment$key } from "@/api/__generated__/FileDownloadCampaignForm_CampaignFragment.graphql";
 
-import CampaignOutcome from "@/components/CampaignOutcome";
-import CampaignStatus from "@/components/CampaignStatus";
+import CampaignOutcome from "@/components/campaigns/campaign-outcome/CampaignOutcome";
+import CampaignStatus from "@/components/campaigns/campaign-status/CampaignStatus";
 import Col from "@/components/ui/col/Col";
 import { SimpleFormRow as FormRow } from "@/components/ui/form-row/FormRow";
 import Row from "@/components/ui/row/Row";

@@ -41,11 +41,11 @@ const colors: Record<CampaignOutcomeEnum, string> = {
 
 const messages = defineMessages<CampaignOutcomeEnum>({
   SUCCESS: {
-    id: "components.CampaignOutcome.Success",
+    id: "components.campaigns.campaign-outcome.CampaignOutcome.Success",
     defaultMessage: "Success",
   },
   FAILURE: {
-    id: "components.CampaignOutcome.Failure",
+    id: "components.campaigns.campaign-outcome.CampaignOutcome.Failure",
     defaultMessage: "Failure",
   },
 });

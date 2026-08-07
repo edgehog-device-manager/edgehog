@@ -29,7 +29,7 @@ import { UpdateTargetsTabs_UpdateTargetsFragment$key } from "@/api/__generated__
 
 import CampaignTargetStatus, {
   CampaignTargetStatusType,
-} from "@/components/CampaignTargetStatus";
+} from "@/components/campaigns/campaign-target-status/CampaignTargetStatus";
 import type { ColumnId } from "@/components/UpdateTargetsTable";
 import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

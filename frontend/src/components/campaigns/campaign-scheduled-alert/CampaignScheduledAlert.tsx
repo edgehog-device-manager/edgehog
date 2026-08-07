@@ -45,7 +45,7 @@ const renderCountdown = ({
   return (
     <strong>
       <FormattedMessage
-        id="components.CampaignScheduledAlert.startsIn"
+        id="components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.startsIn"
         defaultMessage="Starts in {duration}"
         values={{ duration: duration.join(" ") }}
       />
@@ -81,7 +81,7 @@ const CampaignScheduledAlert = ({
           <div>
             <div className="fw-semibold">
               <FormattedMessage
-                id="components.CampaignScheduledAlert.scheduledFor"
+                id="components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledFor"
                 defaultMessage="Scheduled for: {scheduledDate}"
                 values={{ scheduledDate: formattedScheduledDate }}
               />
@@ -105,14 +105,14 @@ const CampaignScheduledAlert = ({
           <div>
             <div>
               <FormattedMessage
-                id="components.CampaignScheduledAlert.scheduledMessage"
+                id="components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledMessage"
                 defaultMessage="This campaign is scheduled and has not started yet."
               />
             </div>
 
             <div className="fw-semibold">
               <FormattedMessage
-                id="components.CampaignScheduledAlert.scheduledActions"
+                id="components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledActions"
                 defaultMessage="You can edit or delete it before it begins."
               />
             </div>
@@ -124,7 +124,7 @@ const CampaignScheduledAlert = ({
             <Icon icon="edit" className="me-2" />
 
             <FormattedMessage
-              id="components.CampaignScheduledAlert.editCampaign"
+              id="components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.editCampaign"
               defaultMessage="Edit Campaign"
             />
           </Button>
@@ -133,7 +133,7 @@ const CampaignScheduledAlert = ({
             <Icon icon="delete" className="me-2" />
 
             <FormattedMessage
-              id="components.CampaignScheduledAlert.deleteCampaign"
+              id="components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.deleteCampaign"
               defaultMessage="Delete Campaign"
             />
           </Button>

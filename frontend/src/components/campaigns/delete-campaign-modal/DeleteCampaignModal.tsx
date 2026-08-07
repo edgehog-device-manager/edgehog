@@ -74,7 +74,7 @@ const DeleteCampaignModal = <C extends Campaign>({
       onError() {
         setErrorFeedback(
           <FormattedMessage
-            id="components.DeleteCampaignModal.error"
+            id="components.campaigns.delete-campaign-modal.DeleteCampaignModal.error"
             defaultMessage="Could not delete campaign."
           />,
         );
@@ -87,7 +87,7 @@ const DeleteCampaignModal = <C extends Campaign>({
       confirmText={campaignToDelete.name || ""}
       title={
         <FormattedMessage
-          id="components.DeleteCampaignModal.title"
+          id="components.campaigns.delete-campaign-modal.DeleteCampaignModal.title"
           defaultMessage="Delete Campaign"
         />
       }
@@ -97,7 +97,7 @@ const DeleteCampaignModal = <C extends Campaign>({
     >
       <p>
         <FormattedMessage
-          id="components.DeleteCampaignModal.warning"
+          id="components.campaigns.delete-campaign-modal.DeleteCampaignModal.warning"
           defaultMessage="This will permanently delete the campaign."
         />
       </p>

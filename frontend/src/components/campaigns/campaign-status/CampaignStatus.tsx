@@ -45,27 +45,27 @@ const colors: Record<CampaignStatusEnum, string> = {
 
 const messages = defineMessages<CampaignStatusEnum>({
   IDLE: {
-    id: "components.CampaignStatus.Idle",
+    id: "components.campaigns.campaign-status.CampaignStatus.Idle",
     defaultMessage: "Idle",
   },
   SCHEDULED: {
-    id: "components.CampaignStatus.Scheduled",
+    id: "components.campaigns.campaign-status.CampaignStatus.Scheduled",
     defaultMessage: "Scheduled",
   },
   IN_PROGRESS: {
-    id: "components.CampaignStatus.InProgress",
+    id: "components.campaigns.campaign-status.CampaignStatus.InProgress",
     defaultMessage: "In progress",
   },
   PAUSING: {
-    id: "components.CampaignStatus.Pausing",
+    id: "components.campaigns.campaign-status.CampaignStatus.Pausing",
     defaultMessage: "Pausing",
   },
   PAUSED: {
-    id: "components.CampaignStatus.Paused",
+    id: "components.campaigns.campaign-status.CampaignStatus.Paused",
     defaultMessage: "Paused",
   },
   FINISHED: {
-    id: "components.CampaignStatus.Finished",
+    id: "components.campaigns.campaign-status.CampaignStatus.Finished",
     defaultMessage: "Finished",
   },
 });

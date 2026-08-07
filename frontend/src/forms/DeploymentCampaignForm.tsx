@@ -28,8 +28,8 @@ import type {
 
 import Col from "@/components/ui/col/Col";
 import Row from "@/components/ui/row/Row";
-import CampaignOutcome from "@/components/CampaignOutcome";
-import CampaignStatus from "@/components/CampaignStatus";
+import CampaignOutcome from "@/components/campaigns/campaign-outcome/CampaignOutcome";
+import CampaignStatus from "@/components/campaigns/campaign-status/CampaignStatus";
 import { SimpleFormRow as FormRow } from "@/components/ui/form-row/FormRow";
 import { Link, Route } from "@/Navigation";
 import { OperationType } from "./CreateDeploymentCampaign";
