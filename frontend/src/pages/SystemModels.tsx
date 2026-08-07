@@ -36,7 +36,7 @@ import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
-import SystemModelsTable from "@/components/SystemModelsTable";
+import SystemModelsTable from "@/components/fleet/system-models/system-models-table/SystemModelsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

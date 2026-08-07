@@ -42,7 +42,7 @@ import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
 import Center from "@/components/ui/center/Center";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
-import DevicesGroupsTable from "@/components/DevicesGroupsTable";
+import DevicesGroupsTable from "@/components/fleet/device-groups/devices-groups-table/DevicesGroupsTable";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";

@@ -35,7 +35,7 @@ import type { Devices_getDevices_Query } from "@/api/__generated__/Devices_getDe
 import { Devices_PaginationQuery } from "@/api/__generated__/Devices_PaginationQuery.graphql";
 
 import Center from "@/components/ui/center/Center";
-import DevicesTable from "@/components/DevicesTable";
+import DevicesTable from "@/components/fleet/devices/devices-table/DevicesTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

@@ -36,7 +36,7 @@ import { Channels_PaginationQuery } from "@/api/__generated__/Channels_Paginatio
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ChannelsTable from "@/components/ChannelsTable";
+import ChannelsTable from "@/components/fleet/channels/channels-table/ChannelsTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

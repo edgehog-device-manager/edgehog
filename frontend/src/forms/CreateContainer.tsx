@@ -45,7 +45,7 @@ import {
 import "@/components/ContainerDetails.scss";
 import DeviceMappingsFormInput, {
   EditableFormInputProps,
-} from "@/components/DeviceMappingsFormInput";
+} from "@/components/fleet/device-groups/device-mappings-form-input/DeviceMappingsFormInput";
 import FieldHelp from "@/components/ui/field-help/FieldHelp";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";

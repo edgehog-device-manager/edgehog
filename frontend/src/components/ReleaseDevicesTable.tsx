@@ -26,7 +26,7 @@ import type {
   ReleaseDevicesTable_DeploymentEdgeFragment$key,
 } from "@/api/__generated__/ReleaseDevicesTable_DeploymentEdgeFragment.graphql";
 
-import ConnectionStatus from "@/components/ConnectionStatus";
+import ConnectionStatus from "@/components/fleet/devices/connection-status/ConnectionStatus";
 import DeploymentStateComponent, {
   type DeploymentState,
 } from "@/components/DeploymentState";

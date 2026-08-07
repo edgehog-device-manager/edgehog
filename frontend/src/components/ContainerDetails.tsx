@@ -33,7 +33,7 @@ import type {
 import CollapseItem, {
   useCollapsibleSections,
 } from "@/components/ui/collapse-item/CollapseItem";
-import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
+import DeviceMappingsFormInput from "@/components/fleet/device-groups/device-mappings-form-input/DeviceMappingsFormInput";
 import Form from "@/components/ui/form/Form";
 import {
   FormRow as BaseFormRow,

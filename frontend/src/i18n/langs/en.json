@@ -97,144 +97,6 @@
     "defaultMessage": "Base Image Version",
     "description": "Title for the Version column of the base images table"
   },
-  "components.BatteryTable.chargeLevelTitle": {
-    "defaultMessage": "Charge Level"
-  },
-  "components.BatteryTable.noBattery.message": {
-    "defaultMessage": "The device has not detected any battery yet."
-  },
-  "components.BatteryTable.noBattery.title": {
-    "defaultMessage": "No battery"
-  },
-  "components.BatteryTable.slotTitle": {
-    "defaultMessage": "Slot"
-  },
-  "components.BatteryTable.status.Charging": {
-    "defaultMessage": "Charging"
-  },
-  "components.BatteryTable.status.Discharging": {
-    "defaultMessage": "Discharging"
-  },
-  "components.BatteryTable.status.Either_idle_or_charging": {
-    "defaultMessage": "Idle/Charging"
-  },
-  "components.BatteryTable.status.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.BatteryTable.status.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.BatteryTable.status.Removed": {
-    "defaultMessage": "Removed"
-  },
-  "components.BatteryTable.status.Unknown": {
-    "defaultMessage": "Unknown"
-  },
-  "components.BatteryTable.statusTitle": {
-    "defaultMessage": "Status"
-  },
-  "components.CellularConnectionTabs.EUTRAN": {
-    "defaultMessage": "E-UTRAN"
-  },
-  "components.CellularConnectionTabs.GSM": {
-    "defaultMessage": "GSM"
-  },
-  "components.CellularConnectionTabs.GSM_COMPACT": {
-    "defaultMessage": "GSM Compact"
-  },
-  "components.CellularConnectionTabs.GSM_EGPRS": {
-    "defaultMessage": "GSM with EGPRS"
-  },
-  "components.CellularConnectionTabs.Modem.APN": {
-    "defaultMessage": "APN"
-  },
-  "components.CellularConnectionTabs.Modem.Carrier": {
-    "defaultMessage": "Carrier"
-  },
-  "components.CellularConnectionTabs.Modem.CellID": {
-    "defaultMessage": "Cell ID"
-  },
-  "components.CellularConnectionTabs.Modem.IMEI": {
-    "defaultMessage": "IMEI"
-  },
-  "components.CellularConnectionTabs.Modem.IMSI": {
-    "defaultMessage": "IMSI"
-  },
-  "components.CellularConnectionTabs.Modem.LocalAreaCode": {
-    "defaultMessage": "Local Area Code"
-  },
-  "components.CellularConnectionTabs.Modem.MobileCountryCode": {
-    "defaultMessage": "Mobile Country Code"
-  },
-  "components.CellularConnectionTabs.Modem.MobileNetworkCode": {
-    "defaultMessage": "Mobile Network Code"
-  },
-  "components.CellularConnectionTabs.Modem.RSSI": {
-    "defaultMessage": "RSSI"
-  },
-  "components.CellularConnectionTabs.Modem.RegistrationStatus": {
-    "defaultMessage": "Registration Status"
-  },
-  "components.CellularConnectionTabs.Modem.technology": {
-    "defaultMessage": "Technology"
-  },
-  "components.CellularConnectionTabs.NotRegistered": {
-    "defaultMessage": "Not Registered"
-  },
-  "components.CellularConnectionTabs.Registered": {
-    "defaultMessage": "Registered"
-  },
-  "components.CellularConnectionTabs.RegisteredRoaming": {
-    "defaultMessage": "Registered, roaming"
-  },
-  "components.CellularConnectionTabs.RegistrationDenied": {
-    "defaultMessage": "Registration denied"
-  },
-  "components.CellularConnectionTabs.SearchingOperator": {
-    "defaultMessage": "Searching an operator to register to"
-  },
-  "components.CellularConnectionTabs.UTRAN": {
-    "defaultMessage": "UTRAN"
-  },
-  "components.CellularConnectionTabs.UTRAN_HSDPA": {
-    "defaultMessage": "UTRAN with HSDPA"
-  },
-  "components.CellularConnectionTabs.UTRAN_HSDPA_HSUPA": {
-    "defaultMessage": "UTRAN with HSDPA and HSUPA"
-  },
-  "components.CellularConnectionTabs.UTRAN_HSUPA": {
-    "defaultMessage": "UTRAN with HSUPA"
-  },
-  "components.CellularConnectionTabs.Unknown": {
-    "defaultMessage": "Unknown"
-  },
-  "components.CellularConnectionTabs.noModems.message": {
-    "defaultMessage": "The device has not detected any modems yet."
-  },
-  "components.CellularConnectionTabs.noModems.title": {
-    "defaultMessage": "No modem"
-  },
-  "components.CellularConnectionTabs.unknownValue": {
-    "defaultMessage": "Unrecognized value received from the device."
-  },
-  "components.ChannelsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the channels table"
-  },
-  "components.ChannelsTable.nameTitle": {
-    "defaultMessage": "Channel Name",
-    "description": "Title for the Name column of the channels table"
-  },
-  "components.ChannelsTable.targetGroupsTitle": {
-    "defaultMessage": "Target Groups",
-    "description": "Title for the Target Groups column of the channels table"
-  },
-  "components.ConnectionStatus.statusConnected": {
-    "defaultMessage": "Online"
-  },
-  "components.ConnectionStatus.statusDisconnected": {
-    "defaultMessage": "Offline"
-  },
   "components.ContainerDetails.bindsLabel": {
     "defaultMessage": "Binds"
   },
@@ -612,286 +474,6 @@
     "defaultMessage": "Release Version",
     "description": "Title for the Release Version column of the deployments table"
   },
-  "components.DeviceGroupsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the device groups table"
-  },
-  "components.DeviceGroupsTable.nameTitle": {
-    "defaultMessage": "Group Name",
-    "description": "Title for the Name column of the device groups table"
-  },
-  "components.DeviceGroupsTable.selectorTitle": {
-    "defaultMessage": "Selector",
-    "description": "Title for the Selector column of the device groups table"
-  },
-  "components.DeviceMappingsFormInput.addDeviceMappingButton": {
-    "defaultMessage": "Add Device Mapping"
-  },
-  "components.DeviceMappingsFormInput.cgroupPermissionsLabel": {
-    "defaultMessage": "Container Group Permissions"
-  },
-  "components.DeviceMappingsFormInput.pathInContainerLabel": {
-    "defaultMessage": "Path In Container"
-  },
-  "components.DeviceMappingsFormInput.pathOnHostLabel": {
-    "defaultMessage": "Path On Host"
-  },
-  "components.DeviceTabs.ApplicationsTab.DeployedApplications": {
-    "defaultMessage": "Deployed Applications"
-  },
-  "components.DeviceTabs.ApplicationsTab.InstallNewApp": {
-    "defaultMessage": "Install Applications"
-  },
-  "components.DeviceTabs.ApplicationsTab.title": {
-    "defaultMessage": "Applications"
-  },
-  "components.DeviceTabs.BaseImageTab.buildId": {
-    "defaultMessage": "Build identifier"
-  },
-  "components.DeviceTabs.BaseImageTab.fingerprint": {
-    "defaultMessage": "Fingerprint"
-  },
-  "components.DeviceTabs.BaseImageTab.name": {
-    "defaultMessage": "Name"
-  },
-  "components.DeviceTabs.BaseImageTab.title": {
-    "defaultMessage": "Base Image"
-  },
-  "components.DeviceTabs.BaseImageTab.version": {
-    "defaultMessage": "Version"
-  },
-  "components.DeviceTabs.BatteryTab.title": {
-    "defaultMessage": "Battery"
-  },
-  "components.DeviceTabs.CellularConnectionTab.title": {
-    "defaultMessage": "Cellular Connection"
-  },
-  "components.DeviceTabs.FileManagementTab.deleteFromDevice": {
-    "defaultMessage": "Delete from Device"
-  },
-  "components.DeviceTabs.FileManagementTab.fileManagementLabel": {
-    "defaultMessage": "File Management Mode"
-  },
-  "components.DeviceTabs.FileManagementTab.toDeviceDirect": {
-    "defaultMessage": "Download to Device - Direct File"
-  },
-  "components.DeviceTabs.FileManagementTab.toDeviceRepository": {
-    "defaultMessage": "Download to Device - Repository"
-  },
-  "components.DeviceTabs.FileManagementTab.uploadFromDevice": {
-    "defaultMessage": "Upload from Device"
-  },
-  "components.DeviceTabs.FilesDeleteTab.deleteSource": {
-    "defaultMessage": "Delete Source"
-  },
-  "components.DeviceTabs.FilesDeleteTab.deviceOffline": {
-    "defaultMessage": "The device is offline."
-  },
-  "components.DeviceTabs.FilesDeleteTab.requestHistory": {
-    "defaultMessage": "Request History"
-  },
-  "components.DeviceTabs.FilesDeleteTab.title": {
-    "defaultMessage": "Files Delete"
-  },
-  "components.DeviceTabs.FilesDeleteTab.unknownError": {
-    "defaultMessage": "Unknown error."
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.error.unknownError": {
-    "defaultMessage": "An unknown error occurred."
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.requestHistory": {
-    "defaultMessage": "Request History"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.sourceType.filesystem": {
-    "defaultMessage": "File System"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.sourceType.storage": {
-    "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.title": {
-    "defaultMessage": "Files Download"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.uploadSource": {
-    "defaultMessage": "Upload Source"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.creationErrorFeedback": {
-    "defaultMessage": "Could not create file download request, please try again."
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.filesystem": {
-    "defaultMessage": "File System"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.storage": {
-    "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.streaming": {
-    "defaultMessage": "Streaming"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.modeFile": {
-    "defaultMessage": "Direct File"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.modeRepository": {
-    "defaultMessage": "Repository"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.requestHistory": {
-    "defaultMessage": "Request History"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.title": {
-    "defaultMessage": "Files Upload"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.uploadErrorFeedback": {
-    "defaultMessage": "Upload failed. Please check your connection."
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.uploadLocation": {
-    "defaultMessage": "Upload Location"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuArchitecture": {
-    "defaultMessage": "CPU architecture"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuModel": {
-    "defaultMessage": "CPU model code"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuModelName": {
-    "defaultMessage": "CPU model name"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuVendor": {
-    "defaultMessage": "CPU vendor"
-  },
-  "components.DeviceTabs.HardwareInfoTab.memoryTotalBytes": {
-    "defaultMessage": "Total memory"
-  },
-  "components.DeviceTabs.HardwareInfoTab.title": {
-    "defaultMessage": "Hardware Info"
-  },
-  "components.DeviceTabs.LocationTab.lastUpdateAt": {
-    "defaultMessage": "Last known location, updated at {date}"
-  },
-  "components.DeviceTabs.LocationTab.title": {
-    "defaultMessage": "Geolocation"
-  },
-  "components.DeviceTabs.NetworkInterfacesTab.title": {
-    "defaultMessage": "Network Interfaces"
-  },
-  "components.DeviceTabs.OSInfoTab.name": {
-    "defaultMessage": "OS name"
-  },
-  "components.DeviceTabs.OSInfoTab.title": {
-    "defaultMessage": "Operating System"
-  },
-  "components.DeviceTabs.OSInfoTab.version": {
-    "defaultMessage": "OS version"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.environment": {
-    "defaultMessage": "Environment"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.name": {
-    "defaultMessage": "Name"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.title": {
-    "defaultMessage": "Runtime"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.url": {
-    "defaultMessage": "URL"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.version": {
-    "defaultMessage": "Version"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.manualOTAUpdate": {
-    "defaultMessage": "Manual OTA Update"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.modeCollection": {
-    "defaultMessage": "Collection"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.modeFile": {
-    "defaultMessage": "File"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
-    "defaultMessage": "Could not start the OTA update, please try again."
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.title": {
-    "defaultMessage": "Software Updates"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.updatesHistory": {
-    "defaultMessage": "History"
-  },
-  "components.DeviceTabs.StorageUsageTab.title": {
-    "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.SystemStatusTab.lastUpdateAt": {
-    "defaultMessage": "Last updated at {date}"
-  },
-  "components.DeviceTabs.SystemStatusTab.memoryFreeBytes": {
-    "defaultMessage": "Free Memory"
-  },
-  "components.DeviceTabs.SystemStatusTab.taskCount": {
-    "defaultMessage": "Active Tasks"
-  },
-  "components.DeviceTabs.SystemStatusTab.title": {
-    "defaultMessage": "System Status"
-  },
-  "components.DeviceTabs.SystemStatusTab.uptimeMilliseconds": {
-    "defaultMessage": "Last boot at"
-  },
-  "components.DeviceTabs.WiFiScanResultsTab.title": {
-    "defaultMessage": "WiFi APs"
-  },
-  "components.DevicesGroupsTable.deviceIdTitle": {
-    "defaultMessage": "Device ID",
-    "description": "Title for the Device ID column of the devices table"
-  },
-  "components.DevicesGroupsTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.DevicesGroupsTable.lastSeenTitle": {
-    "defaultMessage": "Last Seen",
-    "description": "Title for the Last Seen column of the devices table"
-  },
-  "components.DevicesGroupsTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the devices table"
-  },
-  "components.DevicesGroupsTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.DevicesGroupsTable.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "components.DevicesGroupsTable.tagsTitle": {
-    "defaultMessage": "Tags",
-    "description": "Title for the Tags column of the devices table"
-  },
-  "components.DevicesTable.deviceIdTitle": {
-    "defaultMessage": "Device ID",
-    "description": "Title for the Device ID column of the devices table"
-  },
-  "components.DevicesTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.DevicesTable.lastSeenTitle": {
-    "defaultMessage": "Last Seen",
-    "description": "Title for the Last Seen column of the devices table"
-  },
-  "components.DevicesTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the devices table"
-  },
-  "components.DevicesTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.DevicesTable.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "components.DevicesTable.tagsTitle": {
-    "defaultMessage": "Tags",
-    "description": "Title for the Tags column of the devices table"
-  },
   "components.EditDeploymentCampaignModal.applicationLabel": {
     "defaultMessage": "Application"
   },
@@ -1248,71 +830,11 @@
     "defaultMessage": "File Size",
     "description": "Title for the File Size column of the files table"
   },
-  "components.HardwareTypesTable.handleTitle": {
-    "defaultMessage": "Handle"
-  },
-  "components.HardwareTypesTable.nameTitle": {
-    "defaultMessage": "Hardware Type Name"
-  },
-  "components.HardwareTypesTable.partNumbersTitle": {
-    "defaultMessage": "Part Numbers"
-  },
   "components.ImageCredentialsTable.labelTitle": {
     "defaultMessage": "Label"
   },
   "components.ImageCredentialsTable.usernameTitle": {
     "defaultMessage": "Username"
-  },
-  "components.LastSeen.never": {
-    "defaultMessage": "Never"
-  },
-  "components.LastSeen.now": {
-    "defaultMessage": "Now"
-  },
-  "components.LedBehaviorDropdown.behavior.blinkLED": {
-    "defaultMessage": "Blink LED"
-  },
-  "components.LedBehaviorDropdown.behavior.doubleBlinkLED": {
-    "defaultMessage": "Double blink LED"
-  },
-  "components.LedBehaviorDropdown.behavior.slowBlinkLED": {
-    "defaultMessage": "Slow blink LED"
-  },
-  "components.LedBehaviorDropdown.genericErrorFeedback": {
-    "defaultMessage": "The request could not reach the server, please try again."
-  },
-  "components.LedBehaviorDropdown.identify": {
-    "defaultMessage": "Identify"
-  },
-  "components.LedBehaviorDropdown.tooltip": {
-    "defaultMessage": "The device LED will blink for 60s."
-  },
-  "components.NetworkInterfacesTable.macAddressTitle": {
-    "defaultMessage": "MAC Address"
-  },
-  "components.NetworkInterfacesTable.nameTitle": {
-    "defaultMessage": "Name"
-  },
-  "components.NetworkInterfacesTable.noResults.message": {
-    "defaultMessage": "The device has not detected any network interface yet."
-  },
-  "components.NetworkInterfacesTable.noResults.title": {
-    "defaultMessage": "No results"
-  },
-  "components.NetworkInterfacesTable.technology.Bluetooth": {
-    "defaultMessage": "Bluetooth"
-  },
-  "components.NetworkInterfacesTable.technology.Cellular": {
-    "defaultMessage": "Cellular"
-  },
-  "components.NetworkInterfacesTable.technology.Ethernet": {
-    "defaultMessage": "Ethernet"
-  },
-  "components.NetworkInterfacesTable.technology.WiFi": {
-    "defaultMessage": "WiFi"
-  },
-  "components.NetworkInterfacesTable.technologyTitle": {
-    "defaultMessage": "Technology"
   },
   "components.NetworksTable.driverTitle": {
     "defaultMessage": "Driver",
@@ -1432,35 +954,8 @@
   "components.ReuseContainerModal.selectContainer": {
     "defaultMessage": "Select Container"
   },
-  "components.StorageTable.freeSpaceTitle": {
-    "defaultMessage": "Free Space"
-  },
-  "components.StorageTable.labelTitle": {
-    "defaultMessage": "Storage Unit"
-  },
-  "components.StorageTable.noStorage.message": {
-    "defaultMessage": "The device has not detected any storage unit yet."
-  },
-  "components.StorageTable.noStorage.title": {
-    "defaultMessage": "No storage"
-  },
-  "components.StorageTable.totalSpaceTitle": {
-    "defaultMessage": "Total Space"
-  },
   "components.StringArrayFormInput.addButton": {
     "defaultMessage": "Add Item"
-  },
-  "components.SystemModelsTable.handleTitle": {
-    "defaultMessage": "Handle"
-  },
-  "components.SystemModelsTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.SystemModelsTable.nameTitle": {
-    "defaultMessage": "System Model Name"
-  },
-  "components.SystemModelsTable.partNumbersTitle": {
-    "defaultMessage": "Part Numbers"
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -1577,27 +1072,6 @@
     "defaultMessage": "Label",
     "description": "Title for the Label column of the volumes table"
   },
-  "components.WiFiScanResultsTable.apChannelTitle": {
-    "defaultMessage": "Channel"
-  },
-  "components.WiFiScanResultsTable.apEssidTitle": {
-    "defaultMessage": "ESSID"
-  },
-  "components.WiFiScanResultsTable.apMacAddressTitle": {
-    "defaultMessage": "MAC Address"
-  },
-  "components.WiFiScanResultsTable.apRssiTitle": {
-    "defaultMessage": "RSSI"
-  },
-  "components.WiFiScanResultsTable.noResults.message": {
-    "defaultMessage": "The device has not detected any WiFi AP yet."
-  },
-  "components.WiFiScanResultsTable.noResults.title": {
-    "defaultMessage": "No results"
-  },
-  "components.WiFiScanResultsTable.seenAtTitle": {
-    "defaultMessage": "Seen at"
-  },
   "components.campaigns.campaign-outcome.CampaignOutcome.Failure": {
     "defaultMessage": "Failure"
   },
@@ -1660,6 +1134,532 @@
   },
   "components.campaigns.delete-campaign-modal.DeleteCampaignModal.warning": {
     "defaultMessage": "This will permanently delete the campaign."
+  },
+  "components.fleet.channels.channels-table.ChannelsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the channels table"
+  },
+  "components.fleet.channels.channels-table.ChannelsTable.nameTitle": {
+    "defaultMessage": "Channel Name",
+    "description": "Title for the Name column of the channels table"
+  },
+  "components.fleet.channels.channels-table.ChannelsTable.targetGroupsTitle": {
+    "defaultMessage": "Target Groups",
+    "description": "Title for the Target Groups column of the channels table"
+  },
+  "components.fleet.device-groups.device-groups-table.DeviceGroupsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the device groups table"
+  },
+  "components.fleet.device-groups.device-groups-table.DeviceGroupsTable.nameTitle": {
+    "defaultMessage": "Group Name",
+    "description": "Title for the Name column of the device groups table"
+  },
+  "components.fleet.device-groups.device-groups-table.DeviceGroupsTable.selectorTitle": {
+    "defaultMessage": "Selector",
+    "description": "Title for the Selector column of the device groups table"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.addDeviceMappingButton": {
+    "defaultMessage": "Add Device Mapping"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.cgroupPermissionsLabel": {
+    "defaultMessage": "Container Group Permissions"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.pathInContainerLabel": {
+    "defaultMessage": "Path In Container"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.pathOnHostLabel": {
+    "defaultMessage": "Path On Host"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.systemModel": {
+    "defaultMessage": "System Model"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.chargeLevelTitle": {
+    "defaultMessage": "Charge Level"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.noBattery.message": {
+    "defaultMessage": "The device has not detected any battery yet."
+  },
+  "components.fleet.devices.battery-table.BatteryTable.noBattery.title": {
+    "defaultMessage": "No battery"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.slotTitle": {
+    "defaultMessage": "Slot"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Charging": {
+    "defaultMessage": "Charging"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Discharging": {
+    "defaultMessage": "Discharging"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Either_idle_or_charging": {
+    "defaultMessage": "Idle/Charging"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Removed": {
+    "defaultMessage": "Removed"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.EUTRAN": {
+    "defaultMessage": "E-UTRAN"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.GSM": {
+    "defaultMessage": "GSM"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.GSM_COMPACT": {
+    "defaultMessage": "GSM Compact"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.GSM_EGPRS": {
+    "defaultMessage": "GSM with EGPRS"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.APN": {
+    "defaultMessage": "APN"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.Carrier": {
+    "defaultMessage": "Carrier"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.CellID": {
+    "defaultMessage": "Cell ID"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.IMEI": {
+    "defaultMessage": "IMEI"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.IMSI": {
+    "defaultMessage": "IMSI"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.LocalAreaCode": {
+    "defaultMessage": "Local Area Code"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.MobileCountryCode": {
+    "defaultMessage": "Mobile Country Code"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.MobileNetworkCode": {
+    "defaultMessage": "Mobile Network Code"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.RSSI": {
+    "defaultMessage": "RSSI"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.RegistrationStatus": {
+    "defaultMessage": "Registration Status"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.technology": {
+    "defaultMessage": "Technology"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.NotRegistered": {
+    "defaultMessage": "Not Registered"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Registered": {
+    "defaultMessage": "Registered"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.RegisteredRoaming": {
+    "defaultMessage": "Registered, roaming"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.RegistrationDenied": {
+    "defaultMessage": "Registration denied"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.SearchingOperator": {
+    "defaultMessage": "Searching an operator to register to"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN": {
+    "defaultMessage": "UTRAN"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN_HSDPA": {
+    "defaultMessage": "UTRAN with HSDPA"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN_HSDPA_HSUPA": {
+    "defaultMessage": "UTRAN with HSDPA and HSUPA"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN_HSUPA": {
+    "defaultMessage": "UTRAN with HSUPA"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.noModems.message": {
+    "defaultMessage": "The device has not detected any modems yet."
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.noModems.title": {
+    "defaultMessage": "No modem"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.unknownValue": {
+    "defaultMessage": "Unrecognized value received from the device."
+  },
+  "components.fleet.devices.connection-status.ConnectionStatus.statusConnected": {
+    "defaultMessage": "Online"
+  },
+  "components.fleet.devices.connection-status.ConnectionStatus.statusDisconnected": {
+    "defaultMessage": "Offline"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.systemModel": {
+    "defaultMessage": "System Model"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
+  },
+  "components.fleet.devices.last-seen.LastSeen.never": {
+    "defaultMessage": "Never"
+  },
+  "components.fleet.devices.last-seen.LastSeen.now": {
+    "defaultMessage": "Now"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.behavior.blinkLED": {
+    "defaultMessage": "Blink LED"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.behavior.doubleBlinkLED": {
+    "defaultMessage": "Double blink LED"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.behavior.slowBlinkLED": {
+    "defaultMessage": "Slow blink LED"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.genericErrorFeedback": {
+    "defaultMessage": "The request could not reach the server, please try again."
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.identify": {
+    "defaultMessage": "Identify"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.tooltip": {
+    "defaultMessage": "The device LED will blink for 60s."
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.macAddressTitle": {
+    "defaultMessage": "MAC Address"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.nameTitle": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.noResults.message": {
+    "defaultMessage": "The device has not detected any network interface yet."
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.noResults.title": {
+    "defaultMessage": "No results"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.Bluetooth": {
+    "defaultMessage": "Bluetooth"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.Cellular": {
+    "defaultMessage": "Cellular"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.Ethernet": {
+    "defaultMessage": "Ethernet"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.WiFi": {
+    "defaultMessage": "WiFi"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technologyTitle": {
+    "defaultMessage": "Technology"
+  },
+  "components.fleet.devices.storage-table.StorageTable.freeSpaceTitle": {
+    "defaultMessage": "Free Space"
+  },
+  "components.fleet.devices.storage-table.StorageTable.labelTitle": {
+    "defaultMessage": "Storage Unit"
+  },
+  "components.fleet.devices.storage-table.StorageTable.noStorage.message": {
+    "defaultMessage": "The device has not detected any storage unit yet."
+  },
+  "components.fleet.devices.storage-table.StorageTable.noStorage.title": {
+    "defaultMessage": "No storage"
+  },
+  "components.fleet.devices.storage-table.StorageTable.totalSpaceTitle": {
+    "defaultMessage": "Total Space"
+  },
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.DeployedApplications": {
+    "defaultMessage": "Deployed Applications"
+  },
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.InstallNewApp": {
+    "defaultMessage": "Install Applications"
+  },
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.title": {
+    "defaultMessage": "Applications"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.buildId": {
+    "defaultMessage": "Build identifier"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.fingerprint": {
+    "defaultMessage": "Fingerprint"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.name": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.title": {
+    "defaultMessage": "Base Image"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.version": {
+    "defaultMessage": "Version"
+  },
+  "components.fleet.devices.tabs.battery-tab.BatteryTab.title": {
+    "defaultMessage": "Battery"
+  },
+  "components.fleet.devices.tabs.cellular-connection-tab.CellularConnectionTab.title": {
+    "defaultMessage": "Cellular Connection"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.deleteFromDevice": {
+    "defaultMessage": "Delete from Device"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.fileManagementLabel": {
+    "defaultMessage": "File Management Mode"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.toDeviceDirect": {
+    "defaultMessage": "Download to Device - Direct File"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.toDeviceRepository": {
+    "defaultMessage": "Download to Device - Repository"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.uploadFromDevice": {
+    "defaultMessage": "Upload from Device"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.deleteSource": {
+    "defaultMessage": "Delete Source"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.deviceOffline": {
+    "defaultMessage": "The device is offline."
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.title": {
+    "defaultMessage": "Files Delete"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.unknownError": {
+    "defaultMessage": "Unknown error."
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.error.unknownError": {
+    "defaultMessage": "An unknown error occurred."
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.sourceType.filesystem": {
+    "defaultMessage": "File System"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.sourceType.storage": {
+    "defaultMessage": "Storage"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.title": {
+    "defaultMessage": "Files Download"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.uploadSource": {
+    "defaultMessage": "Upload Source"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.creationErrorFeedback": {
+    "defaultMessage": "Could not create file download request, please try again."
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.destinationType.filesystem": {
+    "defaultMessage": "File System"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.destinationType.storage": {
+    "defaultMessage": "Storage"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.destinationType.streaming": {
+    "defaultMessage": "Streaming"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.modeFile": {
+    "defaultMessage": "Direct File"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.modeRepository": {
+    "defaultMessage": "Repository"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.title": {
+    "defaultMessage": "Files Upload"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.uploadErrorFeedback": {
+    "defaultMessage": "Upload failed. Please check your connection."
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.uploadLocation": {
+    "defaultMessage": "Upload Location"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuArchitecture": {
+    "defaultMessage": "CPU architecture"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuModel": {
+    "defaultMessage": "CPU model code"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuModelName": {
+    "defaultMessage": "CPU model name"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuVendor": {
+    "defaultMessage": "CPU vendor"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.memoryTotalBytes": {
+    "defaultMessage": "Total memory"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.title": {
+    "defaultMessage": "Hardware Info"
+  },
+  "components.fleet.devices.tabs.location-tab.LocationTab.lastUpdateAt": {
+    "defaultMessage": "Last known location, updated at {date}"
+  },
+  "components.fleet.devices.tabs.location-tab.LocationTab.title": {
+    "defaultMessage": "Geolocation"
+  },
+  "components.fleet.devices.tabs.network-interfaces-tab.NetworkInterfacesTab.title": {
+    "defaultMessage": "Network Interfaces"
+  },
+  "components.fleet.devices.tabs.os-info-tab.OSInfoTab.name": {
+    "defaultMessage": "OS name"
+  },
+  "components.fleet.devices.tabs.os-info-tab.OSInfoTab.title": {
+    "defaultMessage": "Operating System"
+  },
+  "components.fleet.devices.tabs.os-info-tab.OSInfoTab.version": {
+    "defaultMessage": "OS version"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.environment": {
+    "defaultMessage": "Environment"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.name": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.title": {
+    "defaultMessage": "Runtime"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.url": {
+    "defaultMessage": "URL"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.version": {
+    "defaultMessage": "Version"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.manualOTAUpdate": {
+    "defaultMessage": "Manual OTA Update"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.modeCollection": {
+    "defaultMessage": "Collection"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.modeFile": {
+    "defaultMessage": "File"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
+    "defaultMessage": "Could not start the OTA update, please try again."
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.title": {
+    "defaultMessage": "Software Updates"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.updatesHistory": {
+    "defaultMessage": "History"
+  },
+  "components.fleet.devices.tabs.storage-usage-tab.StorageUsageTab.title": {
+    "defaultMessage": "Storage"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.lastUpdateAt": {
+    "defaultMessage": "Last updated at {date}"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.memoryFreeBytes": {
+    "defaultMessage": "Free Memory"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.taskCount": {
+    "defaultMessage": "Active Tasks"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.title": {
+    "defaultMessage": "System Status"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.uptimeMilliseconds": {
+    "defaultMessage": "Last boot at"
+  },
+  "components.fleet.devices.tabs.wifi-scan-results-tab.WiFiScanResultsTab.title": {
+    "defaultMessage": "WiFi APs"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apChannelTitle": {
+    "defaultMessage": "Channel"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apEssidTitle": {
+    "defaultMessage": "ESSID"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apMacAddressTitle": {
+    "defaultMessage": "MAC Address"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apRssiTitle": {
+    "defaultMessage": "RSSI"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.noResults.message": {
+    "defaultMessage": "The device has not detected any WiFi AP yet."
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.noResults.title": {
+    "defaultMessage": "No results"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.seenAtTitle": {
+    "defaultMessage": "Seen at"
+  },
+  "components.fleet.hardware-types.hardware-types-table.HardwareTypesTable.handleTitle": {
+    "defaultMessage": "Handle"
+  },
+  "components.fleet.hardware-types.hardware-types-table.HardwareTypesTable.nameTitle": {
+    "defaultMessage": "Hardware Type Name"
+  },
+  "components.fleet.hardware-types.hardware-types-table.HardwareTypesTable.partNumbersTitle": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.handleTitle": {
+    "defaultMessage": "Handle"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.nameTitle": {
+    "defaultMessage": "System Model Name"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.partNumbersTitle": {
+    "defaultMessage": "Part Numbers"
   },
   "components.layout.sidebar.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"

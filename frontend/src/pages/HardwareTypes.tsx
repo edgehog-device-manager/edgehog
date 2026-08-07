@@ -34,7 +34,7 @@ import { HardwareTypes_PaginationQuery } from "@/api/__generated__/HardwareTypes
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import HardwareTypesTable from "@/components/HardwareTypesTable";
+import HardwareTypesTable from "@/components/fleet/hardware-types/hardware-types-table/HardwareTypesTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

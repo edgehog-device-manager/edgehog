@@ -35,7 +35,7 @@ import Col from "@/components/ui/col/Col";
 import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
-import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesServerToDeviceTab";
+import type { DestinationTypeOption } from "@/components/fleet/devices/tabs/files-server-to-device-tab/FilesServerToDeviceTab";
 import FileSelect from "@/components/FileSelect";
 import Form from "@/components/ui/form/Form";
 import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";

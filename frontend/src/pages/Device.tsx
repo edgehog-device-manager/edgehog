@@ -54,12 +54,12 @@ import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ConnectionStatus from "@/components/ConnectionStatus";
+import ConnectionStatus from "@/components/fleet/devices/connection-status/ConnectionStatus";
 import Col from "@/components/ui/col/Col";
 import Figure from "@/components/ui/figure/Figure";
 import Form from "@/components/ui/form/Form";
-import LastSeen from "@/components/LastSeen";
-import LedBehaviorDropdown from "@/components/LedBehaviorDropdown";
+import LastSeen from "@/components/fleet/devices/last-seen/LastSeen";
+import LedBehaviorDropdown from "@/components/fleet/devices/led-behavior-dropdown/LedBehaviorDropdown";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Row from "@/components/ui/row/Row";
@@ -72,20 +72,20 @@ import {
   FormRowProps,
 } from "@/components/ui/form-row/FormRow";
 import assets from "@/assets";
-import DeviceHardwareInfoTab from "@/components/DeviceTabs/HardwareInfoTab";
-import DeviceOSInfoTab from "@/components/DeviceTabs/OSInfoTab";
-import DeviceRuntimeInfoTab from "@/components/DeviceTabs/RuntimeInfoTab";
-import DeviceBaseImageTab from "@/components/DeviceTabs/BaseImageTab";
-import DeviceSystemStatusTab from "@/components/DeviceTabs/SystemStatusTab";
-import DeviceStorageUsageTab from "@/components/DeviceTabs/StorageUsageTab";
-import DeviceBatteryTab from "@/components/DeviceTabs/BatteryTab";
-import DeviceCellularConnectionTab from "@/components/DeviceTabs/CellularConnectionTab";
-import DeviceNetworkInterfacesTab from "@/components/DeviceTabs/NetworkInterfacesTab";
-import DeviceLocationTab from "@/components/DeviceTabs/LocationTab";
-import DeviceWiFiScanResultsTab from "@/components/DeviceTabs/WiFiScanResultsTab";
-import DeviceSoftwareUpdateTab from "@/components/DeviceTabs/SoftwareUpdateTab";
-import DeviceFileManagementTab from "@/components/DeviceTabs/FileManagementTab";
-import DeviceApplicationsTab from "@/components/DeviceTabs/ApplicationsTab";
+import DeviceHardwareInfoTab from "@/components/fleet/devices/tabs/hardware-info-tab/HardwareInfoTab";
+import DeviceOSInfoTab from "@/components/fleet/devices/tabs/os-info-tab/OSInfoTab";
+import DeviceRuntimeInfoTab from "@/components/fleet/devices/tabs/runtime-info-tab/RuntimeInfoTab";
+import DeviceBaseImageTab from "@/components/fleet/devices/tabs/base-image-tab/BaseImageTab";
+import DeviceSystemStatusTab from "@/components/fleet/devices/tabs/system-status-tab/SystemStatusTab";
+import DeviceStorageUsageTab from "@/components/fleet/devices/tabs/storage-usage-tab/StorageUsageTab";
+import DeviceBatteryTab from "@/components/fleet/devices/tabs/battery-tab/BatteryTab";
+import DeviceCellularConnectionTab from "@/components/fleet/devices/tabs/cellular-connection-tab/CellularConnectionTab";
+import DeviceNetworkInterfacesTab from "@/components/fleet/devices/tabs/network-interfaces-tab/NetworkInterfacesTab";
+import DeviceLocationTab from "@/components/fleet/devices/tabs/location-tab/LocationTab";
+import DeviceWiFiScanResultsTab from "@/components/fleet/devices/tabs/wifi-scan-results-tab/WiFiScanResultsTab";
+import DeviceSoftwareUpdateTab from "@/components/fleet/devices/tabs/software-update-tab/SoftwareUpdateTab";
+import DeviceFileManagementTab from "@/components/fleet/devices/tabs/file-management-tab/FileManagementTab";
+import DeviceApplicationsTab from "@/components/fleet/devices/tabs/applications-tab/ApplicationsTab";
 
 const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
   fragment Device_connectionStatus on Device {
