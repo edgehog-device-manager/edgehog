@@ -41,15 +41,14 @@ import type { BaseImageCollection_updateBaseImageCollection_Mutation } from "@/a
 import { BaseImages_PaginationQuery } from "@/api/__generated__/BaseImages_PaginationQuery.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
-import BaseImagesTable from "@/components/BaseImagesTable";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import DeleteModal from "@/components/DeleteModal";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import BaseImagesTable from "@/components/apps/releases/base-images-table/BaseImagesTable";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { BaseImageCollectionChanges } from "@/forms/UpdateBaseImageCollection";
 import UpdateBaseImageCollectionForm from "@/forms/UpdateBaseImageCollection";
@@ -129,10 +128,12 @@ const DELETE_BASE_IMAGE_COLLECTION_MUTATION = graphql`
 interface BaseImagesLayoutContainerProps {
   baseImageCollectionRef: BaseImageCollection_BaseImagesFragment$key;
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const BaseImagesLayoutContainer = ({
   baseImageCollectionRef,
   searchText,
+  onSearchChange,
 }: BaseImagesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -177,6 +178,8 @@ const BaseImagesLayoutContainer = ({
       baseImageCollectionId={data?.id}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -330,14 +333,10 @@ const BaseImageCollectionContent = ({
               />
             </Button>
           </div>
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <BaseImagesLayoutContainer
             baseImageCollectionRef={baseImageCollection}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
         {showDeleteModal && (

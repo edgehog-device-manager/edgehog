@@ -22,7 +22,7 @@ import { useEffect } from "react";
 import { FormattedMessage } from "react-intl";
 import { commitLocalUpdate, useRelayEnvironment } from "react-relay/hooks";
 
-import Page from "@/components/Page";
+import Page from "@/components/ui/page/Page";
 import { useAuth } from "@/contexts/Auth";
 
 const LogoutPage = () => {

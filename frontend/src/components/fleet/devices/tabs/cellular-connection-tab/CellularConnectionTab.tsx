@@ -1,0 +1,65 @@
+// This file is part of Edgehog.
+//
+// Copyright 2025-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+import { graphql, useFragment } from "react-relay/hooks";
+import { useIntl } from "react-intl";
+import { Card } from "react-bootstrap";
+
+import type { CellularConnectionTab_cellularConnection$key } from "@/api/__generated__/CellularConnectionTab_cellularConnection.graphql";
+
+import CellularConnectionTabs from "@/components/fleet/devices/cellular-connection-tabs/CellularConnectionTabs";
+import { Tab } from "@/components/ui/tabs/Tabs";
+
+const DEVICE_CELLULAR_CONNECTION_FRAGMENT = graphql`
+  fragment CellularConnectionTab_cellularConnection on Device {
+    capabilities
+    ...CellularConnectionTabs_cellularConnection
+  }
+`;
+
+interface DeviceCellularConnectionTabProps {
+  deviceRef: CellularConnectionTab_cellularConnection$key;
+}
+
+const DeviceCellularConnectionTab = ({
+  deviceRef,
+}: DeviceCellularConnectionTabProps) => {
+  const intl = useIntl();
+  const device = useFragment(DEVICE_CELLULAR_CONNECTION_FRAGMENT, deviceRef);
+
+  if (!device.capabilities.includes("CELLULAR_CONNECTION")) {
+    return null;
+  }
+
+  return (
+    <Tab
+      className="pt-3 d-flex flex-column flex-grow-1"
+      eventKey="device-cellular-connection-tab"
+      title={intl.formatMessage({
+        id: "components.fleet.devices.tabs.cellular-connection-tab.CellularConnectionTab.title",
+        defaultMessage: "Cellular Connection",
+      })}
+    >
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+        <CellularConnectionTabs deviceRef={device} />
+      </Card>
+    </Tab>
+  );
+};
+
+export default DeviceCellularConnectionTab;

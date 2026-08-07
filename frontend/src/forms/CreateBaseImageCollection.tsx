@@ -22,11 +22,11 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { BaseImageCollectionRecord } from "@/pages/BaseImageCollectionCreate";
 

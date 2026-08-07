@@ -28,16 +28,16 @@ import type {
 } from "@/api/__generated__/CreateSystemModel_OptionsFragment.graphql";
 import type { CreateSystemModel_PaginationQuery } from "@/api/__generated__/CreateSystemModel_PaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import CloseButton from "@/components/CloseButton";
-import Col from "@/components/Col";
-import Figure from "@/components/Figure";
-import Form from "@/components/Form";
-import Icon from "@/components/Icon";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import CloseButton from "@/components/ui/close-button/CloseButton";
+import Col from "@/components/ui/col/Col";
+import Figure from "@/components/ui/figure/Figure";
+import Form from "@/components/ui/form/Form";
+import Icon from "@/components/ui/icon/Icon";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import assets from "@/assets";
 import { SystemModelFormData, systemModelSchema } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";

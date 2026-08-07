@@ -38,11 +38,11 @@ import type {
   FileCreate_getOptions_Query$data,
 } from "@/api/__generated__/FileCreate_getOptions_Query.graphql";
 
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import CreateFileForm, { type FileFormOutputData } from "@/forms/CreateFile";
 import { prepareUploadFile } from "@/lib/files";
 import { Link, Route, useNavigate } from "@/Navigation";

@@ -19,8 +19,8 @@
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import type { Props } from "react-select";
 
-import type { Option } from "@/components/options/hooks";
-import Select from "@/components/Select";
+import type { Option } from "@/hooks/options";
+import Select from "@/components/ui/select/Select";
 import { useMemo } from "react";
 
 type ValueType = "primitive" | "object";

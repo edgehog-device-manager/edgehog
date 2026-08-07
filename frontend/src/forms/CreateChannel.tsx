@@ -25,12 +25,12 @@ import { graphql, usePaginationFragment } from "react-relay/hooks";
 import type { CreateChannel_OptionsFragment$key } from "@/api/__generated__/CreateChannel_OptionsFragment.graphql";
 import type { CreateChannel_PaginationQuery } from "@/api/__generated__/CreateChannel_PaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import MultiSelect from "@/components/MultiSelect";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import MultiSelect from "@/components/ui/multi-select/MultiSelect";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   ChannelFormData,

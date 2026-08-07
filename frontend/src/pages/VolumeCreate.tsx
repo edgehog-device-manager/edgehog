@@ -25,8 +25,8 @@ import { Card } from "react-bootstrap";
 
 import type { VolumeCreate_volumeCreate_Mutation } from "@/api/__generated__/VolumeCreate_volumeCreate_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Page from "@/components/Page";
+import Alert from "@/components/ui/alert/Alert";
+import Page from "@/components/ui/page/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateVolumeForm from "@/forms/CreateVolume";
 import { VolumeFormData } from "@/forms/validation";

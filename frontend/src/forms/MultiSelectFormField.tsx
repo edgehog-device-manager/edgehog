@@ -19,8 +19,8 @@
 import { Control, Controller, FieldValues, Path } from "react-hook-form";
 import { MultiValue } from "react-select";
 
-import MultiSelect from "@/components/MultiSelect";
-import type { Option } from "@/components/options/hooks";
+import MultiSelect from "@/components/ui/multi-select/MultiSelect";
+import type { Option } from "@/hooks/options";
 
 type MultiSelectValue = {
   id: string;

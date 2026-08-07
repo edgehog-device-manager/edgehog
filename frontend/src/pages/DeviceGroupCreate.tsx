@@ -24,8 +24,8 @@ import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 import { Card } from "react-bootstrap";
 
 import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
-import Alert from "@/components/Alert";
-import Page from "@/components/Page";
+import Alert from "@/components/ui/alert/Alert";
+import Page from "@/components/ui/page/Page";
 import DeviceGroupCreateForm from "@/forms/CreateDeviceGroup";
 import { Route, useNavigate } from "@/Navigation";
 import { DeviceGroupFormData } from "@/forms/validation";

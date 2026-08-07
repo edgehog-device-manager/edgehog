@@ -41,8 +41,7 @@
   "vulnerabilityAlerts": {
     "enabled": true,
     "addLabels": ["security"],
-    "schedule": [],
-    "transitiveRemediation": true
+    "schedule": []
   },
 
   "lockFileMaintenance": {

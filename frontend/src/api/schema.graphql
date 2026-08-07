@@ -5947,6 +5947,8 @@ type Device implements Node {
 
   availableDeviceMappings: [DeviceMappingStatus!]
 
+  availableDeviceRequests: [DeviceRequestStatus!]
+
   batteryStatus: [BatterySlot!]
 
   hardwareInfo: HardwareInfo
@@ -10173,5 +10175,14 @@ type DeviceMappingStatus {
   id: String
 
   "Whether the device referenced in the mapping is present or not."
+  present: Boolean
+}
+
+"Describe the available device requests on the device."
+type DeviceRequestStatus {
+  "The device request id."
+  id: String
+
+  "Whether the device referenced in the request is present or not."
   present: Boolean
 }

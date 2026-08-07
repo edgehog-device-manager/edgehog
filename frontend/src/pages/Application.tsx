@@ -41,18 +41,17 @@ import type {
 import { Releases_PaginationQuery } from "@/api/__generated__/Releases_PaginationQuery.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
-import ApplicationDevicesTable from "@/components/ApplicationDevicesTable";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import DeleteReleaseModal from "@/components/DeleteReleaseModal";
-import Page from "@/components/Page";
-import type { ReleaseTableRecord } from "@/components/ReleasesTable";
-import ReleasesTable from "@/components/ReleasesTable";
-import Result from "@/components/Result";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
-import Tabs, { Tab } from "@/components/Tabs";
+import Alert from "@/components/ui/alert/Alert";
+import ApplicationDevicesTable from "@/components/apps/releases/application-devices-table/ApplicationDevicesTable";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import DeleteReleaseModal from "@/components/apps/releases/delete-release-modal/DeleteReleaseModal";
+import Page from "@/components/ui/page/Page";
+import type { ReleaseTableRecord } from "@/components/apps/releases/releases-table/ReleasesTable";
+import ReleasesTable from "@/components/apps/releases/releases-table/ReleasesTable";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Tabs, { Tab } from "@/components/ui/tabs/Tabs";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_APPLICATION_QUERY = graphql`
@@ -123,12 +122,14 @@ interface ReleasesLayoutContainerProps {
     Application_getApplication_Query$data["application"]
   >;
   searchText: string | null;
+  onSearchChange: (text: string) => void;
   onDelete: (release: SelectedRelease) => void;
 }
 
 const ReleasesLayoutContainer = ({
   applicationRef,
   searchText,
+  onSearchChange,
   onDelete,
 }: ReleasesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
@@ -243,6 +244,8 @@ const ReleasesLayoutContainer = ({
         releasesRef={releasesRef}
         loading={isLoadingNext}
         onLoadMore={onLoadMore}
+        searchText={searchText ?? ""}
+        onSearchChange={onSearchChange}
       />
     </div>
   );
@@ -363,14 +366,10 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
             })}
           >
             <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-              <SearchBox
-                className="pb-2"
-                value={searchText || ""}
-                onChange={setSearchText}
-              />
               <ReleasesLayoutContainer
                 applicationRef={application}
                 searchText={searchText}
+                onSearchChange={setSearchText}
                 onDelete={setReleaseToDelete}
               />
             </Card>

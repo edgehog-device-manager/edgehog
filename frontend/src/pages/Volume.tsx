@@ -36,15 +36,15 @@ import type {
 } from "@/api/__generated__/Volume_getVolume_Query.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
-import Button from "@/components/Button";
-import DeleteModal from "@/components/DeleteModal";
-import MonacoJsonEditor from "@/components/MonacoJsonEditor";
-import { FormRowWithMargin as FormRow } from "@/components/FormRow";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Button from "@/components/ui/button/Button";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
+import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
 
 const GET_VOLUME_QUERY = graphql`
   query Volume_getVolume_Query($volumeId: ID!) {

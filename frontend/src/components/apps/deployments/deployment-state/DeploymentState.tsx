@@ -1,0 +1,137 @@
+// This file is part of Edgehog.
+//
+// Copyright 2025 - 2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+import { defineMessages, FormattedMessage } from "react-intl";
+
+import type { ApplicationDeploymentState } from "@/api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
+
+import Icon from "@/components/ui/icon/Icon";
+
+type DeploymentState =
+  | "DEPLOYING"
+  | "PENDING"
+  | "SENT"
+  | "STARTING"
+  | "STARTED"
+  | "STOPPING"
+  | "STOPPED"
+  | "ERROR"
+  | "DELETING";
+
+const parseDeploymentState = (
+  apiState?: ApplicationDeploymentState,
+): DeploymentState => {
+  switch (apiState) {
+    case "PENDING":
+      return "PENDING";
+    case "SENT":
+      return "SENT";
+    case "STARTED":
+      return "STARTED";
+
+    case "STOPPED":
+      return "STOPPED";
+
+    default:
+      return "DEPLOYING";
+  }
+};
+
+const stateColors: Record<DeploymentState, string> = {
+  PENDING: "text-success",
+  SENT: "text-success",
+  STARTING: "text-success",
+  STARTED: "text-success",
+  STOPPING: "text-warning",
+  STOPPED: "text-secondary",
+  ERROR: "text-danger",
+  DELETING: "text-danger",
+  DEPLOYING: "text-muted",
+};
+
+const stateMessages = defineMessages<DeploymentState>({
+  PENDING: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.pending",
+    defaultMessage: "Pending",
+  },
+  SENT: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.sent",
+    defaultMessage: "Sent",
+  },
+  STARTING: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.starting",
+    defaultMessage: "Starting",
+  },
+  STARTED: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.started",
+    defaultMessage: "Started",
+  },
+  STOPPING: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.stopping",
+    defaultMessage: "Stopping",
+  },
+  STOPPED: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.stopped",
+    defaultMessage: "Stopped",
+  },
+  ERROR: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.error",
+    defaultMessage: "Error",
+  },
+  DELETING: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.deleting",
+    defaultMessage: "Deleting",
+  },
+  DEPLOYING: {
+    id: "components.apps.deployments.deployment-state.DeploymentState.deploying",
+    defaultMessage: "Deploying",
+  },
+});
+
+const displaySpinner = (state: string, isReady?: boolean | null) => {
+  return (
+    !isReady ||
+    ["STARTING", "STOPPING", "DEPLOYING", "DELETING"].includes(state)
+  );
+};
+
+type DeploymentStateComponentProps = {
+  state: DeploymentState;
+  isReady?: boolean | null;
+};
+
+const DeploymentStateComponent = ({
+  state,
+  isReady,
+}: DeploymentStateComponentProps) => {
+  const displayedState = isReady ? state : "DEPLOYING";
+
+  return (
+    <div className="d-flex align-items-center">
+      <Icon
+        icon={displaySpinner(state, isReady) ? "spinner" : "circle"}
+        className={`me-2 ${stateColors[displayedState]} ${displaySpinner(state, isReady) ? "fa-spin" : ""}`}
+      />
+      <FormattedMessage {...stateMessages[displayedState]} />
+    </div>
+  );
+};
+
+export type { DeploymentState };
+export { parseDeploymentState, stateMessages };
+export default DeploymentStateComponent;

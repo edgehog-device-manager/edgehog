@@ -32,12 +32,11 @@ import type { Repositories_getRepositories_Query } from "@/api/__generated__/Rep
 import { Repositories_PaginationQuery } from "@/api/__generated__/Repositories_PaginationQuery.graphql";
 import { Repositories_RepositoriesFragment$key } from "@/api/__generated__/Repositories_RepositoriesFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import RepositoriesTable from "@/components/RepositoriesTable";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import RepositoriesTable from "@/components/files/repositories/repositories-table/RepositoriesTable";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";
@@ -71,10 +70,12 @@ const REPOSITORIES_FRAGMENT = graphql`
 interface RepositoriesLayoutContainerProps {
   repositoriesData: Repositories_getRepositories_Query["response"];
   searchText: string | null;
+  onSearchChange: (text: string) => void;
 }
 const RepositoriesLayoutContainer = ({
   repositoriesData,
   searchText,
+  onSearchChange,
 }: RepositoriesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext, refetch } =
     usePaginationFragment<
@@ -113,6 +114,8 @@ const RepositoriesLayoutContainer = ({
       repositoriesRef={repositoriesRef}
       loading={isLoadingNext}
       onLoadMore={onLoadMore}
+      searchText={searchText ?? ""}
+      onSearchChange={onSearchChange}
     />
   );
 };
@@ -151,14 +154,10 @@ const RepositoriesContent = ({
       </Page.Header>
       <Page.Main>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <SearchBox
-            className="pb-2"
-            value={searchText || ""}
-            onChange={setSearchText}
-          />
           <RepositoriesLayoutContainer
             repositoriesData={repositoriesData}
             searchText={searchText}
+            onSearchChange={setSearchText}
           />
         </Card>
       </Page.Main>

@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- NOTICE -->
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
+## [0.13.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.0...v0.13.1) (2026-08-06)
+
+### Miscellaneous chores
+
+* Updated the astarte interfaces to version v0.11.0
+
+## [0.13.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.12.4...v0.13.0) (2026-07-27)
 
 ## [0.13.0-rc.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.0-rc.0...v0.13.0-rc.1) (2026-06-26)
 

@@ -1,0 +1,195 @@
+// This file is part of Edgehog.
+//
+// Copyright 2025-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+import compact from "lodash/compact";
+import { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
+
+import type {
+  DeploymentsTable_DeploymentEdgeFragment$data,
+  DeploymentsTable_DeploymentEdgeFragment$key,
+} from "@/api/__generated__/DeploymentsTable_DeploymentEdgeFragment.graphql";
+
+import DeploymentStateComponent, {
+  type DeploymentState,
+} from "@/components/apps/deployments/deployment-state/DeploymentState";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import { Link, Route } from "@/Navigation";
+
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const DEPLOYMENTS_TABLE_FRAGMENT = graphql`
+  fragment DeploymentsTable_DeploymentEdgeFragment on DeploymentConnection {
+    edges {
+      node {
+        id
+        state
+        isReady
+        device {
+          id
+          name
+          online
+        }
+        release {
+          id
+          version
+          application {
+            id
+            name
+          }
+        }
+      }
+    }
+  }
+`;
+
+type TableRecord = NonNullable<
+  NonNullable<DeploymentsTable_DeploymentEdgeFragment$data>["edges"]
+>[number]["node"];
+
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("device.name", {
+    header: () => (
+      <FormattedMessage
+        id="components.apps.deployments.deployments-table.DeploymentsTable.deploymentOnDeviceTitle"
+        defaultMessage="Deployment on Device"
+        description="Title for the Deployment on Device column of the deployments table"
+      />
+    ),
+    meta: {
+      label: "Deployment on Device",
+    },
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.deploymentEdit}
+        params={{
+          deviceId: row.original.device?.id || "",
+          deploymentId: row.original.id,
+        }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
+  columnHelper.accessor("release.application.name", {
+    header: () => (
+      <FormattedMessage
+        id="components.apps.deployments.deployments-table.DeploymentsTable.applicationNameTitle"
+        defaultMessage="Application Name"
+        description="Title for the Application Name column of the deployments table"
+      />
+    ),
+    meta: {
+      label: "Application Name",
+    },
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.application}
+        params={{ applicationId: row.original.release?.application?.id || "" }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
+  columnHelper.accessor("release.version", {
+    header: () => (
+      <FormattedMessage
+        id="components.apps.deployments.deployments-table.DeploymentsTable.releaseVersionTitle"
+        defaultMessage="Release Version"
+        description="Title for the Release Version column of the deployments table"
+      />
+    ),
+    meta: {
+      label: "Release Version",
+    },
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.release}
+        params={{
+          applicationId: row.original.release?.application?.id || "",
+          releaseId: row.original.release?.id || "",
+        }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
+  columnHelper.accessor("state", {
+    header: () => (
+      <FormattedMessage
+        id="components.apps.deployments.deployments-table.DeploymentsTable.applicationStateTitle"
+        defaultMessage="Application State"
+        description="Title for the Application State column of the deployments table"
+      />
+    ),
+    meta: {
+      label: "Application State",
+    },
+    cell: ({ row }) => (
+      <DeploymentStateComponent
+        state={row.original.state as DeploymentState}
+        isReady={row.original.isReady}
+      />
+    ),
+  }),
+];
+
+type DeploymentsTableProps = {
+  className?: string;
+  deploymentsRef: DeploymentsTable_DeploymentEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
+};
+
+const DeploymentsTable = ({
+  className,
+  deploymentsRef,
+  loading = false,
+  onLoadMore,
+  onSearchChange,
+  searchText,
+}: DeploymentsTableProps) => {
+  const deploymentsFragment = useFragment(
+    DEPLOYMENTS_TABLE_FRAGMENT,
+    deploymentsRef || null,
+  );
+
+  const deploymentCampaigns = useMemo<TableRecord[]>(() => {
+    return compact(deploymentsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [deploymentsFragment]);
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={deploymentCampaigns}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      columnVisibilityKey="deployments-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
+    />
+  );
+};
+
+export default DeploymentsTable;

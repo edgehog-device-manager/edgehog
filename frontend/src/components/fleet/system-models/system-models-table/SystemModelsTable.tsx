@@ -1,0 +1,168 @@
+// This file is part of Edgehog.
+//
+// Copyright 2021-2026 SECO Mind Srl
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
+// SPDX-License-Identifier: Apache-2.0
+
+import compact from "lodash/compact";
+import React, { useMemo } from "react";
+import { FormattedMessage } from "react-intl";
+import { graphql, useFragment } from "react-relay/hooks";
+
+import type {
+  SystemModelsTable_SystemModelEdgeFragment$data,
+  SystemModelsTable_SystemModelEdgeFragment$key,
+} from "@/api/__generated__/SystemModelsTable_SystemModelEdgeFragment.graphql";
+
+import { Link, Route } from "@/Navigation";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+
+// We use graphql fields below in columns configuration
+/* eslint-disable relay/unused-fields */
+const SYSTEM_MODELS_TABLE_FRAGMENT = graphql`
+  fragment SystemModelsTable_SystemModelEdgeFragment on SystemModelConnection {
+    edges {
+      node {
+        id
+        handle
+        name
+        hardwareType {
+          name
+        }
+        partNumbers {
+          edges {
+            node {
+              partNumber
+            }
+          }
+        }
+      }
+    }
+  }
+`;
+
+type TableRecord = NonNullable<
+  NonNullable<SystemModelsTable_SystemModelEdgeFragment$data>["edges"]
+>[number]["node"];
+
+const columnHelper = createColumnHelper<TableRecord>();
+const columns = [
+  columnHelper.accessor("name", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.system-models.system-models-table.SystemModelsTable.nameTitle"
+        defaultMessage="System Model Name"
+      />
+    ),
+    meta: {
+      label: "System Model Name",
+    },
+    cell: ({ row, getValue }) => (
+      <Link
+        route={Route.systemModelsEdit}
+        params={{ systemModelId: row.original.id }}
+      >
+        {getValue()}
+      </Link>
+    ),
+  }),
+  columnHelper.accessor("handle", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.system-models.system-models-table.SystemModelsTable.handleTitle"
+        defaultMessage="Handle"
+      />
+    ),
+    meta: {
+      label: "Handle",
+    },
+    cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
+  }),
+  columnHelper.accessor((row) => row.hardwareType?.name, {
+    id: "hardwareType",
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.system-models.system-models-table.SystemModelsTable.hardwareType"
+        defaultMessage="Hardware Type"
+      />
+    ),
+    meta: {
+      label: "Hardware Type",
+    },
+    cell: ({ getValue }) => <span className="text-nowrap">{getValue()}</span>,
+  }),
+  columnHelper.accessor("partNumbers", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.system-models.system-models-table.SystemModelsTable.partNumbersTitle"
+        defaultMessage="Part Numbers"
+      />
+    ),
+    meta: {
+      label: "Part Numbers",
+    },
+    cell: ({ getValue }) =>
+      getValue().edges?.map(({ node: { partNumber } }, index) => (
+        <React.Fragment key={partNumber}>
+          {index > 0 && ", "}
+          <span className="text-nowrap">{partNumber}</span>
+        </React.Fragment>
+      )),
+    enableSorting: false,
+  }),
+];
+
+type Props = {
+  className?: string;
+  systemModelsRef: SystemModelsTable_SystemModelEdgeFragment$key;
+  loading?: boolean;
+  onLoadMore?: () => void;
+  onSearchChange?: (text: string) => void;
+  searchText?: string;
+};
+
+const SystemModelsTable = ({
+  className,
+  systemModelsRef,
+  loading = false,
+  onLoadMore,
+  onSearchChange,
+  searchText,
+}: Props) => {
+  const systemModelsFragment = useFragment(
+    SYSTEM_MODELS_TABLE_FRAGMENT,
+    systemModelsRef || null,
+  );
+
+  const systemModels = useMemo<TableRecord[]>(() => {
+    return compact(systemModelsFragment?.edges?.map((e) => e?.node)) ?? [];
+  }, [systemModelsFragment]);
+
+  return (
+    <InfiniteTable
+      className={className}
+      columns={columns}
+      data={systemModels}
+      loading={loading}
+      onLoadMore={onLoadMore}
+      columnVisibilityKey="systemModels-table"
+      onSearchChange={onSearchChange}
+      searchText={searchText}
+    />
+  );
+};
+
+export default SystemModelsTable;

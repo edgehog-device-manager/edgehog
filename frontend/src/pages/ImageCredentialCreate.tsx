@@ -25,8 +25,8 @@ import { Card } from "react-bootstrap";
 
 import type { ImageCredentialCreate_imageCredentialCreate_Mutation } from "@/api/__generated__/ImageCredentialCreate_imageCredentialCreate_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Page from "@/components/Page";
+import Alert from "@/components/ui/alert/Alert";
+import Page from "@/components/ui/page/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateImageCredentialForm from "@/forms/CreateImageCredential";
 import { ImageCredentialFormData } from "@/forms/validation";

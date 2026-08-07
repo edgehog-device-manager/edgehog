@@ -33,14 +33,14 @@ import {
 import type { ChannelCreate_createChannel_Mutation } from "@/api/__generated__/ChannelCreate_createChannel_Mutation.graphql";
 import type { ChannelCreate_getDeviceGroups_Query } from "@/api/__generated__/ChannelCreate_getDeviceGroups_Query.graphql";
 
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
 import type { ChannelOutputData } from "@/forms/UpdateChannel";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { Link, Route, useNavigate } from "@/Navigation";
-import Result from "@/components/Result";
-import Button from "@/components/Button";
+import Result from "@/components/ui/result/Result";
+import Button from "@/components/ui/button/Button";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import CreateChannelForm from "@/forms/CreateChannel";
 import { Card } from "react-bootstrap";

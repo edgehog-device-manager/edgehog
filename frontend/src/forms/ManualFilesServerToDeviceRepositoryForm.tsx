@@ -30,15 +30,17 @@ import type {
   ManualFilesServerToDeviceRepositoryForm_repositories_Fragment$key,
 } from "@/api/__generated__/ManualFilesServerToDeviceRepositoryForm_repositories_Fragment.graphql";
 
-import Button from "@/components/Button";
-import Col from "@/components/Col";
-import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
-import type { DestinationTypeOption } from "@/components/DeviceTabs/FilesServerToDeviceTab";
-import FileSelect from "@/components/FileSelect";
-import Form from "@/components/Form";
-import { FormRowWithMargin as FormRow } from "@/components/FormRow";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Col from "@/components/ui/col/Col";
+import CollapseItem, {
+  useCollapseToggle,
+} from "@/components/ui/collapse-item/CollapseItem";
+import type { DestinationTypeOption } from "@/components/fleet/devices/tabs/files-server-to-device-tab/FilesServerToDeviceTab";
+import FileSelect from "@/components/files/file-download/file-select/FileSelect";
+import Form from "@/components/ui/form/Form";
+import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
 import {
   ManualFileDownloadRequestFromRepositoryData,

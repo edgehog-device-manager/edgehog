@@ -37,12 +37,12 @@ import type {
 } from "@/api/__generated__/DeploymentCampaignCreate_getOptions_Query.graphql";
 import type { DeploymentCampaignCreate_CreateCampaign_Mutation } from "@/api/__generated__/DeploymentCampaignCreate_CreateCampaign_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import CreateDeploymentCampaignForm from "@/forms/CreateDeploymentCampaign";
 import type { DeploymentCampaignData } from "@/forms/CreateDeploymentCampaign";

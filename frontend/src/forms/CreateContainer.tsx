@@ -34,32 +34,31 @@ import type {
 } from "@/api/__generated__/ContainerCreate_createContainer_Mutation.graphql";
 import type { ContainerCreate_getOptions_Query$data } from "@/api/__generated__/ContainerCreate_getOptions_Query.graphql";
 
-import Button from "@/components/Button";
-import { useCollapsibleSections } from "@/components/CollapseItem";
+import Button from "@/components/ui/button/Button";
+import { useCollapsibleSections } from "@/components/ui/collapse-item/CollapseItem";
 import {
   messages,
   Section,
   SectionKey,
   sectionsList,
-} from "@/components/ContainerDetails";
-import "@/components/ContainerDetails.scss";
-import "@/components/ContainersOverview.scss";
+} from "@/components/apps/containers/container-details/ContainerDetails";
+import "@/components/apps/containers/container-details/ContainerDetails.scss";
 import DeviceMappingsFormInput, {
   EditableFormInputProps,
-} from "@/components/DeviceMappingsFormInput";
-import FieldHelp from "@/components/FieldHelp";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
-import Icon from "@/components/Icon";
-import MonacoJsonEditor from "@/components/MonacoJsonEditor";
-import MultiSelect from "@/components/MultiSelect";
+} from "@/components/fleet/device-groups/device-mappings-form-input/DeviceMappingsFormInput";
+import FieldHelp from "@/components/ui/field-help/FieldHelp";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import Icon from "@/components/ui/icon/Icon";
+import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
+import MultiSelect from "@/components/ui/multi-select/MultiSelect";
 import {
   useImageCredentialOptions,
   useNetworkOptions,
   useVolumeOptions,
-} from "@/components/options/hooks";
-import Stack from "@/components/Stack";
-import StringArrayFormInput from "@/components/StringArrayFormInput";
+} from "@/hooks/options";
+import Stack from "@/components/ui/stack/Stack";
+import StringArrayFormInput from "@/components/apps/containers/string-array-form-input/StringArrayFormInput";
 import FormFeedback from "@/forms/FormFeedback";
 import MultiSelectFormField from "@/forms/MultiSelectFormField";
 import SelectFormField from "@/forms/SelectFormFIeld";
@@ -108,7 +107,6 @@ const mapCreateContainerToInput = (
 ): CreateContainerInput => ({
   ...data,
   env: mapEnv(data.env),
-
   deviceRequests:
     data.deviceRequests?.map((request) => ({
       driver: request.driver,
@@ -1410,7 +1408,6 @@ const CreateContainer = ({
           open={isSectionOpen("deviceMappings")}
           onToggle={() => toggleSection("deviceMappings")}
         />
-
         <DeviceRequestsSection
           form={form}
           open={isSectionOpen("deviceRequests")}

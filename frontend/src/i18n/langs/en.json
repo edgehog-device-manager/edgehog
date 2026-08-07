@@ -1,1798 +1,1801 @@
 {
-  "components.AddAvailableApplications.deployButton": {
-    "defaultMessage": "Deploy"
-  },
-  "components.AddAvailableApplications.deployErrorFeedback": {
-    "defaultMessage": "Could not deploy the Application, please try again."
-  },
-  "components.AddAvailableApplications.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
-  },
-  "components.AddAvailableApplications.noApplicationsAvailable": {
-    "defaultMessage": "No applications available"
-  },
-  "components.AddAvailableApplications.noApplicationsFoundMatching": {
-    "defaultMessage": "No applications found matching \"{inputValue}\""
-  },
-  "components.AddAvailableApplications.noReleasesAvailable": {
-    "defaultMessage": "No releases available for this application"
-  },
-  "components.AddAvailableApplications.noReleasesFoundMatching": {
-    "defaultMessage": "No releases found matching \"{inputValue}\""
-  },
-  "components.AddAvailableApplications.searchPlaceholder": {
-    "defaultMessage": "Search or select an application..."
-  },
-  "components.AddAvailableApplications.selectARelease": {
-    "defaultMessage": "Select a release"
-  },
-  "components.AddAvailableApplications.selectApplication": {
-    "defaultMessage": "Select Application"
-  },
-  "components.AddAvailableApplications.selectApplicationFirst": {
-    "defaultMessage": "Please select an application first"
-  },
-  "components.AddAvailableApplications.selectRelease": {
-    "defaultMessage": "Select Release"
-  },
-  "components.ApplicationDevicesTable.applicationStateTitle": {
-    "defaultMessage": "Application State",
-    "description": "Title for the Application State column of the application devices table"
-  },
-  "components.ApplicationDevicesTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the application devices table"
-  },
-  "components.ApplicationDevicesTable.releaseVersionTitle": {
-    "defaultMessage": "Release Version",
-    "description": "Title for the Release Version column of the application devices table"
-  },
-  "components.ApplicationDevicesTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.ApplicationsTable.action": {
-    "defaultMessage": "Action"
-  },
-  "components.ApplicationsTable.nameTitle": {
-    "defaultMessage": "Application Name",
-    "description": "Title for the Name column of the applications table"
-  },
-  "components.BaseImageCollectionsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the base image collections table"
-  },
-  "components.BaseImageCollectionsTable.nameTitle": {
-    "defaultMessage": "Base Image Collection Name",
-    "description": "Title for the Name column of the base image collections table"
-  },
-  "components.BaseImageCollectionsTable.systemModelTitle": {
-    "defaultMessage": "System Model",
-    "description": "Title for the System Model column of the base image collections table"
-  },
-  "components.BaseImageSelect.ErrorFallback.message": {
-    "defaultMessage": "Failed to load Base Images list."
-  },
-  "components.BaseImageSelect.ErrorFallback.reloadButton": {
-    "defaultMessage": "Reload"
-  },
-  "components.BaseImageSelect.baseImageOption": {
-    "defaultMessage": "Search or select a base image..."
-  },
-  "components.BaseImageSelect.noBaseImagesAvailable": {
-    "defaultMessage": "No base images available"
-  },
-  "components.BaseImageSelect.noBaseImagesFoundMatching": {
-    "defaultMessage": "No base images found matching \"{inputValue}\""
-  },
-  "components.BaseImagesTable.releaseDisplayNameTitle": {
-    "defaultMessage": "Release Name",
-    "description": "Title for the Release Name column of the base images table"
-  },
-  "components.BaseImagesTable.startingVersionRequirementTitle": {
-    "defaultMessage": "Supported Starting Versions",
-    "description": "Title for the Supported Starting Versions column of the base images table"
-  },
-  "components.BaseImagesTable.versionTitle": {
-    "defaultMessage": "Base Image Version",
-    "description": "Title for the Version column of the base images table"
-  },
-  "components.BatteryTable.chargeLevelTitle": {
-    "defaultMessage": "Charge Level"
-  },
-  "components.BatteryTable.noBattery.message": {
-    "defaultMessage": "The device has not detected any battery yet."
-  },
-  "components.BatteryTable.noBattery.title": {
-    "defaultMessage": "No battery"
-  },
-  "components.BatteryTable.slotTitle": {
-    "defaultMessage": "Slot"
-  },
-  "components.BatteryTable.status.Charging": {
-    "defaultMessage": "Charging"
-  },
-  "components.BatteryTable.status.Discharging": {
-    "defaultMessage": "Discharging"
-  },
-  "components.BatteryTable.status.Either_idle_or_charging": {
-    "defaultMessage": "Idle/Charging"
-  },
-  "components.BatteryTable.status.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.BatteryTable.status.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.BatteryTable.status.Removed": {
-    "defaultMessage": "Removed"
-  },
-  "components.BatteryTable.status.Unknown": {
-    "defaultMessage": "Unknown"
-  },
-  "components.BatteryTable.statusTitle": {
-    "defaultMessage": "Status"
-  },
-  "components.CampaignOutcome.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.CampaignOutcome.Success": {
-    "defaultMessage": "Success"
-  },
-  "components.CampaignScheduledAlert.deleteCampaign": {
-    "defaultMessage": "Delete Campaign"
-  },
-  "components.CampaignScheduledAlert.editCampaign": {
-    "defaultMessage": "Edit Campaign"
-  },
-  "components.CampaignScheduledAlert.scheduledActions": {
-    "defaultMessage": "You can edit or delete it before it begins."
-  },
-  "components.CampaignScheduledAlert.scheduledFor": {
-    "defaultMessage": "Scheduled for: {scheduledDate}"
-  },
-  "components.CampaignScheduledAlert.scheduledMessage": {
-    "defaultMessage": "This campaign is scheduled and has not started yet."
-  },
-  "components.CampaignScheduledAlert.startsIn": {
-    "defaultMessage": "Starts in {duration}"
-  },
-  "components.CampaignStatus.Finished": {
-    "defaultMessage": "Finished"
-  },
-  "components.CampaignStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.CampaignStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.CampaignStatus.Paused": {
-    "defaultMessage": "Paused"
-  },
-  "components.CampaignStatus.Pausing": {
-    "defaultMessage": "Pausing"
-  },
-  "components.CampaignStatus.Scheduled": {
-    "defaultMessage": "Scheduled"
-  },
-  "components.CampaignTargetStatus.Failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.CampaignTargetStatus.Idle": {
-    "defaultMessage": "Idle"
-  },
-  "components.CampaignTargetStatus.InProgress": {
-    "defaultMessage": "In progress"
-  },
-  "components.CampaignTargetStatus.Successful": {
-    "defaultMessage": "Successful"
-  },
-  "components.CellularConnectionTabs.EUTRAN": {
-    "defaultMessage": "E-UTRAN"
-  },
-  "components.CellularConnectionTabs.GSM": {
-    "defaultMessage": "GSM"
-  },
-  "components.CellularConnectionTabs.GSM_COMPACT": {
-    "defaultMessage": "GSM Compact"
-  },
-  "components.CellularConnectionTabs.GSM_EGPRS": {
-    "defaultMessage": "GSM with EGPRS"
-  },
-  "components.CellularConnectionTabs.Modem.APN": {
-    "defaultMessage": "APN"
-  },
-  "components.CellularConnectionTabs.Modem.Carrier": {
-    "defaultMessage": "Carrier"
-  },
-  "components.CellularConnectionTabs.Modem.CellID": {
-    "defaultMessage": "Cell ID"
-  },
-  "components.CellularConnectionTabs.Modem.IMEI": {
-    "defaultMessage": "IMEI"
-  },
-  "components.CellularConnectionTabs.Modem.IMSI": {
-    "defaultMessage": "IMSI"
-  },
-  "components.CellularConnectionTabs.Modem.LocalAreaCode": {
-    "defaultMessage": "Local Area Code"
-  },
-  "components.CellularConnectionTabs.Modem.MobileCountryCode": {
-    "defaultMessage": "Mobile Country Code"
-  },
-  "components.CellularConnectionTabs.Modem.MobileNetworkCode": {
-    "defaultMessage": "Mobile Network Code"
-  },
-  "components.CellularConnectionTabs.Modem.RSSI": {
-    "defaultMessage": "RSSI"
-  },
-  "components.CellularConnectionTabs.Modem.RegistrationStatus": {
-    "defaultMessage": "Registration Status"
-  },
-  "components.CellularConnectionTabs.Modem.technology": {
-    "defaultMessage": "Technology"
-  },
-  "components.CellularConnectionTabs.NotRegistered": {
-    "defaultMessage": "Not Registered"
-  },
-  "components.CellularConnectionTabs.Registered": {
-    "defaultMessage": "Registered"
-  },
-  "components.CellularConnectionTabs.RegisteredRoaming": {
-    "defaultMessage": "Registered, roaming"
-  },
-  "components.CellularConnectionTabs.RegistrationDenied": {
-    "defaultMessage": "Registration denied"
-  },
-  "components.CellularConnectionTabs.SearchingOperator": {
-    "defaultMessage": "Searching an operator to register to"
-  },
-  "components.CellularConnectionTabs.UTRAN": {
-    "defaultMessage": "UTRAN"
-  },
-  "components.CellularConnectionTabs.UTRAN_HSDPA": {
-    "defaultMessage": "UTRAN with HSDPA"
-  },
-  "components.CellularConnectionTabs.UTRAN_HSDPA_HSUPA": {
-    "defaultMessage": "UTRAN with HSDPA and HSUPA"
-  },
-  "components.CellularConnectionTabs.UTRAN_HSUPA": {
-    "defaultMessage": "UTRAN with HSUPA"
-  },
-  "components.CellularConnectionTabs.Unknown": {
-    "defaultMessage": "Unknown"
-  },
-  "components.CellularConnectionTabs.noModems.message": {
-    "defaultMessage": "The device has not detected any modems yet."
-  },
-  "components.CellularConnectionTabs.noModems.title": {
-    "defaultMessage": "No modem"
-  },
-  "components.ChannelsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the channels table"
-  },
-  "components.ChannelsTable.nameTitle": {
-    "defaultMessage": "Channel Name",
-    "description": "Title for the Name column of the channels table"
-  },
-  "components.ChannelsTable.targetGroupsTitle": {
-    "defaultMessage": "Target Groups",
-    "description": "Title for the Target Groups column of the channels table"
-  },
-  "components.CollapseItem.collapseList": {
-    "defaultMessage": "Collapse list"
-  },
-  "components.CollapseItem.expandList": {
-    "defaultMessage": "Expand list"
-  },
-  "components.ConfirmModal.cancelButton": {
-    "defaultMessage": "Cancel",
-    "description": "Title for the button to cancel and dismiss a confirmation modal"
-  },
-  "components.ConnectionStatus.statusConnected": {
-    "defaultMessage": "Connected"
-  },
-  "components.ConnectionStatus.statusDisconnected": {
-    "defaultMessage": "Disconnected"
-  },
-  "components.ContainerDetails.bindsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.bindsLabel": {
     "defaultMessage": "Binds"
   },
-  "components.ContainerDetails.capAdd": {
+  "components.apps.containers.container-details.ContainerDetails.capAdd": {
     "defaultMessage": "Cap Add"
   },
-  "components.ContainerDetails.capDrop": {
+  "components.apps.containers.container-details.ContainerDetails.capDrop": {
     "defaultMessage": "Cap Drop"
   },
-  "components.ContainerDetails.capabilities": {
+  "components.apps.containers.container-details.ContainerDetails.capabilities": {
     "defaultMessage": "Capabilities"
   },
-  "components.ContainerDetails.count": {
+  "components.apps.containers.container-details.ContainerDetails.count": {
     "defaultMessage": "Count"
   },
-  "components.ContainerDetails.cpuPeriodLabel": {
+  "components.apps.containers.container-details.ContainerDetails.cpuPeriodLabel": {
     "defaultMessage": "CPU Period (microseconds)"
   },
-  "components.ContainerDetails.cpuQuotaLabel": {
+  "components.apps.containers.container-details.ContainerDetails.cpuQuotaLabel": {
     "defaultMessage": "CPU Quota (microseconds)"
   },
-  "components.ContainerDetails.cpuRealtimePeriodLabel": {
+  "components.apps.containers.container-details.ContainerDetails.cpuRealtimePeriodLabel": {
     "defaultMessage": "CPU Real Time Period (microseconds)"
   },
-  "components.ContainerDetails.cpuRealtimeRuntimeLabel": {
+  "components.apps.containers.container-details.ContainerDetails.cpuRealtimeRuntimeLabel": {
     "defaultMessage": "CPU Realtime Runtime (microseconds)"
   },
-  "components.ContainerDetails.deviceIDs": {
+  "components.apps.containers.container-details.ContainerDetails.deviceIDs": {
     "defaultMessage": "Device IDs"
   },
-  "components.ContainerDetails.deviceMappingsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
   },
-  "components.ContainerDetails.deviceRequestIndex": {
+  "components.apps.containers.container-details.ContainerDetails.deviceRequestIndex": {
     "defaultMessage": "Request {index}"
   },
-  "components.ContainerDetails.deviceRequestLabel": {
+  "components.apps.containers.container-details.ContainerDetails.deviceRequestLabel": {
     "defaultMessage": "Device Requests"
   },
-  "components.ContainerDetails.driver": {
+  "components.apps.containers.container-details.ContainerDetails.driver": {
     "defaultMessage": "Driver"
   },
-  "components.ContainerDetails.driverOptions": {
+  "components.apps.containers.container-details.ContainerDetails.driverOptions": {
     "defaultMessage": "Driver Options"
   },
-  "components.ContainerDetails.envLabel": {
+  "components.apps.containers.container-details.ContainerDetails.envLabel": {
     "defaultMessage": "Environment (JSON String)"
   },
-  "components.ContainerDetails.extraHostsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.extraHostsLabel": {
     "defaultMessage": "Extra Hosts"
   },
-  "components.ContainerDetails.hostnameLabel": {
+  "components.apps.containers.container-details.ContainerDetails.hostnameLabel": {
     "defaultMessage": "Hostname"
   },
-  "components.ContainerDetails.imageConfigSection": {
+  "components.apps.containers.container-details.ContainerDetails.imageConfigSection": {
     "defaultMessage": "Image Configuration"
   },
-  "components.ContainerDetails.imageCredentialsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.imageCredentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
-  "components.ContainerDetails.imageReferenceLabel": {
+  "components.apps.containers.container-details.ContainerDetails.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
   },
-  "components.ContainerDetails.memoryLabel": {
+  "components.apps.containers.container-details.ContainerDetails.memoryLabel": {
     "defaultMessage": "Memory (bytes)"
   },
-  "components.ContainerDetails.memoryReservationLabel": {
+  "components.apps.containers.container-details.ContainerDetails.memoryReservationLabel": {
     "defaultMessage": "Memory Reservation (bytes)"
   },
-  "components.ContainerDetails.memorySwapLabel": {
+  "components.apps.containers.container-details.ContainerDetails.memorySwapLabel": {
     "defaultMessage": "Memory + Swap (bytes)"
   },
-  "components.ContainerDetails.memorySwappinessLabel": {
+  "components.apps.containers.container-details.ContainerDetails.memorySwappinessLabel": {
     "defaultMessage": "Memory Swappiness (0-100)"
   },
-  "components.ContainerDetails.nameLabel": {
+  "components.apps.containers.container-details.ContainerDetails.nameLabel": {
     "defaultMessage": "Container Name"
   },
-  "components.ContainerDetails.networkConfigSection": {
+  "components.apps.containers.container-details.ContainerDetails.networkConfigSection": {
     "defaultMessage": "Network Configuration"
   },
-  "components.ContainerDetails.networkDriverLabel": {
+  "components.apps.containers.container-details.ContainerDetails.networkDriverLabel": {
     "defaultMessage": "Driver"
   },
-  "components.ContainerDetails.networkEnableIPv6Label": {
+  "components.apps.containers.container-details.ContainerDetails.networkEnableIPv6Label": {
     "defaultMessage": "Enable IPv6"
   },
-  "components.ContainerDetails.networkInternalLabel": {
+  "components.apps.containers.container-details.ContainerDetails.networkInternalLabel": {
     "defaultMessage": "Internal"
   },
-  "components.ContainerDetails.networkLabelLabel": {
+  "components.apps.containers.container-details.ContainerDetails.networkLabelLabel": {
     "defaultMessage": "Label"
   },
-  "components.ContainerDetails.networkModeLabel": {
+  "components.apps.containers.container-details.ContainerDetails.networkModeLabel": {
     "defaultMessage": "Network Mode"
   },
-  "components.ContainerDetails.networkOptionsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.networkOptionsLabel": {
     "defaultMessage": "Options (JSON)"
   },
-  "components.ContainerDetails.networksLabel": {
+  "components.apps.containers.container-details.ContainerDetails.networksLabel": {
     "defaultMessage": "Networks"
   },
-  "components.ContainerDetails.noDeviceMappings": {
+  "components.apps.containers.container-details.ContainerDetails.noDeviceMappings": {
     "defaultMessage": "No device mappings assigned."
   },
-  "components.ContainerDetails.noDeviceRequests": {
+  "components.apps.containers.container-details.ContainerDetails.noDeviceRequests": {
     "defaultMessage": "No device requests assigned."
   },
-  "components.ContainerDetails.noNetworks": {
+  "components.apps.containers.container-details.ContainerDetails.noNetworks": {
     "defaultMessage": "No networks assigned."
   },
-  "components.ContainerDetails.noVolumes": {
+  "components.apps.containers.container-details.ContainerDetails.noVolumes": {
     "defaultMessage": "No volumes assigned."
   },
-  "components.ContainerDetails.options": {
+  "components.apps.containers.container-details.ContainerDetails.options": {
     "defaultMessage": "Options"
   },
-  "components.ContainerDetails.portBindingsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.portBindingsLabel": {
     "defaultMessage": "Port Bindings"
   },
-  "components.ContainerDetails.privilegedLabel": {
+  "components.apps.containers.container-details.ContainerDetails.privilegedLabel": {
     "defaultMessage": "Privileged"
   },
-  "components.ContainerDetails.readOnlyRootfsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.readOnlyRootfsLabel": {
     "defaultMessage": "Read-Only Root Filesystem"
   },
-  "components.ContainerDetails.resourceLimitsSection": {
+  "components.apps.containers.container-details.ContainerDetails.resourceLimitsSection": {
     "defaultMessage": "Resource Limits"
   },
-  "components.ContainerDetails.restartPolicyLabel": {
+  "components.apps.containers.container-details.ContainerDetails.restartPolicyLabel": {
     "defaultMessage": "Restart Policy"
   },
-  "components.ContainerDetails.runtimeSection": {
+  "components.apps.containers.container-details.ContainerDetails.runtimeSection": {
     "defaultMessage": "Runtime & Environment"
   },
-  "components.ContainerDetails.securitySection": {
+  "components.apps.containers.container-details.ContainerDetails.securitySection": {
     "defaultMessage": "Security & Capabilities"
   },
-  "components.ContainerDetails.storageConfigSection": {
+  "components.apps.containers.container-details.ContainerDetails.storageConfigSection": {
     "defaultMessage": "Storage Configuration"
   },
-  "components.ContainerDetails.storageOptLabel": {
+  "components.apps.containers.container-details.ContainerDetails.storageOptLabel": {
     "defaultMessage": "Storage Options"
   },
-  "components.ContainerDetails.targetLabel": {
+  "components.apps.containers.container-details.ContainerDetails.targetLabel": {
     "defaultMessage": "Target"
   },
-  "components.ContainerDetails.tmpfsLabel": {
+  "components.apps.containers.container-details.ContainerDetails.tmpfsLabel": {
     "defaultMessage": "Tmpfs"
   },
-  "components.ContainerDetails.volumeDriver": {
+  "components.apps.containers.container-details.ContainerDetails.volumeDriver": {
     "defaultMessage": "Volume Driver"
   },
-  "components.ContainerDetails.volumeDriverLabel": {
+  "components.apps.containers.container-details.ContainerDetails.volumeDriverLabel": {
     "defaultMessage": "Driver"
   },
-  "components.ContainerDetails.volumeLabelLabel": {
+  "components.apps.containers.container-details.ContainerDetails.volumeLabelLabel": {
     "defaultMessage": "Label"
   },
-  "components.ContainerDetails.volumesLabel": {
+  "components.apps.containers.container-details.ContainerDetails.volumesLabel": {
     "defaultMessage": "Volumes"
   },
-  "components.ContainersOverview.noContainers": {
+  "components.apps.containers.containers-overview.ContainersOverview.noContainers": {
     "defaultMessage": "No containers available."
   },
-  "components.ContainersTable.Name": {
+  "components.apps.containers.containers-table.ContainersTable.Name": {
     "defaultMessage": "Name",
     "description": "Title for the Name column of the containers table"
   },
-  "components.ContainersTable.imageTitle": {
+  "components.apps.containers.containers-table.ContainersTable.imageTitle": {
     "defaultMessage": "Image",
     "description": "Title for the Image column of the containers table"
   },
-  "components.DeleteApplicationModal.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the application."
-  },
-  "components.DeleteApplicationModal.deleteModal.title": {
-    "defaultMessage": "Delete Application"
-  },
-  "components.DeleteApplicationModal.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the application, please try again."
-  },
-  "components.DeleteCampaignModal.error": {
-    "defaultMessage": "Could not delete campaign."
-  },
-  "components.DeleteCampaignModal.title": {
-    "defaultMessage": "Delete Campaign"
-  },
-  "components.DeleteCampaignModal.warning": {
-    "defaultMessage": "This will permanently delete the campaign."
-  },
-  "components.DeleteModal.confirmButton": {
-    "defaultMessage": "Delete",
-    "description": "Title for the button to confirm a deletion modal"
-  },
-  "components.DeleteModal.confirmPrompt": {
-    "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
-    "description": "Description of the action to perform to confirm the deletion modal"
-  },
-  "components.DeleteReleaseModal.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the release, please try again."
-  },
-  "components.DeleteReleaseModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the release."
-  },
-  "components.DeleteReleaseModal.title": {
-    "defaultMessage": "Delete Release"
-  },
-  "components.DeployedApplicationsTable.latest": {
-    "defaultMessage": "Latest"
-  },
-  "components.DeployedApplicationsTable.noDeployedApplications": {
-    "defaultMessage": "No deployed applications"
-  },
-  "components.DeploymentActionButtons.deleteButtonTitle": {
-    "defaultMessage": "Delete Deployment"
-  },
-  "components.DeploymentActionButtons.sendButtonTitle": {
-    "defaultMessage": "Redeploy Application"
-  },
-  "components.DeploymentActionButtons.startButtonTitle": {
-    "defaultMessage": "Start Deployment"
-  },
-  "components.DeploymentActionButtons.stopButtonTitle": {
-    "defaultMessage": "Stop Deployment"
-  },
-  "components.DeploymentActionButtons.upgradeButtonTitle": {
-    "defaultMessage": "Upgrade Deployment"
-  },
-  "components.DeploymentCampaignsTable.applicationNameTitle": {
-    "defaultMessage": "Application Name",
-    "description": "Title for the Application Name column of the Deployment Campaigns table"
-  },
-  "components.DeploymentCampaignsTable.deploymentChannelNameTitle": {
-    "defaultMessage": "Channel",
-    "description": "Title for the Channel column of the Deployment Campaigns table"
-  },
-  "components.DeploymentCampaignsTable.nameTitle": {
-    "defaultMessage": "Deployment Campaign Name",
-    "description": "Title for the Name column of the Deployment Campaigns table"
-  },
-  "components.DeploymentCampaignsTable.operationTypeTitle": {
-    "defaultMessage": "Operation type"
-  },
-  "components.DeploymentCampaignsTable.outcomeTitle": {
-    "defaultMessage": "Outcome"
-  },
-  "components.DeploymentCampaignsTable.releaseVersionTitle": {
-    "defaultMessage": "Release Version",
-    "description": "Title for the Release column of the Deployment Campaigns table"
-  },
-  "components.DeploymentCampaignsTable.statusTitle": {
-    "defaultMessage": "Status"
-  },
-  "components.DeploymentDetails.confirmLabel": {
-    "defaultMessage": "Confirm"
-  },
-  "components.DeploymentDetails.confirmModal.description": {
-    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
-  },
-  "components.DeploymentDetails.confirmModal.title": {
-    "defaultMessage": "Upgrade Deployment"
-  },
-  "components.DeploymentDetails.containerWithIndex": {
-    "defaultMessage": "Container {index}"
-  },
-  "components.DeploymentDetails.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
-  },
-  "components.DeploymentDetails.deleteModal.note": {
-    "defaultMessage": "Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
-  },
-  "components.DeploymentDetails.deleteModal.title": {
-    "defaultMessage": "Delete Deployment"
-  },
-  "components.DeploymentDetails.deviceMappings": {
-    "defaultMessage": "Device Mappings"
-  },
-  "components.DeploymentDetails.deviceRequests": {
-    "defaultMessage": "Device Requests"
-  },
-  "components.DeploymentDetails.incompatibleVersion": {
-    "defaultMessage": "{version} (Incompatible system model)"
-  },
-  "components.DeploymentDetails.networks": {
-    "defaultMessage": "Networks"
-  },
-  "components.DeploymentDetails.noContainers": {
-    "defaultMessage": "No containers"
-  },
-  "components.DeploymentDetails.noReleasesAvailable": {
-    "defaultMessage": "No Release Versions Available"
-  },
-  "components.DeploymentDetails.noReleasesFoundMatching": {
-    "defaultMessage": "No release versions found matching \"{inputValue}\""
-  },
-  "components.DeploymentDetails.none": {
-    "defaultMessage": "None"
-  },
-  "components.DeploymentDetails.releaseVersion": {
-    "defaultMessage": "v.{version}"
-  },
-  "components.DeploymentDetails.selectOption": {
-    "defaultMessage": "Select a Release Version"
-  },
-  "components.DeploymentDetails.unnamed": {
-    "defaultMessage": "Unnamed"
-  },
-  "components.DeploymentDetails.unnamedImage": {
-    "defaultMessage": "Unnamed image"
-  },
-  "components.DeploymentDetails.volumes": {
-    "defaultMessage": "Volumes"
-  },
-  "components.DeploymentEventMessage.noMessage": {
-    "defaultMessage": "No message in event."
-  },
-  "components.DeploymentEventMessage.noShortMessage": {
-    "defaultMessage": "No short message. Click to show extended info."
-  },
-  "components.DeploymentEventsCard.Deleting": {
-    "defaultMessage": "Deleting"
-  },
-  "components.DeploymentEventsCard.Error": {
-    "defaultMessage": "Error"
-  },
-  "components.DeploymentEventsCard.Started": {
-    "defaultMessage": "Started"
-  },
-  "components.DeploymentEventsCard.Starting": {
-    "defaultMessage": "Starting"
-  },
-  "components.DeploymentEventsCard.Stopped": {
-    "defaultMessage": "Stopped"
-  },
-  "components.DeploymentEventsCard.Stopping": {
-    "defaultMessage": "Stopping"
-  },
-  "components.DeploymentEventsCard.Updating": {
-    "defaultMessage": "Updating"
-  },
-  "components.DeploymentReadiness.notReady": {
-    "defaultMessage": "Deploying"
-  },
-  "components.DeploymentReadiness.ready": {
-    "defaultMessage": "Ready"
-  },
-  "components.DeploymentState.deleting": {
-    "defaultMessage": "Deleting"
-  },
-  "components.DeploymentState.deploying": {
-    "defaultMessage": "Deploying"
-  },
-  "components.DeploymentState.error": {
-    "defaultMessage": "Error"
-  },
-  "components.DeploymentState.pending": {
-    "defaultMessage": "Pending"
-  },
-  "components.DeploymentState.sent": {
-    "defaultMessage": "Sent"
-  },
-  "components.DeploymentState.started": {
-    "defaultMessage": "Started"
-  },
-  "components.DeploymentState.starting": {
-    "defaultMessage": "Starting"
-  },
-  "components.DeploymentState.stopped": {
-    "defaultMessage": "Stopped"
-  },
-  "components.DeploymentState.stopping": {
-    "defaultMessage": "Stopping"
-  },
-  "components.DeploymentTargetsTable.completionTimestampTitle": {
-    "defaultMessage": "Completed at",
-    "description": "Title for the Completed at column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTable.deviceNameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Device Name column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTable.lastErrorMessageTitle": {
-    "defaultMessage": "Failure Reason",
-    "description": "Title for the Last Error Message column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTable.latestAttemptTitle": {
-    "defaultMessage": "Latest attempt at",
-    "description": "Title for the Latest attempt at column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTable.readinessTitle": {
-    "defaultMessage": "Readiness",
-    "description": "Title for the Readiness column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTable.retryCountTitle": {
-    "defaultMessage": "Retry Count",
-    "description": "Title for the Retry Count column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTable.stateTitle": {
-    "defaultMessage": "State",
-    "description": "Title for the State column of the Deployment Targets table"
-  },
-  "components.DeploymentTargetsTabs.deploymentTargetsLabel": {
-    "defaultMessage": "Devices"
-  },
-  "components.DeploymentsTable.applicationNameTitle": {
-    "defaultMessage": "Application Name",
-    "description": "Title for the Application Name column of the deployments table"
-  },
-  "components.DeploymentsTable.applicationStateTitle": {
-    "defaultMessage": "Application State",
-    "description": "Title for the Application State column of the deployments table"
-  },
-  "components.DeploymentsTable.deploymentOnDeviceTitle": {
-    "defaultMessage": "Deployment on Device",
-    "description": "Title for the Deployment on Device column of the deployments table"
-  },
-  "components.DeploymentsTable.releaseVersionTitle": {
-    "defaultMessage": "Release Version",
-    "description": "Title for the Release Version column of the deployments table"
-  },
-  "components.DeviceGroupsTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the device groups table"
-  },
-  "components.DeviceGroupsTable.nameTitle": {
-    "defaultMessage": "Group Name",
-    "description": "Title for the Name column of the device groups table"
-  },
-  "components.DeviceGroupsTable.selectorTitle": {
-    "defaultMessage": "Selector",
-    "description": "Title for the Selector column of the device groups table"
-  },
-  "components.DeviceMappingsFormInput.addDeviceMappingButton": {
-    "defaultMessage": "Add Device Mapping"
-  },
-  "components.DeviceMappingsFormInput.cgroupPermissionsLabel": {
-    "defaultMessage": "Container Group Permissions"
-  },
-  "components.DeviceMappingsFormInput.pathInContainerLabel": {
-    "defaultMessage": "Path In Container"
-  },
-  "components.DeviceMappingsFormInput.pathOnHostLabel": {
-    "defaultMessage": "Path On Host"
-  },
-  "components.DeviceTabs.ApplicationsTab.DeployedApplications": {
-    "defaultMessage": "Deployed Applications"
-  },
-  "components.DeviceTabs.ApplicationsTab.InstallNewApp": {
-    "defaultMessage": "Install Applications"
-  },
-  "components.DeviceTabs.ApplicationsTab.title": {
-    "defaultMessage": "Applications"
-  },
-  "components.DeviceTabs.BaseImageTab.buildId": {
-    "defaultMessage": "Build identifier"
-  },
-  "components.DeviceTabs.BaseImageTab.fingerprint": {
-    "defaultMessage": "Fingerprint"
-  },
-  "components.DeviceTabs.BaseImageTab.name": {
-    "defaultMessage": "Name"
-  },
-  "components.DeviceTabs.BaseImageTab.title": {
-    "defaultMessage": "Base Image"
-  },
-  "components.DeviceTabs.BaseImageTab.version": {
-    "defaultMessage": "Version"
-  },
-  "components.DeviceTabs.BatteryTab.title": {
-    "defaultMessage": "Battery"
-  },
-  "components.DeviceTabs.CellularConnectionTab.title": {
-    "defaultMessage": "Cellular Connection"
-  },
-  "components.DeviceTabs.FileManagementTab.deleteFromDevice": {
-    "defaultMessage": "Delete from Device"
-  },
-  "components.DeviceTabs.FileManagementTab.fileManagementLabel": {
-    "defaultMessage": "File Management Mode"
-  },
-  "components.DeviceTabs.FileManagementTab.toDeviceDirect": {
-    "defaultMessage": "Download to Device - Direct File"
-  },
-  "components.DeviceTabs.FileManagementTab.toDeviceRepository": {
-    "defaultMessage": "Download to Device - Repository"
-  },
-  "components.DeviceTabs.FileManagementTab.uploadFromDevice": {
-    "defaultMessage": "Upload from Device"
-  },
-  "components.DeviceTabs.FilesDeleteTab.deleteSource": {
-    "defaultMessage": "Delete Source"
-  },
-  "components.DeviceTabs.FilesDeleteTab.deviceOffline": {
-    "defaultMessage": "The device is offline."
-  },
-  "components.DeviceTabs.FilesDeleteTab.requestHistory": {
-    "defaultMessage": "Request History"
-  },
-  "components.DeviceTabs.FilesDeleteTab.title": {
-    "defaultMessage": "Files Delete"
-  },
-  "components.DeviceTabs.FilesDeleteTab.unknownError": {
-    "defaultMessage": "Unknown error."
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.error.unknownError": {
-    "defaultMessage": "An unknown error occurred."
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.requestHistory": {
-    "defaultMessage": "Request History"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.sourceType.filesystem": {
-    "defaultMessage": "File System"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.sourceType.storage": {
-    "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.title": {
-    "defaultMessage": "Files Download"
-  },
-  "components.DeviceTabs.FilesDeviceToServerTab.uploadSource": {
-    "defaultMessage": "Upload Source"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.creationErrorFeedback": {
-    "defaultMessage": "Could not create file download request, please try again."
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.filesystem": {
-    "defaultMessage": "File System"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.storage": {
-    "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.destinationType.streaming": {
-    "defaultMessage": "Streaming"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.modeFile": {
-    "defaultMessage": "Direct File"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.modeRepository": {
-    "defaultMessage": "Repository"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.requestHistory": {
-    "defaultMessage": "Request History"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.title": {
-    "defaultMessage": "Files Upload"
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.uploadErrorFeedback": {
-    "defaultMessage": "Upload failed. Please check your connection."
-  },
-  "components.DeviceTabs.FilesServerToDeviceTab.uploadLocation": {
-    "defaultMessage": "Upload Location"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuArchitecture": {
-    "defaultMessage": "CPU architecture"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuModel": {
-    "defaultMessage": "CPU model code"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuModelName": {
-    "defaultMessage": "CPU model name"
-  },
-  "components.DeviceTabs.HardwareInfoTab.cpuVendor": {
-    "defaultMessage": "CPU vendor"
-  },
-  "components.DeviceTabs.HardwareInfoTab.memoryTotalBytes": {
-    "defaultMessage": "Total memory"
-  },
-  "components.DeviceTabs.HardwareInfoTab.title": {
-    "defaultMessage": "Hardware Info"
-  },
-  "components.DeviceTabs.LocationTab.lastUpdateAt": {
-    "defaultMessage": "Last known location, updated at {date}"
-  },
-  "components.DeviceTabs.LocationTab.title": {
-    "defaultMessage": "Geolocation"
-  },
-  "components.DeviceTabs.NetworkInterfacesTab.title": {
-    "defaultMessage": "Network Interfaces"
-  },
-  "components.DeviceTabs.OSInfoTab.name": {
-    "defaultMessage": "OS name"
-  },
-  "components.DeviceTabs.OSInfoTab.title": {
-    "defaultMessage": "Operating System"
-  },
-  "components.DeviceTabs.OSInfoTab.version": {
-    "defaultMessage": "OS version"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.environment": {
-    "defaultMessage": "Environment"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.name": {
-    "defaultMessage": "Name"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.title": {
-    "defaultMessage": "Runtime"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.url": {
-    "defaultMessage": "URL"
-  },
-  "components.DeviceTabs.RuntimeInfoTab.version": {
-    "defaultMessage": "Version"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.manualOTAUpdate": {
-    "defaultMessage": "Manual OTA Update"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.modeCollection": {
-    "defaultMessage": "Collection"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.modeFile": {
-    "defaultMessage": "File"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
-    "defaultMessage": "Could not start the OTA update, please try again."
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.title": {
-    "defaultMessage": "Software Updates"
-  },
-  "components.DeviceTabs.SoftwareUpdateTab.updatesHistory": {
-    "defaultMessage": "History"
-  },
-  "components.DeviceTabs.StorageUsageTab.title": {
-    "defaultMessage": "Storage"
-  },
-  "components.DeviceTabs.SystemStatusTab.lastUpdateAt": {
-    "defaultMessage": "Last updated at {date}"
-  },
-  "components.DeviceTabs.SystemStatusTab.memoryFreeBytes": {
-    "defaultMessage": "Free Memory"
-  },
-  "components.DeviceTabs.SystemStatusTab.taskCount": {
-    "defaultMessage": "Active Tasks"
-  },
-  "components.DeviceTabs.SystemStatusTab.title": {
-    "defaultMessage": "System Status"
-  },
-  "components.DeviceTabs.SystemStatusTab.uptimeMilliseconds": {
-    "defaultMessage": "Last boot at"
-  },
-  "components.DeviceTabs.WiFiScanResultsTab.title": {
-    "defaultMessage": "WiFi APs"
-  },
-  "components.DevicesGroupsTable.deviceIdTitle": {
-    "defaultMessage": "Device ID",
-    "description": "Title for the Device ID column of the devices table"
-  },
-  "components.DevicesGroupsTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.DevicesGroupsTable.lastSeenTitle": {
-    "defaultMessage": "Last Seen",
-    "description": "Title for the Last Seen column of the devices table"
-  },
-  "components.DevicesGroupsTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the devices table"
-  },
-  "components.DevicesGroupsTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.DevicesGroupsTable.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "components.DevicesGroupsTable.tagsTitle": {
-    "defaultMessage": "Tags",
-    "description": "Title for the Tags column of the devices table"
-  },
-  "components.DevicesTable.deviceIdTitle": {
-    "defaultMessage": "Device ID",
-    "description": "Title for the Device ID column of the devices table"
-  },
-  "components.DevicesTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.DevicesTable.lastSeenTitle": {
-    "defaultMessage": "Last Seen",
-    "description": "Title for the Last Seen column of the devices table"
-  },
-  "components.DevicesTable.nameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Name column of the devices table"
-  },
-  "components.DevicesTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.DevicesTable.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "components.DevicesTable.tagsTitle": {
-    "defaultMessage": "Tags",
-    "description": "Title for the Tags column of the devices table"
-  },
-  "components.EditDeploymentCampaignModal.applicationLabel": {
-    "defaultMessage": "Application"
-  },
-  "components.EditDeploymentCampaignModal.applicationOption": {
-    "defaultMessage": "Search or select an application..."
-  },
-  "components.EditDeploymentCampaignModal.error": {
-    "defaultMessage": "Could not update campaign."
-  },
-  "components.EditDeploymentCampaignModal.maxFailurePercentageLabel": {
-    "defaultMessage": "Max Failures <muted>(%)</muted>"
-  },
-  "components.EditDeploymentCampaignModal.maxInProgressOperationsLabel": {
-    "defaultMessage": "Max Pending Operations"
-  },
-  "components.EditDeploymentCampaignModal.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.EditDeploymentCampaignModal.releaseLabel": {
-    "defaultMessage": "Release"
-  },
-  "components.EditDeploymentCampaignModal.requestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
-  "components.EditDeploymentCampaignModal.requestTimeoutSecondsLabel": {
-    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
-  "components.EditDeploymentCampaignModal.scheduledAtTimestampLabel": {
-    "defaultMessage": "Scheduled At"
-  },
-  "components.EditDeploymentCampaignModal.selectApplication": {
-    "defaultMessage": "Select an application..."
-  },
-  "components.EditDeploymentCampaignModal.selectApplicationAndRelease": {
-    "defaultMessage": "Select an application and a release..."
-  },
-  "components.EditDeploymentCampaignModal.targetReleaseLabel": {
-    "defaultMessage": "Target Release"
-  },
-  "components.EditDeploymentCampaignModal.title": {
-    "defaultMessage": "Edit Deployment Campaign"
-  },
-  "components.EditFileDownloadCampaignModal.advancedOptionsTitle": {
-    "defaultMessage": "Advanced Options"
-  },
-  "components.EditFileDownloadCampaignModal.destinationLabel": {
-    "defaultMessage": "Destination"
-  },
-  "components.EditFileDownloadCampaignModal.destinationPathLabel": {
-    "defaultMessage": "Destination Path"
-  },
-  "components.EditFileDownloadCampaignModal.error": {
-    "defaultMessage": "Could not update campaign."
-  },
-  "components.EditFileDownloadCampaignModal.fileLabel": {
-    "defaultMessage": "File"
-  },
-  "components.EditFileDownloadCampaignModal.fileModeLabel": {
-    "defaultMessage": "File Mode"
-  },
-  "components.EditFileDownloadCampaignModal.groupIdLabel": {
-    "defaultMessage": "Group ID"
-  },
-  "components.EditFileDownloadCampaignModal.maxFailurePercentageLabel": {
-    "defaultMessage": "Max Failures <muted>(%)</muted>"
-  },
-  "components.EditFileDownloadCampaignModal.maxInProgressOperationsLabel": {
-    "defaultMessage": "Max Pending Operations"
-  },
-  "components.EditFileDownloadCampaignModal.nameLabel": {
-    "defaultMessage": "Campaign Name"
-  },
-  "components.EditFileDownloadCampaignModal.repositoryLabel": {
-    "defaultMessage": "Repository"
-  },
-  "components.EditFileDownloadCampaignModal.repositoryOption": {
-    "defaultMessage": "Search or select a repository..."
-  },
-  "components.EditFileDownloadCampaignModal.requestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
-  "components.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel": {
-    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
-  "components.EditFileDownloadCampaignModal.scheduledAtTimestampLabel": {
-    "defaultMessage": "Scheduled At"
-  },
-  "components.EditFileDownloadCampaignModal.selectRepositoryHint": {
-    "defaultMessage": "Select a repository before selecting a file..."
-  },
-  "components.EditFileDownloadCampaignModal.title": {
-    "defaultMessage": "Update Campaign"
-  },
-  "components.EditFileDownloadCampaignModal.ttlLabel": {
-    "defaultMessage": "TTL <muted>(seconds)</muted>"
-  },
-  "components.EditFileDownloadCampaignModal.userIdLabel": {
-    "defaultMessage": "User ID"
-  },
-  "components.EditModal.cancel": {
-    "defaultMessage": "Cancel"
-  },
-  "components.EditModal.save": {
-    "defaultMessage": "Save"
-  },
-  "components.EditModal.saving": {
-    "defaultMessage": "Saving..."
-  },
-  "components.EditUpdateCampaignModal.baseImageCollectionLabel": {
-    "defaultMessage": "Base Image Collection"
-  },
-  "components.EditUpdateCampaignModal.baseImageCollectionOption": {
-    "defaultMessage": "Search or select a base image collection..."
-  },
-  "components.EditUpdateCampaignModal.baseImageLabel": {
-    "defaultMessage": "Base Image"
-  },
-  "components.EditUpdateCampaignModal.error": {
-    "defaultMessage": "Could not update campaign."
-  },
-  "components.EditUpdateCampaignModal.forceDowngradeLabel": {
-    "defaultMessage": "Force Downgrade"
-  },
-  "components.EditUpdateCampaignModal.maxFailurePercentageLabel": {
-    "defaultMessage": "Max Failures <muted>(%)</muted>"
-  },
-  "components.EditUpdateCampaignModal.maxInProgressOperationsLabel": {
-    "defaultMessage": "Max Pending Operations"
-  },
-  "components.EditUpdateCampaignModal.nameLabel": {
-    "defaultMessage": "Name"
-  },
-  "components.EditUpdateCampaignModal.otaRequestRetriesLabel": {
-    "defaultMessage": "Request Retries"
-  },
-  "components.EditUpdateCampaignModal.requestTimeoutSecondsLabel": {
-    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
-  },
-  "components.EditUpdateCampaignModal.scheduledAtTimestampLabel": {
-    "defaultMessage": "Scheduled At"
-  },
-  "components.EditUpdateCampaignModal.selectBaseImageCollection": {
-    "defaultMessage": "Select a base image collection..."
-  },
-  "components.EditUpdateCampaignModal.title": {
-    "defaultMessage": "Edit Update Campaign"
-  },
-  "components.FieldHelp.exampleTitle": {
-    "defaultMessage": "Example:"
-  },
-  "components.FileDeleteRequestsTable.fileName": {
-    "defaultMessage": "File Name"
-  },
-  "components.FileDeleteRequestsTable.force": {
-    "defaultMessage": "Force Delete"
-  },
-  "components.FileDeleteRequestsTable.force.disabled": {
-    "defaultMessage": "No"
-  },
-  "components.FileDeleteRequestsTable.force.enabled": {
-    "defaultMessage": "Yes"
-  },
-  "components.FileDeleteRequestsTable.noRequests": {
-    "defaultMessage": "No file delete requests have been sent yet."
-  },
-  "components.FileDeleteRequestsTable.responseMessages": {
-    "defaultMessage": "Response Messages"
-  },
-  "components.FileDeleteRequestsTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FileDownloadCampaignsTable.channelNameTitle": {
-    "defaultMessage": "Channel"
-  },
-  "components.FileDownloadCampaignsTable.destinationTypeTitle": {
-    "defaultMessage": "Destination Type"
-  },
-  "components.FileDownloadCampaignsTable.fileNameTitle": {
-    "defaultMessage": "File"
-  },
-  "components.FileDownloadCampaignsTable.nameTitle": {
-    "defaultMessage": "File Download Campaign Name"
-  },
-  "components.FileDownloadCampaignsTable.outcomeTitle": {
-    "defaultMessage": "Outcome"
-  },
-  "components.FileDownloadCampaignsTable.repositoryNameTitle": {
-    "defaultMessage": "Repository"
-  },
-  "components.FileDownloadCampaignsTable.statusTitle": {
-    "defaultMessage": "Status"
-  },
-  "components.FileDownloadTargetsTable.completionTimestampTitle": {
-    "defaultMessage": "Completed at"
-  },
-  "components.FileDownloadTargetsTable.deviceTitle": {
-    "defaultMessage": "Device"
-  },
-  "components.FileDownloadTargetsTable.failureReasonTitle": {
-    "defaultMessage": "Failure Reason"
-  },
-  "components.FileDownloadTargetsTable.latestAttemptTitle": {
-    "defaultMessage": "Latest attempt at"
-  },
-  "components.FileDownloadTargetsTable.pathOnDeviceTitle": {
-    "defaultMessage": "Path on device"
-  },
-  "components.FileDownloadTargetsTable.requestProgressTitle": {
-    "defaultMessage": "Progress"
-  },
-  "components.FileDownloadTargetsTable.requestStatusTitle": {
-    "defaultMessage": "Request Status"
-  },
-  "components.FileDownloadTargetsTable.retryCountTitle": {
-    "defaultMessage": "Retry Count"
-  },
-  "components.FileDownloadTargetsTabs.targetsLabel": {
-    "defaultMessage": "Devices"
-  },
-  "components.FileDropzone.addFolders": {
-    "defaultMessage": "add folders"
-  },
-  "components.FileDropzone.addMore": {
-    "defaultMessage": "add files"
-  },
-  "components.FileDropzone.browseFile": {
-    "defaultMessage": "browse file"
-  },
-  "components.FileDropzone.browseFiles": {
-    "defaultMessage": "browse files"
-  },
-  "components.FileDropzone.browseFolders": {
-    "defaultMessage": "browse folders"
-  },
-  "components.FileDropzone.clearAll": {
-    "defaultMessage": "clear all"
-  },
-  "components.FileDropzone.dropzoneActions": {
-    "defaultMessage": "or {browseFiles} · {browseFolder}"
-  },
-  "components.FileDropzone.dropzoneActionsSingle": {
-    "defaultMessage": "or {browseFile}"
-  },
-  "components.FileDropzone.dropzonePrompt": {
-    "defaultMessage": "Drag & drop files or folders here"
-  },
-  "components.FileDropzone.dropzonePromptSingle": {
-    "defaultMessage": "Drag & drop a file here"
-  },
-  "components.FileDropzone.fileSizeSummary": {
-    "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
-  },
-  "components.FileDropzone.fileSizeSummarySingle": {
-    "defaultMessage": "{count} file selected — {size} total · {replaceFile} · {clearAll}"
-  },
-  "components.FileDropzone.replaceFile": {
-    "defaultMessage": "replace file"
-  },
-  "components.FileSelect.ErrorFallback.message": {
-    "defaultMessage": "Failed to load files list."
-  },
-  "components.FileSelect.ErrorFallback.reloadButton": {
-    "defaultMessage": "Reload"
-  },
-  "components.FileSelect.fileOption": {
-    "defaultMessage": "Search or select a file..."
-  },
-  "components.FileSelect.noFilesAvailable": {
-    "defaultMessage": "No files available"
-  },
-  "components.FileSelect.noFilesFoundMatching": {
-    "defaultMessage": "No files found matching \"{inputValue}\""
-  },
-  "components.FilesDeviceToServerTable.actions": {
-    "defaultMessage": "Actions"
-  },
-  "components.FilesDeviceToServerTable.actions.notAvailableYet": {
-    "defaultMessage": "Not available yet"
-  },
-  "components.FilesDeviceToServerTable.encoding": {
-    "defaultMessage": "Encoding"
-  },
-  "components.FilesDeviceToServerTable.encoding.none": {
-    "defaultMessage": "None"
-  },
-  "components.FilesDeviceToServerTable.noRequests": {
-    "defaultMessage": "No file upload requests have been sent yet."
-  },
-  "components.FilesDeviceToServerTable.progress": {
-    "defaultMessage": "Progress"
-  },
-  "components.FilesDeviceToServerTable.responseMessage": {
-    "defaultMessage": "Response Message"
-  },
-  "components.FilesDeviceToServerTable.source": {
-    "defaultMessage": "Source"
-  },
-  "components.FilesDeviceToServerTable.source.filesystem": {
-    "defaultMessage": "FILESYSTEM: {source}"
-  },
-  "components.FilesDeviceToServerTable.source.storage": {
-    "defaultMessage": "STORAGE: {source}"
-  },
-  "components.FilesDeviceToServerTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FilesDeviceToServerTable.status.notTracked": {
-    "defaultMessage": "Not Tracked"
-  },
-  "components.FilesServerToDeviceTable.campaignName": {
-    "defaultMessage": "File Download Campaign"
-  },
-  "components.FilesServerToDeviceTable.destination": {
-    "defaultMessage": "Destination"
-  },
-  "components.FilesServerToDeviceTable.destination.filesystem": {
-    "defaultMessage": "FILESYSTEM: {destination}"
-  },
-  "components.FilesServerToDeviceTable.destination.storage": {
-    "defaultMessage": "STORAGE: {path}"
-  },
-  "components.FilesServerToDeviceTable.fileName": {
-    "defaultMessage": "File Name"
-  },
-  "components.FilesServerToDeviceTable.fileSize": {
-    "defaultMessage": "Uncompressed File Size"
-  },
-  "components.FilesServerToDeviceTable.noRequests": {
-    "defaultMessage": "No file download requests have been sent yet."
-  },
-  "components.FilesServerToDeviceTable.progress": {
-    "defaultMessage": "Progress"
-  },
-  "components.FilesServerToDeviceTable.responseMessage": {
-    "defaultMessage": "Response Message"
-  },
-  "components.FilesServerToDeviceTable.status": {
-    "defaultMessage": "Status"
-  },
-  "components.FilesServerToDeviceTable.status.notTracked": {
-    "defaultMessage": "Not Tracked"
-  },
-  "components.FilesServerToDeviceTable.ttl": {
-    "defaultMessage": "TTL (s)"
-  },
-  "components.FilesServerToDeviceTable.ttl.infinite": {
-    "defaultMessage": "Infinite"
-  },
-  "components.FilesTable.actionsTitle": {
-    "defaultMessage": "Actions"
-  },
-  "components.FilesTable.deleteModal.description": {
-    "defaultMessage": "This action cannot be undone. This will permanently delete the file."
-  },
-  "components.FilesTable.deleteModal.title": {
-    "defaultMessage": "Delete File"
-  },
-  "components.FilesTable.deletionErrorFeedback": {
-    "defaultMessage": "Could not delete the file, please try again."
-  },
-  "components.FilesTable.nameTitle": {
-    "defaultMessage": "File Name",
-    "description": "Title for the File Name column of the files table"
-  },
-  "components.FilesTable.sizeTitle": {
-    "defaultMessage": "File Size",
-    "description": "Title for the File Size column of the files table"
-  },
-  "components.HardwareTypesTable.handleTitle": {
-    "defaultMessage": "Handle"
-  },
-  "components.HardwareTypesTable.nameTitle": {
-    "defaultMessage": "Hardware Type Name"
-  },
-  "components.HardwareTypesTable.partNumbersTitle": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.ImageCredentialsTable.labelTitle": {
+  "components.apps.containers.image-credentials-table.ImageCredentialsTable.labelTitle": {
     "defaultMessage": "Label"
   },
-  "components.ImageCredentialsTable.usernameTitle": {
+  "components.apps.containers.image-credentials-table.ImageCredentialsTable.usernameTitle": {
     "defaultMessage": "Username"
   },
-  "components.InfiniteTable.noRecords": {
-    "defaultMessage": "No records to display."
-  },
-  "components.LastSeen.never": {
-    "defaultMessage": "Never"
-  },
-  "components.LastSeen.now": {
-    "defaultMessage": "Now"
-  },
-  "components.LedBehaviorDropdown.behavior.blinkLED": {
-    "defaultMessage": "Blink LED"
-  },
-  "components.LedBehaviorDropdown.behavior.doubleBlinkLED": {
-    "defaultMessage": "Double blink LED"
-  },
-  "components.LedBehaviorDropdown.behavior.slowBlinkLED": {
-    "defaultMessage": "Slow blink LED"
-  },
-  "components.LedBehaviorDropdown.genericErrorFeedback": {
-    "defaultMessage": "The request could not reach the server, please try again."
-  },
-  "components.LedBehaviorDropdown.identify": {
-    "defaultMessage": "Identify"
-  },
-  "components.LedBehaviorDropdown.tooltip": {
-    "defaultMessage": "The device LED will blink for 60s."
-  },
-  "components.NetworkInterfacesTable.macAddressTitle": {
-    "defaultMessage": "MAC Address"
-  },
-  "components.NetworkInterfacesTable.nameTitle": {
-    "defaultMessage": "Name"
-  },
-  "components.NetworkInterfacesTable.noResults.message": {
-    "defaultMessage": "The device has not detected any network interface yet."
-  },
-  "components.NetworkInterfacesTable.noResults.title": {
-    "defaultMessage": "No results"
-  },
-  "components.NetworkInterfacesTable.technology.Bluetooth": {
-    "defaultMessage": "Bluetooth"
-  },
-  "components.NetworkInterfacesTable.technology.Cellular": {
-    "defaultMessage": "Cellular"
-  },
-  "components.NetworkInterfacesTable.technology.Ethernet": {
-    "defaultMessage": "Ethernet"
-  },
-  "components.NetworkInterfacesTable.technology.WiFi": {
-    "defaultMessage": "WiFi"
-  },
-  "components.NetworkInterfacesTable.technologyTitle": {
-    "defaultMessage": "Technology"
-  },
-  "components.NetworksTable.driverTitle": {
+  "components.apps.containers.networks-table.NetworksTable.driverTitle": {
     "defaultMessage": "Driver",
     "description": "Title for the Driver column of the networks table"
   },
-  "components.NetworksTable.enableIpv6": {
+  "components.apps.containers.networks-table.NetworksTable.enableIpv6": {
     "defaultMessage": "Enable IPv6",
     "description": "Title for the Enable IPv6 column of the networks table"
   },
-  "components.NetworksTable.internalTitle": {
+  "components.apps.containers.networks-table.NetworksTable.internalTitle": {
     "defaultMessage": "Internal",
     "description": "Title for the Internal column of the networks table"
   },
-  "components.NetworksTable.label": {
+  "components.apps.containers.networks-table.NetworksTable.label": {
     "defaultMessage": "Label",
     "description": "Title for the Label column of the networks table"
   },
-  "components.OperationTable.baseImage": {
-    "defaultMessage": "Base Image"
-  },
-  "components.OperationTable.noPreviousUpdates": {
-    "defaultMessage": "No previous updates"
-  },
-  "components.OperationTable.operationStatus": {
-    "defaultMessage": "Status"
-  },
-  "components.OperationTable.operationStatusProgressTitle": {
-    "defaultMessage": "Operation progress"
-  },
-  "components.OperationTable.operationsStatusCodeTitle": {
-    "defaultMessage": "Failure Reason"
-  },
-  "components.OperationTable.startedAt": {
-    "defaultMessage": "Started At"
-  },
-  "components.OperationTable.updateCampaignNameTitle": {
-    "defaultMessage": "Update Campaign"
-  },
-  "components.OperationTable.updatedAt": {
-    "defaultMessage": "Updated At"
-  },
-  "components.Page.loadingError.feedback": {
-    "defaultMessage": "The page couldn't load."
-  },
-  "components.Page.loadingError.retryButton": {
-    "defaultMessage": "Try Again"
-  },
-  "components.ReleaseDevicesTable.applicationStateTitle": {
-    "defaultMessage": "Application State",
-    "description": "Title for the Application State column of the release devices table"
-  },
-  "components.ReleaseDevicesTable.deviceNameTitle": {
-    "defaultMessage": "Device Name",
-    "description": "Title for the Device Name column of the release devices table"
-  },
-  "components.ReleaseDevicesTable.noDevices": {
-    "defaultMessage": "No devices available."
-  },
-  "components.ReleaseDevicesTable.statusTitle": {
-    "defaultMessage": "Status",
-    "description": "Title for the Status column of the devices table"
-  },
-  "components.ReleaseSelect.ErrorFallback.message": {
-    "defaultMessage": "Failed to load Releases list."
-  },
-  "components.ReleaseSelect.ErrorFallback.reloadButton": {
-    "defaultMessage": "Reload"
-  },
-  "components.ReleaseSelect.noReleasesAvailable": {
-    "defaultMessage": "No releases available"
-  },
-  "components.ReleaseSelect.noReleasesFoundMatching": {
-    "defaultMessage": "No releases found matching \"{inputValue}\""
-  },
-  "components.ReleaseSelect.releaseOption": {
-    "defaultMessage": "Search or select a release..."
-  },
-  "components.ReleaseSystemModelsTable.nameTitle": {
-    "defaultMessage": "System Model Name"
-  },
-  "components.ReleaseSystemModelsTable.noSystemModels": {
-    "defaultMessage": "No supported system model specified. This release can be applied to any device."
-  },
-  "components.ReleasesTable.action": {
-    "defaultMessage": "Action"
-  },
-  "components.ReleasesTable.versionTitle": {
-    "defaultMessage": "Release Version",
-    "description": "Title for the Release Version column of the releases table"
-  },
-  "components.RepositoriesTable.handleTitle": {
-    "defaultMessage": "Handle",
-    "description": "Title for the Handle column of the repositories table"
-  },
-  "components.RepositoriesTable.nameTitle": {
-    "defaultMessage": "Repository Name",
-    "description": "Title for the Name column of the repositories table"
-  },
-  "components.RequestStatus.completed": {
-    "defaultMessage": "Completed"
-  },
-  "components.RequestStatus.failed": {
-    "defaultMessage": "Failed"
-  },
-  "components.RequestStatus.inProgress": {
-    "defaultMessage": "In Progress"
-  },
-  "components.RequestStatus.pending": {
-    "defaultMessage": "Pending"
-  },
-  "components.RequestStatus.sent": {
-    "defaultMessage": "Sent"
-  },
-  "components.ReuseContainerModal.confirmButton": {
+  "components.apps.containers.reuse-container-modal.ReuseContainerModal.confirmButton": {
     "defaultMessage": "Confirm"
   },
-  "components.ReuseContainerModal.confirmPrompt": {
+  "components.apps.containers.reuse-container-modal.ReuseContainerModal.confirmPrompt": {
     "defaultMessage": "Choose a container from which you want to copy configuration."
   },
-  "components.ReuseContainerModal.reuseResourcesTitle": {
+  "components.apps.containers.reuse-container-modal.ReuseContainerModal.reuseResourcesTitle": {
     "defaultMessage": "Reuse Resources"
   },
-  "components.ReuseContainerModal.selectContainer": {
+  "components.apps.containers.reuse-container-modal.ReuseContainerModal.selectContainer": {
     "defaultMessage": "Select Container"
   },
-  "components.SearchBox.searchPlaceholder": {
-    "defaultMessage": "Search...",
-    "description": "Placeholder for the search input of the SearchBox"
-  },
-  "components.Sidebar.ChannelsLabel": {
-    "defaultMessage": "Channels"
-  },
-  "components.Sidebar.applications.applicationsLabel": {
-    "defaultMessage": "Applications"
-  },
-  "components.Sidebar.applications.campaignsLabel": {
-    "defaultMessage": "Campaigns"
-  },
-  "components.Sidebar.applications.containersLabel": {
-    "defaultMessage": "Containers"
-  },
-  "components.Sidebar.applications.deploymentsLabel": {
-    "defaultMessage": "Deployments"
-  },
-  "components.Sidebar.applications.imageCredentialsLabel": {
-    "defaultMessage": "Image Credentials"
-  },
-  "components.Sidebar.applications.networksLabel": {
-    "defaultMessage": "Networks"
-  },
-  "components.Sidebar.applications.volumesLabel": {
-    "defaultMessage": "Volumes"
-  },
-  "components.Sidebar.baseImageCollectionsLabel": {
-    "defaultMessage": "Base Image Collections"
-  },
-  "components.Sidebar.deviceGroupsLabel": {
-    "defaultMessage": "Groups"
-  },
-  "components.Sidebar.devicesLabel": {
-    "defaultMessage": "Devices"
-  },
-  "components.Sidebar.fileDownloadCampaignsLabel": {
-    "defaultMessage": "File Download Campaigns"
-  },
-  "components.Sidebar.filesManagementGroupLabel": {
-    "defaultMessage": "Files Management"
-  },
-  "components.Sidebar.hardwareTypesLabel": {
-    "defaultMessage": "Hardware Types"
-  },
-  "components.Sidebar.logoutLabel": {
-    "defaultMessage": "Logout"
-  },
-  "components.Sidebar.modelsGroupLabel": {
-    "defaultMessage": "Models"
-  },
-  "components.Sidebar.modelsLabel": {
-    "defaultMessage": "System Models"
-  },
-  "components.Sidebar.otaUpdatesGroupLabel": {
-    "defaultMessage": "OTA Updates"
-  },
-  "components.Sidebar.repositoriesLabel": {
-    "defaultMessage": "Repositories"
-  },
-  "components.Sidebar.updateCampaignsLabel": {
-    "defaultMessage": "Update Campaigns"
-  },
-  "components.StorageTable.freeSpaceTitle": {
-    "defaultMessage": "Free Space"
-  },
-  "components.StorageTable.labelTitle": {
-    "defaultMessage": "Storage Unit"
-  },
-  "components.StorageTable.noStorage.message": {
-    "defaultMessage": "The device has not detected any storage unit yet."
-  },
-  "components.StorageTable.noStorage.title": {
-    "defaultMessage": "No storage"
-  },
-  "components.StorageTable.totalSpaceTitle": {
-    "defaultMessage": "Total Space"
-  },
-  "components.StringArrayFormInput.addButton": {
+  "components.apps.containers.string-array-form-input.StringArrayFormInput.addButton": {
     "defaultMessage": "Add Item"
   },
-  "components.SystemModelsTable.handleTitle": {
-    "defaultMessage": "Handle"
-  },
-  "components.SystemModelsTable.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "components.SystemModelsTable.nameTitle": {
-    "defaultMessage": "System Model Name"
-  },
-  "components.SystemModelsTable.partNumbersTitle": {
-    "defaultMessage": "Part Numbers"
-  },
-  "components.Table.noRecords": {
-    "defaultMessage": "No records to display."
-  },
-  "components.Table.showing": {
-    "defaultMessage": "Showing {start} to {end} of {total} entries"
-  },
-  "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
-    "defaultMessage": "Base Image Collection",
-    "description": "Title for the Base Image Collection column of the Update Campaigns table"
-  },
-  "components.UpdateCampaignsTable.baseImageTitle": {
-    "defaultMessage": "Base Image",
-    "description": "Title for the Base Image column of the Update Campaigns table"
-  },
-  "components.UpdateCampaignsTable.channelNameTitle": {
-    "defaultMessage": "Channel",
-    "description": "Title for the Channel column of the Update Campaigns table"
-  },
-  "components.UpdateCampaignsTable.nameTitle": {
-    "defaultMessage": "Update Campaign Name",
-    "description": "Title for the Name column of the Update Campaigns table"
-  },
-  "components.UpdateCampaignsTable.outcomeTitle": {
-    "defaultMessage": "Outcome"
-  },
-  "components.UpdateCampaignsTable.statusTitle": {
-    "defaultMessage": "Status"
-  },
-  "components.UpdateTargetsTable.completionTimestampTitle": {
-    "defaultMessage": "Completed at",
-    "description": "Title for the Completed at column of the Update Targets table"
-  },
-  "components.UpdateTargetsTable.deviceTitle": {
-    "defaultMessage": "Device",
-    "description": "Title for the Device column of the Update Targets table"
-  },
-  "components.UpdateTargetsTable.latestAttemptTitle": {
-    "defaultMessage": "Latest attempt at",
-    "description": "Title for the Latest attempt at column of the Update Targets table"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Acknowledged": {
-    "defaultMessage": "Acknowledged"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Deployed": {
-    "defaultMessage": "Deployed"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Deploying": {
-    "defaultMessage": "Deploying"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Downloading": {
-    "defaultMessage": "Downloading"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Error": {
-    "defaultMessage": "Error"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Failure": {
-    "defaultMessage": "Failure"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Pending": {
-    "defaultMessage": "Pending"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Rebooting": {
-    "defaultMessage": "Rebooting"
-  },
-  "components.UpdateTargetsTable.otaOperationStatus.Success": {
-    "defaultMessage": "Success"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.Canceled": {
-    "defaultMessage": "Canceled"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.IOError": {
-    "defaultMessage": "IO error"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.InternalError": {
-    "defaultMessage": "Internal error"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.InvalidBaseImage": {
-    "defaultMessage": "Invalid Base Image"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.InvalidRequest": {
-    "defaultMessage": "Invalid request"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.NetworkError": {
-    "defaultMessage": "Network error"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.RequestTimeout": {
-    "defaultMessage": "Request timeout"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.SystemRollback": {
-    "defaultMessage": "System rollback"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCode.UpdateAlreadyInProgress": {
-    "defaultMessage": "Update already in progress"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusCodeTitle": {
-    "defaultMessage": "Failure Reason",
-    "description": "Title for the Operation Status Code column of the Update Targets table"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusProgressTitle": {
-    "defaultMessage": "Operation progress",
-    "description": "Title for the Operation Status Progress column of the Update Targets table"
-  },
-  "components.UpdateTargetsTable.otaOperationStatusTitle": {
-    "defaultMessage": "Operation",
-    "description": "Title for the Operation Status column of the Update Targets table"
-  },
-  "components.UpdateTargetsTable.retryCountTitle": {
-    "defaultMessage": "Retry Count",
-    "description": "Title for the Retry Count column of the Update Targets table"
-  },
-  "components.UpdateTargetsTabs.updateTargetsLabel": {
-    "defaultMessage": "Devices"
-  },
-  "components.VolumesTable.driverTitle": {
+  "components.apps.containers.volumes-table.VolumesTable.driverTitle": {
     "defaultMessage": "Driver",
     "description": "Title for the Driver column of the volumes table"
   },
-  "components.VolumesTable.label": {
+  "components.apps.containers.volumes-table.VolumesTable.label": {
     "defaultMessage": "Label",
     "description": "Title for the Label column of the volumes table"
   },
-  "components.WiFiScanResultsTable.apChannelTitle": {
+  "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.deleteButtonTitle": {
+    "defaultMessage": "Delete Deployment"
+  },
+  "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.sendButtonTitle": {
+    "defaultMessage": "Redeploy Application"
+  },
+  "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.startButtonTitle": {
+    "defaultMessage": "Start Deployment"
+  },
+  "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.stopButtonTitle": {
+    "defaultMessage": "Stop Deployment"
+  },
+  "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.upgradeButtonTitle": {
+    "defaultMessage": "Upgrade Deployment"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.applicationNameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Application Name column of the Deployment Campaigns table"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.deploymentChannelNameTitle": {
+    "defaultMessage": "Channel",
+    "description": "Title for the Channel column of the Deployment Campaigns table"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.nameTitle": {
+    "defaultMessage": "Deployment Campaign Name",
+    "description": "Title for the Name column of the Deployment Campaigns table"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.operationTypeTitle": {
+    "defaultMessage": "Operation type"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release column of the Deployment Campaigns table"
+  },
+  "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.confirmLabel": {
+    "defaultMessage": "Confirm"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.description": {
+    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.title": {
+    "defaultMessage": "Upgrade Deployment"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.containerWithIndex": {
+    "defaultMessage": "Container {index}"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the deployment."
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.deleteModal.note": {
+    "defaultMessage": "Note: A deletion request will be sent to the device to start the deletion process. Please note that it may take some time for the request to be processed. This is expected behavior."
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.deleteModal.title": {
+    "defaultMessage": "Delete Deployment"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.deviceMappings": {
+    "defaultMessage": "Device Mappings"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.deviceRequests": {
+    "defaultMessage": "Device Requests"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.incompatibleVersion": {
+    "defaultMessage": "{version} (Incompatible system model)"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.networks": {
+    "defaultMessage": "Networks"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.noContainers": {
+    "defaultMessage": "No containers"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesAvailable": {
+    "defaultMessage": "No Release Versions Available"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesFoundMatching": {
+    "defaultMessage": "No release versions found matching \"{inputValue}\""
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.none": {
+    "defaultMessage": "None"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.releaseVersion": {
+    "defaultMessage": "v.{version}"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.selectOption": {
+    "defaultMessage": "Select a Release Version"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.unnamed": {
+    "defaultMessage": "Unnamed"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.unnamedImage": {
+    "defaultMessage": "Unnamed image"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.volumes": {
+    "defaultMessage": "Volumes"
+  },
+  "components.apps.deployments.deployment-event-message.DeploymentEventMessage.noMessage": {
+    "defaultMessage": "No message in event."
+  },
+  "components.apps.deployments.deployment-event-message.DeploymentEventMessage.noShortMessage": {
+    "defaultMessage": "No short message. Click to show extended info."
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Deleting": {
+    "defaultMessage": "Deleting"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Error": {
+    "defaultMessage": "Error"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Started": {
+    "defaultMessage": "Started"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Starting": {
+    "defaultMessage": "Starting"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Stopped": {
+    "defaultMessage": "Stopped"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Stopping": {
+    "defaultMessage": "Stopping"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Updating": {
+    "defaultMessage": "Updating"
+  },
+  "components.apps.deployments.deployment-readiness.DeploymentReadiness.notReady": {
+    "defaultMessage": "Deploying"
+  },
+  "components.apps.deployments.deployment-readiness.DeploymentReadiness.ready": {
+    "defaultMessage": "Ready"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.deleting": {
+    "defaultMessage": "Deleting"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.deploying": {
+    "defaultMessage": "Deploying"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.error": {
+    "defaultMessage": "Error"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.sent": {
+    "defaultMessage": "Sent"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.started": {
+    "defaultMessage": "Started"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.starting": {
+    "defaultMessage": "Starting"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.stopped": {
+    "defaultMessage": "Stopped"
+  },
+  "components.apps.deployments.deployment-state.DeploymentState.stopping": {
+    "defaultMessage": "Stopping"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at",
+    "description": "Title for the Completed at column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.deviceNameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Device Name column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.lastErrorMessageTitle": {
+    "defaultMessage": "Failure Reason",
+    "description": "Title for the Last Error Message column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at",
+    "description": "Title for the Latest attempt at column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.readinessTitle": {
+    "defaultMessage": "Readiness",
+    "description": "Title for the Readiness column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count",
+    "description": "Title for the Retry Count column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-table.DeploymentTargetsTable.stateTitle": {
+    "defaultMessage": "State",
+    "description": "Title for the State column of the Deployment Targets table"
+  },
+  "components.apps.deployments.deployment-targets-tabs.DeploymentTargetsTabs.deploymentTargetsLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.apps.deployments.deployments-table.DeploymentsTable.applicationNameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Application Name column of the deployments table"
+  },
+  "components.apps.deployments.deployments-table.DeploymentsTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the deployments table"
+  },
+  "components.apps.deployments.deployments-table.DeploymentsTable.deploymentOnDeviceTitle": {
+    "defaultMessage": "Deployment on Device",
+    "description": "Title for the Deployment on Device column of the deployments table"
+  },
+  "components.apps.deployments.deployments-table.DeploymentsTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the deployments table"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.applicationLabel": {
+    "defaultMessage": "Application"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.applicationOption": {
+    "defaultMessage": "Search or select an application..."
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.releaseLabel": {
+    "defaultMessage": "Release"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.selectApplication": {
+    "defaultMessage": "Select an application..."
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.selectApplicationAndRelease": {
+    "defaultMessage": "Select an application and a release..."
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.targetReleaseLabel": {
+    "defaultMessage": "Target Release"
+  },
+  "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.title": {
+    "defaultMessage": "Edit Deployment Campaign"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.deployButton": {
+    "defaultMessage": "Deploy"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.deployErrorFeedback": {
+    "defaultMessage": "Could not deploy the Application, please try again."
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsAvailable": {
+    "defaultMessage": "No applications available"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsFoundMatching": {
+    "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesAvailable": {
+    "defaultMessage": "No releases available for this application"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.searchPlaceholder": {
+    "defaultMessage": "Search or select an application..."
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.selectARelease": {
+    "defaultMessage": "Select a release"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplicationFirst": {
+    "defaultMessage": "Please select an application first"
+  },
+  "components.apps.releases.add-available-applications.AddAvailableApplications.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
+  "components.apps.releases.application-devices-table.ApplicationDevicesTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the application devices table"
+  },
+  "components.apps.releases.application-devices-table.ApplicationDevicesTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the application devices table"
+  },
+  "components.apps.releases.application-devices-table.ApplicationDevicesTable.releaseVersionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the application devices table"
+  },
+  "components.apps.releases.application-devices-table.ApplicationDevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.apps.releases.applications-table.ApplicationsTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.apps.releases.applications-table.ApplicationsTable.nameTitle": {
+    "defaultMessage": "Application Name",
+    "description": "Title for the Name column of the applications table"
+  },
+  "components.apps.releases.base-image-collections-table.BaseImageCollectionsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the base image collections table"
+  },
+  "components.apps.releases.base-image-collections-table.BaseImageCollectionsTable.nameTitle": {
+    "defaultMessage": "Base Image Collection Name",
+    "description": "Title for the Name column of the base image collections table"
+  },
+  "components.apps.releases.base-image-collections-table.BaseImageCollectionsTable.systemModelTitle": {
+    "defaultMessage": "System Model",
+    "description": "Title for the System Model column of the base image collections table"
+  },
+  "components.apps.releases.base-image-select.BaseImageSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load Base Images list."
+  },
+  "components.apps.releases.base-image-select.BaseImageSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.apps.releases.base-image-select.BaseImageSelect.baseImageOption": {
+    "defaultMessage": "Search or select a base image..."
+  },
+  "components.apps.releases.base-image-select.BaseImageSelect.noBaseImagesAvailable": {
+    "defaultMessage": "No base images available"
+  },
+  "components.apps.releases.base-image-select.BaseImageSelect.noBaseImagesFoundMatching": {
+    "defaultMessage": "No base images found matching \"{inputValue}\""
+  },
+  "components.apps.releases.base-images-table.BaseImagesTable.releaseDisplayNameTitle": {
+    "defaultMessage": "Release Name",
+    "description": "Title for the Release Name column of the base images table"
+  },
+  "components.apps.releases.base-images-table.BaseImagesTable.startingVersionRequirementTitle": {
+    "defaultMessage": "Supported Starting Versions",
+    "description": "Title for the Supported Starting Versions column of the base images table"
+  },
+  "components.apps.releases.base-images-table.BaseImagesTable.versionTitle": {
+    "defaultMessage": "Base Image Version",
+    "description": "Title for the Version column of the base images table"
+  },
+  "components.apps.releases.delete-application-modal.DeleteApplicationModal.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the application."
+  },
+  "components.apps.releases.delete-application-modal.DeleteApplicationModal.deleteModal.title": {
+    "defaultMessage": "Delete Application"
+  },
+  "components.apps.releases.delete-application-modal.DeleteApplicationModal.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the application, please try again."
+  },
+  "components.apps.releases.delete-release-modal.DeleteReleaseModal.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the release, please try again."
+  },
+  "components.apps.releases.delete-release-modal.DeleteReleaseModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the release."
+  },
+  "components.apps.releases.delete-release-modal.DeleteReleaseModal.title": {
+    "defaultMessage": "Delete Release"
+  },
+  "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.latest": {
+    "defaultMessage": "Latest"
+  },
+  "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.noDeployedApplications": {
+    "defaultMessage": "No deployed applications"
+  },
+  "components.apps.releases.release-devices-table.ReleaseDevicesTable.applicationStateTitle": {
+    "defaultMessage": "Application State",
+    "description": "Title for the Application State column of the release devices table"
+  },
+  "components.apps.releases.release-devices-table.ReleaseDevicesTable.deviceNameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Device Name column of the release devices table"
+  },
+  "components.apps.releases.release-devices-table.ReleaseDevicesTable.noDevices": {
+    "defaultMessage": "No devices available."
+  },
+  "components.apps.releases.release-devices-table.ReleaseDevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.apps.releases.release-select.ReleaseSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load Releases list."
+  },
+  "components.apps.releases.release-select.ReleaseSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.apps.releases.release-select.ReleaseSelect.noReleasesAvailable": {
+    "defaultMessage": "No releases available"
+  },
+  "components.apps.releases.release-select.ReleaseSelect.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.apps.releases.release-select.ReleaseSelect.releaseOption": {
+    "defaultMessage": "Search or select a release..."
+  },
+  "components.apps.releases.release-system-models-table.ReleaseSystemModelsTable.nameTitle": {
+    "defaultMessage": "System Model Name"
+  },
+  "components.apps.releases.release-system-models-table.ReleaseSystemModelsTable.noSystemModels": {
+    "defaultMessage": "No supported system model specified. This release can be applied to any device."
+  },
+  "components.apps.releases.releases-table.ReleasesTable.action": {
+    "defaultMessage": "Action"
+  },
+  "components.apps.releases.releases-table.ReleasesTable.versionTitle": {
+    "defaultMessage": "Release Version",
+    "description": "Title for the Release Version column of the releases table"
+  },
+  "components.campaigns.campaign-outcome.CampaignOutcome.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.campaigns.campaign-outcome.CampaignOutcome.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.deleteCampaign": {
+    "defaultMessage": "Delete Campaign"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.editCampaign": {
+    "defaultMessage": "Edit Campaign"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledActions": {
+    "defaultMessage": "You can edit or delete it before it begins."
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledFor": {
+    "defaultMessage": "Scheduled for: {scheduledDate}"
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.scheduledMessage": {
+    "defaultMessage": "This campaign is scheduled and has not started yet."
+  },
+  "components.campaigns.campaign-scheduled-alert.CampaignScheduledAlert.startsIn": {
+    "defaultMessage": "Starts in {duration}"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Finished": {
+    "defaultMessage": "Finished"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Paused": {
+    "defaultMessage": "Paused"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Pausing": {
+    "defaultMessage": "Pausing"
+  },
+  "components.campaigns.campaign-status.CampaignStatus.Scheduled": {
+    "defaultMessage": "Scheduled"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.Failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.InProgress": {
+    "defaultMessage": "In progress"
+  },
+  "components.campaigns.campaign-target-status.CampaignTargetStatus.Successful": {
+    "defaultMessage": "Successful"
+  },
+  "components.campaigns.delete-campaign-modal.DeleteCampaignModal.error": {
+    "defaultMessage": "Could not delete campaign."
+  },
+  "components.campaigns.delete-campaign-modal.DeleteCampaignModal.title": {
+    "defaultMessage": "Delete Campaign"
+  },
+  "components.campaigns.delete-campaign-modal.DeleteCampaignModal.warning": {
+    "defaultMessage": "This will permanently delete the campaign."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.advancedOptionsTitle": {
+    "defaultMessage": "Advanced Options"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.destinationLabel": {
+    "defaultMessage": "Destination"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.destinationPathLabel": {
+    "defaultMessage": "Destination Path"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.fileLabel": {
+    "defaultMessage": "File"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.fileModeLabel": {
+    "defaultMessage": "File Mode"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.groupIdLabel": {
+    "defaultMessage": "Group ID"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.nameLabel": {
+    "defaultMessage": "Campaign Name"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.repositoryOption": {
+    "defaultMessage": "Search or select a repository..."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.requestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.selectRepositoryHint": {
+    "defaultMessage": "Select a repository before selecting a file..."
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.title": {
+    "defaultMessage": "Update Campaign"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.ttlLabel": {
+    "defaultMessage": "TTL <muted>(seconds)</muted>"
+  },
+  "components.files.file-download.edit-file-download-campaign-modal.EditFileDownloadCampaignModal.userIdLabel": {
+    "defaultMessage": "User ID"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force": {
+    "defaultMessage": "Force Delete"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force.disabled": {
+    "defaultMessage": "No"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.force.enabled": {
+    "defaultMessage": "Yes"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.noRequests": {
+    "defaultMessage": "No file delete requests have been sent yet."
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.responseMessages": {
+    "defaultMessage": "Response Messages"
+  },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.channelNameTitle": {
     "defaultMessage": "Channel"
   },
-  "components.WiFiScanResultsTable.apEssidTitle": {
-    "defaultMessage": "ESSID"
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.destinationTypeTitle": {
+    "defaultMessage": "Destination Type"
   },
-  "components.WiFiScanResultsTable.apMacAddressTitle": {
-    "defaultMessage": "MAC Address"
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.fileNameTitle": {
+    "defaultMessage": "File"
   },
-  "components.WiFiScanResultsTable.apRssiTitle": {
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.nameTitle": {
+    "defaultMessage": "File Download Campaign Name"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.repositoryNameTitle": {
+    "defaultMessage": "Repository"
+  },
+  "components.files.file-download.file-download-campaigns-table.FileDownloadCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.deviceTitle": {
+    "defaultMessage": "Device"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.failureReasonTitle": {
+    "defaultMessage": "Failure Reason"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.pathOnDeviceTitle": {
+    "defaultMessage": "Path on device"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.requestProgressTitle": {
+    "defaultMessage": "Progress"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.requestStatusTitle": {
+    "defaultMessage": "Request Status"
+  },
+  "components.files.file-download.file-download-targets-table.FileDownloadTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count"
+  },
+  "components.files.file-download.file-download-targets-tabs.FileDownloadTargetsTabs.targetsLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.addFolders": {
+    "defaultMessage": "add folders"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.addMore": {
+    "defaultMessage": "add files"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.browseFile": {
+    "defaultMessage": "browse file"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.browseFiles": {
+    "defaultMessage": "browse files"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.browseFolders": {
+    "defaultMessage": "browse folders"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.clearAll": {
+    "defaultMessage": "clear all"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzoneActions": {
+    "defaultMessage": "or {browseFiles} · {browseFolder}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzoneActionsSingle": {
+    "defaultMessage": "or {browseFile}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzonePrompt": {
+    "defaultMessage": "Drag & drop files or folders here"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.dropzonePromptSingle": {
+    "defaultMessage": "Drag & drop a file here"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.fileSizeSummary": {
+    "defaultMessage": "{count} {count, plural, one {file} other {files}} selected — {size} total · {addFiles} · {addFolder} · {clearAll}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.fileSizeSummarySingle": {
+    "defaultMessage": "{count} file selected — {size} total · {replaceFile} · {clearAll}"
+  },
+  "components.files.file-download.file-dropzone.FileDropzone.replaceFile": {
+    "defaultMessage": "replace file"
+  },
+  "components.files.file-download.file-select.FileSelect.ErrorFallback.message": {
+    "defaultMessage": "Failed to load files list."
+  },
+  "components.files.file-download.file-select.FileSelect.ErrorFallback.reloadButton": {
+    "defaultMessage": "Reload"
+  },
+  "components.files.file-download.file-select.FileSelect.fileOption": {
+    "defaultMessage": "Search or select a file..."
+  },
+  "components.files.file-download.file-select.FileSelect.noFilesAvailable": {
+    "defaultMessage": "No files available"
+  },
+  "components.files.file-download.file-select.FileSelect.noFilesFoundMatching": {
+    "defaultMessage": "No files found matching \"{inputValue}\""
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.actions": {
+    "defaultMessage": "Actions"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.actions.notAvailableYet": {
+    "defaultMessage": "Not available yet"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.encoding": {
+    "defaultMessage": "Encoding"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.encoding.none": {
+    "defaultMessage": "None"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.noRequests": {
+    "defaultMessage": "No file upload requests have been sent yet."
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.responseMessage": {
+    "defaultMessage": "Response Message"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source": {
+    "defaultMessage": "Source"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source.filesystem": {
+    "defaultMessage": "FILESYSTEM: {source}"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.source.storage": {
+    "defaultMessage": "STORAGE: {source}"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.campaignName": {
+    "defaultMessage": "File Download Campaign"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination": {
+    "defaultMessage": "Destination"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.filesystem": {
+    "defaultMessage": "FILESYSTEM: {destination}"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.storage": {
+    "defaultMessage": "STORAGE: {path}"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileName": {
+    "defaultMessage": "File Name"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileSize": {
+    "defaultMessage": "Uncompressed File Size"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.noRequests": {
+    "defaultMessage": "No file download requests have been sent yet."
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.progress": {
+    "defaultMessage": "Progress"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.responseMessage": {
+    "defaultMessage": "Response Message"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status": {
+    "defaultMessage": "Status"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status.notTracked": {
+    "defaultMessage": "Not Tracked"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl": {
+    "defaultMessage": "TTL (s)"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl.infinite": {
+    "defaultMessage": "Infinite"
+  },
+  "components.files.file-download.files-table.FilesTable.actionsTitle": {
+    "defaultMessage": "Actions"
+  },
+  "components.files.file-download.files-table.FilesTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the file."
+  },
+  "components.files.file-download.files-table.FilesTable.deleteModal.title": {
+    "defaultMessage": "Delete File"
+  },
+  "components.files.file-download.files-table.FilesTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the file, please try again."
+  },
+  "components.files.file-download.files-table.FilesTable.nameTitle": {
+    "defaultMessage": "File Name",
+    "description": "Title for the File Name column of the files table"
+  },
+  "components.files.file-download.files-table.FilesTable.sizeTitle": {
+    "defaultMessage": "File Size",
+    "description": "Title for the File Size column of the files table"
+  },
+  "components.files.repositories.repositories-table.RepositoriesTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the repositories table"
+  },
+  "components.files.repositories.repositories-table.RepositoriesTable.nameTitle": {
+    "defaultMessage": "Repository Name",
+    "description": "Title for the Name column of the repositories table"
+  },
+  "components.files.request-status.request-status.RequestStatus.completed": {
+    "defaultMessage": "Completed"
+  },
+  "components.files.request-status.request-status.RequestStatus.failed": {
+    "defaultMessage": "Failed"
+  },
+  "components.files.request-status.request-status.RequestStatus.inProgress": {
+    "defaultMessage": "In Progress"
+  },
+  "components.files.request-status.request-status.RequestStatus.pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.files.request-status.request-status.RequestStatus.sent": {
+    "defaultMessage": "Sent"
+  },
+  "components.fleet.channels.channels-table.ChannelsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the channels table"
+  },
+  "components.fleet.channels.channels-table.ChannelsTable.nameTitle": {
+    "defaultMessage": "Channel Name",
+    "description": "Title for the Name column of the channels table"
+  },
+  "components.fleet.channels.channels-table.ChannelsTable.targetGroupsTitle": {
+    "defaultMessage": "Target Groups",
+    "description": "Title for the Target Groups column of the channels table"
+  },
+  "components.fleet.device-groups.device-groups-table.DeviceGroupsTable.handleTitle": {
+    "defaultMessage": "Handle",
+    "description": "Title for the Handle column of the device groups table"
+  },
+  "components.fleet.device-groups.device-groups-table.DeviceGroupsTable.nameTitle": {
+    "defaultMessage": "Group Name",
+    "description": "Title for the Name column of the device groups table"
+  },
+  "components.fleet.device-groups.device-groups-table.DeviceGroupsTable.selectorTitle": {
+    "defaultMessage": "Selector",
+    "description": "Title for the Selector column of the device groups table"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.addDeviceMappingButton": {
+    "defaultMessage": "Add Device Mapping"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.cgroupPermissionsLabel": {
+    "defaultMessage": "Container Group Permissions"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.pathInContainerLabel": {
+    "defaultMessage": "Path In Container"
+  },
+  "components.fleet.device-groups.device-mappings-form-input.DeviceMappingsFormInput.pathOnHostLabel": {
+    "defaultMessage": "Path On Host"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.systemModel": {
+    "defaultMessage": "System Model"
+  },
+  "components.fleet.device-groups.devices-groups-table.DevicesGroupsTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.chargeLevelTitle": {
+    "defaultMessage": "Charge Level"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.noBattery.message": {
+    "defaultMessage": "The device has not detected any battery yet."
+  },
+  "components.fleet.devices.battery-table.BatteryTable.noBattery.title": {
+    "defaultMessage": "No battery"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.slotTitle": {
+    "defaultMessage": "Slot"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Charging": {
+    "defaultMessage": "Charging"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Discharging": {
+    "defaultMessage": "Discharging"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Either_idle_or_charging": {
+    "defaultMessage": "Idle/Charging"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Idle": {
+    "defaultMessage": "Idle"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Removed": {
+    "defaultMessage": "Removed"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.status.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.fleet.devices.battery-table.BatteryTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.EUTRAN": {
+    "defaultMessage": "E-UTRAN"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.GSM": {
+    "defaultMessage": "GSM"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.GSM_COMPACT": {
+    "defaultMessage": "GSM Compact"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.GSM_EGPRS": {
+    "defaultMessage": "GSM with EGPRS"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.APN": {
+    "defaultMessage": "APN"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.Carrier": {
+    "defaultMessage": "Carrier"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.CellID": {
+    "defaultMessage": "Cell ID"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.IMEI": {
+    "defaultMessage": "IMEI"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.IMSI": {
+    "defaultMessage": "IMSI"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.LocalAreaCode": {
+    "defaultMessage": "Local Area Code"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.MobileCountryCode": {
+    "defaultMessage": "Mobile Country Code"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.MobileNetworkCode": {
+    "defaultMessage": "Mobile Network Code"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.RSSI": {
     "defaultMessage": "RSSI"
   },
-  "components.WiFiScanResultsTable.noResults.message": {
-    "defaultMessage": "The device has not detected any WiFi AP yet."
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.RegistrationStatus": {
+    "defaultMessage": "Registration Status"
   },
-  "components.WiFiScanResultsTable.noResults.title": {
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Modem.technology": {
+    "defaultMessage": "Technology"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.NotRegistered": {
+    "defaultMessage": "Not Registered"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Registered": {
+    "defaultMessage": "Registered"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.RegisteredRoaming": {
+    "defaultMessage": "Registered, roaming"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.RegistrationDenied": {
+    "defaultMessage": "Registration denied"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.SearchingOperator": {
+    "defaultMessage": "Searching an operator to register to"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN": {
+    "defaultMessage": "UTRAN"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN_HSDPA": {
+    "defaultMessage": "UTRAN with HSDPA"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN_HSDPA_HSUPA": {
+    "defaultMessage": "UTRAN with HSDPA and HSUPA"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.UTRAN_HSUPA": {
+    "defaultMessage": "UTRAN with HSUPA"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.Unknown": {
+    "defaultMessage": "Unknown"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.noModems.message": {
+    "defaultMessage": "The device has not detected any modems yet."
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.noModems.title": {
+    "defaultMessage": "No modem"
+  },
+  "components.fleet.devices.cellular-connection-tabs.CellularConnectionTabs.unknownValue": {
+    "defaultMessage": "Unrecognized value received from the device."
+  },
+  "components.fleet.devices.connection-status.ConnectionStatus.statusConnected": {
+    "defaultMessage": "Online"
+  },
+  "components.fleet.devices.connection-status.ConnectionStatus.statusDisconnected": {
+    "defaultMessage": "Offline"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.deviceIdTitle": {
+    "defaultMessage": "Device ID",
+    "description": "Title for the Device ID column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.lastSeenTitle": {
+    "defaultMessage": "Last Seen",
+    "description": "Title for the Last Seen column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.nameTitle": {
+    "defaultMessage": "Device Name",
+    "description": "Title for the Name column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.statusTitle": {
+    "defaultMessage": "Status",
+    "description": "Title for the Status column of the devices table"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.systemModel": {
+    "defaultMessage": "System Model"
+  },
+  "components.fleet.devices.devices-table.DevicesTable.tagsTitle": {
+    "defaultMessage": "Tags",
+    "description": "Title for the Tags column of the devices table"
+  },
+  "components.fleet.devices.last-seen.LastSeen.never": {
+    "defaultMessage": "Never"
+  },
+  "components.fleet.devices.last-seen.LastSeen.now": {
+    "defaultMessage": "Now"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.behavior.blinkLED": {
+    "defaultMessage": "Blink LED"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.behavior.doubleBlinkLED": {
+    "defaultMessage": "Double blink LED"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.behavior.slowBlinkLED": {
+    "defaultMessage": "Slow blink LED"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.genericErrorFeedback": {
+    "defaultMessage": "The request could not reach the server, please try again."
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.identify": {
+    "defaultMessage": "Identify"
+  },
+  "components.fleet.devices.led-behavior-dropdown.LedBehaviorDropdown.tooltip": {
+    "defaultMessage": "The device LED will blink for 60s."
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.macAddressTitle": {
+    "defaultMessage": "MAC Address"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.nameTitle": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.noResults.message": {
+    "defaultMessage": "The device has not detected any network interface yet."
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.noResults.title": {
     "defaultMessage": "No results"
   },
-  "components.WiFiScanResultsTable.seenAtTitle": {
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.Bluetooth": {
+    "defaultMessage": "Bluetooth"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.Cellular": {
+    "defaultMessage": "Cellular"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.Ethernet": {
+    "defaultMessage": "Ethernet"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technology.WiFi": {
+    "defaultMessage": "WiFi"
+  },
+  "components.fleet.devices.network-interfaces-table.NetworkInterfacesTable.technologyTitle": {
+    "defaultMessage": "Technology"
+  },
+  "components.fleet.devices.storage-table.StorageTable.freeSpaceTitle": {
+    "defaultMessage": "Free Space"
+  },
+  "components.fleet.devices.storage-table.StorageTable.labelTitle": {
+    "defaultMessage": "Storage Unit"
+  },
+  "components.fleet.devices.storage-table.StorageTable.noStorage.message": {
+    "defaultMessage": "The device has not detected any storage unit yet."
+  },
+  "components.fleet.devices.storage-table.StorageTable.noStorage.title": {
+    "defaultMessage": "No storage"
+  },
+  "components.fleet.devices.storage-table.StorageTable.totalSpaceTitle": {
+    "defaultMessage": "Total Space"
+  },
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.DeployedApplications": {
+    "defaultMessage": "Deployed Applications"
+  },
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.InstallNewApp": {
+    "defaultMessage": "Install Applications"
+  },
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.title": {
+    "defaultMessage": "Applications"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.buildId": {
+    "defaultMessage": "Build identifier"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.fingerprint": {
+    "defaultMessage": "Fingerprint"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.name": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.title": {
+    "defaultMessage": "Base Image"
+  },
+  "components.fleet.devices.tabs.base-image-tab.BaseImageTab.version": {
+    "defaultMessage": "Version"
+  },
+  "components.fleet.devices.tabs.battery-tab.BatteryTab.title": {
+    "defaultMessage": "Battery"
+  },
+  "components.fleet.devices.tabs.cellular-connection-tab.CellularConnectionTab.title": {
+    "defaultMessage": "Cellular Connection"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.deleteFromDevice": {
+    "defaultMessage": "Delete from Device"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.fileManagementLabel": {
+    "defaultMessage": "File Management Mode"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.toDeviceDirect": {
+    "defaultMessage": "Download to Device - Direct File"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.toDeviceRepository": {
+    "defaultMessage": "Download to Device - Repository"
+  },
+  "components.fleet.devices.tabs.file-management-tab.FileManagementTab.uploadFromDevice": {
+    "defaultMessage": "Upload from Device"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.deleteSource": {
+    "defaultMessage": "Delete Source"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.deviceOffline": {
+    "defaultMessage": "The device is offline."
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.title": {
+    "defaultMessage": "Files Delete"
+  },
+  "components.fleet.devices.tabs.files-delete-tab.FilesDeleteTab.unknownError": {
+    "defaultMessage": "Unknown error."
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.error.unknownError": {
+    "defaultMessage": "An unknown error occurred."
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.sourceType.filesystem": {
+    "defaultMessage": "File System"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.sourceType.storage": {
+    "defaultMessage": "Storage"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.title": {
+    "defaultMessage": "Files Download"
+  },
+  "components.fleet.devices.tabs.files-device-to-server-tab.FilesDeviceToServerTab.uploadSource": {
+    "defaultMessage": "Upload Source"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.creationErrorFeedback": {
+    "defaultMessage": "Could not create file download request, please try again."
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.destinationType.filesystem": {
+    "defaultMessage": "File System"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.destinationType.storage": {
+    "defaultMessage": "Storage"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.destinationType.streaming": {
+    "defaultMessage": "Streaming"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot transfer files while it is offline."
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.modeFile": {
+    "defaultMessage": "Direct File"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.modeRepository": {
+    "defaultMessage": "Repository"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.requestHistory": {
+    "defaultMessage": "Request History"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.title": {
+    "defaultMessage": "Files Upload"
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.uploadErrorFeedback": {
+    "defaultMessage": "Upload failed. Please check your connection."
+  },
+  "components.fleet.devices.tabs.files-server-to-device-tab.FilesServerToDeviceTab.uploadLocation": {
+    "defaultMessage": "Upload Location"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuArchitecture": {
+    "defaultMessage": "CPU architecture"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuModel": {
+    "defaultMessage": "CPU model code"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuModelName": {
+    "defaultMessage": "CPU model name"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.cpuVendor": {
+    "defaultMessage": "CPU vendor"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.memoryTotalBytes": {
+    "defaultMessage": "Total memory"
+  },
+  "components.fleet.devices.tabs.hardware-info-tab.HardwareInfoTab.title": {
+    "defaultMessage": "Hardware Info"
+  },
+  "components.fleet.devices.tabs.location-tab.LocationTab.lastUpdateAt": {
+    "defaultMessage": "Last known location, updated at {date}"
+  },
+  "components.fleet.devices.tabs.location-tab.LocationTab.title": {
+    "defaultMessage": "Geolocation"
+  },
+  "components.fleet.devices.tabs.network-interfaces-tab.NetworkInterfacesTab.title": {
+    "defaultMessage": "Network Interfaces"
+  },
+  "components.fleet.devices.tabs.os-info-tab.OSInfoTab.name": {
+    "defaultMessage": "OS name"
+  },
+  "components.fleet.devices.tabs.os-info-tab.OSInfoTab.title": {
+    "defaultMessage": "Operating System"
+  },
+  "components.fleet.devices.tabs.os-info-tab.OSInfoTab.version": {
+    "defaultMessage": "OS version"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.environment": {
+    "defaultMessage": "Environment"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.name": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.title": {
+    "defaultMessage": "Runtime"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.url": {
+    "defaultMessage": "URL"
+  },
+  "components.fleet.devices.tabs.runtime-info-tab.RuntimeInfoTab.version": {
+    "defaultMessage": "Version"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.manualOTAUpdate": {
+    "defaultMessage": "Manual OTA Update"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.modeCollection": {
+    "defaultMessage": "Collection"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.modeFile": {
+    "defaultMessage": "File"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.otaUpdateCreationErrorFeedback": {
+    "defaultMessage": "Could not start the OTA update, please try again."
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.title": {
+    "defaultMessage": "Software Updates"
+  },
+  "components.fleet.devices.tabs.software-update-tab.SoftwareUpdateTab.updatesHistory": {
+    "defaultMessage": "History"
+  },
+  "components.fleet.devices.tabs.storage-usage-tab.StorageUsageTab.title": {
+    "defaultMessage": "Storage"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.lastUpdateAt": {
+    "defaultMessage": "Last updated at {date}"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.memoryFreeBytes": {
+    "defaultMessage": "Free Memory"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.taskCount": {
+    "defaultMessage": "Active Tasks"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.title": {
+    "defaultMessage": "System Status"
+  },
+  "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.uptimeMilliseconds": {
+    "defaultMessage": "Last boot at"
+  },
+  "components.fleet.devices.tabs.wifi-scan-results-tab.WiFiScanResultsTab.title": {
+    "defaultMessage": "WiFi APs"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apChannelTitle": {
+    "defaultMessage": "Channel"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apEssidTitle": {
+    "defaultMessage": "ESSID"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apMacAddressTitle": {
+    "defaultMessage": "MAC Address"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apRssiTitle": {
+    "defaultMessage": "RSSI"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.noResults.message": {
+    "defaultMessage": "The device has not detected any WiFi AP yet."
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.noResults.title": {
+    "defaultMessage": "No results"
+  },
+  "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.seenAtTitle": {
     "defaultMessage": "Seen at"
+  },
+  "components.fleet.hardware-types.hardware-types-table.HardwareTypesTable.handleTitle": {
+    "defaultMessage": "Handle"
+  },
+  "components.fleet.hardware-types.hardware-types-table.HardwareTypesTable.nameTitle": {
+    "defaultMessage": "Hardware Type Name"
+  },
+  "components.fleet.hardware-types.hardware-types-table.HardwareTypesTable.partNumbersTitle": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.handleTitle": {
+    "defaultMessage": "Handle"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.nameTitle": {
+    "defaultMessage": "System Model Name"
+  },
+  "components.fleet.system-models.system-models-table.SystemModelsTable.partNumbersTitle": {
+    "defaultMessage": "Part Numbers"
+  },
+  "components.layout.sidebar.Sidebar.devicesLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel": {
+    "defaultMessage": "Applications"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.campaignsLabel": {
+    "defaultMessage": "Application Campaigns"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.containersLabel": {
+    "defaultMessage": "Containers"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.deploymentsLabel": {
+    "defaultMessage": "Deployments"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.imageCredentialsLabel": {
+    "defaultMessage": "Image Credentials"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.networksLabel": {
+    "defaultMessage": "Networks"
+  },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.volumesLabel": {
+    "defaultMessage": "Volumes"
+  },
+  "components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.fileDownloadCampaignsLabel": {
+    "defaultMessage": "File Campaigns"
+  },
+  "components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.filesManagementGroupLabel": {
+    "defaultMessage": "Files Management"
+  },
+  "components.layout.sidebar.groups.files-sidebar-group.FilesSidebarGroup.repositoriesLabel": {
+    "defaultMessage": "Repositories"
+  },
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.ChannelsLabel": {
+    "defaultMessage": "Channels"
+  },
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.deviceGroupsLabel": {
+    "defaultMessage": "Groups"
+  },
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.fleetGroupLabel": {
+    "defaultMessage": "Fleet Management"
+  },
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.hardwareTypesLabel": {
+    "defaultMessage": "Hardware Types"
+  },
+  "components.layout.sidebar.groups.fleet-sidebar-group.FleetSidebarGroup.modelsLabel": {
+    "defaultMessage": "System Models"
+  },
+  "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.baseImageCollectionsLabel": {
+    "defaultMessage": "Base Image Collections"
+  },
+  "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.otaUpdatesGroupLabel": {
+    "defaultMessage": "OTA Updates"
+  },
+  "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.updateCampaignsLabel": {
+    "defaultMessage": "Update Campaigns"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel": {
+    "defaultMessage": "Logout"
+  },
+  "components.ota.operation-table.OperationTable.baseImage": {
+    "defaultMessage": "Base Image"
+  },
+  "components.ota.operation-table.OperationTable.noPreviousUpdates": {
+    "defaultMessage": "No previous updates"
+  },
+  "components.ota.operation-table.OperationTable.operationStatus": {
+    "defaultMessage": "Status"
+  },
+  "components.ota.operation-table.OperationTable.operationStatusProgressTitle": {
+    "defaultMessage": "Operation progress"
+  },
+  "components.ota.operation-table.OperationTable.operationsStatusCodeTitle": {
+    "defaultMessage": "Failure Reason"
+  },
+  "components.ota.operation-table.OperationTable.startedAt": {
+    "defaultMessage": "Started At"
+  },
+  "components.ota.operation-table.OperationTable.updateCampaignNameTitle": {
+    "defaultMessage": "Update Campaign"
+  },
+  "components.ota.operation-table.OperationTable.updatedAt": {
+    "defaultMessage": "Updated At"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.baseImageCollectionLabel": {
+    "defaultMessage": "Base Image Collection"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.baseImageCollectionOption": {
+    "defaultMessage": "Search or select a base image collection..."
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.baseImageLabel": {
+    "defaultMessage": "Base Image"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.error": {
+    "defaultMessage": "Could not update campaign."
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.forceDowngradeLabel": {
+    "defaultMessage": "Force Downgrade"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.maxFailurePercentageLabel": {
+    "defaultMessage": "Max Failures <muted>(%)</muted>"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.maxInProgressOperationsLabel": {
+    "defaultMessage": "Max Pending Operations"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.nameLabel": {
+    "defaultMessage": "Name"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.otaRequestRetriesLabel": {
+    "defaultMessage": "Request Retries"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.requestTimeoutSecondsLabel": {
+    "defaultMessage": "Request Timeout <muted>(seconds)</muted>"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.scheduledAtTimestampLabel": {
+    "defaultMessage": "Scheduled At"
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.selectBaseImageCollection": {
+    "defaultMessage": "Select a base image collection..."
+  },
+  "components.ota.update-campaigns.edit-update-campaign-modal.EditUpdateCampaignModal.title": {
+    "defaultMessage": "Edit Update Campaign"
+  },
+  "components.ota.update-campaigns.update-campaigns-table.UpdateCampaignsTable.baseImageCollectionNameTitle": {
+    "defaultMessage": "Base Image Collection",
+    "description": "Title for the Base Image Collection column of the Update Campaigns table"
+  },
+  "components.ota.update-campaigns.update-campaigns-table.UpdateCampaignsTable.baseImageTitle": {
+    "defaultMessage": "Base Image",
+    "description": "Title for the Base Image column of the Update Campaigns table"
+  },
+  "components.ota.update-campaigns.update-campaigns-table.UpdateCampaignsTable.channelNameTitle": {
+    "defaultMessage": "Channel",
+    "description": "Title for the Channel column of the Update Campaigns table"
+  },
+  "components.ota.update-campaigns.update-campaigns-table.UpdateCampaignsTable.nameTitle": {
+    "defaultMessage": "Update Campaign Name",
+    "description": "Title for the Name column of the Update Campaigns table"
+  },
+  "components.ota.update-campaigns.update-campaigns-table.UpdateCampaignsTable.outcomeTitle": {
+    "defaultMessage": "Outcome"
+  },
+  "components.ota.update-campaigns.update-campaigns-table.UpdateCampaignsTable.statusTitle": {
+    "defaultMessage": "Status"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.completionTimestampTitle": {
+    "defaultMessage": "Completed at",
+    "description": "Title for the Completed at column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.deviceTitle": {
+    "defaultMessage": "Device",
+    "description": "Title for the Device column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.latestAttemptTitle": {
+    "defaultMessage": "Latest attempt at",
+    "description": "Title for the Latest attempt at column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Acknowledged": {
+    "defaultMessage": "Acknowledged"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Deployed": {
+    "defaultMessage": "Deployed"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Deploying": {
+    "defaultMessage": "Deploying"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Downloading": {
+    "defaultMessage": "Downloading"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Error": {
+    "defaultMessage": "Error"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Failure": {
+    "defaultMessage": "Failure"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Pending": {
+    "defaultMessage": "Pending"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Rebooting": {
+    "defaultMessage": "Rebooting"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatus.Success": {
+    "defaultMessage": "Success"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.Canceled": {
+    "defaultMessage": "Canceled"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.IOError": {
+    "defaultMessage": "IO error"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.InternalError": {
+    "defaultMessage": "Internal error"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.InvalidBaseImage": {
+    "defaultMessage": "Invalid Base Image"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.InvalidRequest": {
+    "defaultMessage": "Invalid request"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.NetworkError": {
+    "defaultMessage": "Network error"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.RequestTimeout": {
+    "defaultMessage": "Request timeout"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.SystemRollback": {
+    "defaultMessage": "System rollback"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCode.UpdateAlreadyInProgress": {
+    "defaultMessage": "Update already in progress"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusCodeTitle": {
+    "defaultMessage": "Failure Reason",
+    "description": "Title for the Operation Status Code column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusProgressTitle": {
+    "defaultMessage": "Operation progress",
+    "description": "Title for the Operation Status Progress column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.otaOperationStatusTitle": {
+    "defaultMessage": "Operation",
+    "description": "Title for the Operation Status column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-table.UpdateTargetsTable.retryCountTitle": {
+    "defaultMessage": "Retry Count",
+    "description": "Title for the Retry Count column of the Update Targets table"
+  },
+  "components.ota.update-campaigns.update-targets-tabs.UpdateTargetsTabs.updateTargetsLabel": {
+    "defaultMessage": "Devices"
+  },
+  "components.ui.collapse-item.CollapseItem.collapseList": {
+    "defaultMessage": "Collapse list"
+  },
+  "components.ui.collapse-item.CollapseItem.expandList": {
+    "defaultMessage": "Expand list"
+  },
+  "components.ui.confirm-modal.ConfirmModal.cancelButton": {
+    "defaultMessage": "Cancel",
+    "description": "Title for the button to cancel and dismiss a confirmation modal"
+  },
+  "components.ui.delete-modal.DeleteModal.confirmButton": {
+    "defaultMessage": "Delete",
+    "description": "Title for the button to confirm a deletion modal"
+  },
+  "components.ui.delete-modal.DeleteModal.confirmPrompt": {
+    "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
+    "description": "Description of the action to perform to confirm the deletion modal"
+  },
+  "components.ui.edit-modal.EditModal.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "components.ui.edit-modal.EditModal.save": {
+    "defaultMessage": "Save"
+  },
+  "components.ui.edit-modal.EditModal.saving": {
+    "defaultMessage": "Saving..."
+  },
+  "components.ui.field-help.FieldHelp.exampleTitle": {
+    "defaultMessage": "Example:"
+  },
+  "components.ui.infinite-table.InfiniteTable.noRecords": {
+    "defaultMessage": "No records to display."
+  },
+  "components.ui.page.Page.loadingError.feedback": {
+    "defaultMessage": "The page couldn't load."
+  },
+  "components.ui.page.Page.loadingError.retryButton": {
+    "defaultMessage": "Try Again"
+  },
+  "components.ui.search-box.SearchBox.searchPlaceholder": {
+    "defaultMessage": "Search...",
+    "description": "Placeholder for the search input of the SearchBox"
+  },
+  "components.ui.table.Table.noRecords": {
+    "defaultMessage": "No records to display."
+  },
+  "components.ui.table.Table.showing": {
+    "defaultMessage": "Showing {start} to {end} of {total} entries"
   },
   "forms.CreateApplication.descriptionLabel": {
     "defaultMessage": "Description"
