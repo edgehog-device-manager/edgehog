@@ -42,7 +42,7 @@ import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/
 import type { SoftwareUpdateTab_getBaseImageCollections_Query } from "@/api/__generated__/SoftwareUpdateTab_getBaseImageCollections_Query.graphql";
 
 import Alert from "@/components/ui/alert/Alert";
-import OperationTable from "@/components/OperationTable";
+import OperationTable from "@/components/ota/operation-table/OperationTable";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";

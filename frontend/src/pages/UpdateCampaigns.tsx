@@ -40,7 +40,7 @@ import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
-import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
+import UpdateCampaignsTable from "@/components/ota/update-campaigns/update-campaigns-table/UpdateCampaignsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

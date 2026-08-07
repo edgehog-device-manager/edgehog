@@ -47,7 +47,7 @@ import CampaignStatsChart from "@/components/campaigns/campaign-stats-chart/Camp
 import Center from "@/components/ui/center/Center";
 import Col from "@/components/ui/col/Col";
 import DeleteCampaignModal from "@/components/campaigns/delete-campaign-modal/DeleteCampaignModal";
-import DeploymentTargetsTabs from "@/components/DeploymentTargetsTabs";
+import DeploymentTargetsTabs from "@/components/apps/deployments/deployment-targets-tabs/DeploymentTargetsTabs";
 import Icon from "@/components/ui/icon/Icon";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
@@ -56,7 +56,7 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import DeploymentCampaignForm from "@/forms/DeploymentCampaignForm";
 import { Link, Route } from "@/Navigation";
-import EditDeploymentCampaignModal from "@/components/EditDeploymentCampaignModal";
+import EditDeploymentCampaignModal from "@/components/apps/deployments/edit-deployment-campaign-modal/EditDeploymentCampaignModal";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query DeploymentCampaign_getCampaign_Query(

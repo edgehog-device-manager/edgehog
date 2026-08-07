@@ -42,10 +42,10 @@ import { ReleaseDevices_PaginationQuery } from "@/api/__generated__/ReleaseDevic
 
 import Alert from "@/components/ui/alert/Alert";
 import Center from "@/components/ui/center/Center";
-import ContainersOverview from "@/components/ContainersOverview";
+import ContainersOverview from "@/components/apps/containers/containers-overview/ContainersOverview";
 import Page from "@/components/ui/page/Page";
-import ReleaseDevicesTable from "@/components/ReleaseDevicesTable";
-import ReleaseSystemModelsTable from "@/components/ReleaseSystemModelsTable";
+import ReleaseDevicesTable from "@/components/apps/releases/release-devices-table/ReleaseDevicesTable";
+import ReleaseSystemModelsTable from "@/components/apps/releases/release-system-models-table/ReleaseSystemModelsTable";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Tabs, { Tab } from "@/components/ui/tabs/Tabs";

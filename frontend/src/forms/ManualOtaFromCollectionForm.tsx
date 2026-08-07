@@ -30,7 +30,7 @@ import type {
   ManualOtaFromCollectionForm_baseImageCollections_Fragment$key,
 } from "@/api/__generated__/ManualOtaFromCollectionForm_baseImageCollections_Fragment.graphql";
 
-import BaseImageSelect from "@/components/BaseImageSelect";
+import BaseImageSelect from "@/components/apps/releases/base-image-select/BaseImageSelect";
 import Button from "@/components/ui/button/Button";
 import Col from "@/components/ui/col/Col";
 import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";

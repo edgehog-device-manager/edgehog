@@ -38,10 +38,12 @@ import type { Applications_getApplications_Query } from "@/api/__generated__/App
 import { Applications_PaginationQuery } from "@/api/__generated__/Applications_PaginationQuery.graphql";
 
 import Alert from "@/components/ui/alert/Alert";
-import ApplicationsTable, { TableRecord } from "@/components/ApplicationsTable";
+import ApplicationsTable, {
+  TableRecord,
+} from "@/components/apps/releases/applications-table/ApplicationsTable";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import DeleteApplicationModal from "@/components/DeleteApplicationModal";
+import DeleteApplicationModal from "@/components/apps/releases/delete-application-modal/DeleteApplicationModal";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

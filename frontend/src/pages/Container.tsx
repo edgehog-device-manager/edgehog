@@ -39,7 +39,7 @@ import { Link, Route } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ContainerDetails from "@/components/ContainerDetails";
+import ContainerDetails from "@/components/apps/containers/container-details/ContainerDetails";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import Icon from "@/components/ui/icon/Icon";

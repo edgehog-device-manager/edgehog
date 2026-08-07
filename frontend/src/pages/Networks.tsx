@@ -34,7 +34,7 @@ import { Networks_PaginationQuery } from "@/api/__generated__/Networks_Paginatio
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import NetworksTable from "@/components/NetworksTable";
+import NetworksTable from "@/components/apps/containers/networks-table/NetworksTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

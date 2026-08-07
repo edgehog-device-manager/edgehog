@@ -33,7 +33,7 @@ import type {
 } from "@/api/__generated__/CreateUpdateCampaign_ChannelOptionsFragment.graphql";
 import type { CreateUpdateCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateUpdateCampaign_ChannelPaginationQuery.graphql";
 
-import BaseImageSelect from "@/components/BaseImageSelect";
+import BaseImageSelect from "@/components/apps/releases/base-image-select/BaseImageSelect";
 import Button from "@/components/ui/button/Button";
 import DatePicker from "@/components/ui/date-picker/DatePicker";
 import Form from "@/components/ui/form/Form";

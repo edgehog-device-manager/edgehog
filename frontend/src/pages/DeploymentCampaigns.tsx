@@ -38,7 +38,7 @@ import { DeploymentCampaigns_PaginationQuery } from "@/api/__generated__/Deploym
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import DeploymentCampaignsTable from "@/components/DeploymentCampaignsTable";
+import DeploymentCampaignsTable from "@/components/apps/deployments/deployment-campaigns-table/DeploymentCampaignsTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

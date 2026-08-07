@@ -31,8 +31,8 @@ import { Card } from "react-bootstrap";
 import type { ApplicationsTab_deployedApplications$key } from "@/api/__generated__/ApplicationsTab_deployedApplications.graphql";
 import type { ApplicationsTab_deployedApplications_RefetchQuery } from "@/api/__generated__/ApplicationsTab_deployedApplications_RefetchQuery.graphql";
 
-import AddAvailableApplications from "@/components/AddAvailableApplications";
-import DeployedApplicationsTable from "@/components/DeployedApplicationsTable";
+import AddAvailableApplications from "@/components/apps/releases/add-available-applications/AddAvailableApplications";
+import DeployedApplicationsTable from "@/components/apps/releases/deployed-applications-table/DeployedApplicationsTable";
 import Alert from "@/components/ui/alert/Alert";
 import { Tab } from "@/components/ui/tabs/Tabs";
 

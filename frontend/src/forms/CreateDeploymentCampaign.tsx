@@ -41,7 +41,7 @@ import Form from "@/components/ui/form/Form";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { FormRow } from "@/components/ui/form-row/FormRow";
-import ReleaseSelectWrapper from "@/components/ReleaseSelect";
+import ReleaseSelectWrapper from "@/components/apps/releases/release-select/ReleaseSelect";
 import FormFeedback from "@/forms/FormFeedback";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {

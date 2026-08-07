@@ -52,11 +52,11 @@ import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Row from "@/components/ui/row/Row";
 import Spinner from "@/components/ui/spinner/Spinner";
-import UpdateTargetsTabs from "@/components/UpdateTargetsTabs";
+import UpdateTargetsTabs from "@/components/ota/update-campaigns/update-targets-tabs/UpdateTargetsTabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import UpdateCampaignForm from "@/forms/UpdateCampaignForm";
 import { Link, Route } from "@/Navigation";
-import EditUpdateCampaignModal from "@/components/EditUpdateCampaignModal";
+import EditUpdateCampaignModal from "@/components/ota/update-campaigns/edit-update-campaign-modal/EditUpdateCampaignModal";
 
 const GET_CAMPAIGN_QUERY = graphql`
   query UpdateCampaign_getCampaign_Query(

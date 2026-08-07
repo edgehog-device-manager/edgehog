@@ -36,7 +36,7 @@ import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
-import VolumesTable from "@/components/VolumesTable";
+import VolumesTable from "@/components/apps/containers/volumes-table/VolumesTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

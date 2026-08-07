@@ -38,7 +38,7 @@ import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
-import ReuseContainerModal from "@/components/ReuseContainerModal";
+import ReuseContainerModal from "@/components/apps/containers/reuse-container-modal/ReuseContainerModal";
 import Spinner from "@/components/ui/spinner/Spinner";
 import CreateContainerForm from "@/forms/CreateContainer";
 import { ContainerInputData } from "@/forms/validation";

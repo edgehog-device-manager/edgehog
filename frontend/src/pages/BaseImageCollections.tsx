@@ -32,7 +32,7 @@ import { BaseImageCollections_BaseImageCollectionsFragment$key } from "@/api/__g
 import type { BaseImageCollections_getBaseImageCollections_Query } from "@/api/__generated__/BaseImageCollections_getBaseImageCollections_Query.graphql";
 import { BaseImageCollections_PaginationQuery } from "@/api/__generated__/BaseImageCollections_PaginationQuery.graphql";
 
-import BaseImageCollectionsTable from "@/components/BaseImageCollectionsTable";
+import BaseImageCollectionsTable from "@/components/apps/releases/base-image-collections-table/BaseImageCollectionsTable";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";

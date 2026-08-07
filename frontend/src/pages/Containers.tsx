@@ -34,7 +34,7 @@ import { Containers_PaginationQuery } from "@/api/__generated__/Containers_Pagin
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ContainersTable from "@/components/ContainersTable";
+import ContainersTable from "@/components/apps/containers/containers-table/ContainersTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

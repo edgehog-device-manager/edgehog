@@ -42,7 +42,7 @@ import { BaseImages_PaginationQuery } from "@/api/__generated__/BaseImages_Pagin
 
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
-import BaseImagesTable from "@/components/BaseImagesTable";
+import BaseImagesTable from "@/components/apps/releases/base-images-table/BaseImagesTable";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";

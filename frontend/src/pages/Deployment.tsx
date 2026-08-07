@@ -48,7 +48,7 @@ import type { Deployment_deleteDeployment_Mutation } from "@/api/__generated__/D
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
 import Center from "@/components/ui/center/Center";
-import DeploymentDetails from "@/components/DeploymentDetails";
+import DeploymentDetails from "@/components/apps/deployments/deployment-details/DeploymentDetails";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";

@@ -36,7 +36,7 @@ import { ImageCredentials_PaginationQuery } from "@/api/__generated__/ImageCrede
 
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ImageCredentialsTable from "@/components/ImageCredentialsTable";
+import ImageCredentialsTable from "@/components/apps/containers/image-credentials-table/ImageCredentialsTable";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";

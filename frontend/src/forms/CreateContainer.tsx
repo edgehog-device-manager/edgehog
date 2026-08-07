@@ -41,8 +41,8 @@ import {
   Section,
   SectionKey,
   sectionsList,
-} from "@/components/ContainerDetails";
-import "@/components/ContainerDetails.scss";
+} from "@/components/apps/containers/container-details/ContainerDetails";
+import "@/components/apps/containers/container-details/ContainerDetails.scss";
 import DeviceMappingsFormInput, {
   EditableFormInputProps,
 } from "@/components/fleet/device-groups/device-mappings-form-input/DeviceMappingsFormInput";
@@ -58,7 +58,7 @@ import {
   useVolumeOptions,
 } from "@/components/options/hooks";
 import Stack from "@/components/ui/stack/Stack";
-import StringArrayFormInput from "@/components/StringArrayFormInput";
+import StringArrayFormInput from "@/components/apps/containers/string-array-form-input/StringArrayFormInput";
 import FormFeedback from "@/forms/FormFeedback";
 import MultiSelectFormField from "@/forms/MultiSelectFormField";
 import SelectFormField from "@/forms/SelectFormFIeld";

@@ -42,13 +42,13 @@ import { Releases_PaginationQuery } from "@/api/__generated__/Releases_Paginatio
 
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
-import ApplicationDevicesTable from "@/components/ApplicationDevicesTable";
+import ApplicationDevicesTable from "@/components/apps/releases/application-devices-table/ApplicationDevicesTable";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import DeleteReleaseModal from "@/components/DeleteReleaseModal";
+import DeleteReleaseModal from "@/components/apps/releases/delete-release-modal/DeleteReleaseModal";
 import Page from "@/components/ui/page/Page";
-import type { ReleaseTableRecord } from "@/components/ReleasesTable";
-import ReleasesTable from "@/components/ReleasesTable";
+import type { ReleaseTableRecord } from "@/components/apps/releases/releases-table/ReleasesTable";
+import ReleasesTable from "@/components/apps/releases/releases-table/ReleasesTable";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Tabs, { Tab } from "@/components/ui/tabs/Tabs";
