@@ -144,7 +144,7 @@ defmodule Edgehog.Containers.Reconciler do
   end
 
   defp name(tenant) do
-    {:via, Registry, {Edgehog.Containers.Reconciler.Registry, tenant.tenant_id}}
+    {:via, Horde.Registry, {Edgehog.Containers.Reconciler.Registry, tenant.tenant_id}}
   end
 
   defp do_register_device(device, state) do
