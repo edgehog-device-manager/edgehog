@@ -20,27 +20,17 @@ defmodule Edgehog.Containers.Network.Deployment.Changes.DeployNetworkOnDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Devices
+  alias Edgehog.Containers.Network.Deployment.Provisioner
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     network_deployment = changeset.data
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
-    with {:ok, network_deployment} <-
-           Ash.load(network_deployment, [:network, :device], tenant: tenant) do
-      network = network_deployment.network
-      device = network_deployment.device
+    Ash.Changeset.after_action(changeset, fn _changeset, result ->
+      Provisioner.provision(network_deployment, deployment, tenant)
 
-      with {:ok, _device} <-
-             Devices.send_create_network_request(device, network, deployment, tenant: tenant) do
-        maybe_update_state(changeset, network_deployment.state)
-      end
-    end
+      {:ok, result}
+    end)
   end
-
-  defp maybe_update_state(changeset, :created),
-    do: Ash.Changeset.change_attribute(changeset, :state, :sent)
-
-  defp maybe_update_state(changeset, _), do: changeset
 end

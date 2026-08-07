@@ -22,9 +22,9 @@ defmodule Edgehog.Containers.Network.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Network.Deployment.Changes
@@ -79,15 +79,11 @@ defmodule Edgehog.Containers.Network.Deployment do
     end
 
     update :mark_as_available do
-      require_atomic? false
       change set_attribute(:state, :available)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_unavailable do
-      require_atomic? false
       change set_attribute(:state, :unavailable)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -101,9 +97,6 @@ defmodule Edgehog.Containers.Network.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do
@@ -154,6 +147,17 @@ defmodule Edgehog.Containers.Network.Deployment do
 
   identities do
     identity :network_instance, [:network_id, :device_id]
+  end
+
+  pub_sub do
+    prefix "network_deployments"
+    module EdgehogWeb.Endpoint
+
+    publish :mark_as_sent, [[:id, "*"]]
+    publish :mark_as_available, [[:id, "*"]]
+    publish :mark_as_unavailable, [[:id, "*"]]
+    publish :mark_as_errored, [[:id, "*"]]
+    publish :set_state, [[:id, "*"]]
   end
 
   postgres do

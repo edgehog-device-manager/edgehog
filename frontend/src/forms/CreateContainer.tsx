@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Controller,
   useFieldArray,
@@ -107,6 +107,20 @@ const mapCreateContainerToInput = (
 ): CreateContainerInput => ({
   ...data,
   env: mapEnv(data.env),
+  deviceRequests:
+    data.deviceRequests?.map((request) => ({
+      driver: request.driver,
+      count: request.count,
+      deviceIds: request.deviceIds ?? [],
+      capabilities:
+        request.capabilities?.map((group) =>
+          group
+            .split(",")
+            .map((capability) => capability.trim())
+            .filter(Boolean),
+        ) ?? [],
+      options: request.options,
+    })) ?? [],
 });
 
 type BaseSectionProps = {
@@ -1046,6 +1060,274 @@ const DeviceMappingsSection = ({ form, open, onToggle }: BaseSectionProps) => {
   );
 };
 
+const DeviceRequestsSection = ({ form, open, onToggle }: BaseSectionProps) => {
+  const [selectedRequest, setSelectedRequest] = useState(0);
+
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
+
+  const deviceRequests = useFieldArray({
+    control,
+    name: "deviceRequests",
+    keyName: "key",
+  });
+
+  const removeRequest = (index: number) => {
+    deviceRequests.remove(index);
+
+    if (selectedRequest >= index && selectedRequest > 0) {
+      setSelectedRequest(selectedRequest - 1);
+    }
+  };
+
+  return (
+    <Section
+      open={open}
+      onToggle={onToggle}
+      label={messages.deviceRequestsLabel}
+    >
+      {deviceRequests.fields.length === 0 ? (
+        <>
+          <FormRow
+            id={`deviceMappings`}
+            label={
+              <FormattedMessage
+                id="forms.CreateContainer.deviceMappingsLabel"
+                defaultMessage="Device Mappings"
+              />
+            }
+          >
+            <FieldHelp id="deviceRequests" itemsAlignment="center">
+              <div className="border rounded p-3">
+                <Button
+                  variant="outline-primary"
+                  onClick={() => {
+                    deviceRequests.append({
+                      driver: "",
+                      count: -1,
+                      deviceIds: [],
+                      capabilities: [],
+                      options: "{}",
+                    });
+
+                    setSelectedRequest(0);
+                  }}
+                >
+                  <FormattedMessage
+                    id="forms.CreateContainer.deviceRequestsAddButton"
+                    defaultMessage="Add Device Request"
+                  />
+                </Button>
+              </div>
+            </FieldHelp>
+          </FormRow>
+        </>
+      ) : (
+        <div className="d-flex align-items-stretch gap-4 mt-2">
+          <div className="border-end pe-5">
+            <Stack gap={1}>
+              {deviceRequests.fields.map((field, index) => (
+                <Button
+                  key={field.key}
+                  variant="light"
+                  className={`containerListItem ${
+                    selectedRequest === index ? "active" : ""
+                  }`}
+                  onClick={() => setSelectedRequest(index)}
+                >
+                  <FormattedMessage
+                    id="forms.CreateContainer.deviceRequestIndex"
+                    defaultMessage="Request {index}"
+                    values={{ index: index + 1 }}
+                  />
+                </Button>
+              ))}
+
+              <Button
+                variant="link"
+                className="text-start text-decoration-none px-3 py-2"
+                onClick={() => {
+                  deviceRequests.append({
+                    driver: "",
+                    count: -1,
+                    deviceIds: [],
+                    capabilities: [],
+                    options: "{}",
+                  });
+
+                  setSelectedRequest(deviceRequests.fields.length);
+                }}
+              >
+                <Icon icon="plus" className="me-2" />
+                <FormattedMessage
+                  id="forms.CreateContainer.requestsAddButton"
+                  defaultMessage="Add Request"
+                />
+              </Button>
+            </Stack>
+          </div>
+
+          <div className="flex-grow-1 ps-2 w-75" style={{ minWidth: 0 }}>
+            {deviceRequests.fields[selectedRequest] &&
+              (() => {
+                const error = errors.deviceRequests?.[selectedRequest];
+
+                return (
+                  <Stack
+                    key={deviceRequests.fields[selectedRequest].key}
+                    gap={2}
+                  >
+                    <FieldHelp id="driver">
+                      <FormRow
+                        id={`device-request-driver-${selectedRequest}`}
+                        label="Driver"
+                      >
+                        <Form.Control
+                          {...register(
+                            `deviceRequests.${selectedRequest}.driver`,
+                          )}
+                          isInvalid={!!error?.driver}
+                        />
+                        <FormFeedback feedback={error?.driver?.message} />
+                      </FormRow>
+                    </FieldHelp>
+
+                    <FieldHelp id="count">
+                      <FormRow
+                        id={`device-request-count-${selectedRequest}`}
+                        label="Count"
+                      >
+                        <Form.Control
+                          {...register(
+                            `deviceRequests.${selectedRequest}.count`,
+                            {
+                              setValueAs: (value) =>
+                                value === "" ? undefined : Number(value),
+                            },
+                          )}
+                          isInvalid={!!error?.count}
+                        />
+                        <FormFeedback feedback={error?.count?.message} />
+                      </FormRow>
+                    </FieldHelp>
+
+                    <FieldHelp id="deviceIDs" itemsAlignment="center">
+                      <FormRow
+                        id={`device-request-deviceIds-${selectedRequest}`}
+                        label="Device IDs"
+                      >
+                        <Controller
+                          control={control}
+                          name={`deviceRequests.${selectedRequest}.deviceIds`}
+                          render={({ field }) => (
+                            <StringArrayFormInput
+                              value={field.value || []}
+                              onChange={field.onChange}
+                              errors={
+                                Array.isArray(error?.deviceIds)
+                                  ? error.deviceIds
+                                  : undefined
+                              }
+                              addButtonLabel="Add Device ID"
+                              canAddItem={
+                                field.value?.every((id) => id.trim() !== "") ??
+                                true
+                              }
+                            />
+                          )}
+                        />
+                      </FormRow>
+                    </FieldHelp>
+
+                    <FieldHelp id="capabilities" itemsAlignment="center">
+                      <FormRow
+                        id={`device-request-capabilities-${selectedRequest}`}
+                        label="Capabilities"
+                      >
+                        <Controller
+                          control={control}
+                          name={`deviceRequests.${selectedRequest}.capabilities`}
+                          render={({ field }) => (
+                            <StringArrayFormInput
+                              value={field.value ?? []}
+                              onChange={field.onChange}
+                              errors={
+                                Array.isArray(error?.capabilities)
+                                  ? error.capabilities
+                                  : undefined
+                              }
+                              addButtonLabel="Add Capability"
+                              canAddItem={
+                                field.value?.every(
+                                  (capability) => capability.trim() !== "",
+                                ) ?? true
+                              }
+                            />
+                          )}
+                        />
+                      </FormRow>
+                    </FieldHelp>
+
+                    <FieldHelp id="driverOptions" itemsAlignment="center">
+                      <FormRow
+                        id="options"
+                        label={
+                          <FormattedMessage
+                            id="forms.CreateContainer.driverOptionsLabel"
+                            defaultMessage="Driver Options (JSON String)"
+                          />
+                        }
+                      >
+                        <Controller
+                          control={control}
+                          name={`deviceRequests.${selectedRequest}.options`}
+                          render={({ field, fieldState }) => (
+                            <MonacoJsonEditor
+                              value={
+                                field.value && typeof field.value !== "string"
+                                  ? envToString(field.value)
+                                  : (field.value ?? "")
+                              }
+                              defaultValue={
+                                field.value && typeof field.value !== "string"
+                                  ? envToString(field.value)
+                                  : "{}"
+                              }
+                              onChange={(value) => field.onChange(value ?? "")}
+                              error={fieldState.error?.message}
+                            />
+                          )}
+                        />
+                      </FormRow>
+                    </FieldHelp>
+
+                    <div className="pt-3 mt-2 d-flex justify-content-end">
+                      <Button
+                        variant="outline-danger"
+                        onClick={() => {
+                          removeRequest(selectedRequest);
+                        }}
+                      >
+                        <Icon icon="delete" className="me-2" />
+                        <FormattedMessage
+                          id="forms.CreateContainer.removeDeviceRequestButton"
+                          defaultMessage="Remove Request"
+                        />
+                      </Button>
+                    </div>
+                  </Stack>
+                );
+              })()}
+          </div>
+        </div>
+      )}
+    </Section>
+  );
+};
+
 type CreateContainerProps = {
   queryRef: ContainerCreate_getOptions_Query$data;
   isLoading?: boolean;
@@ -1125,6 +1407,11 @@ const CreateContainer = ({
           form={form}
           open={isSectionOpen("deviceMappings")}
           onToggle={() => toggleSection("deviceMappings")}
+        />
+        <DeviceRequestsSection
+          form={form}
+          open={isSectionOpen("deviceRequests")}
+          onToggle={() => toggleSection("deviceRequests")}
         />
       </div>
 

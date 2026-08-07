@@ -22,7 +22,8 @@ defmodule Edgehog.Containers.Container.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Container.Deployment.Calculations
@@ -36,7 +37,8 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     paginate_relationship_with network_deployments: :relay,
                                volume_deployments: :relay,
-                               device_mapping_deployments: :relay
+                               device_mapping_deployments: :relay,
+                               device_request_deployments: :relay
   end
 
   actions do
@@ -119,14 +121,6 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change Changes.MaybeNotifyUpwards
-    end
-
-    update :maybe_notify_upwards do
-      require_atomic? false
-      change Changes.MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do
@@ -198,6 +192,13 @@ defmodule Edgehog.Containers.Container.Deployment do
       destination_attribute_on_join_resource :device_mapping_deployment_id
       public? true
     end
+
+    many_to_many :device_request_deployments, Edgehog.Containers.DeviceRequest.Deployment do
+      through Edgehog.Containers.ContainerDeploymentDeviceRequestDeployment
+      source_attribute_on_join_resource :container_deployment_id
+      destination_attribute_on_join_resource :device_request_deployment_id
+      public? true
+    end
   end
 
   calculations do
@@ -212,6 +213,17 @@ defmodule Edgehog.Containers.Container.Deployment do
 
   identities do
     identity :container_instance, [:container_id, :device_id]
+  end
+
+  pub_sub do
+    prefix "container_deployments"
+    module EdgehogWeb.Endpoint
+
+    publish :mark_as_received, [[:id, "*"]]
+    publish :mark_as_created, [[:id, "*"]]
+    publish :mark_as_stopped, [[:id, "*"]]
+    publish :mark_as_running, [[:id, "*"]]
+    publish :mark_as_errored, [[:id, "*"]]
   end
 
   postgres do

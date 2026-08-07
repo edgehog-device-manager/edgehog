@@ -28,12 +28,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
   alias Ash.Error.Invalid
   alias Astarte.Client.APIError
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
   alias Edgehog.Campaigns.CampaignTarget
+  alias Edgehog.Containers.Deployment
   alias Phoenix.Socket.Broadcast
 
   setup do
@@ -72,16 +72,15 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       # Subscribe to deployment updates
       assert :ok = MechanismCore.subscribe_to_operation_updates!(mechanism, deployment.id)
 
-      # Trigger an update by marking the deployment as started
+      # Trigger an update by marking the deployment as timed out
       {:ok, updated_deployment} =
-        Edgehog.Containers.mark_deployment_as_stopped(deployment, tenant: tenant.tenant_id)
+        Edgehog.Containers.mark_deployment_as_timed_out(deployment, tenant: tenant.tenant_id)
 
-      topic = "deployments:#{deployment.id}"
+      topic = "deployments:timeout:#{deployment.id}"
 
       # Assert we receive the PubSub notification
       assert_receive %Broadcast{
         topic: ^topic,
-        event: "mark_as_stopped",
         payload: %Ash.Notifier.Notification{
           data: received_deployment
         }
@@ -146,10 +145,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
@@ -179,10 +176,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       mechanism = campaign.campaign_mechanism.value
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       # Now retry the operation
@@ -227,10 +222,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       assert {:ok, target} =
                MechanismCore.fetch_next_valid_target(mechanism, campaign.id, tenant.tenant_id)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       # Step 2: Execute operation

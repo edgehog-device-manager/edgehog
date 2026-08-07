@@ -26,11 +26,15 @@ defmodule Edgehog.Devices.Device do
     domain: Edgehog.Devices,
     extensions: [
       AshGraphql.Resource
+    ],
+    notifiers: [
+      Ash.Notifier.PubSub
     ]
 
   alias Edgehog.Changes.NormalizeTagName
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
+  alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Volume
@@ -388,6 +392,24 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SendCreateDeviceMapping
     end
 
+    update :send_create_device_request_request do
+      description "Send a create device request to the device."
+
+      argument :device_request, :struct do
+        constraints instance_of: DeviceRequest
+        description "The new device request for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this device request is used."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateDeviceRequest
+    end
+
     update :send_release_command do
       description "Sends a command for the given application release."
 
@@ -605,6 +627,11 @@ defmodule Edgehog.Devices.Device do
       calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_mappings}
     end
 
+    calculate :available_device_requests, {:array, Types.DeviceRequestStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_requests}
+    end
+
     calculate :battery_status, {:array, BatterySlot} do
       public? true
       calculation Calculations.BatteryStatus
@@ -705,6 +732,25 @@ defmodule Edgehog.Devices.Device do
 
   identities do
     identity :unique_realm_device_id, [:device_id, :realm_id]
+  end
+
+  pub_sub do
+    module EdgehogWeb.Endpoint
+    prefix "devices"
+
+    publish_all "online_create", :create, ["online", :id], filter: &online_filter/1
+    publish "online_update", :from_device_status, ["online", :id], filter: &online_filter/1
+
+    publish_all "offline_create", :create, ["offline", :id], filter: &offline_filter/1
+    publish "offline_update", :from_device_status, ["offline", :id], filter: &offline_filter/1
+  end
+
+  defp online_filter(inp) do
+    Ash.Changeset.get_argument_or_attribute(inp.changeset, :online) == true
+  end
+
+  defp offline_filter(inp) do
+    Ash.Changeset.get_argument_or_attribute(inp.changeset, :online) == false
   end
 
   postgres do

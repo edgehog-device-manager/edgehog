@@ -110,11 +110,27 @@ defmodule Edgehog.CapabilitiesTest do
         "io.edgehog.devicemanager.apps.DeploymentUpdate" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.apps.AvailableNetworks" => %InterfaceVersion{major: 0, minor: 1},
         "io.edgehog.devicemanager.apps.AvailableVolumes" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableDeviceMappings" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableDeviceRequests" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
         "io.edgehog.devicemanager.apps.CreateNetworkRequest" => %InterfaceVersion{
           major: 0,
           minor: 1
         },
         "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeviceRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest" => %InterfaceVersion{
           major: 0,
           minor: 1
         }
@@ -354,6 +370,108 @@ defmodule Edgehog.CapabilitiesTest do
       refute :file_transfer_stream in device_capabilities
       refute :file_transfer_storage in device_capabilities
       refute :file_transfer_read in device_capabilities
+    end
+
+    test "does not return container management capability when device request interfaces are missing" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.apps.AvailableContainers" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableDeployments" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableImages" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.CreateContainerRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeploymentRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateImageRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.DeploymentCommand" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentUpdate" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableNetworks" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableVolumes" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableDeviceMappings" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateNetworkRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      refute :container_management in device_capabilities
+    end
+
+    test "does not return container management capability when device mapping interfaces are missing" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.apps.AvailableContainers" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableDeployments" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableImages" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.CreateContainerRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeploymentRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateImageRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.DeploymentCommand" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentUpdate" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableNetworks" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableVolumes" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableDeviceRequests" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateNetworkRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeviceRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        }
+      }
+
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      refute :container_management in device_capabilities
     end
   end
 end

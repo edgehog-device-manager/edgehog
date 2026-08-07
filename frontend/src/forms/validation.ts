@@ -1052,6 +1052,32 @@ const deviceMappingsSchema = z.array(
   }),
 );
 
+const deviceRequestSchema = z
+  .object({
+    driver: z.string().optional(),
+    count: z
+      .number()
+      .int()
+      .optional()
+      .refine((value) => value === undefined || value >= -1, {
+        message: "Count must be -1 or a non-negative integer",
+      }),
+    deviceIds: z.array(z.string().trim().min(1)),
+    capabilities: z.array(z.string().trim().min(1)),
+    options: optionsSchema.optional(),
+  })
+  .refine(
+    (data) =>
+      data.count !== undefined ||
+      (data.deviceIds?.length ?? 0) > 0 ||
+      (data.capabilities?.length ?? 0) > 0,
+    {
+      message:
+        "At least one of Count, Device IDs, or Capabilities must be provided.",
+      path: ["count"],
+    },
+  );
+
 const containerSchema = z
   .object({
     name: z.string().min(1),
@@ -1081,6 +1107,7 @@ const containerSchema = z
     restartPolicy: nullableTrimString.optional(),
     env: envSchema.optional(),
     deviceMappings: deviceMappingsSchema.optional(),
+    deviceRequests: z.array(deviceRequestSchema).optional(),
   })
   .superRefine((container, ctx) => {
     const cpuPeriod = container.cpuPeriod;

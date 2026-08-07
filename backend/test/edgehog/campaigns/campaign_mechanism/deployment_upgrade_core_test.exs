@@ -28,7 +28,6 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
 
   alias Ash.Error.Invalid
   alias Astarte.Client.APIError
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
   alias Edgehog.Astarte.Device.DeploymentCommand
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
@@ -36,6 +35,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
   alias Phoenix.Socket.Broadcast
 
   setup do
@@ -174,10 +174,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
@@ -222,10 +220,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
       # First do the operation to link the deployment to the target
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 2, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 2, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       {:ok, target} = MechanismCore.do_operation(mechanism, target)
@@ -273,10 +269,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
       # First do the operation to link the deployment to the target
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       {:ok, target} = MechanismCore.do_operation(mechanism, target)
@@ -354,10 +348,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _client,
-                                                                             _device_id,
-                                                                             _data ->
-        :ok
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
       end)
 
       # Step 2: Execute upgrade operation

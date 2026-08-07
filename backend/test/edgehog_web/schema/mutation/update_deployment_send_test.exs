@@ -24,24 +24,14 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Astarte.Device.CreateContainerRequest
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Astarte.Device.CreateImageRequest
+  alias Edgehog.Containers.Deployment.Orchestrator
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do
       # we need to set the state of deployment in one of ready states so the action validation passes
       deployment = deployment_fixture(release_opts: [containers: 1], tenant: tenant)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _, _, _ ->
-        :ok
-      end)
-
-      expect(CreateContainerRequest, :send_create_container_request, fn _, _, _ ->
-        :ok
-      end)
-
-      expect(CreateImageRequest, :send_create_image_request, fn _, _, _ -> :ok end)
+      expect(Orchestrator, :conduct, fn _, _ -> {:ok, :mock_pid} end)
 
       result =
         [tenant: tenant, deployment: deployment]
@@ -49,7 +39,6 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
         |> extract_result!()
 
       assert AshGraphql.Resource.encode_relay_id(deployment) == result["id"]
-      assert result["state"] == "SENT"
     end
   end
 

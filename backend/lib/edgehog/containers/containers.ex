@@ -196,7 +196,7 @@ defmodule Edgehog.Containers do
       update Deployment, :start_deployment, :start
       update Deployment, :stop_deployment, :stop
       update Deployment, :delete_deployment, :delete
-      update Deployment, :send_deployment, :retry_deployment
+      update Deployment, :send_deployment, :send_deployment
 
       update Deployment, :upgrade_deployment, :upgrade_release do
         relay_id_translations input: [target: :release]
@@ -234,7 +234,6 @@ defmodule Edgehog.Containers do
       define :destroy_deployment, action: :destroy
       define :fetch_deployment, action: :read, get_by: [:id]
       define :delete_deployment, action: :destroy
-      define :deployment_update_resources_state, action: :maybe_run_ready_actions
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
       define :deployment_by_identity, action: :read, get_by_identity: :release_instance
       define :run_ready_actions, action: :run_ready_actions
@@ -329,6 +328,26 @@ defmodule Edgehog.Containers do
         action: :mark_as_errored,
         args: [:message]
     end
+
+    resource Edgehog.Containers.DeviceRequest
+
+    resource Edgehog.Containers.DeviceRequest.Deployment do
+      define :deploy_device_request,
+        action: :deploy,
+        args: [:device_request, :device]
+
+      define :destroy_device_request_deployment, action: :destroy
+
+      define :fetch_device_request_deployment,
+        action: :read,
+        get_by_identity: :device_request_instance
+
+      define :mark_device_request_deployment_as_sent, action: :mark_as_sent
+      define :mark_device_request_deployment_as_present, action: :mark_as_present
+      define :mark_device_request_deployment_as_not_present, action: :mark_as_not_present
+    end
+
+    resource Edgehog.Containers.ContainerDeploymentDeviceRequestDeployment
 
     resource Edgehog.Containers.ContainerDeploymentDeviceMappingDeployment
 

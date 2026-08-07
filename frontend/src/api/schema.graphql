@@ -1641,6 +1641,41 @@ input ContainerCreateWithNestedDeviceMappingsInput {
   pathOnHost: String!
 }
 
+input ContainerCreateWithNestedDeviceRequestsInput {
+  """
+  A list of capabilities; an OR list of AND lists of capabilities.
+
+  Note that if a driver is specified, the capabilities have no effect
+  on selecting a driver, as the driver name is used directly.
+
+  If no driver is specified, the capabilities are used to select a
+  driver with the required capabilities.
+  """
+  capabilities: [[String!]!]
+
+  """
+  Count for the device to request for the container.
+  Default value is -1.
+  """
+  count: Int
+
+  "IDs of the devices to request for the container."
+  deviceIds: [String!]
+
+  """
+  The name of the device driver to use for this request.
+  Note that if this is specified, the capabilities are ignored
+  when selecting a device driver. Default value is an empty string.
+  """
+  driver: String
+
+  """
+  Driver-specific options, specified as key/value pairs.
+  These options are passed directly to the driver.
+  """
+  options: JsonString
+}
+
 input ReleaseCreateContainersInput {
   id: ID
 }
@@ -1772,6 +1807,302 @@ type ContainerVolume {
   volumeId: ID!
 
   volume: Volume!
+}
+
+enum DeviceRequestDeploymentSortField {
+  ID
+  STATE
+  DEVICE_REQUEST_ID
+  IS_READY
+}
+
+":device_request_deployment connection"
+type DeviceRequestDeploymentConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_request_deployment edges"
+  edges: [DeviceRequestDeploymentEdge!]
+}
+
+":device_request_deployment edge"
+type DeviceRequestDeploymentEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_request_deployment node"
+  node: DeviceRequestDeployment!
+}
+
+input DeviceRequestDeploymentFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input DeviceRequestDeploymentFilterDeviceRequestId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input DeviceRequestDeploymentFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
+input DeviceRequestDeploymentFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input DeviceRequestDeploymentFilterInput {
+  and: [DeviceRequestDeploymentFilterInput!]
+  or: [DeviceRequestDeploymentFilterInput!]
+  not: [DeviceRequestDeploymentFilterInput!]
+  id: DeviceRequestDeploymentFilterId
+  state: DeviceRequestDeploymentFilterState
+  deviceRequestId: DeviceRequestDeploymentFilterDeviceRequestId
+  deviceRequest: DeviceRequestFilterInput
+  containerDeployments: ContainerDeploymentFilterInput
+  isReady: DeviceRequestDeploymentFilterIsReady
+}
+
+input DeviceRequestDeploymentSortInput {
+  order: SortOrder
+  field: DeviceRequestDeploymentSortField!
+}
+
+type DeviceRequestDeployment {
+  id: ID!
+  state: String
+  deviceRequestId: ID
+  deviceRequest: DeviceRequest
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
+  isReady: Boolean
+}
+
+enum DeviceRequestSortField {
+  ID
+  DRIVER
+  COUNT
+  OPTIONS
+  CONTAINER_ID
+}
+
+":device_request connection"
+type DeviceRequestConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":device_request edges"
+  edges: [DeviceRequestEdge!]
+}
+
+":device_request edge"
+type DeviceRequestEdge {
+  "Cursor"
+  cursor: String!
+
+  ":device_request node"
+  node: DeviceRequest!
+}
+
+input DeviceRequestFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input DeviceRequestFilterOptions {
+  isNil: Boolean
+  eq: JsonString
+  notEq: JsonString
+  in: [JsonString]
+  lessThan: JsonString
+  greaterThan: JsonString
+  lessThanOrEqual: JsonString
+  greaterThanOrEqual: JsonString
+  isDistinctFrom: JsonString
+  isNotDistinctFrom: JsonString
+}
+
+input DeviceRequestFilterCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input DeviceRequestFilterDriver {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input DeviceRequestFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input DeviceRequestFilterInput {
+  and: [DeviceRequestFilterInput!]
+
+  or: [DeviceRequestFilterInput!]
+
+  not: [DeviceRequestFilterInput!]
+
+  id: DeviceRequestFilterId
+
+  """
+  The name of the device driver to use for this request.
+  Note that if this is specified, the capabilities are ignored
+  when selecting a device driver. Default value is an empty string.
+  """
+  driver: DeviceRequestFilterDriver
+
+  """
+  Count for the device to request for the container.
+  Default value is -1.
+  """
+  count: DeviceRequestFilterCount
+
+  """
+  Driver-specific options, specified as key/value pairs.
+  These options are passed directly to the driver.
+  """
+  options: DeviceRequestFilterOptions
+
+  containerId: DeviceRequestFilterContainerId
+
+  container: ContainerFilterInput
+}
+
+input DeviceRequestSortInput {
+  order: SortOrder
+  field: DeviceRequestSortField!
+}
+
+type DeviceRequest {
+  id: ID!
+
+  """
+  The name of the device driver to use for this request.
+  Note that if this is specified, the capabilities are ignored
+  when selecting a device driver. Default value is an empty string.
+  """
+  driver: String
+
+  """
+  Count for the device to request for the container.
+  Default value is -1.
+  """
+  count: Int
+
+  "IDs of the devices to request for the container."
+  deviceIds: [String!]
+
+  """
+  Driver-specific options, specified as key/value pairs.
+  These options are passed directly to the driver.
+  """
+  options: JsonString
+
+  containerId: ID
+
+  container: Container
+
+  """
+  A list of capabilities; an OR list of AND lists of capabilities.
+
+  Note that if a driver is specified, the capabilities have no effect
+  on selecting a driver, as the driver name is used directly.
+
+  If no driver is specified, the capabilities are used to select a
+  driver with the required capabilities.
+  """
+  capabilities: [[String!]!]
 }
 
 enum DeviceMappingDeploymentSortField {
@@ -3667,6 +3998,7 @@ input ContainerDeploymentFilterInput {
   networkDeployments: NetworkDeploymentFilterInput
   volumeDeployments: VolumeDeploymentFilterInput
   deviceMappingDeployments: DeviceMappingDeploymentFilterInput
+  deviceRequestDeployments: DeviceRequestDeploymentFilterInput
 }
 
 input ContainerDeploymentSortInput {
@@ -3740,6 +4072,25 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceMappingDeploymentConnection!
+  deviceRequestDeployments(
+    "How to sort the records in the response"
+    sort: [DeviceRequestDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceRequestDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceRequestDeploymentConnection!
   isReady: Boolean
 }
 
@@ -3799,6 +4150,7 @@ input CreateContainerInput {
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
   deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
+  deviceRequests: [ContainerCreateWithNestedDeviceRequestsInput!]
 }
 
 enum ContainerSortField {
@@ -4110,6 +4462,7 @@ input ContainerFilterInput {
   devices: DeviceFilterInput
   containerVolumes: ContainerVolumeFilterInput
   deviceMappings: DeviceMappingFilterInput
+  deviceRequests: DeviceRequestFilterInput
 }
 
 input ContainerSortInput {
@@ -4239,6 +4592,25 @@ type Container implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceMappingConnection!
+  deviceRequests(
+    "How to sort the records in the response"
+    sort: [DeviceRequestSortInput]
+
+    "A filter to limit the results"
+    filter: DeviceRequestFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeviceRequestConnection!
 }
 
 type application_result {
@@ -5574,6 +5946,8 @@ type Device implements Node {
   availableContainers: [ContainerStatus!]
 
   availableDeviceMappings: [DeviceMappingStatus!]
+
+  availableDeviceRequests: [DeviceRequestStatus!]
 
   batteryStatus: [BatterySlot!]
 
@@ -9801,5 +10175,14 @@ type DeviceMappingStatus {
   id: String
 
   "Whether the device referenced in the mapping is present or not."
+  present: Boolean
+}
+
+"Describe the available device requests on the device."
+type DeviceRequestStatus {
+  "The device request id."
+  id: String
+
+  "Whether the device referenced in the request is present or not."
   present: Boolean
 }

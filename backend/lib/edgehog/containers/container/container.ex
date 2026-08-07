@@ -52,7 +52,8 @@ defmodule Edgehog.Containers.Container do
                                devices: :relay,
                                releases: :relay,
                                container_volumes: :relay,
-                               device_mappings: :relay
+                               device_mappings: :relay,
+                               device_requests: :relay
   end
 
   actions do
@@ -119,6 +120,7 @@ defmodule Edgehog.Containers.Container do
       argument :networks, {:array, :map}
       argument :volumes, {:array, :map}
       argument :device_mappings, {:array, :map}
+      argument :device_requests, {:array, :map}
 
       change manage_relationship(:volumes,
                on_no_match: :error,
@@ -138,6 +140,10 @@ defmodule Edgehog.Containers.Container do
              )
 
       change manage_relationship(:device_mappings,
+               type: :create
+             )
+
+      change manage_relationship(:device_requests,
                type: :create
              )
     end
@@ -174,6 +180,7 @@ defmodule Edgehog.Containers.Container do
       argument :volumes, {:array, :map}
       argument :networks, {:array, :uuid}
       argument :device_mappings, {:array, :uuid}
+      argument :device_requests, {:array, :uuid}
 
       change manage_relationship(:volumes,
                on_no_match: {:create, :create, :create, [:target]},
@@ -182,6 +189,7 @@ defmodule Edgehog.Containers.Container do
 
       change manage_relationship(:networks, type: :append)
       change manage_relationship(:device_mappings, type: :append)
+      change manage_relationship(:device_requests, type: :append)
     end
 
     read :filter_by_image do
@@ -376,6 +384,10 @@ defmodule Edgehog.Containers.Container do
     end
 
     has_many :device_mappings, Edgehog.Containers.DeviceMapping do
+      public? true
+    end
+
+    has_many :device_requests, Edgehog.Containers.DeviceRequest do
       public? true
     end
   end

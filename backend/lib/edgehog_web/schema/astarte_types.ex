@@ -226,4 +226,13 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "Whether the device referenced in the mapping is present or not."
     field :present, :boolean
   end
+
+  @desc "Describe the available device requests on the device."
+  object :device_request_status do
+    @desc "The device request id."
+    field :id, :string
+
+    @desc "Whether the device referenced in the request is present or not."
+    field :present, :boolean
+  end
 end

@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Deployment.Calculations
   alias Edgehog.Containers.Deployment.Changes
   alias Edgehog.Containers.Deployment.Types.DeploymentContext
@@ -86,7 +87,7 @@ defmodule Edgehog.Containers.Deployment do
 
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.Relate
-      change Changes.SendRequest
+      change Changes.SendDeploymentToDevice
     end
 
     create :just_create do
@@ -188,23 +189,10 @@ defmodule Edgehog.Containers.Deployment do
       Deploys the necessary resources and sends the deployment request.
       """
 
-      require_atomic? false
+      transaction? false
 
       validate {Validations.IsReady, [readiness: false]}
-      change Changes.SendDeploymentToDevice
-    end
-
-    update :retry_deployment do
-      description """
-      Sends the deployment to the device.
-      Deploys the necessary resources and sends the deployment request.
-      """
-
-      require_atomic? false
-
-      validate {Validations.IsReady, [readiness: false]}
-      change Changes.SendDeploymentToDevice
-      change Changes.Reconcile
+      manual Deployment.ManualActions.StartSupervisor
     end
 
     update :upgrade_release do
@@ -228,8 +216,6 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_sent do
       change set_attribute(:state, :sent)
-
-      require_atomic? false
     end
 
     update :mark_as_started do
@@ -250,8 +236,6 @@ defmodule Edgehog.Containers.Deployment do
 
     update :mark_as_timed_out do
       change set_attribute(:timed_out, true)
-
-      require_atomic? false
     end
 
     update :append_event do
@@ -297,12 +281,6 @@ defmodule Edgehog.Containers.Deployment do
       end
 
       change Changes.AppendEvent
-    end
-
-    update :maybe_run_ready_actions do
-      change Changes.MaybeHandleReadiness
-
-      require_atomic? false
     end
 
     read :filter_by_release do
@@ -415,12 +393,12 @@ defmodule Edgehog.Containers.Deployment do
     publish :deploy, [[:id, "*"]]
     publish :just_create, [[:id, "*"]]
 
-    publish :mark_as_sent, [[:id, "*"]]
-    publish :mark_as_started, [[:id, "*"]]
-    publish :mark_as_stopped, [[:id, "*"]]
-    publish :mark_as_timed_out, [[:id, "*"]]
-    publish :append_event, [[:id, "*"]]
-    publish :maybe_run_ready_actions, [[:id, "*"]]
+    publish :set_state, [[:state, nil], [:id, "*"]]
+    publish :mark_as_sent, [[:state, nil], [:id, "*"]]
+    publish :mark_as_started, [[:state, nil], [:id, "*"]]
+    publish :mark_as_stopped, [[:state, nil], [:id, "*"]]
+    publish :mark_as_timed_out, [["timeout", nil], [:id, "*"]]
+    publish :append_event, [["events", nil], [:id, "*"]]
     publish :destroy_and_gc, [[:id, "*"]]
   end
 

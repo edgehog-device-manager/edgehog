@@ -362,6 +362,84 @@ const fieldExplanations = defineMessages({
     defaultMessage:
       '[("pathOnHost":"/dev/sda1","pathInContainer":"/dev/storage","cGroupPermissions":"mrw")]',
   },
+  driverTitle: {
+    id: "forms.fieldExplanation.deviceRequest.driver.title",
+    defaultMessage: "Driver",
+  },
+  driverDescription: {
+    id: "forms.fieldExplanation.deviceRequest.driver.description",
+    defaultMessage:
+      "The name of the Docker runtime driver plugin installed on the host system (for example 'nvidia' or 'cdi'). Leave empty to use the default Docker runtime if supported.",
+  },
+  driverExample: {
+    id: "forms.fieldExplanation.deviceRequest.driver.example",
+    defaultMessage: "nvidia",
+  },
+  countTitle: {
+    id: "forms.fieldExplanation.deviceRequest.count.title",
+    defaultMessage: "Count",
+  },
+  countDescription: {
+    id: "forms.fieldExplanation.deviceRequest.count.description",
+    defaultMessage:
+      "The number of matching devices to assign to the container. Set to -1 to request all matching devices, or specify a positive number to let Docker automatically choose that many devices.",
+  },
+  countExample: {
+    id: "forms.fieldExplanation.deviceRequest.count.example",
+    defaultMessage: "-1",
+  },
+  deviceIDsTitle: {
+    id: "forms.fieldExplanation.deviceRequest.deviceIds.title",
+    defaultMessage: "Device IDs",
+  },
+  deviceIDsDescription: {
+    id: "forms.fieldExplanation.deviceRequest.deviceIds.description",
+    defaultMessage:
+      "Request specific hardware devices instead of allowing Docker to automatically select them. When Device IDs are specified, Count should usually be omitted or set to 0.",
+  },
+  deviceIDsExample: {
+    id: "forms.fieldExplanation.deviceRequest.deviceIds.example",
+    defaultMessage: '["0", "2"]',
+  },
+  capabilitiesTitle: {
+    id: "forms.fieldExplanation.deviceRequest.capabilities.title",
+    defaultMessage: "Capabilities",
+  },
+  capabilitiesDescription: {
+    id: "forms.fieldExplanation.deviceRequest.capabilities.description",
+    defaultMessage:
+      "Each row represents an OR condition. Comma-separated values within a row represent AND conditions. For example, 'gpu,compute' requires both capabilities, while separate rows such as 'gpu' and 'video' allow either capability.",
+  },
+  capabilitiesExample: {
+    id: "forms.fieldExplanation.deviceRequest.capabilities.example",
+    defaultMessage: "gpu,compute\nvideo",
+  },
+  driverOptionsTitle: {
+    id: "forms.fieldExplanation.driverOptions.title",
+    defaultMessage: "Driver Options",
+  },
+  driverOptionsDescription: {
+    id: "forms.fieldExplanation.driverOptions.description",
+    defaultMessage:
+      "A key-value map passed directly to the underlying device driver plugin for runtime-specific constraints (such as minimum driver versions or environmental bindings)",
+  },
+  driverOptionsExample: {
+    id: "forms.fieldExplanation.driverOptions.example",
+    defaultMessage: '[("require.cuda": "12.2")]',
+  },
+  deviceRequestsTitle: {
+    id: "forms.fieldExplanation.deviceRequest.title",
+    defaultMessage: "Device Requests",
+  },
+  deviceRequestsDescription: {
+    id: "forms.fieldExplanation.deviceRequest.description",
+    defaultMessage:
+      "Configure hardware device requirements for your container. Device requests allow you to specify a driver, required device count, device IDs, and capabilities.",
+  },
+  deviceRequestsExample: {
+    id: "forms.fieldExplanation.deviceRequest.example",
+    defaultMessage: "GPU device request: driver=nvidia, count=1",
+  },
 });
 
 export { fieldExplanations };

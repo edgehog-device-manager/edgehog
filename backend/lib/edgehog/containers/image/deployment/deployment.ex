@@ -22,9 +22,9 @@ defmodule Edgehog.Containers.Image.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
@@ -80,17 +80,11 @@ defmodule Edgehog.Containers.Image.Deployment do
     end
 
     update :mark_as_unpulled do
-      require_atomic? false
-
       change set_attribute(:state, :unpulled)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_pulled do
-      require_atomic? false
-
       change set_attribute(:state, :pulled)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -104,9 +98,6 @@ defmodule Edgehog.Containers.Image.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do
@@ -154,6 +145,17 @@ defmodule Edgehog.Containers.Image.Deployment do
 
   identities do
     identity :image_instance, [:image_id, :device_id]
+  end
+
+  pub_sub do
+    prefix "image_deployments"
+    module EdgehogWeb.Endpoint
+
+    publish :mark_as_sent, [[:id, "*"]]
+    publish :mark_as_unpulled, [[:id, "*"]]
+    publish :mark_as_pulled, [[:id, "*"]]
+    publish :mark_as_errored, [[:id, "*"]]
+    publish :set_state, [[:id, "*"]]
   end
 
   postgres do

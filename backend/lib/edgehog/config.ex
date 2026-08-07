@@ -131,12 +131,58 @@ defmodule Edgehog.Config do
     type: :binary
 
   @envdoc """
-  Edgehog tenant reconciliation timeout (seconds).
+  Edgehog tenant reconciliation timeout (milliseconds).
 
   This environment variable sets the default reconciliation timeout for all tenants. Set it to 0 to set manual reconciliation only.
   """
   app_env :tenant_reconciler_timeout, :edgehog, :tenant_reconciler_timeout,
     os_env: "EDGEHOG_TENANT_RECONCILER_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(minute: 10)
+
+  @envdoc """
+  Edgehog message min timeout (milliseconds).
+
+  This environment variable sets the standard timeout to handle communication between a device and edgehog.
+  Defaults to 5 minutes.
+  """
+  app_env :message_min_timeout, :edgehog, :message_min_timeout,
+    os_env: "EDGEHOG_MESSAGE_MIN_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(minute: 5)
+
+  @envdoc """
+  Edgehog message max timeout (milliseconds).
+
+  This environment variable sets the standard timeout to handle communication between a device and edgehog.
+  Defaults to 2 days.
+  """
+  app_env :message_max_timeout, :edgehog, :message_max_timeout,
+    os_env: "EDGEHOG_MESSAGE_MAX_TIMEOUT",
+    type: :non_neg_integer,
+    default: to_timeout(day: 2)
+
+  @envdoc """
+  Edgehog max retries.
+
+  This environment variable sets the maximum retires provisioners will use as a fallback if no more specific max retires variables are set.
+  Defaults to 100.
+  """
+  app_env :max_retries, :edgehog, :max_retries,
+    os_env: "EDGEHOG_PROVISIONING_MAX_RETRIES",
+    type: :non_neg_integer,
+    default: 100
+
+  @envdoc """
+  Edgehog deployment provisioning timeout (milliseconds).
+
+  This environment variable sets the deadline a single provisioner has to
+  complete its provisioning. When it is hit the provisioner gives up and
+  broadcasts a failure, which the deployment orchestrator reacts to by marking
+  the deployment as timed out and broadcasting a failure. Defaults to 10 minutes.
+  """
+  app_env :deployment_provisioning_timeout, :edgehog, :deployment_provisioning_timeout,
+    os_env: "EDGEHOG_DEPLOYMENT_PROVISIONING_TIMEOUT",
     type: :non_neg_integer,
     default: to_timeout(minute: 10)
 

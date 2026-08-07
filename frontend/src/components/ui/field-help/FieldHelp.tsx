@@ -51,7 +51,13 @@ type FieldKey =
   | "capAdd"
   | "capDrop"
   | "volumeDriver"
-  | "deviceMappings";
+  | "deviceMappings"
+  | "driver"
+  | "count"
+  | "deviceIDs"
+  | "capabilities"
+  | "driverOptions"
+  | "deviceRequests";
 
 function getFieldExplanation(field: FieldKey) {
   return {

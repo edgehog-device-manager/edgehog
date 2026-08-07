@@ -28,6 +28,7 @@ import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/De
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
 import type { DeploymentDetails_containerDeployments$key } from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
 import type { DeploymentDetails_deviceMappingDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
+import type { DeploymentDetails_deviceRequestDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceRequestDeployments.graphql";
 import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
@@ -93,6 +94,7 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
               reference
             }
           }
+          ...DeploymentDetails_deviceRequestDeployments
           ...DeploymentDetails_deviceMappingDeployments
           ...DeploymentDetails_networkDeployments
           ...DeploymentDetails_volumeDeployments
@@ -155,6 +157,29 @@ const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
             pathOnHost
             pathInContainer
             cgroupPermissions
+          }
+        }
+      }
+    }
+  }
+`;
+
+const DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT = graphql`
+  fragment DeploymentDetails_deviceRequestDeployments on ContainerDeployment {
+    id
+    deviceRequestDeployments(first: $first, after: $after) {
+      edges {
+        node {
+          id
+          state
+          isReady
+          deviceRequest {
+            id
+            driver
+            count
+            deviceIds
+            capabilities
+            options
           }
         }
       }
@@ -227,7 +252,8 @@ interface ContainerDeploymentItemProps {
   index: number;
   containerFragmentKey: DeploymentDetails_networkDeployments$key &
     DeploymentDetails_volumeDeployments$key &
-    DeploymentDetails_deviceMappingDeployments$key;
+    DeploymentDetails_deviceMappingDeployments$key &
+    DeploymentDetails_deviceRequestDeployments$key;
   imageDeployment: any;
   containerState: string;
   isReady: boolean | null;
@@ -256,6 +282,12 @@ const ContainerDeploymentItem = ({
   const deviceMappingData =
     useFragment<DeploymentDetails_deviceMappingDeployments$key>(
       DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT,
+      containerFragmentKey,
+    );
+
+  const deviceRequestData =
+    useFragment<DeploymentDetails_deviceRequestDeployments$key>(
+      DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT,
       containerFragmentKey,
     );
 
@@ -316,6 +348,42 @@ const ContainerDeploymentItem = ({
       },
     );
 
+    const formatDeviceRequest = (request: {
+      driver?: string | null;
+      count?: number | null;
+      deviceIds?: readonly string[] | null;
+    }) => {
+      const driver = request.driver || "Default runtime";
+
+      if (request.deviceIds?.length) {
+        return `${driver} → Device IDs: ${request.deviceIds.join(", ")}`;
+      }
+
+      if (request.count === -1) {
+        return `${driver} → All devices`;
+      }
+
+      return `${driver} → ${request.count ?? 0} ${
+        request.count === 1 ? "device" : "devices"
+      }`;
+    };
+
+    const deviceRequestsSubTree = buildSubTree(
+      prefix,
+      "device-request",
+      deviceRequestData?.deviceRequestDeployments?.edges?.map((e) => e.node) ??
+        [],
+      (d) => formatDeviceRequest(d.deviceRequest),
+      {
+        title: intl.formatMessage({
+          id: "components.apps.deployments.deployment-details.DeploymentDetails.deviceRequests",
+          defaultMessage: "Device Requests",
+        }),
+        empty,
+        unnamed,
+      },
+    );
+
     const imageTreeNode: TreeNode = {
       id: `${prefix}-image-${imageDeployment?.image?.id}`,
       name:
@@ -345,6 +413,7 @@ const ContainerDeploymentItem = ({
         isReady,
         children: [
           imageTreeNode,
+          deviceRequestsSubTree,
           deviceMappingsSubTree,
           volumeSubTree,
           networkSubTree,

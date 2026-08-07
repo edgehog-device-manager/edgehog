@@ -102,6 +102,26 @@ defmodule Edgehog.ContainersFixtures do
   """
   def unique_device_mapping_path_in_container, do: "/dev/sda#{System.unique_integer([:positive])}"
 
+  def unique_device_request_driver, do: "driver-#{System.unique_integer([:positive])}"
+
+  def unique_device_request_count, do: System.unique_integer([:positive])
+
+  def unique_device_request_device_ids, do: ["device-#{System.unique_integer([:positive])}"]
+
+  def unique_device_request_capabilities do
+    [
+      ["wifi", "bluetooth"],
+      ["gpu", "compute"]
+    ]
+  end
+
+  def unique_device_request_options do
+    %{
+      key: "key-#{System.unique_integer([:positive])}",
+      value: "value-#{System.unique_integer([:positive])}"
+    }
+  end
+
   @doc """
   Generate a %ImageCredentials{}.
   """
@@ -141,6 +161,28 @@ defmodule Edgehog.ContainersFixtures do
       tenant: tenant
     )
     |> Ash.create!()
+  end
+
+  def device_request_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    params =
+      Enum.into(opts, %{
+        driver: unique_device_request_driver(),
+        count: unique_device_request_count(),
+        device_ids: unique_device_request_device_ids(),
+        capabilities: unique_device_request_capabilities(),
+        options: unique_device_request_options()
+      })
+
+    Edgehog.Containers.DeviceRequest
+    |> Ash.Changeset.for_create(
+      :create,
+      params,
+      tenant: tenant
+    )
+    |> Ash.create!()
+    |> Ash.load!(:capabilities)
   end
 
   def network_fixture(opts \\ []) do
@@ -212,6 +254,7 @@ defmodule Edgehog.ContainersFixtures do
 
     {networks, opts} = Keyword.pop(opts, :networks, [])
     {device_mappings, opts} = Keyword.pop(opts, :device_mappings, [])
+    {device_requests, opts} = Keyword.pop(opts, :device_requests, [])
 
     {name, opts} =
       Keyword.pop_lazy(opts, :name, fn ->
@@ -224,7 +267,8 @@ defmodule Edgehog.ContainersFixtures do
         image_id: image_id,
         volumes: volumes,
         networks: networks,
-        device_mappings: device_mappings
+        device_mappings: device_mappings,
+        device_requests: device_requests
       })
 
     Container
@@ -349,6 +393,55 @@ defmodule Edgehog.ContainersFixtures do
     Deployment
     |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!(tenant: tenant)
+  end
+
+  @doc """
+  Generate a %Deployment{} in a ready state.
+
+  Sets the deployment and all of its underlying container deployments (and
+  their sub-deployments) to ready states, so the deployment `is_ready`.
+  """
+  def make_deployment_ready!(deployment, tenant) do
+    deployment =
+      Ash.load!(
+        deployment,
+        [
+          container_deployments: [
+            :image_deployment,
+            :volume_deployments,
+            :network_deployments,
+            :device_mapping_deployments,
+            :device_request_deployments
+          ]
+        ],
+        tenant: tenant
+      )
+
+    Enum.each(deployment.container_deployments, fn cd ->
+      Ash.update!(cd.image_deployment, %{state: :unpulled}, action: :set_state, tenant: tenant)
+      Ash.update!(cd, %{state: :stopped}, action: :set_state, tenant: tenant)
+
+      Ash.bulk_update!(cd.volume_deployments, :set_state, %{state: :available}, tenant: tenant)
+      Ash.bulk_update!(cd.network_deployments, :set_state, %{state: :available}, tenant: tenant)
+
+      Ash.bulk_update!(
+        cd.device_mapping_deployments,
+        :set_state,
+        %{state: :present},
+        tenant: tenant
+      )
+
+      Ash.bulk_update!(
+        cd.device_request_deployments,
+        :mark_as_present,
+        %{},
+        tenant: tenant
+      )
+    end)
+
+    {:ok, deployment} = Edgehog.Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
+
+    deployment
   end
 
   @doc """
@@ -521,5 +614,41 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Ash.create!(Edgehog.Containers.DeviceMapping.Deployment, params, tenant: tenant)
+  end
+
+  @doc """
+  Generate a %DeviceRequest.Deployment{}
+  """
+  def device_request_deployment_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {realm_id, opts} =
+      case opts[:device_id] do
+        nil ->
+          Keyword.pop_lazy(opts, :realm_id, fn ->
+            AstarteFixtures.realm_fixture(tenant: tenant).id
+          end)
+
+        _ ->
+          {nil, Keyword.delete(opts, :realm_id)}
+      end
+
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        Edgehog.DevicesFixtures.device_fixture(realm_id: realm_id, tenant: tenant).id
+      end)
+
+    {device_request_id, opts} =
+      Keyword.pop_lazy(opts, :device_request_id, fn ->
+        device_request_fixture(tenant: tenant).id
+      end)
+
+    params =
+      Enum.into(opts, %{
+        device_id: device_id,
+        device_request_id: device_request_id
+      })
+
+    Ash.create!(Edgehog.Containers.DeviceRequest.Deployment, params, tenant: tenant)
   end
 end

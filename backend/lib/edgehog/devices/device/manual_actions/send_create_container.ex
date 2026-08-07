@@ -37,6 +37,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
              :image,
              :networks,
              :device_mappings,
+             device_requests: [:capabilities],
              container_volumes: [:binding]
            ]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
@@ -65,7 +66,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         capAdd: container.cap_add,
         capDrop: container.cap_drop,
         deviceMappingIds: Enum.map(container.device_mappings, & &1.id),
-        deviceRequestIds: [],
         cpuPeriod: normalize(container.cpu_period),
         cpuQuota: normalize(container.cpu_quota),
         cpuRealtimePeriod: normalize(container.cpu_realtime_period),
@@ -78,7 +78,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         storageOpt: container.storage_opt,
         readOnlyRootfs: container.read_only_rootfs,
         tmpfs: container.tmpfs,
-        privileged: container.privileged
+        privileged: container.privileged,
+        deviceRequestIds: Enum.map(container.device_requests, & &1.id)
       }
 
       with :ok <-

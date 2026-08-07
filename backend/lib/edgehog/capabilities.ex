@@ -93,6 +93,16 @@ defmodule Edgehog.Capabilities do
         minor: 1
       },
       %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.apps.CreateContainerRequest",
         major: 0,
         minor: 1
@@ -114,6 +124,16 @@ defmodule Edgehog.Capabilities do
       },
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.apps.CreateVolumeRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest",
+        major: 0,
+        minor: 1
+      },
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.CreateDeviceRequest",
         major: 0,
         minor: 1
       },

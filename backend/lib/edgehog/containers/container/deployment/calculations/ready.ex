@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -39,7 +39,8 @@ defmodule Edgehog.Containers.Container.Deployment.Calculations.Ready do
       image_deployment: :is_ready,
       volume_deployments: :is_ready,
       network_deployments: :is_ready,
-      device_mapping_deployments: :is_ready
+      device_mapping_deployments: :is_ready,
+      device_request_deployments: :is_ready
     ]
 
   @impl Calculation
@@ -59,10 +60,14 @@ defmodule Edgehog.Containers.Container.Deployment.Calculations.Ready do
     device_mapping_deployments? =
       deployment.device_mapping_deployments |> Enum.map(& &1.is_ready) |> Enum.all?()
 
+    device_request_deployments? =
+      deployment.device_request_deployments |> Enum.map(& &1.is_ready) |> Enum.all?()
+
     self and
       image_deployment? and
       volume_deployments? and
       network_deployments? and
-      device_mapping_deployments?
+      device_mapping_deployments? and
+      device_request_deployments?
   end
 end
