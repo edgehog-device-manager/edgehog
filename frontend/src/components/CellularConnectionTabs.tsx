@@ -117,6 +117,28 @@ const CELLULAR_CONNECTION_TABS_FRAGMENT = graphql`
   }
 `;
 
+const getRegistrationStatusMessage = (
+  status: ModemRegistrationStatus,
+  intl: ReturnType<typeof useIntl>,
+): { value: string; isUnknown: boolean } => {
+  const message = registrationStatusMessages[status];
+  if (!message) {
+    return { value: status, isUnknown: true };
+  }
+  return { value: intl.formatMessage(message), isUnknown: false };
+};
+
+const getTechnologyMessage = (
+  technology: ModemTechnology,
+  intl: ReturnType<typeof useIntl>,
+): { value: string; isUnknown: boolean } => {
+  const message = technologyMessages[technology];
+  if (!message) {
+    return { value: technology, isUnknown: true };
+  }
+  return { value: intl.formatMessage(message), isUnknown: false };
+};
+
 type Modems = NonNullable<
   CellularConnectionTabs_cellularConnection$data["cellularConnection"]
 >;
@@ -191,42 +213,72 @@ const ModemTab = ({ modem }: { modem: Modem }) => {
             <Form.Control type="text" value={modem.carrier} readOnly />
           </FormRow>
         )}
-        {modem.registrationStatus != null && (
-          <FormRow
-            id={`modem-registrationStatus-${slot}`}
-            label={
-              <FormattedMessage
-                id="components.CellularConnectionTabs.Modem.RegistrationStatus"
-                defaultMessage="Registration Status"
-              />
-            }
-          >
-            <Form.Control
-              type="text"
-              value={intl.formatMessage(
-                registrationStatusMessages[modem.registrationStatus],
-              )}
-              readOnly
-            />
-          </FormRow>
-        )}
-        {modem.technology != null && (
-          <FormRow
-            id={`modem-technology-${slot}`}
-            label={
-              <FormattedMessage
-                id="components.CellularConnectionTabs.Modem.technology"
-                defaultMessage="Technology"
-              />
-            }
-          >
-            <Form.Control
-              type="text"
-              value={intl.formatMessage(technologyMessages[modem.technology])}
-              readOnly
-            />
-          </FormRow>
-        )}
+        {modem.registrationStatus != null &&
+          (() => {
+            const { value, isUnknown } = getRegistrationStatusMessage(
+              modem.registrationStatus,
+              intl,
+            );
+            return (
+              <FormRow
+                id={`modem-registrationStatus-${slot}`}
+                label={
+                  <FormattedMessage
+                    id="components.CellularConnectionTabs.Modem.RegistrationStatus"
+                    defaultMessage="Registration Status"
+                  />
+                }
+              >
+                <Form.Control
+                  type="text"
+                  value={value}
+                  readOnly
+                  isInvalid={isUnknown}
+                />
+                {isUnknown && (
+                  <Form.Control.Feedback type="invalid">
+                    <FormattedMessage
+                      id="components.CellularConnectionTabs.unknownValue"
+                      defaultMessage="Unrecognized value received from the device."
+                    />
+                  </Form.Control.Feedback>
+                )}
+              </FormRow>
+            );
+          })()}
+        {modem.technology != null &&
+          (() => {
+            const { value, isUnknown } = getTechnologyMessage(
+              modem.technology,
+              intl,
+            );
+            return (
+              <FormRow
+                id={`modem-technology-${slot}`}
+                label={
+                  <FormattedMessage
+                    id="components.CellularConnectionTabs.Modem.technology"
+                    defaultMessage="Technology"
+                  />
+                }
+              >
+                <Form.Control
+                  type="text"
+                  value={value}
+                  readOnly
+                  isInvalid={isUnknown}
+                />
+                {isUnknown && (
+                  <Form.Control.Feedback type="invalid">
+                    <FormattedMessage
+                      id="components.CellularConnectionTabs.unknownValue"
+                      defaultMessage="Unrecognized value received from the device."
+                    />
+                  </Form.Control.Feedback>
+                )}
+              </FormRow>
+            );
+          })()}
         {modem.rssi != null && (
           <FormRow
             id={`modem-rssi-${slot}`}
