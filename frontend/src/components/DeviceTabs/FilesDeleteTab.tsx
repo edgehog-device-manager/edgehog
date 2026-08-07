@@ -38,10 +38,10 @@ import type { FilesDeleteTab_deviceFiles_PaginationQuery } from "@/api/__generat
 import type { FilesDeleteTab_fileDeleteRequest_Subscription } from "@/api/__generated__/FilesDeleteTab_fileDeleteRequest_Subscription.graphql";
 import type { FilesDeleteTab_fileManagement$key } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
 
-import Alert from "@/components/Alert";
+import Alert from "@/components/ui/alert/Alert";
 import FileDeleteRequestsTable from "@/components/FileDeleteRequestsTable";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import ManualFileDeleteRequestForm, {
   type ManualFileDeleteRequestFormValues,
   type StorageSourceOption,

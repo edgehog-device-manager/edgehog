@@ -30,15 +30,15 @@ import type {
   DeployedApplicationsTable_deployedApplications$data,
 } from "@/api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 import { Route, useNavigate } from "@/Navigation";
-import Button from "@/components/Button";
+import Button from "@/components/ui/button/Button";
 import {
   DeploymentState,
   parseDeploymentState,
   stateMessages,
 } from "@/components/DeploymentState";
-import CollapseItem from "./CollapseItem";
+import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
 
 // We use graphql fields below in columns configuration
 

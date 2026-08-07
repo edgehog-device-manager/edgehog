@@ -32,12 +32,15 @@ import type {
 
 import CollapseItem, {
   useCollapsibleSections,
-} from "@/components/CollapseItem";
+} from "@/components/ui/collapse-item/CollapseItem";
 import DeviceMappingsFormInput from "@/components/DeviceMappingsFormInput";
-import Form from "@/components/Form";
-import { FormRow as BaseFormRow, FormRowProps } from "@/components/FormRow";
-import MonacoJsonEditor from "@/components/MonacoJsonEditor";
-import MultiSelect from "@/components/MultiSelect";
+import Form from "@/components/ui/form/Form";
+import {
+  FormRow as BaseFormRow,
+  FormRowProps,
+} from "@/components/ui/form-row/FormRow";
+import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
+import MultiSelect from "@/components/ui/multi-select/MultiSelect";
 import StringArrayFormInput from "@/components/StringArrayFormInput";
 import "@/components/ContainerDetails.scss";
 import { restartPolicyOptions } from "@/forms/CreateContainer";

@@ -20,7 +20,7 @@
 
 import { useIntl } from "react-intl";
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 interface Props {
   connected: boolean;

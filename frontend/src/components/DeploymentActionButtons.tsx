@@ -20,10 +20,10 @@
 
 import { useIntl } from "react-intl";
 
-import Button from "@/components/Button";
+import Button from "@/components/ui/button/Button";
 import "@/components/DeploymentActionButtons.scss";
 import type { DeploymentState } from "@/components/DeploymentState";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 type DeploymentActionButtonsProps = {
   state: DeploymentState;

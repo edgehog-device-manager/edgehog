@@ -26,7 +26,7 @@ import type {
   ContainersOverview_ContainerEdgeFragment$key,
 } from "@/api/__generated__/ContainersOverview_ContainerEdgeFragment.graphql";
 
-import Button from "@/components/Button";
+import Button from "@/components/ui/button/Button";
 import ContainerDetails from "@/components/ContainerDetails";
 import "@/components/ContainersOverview.scss";
 import { Card } from "react-bootstrap";

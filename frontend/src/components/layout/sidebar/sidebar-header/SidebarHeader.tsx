@@ -21,7 +21,7 @@
 import Button from "react-bootstrap/Button";
 import Image from "react-bootstrap/Image";
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 import assets from "@/assets";
 
 type SidebarHeaderProps = {

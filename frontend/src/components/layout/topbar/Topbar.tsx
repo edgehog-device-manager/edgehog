@@ -21,8 +21,8 @@
 import Image from "react-bootstrap/Image";
 
 import assets from "@/assets";
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/button/Button";
+import Icon from "@/components/ui/icon/Icon";
 import "@/components/layout/topbar/Topbar.scss";
 
 interface TopbarProps {

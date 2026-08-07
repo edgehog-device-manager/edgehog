@@ -23,7 +23,7 @@ import { FormattedMessage } from "react-intl";
 import type { FilesDeleteTab_fileManagement$data } from "@/api/__generated__/FilesDeleteTab_fileManagement.graphql";
 
 import RequestStatus from "@/components/RequestStatus";
-import Table, { createColumnHelper } from "@/components/Table";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
 type FileDeleteRequestNode = NonNullable<
   NonNullable<FilesDeleteTab_fileManagement$data["fileDeleteRequests"]>["edges"]

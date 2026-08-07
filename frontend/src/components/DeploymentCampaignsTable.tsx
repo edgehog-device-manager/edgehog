@@ -30,9 +30,9 @@ import type {
 
 import CampaignOutcome from "@/components/CampaignOutcome";
 import CampaignStatus from "@/components/CampaignStatus";
-import Icon from "@/components/Icon";
-import InfiniteTable from "@/components/InfiniteTable";
-import { createColumnHelper } from "@/components/Table";
+import Icon from "@/components/ui/icon/Icon";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration

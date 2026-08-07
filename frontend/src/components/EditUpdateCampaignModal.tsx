@@ -29,18 +29,18 @@ import type { EditUpdateCampaignModal_BaseImageCollPaginationQuery } from "@/api
 import type { EditUpdateCampaignModal_updateCampaign_Mutation } from "@/api/__generated__/EditUpdateCampaignModal_updateCampaign_Mutation.graphql";
 
 import BaseImageSelect from "@/components/BaseImageSelect";
-import EditModal from "@/components/EditModal";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
-import Stack from "@/components/Stack";
+import EditModal from "@/components/ui/edit-modal/EditModal";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import Stack from "@/components/ui/stack/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import {
   editUpdateCampaignSchema,
   type EditUpdateCampaignFormData,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import DatePicker from "./DatePicker";
-import Select from "@/components/Select";
+import DatePicker from "@/components/ui/date-picker/DatePicker";
+import Select from "@/components/ui/select/Select";
 
 const CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment EditUpdateCampaignModal_BaseImageCollOptionsFragment on RootQueryType

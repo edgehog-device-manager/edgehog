@@ -37,13 +37,13 @@ import {
 import { BaseImageSelect_BaseImagesPaginationQuery } from "@/api/__generated__/BaseImageSelect_BaseImagesPaginationQuery.graphql";
 import { BaseImageSelect_getBaseImageCollection_Query } from "@/api/__generated__/BaseImageSelect_getBaseImageCollection_Query.graphql";
 
-import Button from "@/components/Button";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
+import Button from "@/components/ui/button/Button";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import { BaseImageCollectionRecord } from "@/forms/CreateUpdateCampaign";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import Select from "@/components/Select";
+import Select from "@/components/ui/select/Select";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageSelect_getBaseImageCollection_Query(

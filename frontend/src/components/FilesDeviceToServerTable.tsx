@@ -23,10 +23,10 @@ import { FormattedMessage } from "react-intl";
 
 import type { FilesDeviceToServerTab_fileUploadRequests$data } from "@/api/__generated__/FilesDeviceToServerTab_fileUploadRequests.graphql";
 
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/button/Button";
+import Icon from "@/components/ui/icon/Icon";
 import RequestStatus from "@/components/RequestStatus";
-import Table, { createColumnHelper } from "@/components/Table";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
 type FileUploadRequestNode = NonNullable<
   NonNullable<

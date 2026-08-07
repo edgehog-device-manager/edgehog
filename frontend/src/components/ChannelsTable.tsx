@@ -27,9 +27,9 @@ import type {
 } from "@/api/__generated__/ChannelsTable_ChannelEdgeFragment.graphql";
 
 import { Link, Route } from "@/Navigation";
-import { createColumnHelper } from "@/components/Table";
-import Tag from "@/components/Tag";
-import InfiniteTable from "./InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import Tag from "@/components/ui/tag/Tag";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

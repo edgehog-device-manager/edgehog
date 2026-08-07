@@ -20,7 +20,7 @@ import { defineMessages, FormattedMessage } from "react-intl";
 
 import type { ApplicationDeploymentState } from "@/api/__generated__/DeployedApplicationsTable_deployedApplications.graphql";
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 type DeploymentState =
   | "DEPLOYING"

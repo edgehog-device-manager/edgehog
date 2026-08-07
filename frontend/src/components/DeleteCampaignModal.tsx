@@ -24,7 +24,7 @@ import { graphql, useMutation } from "react-relay";
 
 import type { DeleteCampaignModal_deleteCampaign_Mutation } from "@/api/__generated__/DeleteCampaignModal_deleteCampaign_Mutation.graphql";
 
-import DeleteModal from "@/components/DeleteModal";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 
 const DELETE_CAMPAIGN_MUTATION = graphql`
   mutation DeleteCampaignModal_deleteCampaign_Mutation($id: ID!) {

@@ -50,11 +50,11 @@ import type {
 import type { FilesServerToDeviceTab_fileDownloadRequests$key } from "@/api/__generated__/FilesServerToDeviceTab_fileDownloadRequests.graphql";
 import type { FilesServerToDeviceTab_getRepositories_Query } from "@/api/__generated__/FilesServerToDeviceTab_getRepositories_Query.graphql";
 
-import Alert from "@/components/Alert";
+import Alert from "@/components/ui/alert/Alert";
 import FilesServerToDeviceTable from "@/components/FilesServerToDeviceTable";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import type { FileDownloadRequestFormValues } from "@/forms/ManualFilesServerToDeviceFileForm";
 import ManualFileDownloadRequestForm from "@/forms/ManualFilesServerToDeviceFileForm";

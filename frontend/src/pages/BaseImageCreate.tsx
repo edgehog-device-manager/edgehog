@@ -35,11 +35,11 @@ import type {
   BaseImageCreate_getOptions_Query$data,
 } from "@/api/__generated__/BaseImageCreate_getOptions_Query.graphql";
 import type { BaseImageCreate_createBaseImage_Mutation } from "@/api/__generated__/BaseImageCreate_createBaseImage_Mutation.graphql";
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import CreateBaseImageForm from "@/forms/CreateBaseImage";
 import type { BaseImageOutputData } from "@/forms/CreateBaseImage";
 import { Link, Route, useNavigate } from "@/Navigation";

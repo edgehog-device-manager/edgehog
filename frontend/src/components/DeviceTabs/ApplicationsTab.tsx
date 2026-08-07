@@ -33,8 +33,8 @@ import type { ApplicationsTab_deployedApplications_RefetchQuery } from "@/api/__
 
 import AddAvailableApplications from "@/components/AddAvailableApplications";
 import DeployedApplicationsTable from "@/components/DeployedApplicationsTable";
-import Alert from "@/components/Alert";
-import { Tab } from "@/components/Tabs";
+import Alert from "@/components/ui/alert/Alert";
+import { Tab } from "@/components/ui/tabs/Tabs";
 
 // TODO: the fragment is defined on the RootQueryType so it can specify
 // which query to run, otherwise Relay would automatically use the `node`

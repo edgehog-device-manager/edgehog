@@ -283,16 +283,6 @@
     "defaultMessage": "Target Groups",
     "description": "Title for the Target Groups column of the channels table"
   },
-  "components.CollapseItem.collapseList": {
-    "defaultMessage": "Collapse list"
-  },
-  "components.CollapseItem.expandList": {
-    "defaultMessage": "Expand list"
-  },
-  "components.ConfirmModal.cancelButton": {
-    "defaultMessage": "Cancel",
-    "description": "Title for the button to cancel and dismiss a confirmation modal"
-  },
   "components.ConnectionStatus.statusConnected": {
     "defaultMessage": "Online"
   },
@@ -465,14 +455,6 @@
   },
   "components.DeleteCampaignModal.warning": {
     "defaultMessage": "This will permanently delete the campaign."
-  },
-  "components.DeleteModal.confirmButton": {
-    "defaultMessage": "Delete",
-    "description": "Title for the button to confirm a deletion modal"
-  },
-  "components.DeleteModal.confirmPrompt": {
-    "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
-    "description": "Description of the action to perform to confirm the deletion modal"
   },
   "components.DeleteReleaseModal.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the release, please try again."
@@ -1072,15 +1054,6 @@
   "components.EditFileDownloadCampaignModal.userIdLabel": {
     "defaultMessage": "User ID"
   },
-  "components.EditModal.cancel": {
-    "defaultMessage": "Cancel"
-  },
-  "components.EditModal.save": {
-    "defaultMessage": "Save"
-  },
-  "components.EditModal.saving": {
-    "defaultMessage": "Saving..."
-  },
   "components.EditUpdateCampaignModal.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
@@ -1119,9 +1092,6 @@
   },
   "components.EditUpdateCampaignModal.title": {
     "defaultMessage": "Edit Update Campaign"
-  },
-  "components.FieldHelp.exampleTitle": {
-    "defaultMessage": "Example:"
   },
   "components.FileDeleteRequestsTable.fileName": {
     "defaultMessage": "File Name"
@@ -1356,9 +1326,6 @@
   "components.ImageCredentialsTable.usernameTitle": {
     "defaultMessage": "Username"
   },
-  "components.InfiniteTable.noRecords": {
-    "defaultMessage": "No records to display."
-  },
   "components.LastSeen.never": {
     "defaultMessage": "Never"
   },
@@ -1450,12 +1417,6 @@
   "components.OperationTable.updatedAt": {
     "defaultMessage": "Updated At"
   },
-  "components.Page.loadingError.feedback": {
-    "defaultMessage": "The page couldn't load."
-  },
-  "components.Page.loadingError.retryButton": {
-    "defaultMessage": "Try Again"
-  },
   "components.ReleaseDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the release devices table"
@@ -1534,10 +1495,6 @@
   "components.ReuseContainerModal.selectContainer": {
     "defaultMessage": "Select Container"
   },
-  "components.SearchBox.searchPlaceholder": {
-    "defaultMessage": "Search...",
-    "description": "Placeholder for the search input of the SearchBox"
-  },
   "components.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
   },
@@ -1567,12 +1524,6 @@
   },
   "components.SystemModelsTable.partNumbersTitle": {
     "defaultMessage": "Part Numbers"
-  },
-  "components.Table.noRecords": {
-    "defaultMessage": "No records to display."
-  },
-  "components.Table.showing": {
-    "defaultMessage": "Showing {start} to {end} of {total} entries"
   },
   "components.UpdateCampaignsTable.baseImageCollectionNameTitle": {
     "defaultMessage": "Base Image Collection",
@@ -1769,6 +1720,55 @@
   },
   "components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel": {
     "defaultMessage": "Logout"
+  },
+  "components.ui.collapse-item.CollapseItem.collapseList": {
+    "defaultMessage": "Collapse list"
+  },
+  "components.ui.collapse-item.CollapseItem.expandList": {
+    "defaultMessage": "Expand list"
+  },
+  "components.ui.confirm-modal.ConfirmModal.cancelButton": {
+    "defaultMessage": "Cancel",
+    "description": "Title for the button to cancel and dismiss a confirmation modal"
+  },
+  "components.ui.delete-modal.DeleteModal.confirmButton": {
+    "defaultMessage": "Delete",
+    "description": "Title for the button to confirm a deletion modal"
+  },
+  "components.ui.delete-modal.DeleteModal.confirmPrompt": {
+    "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
+    "description": "Description of the action to perform to confirm the deletion modal"
+  },
+  "components.ui.edit-modal.EditModal.cancel": {
+    "defaultMessage": "Cancel"
+  },
+  "components.ui.edit-modal.EditModal.save": {
+    "defaultMessage": "Save"
+  },
+  "components.ui.edit-modal.EditModal.saving": {
+    "defaultMessage": "Saving..."
+  },
+  "components.ui.field-help.FieldHelp.exampleTitle": {
+    "defaultMessage": "Example:"
+  },
+  "components.ui.infinite-table.InfiniteTable.noRecords": {
+    "defaultMessage": "No records to display."
+  },
+  "components.ui.page.Page.loadingError.feedback": {
+    "defaultMessage": "The page couldn't load."
+  },
+  "components.ui.page.Page.loadingError.retryButton": {
+    "defaultMessage": "Try Again"
+  },
+  "components.ui.search-box.SearchBox.searchPlaceholder": {
+    "defaultMessage": "Search...",
+    "description": "Placeholder for the search input of the SearchBox"
+  },
+  "components.ui.table.Table.noRecords": {
+    "defaultMessage": "No records to display."
+  },
+  "components.ui.table.Table.showing": {
+    "defaultMessage": "Showing {start} to {end} of {total} entries"
   },
   "forms.CreateApplication.descriptionLabel": {
     "defaultMessage": "Description"

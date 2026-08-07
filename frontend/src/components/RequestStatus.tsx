@@ -20,7 +20,7 @@
 
 import { defineMessages, FormattedMessage } from "react-intl";
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 export type FileDownloadRequestStatus =
   "COMPLETED" | "FAILED" | "IN_PROGRESS" | "PENDING" | "SENT";

@@ -30,10 +30,10 @@ import type {
 
 import ConnectionStatus from "@/components/ConnectionStatus";
 import LastSeen from "@/components/LastSeen";
-import { createColumnHelper } from "@/components/Table";
-import Tag from "@/components/Tag";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import Tag from "@/components/ui/tag/Tag";
 import { Link, Route } from "@/Navigation";
-import InfiniteTable from "./InfiniteTable";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

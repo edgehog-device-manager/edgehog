@@ -24,7 +24,7 @@ import { DeploymentEventType } from "@/api/__generated__/Releases_PaginationQuer
 import "@/components/DeploymentEventsCard.scss";
 import type { Event } from "./DeploymentDetails";
 import DeploymentEventMessage from "./DeploymentEventMessage";
-import FullHeightCard from "./FullHeightCard";
+import FullHeightCard from "@/components/ui/full-height-card/FullHeightCard";
 
 const getEventTypeVariant = (eventType: DeploymentEventType): string => {
   switch (eventType) {

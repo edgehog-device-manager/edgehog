@@ -26,12 +26,12 @@ import { graphql, useFragment } from "react-relay/hooks";
 
 import type { CreateFile_RepositoryFragment$key } from "@/api/__generated__/CreateFile_RepositoryFragment.graphql";
 
-import Button from "@/components/Button";
+import Button from "@/components/ui/button/Button";
 import FileDropzone from "@/components/FileDropzone";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import { FileFormData, fileSchema } from "@/forms/validation";
 import {

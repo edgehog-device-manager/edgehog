@@ -29,11 +29,11 @@ import type {
 
 import type { FilesTable_deleteFile_Mutation } from "@/api/__generated__/FilesTable_deleteFile_Mutation.graphql";
 
-import Button from "@/components/Button";
-import DeleteModal from "@/components/DeleteModal";
-import Icon from "@/components/Icon";
-import InfiniteTable from "@/components/InfiniteTable";
-import { createColumnHelper } from "@/components/Table";
+import Button from "@/components/ui/button/Button";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import Icon from "@/components/ui/icon/Icon";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { formatFileSize } from "@/lib/files";
 
 // We use graphql fields below in columns configuration

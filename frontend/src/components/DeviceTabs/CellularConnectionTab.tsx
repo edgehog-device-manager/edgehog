@@ -23,7 +23,7 @@ import { Card } from "react-bootstrap";
 import type { CellularConnectionTab_cellularConnection$key } from "@/api/__generated__/CellularConnectionTab_cellularConnection.graphql";
 
 import CellularConnectionTabs from "@/components/CellularConnectionTabs";
-import { Tab } from "@/components/Tabs";
+import { Tab } from "@/components/ui/tabs/Tabs";
 
 const DEVICE_CELLULAR_CONNECTION_FRAGMENT = graphql`
   fragment CellularConnectionTab_cellularConnection on Device {

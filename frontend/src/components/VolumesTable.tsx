@@ -27,8 +27,8 @@ import type {
 } from "@/api/__generated__/VolumesTable_VolumeEdgeFragment.graphql";
 
 import { Link, Route } from "@/Navigation";
-import { createColumnHelper } from "@/components/Table";
-import InfiniteTable from "./InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 /* eslint-disable relay/unused-fields */
 const VOLUMES_TABLE_FRAGMENT = graphql`

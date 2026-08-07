@@ -23,7 +23,7 @@ import { useLocation } from "react-router-dom";
 
 import { Link, ParametricRoute } from "@/Navigation";
 import { matchPaths, Route } from "@/Navigation";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 type SidebarItemProps = {
   icon?: React.ComponentProps<typeof Icon>["icon"];

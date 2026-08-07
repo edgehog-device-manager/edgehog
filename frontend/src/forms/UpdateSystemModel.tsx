@@ -22,16 +22,16 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Button from "@/components/Button";
-import CloseButton from "@/components/CloseButton";
-import Col from "@/components/Col";
-import Figure from "@/components/Figure";
-import Form from "@/components/Form";
-import Icon from "@/components/Icon";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import CloseButton from "@/components/ui/close-button/CloseButton";
+import Col from "@/components/ui/col/Col";
+import Figure from "@/components/ui/figure/Figure";
+import Form from "@/components/ui/form/Form";
+import Icon from "@/components/ui/icon/Icon";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 
 import type {
   UpdateSystemModel_SystemModelFragment$key,

@@ -21,12 +21,12 @@ import { useForm, useFieldArray } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
 
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import Icon from "@/components/Icon";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import Icon from "@/components/ui/icon/Icon";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import { HardwareTypeFormData, hardwareTypeSchema } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
 

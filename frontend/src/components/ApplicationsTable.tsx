@@ -29,10 +29,10 @@ import type {
 } from "@/api/__generated__/ApplicationsTable_ApplicationEdgeFragment.graphql";
 
 import { Link, Route } from "@/Navigation";
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
-import { createColumnHelper } from "@/components/Table";
-import InfiniteTable from "./InfiniteTable";
+import Button from "@/components/ui/button/Button";
+import Icon from "@/components/ui/icon/Icon";
+import { createColumnHelper } from "@/components/ui/table/Table";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

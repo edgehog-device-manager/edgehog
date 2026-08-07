@@ -22,8 +22,8 @@ import { Card } from "react-bootstrap";
 
 import type { LocationTab_location$key } from "@/api/__generated__/LocationTab_location.graphql";
 
-import Map from "@/components/Map";
-import { Tab } from "@/components/Tabs";
+import Map from "@/components/ui/map/Map";
+import { Tab } from "@/components/ui/tabs/Tabs";
 
 const DEVICE_LOCATION_FRAGMENT = graphql`
   fragment LocationTab_location on Device {

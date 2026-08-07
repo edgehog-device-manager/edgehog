@@ -36,10 +36,10 @@ import type { UpdateCampaigns_getCampaigns_Query } from "@/api/__generated__/Upd
 import { UpdateCampaigns_PaginationQuery } from "@/api/__generated__/UpdateCampaigns_PaginationQuery.graphql";
 import { UpdateCampaigns_UpdateCampaignsFragment$key } from "@/api/__generated__/UpdateCampaigns_UpdateCampaignsFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import UpdateCampaignsTable from "@/components/UpdateCampaignsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";

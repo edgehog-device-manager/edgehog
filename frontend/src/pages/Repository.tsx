@@ -43,15 +43,15 @@ import type {
 import type { Repository_updateRepository_Mutation } from "@/api/__generated__/Repository_updateRepository_Mutation.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import DeleteModal from "@/components/DeleteModal";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import FilesTable from "@/components/FilesTable";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import SearchBox from "@/components/SearchBox";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import SearchBox from "@/components/ui/search-box/SearchBox";
+import Spinner from "@/components/ui/spinner/Spinner";
 import UpdateRepositoryForm, {
   RepositoryOutputData,
 } from "@/forms/UpdateRepository";

@@ -28,7 +28,7 @@ import type {
   OperationTable_otaOperationEdgeFragment$key,
 } from "@/api/__generated__/OperationTable_otaOperationEdgeFragment.graphql";
 
-import Table, { createColumnHelper } from "@/components/Table";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
 import {
   OperationStatus,

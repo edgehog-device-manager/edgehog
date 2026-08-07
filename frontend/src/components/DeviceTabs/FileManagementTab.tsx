@@ -35,9 +35,9 @@ import type { FileManagementTab_DeviceFilesSubscription } from "@/api/__generate
 import FilesDeleteTab from "@/components/DeviceTabs/FilesDeleteTab";
 import FilesDownloadTab from "@/components/DeviceTabs/FilesDeviceToServerTab";
 import FilesServerToDeviceTab from "@/components/DeviceTabs/FilesServerToDeviceTab";
-import Form from "@/components/Form";
-import { Tab } from "@/components/Tabs";
-import Select from "@/components/Select";
+import Form from "@/components/ui/form/Form";
+import { Tab } from "@/components/ui/tabs/Tabs";
+import Select from "@/components/ui/select/Select";
 
 type FileManagementMode =
   | "download-to-device-file"

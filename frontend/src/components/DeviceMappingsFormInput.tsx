@@ -25,9 +25,9 @@ import {
 } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import Icon from "@/components/ui/icon/Icon";
 import FormFeedback from "@/forms/FormFeedback";
 import { ContainerInputData } from "@/forms/validation";
 

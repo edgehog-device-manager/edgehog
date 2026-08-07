@@ -34,10 +34,10 @@ import { Devices_DevicesFragment$key } from "@/api/__generated__/Devices_Devices
 import type { Devices_getDevices_Query } from "@/api/__generated__/Devices_getDevices_Query.graphql";
 import { Devices_PaginationQuery } from "@/api/__generated__/Devices_PaginationQuery.graphql";
 
-import Center from "@/components/Center";
+import Center from "@/components/ui/center/Center";
 import DevicesTable from "@/components/DevicesTable";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 

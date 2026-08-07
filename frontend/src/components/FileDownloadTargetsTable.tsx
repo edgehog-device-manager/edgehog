@@ -28,9 +28,9 @@ import type {
   FileDownloadTargetsTable_CampaignTargetEdgeFragment$key,
 } from "@/api/__generated__/FileDownloadTargetsTable_CampaignTargetEdgeFragment.graphql";
 
-import InfiniteTable from "@/components/InfiniteTable";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 import RequestStatus from "@/components/RequestStatus";
-import { createColumnHelper } from "@/components/Table";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration

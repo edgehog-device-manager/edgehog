@@ -51,23 +51,26 @@ import type { Device_requestForwarderSession_Mutation } from "@/api/__generated_
 import type { Device_getForwarderSession_Query } from "@/api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "@/api/__generated__/Device_getExistingDeviceTags_Query.graphql";
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
 import ConnectionStatus from "@/components/ConnectionStatus";
-import Col from "@/components/Col";
-import Figure from "@/components/Figure";
-import Form from "@/components/Form";
+import Col from "@/components/ui/col/Col";
+import Figure from "@/components/ui/figure/Figure";
+import Form from "@/components/ui/form/Form";
 import LastSeen from "@/components/LastSeen";
 import LedBehaviorDropdown from "@/components/LedBehaviorDropdown";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Row from "@/components/Row";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import Tabs from "@/components/Tabs";
-import MultiSelect from "@/components/MultiSelect";
-import { FormRow as BaseFormRow, FormRowProps } from "@/components/FormRow";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Row from "@/components/ui/row/Row";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import Tabs from "@/components/ui/tabs/Tabs";
+import MultiSelect from "@/components/ui/multi-select/MultiSelect";
+import {
+  FormRow as BaseFormRow,
+  FormRowProps,
+} from "@/components/ui/form-row/FormRow";
 import assets from "@/assets";
 import DeviceHardwareInfoTab from "@/components/DeviceTabs/HardwareInfoTab";
 import DeviceOSInfoTab from "@/components/DeviceTabs/OSInfoTab";

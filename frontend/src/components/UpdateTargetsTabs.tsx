@@ -34,9 +34,9 @@ import type { ColumnId } from "@/components/UpdateTargetsTable";
 import UpdateTargetsTable, { columnIds } from "@/components/UpdateTargetsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import Button from "@/components/Button";
-import SegmentedControl from "@/components/SegmentedControl";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import SegmentedControl from "@/components/ui/segmented-control/SegmentedControl";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { useNavigate, Route } from "@/Navigation";
 
 /* eslint-disable relay/unused-fields */

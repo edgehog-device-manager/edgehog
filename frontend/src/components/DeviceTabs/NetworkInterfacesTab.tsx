@@ -22,7 +22,7 @@ import { Card } from "react-bootstrap";
 
 import type { NetworkInterfacesTab_networkInterfaces$key } from "@/api/__generated__/NetworkInterfacesTab_networkInterfaces.graphql";
 
-import { Tab } from "@/components/Tabs";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import NetworkInterfacesTable from "@/components/NetworkInterfacesTable";
 
 const DEVICE_NETWORK_INTERFACES__FRAGMENT = graphql`

@@ -30,10 +30,10 @@ import type {
   UpdateTargetsTable_CampaignTargetEdgeFragment$key,
 } from "@/api/__generated__/UpdateTargetsTable_CampaignTargetEdgeFragment.graphql";
 
-import Icon from "@/components/Icon";
-import { createColumnHelper } from "@/components/Table";
+import Icon from "@/components/ui/icon/Icon";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
-import InfiniteTable from "./InfiniteTable";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

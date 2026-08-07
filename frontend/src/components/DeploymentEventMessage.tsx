@@ -23,7 +23,7 @@ import { FormattedMessage } from "react-intl";
 
 import { DeploymentTargetsTable_CampaignTargetEdgeFragment$data } from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetEdgeFragment.graphql";
 
-import CollapseItem from "@/components/CollapseItem";
+import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
 
 type DeploymentEventMessageProps = {
   event: NonNullable<

@@ -22,9 +22,9 @@ import type { ReactNode } from "react";
 import Countdown, { type CountdownRenderProps } from "react-countdown";
 import { FormattedMessage } from "react-intl";
 
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Icon from "@/components/ui/icon/Icon";
 
 const renderCountdown = ({
   completed,

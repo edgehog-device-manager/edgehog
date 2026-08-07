@@ -37,13 +37,13 @@ import type { Applications_ApplicationSubscription } from "@/api/__generated__/A
 import type { Applications_getApplications_Query } from "@/api/__generated__/Applications_getApplications_Query.graphql";
 import { Applications_PaginationQuery } from "@/api/__generated__/Applications_PaginationQuery.graphql";
 
-import Alert from "@/components/Alert";
+import Alert from "@/components/ui/alert/Alert";
 import ApplicationsTable, { TableRecord } from "@/components/ApplicationsTable";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
 import DeleteApplicationModal from "@/components/DeleteApplicationModal";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

@@ -24,9 +24,9 @@ import dayjs from "dayjs";
 
 import type { SystemStatusTab_systemStatus$key } from "@/api/__generated__/SystemStatusTab_systemStatus.graphql";
 
-import Form from "@/components/Form";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Form from "@/components/ui/form/Form";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import { formatBytes, FormRow, FormValue } from "@/pages/Device";
 
 const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`

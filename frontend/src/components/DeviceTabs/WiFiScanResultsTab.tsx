@@ -22,7 +22,7 @@ import { Card } from "react-bootstrap";
 
 import type { WiFiScanResultsTab_wifiScanResults$key } from "@/api/__generated__/WiFiScanResultsTab_wifiScanResults.graphql";
 
-import { Tab } from "@/components/Tabs";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import WiFiScanResultsTable from "@/components/WiFiScanResultsTable";
 
 const DEVICE_WIFI_SCAN_RESULTS_FRAGMENT = graphql`

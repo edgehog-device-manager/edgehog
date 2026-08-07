@@ -25,10 +25,10 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type { UpdateImageCredential_imageCredential_Fragment$key } from "@/api/__generated__/UpdateImageCredential_imageCredential_Fragment.graphql";
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import {
   ImageCredentialUpdateFormData,
   imageCredentialUpdateSchema,

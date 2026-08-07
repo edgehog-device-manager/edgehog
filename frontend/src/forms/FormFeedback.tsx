@@ -20,7 +20,7 @@
 
 import type { ReactNode } from "react";
 import { useIntl } from "react-intl";
-import Form from "@/components/Form";
+import Form from "@/components/ui/form/Form";
 
 type Feedback =
   | undefined

@@ -32,11 +32,11 @@ import type { HardwareTypes_getHardwareTypes_Query } from "@/api/__generated__/H
 import { HardwareTypes_HardwareTypesFragment$key } from "@/api/__generated__/HardwareTypes_HardwareTypesFragment.graphql";
 import { HardwareTypes_PaginationQuery } from "@/api/__generated__/HardwareTypes_PaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
 import HardwareTypesTable from "@/components/HardwareTypesTable";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

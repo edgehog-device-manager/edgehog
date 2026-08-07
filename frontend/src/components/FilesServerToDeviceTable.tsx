@@ -23,7 +23,7 @@ import { FormattedMessage } from "react-intl";
 import type { FilesServerToDeviceTab_fileDownloadRequests$data } from "@/api/__generated__/FilesServerToDeviceTab_fileDownloadRequests.graphql";
 
 import RequestStatus from "@/components/RequestStatus";
-import Table, { createColumnHelper } from "@/components/Table";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
 import { formatFileSize } from "@/lib/files";
 import { Link, Route } from "@/Navigation";
 

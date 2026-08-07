@@ -37,10 +37,10 @@ import type { Deployments_deployment_updated_Subscription } from "@/api/__genera
 import type { Deployments_getDeployments_Query } from "@/api/__generated__/Deployments_getDeployments_Query.graphql";
 import { Deployments_PaginationQuery } from "@/api/__generated__/Deployments_PaginationQuery.graphql";
 
-import Center from "@/components/Center";
+import Center from "@/components/ui/center/Center";
 import DeploymentsTable from "@/components/DeploymentsTable";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 

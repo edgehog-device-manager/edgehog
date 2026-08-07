@@ -36,16 +36,16 @@ import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
-import ConfirmModal from "@/components/ConfirmModal";
-import DeleteModal from "@/components/DeleteModal";
+import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import DeploymentActionButtons from "@/components/DeploymentActionButtons";
 import DeploymentEventsCard from "@/components/DeploymentEventsCard";
 import { parseDeploymentState } from "@/components/DeploymentState";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 import ResourceStateIcon from "@/components/ResourceStateIcon";
 import { Link, Route } from "@/Navigation";
-import FullHeightCard from "@/components/FullHeightCard";
-import Select from "@/components/Select";
+import FullHeightCard from "@/components/ui/full-height-card/FullHeightCard";
+import Select from "@/components/ui/select/Select";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`

@@ -27,7 +27,7 @@ import { SingleValue } from "react-select";
 import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "@/api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
 import type { AddAvailableApplications_DeployRelease_Mutation } from "@/api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
 import { useNavigate, Route } from "@/Navigation";
-import Select from "@/components/Select";
+import Select from "@/components/ui/select/Select";
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
   query AddAvailableApplications_GetApplicationsWithReleases_Query(

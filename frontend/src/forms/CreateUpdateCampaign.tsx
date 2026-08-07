@@ -34,12 +34,12 @@ import type {
 import type { CreateUpdateCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateUpdateCampaign_ChannelPaginationQuery.graphql";
 
 import BaseImageSelect from "@/components/BaseImageSelect";
-import Button from "@/components/Button";
-import DatePicker from "@/components/DatePicker";
-import Form from "@/components/Form";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Button from "@/components/ui/button/Button";
+import DatePicker from "@/components/ui/date-picker/DatePicker";
+import Form from "@/components/ui/form/Form";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import FormFeedback from "@/forms/FormFeedback";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {

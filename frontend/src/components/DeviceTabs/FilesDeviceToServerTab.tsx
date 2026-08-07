@@ -37,10 +37,10 @@ import type { FilesDeviceToServerTab_deviceFiles_PaginationQuery } from "@/api/_
 import type { FilesDeviceToServerTab_fileUploadRequest_updated_Subscription } from "@/api/__generated__/FilesDeviceToServerTab_fileUploadRequest_updated_Subscription.graphql";
 import type { FilesDeviceToServerTab_fileUploadRequests$key } from "@/api/__generated__/FilesDeviceToServerTab_fileUploadRequests.graphql";
 
-import Alert from "@/components/Alert";
+import Alert from "@/components/ui/alert/Alert";
 import FilesDeviceToServerTable from "@/components/FilesDeviceToServerTable";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import ManualFilesDeviceToServerForm, {
   type SourceTypeOption,
   type StorageSourceOption,

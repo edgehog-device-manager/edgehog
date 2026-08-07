@@ -28,7 +28,7 @@ import type {
 
 import { Link, Route } from "@/Navigation";
 import { createColumnHelper } from "@tanstack/react-table";
-import InfiniteTable from "./InfiniteTable";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 /* eslint-disable relay/unused-fields */
 const CONTAINERS_TABLE_FRAGMENT = graphql`

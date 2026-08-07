@@ -22,7 +22,7 @@ import { graphql, useMutation } from "react-relay";
 
 import type { DeleteApplicationModal_deleteApplication_Mutation } from "@/api/__generated__/DeleteApplicationModal_deleteApplication_Mutation.graphql";
 
-import DeleteModal from "./DeleteModal";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 
 const DELETE_APPLICATION_MUTATION = graphql`
   mutation DeleteApplicationModal_deleteApplication_Mutation($id: ID!) {

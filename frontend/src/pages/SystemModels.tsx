@@ -32,10 +32,10 @@ import type { SystemModels_getSystemModels_Query } from "@/api/__generated__/Sys
 import { SystemModels_PaginationQuery } from "@/api/__generated__/SystemModels_PaginationQuery.graphql";
 import { SystemModels_SystemModelsFragment$key } from "@/api/__generated__/SystemModels_SystemModelsFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import SystemModelsTable from "@/components/SystemModelsTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";

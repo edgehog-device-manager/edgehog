@@ -31,8 +31,8 @@ import type {
 import DeploymentEventMessage from "@/components/DeploymentEventMessage";
 import DeploymentReadiness from "@/components/DeploymentReadiness";
 import DeploymentStateComponent from "@/components/DeploymentState";
-import InfiniteTable from "@/components/InfiniteTable";
-import { createColumnHelper } from "@/components/Table";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration

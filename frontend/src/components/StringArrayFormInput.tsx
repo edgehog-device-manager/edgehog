@@ -19,10 +19,10 @@
 import React from "react";
 import { FormattedMessage } from "react-intl";
 
-import Button from "@/components/Button";
-import Form from "@/components/Form";
-import Stack from "@/components/Stack";
-import Icon from "@/components/Icon";
+import Button from "@/components/ui/button/Button";
+import Form from "@/components/ui/form/Form";
+import Stack from "@/components/ui/stack/Stack";
+import Icon from "@/components/ui/icon/Icon";
 import FormFeedback from "@/forms/FormFeedback";
 
 interface StringArrayFormInputProps {

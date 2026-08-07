@@ -34,12 +34,12 @@ import type {
 } from "@/api/__generated__/ContainerCreate_createContainer_Mutation.graphql";
 import type { ContainerCreate_getOptions_Query } from "@/api/__generated__/ContainerCreate_getOptions_Query.graphql";
 
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
 import ReuseContainerModal from "@/components/ReuseContainerModal";
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/ui/spinner/Spinner";
 import CreateContainerForm from "@/forms/CreateContainer";
 import { ContainerInputData } from "@/forms/validation";
 import { Route, useNavigate } from "@/Navigation";

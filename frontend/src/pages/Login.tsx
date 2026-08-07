@@ -26,9 +26,9 @@ import Alert from "react-bootstrap/Alert";
 import Form from "react-bootstrap/Form";
 
 import AuthPage from "@/components/AuthPage";
-import Button from "@/components/Button";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
+import Button from "@/components/ui/button/Button";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
 import { useAuth } from "@/contexts/Auth";
 
 interface FormData {

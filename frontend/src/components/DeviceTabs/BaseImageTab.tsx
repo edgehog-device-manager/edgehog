@@ -22,9 +22,9 @@ import { graphql, useFragment } from "react-relay/hooks";
 
 import type { BaseImageTab_baseImage$key } from "@/api/__generated__/BaseImageTab_baseImage.graphql";
 
-import Form from "@/components/Form";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Form from "@/components/ui/form/Form";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import { FormRow } from "@/pages/Device";
 
 const DEVICE_BASE_IMAGE_FRAGMENT = graphql`

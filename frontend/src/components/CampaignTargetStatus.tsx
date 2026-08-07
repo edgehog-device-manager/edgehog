@@ -26,7 +26,7 @@ import type {
   CampaignTargetStatus_CampaignTargetStatusFragment$key,
 } from "@/api/__generated__/CampaignTargetStatus_CampaignTargetStatusFragment.graphql";
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 import "./CampaignTargetStatus.scss";
 
 const CAMPAIGN_TARGET_STATUS_FRAGMENT = graphql`

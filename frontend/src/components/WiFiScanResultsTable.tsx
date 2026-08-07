@@ -26,9 +26,9 @@ import type {
   WiFiScanResultsTable_wifiScanResults$key,
 } from "@/api/__generated__/WiFiScanResultsTable_wifiScanResults.graphql";
 
-import Result from "@/components/Result";
-import Table, { createColumnHelper } from "@/components/Table";
-import type { Row } from "@/components/Table";
+import Result from "@/components/ui/result/Result";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
+import type { Row } from "@/components/ui/table/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

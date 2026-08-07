@@ -41,11 +41,11 @@ import {
 import type { SoftwareUpdateTab_createManualOtaOperation_Mutation } from "@/api/__generated__/SoftwareUpdateTab_createManualOtaOperation_Mutation.graphql";
 import type { SoftwareUpdateTab_getBaseImageCollections_Query } from "@/api/__generated__/SoftwareUpdateTab_getBaseImageCollections_Query.graphql";
 
-import Alert from "@/components/Alert";
+import Alert from "@/components/ui/alert/Alert";
 import OperationTable from "@/components/OperationTable";
-import Spinner from "@/components/Spinner";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import ManualOtaFromCollectionForm from "@/forms/ManualOtaFromCollectionForm";
 import ManualOtaFromFileForm from "@/forms/ManualOtaFromFileForm";

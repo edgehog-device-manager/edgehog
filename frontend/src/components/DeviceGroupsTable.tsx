@@ -26,8 +26,8 @@ import type {
   DeviceGroupsTable_DeviceGroupEdgeFragment$key,
 } from "@/api/__generated__/DeviceGroupsTable_DeviceGroupEdgeFragment.graphql";
 
-import InfiniteTable from "@/components/InfiniteTable";
-import { createColumnHelper } from "@/components/Table";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
 
 // We use graphql fields below in columns configuration

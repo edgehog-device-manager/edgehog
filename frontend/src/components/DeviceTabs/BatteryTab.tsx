@@ -22,7 +22,7 @@ import { Card } from "react-bootstrap";
 
 import type { BatteryTab_batteryStatus$key } from "@/api/__generated__/BatteryTab_batteryStatus.graphql";
 
-import { Tab } from "@/components/Tabs";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import BatteryTable from "@/components/BatteryTable";
 
 const DEVICE_BATTERY_STATUS_FRAGMENT = graphql`

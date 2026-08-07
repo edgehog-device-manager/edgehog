@@ -22,9 +22,9 @@ import { Card } from "react-bootstrap";
 
 import type { HardwareInfoTab_hardwareInfo$key } from "@/api/__generated__/HardwareInfoTab_hardwareInfo.graphql";
 
-import Form from "@/components/Form";
-import Stack from "@/components/Stack";
-import { Tab } from "@/components/Tabs";
+import Form from "@/components/ui/form/Form";
+import Stack from "@/components/ui/stack/Stack";
+import { Tab } from "@/components/ui/tabs/Tabs";
 import { formatBytes, FormRow } from "@/pages/Device";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`

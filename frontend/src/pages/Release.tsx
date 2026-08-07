@@ -40,15 +40,15 @@ import type {
 } from "@/api/__generated__/Release_getRelease_Query.graphql";
 import { ReleaseDevices_PaginationQuery } from "@/api/__generated__/ReleaseDevices_PaginationQuery.graphql";
 
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
 import ContainersOverview from "@/components/ContainersOverview";
-import Page from "@/components/Page";
+import Page from "@/components/ui/page/Page";
 import ReleaseDevicesTable from "@/components/ReleaseDevicesTable";
 import ReleaseSystemModelsTable from "@/components/ReleaseSystemModelsTable";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
-import Tabs, { Tab } from "@/components/Tabs";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Tabs, { Tab } from "@/components/ui/tabs/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route, useNavigate } from "@/Navigation";

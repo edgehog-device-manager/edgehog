@@ -32,10 +32,10 @@ import type { Volumes_getVolumes_Query } from "@/api/__generated__/Volumes_getVo
 import { Volumes_PaginationQuery } from "@/api/__generated__/Volumes_PaginationQuery.graphql";
 import { Volumes_VolumesFragment$key } from "@/api/__generated__/Volumes_VolumesFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import VolumesTable from "@/components/VolumesTable";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";

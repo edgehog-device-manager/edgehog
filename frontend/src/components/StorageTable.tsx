@@ -26,8 +26,8 @@ import type {
   StorageTable_storageUsage$key,
 } from "@/api/__generated__/StorageTable_storageUsage.graphql";
 
-import Result from "@/components/Result";
-import Table, { createColumnHelper } from "@/components/Table";
+import Result from "@/components/ui/result/Result";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

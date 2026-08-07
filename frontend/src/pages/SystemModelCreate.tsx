@@ -37,14 +37,14 @@ import type {
 } from "@/api/__generated__/SystemModelCreate_getOptions_Query.graphql";
 import type { SystemModelCreate_createSystemModel_Mutation } from "@/api/__generated__/SystemModelCreate_createSystemModel_Mutation.graphql";
 
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
 import CreateSystemModelForm from "@/forms/CreateSystemModel";
 import type { SystemModelOutputData } from "@/forms/CreateSystemModel";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { Link, Route, useNavigate } from "@/Navigation";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 

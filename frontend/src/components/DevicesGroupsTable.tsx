@@ -25,9 +25,9 @@ import type {
 } from "@/api/__generated__/DevicesGroupsTable_DeviceFragment.graphql";
 
 import LastSeen from "@/components/LastSeen";
-import Table, { createColumnHelper } from "@/components/Table";
+import Table, { createColumnHelper } from "@/components/ui/table/Table";
 import ConnectionStatus from "@/components/ConnectionStatus";
-import Tag from "@/components/Tag";
+import Tag from "@/components/ui/tag/Tag";
 import { Link, Route } from "@/Navigation";
 
 // TODO This component is being temporarily used in DeviceGroup.tsx

@@ -39,13 +39,13 @@ import type {
 import type { DeviceGroup_updateDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroup_updateDeviceGroup_Mutation.graphql";
 import type { DeviceGroup_deleteDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroup_deleteDeviceGroup_Mutation.graphql";
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
-import DeleteModal from "@/components/DeleteModal";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import DevicesGroupsTable from "@/components/DevicesGroupsTable";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import UpdateDeviceGroupForm, {
   DeviceGroupFormData,
 } from "@/forms/UpdateDeviceGroup";

@@ -28,9 +28,9 @@ import Dropdown from "react-bootstrap/Dropdown";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
 import Tooltip from "react-bootstrap/Tooltip";
 
-import Button from "@/components/Button";
-import Icon from "@/components/Icon";
-import Spinner from "@/components/Spinner";
+import Button from "@/components/ui/button/Button";
+import Icon from "@/components/ui/icon/Icon";
+import Spinner from "@/components/ui/spinner/Spinner";
 
 import type { LedBehaviorDropdown_setLedBehavior_Mutation } from "@/api/__generated__/LedBehaviorDropdown_setLedBehavior_Mutation.graphql";
 

@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 const AVAILABLE_STATES = new Set(["available", "pulled", "present", "running"]);
 

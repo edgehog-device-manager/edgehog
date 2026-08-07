@@ -24,14 +24,14 @@ import { fetchQuery, graphql, useLazyLoadQuery } from "react-relay/hooks";
 import { ReuseContainerModal_getContainerDetails_Query } from "@/api/__generated__/ReuseContainerModal_getContainerDetails_Query.graphql";
 import { ReuseContainerModal_getContainers_Query } from "@/api/__generated__/ReuseContainerModal_getContainers_Query.graphql";
 
-import ConfirmModal from "@/components/ConfirmModal";
-import { FormRow } from "@/components/FormRow";
+import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import {
   CapAddList,
   CapDropList,
   ContainerInputData,
 } from "@/forms/validation";
-import Select from "@/components/Select";
+import Select from "@/components/ui/select/Select";
 
 const GET_CONTAINERS_QUERY = graphql`
   query ReuseContainerModal_getContainers_Query {

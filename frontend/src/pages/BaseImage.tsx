@@ -35,12 +35,12 @@ import type {
 } from "@/api/__generated__/BaseImage_getBaseImage_Query.graphql";
 import type { BaseImage_updateBaseImage_Mutation } from "@/api/__generated__/BaseImage_updateBaseImage_Mutation.graphql";
 import type { BaseImage_deleteBaseImage_Mutation } from "@/api/__generated__/BaseImage_deleteBaseImage_Mutation.graphql";
-import Alert from "@/components/Alert";
-import Center from "@/components/Center";
-import DeleteModal from "@/components/DeleteModal";
-import Page from "@/components/Page";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
+import Alert from "@/components/ui/alert/Alert";
+import Center from "@/components/ui/center/Center";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import Page from "@/components/ui/page/Page";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
 import UpdateBaseImageForm from "@/forms/UpdateBaseImage";
 import type { BaseImageChanges } from "@/forms/UpdateBaseImage";
 import { Link, Route, useNavigate } from "@/Navigation";

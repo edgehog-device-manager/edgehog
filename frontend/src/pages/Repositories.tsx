@@ -32,11 +32,11 @@ import type { Repositories_getRepositories_Query } from "@/api/__generated__/Rep
 import { Repositories_PaginationQuery } from "@/api/__generated__/Repositories_PaginationQuery.graphql";
 import { Repositories_RepositoriesFragment$key } from "@/api/__generated__/Repositories_RepositoriesFragment.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
-import Page from "@/components/Page";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
+import Page from "@/components/ui/page/Page";
 import RepositoriesTable from "@/components/RepositoriesTable";
-import Spinner from "@/components/Spinner";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

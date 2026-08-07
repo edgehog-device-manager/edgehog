@@ -41,17 +41,17 @@ import type {
 import { Releases_PaginationQuery } from "@/api/__generated__/Releases_PaginationQuery.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
-import Alert from "@/components/Alert";
+import Alert from "@/components/ui/alert/Alert";
 import ApplicationDevicesTable from "@/components/ApplicationDevicesTable";
-import Button from "@/components/Button";
-import Center from "@/components/Center";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
 import DeleteReleaseModal from "@/components/DeleteReleaseModal";
-import Page from "@/components/Page";
+import Page from "@/components/ui/page/Page";
 import type { ReleaseTableRecord } from "@/components/ReleasesTable";
 import ReleasesTable from "@/components/ReleasesTable";
-import Result from "@/components/Result";
-import Spinner from "@/components/Spinner";
-import Tabs, { Tab } from "@/components/Tabs";
+import Result from "@/components/ui/result/Result";
+import Spinner from "@/components/ui/spinner/Spinner";
+import Tabs, { Tab } from "@/components/ui/tabs/Tabs";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_APPLICATION_QUERY = graphql`

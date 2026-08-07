@@ -28,9 +28,9 @@ import type {
   ImageCredentialsTable_ImageCredentialEdgeFragment$key,
 } from "@/api/__generated__/ImageCredentialsTable_ImageCredentialEdgeFragment.graphql";
 
-import { createColumnHelper } from "@/components/Table";
+import { createColumnHelper } from "@/components/ui/table/Table";
 import { Link, Route } from "@/Navigation";
-import InfiniteTable from "./InfiniteTable";
+import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */

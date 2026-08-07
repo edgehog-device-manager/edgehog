@@ -34,11 +34,11 @@ import { Channels_ChannelsFragment$key } from "@/api/__generated__/Channels_Chan
 import type { Channels_getChannels_Query } from "@/api/__generated__/Channels_getChannels_Query.graphql";
 import { Channels_PaginationQuery } from "@/api/__generated__/Channels_PaginationQuery.graphql";
 
-import Button from "@/components/Button";
-import Center from "@/components/Center";
+import Button from "@/components/ui/button/Button";
+import Center from "@/components/ui/center/Center";
 import ChannelsTable from "@/components/ChannelsTable";
-import Page from "@/components/Page";
-import Spinner from "@/components/Spinner";
+import Page from "@/components/ui/page/Page";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route } from "@/Navigation";

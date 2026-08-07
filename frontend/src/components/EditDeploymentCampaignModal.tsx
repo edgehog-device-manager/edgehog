@@ -28,19 +28,19 @@ import type { EditDeploymentCampaignModal_ApplicationOptionsFragment$key } from 
 import type { EditDeploymentCampaignModal_ApplicationPaginationQuery } from "@/api/__generated__/EditDeploymentCampaignModal_ApplicationPaginationQuery.graphql";
 import type { EditDeploymentCampaignModal_updateCampaign_Mutation } from "@/api/__generated__/EditDeploymentCampaignModal_updateCampaign_Mutation.graphql";
 
-import EditModal from "@/components/EditModal";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
+import EditModal from "@/components/ui/edit-modal/EditModal";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import ReleaseSelectWrapper from "@/components/ReleaseSelect";
-import Stack from "@/components/Stack";
+import Stack from "@/components/ui/stack/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import {
   editDeploymentCampaignSchema,
   type EditDeploymentCampaignFormData,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import DatePicker from "@/components/DatePicker";
-import Select from "@/components/Select";
+import DatePicker from "@/components/ui/date-picker/DatePicker";
+import Select from "@/components/ui/select/Select";
 
 const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment EditDeploymentCampaignModal_ApplicationOptionsFragment on RootQueryType

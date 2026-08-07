@@ -23,7 +23,7 @@ import { Card } from "react-bootstrap";
 import type { StorageUsageTab_storageUsage$key } from "@/api/__generated__/StorageUsageTab_storageUsage.graphql";
 
 import StorageTable from "@/components/StorageTable";
-import { Tab } from "@/components/Tabs";
+import { Tab } from "@/components/ui/tabs/Tabs";
 
 const DEVICE_STORAGE_USAGE_FRAGMENT = graphql`
   fragment StorageUsageTab_storageUsage on Device {

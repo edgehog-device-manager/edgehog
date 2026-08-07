@@ -21,9 +21,9 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { FormattedMessage } from "react-intl";
 
-import CloseButton from "@/components/CloseButton";
-import Icon from "@/components/Icon";
-import Tag from "@/components/Tag";
+import CloseButton from "@/components/ui/close-button/CloseButton";
+import Icon from "@/components/ui/icon/Icon";
+import Tag from "@/components/ui/tag/Tag";
 import { formatFileSize } from "@/lib/files";
 
 const readFileEntry = (entry: FileSystemFileEntry): Promise<File> =>

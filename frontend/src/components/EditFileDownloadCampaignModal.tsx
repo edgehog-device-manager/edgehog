@@ -35,20 +35,22 @@ import type {
   FileDestination,
 } from "@/api/__generated__/EditFileDownloadCampaignModal_updateCampaign_Mutation.graphql";
 
-import CollapseItem, { useCollapseToggle } from "@/components/CollapseItem";
-import EditModal from "@/components/EditModal";
+import CollapseItem, {
+  useCollapseToggle,
+} from "@/components/ui/collapse-item/CollapseItem";
+import EditModal from "@/components/ui/edit-modal/EditModal";
 import FileSelect from "@/components/FileSelect";
-import Form from "@/components/Form";
-import { FormRow } from "@/components/FormRow";
-import Stack from "@/components/Stack";
+import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import Stack from "@/components/ui/stack/Stack";
 import FormFeedback from "@/forms/FormFeedback";
 import {
   UpdateFileDownloadCampaignFormData,
   updateFileDownloadCampaignSchema,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import DatePicker from "@/components/DatePicker";
-import Select from "@/components/Select";
+import DatePicker from "@/components/ui/date-picker/DatePicker";
+import Select from "@/components/ui/select/Select";
 
 const CAMPAIGN_REPOSITORY_OPTIONS_FRAGMENT = graphql`
   fragment EditFileDownloadCampaignModal_RepositoryOptionsFragment on RootQueryType

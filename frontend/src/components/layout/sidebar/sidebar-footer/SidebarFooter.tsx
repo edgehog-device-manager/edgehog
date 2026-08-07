@@ -22,7 +22,7 @@ import { FormattedMessage } from "react-intl";
 
 import { Route } from "@/Navigation";
 import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
-import Icon from "@/components/Icon";
+import Icon from "@/components/ui/icon/Icon";
 
 type SidebarFooterProps = {
   appName?: string;

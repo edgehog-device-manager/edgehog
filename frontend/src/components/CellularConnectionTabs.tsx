@@ -24,10 +24,10 @@ import Nav from "react-bootstrap/Nav";
 import Row from "react-bootstrap/Row";
 import Tab from "react-bootstrap/Tab";
 
-import Form from "@/components/Form";
-import Result from "@/components/Result";
-import Stack from "@/components/Stack";
-import { FormRow } from "@/components/FormRow";
+import Form from "@/components/ui/form/Form";
+import Result from "@/components/ui/result/Result";
+import Stack from "@/components/ui/stack/Stack";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 
 import type {
   CellularConnectionTabs_cellularConnection$data,
