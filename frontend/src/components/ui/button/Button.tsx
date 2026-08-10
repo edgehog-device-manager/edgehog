@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -18,19 +18,19 @@
   SPDX-License-Identifier: Apache-2.0
 */
 
-import { ComponentProps } from "react";
+import { ComponentProps, forwardRef } from "react";
 import RNButton from "react-bootstrap/Button";
 
 // Define the 'as' prop with correct types
 // See issue: https://github.com/react-bootstrap/react-bootstrap/issues/6103
 type RNButtonProps = ComponentProps<typeof RNButton>;
-type Props = Omit<RNButtonProps, "as"> & {
+type Props = Omit<RNButtonProps, "as" | "ref"> & {
   as?: "button" | "a" | React.ElementType;
 };
 
-const Button = (props: Props) => (
+const Button = forwardRef<HTMLElement, Props>((props, ref) => (
   // @ts-expect-error wrong types
-  <RNButton {...props} />
-);
+  <RNButton ref={ref} {...props} />
+));
 
 export default Button;

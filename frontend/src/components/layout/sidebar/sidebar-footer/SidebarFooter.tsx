@@ -18,17 +18,21 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import { Route } from "@/Navigation";
 import SidebarItem from "@/components/layout/sidebar/sidebar-item/SidebarItem";
+import Button from "@/components/ui/button/Button";
 import Icon from "@/components/ui/icon/Icon";
+import Popover from "@/components/ui/popover/Popover";
+import OverlayTrigger from "@/components/ui/overlay-trigger/OverlayTrigger";
 
 type SidebarFooterProps = {
   appName?: string;
   appVersion: string;
   repoUrl?: string;
   docsUrl?: string;
+  isCollapsed?: boolean;
 };
 
 const SidebarFooter = ({
@@ -36,55 +40,108 @@ const SidebarFooter = ({
   appVersion,
   repoUrl,
   docsUrl,
+  isCollapsed,
 }: SidebarFooterProps) => {
-  return (
-    <div className="sidebar-footer d-flex flex-column align-items-center flex-shrink-0 mb-2 bg-white border-top">
-      <div className="sidebar-logout-wrapper w-100 d-flex mt-2">
-        <SidebarItem
-          label={
+  const intl = useIntl();
+
+  const layout = isCollapsed
+    ? "flex-column align-items-center"
+    : "flex-row justify-content-between w-100";
+
+  const infoPopover = (
+    <Popover className="sidebar-footer-popover">
+      <Popover.Header as="h3" className="d-flex align-items-center gap-2">
+        <span className="sidebar-app-name">{appName}</span>
+        <small className="text-secondary opacity-75 fw-normal">
+          <FormattedMessage
+            id="components.layout.sidebar.sidebar-footer.SidebarFooter.versionLabel"
+            defaultMessage="Version {appVersion}"
+            values={{ appVersion }}
+          />
+        </small>
+      </Popover.Header>
+      <Popover.Body className="d-flex flex-column gap-1 p-2">
+        {repoUrl && (
+          <a
+            href={repoUrl}
+            className="sidebar-footer-link d-flex align-items-center gap-2 px-2 py-1 rounded text-decoration-none"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Icon className="text-black flex-shrink-0" icon="github" />
             <FormattedMessage
-              id="components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel"
-              defaultMessage="Logout"
+              id="components.layout.sidebar.sidebar-footer.SidebarFooter.sourceCodeLabel"
+              defaultMessage="Source code"
             />
-          }
-          icon="logout"
-          route={Route.logout}
-          className="w-100 justify-content-center"
-        />
-      </div>
-      <div className="sidebar-meta text-muted fw-semibold text-center">
-        <div>
-          <span className="sidebar-app-name">{appName}</span>
-          <small className="text-secondary opacity-75 ms-1">
-            v{appVersion}
-          </small>
+          </a>
+        )}
+
+        {docsUrl && (
+          <a
+            href={docsUrl}
+            className="sidebar-footer-link d-flex align-items-center gap-2 px-2 py-1 rounded text-decoration-none"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <Icon className="text-black flex-shrink-0" icon="documentation" />
+            <FormattedMessage
+              id="components.layout.sidebar.sidebar-footer.SidebarFooter.documentationLabel"
+              defaultMessage="Documentation"
+            />
+          </a>
+        )}
+      </Popover.Body>
+    </Popover>
+  );
+
+  return (
+    <div className="sidebar-footer d-flex align-items-center flex-shrink-0 mb-2 bg-white border-top">
+      <div
+        className={`sidebar-footer-actions d-flex ${layout}`}
+        data-testid="sidebar-footer-actions"
+      >
+        <div className="sidebar-footer-action-item sidebar-footer-action">
+          <OverlayTrigger
+            trigger="click"
+            rootClose
+            placement={isCollapsed ? "right" : "top"}
+            overlay={infoPopover}
+          >
+            <Button
+              variant="light"
+              className="sidebar-info-button d-flex align-items-center justify-content-center"
+              aria-label={intl.formatMessage({
+                id: "components.layout.sidebar.sidebar-footer.SidebarFooter.infoLabel",
+                defaultMessage: "About",
+              })}
+            >
+              <Icon icon="info" className="sidebar-icon flex-shrink-0" />
+              <span className="sidebar-item-label text-truncate">
+                <FormattedMessage
+                  id="components.layout.sidebar.sidebar-footer.SidebarFooter.infoLabel"
+                  defaultMessage="About"
+                />
+              </span>
+            </Button>
+          </OverlayTrigger>
         </div>
 
-        {(repoUrl || docsUrl) && (
-          <div className="sidebar-app-name mt-1">
-            {repoUrl && (
-              <a
-                href={repoUrl}
-                className="text-reset mx-1"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Icon className="text-black" icon="github" />
-              </a>
-            )}
+        <div className="sidebar-footer-divider" />
 
-            {docsUrl && (
-              <a
-                href={docsUrl}
-                className="text-reset mx-1"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Icon className="text-black" icon="documentation" />
-              </a>
-            )}
+        <div className="sidebar-footer-action-item sidebar-footer-action">
+          <div className="sidebar-logout">
+            <SidebarItem
+              label={
+                <FormattedMessage
+                  id="components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel"
+                  defaultMessage="Logout"
+                />
+              }
+              icon="logout"
+              route={Route.logout}
+            />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

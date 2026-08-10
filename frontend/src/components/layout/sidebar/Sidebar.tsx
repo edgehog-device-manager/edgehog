@@ -88,6 +88,7 @@ const Sidebar = ({
         appVersion={appVersion}
         repoUrl={repoUrl}
         docsUrl={docsUrl}
+        isCollapsed={isDesktopCollapsed}
       />
     </aside>
   );
