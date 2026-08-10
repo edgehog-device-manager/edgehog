@@ -1605,8 +1605,20 @@
   "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
   },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.documentationLabel": {
+    "defaultMessage": "Documentation"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.infoLabel": {
+    "defaultMessage": "About"
+  },
   "components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel": {
     "defaultMessage": "Logout"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.sourceCodeLabel": {
+    "defaultMessage": "Source code"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.versionLabel": {
+    "defaultMessage": "Version {appVersion}"
   },
   "components.ota.operation-table.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
