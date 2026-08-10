@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       openfga:
-        image: openfga/openfga:v1.16.1
+        image: openfga/openfga:v1.17.0
         command: run
         ports:
           - 8080:8080
@@ -46,7 +46,7 @@ jobs:
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - name: Install OpenFGA cli
-        uses: jaxxstorm/action-install-gh-release@7f2440a9a41f74262d8f6433da138c799799a969 # v1.13.0
+        uses: jaxxstorm/action-install-gh-release@cd6b2b78ad38bdd294341cda064ec0692b06215b # v1.14.0
         with:
           repo: openfga/cli
           cache: enable
