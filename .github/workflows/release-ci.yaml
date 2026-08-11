@@ -44,11 +44,8 @@ jobs:
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
   publish-docs:
-    needs: [make-release]
     uses: ./.github/workflows/docs-ci.yaml
     with:
-      release-made: ${{ needs.make-release.outputs.backend--release_created == true }}
-      release-version: ${{ needs.make-release.outputs.backend--version }}
       publish: ${{ github.repository_owner == 'edgehog-device-manager' }}
     secrets:
       publish-key: ${{ secrets.DOCS_DEPLOY_KEY }}
