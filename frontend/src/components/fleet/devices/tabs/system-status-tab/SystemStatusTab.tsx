@@ -24,10 +24,12 @@ import dayjs from "dayjs";
 
 import type { SystemStatusTab_systemStatus$key } from "@/api/__generated__/SystemStatusTab_systemStatus.graphql";
 
+import FormValue from "@/components/ui/form-value/FormValue";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import Form from "@/components/ui/form/Form";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
-import { formatBytes, FormRow, FormValue } from "@/pages/Device";
+import formatBytes from "@/utils/formatBytes";
 
 const DEVICE_SYSTEM_STATUS_FRAGMENT = graphql`
   fragment SystemStatusTab_systemStatus on Device {
@@ -85,6 +87,8 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
         <Stack gap={3}>
           {systemStatus.memoryFreeBytes != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-system-status-memory-free-bytes"
               label={
                 <FormattedMessage
@@ -102,6 +106,8 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
           )}
           {systemStatus.taskCount != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-system-status-task-count"
               label={
                 <FormattedMessage
@@ -119,6 +125,8 @@ const DeviceSystemStatusTab = ({ deviceRef }: DeviceSystemStatusTabProps) => {
           )}
           {systemStatus.uptimeMilliseconds != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-system-status-uptime"
               label={
                 <FormattedMessage

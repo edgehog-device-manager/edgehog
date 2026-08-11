@@ -25,7 +25,7 @@ import type { BaseImageTab_baseImage$key } from "@/api/__generated__/BaseImageTa
 import Form from "@/components/ui/form/Form";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
-import { FormRow } from "@/pages/Device";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 
 const DEVICE_BASE_IMAGE_FRAGMENT = graphql`
   fragment BaseImageTab_baseImage on Device {
@@ -69,6 +69,8 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
         <Stack gap={3}>
           {baseImage.name !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-base-image-name"
               label={
                 <FormattedMessage
@@ -82,6 +84,8 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
           )}
           {baseImage.version !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-base-image-version"
               label={
                 <FormattedMessage
@@ -95,6 +99,8 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
           )}
           {baseImage.buildId !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-base-image-buildId"
               label={
                 <FormattedMessage
@@ -108,6 +114,8 @@ const DeviceBaseImageTab = ({ deviceRef }: DeviceBaseImageTabProps) => {
           )}
           {baseImage.fingerprint !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-base-image-fingerprint"
               label={
                 <FormattedMessage
