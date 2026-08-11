@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: crate-ci/typos@f8a58b6b53f2279f71eb605f03a4ae4d10608f45 # v1.47.0
+      - uses: crate-ci/typos@44e2070e6017f834bf069503acb35ca0ca0b75f2 # v1.47.1
   committed:
     name: Commits follow conventional commits
     runs-on: ubuntu-latest
@@ -66,6 +66,6 @@ jobs:
       - name: Extract commit messages
         run: git --no-pager log --pretty=%B "origin/${{ github.base_ref }}..HEAD" > commit-messages.txt
       - name: Spellcheck Commits
-        uses: crate-ci/typos@f8a58b6b53f2279f71eb605f03a4ae4d10608f45 # v1.47.0
+        uses: crate-ci/typos@44e2070e6017f834bf069503acb35ca0ca0b75f2 # v1.47.1
         with:
           files: ./commit-messages.txt
