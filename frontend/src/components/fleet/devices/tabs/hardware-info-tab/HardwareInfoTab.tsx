@@ -23,9 +23,10 @@ import { Card } from "react-bootstrap";
 import type { HardwareInfoTab_hardwareInfo$key } from "@/api/__generated__/HardwareInfoTab_hardwareInfo.graphql";
 
 import Form from "@/components/ui/form/Form";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
-import { formatBytes, FormRow } from "@/pages/Device";
+import formatBytes from "@/utils/formatBytes";
 
 const DEVICE_HARDWARE_INFO_FRAGMENT = graphql`
   fragment HardwareInfoTab_hardwareInfo on Device {
@@ -66,6 +67,8 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
         <Stack gap={3}>
           {hardwareInfo.cpuArchitecture != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-hardware-info-cpu-architecture"
               label={
                 <FormattedMessage
@@ -83,6 +86,8 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
           )}
           {hardwareInfo.cpuModel != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-hardware-info-cpu-model"
               label={
                 <FormattedMessage
@@ -100,6 +105,8 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
           )}
           {hardwareInfo.cpuModelName != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-hardware-info-cpu-model-name"
               label={
                 <FormattedMessage
@@ -117,6 +124,8 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
           )}
           {hardwareInfo.cpuVendor != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-hardware-info-cpu-vendor"
               label={
                 <FormattedMessage
@@ -134,6 +143,8 @@ const DeviceHardwareInfoTab = ({ deviceRef }: DeviceHardwareInfoTabProps) => {
           )}
           {hardwareInfo.memoryTotalBytes != null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-hardware-info-memory-total-bytes"
               label={
                 <FormattedMessage

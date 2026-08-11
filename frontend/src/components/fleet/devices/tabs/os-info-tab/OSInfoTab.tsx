@@ -25,7 +25,7 @@ import type { OSInfoTab_osInfo$key } from "@/api/__generated__/OSInfoTab_osInfo.
 import Form from "@/components/ui/form/Form";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
-import { FormRow } from "@/pages/Device";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 
 const DEVICE_OS_INFO_FRAGMENT = graphql`
   fragment OSInfoTab_osInfo on Device {
@@ -67,6 +67,8 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
         <Stack gap={3}>
           {osInfo.name !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-os-info-name"
               label={
                 <FormattedMessage
@@ -80,6 +82,8 @@ const DeviceOSInfoTab = ({ deviceRef }: DeviceOSInfoTabProps) => {
           )}
           {osInfo.version !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-os-info-version"
               label={
                 <FormattedMessage

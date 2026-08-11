@@ -18,60 +18,30 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import debounce from "lodash/debounce";
 import React, {
   Suspense,
   useCallback,
   useEffect,
-  useState,
   useMemo,
+  useState,
 } from "react";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
-import {
-  graphql,
-  useFragment,
-  usePreloadedQuery,
-  useQueryLoader,
-  useMutation,
-  fetchQuery,
-  useRelayEnvironment,
-} from "react-relay/hooks";
+import { graphql, usePreloadedQuery, useQueryLoader } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
-import type { PayloadError } from "relay-runtime";
 import { FormattedMessage } from "react-intl";
-import { Card } from "react-bootstrap";
 
-import type { Device_connectionStatus$key } from "@/api/__generated__/Device_connectionStatus.graphql";
 import type { Device_getDevice_Query } from "@/api/__generated__/Device_getDevice_Query.graphql";
-import type { Device_updateDevice_Mutation } from "@/api/__generated__/Device_updateDevice_Mutation.graphql";
-import type { Device_addDeviceTags_Mutation } from "@/api/__generated__/Device_addDeviceTags_Mutation.graphql";
-import type { Device_removeDeviceTags_Mutation } from "@/api/__generated__/Device_removeDeviceTags_Mutation.graphql";
-import type { Device_requestForwarderSession_Mutation } from "@/api/__generated__/Device_requestForwarderSession_Mutation.graphql";
-import type { Device_getForwarderSession_Query } from "@/api/__generated__/Device_getForwarderSession_Query.graphql";
 import type { Device_getExistingDeviceTags_Query } from "@/api/__generated__/Device_getExistingDeviceTags_Query.graphql";
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
-import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ConnectionStatus from "@/components/fleet/devices/connection-status/ConnectionStatus";
-import Col from "@/components/ui/col/Col";
-import Figure from "@/components/ui/figure/Figure";
-import Form from "@/components/ui/form/Form";
-import LastSeen from "@/components/fleet/devices/last-seen/LastSeen";
-import LedBehaviorDropdown from "@/components/fleet/devices/led-behavior-dropdown/LedBehaviorDropdown";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
-import Row from "@/components/ui/row/Row";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import Tabs from "@/components/ui/tabs/Tabs";
-import MultiSelect from "@/components/ui/multi-select/MultiSelect";
-import {
-  FormRow as BaseFormRow,
-  FormRowProps,
-} from "@/components/ui/form-row/FormRow";
-import assets from "@/assets";
+import DeviceInfoCard from "@/components/fleet/devices/device-info-card/DeviceInfoCard";
 import DeviceHardwareInfoTab from "@/components/fleet/devices/tabs/hardware-info-tab/HardwareInfoTab";
 import DeviceOSInfoTab from "@/components/fleet/devices/tabs/os-info-tab/OSInfoTab";
 import DeviceRuntimeInfoTab from "@/components/fleet/devices/tabs/runtime-info-tab/RuntimeInfoTab";
@@ -87,46 +57,14 @@ import DeviceSoftwareUpdateTab from "@/components/fleet/devices/tabs/software-up
 import DeviceFileManagementTab from "@/components/fleet/devices/tabs/file-management-tab/FileManagementTab";
 import DeviceApplicationsTab from "@/components/fleet/devices/tabs/applications-tab/ApplicationsTab";
 
-const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
-  fragment Device_connectionStatus on Device {
-    online
-    lastConnection
-    lastDisconnection
-  }
-`;
-
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!, $first: Int, $after: String) {
     forwarderConfig {
       __typename
     }
     device(id: $id) {
-      id
-      deviceId
       name
-      online
-      capabilities
-      partNumber
-      serialNumber
-      systemModel {
-        name
-        pictureUrl
-        hardwareType {
-          name
-        }
-      }
-      tags {
-        edges {
-          node {
-            id
-            name
-          }
-        }
-      }
-      deviceGroups {
-        id
-        name
-      }
+      ...DeviceInfoCard_device
       ...HardwareInfoTab_hardwareInfo
       ...BaseImageTab_baseImage
       ...OSInfoTab_osInfo
@@ -141,73 +79,8 @@ const GET_DEVICE_QUERY = graphql`
       ...NetworkInterfacesTab_networkInterfaces
       ...FileManagementTab_fileManagement
         @arguments(storageFirst: $first, storageAfter: $after)
-      ...Device_connectionStatus
     }
     ...ApplicationsTab_deployedApplications
-  }
-`;
-
-const UPDATE_DEVICE_MUTATION = graphql`
-  mutation Device_updateDevice_Mutation(
-    $deviceId: ID!
-    $input: UpdateDeviceInput!
-  ) {
-    updateDevice(id: $deviceId, input: $input) {
-      result {
-        id
-        name
-      }
-    }
-  }
-`;
-
-const ADD_DEVICE_TAGS_MUTATION = graphql`
-  mutation Device_addDeviceTags_Mutation(
-    $deviceId: ID!
-    $input: AddDeviceTagsInput!
-  ) {
-    addDeviceTags(id: $deviceId, input: $input) {
-      result {
-        id
-        tags {
-          edges {
-            node {
-              id
-              name
-            }
-          }
-        }
-        deviceGroups {
-          id
-          name
-        }
-      }
-    }
-  }
-`;
-
-const REMOVE_DEVICE_TAGS_MUTATION = graphql`
-  mutation Device_removeDeviceTags_Mutation(
-    $deviceId: ID!
-    $input: RemoveDeviceTagsInput!
-  ) {
-    removeDeviceTags(id: $deviceId, input: $input) {
-      result {
-        id
-        tags {
-          edges {
-            node {
-              id
-              name
-            }
-          }
-        }
-        deviceGroups {
-          id
-          name
-        }
-      }
-    }
   }
 `;
 
@@ -222,30 +95,6 @@ const GET_TAGS_QUERY = graphql`
     }
   }
 `;
-
-const REQUEST_FORWARDER_SESSION_MUTATION = graphql`
-  mutation Device_requestForwarderSession_Mutation(
-    $input: RequestForwarderSessionInput!
-  ) {
-    requestForwarderSession(input: $input)
-  }
-`;
-
-const GET_FORWARDER_SESSION_QUERY = graphql`
-  query Device_getForwarderSession_Query(
-    $deviceId: ID!
-    $sessionToken: String!
-  ) {
-    forwarderSession(deviceId: $deviceId, token: $sessionToken) {
-      status
-      secure
-      forwarderHostname
-      forwarderPort
-    }
-  }
-`;
-
-const TTYD_PORT = 7681;
 
 const TAB_KEYS = [
   "device-hardware-info-tab",
@@ -264,103 +113,6 @@ const TAB_KEYS = [
   "device-applications-tab",
 ];
 
-const FormRow = (props: FormRowProps) => (
-  <BaseFormRow {...props} labelCol={3} valueCol={9} />
-);
-
-const FormValue = (params: { children: React.ReactNode }) => {
-  return <div className="h-100 py-2">{params.children}</div>;
-};
-
-const formatBytes = (bytes: number, decimals = 2) => {
-  if (bytes === 0) return "0 B";
-
-  const k = 1024;
-  const dm = decimals < 0 ? 0 : decimals;
-  const sizes = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
-
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-};
-
-interface DeviceConnectionFormRowsProps {
-  deviceRef: Device_connectionStatus$key;
-}
-const DeviceConnectionFormRows = ({
-  deviceRef,
-}: DeviceConnectionFormRowsProps) => {
-  const { online, lastConnection, lastDisconnection } = useFragment(
-    DEVICE_CONNECTION_STATUS_FRAGMENT,
-    deviceRef,
-  );
-
-  return (
-    <>
-      <FormRow
-        id="form-device-connection-status"
-        label={
-          <FormattedMessage
-            id="pages.Device.connectionStatus"
-            defaultMessage="Connection"
-          />
-        }
-      >
-        <FormValue>
-          <ConnectionStatus connected={online} />
-        </FormValue>
-      </FormRow>
-      <FormRow
-        id="form-device-last-seen"
-        label={
-          <FormattedMessage
-            id="pages.Device.lastSeen"
-            defaultMessage="Last seen"
-          />
-        }
-      >
-        <FormValue>
-          <LastSeen
-            lastConnection={lastConnection}
-            lastDisconnection={lastDisconnection}
-            online={online}
-          />
-        </FormValue>
-      </FormRow>
-    </>
-  );
-};
-
-function timeoutPromise<T>(promise: Promise<T>, millis: number) {
-  return Promise.race([
-    promise,
-    new Promise((_resolve, reject) => setTimeout(() => reject(), millis)),
-  ]);
-}
-
-async function retryWithExponentialBackoff<T>(
-  fn: () => Promise<T>,
-  attempt = 1,
-  maxAttempts = 4,
-  baseDelayMs = 1000,
-): Promise<T> {
-  try {
-    return await fn();
-  } catch (error) {
-    if (attempt >= maxAttempts) {
-      throw error;
-    }
-    const delayMs = baseDelayMs * (2 ** attempt - 1);
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
-    return await retryWithExponentialBackoff(
-      fn,
-      attempt + 1,
-      maxAttempts,
-      baseDelayMs,
-    );
-  }
-}
-
 interface DeviceContentProps {
   getDeviceQuery: PreloadedQuery<Device_getDevice_Query>;
   getTagsQuery: PreloadedQuery<Device_getExistingDeviceTags_Query>;
@@ -374,10 +126,6 @@ const DeviceContent = ({
 }: DeviceContentProps) => {
   const { deviceId = "", activeTab } = useParams();
   const navigate = useNavigate();
-  const relayEnvironment = useRelayEnvironment();
-  const [isOpeningRemoteTerminal, setIsOpeningRemoteTerminal] = useState(false);
-  const [remoteTerminalErrorFeedback, setRemoteTerminalErrorFeedback] =
-    useState<React.ReactNode>(null);
 
   const deviceData = usePreloadedQuery<Device_getDevice_Query>(
     GET_DEVICE_QUERY,
@@ -395,16 +143,6 @@ const DeviceContent = ({
   );
 
   const device = deviceData.device;
-  const [deviceDraftName, setDeviceDraftName] = useState(device?.name || "");
-
-  const deviceTags = useMemo(
-    () =>
-      device?.tags?.edges?.map(({ node: { name: tag } }) => ({
-        label: tag,
-        value: tag,
-      })) || [],
-    [device?.tags],
-  );
 
   const tags = useMemo(
     () =>
@@ -416,279 +154,6 @@ const DeviceContent = ({
   );
 
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
-  const handleAPIErrors = useCallback((errors: PayloadError[]) => {
-    const errorFeedback = errors
-      .map(({ fields, message }) =>
-        fields.length ? `${fields.join(" ")} ${message}` : message,
-      )
-      .join(". \n");
-    setErrorFeedback(errorFeedback);
-  }, []);
-
-  const [requestForwarderSession, isRequestingForwarderSession] =
-    useMutation<Device_requestForwarderSession_Mutation>(
-      REQUEST_FORWARDER_SESSION_MUTATION,
-    );
-
-  const handleOpenRemoteTerminal = useCallback(
-    async (sessionToken: string) => {
-      const data = await fetchQuery<Device_getForwarderSession_Query>(
-        relayEnvironment,
-        GET_FORWARDER_SESSION_QUERY,
-        { deviceId, sessionToken },
-      ).toPromise();
-
-      if (!data?.forwarderSession) {
-        throw new Error("The forwarder session does not exist.");
-      }
-
-      const { forwarderHostname, forwarderPort, secure, status } =
-        data.forwarderSession;
-
-      if (status !== "CONNECTED") {
-        throw new Error("The forwarder session is not connected.");
-      }
-
-      const forwarderProtocol = secure ? "https" : "http";
-
-      window.open(
-        `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/v1/${sessionToken}/http/${TTYD_PORT}`,
-        "_blank",
-      );
-    },
-    [relayEnvironment, deviceId],
-  );
-
-  const handleRequestForwarderSession = useCallback(() => {
-    requestForwarderSession({
-      variables: { input: { deviceId } },
-      onCompleted(data, errors) {
-        if (errors) {
-          handleAPIErrors(errors);
-          return;
-        }
-        const sessionToken = data.requestForwarderSession;
-
-        setIsOpeningRemoteTerminal(true);
-        timeoutPromise(
-          retryWithExponentialBackoff(() =>
-            handleOpenRemoteTerminal(sessionToken),
-          ),
-          10_000,
-        )
-          .catch(() => {
-            setRemoteTerminalErrorFeedback(
-              <FormattedMessage
-                id="pages.Device.openRemoteTerminalErrorFeedback"
-                defaultMessage="Could not access the remote terminal, please try again."
-                description="Feedback for unknown error while opening a remote terminal session"
-              />,
-            );
-          })
-          .finally(() => {
-            setIsOpeningRemoteTerminal(false);
-          });
-      },
-      onError() {
-        setErrorFeedback(
-          <FormattedMessage
-            id="pages.Device.openRemoteTerminalErrorFeedback"
-            defaultMessage="Could not access the remote terminal, please try again."
-            description="Feedback for unknown error while opening a remote terminal session"
-          />,
-        );
-      },
-    });
-  }, [requestForwarderSession, handleOpenRemoteTerminal, deviceId]);
-
-  const [updateDevice] = useMutation<Device_updateDevice_Mutation>(
-    UPDATE_DEVICE_MUTATION,
-  );
-  const [addDeviceTags] = useMutation<Device_addDeviceTags_Mutation>(
-    ADD_DEVICE_TAGS_MUTATION,
-  );
-  const [removeDeviceTags] = useMutation<Device_removeDeviceTags_Mutation>(
-    REMOVE_DEVICE_TAGS_MUTATION,
-  );
-
-  const handleUpdateDeviceName = useMemo(
-    () =>
-      debounce(
-        (newDeviceName: string) => {
-          updateDevice({
-            variables: { deviceId, input: { name: newDeviceName } },
-            onCompleted(_data, errors) {
-              if (errors) {
-                handleAPIErrors(errors);
-                return;
-              }
-            },
-            onError() {
-              setErrorFeedback(
-                <FormattedMessage
-                  id="pages.Device.updateDeviceErrorFeedback"
-                  defaultMessage="Could not update the device, please try again."
-                  description="Feedback for unknown error while updating a device"
-                />,
-              );
-            },
-          });
-        },
-        500,
-        { leading: true },
-      ),
-    [updateDevice, deviceId],
-  );
-
-  const handleDeviceNameChange = useCallback(
-    (newDeviceName: string) => {
-      setDeviceDraftName(newDeviceName);
-      handleUpdateDeviceName(newDeviceName);
-    },
-    [handleUpdateDeviceName],
-  );
-
-  const isValidNewTag = useCallback(
-    (inputValue: string) => {
-      const newTag = inputValue.trim().toLowerCase();
-      return newTag !== "" && !deviceTags.some((tag) => tag.value === newTag);
-    },
-    [deviceTags],
-  );
-
-  const handleAddDeviceTags = useCallback(
-    (tags: string[]) => {
-      addDeviceTags({
-        variables: {
-          deviceId,
-          input: { tags },
-        },
-        onCompleted(_data, errors) {
-          if (errors) {
-            handleAPIErrors(errors);
-            return;
-          }
-          // TODO refresh tags only when adding unexisting tags
-          refreshTags();
-        },
-        updater(store, data) {
-          if (!data?.addDeviceTags?.result) {
-            return;
-          }
-
-          const root = store.getRoot();
-          const deviceGroups = root.getLinkedRecords("deviceGroups");
-          if (!deviceGroups) {
-            return;
-          }
-
-          const device = store
-            .getRootField("addDeviceTags")
-            .getLinkedRecord("result");
-          const deviceId = device.getDataID();
-
-          const linkedGroups = new Set(
-            device
-              .getLinkedRecords("deviceGroups")
-              ?.map((deviceGroup) => deviceGroup.getDataID()),
-          );
-
-          deviceGroups.forEach((deviceGroup) => {
-            const devices = deviceGroup.getLinkedRecords("devices");
-            if (!devices) {
-              return;
-            }
-            if (!linkedGroups.has(deviceGroup.getDataID())) {
-              return deviceGroup.setLinkedRecords(
-                devices.filter((device) => device.getDataID() !== deviceId),
-                "devices",
-              );
-            }
-            if (!devices.some((device) => device.getDataID() === deviceId)) {
-              deviceGroup.setLinkedRecords([...devices, device], "devices");
-            }
-          });
-        },
-      });
-    },
-    [addDeviceTags, deviceId, handleAPIErrors, refreshTags],
-  );
-
-  const handleRemoveDeviceTags = useCallback(
-    (tags: string[]) => {
-      removeDeviceTags({
-        variables: {
-          deviceId,
-          input: { tags },
-        },
-        onCompleted(_data, errors) {
-          if (errors) {
-            handleAPIErrors(errors);
-            return;
-          }
-        },
-        updater(store, data) {
-          if (!data?.removeDeviceTags?.result) {
-            return;
-          }
-
-          const root = store.getRoot();
-          const deviceGroups = root.getLinkedRecords("deviceGroups");
-          if (!deviceGroups) {
-            return;
-          }
-
-          const device = store
-            .getRootField("removeDeviceTags")
-            .getLinkedRecord("result");
-          const deviceId = device.getDataID();
-
-          const linkedGroups = new Set(
-            device
-              .getLinkedRecords("deviceGroups")
-              ?.map((deviceGroup) => deviceGroup.getDataID()),
-          );
-
-          deviceGroups.forEach((deviceGroup) => {
-            const devices = deviceGroup.getLinkedRecords("devices");
-            if (!devices) {
-              return;
-            }
-            if (!linkedGroups.has(deviceGroup.getDataID())) {
-              return deviceGroup.setLinkedRecords(
-                devices.filter((device) => device.getDataID() !== deviceId),
-                "devices",
-              );
-            }
-            if (!devices.some((device) => device.getDataID() === deviceId)) {
-              deviceGroup.setLinkedRecords([...devices, device], "devices");
-            }
-          });
-        },
-      });
-    },
-    [deviceId, removeDeviceTags],
-  );
-
-  const handleTagsChange = useCallback(
-    (updatedTags: string[]) => {
-      const previousTags = deviceTags.map((tag) => tag.value);
-      const tagsToBeAdded = updatedTags.filter(
-        (t) => !previousTags.includes(t),
-      );
-      const tagsToBeRemoved = previousTags.filter(
-        (t) => !updatedTags.includes(t),
-      );
-
-      if (tagsToBeAdded.length > 0) {
-        handleAddDeviceTags(tagsToBeAdded);
-      }
-      if (tagsToBeRemoved.length > 0) {
-        handleRemoveDeviceTags(tagsToBeRemoved);
-      }
-    },
-    [deviceTags, handleAddDeviceTags, handleRemoveDeviceTags],
-  );
 
   const currentTabKey = activeTab || TAB_KEYS[0];
 
@@ -712,9 +177,6 @@ const DeviceContent = ({
     );
   }
 
-  const isRemoteTerminalSupported =
-    isForwarderEnabled && device.capabilities.includes("REMOTE_TERMINAL");
-
   return (
     <Page>
       <Page.Header title={device.name} />
@@ -728,227 +190,13 @@ const DeviceContent = ({
           >
             {errorFeedback}
           </Alert>
-          <Card className="h-100 border-0 p-3 shadow-sm mb-2">
-            <Row>
-              <Col md="5" lg="4" xl="3">
-                <div>
-                  <Figure
-                    alt={device.name}
-                    src={
-                      device.systemModel?.pictureUrl || assets.images.devices
-                    }
-                  />
-                </div>
-              </Col>
-              <Col md="7" lg="8" xl="9">
-                <Form className="ms-3">
-                  <Stack gap={3}>
-                    <FormRow
-                      id="form-device-name"
-                      label={
-                        <FormattedMessage
-                          id="pages.Device.name"
-                          defaultMessage="Name"
-                        />
-                      }
-                    >
-                      <Form.Control
-                        type="text"
-                        value={deviceDraftName}
-                        onChange={(e) => handleDeviceNameChange(e.target.value)}
-                      />
-                    </FormRow>
-                    <FormRow
-                      id="form-device-tags"
-                      label={
-                        <FormattedMessage
-                          id="pages.Device.tags"
-                          defaultMessage="Tags"
-                        />
-                      }
-                    >
-                      <MultiSelect
-                        creatable
-                        value={deviceTags}
-                        options={tags}
-                        onChange={(newTags) =>
-                          handleTagsChange(newTags.map(({ value }) => value))
-                        }
-                        isValidNewOption={isValidNewTag}
-                        onCreateOption={(inputValue) => {
-                          const newTag = inputValue.trim().toLowerCase();
-                          handleAddDeviceTags([newTag]);
-                        }}
-                      />
-                    </FormRow>
-                    <FormRow
-                      id="form-device-deviceId"
-                      label={
-                        <FormattedMessage
-                          id="pages.Device.deviceId"
-                          defaultMessage="Device ID"
-                        />
-                      }
-                    >
-                      <Form.Control
-                        type="text"
-                        value={device.deviceId}
-                        readOnly
-                      />
-                    </FormRow>
-                    {device.serialNumber && (
-                      <FormRow
-                        id="form-device-serialNumber"
-                        label={
-                          <FormattedMessage
-                            id="pages.Device.serialNumber"
-                            defaultMessage="Serial Number"
-                          />
-                        }
-                      >
-                        <Form.Control
-                          type="text"
-                          value={device.serialNumber}
-                          readOnly
-                        />
-                      </FormRow>
-                    )}
-                    {device.partNumber && (
-                      <FormRow
-                        id="device-hardware-info-part-number"
-                        label={
-                          <FormattedMessage
-                            id="pages.Device.partNumber"
-                            defaultMessage="Part Number"
-                          />
-                        }
-                      >
-                        <Form.Control
-                          type="text"
-                          value={device.partNumber}
-                          readOnly
-                        />
-                      </FormRow>
-                    )}
-                    {device.systemModel && (
-                      <>
-                        <FormRow
-                          id="form-device-system-model"
-                          label={
-                            <FormattedMessage
-                              id="pages.Device.systemModel"
-                              defaultMessage="System Model"
-                            />
-                          }
-                        >
-                          <Form.Control
-                            type="text"
-                            value={device.systemModel.name}
-                            readOnly
-                          />
-                        </FormRow>
-                        <FormRow
-                          id="form-device-hardware-type"
-                          label={
-                            <FormattedMessage
-                              id="pages.Device.hardwareType"
-                              defaultMessage="Hardware Type"
-                            />
-                          }
-                        >
-                          <Form.Control
-                            type="text"
-                            value={device.systemModel.hardwareType?.name}
-                            readOnly
-                          />
-                        </FormRow>
-                      </>
-                    )}
-                    <FormRow
-                      id="form-device-deviceGroups"
-                      label={
-                        <FormattedMessage
-                          id="pages.Device.groups"
-                          defaultMessage="Groups"
-                        />
-                      }
-                    >
-                      <Stack direction="horizontal" gap={3}>
-                        {device.deviceGroups.map((deviceGroup) => (
-                          <Link
-                            key={`device-group-link-${deviceGroup.id}`}
-                            route={Route.deviceGroupsEdit}
-                            params={{ deviceGroupId: deviceGroup.id }}
-                          >
-                            {deviceGroup.name}
-                          </Link>
-                        ))}
-                      </Stack>
-                    </FormRow>
-                    <DeviceConnectionFormRows deviceRef={device} />
-                    {device.capabilities.includes("LED_BEHAVIORS") && (
-                      <FormRow
-                        id="form-device-check-my-device"
-                        label={
-                          <FormattedMessage
-                            id="pages.Device.checkMyDevice"
-                            defaultMessage="Check my Device"
-                          />
-                        }
-                      >
-                        <LedBehaviorDropdown
-                          deviceId={device.id}
-                          disabled={!device.online}
-                          onError={setErrorFeedback}
-                        />
-                      </FormRow>
-                    )}
-                    {isRemoteTerminalSupported && (
-                      <FormRow
-                        id="form-device-open-remote-terminal"
-                        label={
-                          <FormattedMessage
-                            id="pages.Device.remoteTerminal.label"
-                            defaultMessage="Remote Terminal"
-                          />
-                        }
-                      >
-                        <>
-                          <Button
-                            variant="secondary"
-                            onClick={handleRequestForwarderSession}
-                            disabled={
-                              !device.online ||
-                              isRequestingForwarderSession ||
-                              isOpeningRemoteTerminal
-                            }
-                          >
-                            {(isRequestingForwarderSession ||
-                              isOpeningRemoteTerminal) && (
-                              <Spinner size="sm" className="me-2" />
-                            )}
-                            <FormattedMessage
-                              id="pages.Device.remoteTerminal.openTerminalButton"
-                              defaultMessage="Open"
-                            />
-                          </Button>
-                          <Alert
-                            show={!!remoteTerminalErrorFeedback}
-                            variant="danger"
-                            onClose={() => setRemoteTerminalErrorFeedback(null)}
-                            dismissible
-                            className="mt-3"
-                          >
-                            {remoteTerminalErrorFeedback}
-                          </Alert>
-                        </>
-                      </FormRow>
-                    )}
-                  </Stack>
-                </Form>
-              </Col>
-            </Row>
-          </Card>
+          <DeviceInfoCard
+            deviceRef={device}
+            tags={tags}
+            refreshTags={refreshTags}
+            isForwarderSupported={isForwarderEnabled}
+            onError={setErrorFeedback}
+          />
           <Tabs
             className="pt-1 d-flex flex-column flex-grow-1"
             activeKey={currentTabKey}
@@ -1033,7 +281,5 @@ const DevicePage = () => {
     </Suspense>
   );
 };
-
-export { FormRow, FormValue, formatBytes };
 
 export default DevicePage;
