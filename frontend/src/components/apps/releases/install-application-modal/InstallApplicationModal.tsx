@@ -19,18 +19,19 @@
  */
 
 import React, { useCallback, useState, useMemo } from "react";
-import { Form, Button, Row, Col } from "react-bootstrap";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
 import { SingleValue } from "react-select";
 
-import type { AddAvailableApplications_GetApplicationsWithReleases_Query } from "@/api/__generated__/AddAvailableApplications_GetApplicationsWithReleases_Query.graphql";
-import type { AddAvailableApplications_DeployRelease_Mutation } from "@/api/__generated__/AddAvailableApplications_DeployRelease_Mutation.graphql";
+import type { InstallApplicationModal_GetApplicationsWithReleases_Query } from "@/api/__generated__/InstallApplicationModal_GetApplicationsWithReleases_Query.graphql";
+import type { InstallApplicationModal_DeployRelease_Mutation } from "@/api/__generated__/InstallApplicationModal_DeployRelease_Mutation.graphql";
 import { useNavigate, Route } from "@/Navigation";
 import Select from "@/components/ui/select/Select";
+import { FormRow } from "@/components/ui/form-row/FormRow";
+import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 
 const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
-  query AddAvailableApplications_GetApplicationsWithReleases_Query(
+  query InstallApplicationModal_GetApplicationsWithReleases_Query(
     $filter: ApplicationFilterInput = {}
   ) {
     applications(first: 10000, filter: $filter) {
@@ -56,7 +57,7 @@ const GET_APPLICATIONS_WITH_RELEASES_QUERY = graphql`
 `;
 
 const DEPLOY_RELEASE_MUTATION = graphql`
-  mutation AddAvailableApplications_DeployRelease_Mutation(
+  mutation InstallApplicationModal_DeployRelease_Mutation(
     $input: DeployReleaseInput!
   ) {
     deployRelease(input: $input) {
@@ -71,7 +72,9 @@ const DEPLOY_RELEASE_MUTATION = graphql`
   }
 `;
 
-type AddAvailableApplicationsProps = {
+type InstallApplicationModalProps = {
+  open: boolean;
+  onToggleModal: (show: boolean) => void;
   deviceId: string;
   systemModelName: string | undefined;
   isOnline: boolean;
@@ -84,12 +87,14 @@ type SelectOption = {
   disabled: boolean;
 };
 
-const AddAvailableApplications = ({
+const InstallApplicationModal = ({
+  open,
+  onToggleModal,
   deviceId,
   systemModelName,
   isOnline,
   setErrorFeedback,
-}: AddAvailableApplicationsProps) => {
+}: InstallApplicationModalProps) => {
   const intl = useIntl();
   const navigate = useNavigate();
 
@@ -97,7 +102,7 @@ const AddAvailableApplications = ({
   const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
 
   const data =
-    useLazyLoadQuery<AddAvailableApplications_GetApplicationsWithReleases_Query>(
+    useLazyLoadQuery<InstallApplicationModal_GetApplicationsWithReleases_Query>(
       GET_APPLICATIONS_WITH_RELEASES_QUERY,
       {
         filter: {
@@ -173,7 +178,7 @@ const AddAvailableApplications = ({
   }, [releaseOptions, selectedRelease]);
 
   const [deployRelease, isDeploying] =
-    useMutation<AddAvailableApplications_DeployRelease_Mutation>(
+    useMutation<InstallApplicationModal_DeployRelease_Mutation>(
       DEPLOY_RELEASE_MUTATION,
     );
 
@@ -181,7 +186,7 @@ const AddAvailableApplications = ({
     if (!isOnline) {
       setErrorFeedback(
         <FormattedMessage
-          id="components.apps.releases.add-available-applications.AddAvailableApplications.deviceOfflineError"
+          id="components.apps.releases.install-application-modal.InstallApplicationModal.deviceOfflineError"
           defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
         />,
       );
@@ -195,6 +200,16 @@ const AddAvailableApplications = ({
   const handleReleaseChange = (option: SingleValue<SelectOption>) => {
     setSelectedRelease(option?.value || null);
   };
+
+  const resetSelections = useCallback(() => {
+    setSelectedApp(null);
+    setSelectedRelease(null);
+  }, []);
+
+  const handleCancel = useCallback(() => {
+    resetSelections();
+    onToggleModal(false);
+  }, [resetSelections, onToggleModal]);
 
   const handleDeploy = useCallback(() => {
     if (selectedRelease) {
@@ -214,9 +229,9 @@ const AddAvailableApplications = ({
               .join(". \n");
             return setErrorFeedback(errorFeedback);
           }
-          setSelectedApp(null); // Reset selected app
-          setSelectedRelease(null); // Reset selected release
+          resetSelections();
           setErrorFeedback(null);
+          onToggleModal(false);
 
           const deploymentId = data?.deployRelease?.result?.id;
 
@@ -230,46 +245,72 @@ const AddAvailableApplications = ({
         onError: () => {
           setErrorFeedback(
             <FormattedMessage
-              id="components.apps.releases.add-available-applications.AddAvailableApplications.deployErrorFeedback"
+              id="components.apps.releases.install-application-modal.InstallApplicationModal.deployErrorFeedback"
               defaultMessage="Could not deploy the Application, please try again."
             />,
           );
         },
       });
     }
-  }, [deviceId, selectedRelease, deployRelease, setErrorFeedback, navigate]);
+  }, [
+    deviceId,
+    selectedRelease,
+    deployRelease,
+    resetSelections,
+    setErrorFeedback,
+    onToggleModal,
+    navigate,
+  ]);
 
   return (
-    <Form.Group controlId="auto-deploy-group">
-      <Form.Group as={Row} controlId="select-application" className="mt-3">
-        <Form.Label column sm={2}>
-          <FormattedMessage
-            id="components.apps.releases.add-available-applications.AddAvailableApplications.selectApplication"
-            defaultMessage="Select Application"
-          />
-        </Form.Label>
-        <Col sm={10}>
+    <ConfirmModal
+      title={
+        <FormattedMessage
+          id="components.apps.releases.install-application-modal.InstallApplicationModal.title"
+          defaultMessage="Install Application"
+        />
+      }
+      confirmLabel={
+        <FormattedMessage
+          id="components.apps.releases.install-application-modal.InstallApplicationModal.deployButton"
+          defaultMessage="Deploy"
+        />
+      }
+      show={open}
+      onCancel={handleCancel}
+      onConfirm={handleDeploy}
+      disabled={!isOnline || !selectedRelease}
+      isConfirming={isDeploying}
+    >
+      <div className="d-flex flex-column gap-2">
+        <FormRow
+          id="select-application"
+          label={intl.formatMessage({
+            id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication",
+            defaultMessage: "Select Application",
+          })}
+        >
           <Select
             value={selectedApplicationOption}
             onChange={handleAppChange}
             options={applicationOptions}
             isClearable
             placeholder={intl.formatMessage({
-              id: "components.apps.releases.add-available-applications.AddAvailableApplications.searchPlaceholder",
+              id: "components.apps.releases.install-application-modal.InstallApplicationModal.searchPlaceholder",
               defaultMessage: "Search or select an application...",
             })}
             noOptionsMessage={({ inputValue }) =>
               inputValue
                 ? intl.formatMessage(
                     {
-                      id: "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsFoundMatching",
+                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching",
                       defaultMessage:
                         'No applications found matching "{inputValue}"',
                     },
                     { inputValue },
                   )
                 : intl.formatMessage({
-                    id: "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsAvailable",
+                    id: "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable",
                     defaultMessage: "No applications available",
                   })
             }
@@ -280,31 +321,29 @@ const AddAvailableApplications = ({
                 .includes(inputValue.toLowerCase());
             }}
           />
-        </Col>
-      </Form.Group>
+        </FormRow>
 
-      <Form.Group as={Row} controlId="select-release" className="mt-3">
-        <Form.Label column sm={2}>
-          <FormattedMessage
-            id="components.apps.releases.add-available-applications.AddAvailableApplications.selectRelease"
-            defaultMessage="Select Release"
-          />
-        </Form.Label>
-        <Col sm={10}>
+        <FormRow
+          id="select-release"
+          label={intl.formatMessage({
+            id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease",
+            defaultMessage: "Select Release",
+          })}
+        >
           <Select
             value={selectedReleaseOption}
             onChange={handleReleaseChange}
             options={releaseOptions}
             isClearable
             placeholder={intl.formatMessage({
-              id: "components.apps.releases.add-available-applications.AddAvailableApplications.selectARelease",
+              id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectARelease",
               defaultMessage: "Select a release",
             })}
             noOptionsMessage={({ inputValue }) =>
               inputValue
                 ? intl.formatMessage(
                     {
-                      id: "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesFoundMatching",
+                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesFoundMatching",
                       defaultMessage:
                         'No releases found matching "{inputValue}"',
                     },
@@ -312,12 +351,12 @@ const AddAvailableApplications = ({
                   )
                 : selectedApp
                   ? intl.formatMessage({
-                      id: "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesAvailable",
+                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable",
                       defaultMessage:
                         "No releases available for this application",
                     })
                   : intl.formatMessage({
-                      id: "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplicationFirst",
+                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst",
                       defaultMessage: "Please select an application first",
                     })
             }
@@ -330,23 +369,10 @@ const AddAvailableApplications = ({
             isDisabled={!selectedApp}
             isOptionDisabled={(option) => option.disabled}
           />
-        </Col>
-      </Form.Group>
-
-      <Form.Group className="d-flex justify-content-end mt-2">
-        <Button
-          variant="primary"
-          onClick={handleDeploy}
-          disabled={!isOnline || !selectedRelease || isDeploying}
-        >
-          <FormattedMessage
-            id="components.apps.releases.add-available-applications.AddAvailableApplications.deployButton"
-            defaultMessage="Deploy"
-          />
-        </Button>
-      </Form.Group>
-    </Form.Group>
+        </FormRow>
+      </div>
+    </ConfirmModal>
   );
 };
 
-export default AddAvailableApplications;
+export default InstallApplicationModal;

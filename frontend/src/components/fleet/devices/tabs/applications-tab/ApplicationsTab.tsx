@@ -31,10 +31,12 @@ import { Card } from "react-bootstrap";
 import type { ApplicationsTab_deployedApplications$key } from "@/api/__generated__/ApplicationsTab_deployedApplications.graphql";
 import type { ApplicationsTab_deployedApplications_RefetchQuery } from "@/api/__generated__/ApplicationsTab_deployedApplications_RefetchQuery.graphql";
 
-import AddAvailableApplications from "@/components/apps/releases/add-available-applications/AddAvailableApplications";
+import InstallApplicationModal from "@/components/apps/releases/install-application-modal/InstallApplicationModal";
 import DeployedApplicationsTable from "@/components/apps/releases/deployed-applications-table/DeployedApplicationsTable";
 import Alert from "@/components/ui/alert/Alert";
 import { Tab } from "@/components/ui/tabs/Tabs";
+import Button from "@/components/ui/button/Button";
+import Icon from "@/components/ui/icon/Icon";
 
 // TODO: the fragment is defined on the RootQueryType so it can specify
 // which query to run, otherwise Relay would automatically use the `node`
@@ -85,6 +87,7 @@ interface DeviceApplicationsTabProps {
 
 const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+  const [showInstallModal, setShowInstallModal] = useState(false);
   const intl = useIntl();
 
   const [{ device }] = useRefetchableFragment<
@@ -186,28 +189,31 @@ const DeviceApplicationsTab = ({ deviceRef }: DeviceApplicationsTabProps) => {
       >
         {errorFeedback}
       </Alert>
-      <Card className="h-100 border-0 p-3 shadow-sm mb-3">
-        <h5>
-          <FormattedMessage
-            id="components.fleet.devices.tabs.applications-tab.ApplicationsTab.InstallNewApp"
-            defaultMessage="Install Applications"
-          />
-        </h5>
-        <AddAvailableApplications
+      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+        <div className="d-flex justify-content-between align-items-center mb-4">
+          <h5 className="mb-0">
+            <FormattedMessage
+              id="components.fleet.devices.tabs.applications-tab.ApplicationsTab.title"
+              defaultMessage="Applications"
+            />
+          </h5>
+          <Button variant="primary" onClick={() => setShowInstallModal(true)}>
+            <Icon icon="plus" className="me-2" />
+            <FormattedMessage
+              id="components.fleet.devices.tabs.applications-tab.ApplicationsTab.installNewApplication"
+              defaultMessage="Install"
+            />
+          </Button>
+        </div>
+        <DeployedApplicationsTable deviceRef={device} />
+        <InstallApplicationModal
+          open={showInstallModal}
+          onToggleModal={setShowInstallModal}
           deviceId={device.id}
           systemModelName={device.systemModel?.name}
           isOnline={isOnline}
           setErrorFeedback={setErrorFeedback}
         />
-      </Card>
-      <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-        <h5 className="mt-4">
-          <FormattedMessage
-            id="components.fleet.devices.tabs.applications-tab.ApplicationsTab.DeployedApplications"
-            defaultMessage="Deployed Applications"
-          />
-        </h5>
-        <DeployedApplicationsTable deviceRef={device} />
       </Card>
     </Tab>
   );

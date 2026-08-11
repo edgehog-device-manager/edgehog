@@ -466,42 +466,6 @@
   "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.title": {
     "defaultMessage": "Edit Deployment Campaign"
   },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.deployButton": {
-    "defaultMessage": "Deploy"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.deployErrorFeedback": {
-    "defaultMessage": "Could not deploy the Application, please try again."
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsAvailable": {
-    "defaultMessage": "No applications available"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsFoundMatching": {
-    "defaultMessage": "No applications found matching \"{inputValue}\""
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesAvailable": {
-    "defaultMessage": "No releases available for this application"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesFoundMatching": {
-    "defaultMessage": "No releases found matching \"{inputValue}\""
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.searchPlaceholder": {
-    "defaultMessage": "Search or select an application..."
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectARelease": {
-    "defaultMessage": "Select a release"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplication": {
-    "defaultMessage": "Select Application"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplicationFirst": {
-    "defaultMessage": "Please select an application first"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectRelease": {
-    "defaultMessage": "Select Release"
-  },
   "components.apps.releases.application-devices-table.ApplicationDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the application devices table"
@@ -587,6 +551,45 @@
   },
   "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.deployButton": {
+    "defaultMessage": "Deploy"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.deployErrorFeedback": {
+    "defaultMessage": "Could not deploy the Application, please try again."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable": {
+    "defaultMessage": "No applications available"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching": {
+    "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable": {
+    "defaultMessage": "No releases available for this application"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.searchPlaceholder": {
+    "defaultMessage": "Search or select an application..."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectARelease": {
+    "defaultMessage": "Select a release"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst": {
+    "defaultMessage": "Please select an application first"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.title": {
+    "defaultMessage": "Install Application"
   },
   "components.apps.releases.release-devices-table.ReleaseDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
@@ -1302,11 +1305,8 @@
   "components.fleet.devices.storage-table.StorageTable.totalSpaceTitle": {
     "defaultMessage": "Total Space"
   },
-  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.DeployedApplications": {
-    "defaultMessage": "Deployed Applications"
-  },
-  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.InstallNewApp": {
-    "defaultMessage": "Install Applications"
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.installNewApplication": {
+    "defaultMessage": "Install"
   },
   "components.fleet.devices.tabs.applications-tab.ApplicationsTab.title": {
     "defaultMessage": "Applications"

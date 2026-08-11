@@ -22,16 +22,15 @@ import { useCallback } from "react";
 import type { MessageDescriptor } from "react-intl";
 import { defineMessages } from "react-intl";
 import type { ParamParseKey } from "react-router";
-import {
-  matchPath,
-  generatePath as routerGeneratePath,
-  useNavigate as useRouterNavigate,
-} from "react-router";
+import { matchPath, generatePath as routerGeneratePath } from "react-router";
 import type {
   LinkProps as RouterLinkProps,
   NavigateOptions,
 } from "react-router-dom";
-import { Link as RouterLink } from "react-router-dom";
+import {
+  Link as RouterLink,
+  useNavigate as useRouterNavigate,
+} from "react-router-dom";
 
 enum Route {
   devices = "/devices",
