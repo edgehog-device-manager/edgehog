@@ -18,17 +18,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Network.Deployment.Provisioner do
+defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   @moduledoc """
-  The provisioner for deploying networks on a device.
+  The provisioner for deploying device requests on a device.
 
   For more information, check the `Edgehog.Containers.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner, resource: :network
+  use Edgehog.Containers.Provisioner, resource: :device_request
 
   defmodule Core do
     @moduledoc """
-    The module describing the Core functions required by the network deployment provisioner.
+    The module describing the Core functions required by the device request deployment provisioner.
 
     For more information, check the `Edgehog.Containers.Provisioner.Core` docs.
     """
