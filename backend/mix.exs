@@ -137,6 +137,16 @@ defmodule Edgehog.MixProject do
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
       {:ex_doc, "~> 0.40", only: :dev},
+      # NOTE: intentionally pinning google_gax to a non google api repository.
+      # Google gax used an old tesla engine (1.17.0), unpatched with critical
+      # security vulnerabilities. `dufflehq` forked it and started maintaining
+      # its own fork to work with the latest tesla updates. Using their fork.
+      {:google_gax,
+       github: "duffelhq/elixir-google-api",
+       subdir: "clients/gax",
+       ref: "f1b24276c28a2943dde36cd82c2a7ff2a4a1ee1a",
+       override: true},
+      {:poison, "~>4.0", override: true},
       # NOTE:
       # This project intentionally pins nimble_lz4 to v1.1.0 because it depends on lz4_flex v0.9.0,
       # which uses a fixed default block size of 64kB — this matches our device/protocol requirement.

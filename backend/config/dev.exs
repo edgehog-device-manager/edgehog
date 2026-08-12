@@ -107,14 +107,30 @@ config :edgehog, EdgehogWeb.Endpoint,
 # configured to run both http and https servers on
 # different ports.
 
+max_upload_size_bytes =
+  "MAX_UPLOAD_SIZE_BYTES"
+  |> System.get_env(to_string(4_000_000_000))
+  |> String.to_integer()
+
+config :edgehog,
+  enable_s3_storage?: true,
+  max_upload_size_bytes: max_upload_size_bytes,
+  storage_type: :s3,
+  storage_bucket: "edgehog",
+  s3_presign_host_config: %{
+    scheme: "http://",
+    host: "rustfs-storage.edgehog.localhost",
+    port: 9000
+  }
+
 config :ex_aws, :s3,
   scheme: "http://",
   host: "localhost",
   port: "9000"
 
 config :ex_aws,
-  access_key_id: "minioadmin",
-  secret_access_key: "minioadmin"
+  access_key_id: "rustfsadmin",
+  secret_access_key: "rustfsadmin"
 
 config :goth,
   disabled: true
@@ -132,5 +148,5 @@ config :phoenix, :stacktrace_depth, 20
 config :waffle,
   storage: Waffle.Storage.S3,
   bucket: "edgehog",
-  asset_host: "http://localhost:9000/edgehog",
-  virtual_host: true
+  asset_host: "http://rustfs-storage.edgehog.localhost:9000/edgehog",
+  virtual_host: false
