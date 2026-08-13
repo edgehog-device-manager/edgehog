@@ -141,7 +141,16 @@ const getColumnsDefinition = () => [
       const statusCode = row.original.responseCode;
       const message = getValue();
 
-      if (!statusCode && !message) return null;
+      if (!statusCode && !message) {
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.noResponse"
+              defaultMessage="No response"
+            />
+          </span>
+        );
+      }
 
       if (!statusCode) return message ?? null;
       if (!message) return String(statusCode);

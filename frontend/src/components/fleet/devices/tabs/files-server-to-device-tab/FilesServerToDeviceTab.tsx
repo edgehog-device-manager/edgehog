@@ -106,6 +106,9 @@ const DEVICE_FILE_DOWNLOAD_REQUESTS_FRAGMENT = graphql`
               name
             }
           }
+          userId
+          groupId
+          fileMode
         }
       }
     }
@@ -145,6 +148,9 @@ const DEVICE_CREATE_MANUAL_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         progressTracked
         ttlSeconds
         uncompressedFileSizeBytes
+        userId
+        groupId
+        fileMode
       }
     }
   }
@@ -172,6 +178,9 @@ const DEVICE_CREATE_MANAGED_FILE_DOWNLOAD_REQUEST_MUTATION = graphql`
         progressTracked
         ttlSeconds
         uncompressedFileSizeBytes
+        userId
+        groupId
+        fileMode
       }
     }
   }
@@ -192,6 +201,9 @@ const FILE_DOWNLOAD_REQUEST_UPDATED_SUBSCRIPTION = graphql`
           pathOnDevice
           sizeBytes
         }
+        userId
+        groupId
+        fileMode
       }
     }
   }

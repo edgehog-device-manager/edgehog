@@ -739,6 +739,9 @@
   "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.noRequests": {
     "defaultMessage": "No file delete requests have been sent yet."
   },
+  "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.noResponse": {
+    "defaultMessage": "No response"
+  },
   "components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.responseMessages": {
     "defaultMessage": "Response Messages"
   },
@@ -862,6 +865,9 @@
   "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.noRequests": {
     "defaultMessage": "No file upload requests have been sent yet."
   },
+  "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.noResponse": {
+    "defaultMessage": "No response"
+  },
   "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.progress": {
     "defaultMessage": "Progress"
   },
@@ -883,6 +889,9 @@
   "components.files.file-download.files-device-to-server-table.FilesDeviceToServerTable.status.notTracked": {
     "defaultMessage": "Not Tracked"
   },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.campaign.notPartOfCampaign": {
+    "defaultMessage": "Not part of a campaign"
+  },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.campaignName": {
     "defaultMessage": "File Download Campaign"
   },
@@ -895,11 +904,23 @@
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.destination.storage": {
     "defaultMessage": "STORAGE: {path}"
   },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileMode": {
+    "defaultMessage": "File Mode"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileMode.notSet": {
+    "defaultMessage": "Not set"
+  },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileName": {
     "defaultMessage": "File Name"
   },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileSize": {
     "defaultMessage": "Uncompressed File Size"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.groupID": {
+    "defaultMessage": "Group ID"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.groupID.notSet": {
+    "defaultMessage": "Not set"
   },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.noRequests": {
     "defaultMessage": "No file download requests have been sent yet."
@@ -909,6 +930,9 @@
   },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.responseMessage": {
     "defaultMessage": "Response Message"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.responseMessage.noResponse": {
+    "defaultMessage": "No response"
   },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.status": {
     "defaultMessage": "Status"
@@ -921,6 +945,12 @@
   },
   "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.ttl.infinite": {
     "defaultMessage": "Infinite"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.userID": {
+    "defaultMessage": "User ID"
+  },
+  "components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.userID.notSet": {
+    "defaultMessage": "Not set"
   },
   "components.files.file-download.files-table.FilesTable.actionsTitle": {
     "defaultMessage": "Actions"

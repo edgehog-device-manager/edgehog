@@ -109,7 +109,14 @@ const columns = [
         messages && messages.length > 0 ? messages.join(", ") : null;
 
       if (!statusCode && !joinedMessages) {
-        return null;
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.file-delete-requests-table.FileDeleteRequestsTable.noResponse"
+              defaultMessage="No response"
+            />
+          </span>
+        );
       }
 
       if (!statusCode) {

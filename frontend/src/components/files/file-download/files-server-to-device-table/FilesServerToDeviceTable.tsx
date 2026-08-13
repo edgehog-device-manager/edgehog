@@ -37,6 +37,9 @@ const HIDDEN_COLUMNS = [
   "destinationType",
   "uncompressedFileSizeBytes",
   "ttlSeconds",
+  "userId",
+  "groupId",
+  "fileMode",
 ];
 
 const columnHelper = createColumnHelper<FileDownloadRequestNode>();
@@ -58,17 +61,33 @@ const columns = [
         defaultMessage="File Download Campaign"
       />
     ),
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.fileDownloadCampaignsEdit}
-        params={{
-          fileDownloadCampaignId:
-            row.original.campaignTarget?.campaign?.id ?? "",
-        }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ row, getValue }) => {
+      const campaignName = getValue();
+      const campaignId = row.original.campaignTarget?.campaign?.id;
+
+      if (!campaignName || !campaignId) {
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.campaign.notPartOfCampaign"
+              defaultMessage="Not part of a campaign"
+            />
+          </span>
+        );
+      }
+
+      return (
+        <Link
+          route={Route.fileDownloadCampaignsEdit}
+          params={{
+            fileDownloadCampaignId:
+              row.original.campaignTarget?.campaign?.id ?? "",
+          }}
+        >
+          {getValue()}
+        </Link>
+      );
+    },
   }),
   columnHelper.accessor("status", {
     header: () => (
@@ -183,6 +202,78 @@ const columns = [
       return ttl;
     },
   }),
+  columnHelper.accessor("userId", {
+    header: () => (
+      <FormattedMessage
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.userID"
+        defaultMessage="User ID"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const userId = getValue();
+
+      if (userId === -1) {
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.userID.notSet"
+              defaultMessage="Not set"
+            />
+          </span>
+        );
+      }
+
+      return userId;
+    },
+  }),
+  columnHelper.accessor("groupId", {
+    header: () => (
+      <FormattedMessage
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.groupID"
+        defaultMessage="Group ID"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const groupId = getValue();
+
+      if (groupId === -1) {
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.groupID.notSet"
+              defaultMessage="Not set"
+            />
+          </span>
+        );
+      }
+
+      return groupId;
+    },
+  }),
+  columnHelper.accessor("fileMode", {
+    header: () => (
+      <FormattedMessage
+        id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileMode"
+        defaultMessage="File Mode"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const fileMode = getValue();
+
+      if (fileMode === 0) {
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.fileMode.notSet"
+              defaultMessage="Not set"
+            />
+          </span>
+        );
+      }
+
+      return fileMode;
+    },
+  }),
   columnHelper.accessor("responseMessage", {
     header: () => (
       <FormattedMessage
@@ -194,7 +285,16 @@ const columns = [
       const statusCode = row.original.responseCode;
       const message = getValue();
 
-      if (!statusCode && !message) return null;
+      if (!statusCode && !message) {
+        return (
+          <span className="text-muted">
+            <FormattedMessage
+              id="components.files.file-download.files-server-to-device-table.FilesServerToDeviceTable.responseMessage.noResponse"
+              defaultMessage="No response"
+            />
+          </span>
+        );
+      }
 
       if (!statusCode) return message ?? null;
       if (!message) return String(statusCode);
