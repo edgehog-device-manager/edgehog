@@ -1739,6 +1739,12 @@
     "defaultMessage": "Please type <bold>{confirmText}</bold> to confirm.",
     "description": "Description of the action to perform to confirm the deletion modal"
   },
+  "components.ui.details-modal.DetailsModal.close": {
+    "defaultMessage": "Close"
+  },
+  "components.ui.details-modal.DetailsModal.title": {
+    "defaultMessage": "Details"
+  },
   "components.ui.edit-modal.EditModal.cancel": {
     "defaultMessage": "Cancel"
   },
@@ -1763,6 +1769,9 @@
   "components.ui.search-box.SearchBox.searchPlaceholder": {
     "defaultMessage": "Search...",
     "description": "Placeholder for the search input of the SearchBox"
+  },
+  "components.ui.table.Table.detailsColumn": {
+    "defaultMessage": "Details"
   },
   "components.ui.table.Table.noRecords": {
     "defaultMessage": "No records to display."

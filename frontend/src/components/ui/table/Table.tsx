@@ -41,6 +41,7 @@ import { FormattedMessage } from "react-intl";
 
 import ColumnVisibilityDropdown from "@/components/ui/column-visibility-dropdown/ColumnVisibilityDropdown";
 import Icon from "@/components/ui/icon/Icon";
+import DetailsModal from "@/components/ui/details-modal/DetailsModal";
 import SearchBox from "@/components/ui/search-box/SearchBox";
 import TablePagination from "@/components/ui/table-pagination/TablePagination";
 import "@/components/ui/table/Table.scss";
@@ -74,7 +75,8 @@ export type TableProps<T extends RowData> = {
   searchFunction?: FilterFnOption<T>;
   hideSearch?: boolean;
   hideColumnVisibility?: boolean;
-  getRowProps?: (row: Row<T>) => object;
+  showDetailsColumn?: boolean;
+  getRowProps?: (row: Row<T>) => React.HTMLAttributes<HTMLTableRowElement>;
   columnVisibilityKey?: string;
 };
 
@@ -89,11 +91,13 @@ const Table = <T extends RowData>({
   searchFunction,
   hideSearch = false,
   hideColumnVisibility = false,
+  showDetailsColumn = false,
   getRowProps,
   columnVisibilityKey,
 }: TableProps<T>) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [sorting, setSorting] = useState<SortingState>(sortBy);
+  const [selectedRow, setSelectedRow] = useState<Row<T> | null>(null);
 
   const pagination = useMemo<PaginationState>(() => {
     const totalPages = Math.ceil(data.length / maxPageRows);
@@ -110,10 +114,41 @@ const Table = <T extends RowData>({
     columnVisibilityKey,
     hiddenColumns,
   );
+
+  const detailsColumn: ColumnDef<T> = {
+    id: "details",
+    enableHiding: true,
+    enableSorting: false,
+    header: () => (
+      <FormattedMessage
+        id="components.ui.table.Table.detailsColumn"
+        defaultMessage="Details"
+      />
+    ),
+    meta: {
+      label: "Details",
+    },
+    cell: ({ row }) => (
+      <button
+        type="button"
+        className="btn btn-sm p-0 border-0 bg-transparent text-secondary"
+        aria-label="Show row details"
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelectedRow(row);
+        }}
+      >
+        <Icon icon="details" />
+      </button>
+    ),
+  };
+
+  const allColumns = showDetailsColumn ? [...columns, detailsColumn] : columns;
+
   // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable<T>({
     data: data as T[], // TODO: remove when react-table narrows data type to readonly array
-    columns,
+    columns: allColumns,
     state: {
       columnVisibility,
       pagination,
@@ -146,7 +181,15 @@ const Table = <T extends RowData>({
     !hideColumnVisibility && leafColumns.some((column) => column.getCanHide());
 
   return (
-    <div className={`${className}`}>
+    <div className={className}>
+      {selectedRow && (
+        <DetailsModal
+          row={selectedRow}
+          columns={table.getAllColumns()}
+          onClose={() => setSelectedRow(null)}
+        />
+      )}
+
       {(!hideSearch || showColumnVisibilityDropdown) && (
         <div className="d-flex mb-4 gap-3">
           {!hideSearch && (
@@ -177,7 +220,9 @@ const Table = <T extends RowData>({
                     key={header.id}
                     colSpan={header.colSpan}
                     style={headerStyle}
-                    className={`py-3 fw-bold table-header ${isSortable ? "is-sortable" : ""}`}
+                    className={`py-3 fw-bold table-header ${
+                      isSortable ? "is-sortable" : ""
+                    }`}
                     onClick={header.column.getToggleSortingHandler()}
                   >
                     <div className="d-flex align-items-center text-nowrap">

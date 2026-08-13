@@ -74,6 +74,7 @@ import {
   Package,
   HardDriveDownload,
   Grid2x2Check,
+  EllipsisVertical,
   type LucideProps,
 } from "lucide-react";
 
@@ -133,6 +134,7 @@ const icons = {
   containers: Container,
   deployments: HardDriveDownload,
   columnVisibility: Grid2x2Check,
+  details: EllipsisVertical,
 } as const;
 
 export type IconName = keyof typeof icons;

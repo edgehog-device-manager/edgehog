@@ -33,6 +33,12 @@ type FileDownloadRequestNode = NonNullable<
   >["edges"]
 >[number]["node"];
 
+const HIDDEN_COLUMNS = [
+  "destinationType",
+  "uncompressedFileSizeBytes",
+  "ttlSeconds",
+];
+
 const columnHelper = createColumnHelper<FileDownloadRequestNode>();
 const columns = [
   columnHelper.accessor("fileName", {
@@ -221,6 +227,8 @@ const FilesServerToDeviceTable = ({
       columns={columns}
       data={requests}
       hideSearch
+      showDetailsColumn
+      hiddenColumns={HIDDEN_COLUMNS}
       columnVisibilityKey="fileServerToDevice-table"
     />
   );
