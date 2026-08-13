@@ -467,8 +467,6 @@ const FilesDeviceToServerTab = ({
         </Stack>
       </Card>
 
-      <hr />
-
       <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
         <h5>
           <FormattedMessage
