@@ -252,7 +252,7 @@ services:
       - registry-auth:/auth
 
   registry-init:
-    image: docker:29.5.3-dind
+    image: docker:29.6.0-dind
     depends_on:
       - registry
     privileged: true
