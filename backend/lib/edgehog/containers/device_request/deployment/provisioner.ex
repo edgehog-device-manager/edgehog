@@ -24,14 +24,9 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
 
   For more information, check the `Edgehog.Containers.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner, resource: :device_request
+  use Edgehog.Containers.Provisioner,
+    resource: Edgehog.Containers.DeviceRequest.Deployment,
+    core: Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Core
 
-  defmodule Core do
-    @moduledoc """
-    The module describing the Core functions required by the device request deployment provisioner.
-
-    For more information, check the `Edgehog.Containers.Provisioner.Core` docs.
-    """
-    use Edgehog.Containers.Provisioner.Core
-  end
+  @sup Edgehog.Containers.DeviceRequest.Provisioner.Supervisor
 end

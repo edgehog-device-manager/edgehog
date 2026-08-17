@@ -62,7 +62,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          deployment: deployment,
+          resource: deployment,
           mode: :manual
         )
 
@@ -226,7 +226,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
       Sandbox.allow(Edgehog.Repo, self(), provisioner)
 
       # External services expect to be able to subscribe to this topic
-      topic = Provisioner.topic(deployment)
+      topic = Provisioner.Core.topic(deployment)
 
       Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
 
@@ -256,7 +256,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
 
       Sandbox.allow(Edgehog.Repo, test_process, provisioner)
 
-      ready_topic = Provisioner.topic(deployment.id)
+      ready_topic = Provisioner.Core.topic(deployment.id)
       Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
 
       deployment =
@@ -307,7 +307,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
         {:ok, containers}
       end)
 
-      ready_topic = Provisioner.topic(deployment)
+      ready_topic = Provisioner.Core.topic(deployment)
       Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
 
       Provisioner.run(provisioner)

@@ -71,7 +71,7 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          volume_deployment: volume_deployment,
+          resource: volume_deployment,
           deployment: deployment,
           mode: :manual
         )

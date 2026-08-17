@@ -76,7 +76,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          device_mapping_deployment: device_mapping_deployment,
+          resource: device_mapping_deployment,
           deployment: deployment,
           mode: :manual
         )

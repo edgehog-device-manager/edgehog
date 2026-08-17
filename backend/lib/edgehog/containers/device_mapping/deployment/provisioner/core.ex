@@ -18,48 +18,48 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Container.Deployment.Provisioner.Core do
+defmodule Edgehog.Containers.DeviceMapping.Deployment.Provisioner.Core do
   @moduledoc """
-  The module describing the Core functions required by the container deployment provisioner.
+  The module describing the Core functions required by the device mapping deployment provisioner.
 
   For more information, check the `Edgehog.Containers.Provisioner.Core.Behaviour` docs.
   """
   use Edgehog.Containers.Provisioner.Core
 
-  alias Edgehog.Astarte.Device.AvailableContainers.ContainerStatus
+  alias Edgehog.Astarte.Device.AvailableDeviceMappings.DeviceMappingStatus
   alias Edgehog.Devices
 
   require Logger
 
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
-  def ready?(%{state: state}), do: state in [:received, :device_created, :stopped, :running]
+  def ready?(%{state: state}), do: state in [:present, :not_present]
 
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
-  def topic(%{id: id}), do: "container_deployments:provisioning:#{id}"
-  def topic(id), do: "container_deployments:provisioning:#{id}"
+  def topic(%{id: id}), do: "ready:device_mapping_deployments:#{id}"
+  def topic(id), do: "ready:device_mapping_deployments:#{id}"
 
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
-  def subscribe_topic(%{id: id}), do: "container_deployments:#{id}"
-  def subscribe_topic(id), do: "container_deployments:#{id}"
+  def subscribe_topic(%{id: id}), do: "device_mapping_deployments:#{id}"
+  def subscribe_topic(id), do: "device_mapping_deployments:#{id}"
 
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
   def name(%{id: id}),
-    do: {:via, Registry, {Edgehog.Containers.Container.Deployment.Provisioner.Registry, id}}
+    do: {:via, Registry, {Edgehog.Containers.DeviceMapping.Deployment.Provisioner.Registry, id}}
 
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
     deployment = Keyword.fetch!(opts, :deployment)
 
-    with {:ok, resource} <- Ash.load(resource, [:container, :device], tenant: tenant),
-         {:ok, actual_resource} <- Map.fetch(resource, :container),
+    with {:ok, resource} <- Ash.load(resource, [:device_mapping, :device], tenant: tenant),
+         {:ok, actual_resource} <- Map.fetch(resource, :device_mapping),
          {:ok, device} <- Map.fetch(resource, :device),
          {:ok, device} <-
-           Devices.send_create_container_request(device, actual_resource, deployment,
+           Devices.send_create_device_mapping_request(device, actual_resource, deployment,
              tenant: tenant
            ) do
       Logger.info("""
-      Container #{actual_resource.id} provisioned on device #{device.device_id}. Waiting events
+      DeviceMapping #{actual_resource.id} provisioned on device #{device.device_id}. Waiting events
       """)
 
       :ok
@@ -71,24 +71,25 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.Core do
     tenant = Keyword.fetch!(opts, :tenant)
 
     with {:ok, resource} <-
-           Ash.load(resource, [container: [], device: [:available_containers]], tenant: tenant),
-         {:ok, actual_resource} <- Map.fetch(resource, :container),
+           Ash.load(
+             resource,
+             [device_mapping: [], device: [:available_device_mappings]],
+             tenant: tenant
+           ),
+         {:ok, actual_resource} <- Map.fetch(resource, :device_mapping),
          {:ok, device} <- Map.fetch(resource, :device),
-         {:ok, available_resources} <- Map.fetch(device, :available_containers) do
+         {:ok, available_resources} <- Map.fetch(device, :available_device_mappings) do
       available_resources
       |> Enum.find(:not_found, &(&1.id == actual_resource.id))
       |> maybe_update(resource, tenant)
     end
   end
 
-  def maybe_update(%ContainerStatus{status: status}, resource, tenant) do
+  def maybe_update(%DeviceMappingStatus{present: present}, resource, tenant) do
     action =
-      case status do
-        "Received" -> :mark_as_received
-        "Created" -> :mark_as_created
-        "Running" -> :mark_as_running
-        "Stopped" -> :mark_as_stopped
-      end
+      if present,
+        do: :mark_as_present,
+        else: :mark_as_not_present
 
     # NOTE: this will trigger a publish on the appropriate topic, the
     # provisioner will react to it.

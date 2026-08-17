@@ -46,9 +46,9 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
   use GenServer, restart: :transient
 
-  alias Container.Deployment.Orchestrator.Registry, as: ContainerRegistry
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Container.Deployment.Orchestrator.Core
+  alias Edgehog.Containers.Container.Deployment.Orchestrator.Registry, as: ContainerRegistry
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image

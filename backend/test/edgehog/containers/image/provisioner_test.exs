@@ -66,7 +66,7 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          image_deployment: image_deployment,
+          resource: image_deployment,
           deployment: deployment,
           mode: :manual
         )
@@ -88,6 +88,20 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
         provisioner: provisioner,
         provisioner_ref: ref
       }
+    end
+
+    test "timeout/1 returns a bounded timeout that grows with the retries", _context do
+      Config
+      |> stub(:message_min_timeout!, fn -> 100 end)
+      |> stub(:message_max_timeout!, fn -> 1000 end)
+
+      init_timeout = Provisioner.timeout(%{state: :init, retries: 0})
+      assert init_timeout >= 0
+      assert init_timeout <= 1000
+
+      sent_timeout = Provisioner.timeout(%{state: :sent, retries: 3})
+      assert sent_timeout >= 100
+      assert sent_timeout <= 1000
     end
 
     test "sets-up an image on a device", context do

@@ -25,110 +25,67 @@ defmodule Edgehog.Containers.Provisioner do
 
   ```ex
   defmodule ResourceDeployment.Provisioner do
-    use Edgehog.Containers.Provisioner, resource: :image
+    @sup Edgehog.Containers.Resource.Provisioner.Supervisor
+
+    use Edgehog.Containers.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
   end
   ```
 
-  Here is how the default implementation works:
-  Each and every time an resource should be deployed, it can be done through this
-  provisioner. The provisioner sends the appropriate messages to the device and
-  emits a `ready:<resource_name>_deployments:id` event whenever resource is present in the
-  device.
+  where `resource` is the module of the resource to provision. The provisioner
+  is a `GenServer` that takes a resource (not just deployments) and orchestrates
+  the whole provisioning with the device: sending requests, managing timeouts,
+  retries and errors.
+
+  The resource specific logic is delegated to the `Core` module nested inside
+  the provisioner (see `Edgehog.Containers.Provisioner.Core.Behaviour`): pure
+  functions that can be tested in isolation (e.g. `ready?/1`, `topic/1`) and
+  functions that provide the side effects of the provisioning (e.g.
+  `send_to_device/2`, `reconcile/2`).
 
   The provisioning flow can be described as follows:
 
-  - start_link/1 called, initializing the process and subscribing to the
-    events emitted on `<resource_name>_deployments:<id>` (id of the resource deployment)
-  - if the resource deployment is already ready, the provisioner terminates normally
+  - `start_link/1` called, initializing the process and subscribing to the
+    events emitted on `Core.subscribe_topic/1`
+  - if the resource is already ready, the provisioner terminates normally
     right away, broadcasting readiness
   - otherwise the appropriate messages are sent to the device through the
-    `Core` module (see `Core.send/1` docs for more info)
+    `Core` module (see `Core.send_to_device/2` docs for more info)
 
   Nice flow (everything goes ok)
-  - Astarte triggers update the resource deployment state, marking it as present or
+  - Astarte triggers update the resource state, marking it as present or
   not present and emitting an event on the correct topic
   - The server reacts to the event, handles the message and emits an event on
-  `ready:<resource_name>_deployments:id` when the resource is ready
+  `Core.topic/1` when the resource is ready
   - listening processes can react to this information
 
   Timeouts (something goes wrong)
-  - `Core.send/1` failed, maybe the device is offline, or there was some
-    problem with astarte
+  - `Core.send_to_device/2` failed, maybe the device is offline, or there was
+    some problem with astarte
   - an exponential backoff timeout is started
-  - A :timeout hits the server, it retries to send the resource information to the
-  device
-
-  TODOs, shortcomigs:
-  The logic to handle send succeeding but no message coming back from astarte is
-  not there yet
+  - A :timeout hits the server, it retries to send the resource information to
+    the device
   """
 
-  @module_base Edgehog.Containers
-
   defmacro __using__(opts) do
-    resource_name = Keyword.fetch!(opts, :resource)
-    deployment_string = to_string(resource_name)
+    resource_module = Keyword.fetch!(opts, :resource)
 
-    {deployment_string, type_string} =
-      if String.ends_with?(deployment_string, "_deployment") do
-        {deployment_string, String.replace(deployment_string, "_deployment", "")}
-      else
-        {deployment_string <> "_deployment", deployment_string}
-      end
-
-    # all the calls for `String.to_atom/1` are at compile-time, and at a very restricted scope
-    # credo:disable-for-lines:30 Credo.Check.Warning.UnsafeToAtom
-    type_atom = String.to_existing_atom(type_string)
-    deployment_atom = String.to_atom(deployment_string)
-
-    type_string_lower = String.downcase(type_string)
-    deployment_string_lower = String.downcase(deployment_string)
-
-    type_string_camel =
-      snake_to_camel(type_string)
-
-    module_string_camel = String.replace(type_string_camel, " ", "")
-    deployment_module_suffix = String.to_atom(module_string_camel <> ".Deployment")
-    deployment_module = Module.safe_concat(@module_base, module_string_camel <> ".Deployment")
-    core_module = Module.concat(deployment_module, Provisioner.Core)
-
-    supervisor_module =
-      Module.concat(@module_base, module_string_camel <> ".Provisioner.Supervisor")
-
-    available_string = "available_" <> type_string <> "s"
-    available_atom = String.to_atom(available_string)
-
-    available_resources_module =
-      available_string
-      |> snake_to_camel("")
-      |> then(&Module.safe_concat(Edgehog.Astarte.Device, &1))
-
-    status_module =
-      (module_string_camel <> "Status")
-      |> String.to_atom()
-      |> then(&Module.safe_concat(available_resources_module, &1))
-
-    # NOTE: All of the variables defined above, especially the ones indicating module
-    # atoms, are created on the convention of how we structured the code so far,
-    # to reduce boilerplate to a minimum.
-    # If in the future we do not follow those conventions anymore, the burden of providing
-    # these variables should be on the modules using this macro, and the macro should
-    # be updated to simply accept those values.
+    core_module = Keyword.fetch!(opts, :core)
 
     # credo:disable-for-next-line Credo.Check.Refactor.LongQuoteBlocks
     quote do
       use GenServer, restart: :transient
 
       alias Edgehog.Config
-      alias unquote(deployment_module)
-      alias unquote(core_module)
-      alias unquote(Module.safe_concat(@module_base, Provisioner))
+      alias Edgehog.Containers.Provisioner
+      alias unquote(core_module), as: Core
+      alias unquote(resource_module), as: Resource
 
       require Logger
 
+      @before_compile unquote(__MODULE__)
+
       # credo:disable-for-lines:2
       @test Mix.env() == :test
-      @sup unquote(supervisor_module)
 
       # Test additional API
       # In test environment, allow to run the process with a message, so that the
@@ -140,86 +97,88 @@ defmodule Edgehog.Containers.Provisioner do
 
         @impl GenServer
         def handle_cast(:run, state) do
-          {:noreply, state, {:continue, :check_deployment_state}}
+          {:noreply, state, {:continue, :check_state}}
         end
       end
 
       @behaviour Provisioner.Behaviour
 
-      defoverridable Provisioner.Behaviour
-
       #### API
 
       @impl Provisioner.Behaviour
-      def provision(resource_deployment, deployment, tenant, opts \\ []) do
-        args =
-          opts
-          |> Keyword.put(unquote(deployment_atom), resource_deployment)
-          |> Keyword.put(:deployment, deployment)
-          |> Keyword.put(:tenant, tenant)
-
-        child_spec = Supervisor.child_spec({__MODULE__, args}, id: resource_deployment.id)
-
-        with {:error, {:already_started, pid}} <- DynamicSupervisor.start_child(@sup, child_spec) do
-          {:ok, pid}
-        end
-      end
-
-      @impl Provisioner.Behaviour
       def start_link(args) do
-        resource_deployment =
-          args |> Keyword.fetch!(unquote(deployment_atom)) |> Ash.load!(:device)
+        resource = args |> Keyword.fetch!(:resource) |> Ash.load!(:device)
 
-        args = Keyword.put(args, :resource_deployment, resource_deployment)
+        args = Keyword.put(args, :resource, resource)
 
-        GenServer.start_link(__MODULE__, args, name: name(resource_deployment))
+        GenServer.start_link(__MODULE__, args, name: Core.name(resource))
       end
 
       @impl Provisioner.Behaviour
       def start(args) do
-        resource_deployment =
-          args |> Keyword.fetch!(unquote(deployment_atom)) |> Ash.load!(:device)
+        resource = args |> Keyword.fetch!(:resource) |> Ash.load!(:device)
 
-        args = Keyword.put(args, :resource_deployment, resource_deployment)
+        args = Keyword.put(args, :resource, resource)
 
-        GenServer.start(__MODULE__, args, name: name(resource_deployment))
+        GenServer.start(__MODULE__, args, name: Core.name(resource))
       end
 
       @impl Provisioner.Behaviour
-      def name(%Deployment{id: id}) do
-        {:via, Registry,
-         {unquote(Module.concat(deployment_module_suffix, Provisioner.Registry)), id}}
+      def timeout(state) do
+        %{
+          state: d_state,
+          retries: retries
+        } = state
+
+        pad = pad(d_state)
+
+        exp = :math.pow(2, retries)
+
+        rand = Enum.random(0..1000)
+
+        max_timeout = Config.message_max_timeout!()
+
+        pad
+        |> Kernel.+(exp)
+        |> Kernel.+(rand)
+        |> min(max_timeout)
+        |> round()
       end
+
+      defp pad(:sent), do: Config.message_min_timeout!()
+      defp pad(:init), do: 0
 
       #### Callbacks
 
       @impl GenServer
       def init(args) do
-        resource_deployment = Keyword.fetch!(args, :resource_deployment)
-        deployment = Keyword.fetch!(args, :deployment)
+        resource = Keyword.fetch!(args, :resource)
         tenant = Keyword.fetch!(args, :tenant)
 
         mode = Keyword.get(args, :mode, :auto)
 
-        %{id: id, device: %{id: device_id, online: device_online?}} =
-          resource_deployment
+        # The remaining options are resource specific context that the Core
+        # might need (e.g. the application deployment a resource belongs to).
+        context = Keyword.drop(args, [:resource, :tenant, :mode])
+
+        %{id: id, device: %{id: device_id, online: device_online?}} = resource
 
         state = %{
-          resource_deployment: resource_deployment,
-          deployment: deployment,
-          device_online?: device_online?,
+          resource: resource,
           tenant: tenant,
+          context: context,
+          device_online?: device_online?,
           state: :init,
           mode: mode,
           retries: 0
         }
 
-        Logger.info("Subscribing to events on #{unquote(type_string_lower)} deployment #{id}")
-        Phoenix.PubSub.subscribe(Edgehog.PubSub, "#{unquote(deployment_string_lower)}s:#{id}")
+        topic = Core.subscribe_topic(resource)
 
-        Logger.info(
-          "Subscribing to status events of device #{device_id} for #{unquote(type_string_lower)} deployment #{id}"
-        )
+        Logger.info("Subscribing to events on #{topic}")
+        Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+
+        Logger.info("Subscribing to status events of device #{device_id}")
 
         Phoenix.PubSub.subscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
 
@@ -238,97 +197,83 @@ defmodule Edgehog.Containers.Provisioner do
 
       @impl GenServer
       def handle_continue(:maybe_start, %{mode: :auto} = state) do
-        next_step = {:noreply, state, {:continue, :check_deployment_state}}
-        Core.maybe_early_terminate(state, next_step)
+        next_step = {:noreply, state, {:continue, :check_state}}
+        maybe_early_terminate(state, next_step)
       end
 
       @impl GenServer
       def handle_continue(:maybe_start, %{mode: :manual} = state) do
         next_step = {:noreply, state}
-        Core.maybe_early_terminate(state, next_step)
+        maybe_early_terminate(state, next_step)
       end
 
       @impl GenServer
-      def handle_continue(
-            :check_deployment_state,
-            %{resource_deployment: resource_deployment} = state
-          ) do
-        resource_deployment =
-          Ash.load!(resource_deployment, :is_ready, tenant: resource_deployment.tenant_id)
-
-        if resource_deployment.is_ready do
-          new_state = Map.put(state, :resource_deployment, resource_deployment)
-          {:stop, :normal, new_state}
+      def handle_continue(:check_state, %{resource: resource} = state) do
+        if Core.ready?(resource) do
+          {:stop, :normal, state}
         else
           {:noreply, state, {:continue, :send}}
         end
       end
 
       @impl GenServer
-      def handle_continue(:send, state), do: Core.send(state)
+      def handle_continue(:send, state), do: maybe_send(state)
 
       # We were not able to send the message to the device. retry
       @impl GenServer
-      def handle_info(:timeout, %{state: :init} = state), do: Core.send(state)
+      def handle_info(:timeout, %{state: :init} = state), do: maybe_send(state)
 
       # We sent the message to the device, but no trigger came back.
       # 1. Reconcile with astarte
       # 2. if still nothing has come back, retry to send
       @impl GenServer
       def handle_info(:timeout, %{state: :sent} = state) do
-        %{resource_deployment: resource_deployment, tenant: tenant} = state
+        %{resource: resource, tenant: tenant} = state
 
-        rec = Core.reconcile(resource_deployment, tenant: tenant)
-
-        case rec do
+        case Core.reconcile(resource, tenant: tenant) do
           :not_found ->
-            Core.maybe_send(state)
+            maybe_send(state)
 
-          {:ok, resource_deployment} ->
-            # Reconciliation updated the resource deployment, just update the state as a
+          {:ok, resource} ->
+            # Reconciliation updated the resource, just update the state as a
             # new message will come in the queue
-            new_state = Map.put(state, :resource_deployment, resource_deployment)
+            new_state = Map.put(state, :resource, resource)
 
             # This just in case the message is not actually there, but I'd consider it a bug
-            timeout = Core.timeout(state)
+            timeout = timeout(new_state)
 
             {:noreply, new_state, timeout}
         end
       end
 
-      # The resource deployment provisioning deadline was hit, give up and broadcast a
+      # The provisioning deadline was hit, give up and broadcast a
       # failure so that the orchestrator can react
       @impl GenServer
       def handle_info(:give_up, state) do
         Logger.warning("""
-        #{unquote(type_string_camel)} deployment #{state.resource_deployment.id} provisioning timed out. Giving up.
+        Resource #{state.resource.id} provisioning timed out. Giving up.
         """)
 
         {:stop, {:shutdown, :timeout_hit}, state}
       end
 
-      # We get the resource deployment from the broadcast, which is in the :payload ->
-      # :data section. This resource deployment is more recent, as it comes from an
+      # We get the resource from the broadcast, which is in the :payload ->
+      # :data section. This resource is more recent, as it comes from an
       # update in the database.
       @impl GenServer
       def handle_info(
-            %Phoenix.Socket.Broadcast{payload: %{data: %Deployment{} = resource_deployment}},
+            %Phoenix.Socket.Broadcast{payload: %{data: %Resource{} = resource}},
             state
           ) do
-        # We can publish on readiness topic.
-        id = resource_deployment.id
+        new_state = Map.put(state, :resource, resource)
 
-        Phoenix.PubSub.broadcast(
-          Edgehog.PubSub,
-          "ready:#{unquote(deployment_string_lower)}s:#{id}",
-          {:ready, resource_deployment}
-        )
-
-        new_state = Map.put(state, :resource_deployment, resource_deployment)
-
-        # Somewhere the resource has been marked in some state (i.e: pulled/unpulled for images). For
-        # now we can just shutdown gracefully
-        {:stop, :normal, new_state}
+        # The resource has been updated, check if it's ready and, in that case,
+        # terminate gracefully. Otherwise keep waiting with a new timeout.
+        if Core.ready?(resource) do
+          {:stop, :normal, new_state}
+        else
+          {:noreply, new_state, timeout(new_state)}
+        end
       end
 
       @impl GenServer
@@ -342,57 +287,44 @@ defmodule Edgehog.Containers.Provisioner do
 
       @impl GenServer
       def terminate(:normal, state) do
-        %{
-          resource_deployment: %{id: id, device_id: device_id} = resource_deployment,
-          retries: retries
-        } = state
+        %{resource: %{id: id, device_id: device_id} = resource} = state
 
         Logger.info("""
-        #{unquote(type_string_camel)} deployment #{id} successfully provisioned after #{retries} retries.
+        Resource #{id} successfully provisioned after #{state.retries} retries.
         """)
 
         # Broadcast readiness so that the orchestrator can proceed
-        Phoenix.PubSub.broadcast(
-          Edgehog.PubSub,
-          "ready:#{unquote(deployment_string_lower)}s:#{id}",
-          {:ready, resource_deployment}
-        )
+        Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:ready, resource})
 
         # Unsubscribe from events, we're terminating
-        Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "#{unquote(deployment_string_lower)}s:#{id}")
+        Phoenix.PubSub.unsubscribe(Edgehog.PubSub, Core.subscribe_topic(resource))
         Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
       end
 
       @impl GenServer
-      def terminate({:shutdown, reason}, %{resource_deployment: resource_deployment})
+      def terminate({:shutdown, reason}, %{resource: resource})
           when reason in [:max_retries, :device_offline, :timeout_hit] do
-        %{id: id, device_id: device_id} = resource_deployment
+        %{id: id, device_id: device_id} = resource
 
         Logger.info("""
-        Provisioner for #{unquote(type_string_lower)} deployment #{id} gave up with reason #{inspect(reason)}.
+        Provisioner for resource #{id} gave up with reason #{inspect(reason)}.
         """)
 
-        # Broadcast readiness so that the orchestrator can proceed
-        Phoenix.PubSub.broadcast(
-          Edgehog.PubSub,
-          "ready:#{unquote(deployment_string_lower)}s:#{id}",
-          {:failure, resource_deployment}
-        )
+        # Broadcast failure so that the orchestrator can react
+        Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:failure, resource})
 
         # Unsubscribe from events, we're terminating
-        Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "#{unquote(deployment_string_lower)}s:#{id}")
+        Phoenix.PubSub.unsubscribe(Edgehog.PubSub, Core.subscribe_topic(resource))
         Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
       end
 
       @impl GenServer
       def terminate(reason, state) do
-        %{
-          resource_deployment: %{id: id, device: %{id: device_id}}
-        } = state
+        %{resource: %{id: id, device: %{id: device_id}}} = state
 
         Logger.warning(
           """
-          Unexpectedly terminating provisioner for #{unquote(type_string_lower)} deployment #{id} on device #{device_id}.
+          Unexpectedly terminating provisioner for resource #{id} on device #{device_id}.
           Reason: #{inspect(reason)}
           """,
           reason: reason,
@@ -400,15 +332,89 @@ defmodule Edgehog.Containers.Provisioner do
         )
       end
 
-      @status_module unquote(status_module)
-      @type_atom unquote(type_atom)
-      @type_string unquote(type_string)
-      @type_string_camel unquote(type_string_camel)
-      @available_atom unquote(available_atom)
+      defp maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
+        if device_online? do
+          next_step
+        else
+          {:stop, {:shutdown, :device_offline}, state}
+        end
+      end
+
+      defp maybe_send(state) do
+        retries = Map.fetch!(state, :retries)
+        max_retries = Config.max_retries!()
+
+        if retries < max_retries do
+          state
+          |> increase_retries()
+          |> send_resource()
+        else
+          {:stop, {:shutdown, :max_retries}, state}
+        end
+      end
+
+      defp send_resource(state) do
+        %{resource: resource, tenant: tenant, context: context} = state
+
+        opts = [tenant: tenant] ++ context
+
+        new_state =
+          case Core.send_to_device(resource, opts) do
+            :ok ->
+              Map.put(state, :state, :sent)
+
+            error ->
+              Logger.warning(
+                "Error while sending the resource #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
+              )
+
+              state
+          end
+
+        timeout = timeout(new_state)
+
+        {:noreply, new_state, timeout}
+      end
+
+      defp increase_retries(state) do
+        Map.update!(state, :retries, &Kernel.+(&1, 1))
+      end
+
+      defoverridable Provisioner.Behaviour
     end
   end
 
-  defp snake_to_camel(str, camel_delimiter \\ " ") do
-    str |> String.split("_") |> Enum.map_join(camel_delimiter, &String.capitalize/1)
+  @doc false
+  defmacro __before_compile__(env) do
+    case Module.defines?(env.module, {:provision, 3}) do
+      false ->
+        sup = Module.get_attribute(env.module, :sup)
+
+        if is_nil(sup) do
+          raise "the `@sup` module attribute must be set before `use Edgehog.Containers.Provisioner`, " <>
+                  "specifying the supervisor under which the provisioner processes are started. " <>
+                  "Alternatively, override the `provision/3` callback to start the process as needed."
+        end
+
+        quote do
+          @impl Edgehog.Containers.Provisioner.Behaviour
+          def provision(resource, tenant, opts \\ []) do
+            args =
+              opts
+              |> Keyword.put(:resource, resource)
+              |> Keyword.put(:tenant, tenant)
+
+            child_spec = Supervisor.child_spec({__MODULE__, args}, id: resource.id)
+
+            with {:error, {:already_started, pid}} <-
+                   DynamicSupervisor.start_child(unquote(sup), child_spec) do
+              {:ok, pid}
+            end
+          end
+        end
+
+      true ->
+        quote(do: :ok)
+    end
   end
 end

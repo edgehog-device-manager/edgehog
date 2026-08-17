@@ -77,7 +77,7 @@ defmodule Edgehog.Containers.Network.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          network_deployment: network_deployment,
+          resource: network_deployment,
           deployment: deployment,
           mode: :manual
         )

@@ -24,14 +24,9 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
 
   For more information, check the `Edgehog.Containers.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner, resource: :volume
+  use Edgehog.Containers.Provisioner,
+    resource: Edgehog.Containers.Volume.Deployment,
+    core: Edgehog.Containers.Volume.Deployment.Provisioner.Core
 
-  defmodule Core do
-    @moduledoc """
-    The module describing the Core functions required by the volume deployment provisioner.
-
-    For more information, check the `Edgehog.Containers.Provisioner.Core` docs.
-    """
-    use Edgehog.Containers.Provisioner.Core
-  end
+  @sup Edgehog.Containers.Volume.Provisioner.Supervisor
 end

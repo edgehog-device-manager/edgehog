@@ -37,15 +37,15 @@ defmodule Edgehog.Containers.Supervisor do
   def init(_args) do
     children = [
       # Registries
-      {Registry, keys: :unique, name: Deployment.Orchestrator.Registry},
-      {Registry, keys: :unique, name: Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: Container.Deployment.Orchestrator.Registry},
-      {Registry, keys: :unique, name: Container.Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: Image.Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: Network.Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: DeviceMapping.Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: Volume.Deployment.Provisioner.Registry},
-      {Registry, keys: :unique, name: DeviceRequest.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Deployment.Orchestrator.Registry},
+      {Registry, keys: :unique, name: Containers.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Container.Deployment.Orchestrator.Registry},
+      {Registry, keys: :unique, name: Containers.Container.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Image.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Network.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.DeviceMapping.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Volume.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.DeviceRequest.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Containers.Deployment.Starter.Registry},
 
       # Supervisors

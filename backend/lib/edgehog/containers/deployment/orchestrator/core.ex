@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator.Core do
 
   alias Edgehog.Containers.Container.Deployment.Orchestrator
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Deployment.Provisioner.Core
 
   require Logger
 
@@ -121,7 +122,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator.Core do
       tenant: tenant
     } = state
 
-    topic = Deployment.Provisioner.topic(deployment)
+    topic = Core.topic(deployment)
 
     # Subscribe to the deployment readiness
     Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)

@@ -226,12 +226,15 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     %{id: id} = image_deployment
 
     # Subscribe to the image_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:image_deployments:#{id}")
+    Phoenix.PubSub.subscribe(
+      Edgehog.PubSub,
+      Image.Deployment.Provisioner.Core.topic(image_deployment)
+    )
 
     case Image.Deployment.Provisioner.provision(
            image_deployment,
-           deployment,
            tenant,
+           deployment: deployment,
            mode: state.mode
          ) do
       {:ok, _pid} ->
@@ -263,10 +266,14 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     %{id: id} = volume_deployment
 
     # Subscribe to the volume_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:volume_deployments:#{id}")
+    Phoenix.PubSub.subscribe(
+      Edgehog.PubSub,
+      Volume.Deployment.Provisioner.Core.topic(volume_deployment)
+    )
 
     # Start the provisioner
-    case Volume.Deployment.Provisioner.provision(volume_deployment, deployment, tenant,
+    case Volume.Deployment.Provisioner.provision(volume_deployment, tenant,
+           deployment: deployment,
            mode: state.mode
          ) do
       {:ok, _pid} ->
@@ -298,10 +305,14 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     %{id: id} = network_deployment
 
     # Subscribe to the network_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:network_deployments:#{id}")
+    Phoenix.PubSub.subscribe(
+      Edgehog.PubSub,
+      Network.Deployment.Provisioner.Core.topic(network_deployment)
+    )
 
     # Start the provisioner
-    case Network.Deployment.Provisioner.provision(network_deployment, deployment, tenant,
+    case Network.Deployment.Provisioner.provision(network_deployment, tenant,
+           deployment: deployment,
            mode: state.mode
          ) do
       {:ok, _pid} ->
@@ -333,14 +344,17 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     %{id: id} = device_mapping_deployment
 
     # Subscribe to the device_mapping_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:device_mapping_deployments:#{id}")
+    Phoenix.PubSub.subscribe(
+      Edgehog.PubSub,
+      DeviceMapping.Deployment.Provisioner.Core.topic(device_mapping_deployment)
+    )
 
     # Start the provisioner
     provisioner =
       DeviceMapping.Deployment.Provisioner.provision(
         device_mapping_deployment,
-        deployment,
         tenant,
+        deployment: deployment,
         mode: state.mode
       )
 
@@ -376,14 +390,17 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     %{id: id} = device_request_deployment
 
     # Subscribe to the device_request_deployment readiness
-    Phoenix.PubSub.subscribe(Edgehog.PubSub, "ready:device_request_deployments:#{id}")
+    Phoenix.PubSub.subscribe(
+      Edgehog.PubSub,
+      DeviceRequest.Deployment.Provisioner.Core.topic(device_request_deployment)
+    )
 
     # Start the provisioner
     provisioner =
       DeviceRequest.Deployment.Provisioner.provision(
         device_request_deployment,
-        deployment,
         tenant,
+        deployment: deployment,
         mode: state.mode
       )
 
@@ -411,13 +428,14 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
 
     %{id: id} = container_deployment
 
-    topic = ContainerProvisioner.topic(container_deployment)
+    topic = ContainerProvisioner.Core.topic(container_deployment)
 
     # Subscribe to the container_deployment readiness
     Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
 
     # Start the provisioner
-    case ContainerProvisioner.provision(container_deployment, deployment, tenant,
+    case ContainerProvisioner.provision(container_deployment, tenant,
+           deployment: deployment,
            mode: state.mode
          ) do
       {:ok, _pid} ->

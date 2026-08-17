@@ -20,9 +20,16 @@
 
 defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   @moduledoc """
-  Behaviour describing the API of the Core functions for a deployment Provisioner.
+  Behaviour describing the API of the Core functions for a Provisioner.
+
+  A `Core` module contains the resource specific functions required by the
+  provisioner to perform the provisioning: pure functions that can be tested in
+  isolation, and functions that provide the side effects of the provisioning
+  flow (e.g. actually sending the request to the device, or reconciling the
+  resource state with what astarte reports).
+
   This module shouldn't be used directly. Rather, it's best to
-  use `Edgehog.Containers.Provisioner.Core`), i.e.:
+  use `Edgehog.Containers.Provisioner.Core`, i.e.:
 
   ```ex
   defmodule ResourceProvisioner.Core do
@@ -30,105 +37,66 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   end
   ```
 
-  which will add the default implementation of `Provisioner.Core`.
-
-  All of the functions of this behaviour are overridable.
+  which will declare that the module implements this behaviour. All the
+  functions of this behaviour must be implemented explicitly: there are no
+  default implementations.
   """
 
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Provisioner
   alias Edgehog.Tenants.Tenant
 
   @doc """
-  Sends the appropriate message to a device, extracting the required information
-  from the provisioner state.
-
-  By default, it returns a `{:noreply, state, timeout}` tuple for the provisioner,
-  with the updated state and the timeout after which the send should be retried.
-  """
-  @callback send(state()) :: {:noreply, state(), timeout()}
-
-  @doc """
   Sends the appropriate messages to the device.
 
-  In the default implementation, it loads all the necessary data from the deployment,
-  and then calls the correct `Edgehog.Devices.send_create_<resource_name>_request/4`
-  function.
+  It loads all the necessary data from the resource, and then calls the correct
+  `Edgehog.Devices.send_create_<resource_name>_request/4` function.
   """
-  @callback send_to_device(resource_deployment(), keyword()) :: :ok | {:error, term()}
+  @callback send_to_device(resource(), send_to_device_opts()) :: :ok | {:error, term()}
 
   @doc """
-  Tries to reconcile the resource deployment with the property set by the device.
+  Tries to reconcile the resource with the property set by the device.
 
-  In the default implementation, this function reads the available resources the
-  device publishes, and either finds a state, and sets the resource deployment to
-  that state or does not find a valid state, therefore the device does not have
-  such resource deployed, and the function returns :not_found.
+  This function reads the available resources the device publishes, and either
+  finds a state, and sets the resource to that state or does not find a valid
+  state, therefore the device does not have such resource deployed, and the
+  function returns :not_found.
 
   Alternatively, if something went wrong while updating the resource, an
   `{:error, _}` is returned.
 
   Example:
   ```elixir
-  Core.reconcile(resource_deployment, tenant: tenant)
-  > {:ok, new_resource_deployment}
+  Core.reconcile(resource, tenant: tenant)
+  > {:ok, new_resource}
 
-  Core.reconcile(resource_deployment, tenant: tenant)
+  Core.reconcile(resource, tenant: tenant)
   > :not_found
   ```
   """
-  @callback reconcile(resource_deployment(), reconcile_opts()) :: ash_action_return() | :not_found
-
-  @doc "Should be considered a **private** function, and not to be used directly."
-  @callback __maybe_update__(
-              resource_status_record(),
-              resource_deployment(),
-              Tenant.t()
-            ) :: ash_action_return()
+  @callback reconcile(resource(), reconcile_opts()) :: ash_action_return() | :not_found
 
   @doc """
-  Returns the timeout for retries.
-
-  In the default implementation, it is an exponential backoff timeout:
-  it reads information from the deployment state (current deployment state, and
-  number of retries that happened), and it computes the timeout with the following
-  formula
-
-  ```
-  timeout = pad + (2^retries) + rand(0,1000)
-  timeout = min(timeout, max_timeout)
-  ```
-
-  - pad       :: the pad component is there to ensure a minimum timeout is
-  guaranteed. The pad is only applied when the resource deployment
-  has been sent, and therefore we're waiting for astarte triggers
-  - 2^retries :: this is the exponential component, increases at each retry to
-  ensure we don't DDoS astarte/the device.
-  - rand      :: a random (between 0 and 1s) ensures no synchronization errors
-  appear.
+  Checks whether the resource is in a terminal (ready) state, i.e. the device
+  acknowledged its presence (or absence) and no further provisioning is needed.
   """
-  @callback timeout(state()) :: timeout()
+  @callback ready?(resource()) :: boolean()
 
   @doc """
-  A function that returns the action to perform on a given resource
-  deployment, based on the status returned by the corresponding Astarte interface.
-  Should be considered **private**, and not to be used directly.
+  Returns the via tuple used as the name for the provisioner on its registry.
   """
-  @callback __update_action__(resource_status_record()) :: mark_as_action_atom()
+  @callback name(resource()) :: {:via, Registry, {provisioner_registry(), id()}}
 
-  @typedoc """
-  An `Ash.Resource.record()` for a specific resource status, as returned by
-  a `AvailableResource` Astarte interface
+  @doc """
+  Returns the topic onto which the provisioner broadcasts readiness and failure
+  for the given resource.
   """
-  @type resource_status_record() :: Ash.Resource.record()
+  @callback topic(resource()) :: String.t()
 
-  @typedoc """
-  The atom representing an update action for a resource deployment.
-  It follows the form `:mark_as_*`.
-
-  For example, image deployments are either `:mark_as_unpulled` or `:mark_as_pulled`.
+  @doc """
+  Returns the topic onto which the provisioner subscribes to receive the events
+  that the resource emits when it is updated.
   """
-  @type mark_as_action_atom() :: atom()
+  @callback subscribe_topic(resource()) :: String.t()
 
   @type ash_action_return() ::
           {:ok, Ash.Resource.record()}
@@ -136,16 +104,18 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
           | {:error, term()}
 
   @typedoc """
-  See `Edgehog.Containers.Provisioner.Behaviour.state()`.
+  See `Edgehog.Containers.Provisioner.Behaviour.resource()`.
   """
-  @type state() :: Provisioner.Behaviour.state()
-
-  @typedoc """
-  See `Edgehog.Containers.Provisioner.Behaviour.resource_deployment()`.
-  """
-  @type resource_deployment() :: Provisioner.Behaviour.resource_deployment()
+  @type resource() :: Provisioner.Behaviour.resource()
 
   @type reconcile_opts() :: [tenant: Tenant.t()]
 
-  @type send_to_device_opts() :: [tenant: Tenant.t(), deployment: Deployment.t()]
+  @type send_to_device_opts() :: [tenant: Tenant.t(), deployment: term()]
+
+  @typedoc """
+  A term, usually a module-like atom, identifying a registry for the provisioners
+  """
+  @type provisioner_registry() :: term()
+
+  @type id() :: term()
 end

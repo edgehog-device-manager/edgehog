@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
     image_deployment = changeset.data
 
     Ash.Changeset.after_action(changeset, fn _changeset, result ->
-      Provisioner.provision(image_deployment, deployment, tenant)
+      Provisioner.provision(image_deployment, tenant, deployment: deployment)
 
       {:ok, result}
     end)

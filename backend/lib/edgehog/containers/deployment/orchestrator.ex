@@ -48,7 +48,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Deployment.Orchestrator.Core
-  alias Elixir.Deployment.Orchestrator.Registry, as: DeploymentOrchestratorRegistry
+  alias Edgehog.Containers.Deployment.Orchestrator.Registry, as: DeploymentOrchestratorRegistry
 
   require Logger
 

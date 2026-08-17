@@ -96,7 +96,7 @@ defmodule Edgehog.Containers.Container.Deployment.OrchestratorTest do
       # they report readiness and let the orchestrator proceed
       image_provisioner =
         container_deployment.image_deployment
-        |> ImageProvisioner.name()
+        |> ImageProvisioner.Core.name()
         |> via_pid!()
 
       Sandbox.allow(Edgehog.Repo, self(), image_provisioner)
@@ -104,7 +104,7 @@ defmodule Edgehog.Containers.Container.Deployment.OrchestratorTest do
 
       container_provisioner =
         container_deployment
-        |> Provisioner.name()
+        |> Provisioner.Core.name()
         |> via_pid!()
 
       Sandbox.allow(Edgehog.Repo, self(), container_provisioner)
@@ -195,7 +195,7 @@ defmodule Edgehog.Containers.Container.Deployment.OrchestratorTest do
       # waiting for anything else
       ImageProvisioner
       |> allow(test_process, orchestrator)
-      |> expect(:provision, fn image_deployment, _deployment, _tenant, _opts ->
+      |> expect(:provision, fn image_deployment, _tenant, _opts ->
         %{id: id} = image_deployment
 
         Phoenix.PubSub.broadcast!(

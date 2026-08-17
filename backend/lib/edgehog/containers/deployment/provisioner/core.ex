@@ -20,65 +20,33 @@
 
 defmodule Edgehog.Containers.Deployment.Provisioner.Core do
   @moduledoc """
-  Deployment provisioner core functions.
+  The module describing the Core functions required by the deployment provisioner.
 
-  This module contains all functions required by the provisioner that handle the
-  pure provisioning logic, e.g. sending data to the device.
+  For more information, check the `Edgehog.Containers.Provisioner.Core.Behaviour` docs.
   """
+  use Edgehog.Containers.Provisioner.Core
 
   alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Config
   alias Edgehog.Devices
 
   require Logger
 
-  @deployment_ready_states [:started, :stopped]
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def ready?(%{state: state}), do: state in [:started, :stopped]
 
-  @doc """
-  Sends the appropriate messages to the device.
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def topic(%{id: id}), do: "deployments:provisioning:#{id}"
+  def topic(id), do: "deployments:provisioning:#{id}"
 
-  Returns a `{:noreply, state, timeout}` tuple for the provisioner, with the
-  updated state and the timeout after which the send should be retried.
-  """
-  def send(state) do
-    %{
-      deployment: deployment,
-      tenant: tenant
-    } = state
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def subscribe_topic(%{id: id}), do: "deployments:#{id}"
+  def subscribe_topic(id), do: "deployments:#{id}"
 
-    new_state =
-      deployment
-      |> send_to_device(tenant: tenant)
-      |> update_state_on_send(state)
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def name(%{id: id}),
+    do: {:via, Registry, {Edgehog.Containers.Deployment.Provisioner.Registry, id}}
 
-    {:noreply, new_state, timeout(new_state)}
-  end
-
-  def maybe_send(state) do
-    retries = Map.fetch!(state, :retries)
-    max_retries = Config.max_retries!()
-
-    if retries < max_retries do
-      state
-      |> increase_retries()
-      |> send()
-    else
-      {:stop, {:shutdown, :max_retries}, state}
-    end
-  end
-
-  def maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
-    if device_online? do
-      next_step
-    else
-      {:stop, {:shutdown, :device_offline}, state}
-    end
-  end
-
-  def ready?(deployment) do
-    deployment.state in @deployment_ready_states
-  end
-
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
   def send_to_device(deployment, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
@@ -91,51 +59,14 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
       |> Ash.update!()
 
       Logger.info("""
-        Deployment #{deployment.id} provisioned on device #{device.device_id}. Waiting events
+      Deployment #{deployment.id} provisioned on device #{device.device_id}. Waiting events
       """)
 
       :ok
     end
   end
 
-  defp update_state_on_send(:ok, state) do
-    Map.put(state, :state, :sent)
-  end
-
-  defp update_state_on_send(error, state) do
-    %{deployment: %{id: id}} = state
-
-    Logger.warning(
-      "Error while sending the deployment #{id}: #{inspect(error)}. The operation will be retried shortly."
-    )
-
-    state
-  end
-
-  defp increase_retries(state) do
-    Map.update!(state, :retries, &Kernel.+(&1, 1))
-  end
-
-  @doc """
-  Tries to reconcile the deployment with the property set by the device.
-
-  The device publishes the available deployments, this function reads such property
-  and either finds a state, and sets the deployment to that state or does
-  not find a valid state, therefore the device does not have such deployment
-  deployed, and the function returns :not_found
-
-  Alternatively, if something went wrong while updating the deployment, an 
-  `{:error, _}` is returned.
-
-  Example:
-  ```elixir
-  Core.reconcile(deployment, tenant: tenant)
-  > {:ok, new_deployment}
-
-  Core.reconcile(deployment, tenant: tenant)
-  > :not_found
-  ```
-  """
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
   def reconcile(deployment, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
@@ -149,7 +80,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
     end
   end
 
-  defp maybe_update(%DeploymentStatus{status: status}, deployment, tenant) do
+  def maybe_update(%DeploymentStatus{status: status}, deployment, tenant) do
     # NOTE: this will trigger a publish on the appropriate topic, the
     # provisioner will react to it.
 
@@ -164,47 +95,5 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
     |> Ash.update(tenant: tenant)
   end
 
-  defp maybe_update(other, _deployment, _tenant), do: other
-
-  @doc """
-  exponential backoff timeout.
-
-  Reads from the state; computing the retry timeout with the following formula
-
-  ```
-  timeout = pan + (2^retries) + rand(0,1000)
-  timeout = min(timeout, max_timeout)
-  ```
-
-  - pan       :: the pan component is there to ensure a minimum timeout is
-                 guaranteed. The pan is only applied when the deployment
-                 has been sent, and therefore we're waiting for astarte triggers
-  - 2^retries :: this is the exponential component, increases at each retry to
-                 ensure we don't DDoS astarte/the device.
-  - rand      :: a random (between 0 and 1s) ensures no synchronization errors
-                 appear.
-  """
-  def timeout(state) do
-    %{
-      state: d_state,
-      retries: retries
-    } = state
-
-    pan = pan(d_state)
-
-    exp = :math.pow(2, retries)
-
-    rand = Enum.random(0..1000)
-
-    max_timeout = Config.message_max_timeout!()
-
-    pan
-    |> Kernel.+(exp)
-    |> Kernel.+(rand)
-    |> min(max_timeout)
-    |> round()
-  end
-
-  defp pan(:sent), do: Config.message_min_timeout!()
-  defp pan(:init), do: 0
+  def maybe_update(other, _deployment, _tenant), do: other
 end

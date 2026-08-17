@@ -79,7 +79,7 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          device_request_deployment: device_request_deployment,
+          resource: device_request_deployment,
           deployment: deployment,
           mode: :manual
         )

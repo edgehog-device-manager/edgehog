@@ -64,7 +64,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
       provisioner =
         Provisioner.start(
           tenant: tenant,
-          container_deployment: container_deployment,
+          resource: container_deployment,
           deployment: deployment,
           mode: :manual
         )
@@ -173,7 +173,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
 
       Sandbox.allow(Edgehog.Repo, self(), provisioner)
 
-      topic = Provisioner.topic(container_deployment)
+      topic = Provisioner.Core.topic(container_deployment)
 
       Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
 
@@ -203,7 +203,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
 
       Sandbox.allow(Edgehog.Repo, test_process, provisioner)
 
-      ready_topic = Provisioner.topic(container_deployment.id)
+      ready_topic = Provisioner.Core.topic(container_deployment.id)
       Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
 
       container_deployment =
@@ -254,7 +254,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
         {:ok, containers}
       end)
 
-      ready_topic = Provisioner.topic(container_deployment)
+      ready_topic = Provisioner.Core.topic(container_deployment)
       Phoenix.PubSub.subscribe(Edgehog.PubSub, ready_topic)
 
       Provisioner.run(provisioner)
