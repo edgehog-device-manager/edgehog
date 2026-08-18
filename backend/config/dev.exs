@@ -146,6 +146,7 @@ config :phoenix, :plug_init_mode, :runtime
 config :phoenix, :stacktrace_depth, 20
 
 config :waffle,
+  http_client: Waffle.HTTPClient.Req,
   storage: Waffle.Storage.S3,
   bucket: "edgehog",
   asset_host: "http://rustfs-storage.edgehog.localhost:9000/edgehog",

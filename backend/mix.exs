@@ -101,13 +101,14 @@ defmodule Edgehog.MixProject do
       {:mimic, "~> 2.3", only: :test},
       {:tesla, "~> 1.17"},
       {:finch, "~> 0.21", override: true},
-      {:waffle, "~> 1.1"},
+      {:waffle, "~> 2.0.0-rc.1", override: true},
+      {:req, "~> 0.7"},
       {:envar, "~> 1.1"},
       {:ex_aws, "~> 2.6"},
       {:ex_aws_s3, "~> 2.5"},
-      {:azurex, "~> 1.1"},
+      {:azurex, github: "edgehog-device-manager/azurex", ref: "main"},
       {:sweet_xml, "~> 0.7"},
-      {:waffle_gcs, "~> 0.2"},
+      {:waffle_gcs, github: "edgehog-device-manager/waffle_gcs", ref: "main"},
       {:guardian, "~> 2.4"},
       {:jose, "~> 1.11"},
       {:skogsra, "~> 2.5"},
@@ -140,7 +141,8 @@ defmodule Edgehog.MixProject do
       # NOTE: intentionally pinning google_gax to a non google api repository.
       # Google gax used an old tesla engine (1.17.0), unpatched with critical
       # security vulnerabilities. `dufflehq` forked it and started maintaining
-      # its own fork to work with the latest tesla updates. Using their fork.
+      # its own fork to work with the latest tesla updates. Pinning the new ref
+      # for `0.4.2` version of gax.
       {:google_gax,
        github: "duffelhq/elixir-google-api",
        subdir: "clients/gax",

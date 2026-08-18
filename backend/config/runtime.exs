@@ -188,6 +188,7 @@ if config_env() in [:prod, :test] do
     json: s3.gcp_credentials
 
   config :waffle,
+    http_client: Waffle.HTTPClient.Req,
     storage: storage_module,
     asset_host: waffle_asset_host,
     bucket: waffle_bucket,
