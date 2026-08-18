@@ -47,7 +47,31 @@ defmodule Edgehog.Containers.Provisioner.Core do
 
   defmacro __using__(_opts) do
     quote do
-      @behaviour Edgehog.Containers.Provisioner.Core.Behaviour
+      alias Edgehog.Containers.Provisioner.Core
+
+      @behaviour Core.Behaviour
+
+      @impl Core.Behaviour
+      def temporary_error?(error)
+
+      def temporary_error?({:error, error}), do: temporary_error?(error)
+
+      def temporary_error?(%{errors: errors}) when is_list(errors) and errors != [],
+        do: Enum.any?(errors, &temporary_error?/1)
+
+      def temporary_error?("connection refused"), do: true
+
+      def temporary_error?(%Astarte.Client.APIError{status: status}) when status in 500..599,
+        do: true
+
+      def temporary_error?(%Edgehog.Error.AstarteAPIError{status: status})
+          when status in 500..599, do: true
+
+      def temporary_error?(%Edgehog.Error.DeviceOffline{}), do: true
+
+      def temporary_error?(_error), do: false
+
+      defoverridable temporary_error?: 1
     end
   end
 end

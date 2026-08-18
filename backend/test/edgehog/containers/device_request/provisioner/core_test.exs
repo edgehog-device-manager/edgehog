@@ -142,5 +142,37 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner.CoreTest do
 
       assert :not_found == Core.reconcile(device_request_deployment, tenant: tenant)
     end
+
+    test "temporary_error?/1 correctly recurses on nested errors", _context do
+      error = "connection refused"
+      assert Core.temporary_error?({:error, error}) == Core.temporary_error?(error)
+
+      error = %{errors: ["unknown error"]}
+      assert Core.temporary_error?({:error, error}) == Core.temporary_error?(error)
+
+      error = :other
+      assert Core.temporary_error?({:error, error}) == Core.temporary_error?(error)
+    end
+
+    test "temporary_error?/1 returns true for \"connection refused\" errors", _context do
+      assert Core.temporary_error?("connection refused")
+    end
+
+    test "temporary_error?/1 returns true for 5xx responses", _context do
+      assert Core.temporary_error?(%Astarte.Client.APIError{
+               status: Enum.random(500..599),
+               response: "server error"
+             })
+
+      assert Core.temporary_error?(%Edgehog.Error.AstarteAPIError{status: Enum.random(500..599)})
+    end
+
+    test "temporary_error?/1 returns true for Edgehog.Error.DeviceOffline errors", _context do
+      assert Core.temporary_error?(%Edgehog.Error.DeviceOffline{})
+    end
+
+    test "temporary_error?/1 returns false for other unspecified errors", _context do
+      refute Core.temporary_error?(:other_unspecified_error)
+    end
   end
 end

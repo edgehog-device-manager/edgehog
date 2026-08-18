@@ -98,6 +98,13 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   """
   @callback subscribe_topic(resource()) :: String.t()
 
+  @doc """
+  Checks whether an error returned by `send_to_device/3` from Astarte APIs is
+  temporary (i.e.: can be retried in a bit), or if it's not, and should thus cause
+  a failure of the Provisioner.
+  """
+  @callback temporary_error?(error()) :: boolean()
+
   @type ash_action_return() ::
           {:ok, Ash.Resource.record()}
           | {:ok, Ash.Resource.record(), [Ash.Notifier.Notification.t()]}
@@ -118,4 +125,6 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   @type provisioner_registry() :: term()
 
   @type id() :: term()
+
+  @type error() :: term()
 end

@@ -156,7 +156,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
       CreateDeviceMappingRequest
       |> allow(test_process, provisioner)
       |> expect(:send_create_device_mapping_request, fn _, _, _ ->
-        {:error, %Astarte.Client.APIError{status: 500, response: "some error message"}}
+        {:error, %Edgehog.Error.AstarteAPIError{status: 500, response: "some error message"}}
       end)
       |> expect(:send_create_device_mapping_request, fn _, _, data ->
         %Edgehog.Astarte.Device.CreateDeviceMappingRequest.RequestData{
@@ -392,6 +392,38 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.ProvisionerTest do
       Provisioner.run(provisioner)
 
       assert_receive {:DOWN, ^ref, :process, ^provisioner, {:shutdown, :device_offline}}, 2000
+    end
+
+    test "stops on unsolvable, non-temporary errors", context do
+      %{
+        device_mapping_deployment: device_mapping_deployment,
+        provisioner: provisioner,
+        provisioner_ref: ref
+      } = context
+
+      test_process = self()
+
+      topic = Provisioner.Core.topic(device_mapping_deployment)
+
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+
+      CreateDeviceMappingRequest
+      |> allow(test_process, provisioner)
+      |> expect(:send_create_device_mapping_request, fn _, _, _ ->
+        {:error, %Edgehog.Error.AstarteAPIError{status: 400, response: "some error message"}}
+      end)
+
+      Sandbox.allow(Edgehog.Repo, self(), provisioner)
+
+      Provisioner.run(provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^provisioner, {:shutdown, :unsolvable_api_error}},
+                     2000
+
+      assert_receive {:failure, failed_resource}, 2000
+      assert failed_resource.id == device_mapping_deployment.id
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
     end
   end
 
