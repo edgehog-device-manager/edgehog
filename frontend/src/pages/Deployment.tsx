@@ -408,6 +408,47 @@ const DeploymentContent = ({
           id: deploymentId,
           input: { target: upgradeTargetReleaseId },
         },
+
+        updater: (store, response) => {
+          const upgradedDeployment = response?.upgradeDeployment?.result;
+
+          if (!upgradedDeployment) {
+            return;
+          }
+
+          const newDeploymentId = upgradedDeployment.id;
+
+          const newDeploymentRecord = store.get(newDeploymentId);
+
+          if (!newDeploymentRecord) {
+            return;
+          }
+
+          const deviceRecord = deviceId ? store.get(deviceId) : null;
+
+          if (!deviceRecord) {
+            return;
+          }
+
+          const connection = ConnectionHandler.getConnection(
+            deviceRecord,
+            "DeployedApplicationsTable_applicationDeployments",
+          );
+
+          if (!connection) {
+            return;
+          }
+
+          const edge = ConnectionHandler.createEdge(
+            store,
+            connection,
+            newDeploymentRecord,
+            "DeploymentEdge",
+          );
+
+          ConnectionHandler.insertEdgeBefore(connection, edge);
+        },
+
         onCompleted: (data, errors) => {
           handleMutationCompletion(errors, setErrorFeedback, () => {
             if (deviceId && data?.upgradeDeployment?.result?.id) {
