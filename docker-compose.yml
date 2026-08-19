@@ -119,7 +119,7 @@ services:
       URL_SCHEME: http
       GQL_SUBSCRIPTIONS_ALLOWED_ORIGINS: http://${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
       EDGEHOG_FORWARDER_HOSTNAME: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
-      EDGEHOG_FORWARDER_PORT: 80
+      EDGEHOG_FORWARDER_PORT: 4001
       EDGEHOG_FORWARDER_SECURE_SESSIONS: "false"
       ADMIN_JWT_PUBLIC_KEY_PATH: /keys/admin_public.pem
       EDGEHOG_AUTHZ_PROVIDER: openfga
@@ -157,6 +157,7 @@ services:
     environment:
       BACKEND_URL: http://api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}/
       HIDE_NAVIGATION_ELEMENTS: ${HIDE_NAVIGATION_ELEMENTS:-false}
+      FORWARDER_VERSION: ${FORWARDER_VERSION:-0.2.0}
     restart: on-failure
     labels:
       - "traefik.enable=true"
@@ -166,10 +167,11 @@ services:
       - "traefik.http.services.edgehog-frontend.loadbalancer.server.port=80"
 
   edgehog-device-forwarder:
-    image: edgehogdevicemanager/edgehog-device-forwarder:0.1.0
+    image: localhost/edgehog-device-forwarder:0.2.0
     environment:
       RELEASE_NAME: edgehog-device-forwarder
       SECRET_KEY_BASE: fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
+      JWT_SECRET: wFJnCDGm5LtiP6FafGHWP8tukf9NmDkn7Sr7EfErG10RIoQTVux8BLP7Pl7COcSQ
       PORT: 4001
       PHX_HOST: device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}
     restart: on-failure
