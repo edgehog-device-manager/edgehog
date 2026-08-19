@@ -79,6 +79,12 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
                                Edgehog.Astarte.Device.AvailableDeviceMappings
                              )
 
+  @available_device_requests Application.compile_env(
+                               :edgehog,
+                               :astarte_available_device_requests_module,
+                               Edgehog.Astarte.Device.AvailableDeviceRequests
+                             )
+
   @base_image Application.compile_env(
                 :edgehog,
                 :astarte_base_image_module,
@@ -139,6 +145,7 @@ defmodule Edgehog.Devices.Device.Calculations.AstarteInterfaceValue do
   defp value_id_to_fetch_fun(:available_volumes), do: &@available_volumes.get/2
   defp value_id_to_fetch_fun(:available_networks), do: &@available_networks.get/2
   defp value_id_to_fetch_fun(:available_device_mappings), do: &@available_device_mappings.get/2
+  defp value_id_to_fetch_fun(:available_device_requests), do: &@available_device_requests.get/2
   defp value_id_to_fetch_fun(:base_image_info), do: &@base_image.get/2
   defp value_id_to_fetch_fun(:hardware_info), do: &@hardware_info.get/2
   defp value_id_to_fetch_fun(:file_transfer_capabilities), do: &@file_transfer_capabilities.get/2

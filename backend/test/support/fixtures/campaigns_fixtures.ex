@@ -537,14 +537,10 @@ defmodule Edgehog.CampaignsFixtures do
 
       Enum.each(deployable_devices, fn device ->
         deployment =
-          [device_id: device.id, release_id: release.id, tenant: tenant]
-          |> ContainersFixtures.deployment_fixture()
-          |> Ash.load!(
-            container_deployments: [
-              :device_mapping_deployments,
-              :network_deployments,
-              :volume_deployments
-            ]
+          ContainersFixtures.deployment_fixture(
+            device_id: device.id,
+            release_id: release.id,
+            tenant: tenant
           )
 
         # We set the state of deployment to one of ready states, so the overall deployment is ready
@@ -583,14 +579,10 @@ defmodule Edgehog.CampaignsFixtures do
 
     # Deploy the release to the device so it can be targeted by these operations
     deployment =
-      [device_id: device.id, release_id: release_id, tenant: tenant]
-      |> ContainersFixtures.deployment_fixture()
-      |> Ash.load!(
-        container_deployments: [
-          :device_mapping_deployments,
-          :network_deployments,
-          :volume_deployments
-        ]
+      ContainersFixtures.deployment_fixture(
+        device_id: device.id,
+        release_id: release_id,
+        tenant: tenant
       )
 
     # We set the state of deployment to one of ready states, so the overall deployment is ready
@@ -614,34 +606,13 @@ defmodule Edgehog.CampaignsFixtures do
   end
 
   defp fake_deployment_readiness(deployment, mechanism_type, tenant) do
-    Enum.each(deployment.container_deployments, fn cd ->
-      Ash.bulk_update!(
-        cd.device_mapping_deployments,
-        :set_state,
-        %{state: :present},
-        tenant: tenant
-      )
-
-      Ash.bulk_update!(
-        cd.network_deployments,
-        :set_state,
-        %{state: :available},
-        tenant: tenant
-      )
-
-      Ash.bulk_update!(
-        cd.volume_deployments,
-        :set_state,
-        %{state: :available},
-        tenant: tenant
-      )
-    end)
+    deployment = ContainersFixtures.make_deployment_ready!(deployment, tenant)
 
     if mechanism_type == :deployment_stop do
       Edgehog.Containers.mark_deployment_as_started(deployment, tenant: tenant)
-    else
-      Edgehog.Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
     end
+
+    deployment
   end
 
   #  Setup Helpers

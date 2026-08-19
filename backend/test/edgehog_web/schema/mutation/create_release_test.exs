@@ -246,6 +246,40 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
                  dep["container"]["name"] == "service-a"
              end)
     end
+
+    test "returns error when the release has circular container dependencies", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      c1 = container_fixture(tenant: tenant, name: "service-a")
+      c2 = container_fixture(tenant: tenant, name: "service-b")
+
+      response =
+        create_release(
+          tenant: tenant,
+          application_id: application_id,
+          containers: [
+            %{"id" => AshGraphql.Resource.encode_relay_id(c1)},
+            %{"id" => AshGraphql.Resource.encode_relay_id(c2)}
+          ],
+          container_dependencies: [
+            %{
+              "container_id" => AshGraphql.Resource.encode_relay_id(c1),
+              "dependency_id" => AshGraphql.Resource.encode_relay_id(c2)
+            },
+            %{
+              "container_id" => AshGraphql.Resource.encode_relay_id(c2),
+              "dependency_id" => AshGraphql.Resource.encode_relay_id(c1)
+            }
+          ]
+        )
+
+      error = extract_error!(response)
+
+      assert error.code == "invalid_attribute"
+      assert error.fields == [:container_dependencies]
+      assert error.message == "circular dependencies detected"
+    end
   end
 
   defp create_release(opts) do

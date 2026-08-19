@@ -22,31 +22,24 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Astarte.Device.CreateContainerRequest
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Astarte.Device.CreateDeviceMappingRequest
-  alias Edgehog.Astarte.Device.CreateImageRequest
-  alias Edgehog.Astarte.Device.CreateNetworkRequest
-  alias Edgehog.Astarte.Device.CreateVolumeRequest
+  alias Edgehog.Containers.Deployment
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
-    # one image per container
-    images = containers
-
     # one volume per container
     volumes_per_container = 1
-    volumes = volumes_per_container * containers
     volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
 
     network = network_fixture(tenant: tenant)
     device_mapping = device_mapping_fixture(tenant: tenant)
+    device_request = device_request_fixture(tenant: tenant)
 
     container_params = [
       volumes: volumes_per_container,
       volume_target: volume_target,
       networks: [network.id],
-      device_mappings: [device_mapping.id]
+      device_mappings: [device_mapping.id],
+      device_requests: [device_request.id]
     ]
 
     device = device_fixture(tenant: tenant)
@@ -54,44 +47,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     release =
       release_fixture(tenant: tenant, containers: containers, container_params: container_params)
 
-    expect(CreateImageRequest, :send_create_image_request, images, fn _, _, _ -> :ok end)
-
-    expect(CreateVolumeRequest, :send_create_volume_request, volumes, fn _, _, _ -> :ok end)
-
-    expect(CreateNetworkRequest, :send_create_network_request, containers, fn _, _, _ ->
-      :ok
-    end)
-
-    expect(CreateDeviceMappingRequest, :send_create_device_mapping_request, 1, fn _, _, _ ->
-      :ok
-    end)
-
-    expect(CreateContainerRequest, :send_create_container_request, containers, fn _, _, data ->
-      assert Enum.count(data.volumeIds) == volumes_per_container
-
-      binds_by_source =
-        data.binds
-        |> Enum.map(&String.split(&1, ":"))
-        |> Enum.group_by(&hd/1, fn bind ->
-          {target, options} =
-            case bind do
-              [_source, target] -> {target, []}
-              [_source, target, options] -> {target, options}
-            end
-
-          %{target: target, options: options}
-        end)
-
-      for id <- data.volumeIds do
-        volume_binds = Map.fetch!(binds_by_source, id)
-        assert Enum.any?(volume_binds, fn %{target: target} -> target == volume_target end)
-      end
-
-      :ok
-    end)
-
-    expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _, _, data ->
-      assert Enum.count(data.containers) == containers
+    expect(Deployment.Orchestrator, :conduct, fn _, _ ->
+      # We just expect the container orchestrator to be started, the container orchestrator tests are separate
       :ok
     end)
 
@@ -133,14 +90,14 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     ordered_containers = [container_1.id, container_3.id, container_2.id]
 
-    expect(CreateImageRequest, :send_create_image_request, 3, fn _, _, _ -> :ok end)
+    expect(Deployment.Orchestrator, :conduct, fn deployment, _ ->
+      {:ok, ids} =
+        deployment
+        |> Ash.load!(release: [:containers, :container_dependencies])
+        |> sort_containers()
 
-    expect(CreateContainerRequest, :send_create_container_request, 3, fn _, _, _ ->
-      :ok
-    end)
+      assert ids == ordered_containers
 
-    expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _, _, data ->
-      assert data.containers == ordered_containers
       :ok
     end)
 
@@ -151,53 +108,6 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     ]
     |> deploy_release_mutation()
     |> extract_result!()
-  end
-
-  test "deployRelease returns an error if the release has a circular dependency", %{
-    tenant: tenant
-  } do
-    container_1 = container_fixture(tenant: tenant)
-    container_2 = container_fixture(tenant: tenant)
-
-    container_dependencies = [
-      %{
-        "container_id" => container_1.id,
-        "dependency_id" => container_2.id
-      },
-      %{
-        "container_id" => container_2.id,
-        "dependency_id" => container_1.id
-      }
-    ]
-
-    device = device_fixture(tenant: tenant)
-
-    release =
-      release_fixture(
-        tenant: tenant,
-        container_ids: [container_1.id, container_2.id],
-        container_dependencies: container_dependencies
-      )
-
-    expect(CreateImageRequest, :send_create_image_request, 2, fn _, _, _ -> :ok end)
-
-    expect(CreateContainerRequest, :send_create_container_request, 2, fn _, _, _ ->
-      :ok
-    end)
-
-    error =
-      [
-        tenant: tenant,
-        release_id: AshGraphql.Resource.encode_relay_id(release),
-        device_id: AshGraphql.Resource.encode_relay_id(device)
-      ]
-      |> deploy_release_mutation()
-      |> extract_error!()
-
-    assert %{
-             code: "invalid_changes",
-             message: "Invalid deployment: circular dependencies detected"
-           } = error
   end
 
   test "deployRelease returns an error if the application's release system model does not match the device's system model",
@@ -256,7 +166,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
         system_models: [system_model]
       )
 
-    expect(CreateDeploymentRequest, :send_create_deployment_request, 1, fn _, _, _ ->
+    expect(Deployment.Orchestrator, :conduct, fn _, _ ->
+      # We just expect the container orchestrator to be started, the container orchestrator tests are separate
       :ok
     end)
 
@@ -329,5 +240,32 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
            } = result
 
     error
+  end
+
+  # NOTE: coped from `send_create_deployment`, builds the dependency graph from
+  # dependencies spec
+  defp sort_containers(deployment) do
+    release = deployment.release
+
+    dependency_graph = build_graph(release.containers, release.container_dependencies)
+
+    case Graph.topsort(dependency_graph) do
+      false ->
+        {:error, "Invalid deployment: circular dependencies detected"}
+
+      ids ->
+        {:ok, ids}
+    end
+  end
+
+  defp build_graph(containers, dependencies) do
+    graph =
+      Enum.reduce(containers, Graph.new(), fn container, graph ->
+        Graph.add_vertex(graph, container.id)
+      end)
+
+    Enum.reduce(dependencies, graph, fn dep, graph ->
+      Graph.add_edge(graph, dep.dependency_id, dep.container_id)
+    end)
   end
 end

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,11 +29,14 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
          {:ok, device} <- Ash.Changeset.fetch_argument(changeset, :device),
          {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
          {:ok, container} <-
-           Ash.load(container, [:image, :volumes, :networks, :device_mappings], tenant: tenant) do
+           Ash.load(container, [:image, :volumes, :networks, :device_mappings, :device_requests],
+             tenant: tenant
+           ) do
       image = container.image
       networks = container.networks
       volumes = container.volumes
       device_mappings = container.device_mappings
+      device_requests = container.device_requests
 
       image_input = %{
         image: image,
@@ -76,6 +79,17 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
           }
         end)
 
+      device_requests_input =
+        Enum.map(device_requests, fn device_request ->
+          %{
+            device_request: device_request,
+            device: device,
+            deployment: deployment,
+            device_request_id: device_request.id,
+            device_id: device.id
+          }
+        end)
+
       changeset
       |> Ash.Changeset.manage_relationship(:image_deployment, image_input,
         on_no_match: {:create, :deploy},
@@ -96,6 +110,11 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_mapping_instance]
+      )
+      |> Ash.Changeset.manage_relationship(:device_request_deployments, device_requests_input,
+        on_no_match: {:create, :deploy},
+        on_lookup: :relate,
+        use_identities: [:device_request_instance]
       )
     end
   end

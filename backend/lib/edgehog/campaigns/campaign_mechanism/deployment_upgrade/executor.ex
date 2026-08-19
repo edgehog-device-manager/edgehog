@@ -25,8 +25,6 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
   """
   use Edgehog.Campaigns.Executors.Lazy.LazyBatch
 
-  alias Edgehog.Campaigns
-  alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.Executors.Lazy.LazyBatch
 
   @impl LazyBatch
@@ -44,7 +42,58 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
 
   # Common event handling
 
-  # Note that external (e.g. :info) and timeout events are always handled after the internal
+  # NOTE: The topic has to match what the deployment orchestrator publishes onto!
+  # Check the Deployment.Orchestrator implementation of `topic/1`
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: "deployments:ready:" <> _,
+          event: :ready,
+          payload: deployment
+        },
+        _state,
+        data
+      ) do
+    handle_ready(deployment, data)
+  end
+
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: "deployments:ready:" <> _,
+          event: :failure,
+          payload: deployment
+        },
+        _state,
+        data
+      ) do
+    handle_failure(deployment, data)
+  end
+
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: "deployments:started:" <> _,
+          payload: %{data: deployment}
+        },
+        _state,
+        data
+      ) do
+    handle_started(deployment, data)
+  end
+
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{
+          topic: "deployments:timeout:" <> _
+        } = notification,
+        _state,
+        data
+      ) do
+    handle_mark_as_timed_out(notification, data)
+  end
+
+  # NOTE: external (e.g. :info) and timeout events are always handled after the internal
   # events enqueued with the :next_event action. This means that we can be sure an :info event
   # or a timeout won't be handled, e.g., between a rollout and the handling of its error
   @impl LazyBatch
@@ -62,56 +111,43 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
 
   defp handle_update(notification, state, data) do
     case notification.payload.action.name do
-      :maybe_run_ready_actions -> handle_maybe_run_ready_actions(notification, data)
-      :mark_as_timed_out -> handle_mark_as_timed_out(notification, data)
       :pause -> handle_mark_as_paused(state, data)
       _ -> :keep_state_and_data
     end
   end
 
-  defp handle_maybe_run_ready_actions(notification, data) do
-    case Map.get(notification.payload.metadata || %{}, :custom_event) do
-      :deployment_ready ->
-        handle_ready(notification.payload.data, data)
-
-      _ ->
-        :keep_state_and_data
-    end
+  defp handle_ready(_deployment, _data) do
+    # When an upgrade is triggered, the new release deployment must be both deployed and started.
+    # We avoid triggering the :deployment_success event while the deployment is only in the
+    # :stopped (deployed) state — it should trigger only once the deployment transitions to :started.
+    :keep_state_and_data
   end
 
-  defp handle_ready(deployment, data) do
-    if deployment.state === :stopped do
-      # This part of code handles retries for upgrade operations.
-      # In retry_target_operation/1, the :send_deployment action is triggered,
-      # but upgrades require both deployment and start actions.
-      # Therefore, we explicitly trigger the :start operation here if a retry occurred.
-      target =
-        Campaigns.fetch_target_by_device_and_campaign!(
-          deployment.device_id,
-          data.campaign_id,
-          tenant: data.tenant_id
-        )
+  # The target deployed started, the operation was successful
+  defp handle_started(deployment, data) do
+    # We always cancel the retry timeout for every kind of update we see on a Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
 
-      if target.retry_count > 0 do
-        MechanismCore.retry_operation(data.mechanism, target)
-      end
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      {:next_event, :internal, {:operation_success, deployment}}
+    ]
 
-      # When an upgrade is triggered, the new release deployment must be both deployed and started.
-      # We avoid triggering the :deployment_success event while the deployment is only in the
-      # :stopped (deployed) state — it should trigger only once the deployment transitions to :started.
-      :keep_state_and_data
-    else
-      # We always cancel the retry timeout for every kind of update we see on a Deployment.
-      # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-      # If the timeout does not exist, this is a no-op anyway.
+    {:keep_state_and_data, actions}
+  end
 
-      actions = [
-        cancel_retry_timeout(data.tenant_id, deployment.id),
-        {:next_event, :internal, {:operation_success, deployment}}
-      ]
+  defp handle_failure(deployment, data) do
+    # We always cancel the retry timeout for every kind of update we see on an Deployment.
+    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
+    # If the timeout does not exist, this is a no-op anyway.
 
-      {:keep_state_and_data, actions}
-    end
+    actions = [
+      cancel_retry_timeout(data.tenant_id, deployment.id),
+      internal_event({:operation_failure_event, deployment})
+    ]
+
+    {:keep_state_and_data, actions}
   end
 
   defp handle_mark_as_timed_out(notification, data) do

@@ -16,8 +16,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useMemo } from "react";
-import { Stack } from "react-bootstrap";
+import React, { useMemo, useState } from "react";
+import { Button, Stack } from "react-bootstrap";
 import {
   FormattedMessage,
   MessageDescriptor,
@@ -230,6 +230,34 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.noDeviceMappings",
     defaultMessage: "No device mappings assigned.",
   },
+  deviceRequestsLabel: {
+    id: "components.apps.containers.container-details.ContainerDetails.deviceRequestLabel",
+    defaultMessage: "Device Requests",
+  },
+  noDeviceRequests: {
+    id: "components.apps.containers.container-details.ContainerDetails.noDeviceRequests",
+    defaultMessage: "No device requests assigned.",
+  },
+  driver: {
+    id: "components.apps.containers.container-details.ContainerDetails.driver",
+    defaultMessage: "Driver",
+  },
+  count: {
+    id: "components.apps.containers.container-details.ContainerDetails.count",
+    defaultMessage: "Count",
+  },
+  deviceIDs: {
+    id: "components.apps.containers.container-details.ContainerDetails.deviceIDs",
+    defaultMessage: "Device IDs",
+  },
+  capabilities: {
+    id: "components.apps.containers.container-details.ContainerDetails.capabilities",
+    defaultMessage: "Capabilities",
+  },
+  driverOptions: {
+    id: "components.apps.containers.container-details.ContainerDetails.driverOptions",
+    defaultMessage: "Driver Options",
+  },
 });
 
 const CONTAINER_DETAILS_FRAGMENT = graphql`
@@ -304,6 +332,18 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
         }
       }
     }
+    deviceRequests {
+      edges {
+        node {
+          id
+          driver
+          count
+          deviceIds
+          capabilities
+          options
+        }
+      }
+    }
   }
 `;
 
@@ -329,7 +369,8 @@ type SectionKey =
   | "resourceLimits"
   | "securityCapabilities"
   | "runtimeEnvironment"
-  | "deviceMappings";
+  | "deviceMappings"
+  | "deviceRequests";
 
 const sectionsList: SectionKey[] = [
   "image",
@@ -339,6 +380,7 @@ const sectionsList: SectionKey[] = [
   "securityCapabilities",
   "runtimeEnvironment",
   "deviceMappings",
+  "deviceRequests",
 ];
 
 type SectionProps = {
@@ -595,6 +637,85 @@ const DeviceMappingDetails = ({
   );
 };
 
+const DeviceRequestDetails = ({
+  deviceRequests,
+}: {
+  deviceRequests: ContainerDetailsFragment$data["deviceRequests"];
+}) => {
+  const edges = deviceRequests?.edges ?? [];
+
+  const [selectedRequest, setSelectedRequest] = useState(0);
+
+  if (!edges.length) {
+    return (
+      <p className="fst-italic mb-0">
+        <FormattedMessage {...messages.noDeviceRequests} />
+      </p>
+    );
+  }
+
+  const request = edges[selectedRequest]?.node;
+
+  return (
+    <div className="d-flex align-items-stretch gap-4 mt-2">
+      <div className="border-end pe-5">
+        <Stack gap={1}>
+          {edges.map((edge, index) => (
+            <Button
+              key={edge.node.id}
+              variant="light"
+              className={`pe-5 containerListItem ${selectedRequest === index ? "active" : ""}`}
+              onClick={() => setSelectedRequest(index)}
+            >
+              <FormattedMessage
+                id="components.apps.containers.container-details.ContainerDetails.deviceRequestIndex"
+                defaultMessage="Request {index}"
+                values={{ index: index + 1 }}
+              />
+            </Button>
+          ))}
+        </Stack>
+      </div>
+
+      <div className="flex-grow-1 ps-2 w-75">
+        <Stack gap={2}>
+          <PrimitiveField
+            id="driver"
+            label={messages.driver}
+            value={request.driver}
+          />
+
+          <PrimitiveField
+            id="count"
+            label={messages.count}
+            value={request.count}
+          />
+
+          <StringArrayField
+            id="deviceIds"
+            label={messages.deviceIDs}
+            value={request.deviceIds}
+          />
+
+          <PrimitiveField
+            id="capabilities"
+            label={messages.capabilities}
+            value={request.capabilities
+              ?.map((group) => group.join(", "))
+              .join(" OR ")}
+          />
+
+          <JsonEditorField
+            id="options"
+            label={messages.driverOptions}
+            value={request.options}
+          />
+        </Stack>
+      </div>
+    </div>
+  );
+};
+
 type SectionComponentProps = {
   data: ContainerDetailsFragment$data;
   open: boolean;
@@ -801,6 +922,16 @@ const DeviceMappingsSection = ({
   );
 };
 
+const DeviceRequestsSection = ({
+  data,
+  open,
+  onToggle,
+}: SectionComponentProps) => (
+  <Section label={messages.deviceRequestsLabel} open={open} onToggle={onToggle}>
+    <DeviceRequestDetails deviceRequests={data.deviceRequests} />
+  </Section>
+);
+
 type ContainerDetailsProps = {
   container: ContainerDetailsFragment$key;
 };
@@ -853,6 +984,12 @@ const ContainerDetails = ({ container }: ContainerDetailsProps) => {
         data={data}
         open={isSectionOpen("deviceMappings")}
         onToggle={() => toggleSection("deviceMappings")}
+      />
+
+      <DeviceRequestsSection
+        data={data}
+        open={isSectionOpen("deviceRequests")}
+        onToggle={() => toggleSection("deviceRequests")}
       />
     </div>
   );

@@ -29,6 +29,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
+  alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Volume
@@ -749,6 +750,108 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
 
       assert {:error, _} =
                Ash.get(DeviceMapping.Deployment, device_mapping_deployment.id, tenant: tenant)
+    end
+
+    test "AvailableDeviceRequests with true marks device request as present", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      device_request = device_request_fixture(tenant: tenant)
+
+      device_request_deployment =
+        device_request_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          device_request_id: device_request.id
+        )
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
+          path: "/" <> device_request.id <> "/present",
+          value: true
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated = Ash.get!(DeviceRequest.Deployment, device_request_deployment.id, tenant: tenant)
+      assert updated.state == :present
+    end
+
+    test "AvailableDeviceRequests with false marks device request as present", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      device_request = device_request_fixture(tenant: tenant)
+
+      device_request_deployment =
+        device_request_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          device_request_id: device_request.id
+        )
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
+          path: "/" <> device_request.id <> "/present",
+          value: false
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated = Ash.get!(DeviceRequest.Deployment, device_request_deployment.id, tenant: tenant)
+      assert updated.state == :not_present
+    end
+
+    test "AvailableDeviceRequests with nil destroys device mapping deployment", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      device_request = device_request_fixture(tenant: tenant)
+
+      device_request_deployment =
+        device_request_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          device_request_id: device_request.id
+        )
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
+          path: "/" <> device_request.id <> "/present",
+          value: nil
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      assert {:error, _} =
+               Ash.get(DeviceRequest.Deployment, device_request_deployment.id, tenant: tenant)
     end
 
     test "AvailableContainers with Received status marks container as received", context do

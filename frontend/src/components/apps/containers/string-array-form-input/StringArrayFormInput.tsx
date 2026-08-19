@@ -30,6 +30,7 @@ interface StringArrayFormInputProps {
   onChange?: (value: string[]) => void;
   errors?: { message?: string }[];
   addButtonLabel?: React.ReactNode;
+  canAddItem?: boolean;
   mode?: "input" | "details";
 }
 
@@ -43,6 +44,7 @@ const StringArrayFormInput: React.FC<StringArrayFormInputProps> = ({
       defaultMessage="Add Item"
     />
   ),
+  canAddItem = true,
   mode = "input",
 }) => {
   const handleAdd = () => {
@@ -101,6 +103,7 @@ const StringArrayFormInput: React.FC<StringArrayFormInputProps> = ({
           className="me-auto"
           variant="outline-primary"
           onClick={handleAdd}
+          disabled={!canAddItem}
         >
           {addButtonLabel}
         </Button>

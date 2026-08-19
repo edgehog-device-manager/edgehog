@@ -220,6 +220,69 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
       assert hd(mappings)["pathOnHost"] == "/dev/ttyUSB0"
     end
 
+    test "creates a container with nested device requests", %{tenant: tenant} do
+      image = image_fixture(tenant: tenant)
+
+      input = %{
+        "name" => "device-container",
+        "image" => %{"reference" => image.reference},
+        "device_requests" => [
+          %{
+            "driver" => "driver",
+            "count" => 2,
+            "capabilities" => [["gpu", "compute"]],
+            "options" =>
+              Jason.encode!(%{
+                "key1" => "value1",
+                "key2" => "value2"
+              })
+          }
+        ]
+      }
+
+      document = """
+      mutation CreateContainer($input: CreateContainerInput!) {
+        createContainer(input: $input) {
+          result {
+            id
+            deviceRequests {
+              edges {
+                node {
+                  driver
+                  count
+                  capabilities
+                  options
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      response =
+        create_container(tenant: tenant, input: input, document: document)
+
+      result = extract_result!(response)
+
+      {:ok, %{id: container_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+      db_container =
+        Containers.fetch_container!(container_id,
+          tenant: tenant,
+          load: [device_requests: [:capabilities]]
+        )
+
+      assert [
+               %Edgehog.Containers.DeviceRequest{
+                 driver: "driver",
+                 capabilities: [["gpu", "compute"]],
+                 count: 2,
+                 options: %{"key1" => "value1", "key2" => "value2"}
+               }
+             ] = db_container.device_requests
+    end
+
     test "fails when cpu_period is out of constraints", %{tenant: tenant} do
       image = image_fixture(tenant: tenant)
 

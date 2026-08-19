@@ -113,6 +113,10 @@ defmodule Edgehog.Devices do
         action: :send_create_device_mapping_request,
         args: [:device_mapping, :deployment]
 
+      define :send_create_device_request_request,
+        action: :send_create_device_request_request,
+        args: [:device_request, :deployment]
+
       define :send_create_deployment_request,
         action: :send_create_deployment_request,
         args: [:deployment]

@@ -77,7 +77,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStopCoreTest do
       {:ok, updated_deployment} =
         Containers.mark_deployment_as_stopped(deployment, tenant: tenant.tenant_id)
 
-      topic = "deployments:#{deployment.id}"
+      topic = "deployments:stopped:#{deployment.id}"
 
       # Assert we receive the PubSub notification
       assert_receive %Broadcast{

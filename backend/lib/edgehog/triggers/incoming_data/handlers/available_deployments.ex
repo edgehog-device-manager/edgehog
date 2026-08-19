@@ -44,15 +44,11 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableDeployments do
   end
 
   defp change_state("Started", %Deployment{} = deployment, tenant) do
-    with {:ok, deployment} <- Containers.mark_deployment_as_started(deployment, tenant: tenant) do
-      Containers.deployment_update_resources_state(deployment, tenant: tenant)
-    end
+    Containers.mark_deployment_as_started(deployment, tenant: tenant)
   end
 
   defp change_state("Stopped", %Deployment{} = deployment, tenant) do
-    with {:ok, deployment} <- Containers.mark_deployment_as_stopped(deployment, tenant: tenant) do
-      Containers.deployment_update_resources_state(deployment, tenant: tenant)
-    end
+    Containers.mark_deployment_as_stopped(deployment, tenant: tenant)
   end
 
   defp change_state(nil, %Deployment{} = deployment, tenant) do

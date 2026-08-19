@@ -67,6 +67,13 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     Containers.mark_deployment_as_timed_out!(deployment, tenant: tenant_id)
   end
 
+  def topics(operation_id) do
+    [
+      "deployments:timeout:#{operation_id}",
+      Deployment.Orchestrator.topic(operation_id)
+    ]
+  end
+
   @doc """
   Subscribes to deployment operation updates via PubSub.
 
@@ -79,8 +86,14 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - Raises an error on failure.
   """
   def subscribe_to_operation_updates!(_mechanism, operation_id) do
+    operation_id
+    |> topics()
+    |> Enum.each(&sub_to/1)
+  end
+
+  defp sub_to(topic) do
     with {:error, reason} <-
-           Phoenix.PubSub.subscribe(Edgehog.PubSub, "deployments:#{operation_id}") do
+           Phoenix.PubSub.subscribe(Edgehog.PubSub, topic) do
       raise reason
     end
   end
@@ -96,8 +109,12 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - `:ok`
   """
   def unsubscribe_to_operation_updates!(_mechanism, operation_id) do
-    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "deployments:#{operation_id}")
+    operation_id
+    |> topics()
+    |> Enum.each(&unsub_to/1)
   end
+
+  defp unsub_to(topic), do: Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
 
   # Target Management
 
@@ -164,11 +181,11 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
       deployment_result =
         target
         |> Ash.load!(:deployment, tenant: target.tenant_id)
-        |> Map.get(:deployment)
-        |> Ash.Changeset.for_update(:send_deployment, %{}, tenant: target.tenant_id)
-        |> Ash.update()
+        |> Map.fetch(:deployment)
 
-      with {:ok, _deployment} <- deployment_result do
+      with {:ok, deployment} <- deployment_result do
+        Deployment.Orchestrator.conduct(deployment, target.tenant_id)
+
         {:ok, target}
       end
     end

@@ -25,6 +25,7 @@ defmodule EdgehogWeb.GraphqlCase do
   Sets up a database connection and a tenant. 
   """
   use ExUnit.CaseTemplate
+  use Mimic
 
   alias Ecto.Adapters.SQL
 

@@ -110,6 +110,17 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
           }
         }
       }
+      deviceRequests {
+        edges {
+          node {
+            driver
+            count
+            deviceIds
+            capabilities
+            options
+          }
+        }
+      }
     }
   }
 `;
@@ -280,6 +291,33 @@ const ReuseContainerModal = ({
                     }
 
                     return deviceMappings;
+                  }, [])
+                : undefined,
+              deviceRequests: c.deviceRequests?.edges
+                ? c.deviceRequests.edges.reduce<
+                    {
+                      driver: string;
+                      count: number;
+                      deviceIds: string[];
+                      capabilities: string[];
+                      options: string;
+                    }[]
+                  >((deviceRequests, edge) => {
+                    const node = edge?.node;
+
+                    if (node) {
+                      deviceRequests.push({
+                        driver: node.driver ?? "",
+                        count: node.count ?? -1,
+                        deviceIds: node.deviceIds ? [...node.deviceIds] : [],
+                        capabilities:
+                          node.capabilities?.map((group) => group.join(",")) ??
+                          [],
+                        options: node.options ?? "",
+                      });
+                    }
+
+                    return deviceRequests;
                   }, [])
                 : undefined,
             };

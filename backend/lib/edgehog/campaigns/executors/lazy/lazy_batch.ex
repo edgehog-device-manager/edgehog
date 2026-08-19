@@ -37,7 +37,8 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
     :available_slots,
     :failed_count,
     :in_progress_count,
-    :target_count
+    :target_count,
+    :context
   ]
 
   @doc """
@@ -95,7 +96,8 @@ defmodule Edgehog.Campaigns.Executors.Lazy.LazyBatch do
       data = %{
         data
         | mechanism: mechanism,
-          target_count: target_count
+          target_count: target_count,
+          context: %{}
       }
 
       case campaign_status do

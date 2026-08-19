@@ -22,9 +22,9 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
-    extensions: [AshGraphql.Resource]
+    extensions: [AshGraphql.Resource],
+    notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Changes.MaybeNotifyUpwards
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceMapping.Deployment.Changes
@@ -78,17 +78,11 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
     end
 
     update :mark_as_present do
-      require_atomic? false
-
       change set_attribute(:state, :present)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_not_present do
-      require_atomic? false
-
       change set_attribute(:state, :not_present)
-      change MaybeNotifyUpwards
     end
 
     update :mark_as_errored do
@@ -102,9 +96,6 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
     update :set_state do
       accept [:state]
-
-      require_atomic? false
-      change MaybeNotifyUpwards
     end
 
     destroy :destroy_if_dangling do
@@ -155,6 +146,16 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment do
 
   identities do
     identity :device_mapping_instance, [:device_mapping_id, :device_id]
+  end
+
+  pub_sub do
+    prefix "device_mapping_deployments"
+    module EdgehogWeb.Endpoint
+
+    publish :mark_as_present, [[:id, "*"]]
+    publish :mark_as_not_present, [[:id, "*"]]
+    publish :mark_as_errored, [[:id, "*"]]
+    publish :set_state, [[:id, "*"]]
   end
 
   postgres do

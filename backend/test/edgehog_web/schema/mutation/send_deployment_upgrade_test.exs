@@ -24,9 +24,8 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Astarte.Device.DeploymentUpdate
   alias Edgehog.Containers
+  alias Edgehog.Containers.Deployment
 
   describe "sendDeploymentUpgrade" do
     setup %{tenant: tenant} do
@@ -56,7 +55,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
         |> deployment_fixture()
         |> Containers.mark_deployment_as_stopped(tenant: tenant)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, fn _, _, _ -> :ok end)
+      expect(Deployment.Orchestrator, :conduct, fn _, _ -> :ok end)
 
       result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
@@ -70,18 +69,40 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
              |> Map.fetch!(:deployment_id) == deployment_id
     end
 
-    test "sends the deployment upgrade once the new deployment is ready", args do
-      %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
-        args
+    test "supervises the new deployment with its container deployments loaded", args do
+      %{tenant: tenant} = args
 
-      # we need to set the state of deployment in one of ready states so the action validation passes
-      {:ok, deployment_0_0_1} =
+      application = application_fixture(tenant: tenant)
+
+      release_0_0_1 =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "0.0.1",
+          containers: 1
+        )
+
+      release_0_0_2 =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "0.0.2",
+          containers: 1
+        )
+
+      deployment_0_0_1 =
         [release_id: release_0_0_1.id, tenant: tenant]
         |> deployment_fixture()
-        |> Containers.mark_deployment_as_stopped(tenant: tenant)
+        |> make_deployment_ready!(tenant)
 
-      expect(CreateDeploymentRequest, :send_create_deployment_request, fn _, _, _ -> :ok end)
-      expect(DeploymentUpdate, :update, fn _, _, _ -> :ok end)
+      parent = self()
+      ref = make_ref()
+
+      expect(Deployment.Orchestrator, :conduct, fn new_deployment, tenant ->
+        new_deployment = Ash.load!(new_deployment, :container_deployments, tenant: tenant)
+        send(parent, {ref, new_deployment})
+        :ok
+      end)
 
       result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
@@ -90,13 +111,56 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
 
       {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
 
-      deployment =
-        deployment_id
-        |> Containers.fetch_deployment!(tenant: tenant)
-        |> Containers.mark_deployment_as_stopped!(tenant: tenant)
-        |> Ash.load!(release: [containers: [:image, :volumes, :networks]], device: [])
+      assert_receive {^ref, supervised_deployment}, 1000
 
-      Containers.deployment_update_resources_state!(deployment)
+      assert supervised_deployment.id == deployment_id
+      assert supervised_deployment.release_id == release_0_0_2.id
+
+      # The supervisor must see the container deployments of the new release
+      container_ids =
+        release_0_0_2
+        |> Ash.load!(:containers, tenant: tenant)
+        |> Map.fetch!(:containers)
+        |> Enum.map(& &1.id)
+        |> Enum.sort()
+
+      assert supervised_deployment.container_deployments
+             |> Enum.map(& &1.container_id)
+             |> Enum.sort() == container_ids
+    end
+
+    test "sends the deployment upgrade once the new deployment is ready", args do
+      %{release_0_0_1: release_0_0_1, release_0_0_2: release_0_0_2, tenant: tenant} =
+        args
+
+      # We need to set the state of deployment in one of ready states so the
+      # action validation passes
+      {:ok, deployment_0_0_1} =
+        [release_id: release_0_0_1.id, tenant: tenant]
+        |> deployment_fixture()
+        |> Containers.mark_deployment_as_stopped(tenant: tenant)
+
+      test_process = self()
+      supervisor_ref = make_ref()
+
+      # The upgrade must start supervising the newly created deployment
+      expect(Deployment.Orchestrator, :conduct, fn deployment, _tenant ->
+        send(test_process, {supervisor_ref, deployment.id})
+
+        {:ok, :mock_pid}
+      end)
+
+      result =
+        [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
+        |> send_deployment_upgrade_mutation()
+        |> extract_result!()
+
+      {:ok, %{id: deployment_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+      # Receive the pid of the newly created deployment
+      assert_receive {^supervisor_ref, supervised_id}, 1000
+
+      assert supervised_id == deployment_id
     end
 
     test "fails if the deployments do not belong to the same application", args do
@@ -138,7 +202,7 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       deployment_0_0_1 =
         deployment_fixture(release_id: release_0_0_1.id, tenant: tenant)
 
-      reject(&CreateDeploymentRequest.send_create_deployment_request/3)
+      reject(&Deployment.Orchestrator.conduct/2)
 
       _result =
         [tenant: tenant, deployment: deployment_0_0_1, target: release_0_0_2]
