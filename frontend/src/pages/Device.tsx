@@ -86,6 +86,8 @@ import DeviceWiFiScanResultsTab from "@/components/fleet/devices/tabs/wifi-scan-
 import DeviceSoftwareUpdateTab from "@/components/fleet/devices/tabs/software-update-tab/SoftwareUpdateTab";
 import DeviceFileManagementTab from "@/components/fleet/devices/tabs/file-management-tab/FileManagementTab";
 import DeviceApplicationsTab from "@/components/fleet/devices/tabs/applications-tab/ApplicationsTab";
+import semver from "semver";
+import { forwarderVersion } from "@/api";
 
 const DEVICE_CONNECTION_STATUS_FRAGMENT = graphql`
   fragment Device_connectionStatus on Device {
@@ -451,10 +453,18 @@ const DeviceContent = ({
 
       const forwarderProtocol = secure ? "https" : "http";
 
-      window.open(
-        `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/v1/${sessionToken}/http/${TTYD_PORT}`,
-        "_blank",
-      );
+      if (semver.satisfies(forwarderVersion, "0.1.x")) {
+        window.open(
+          `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/${sessionToken}/http/${TTYD_PORT}`,
+          "_blank",
+        );
+      } else if (semver.satisfies(forwarderVersion, "0.2.x")) {
+        window.open(
+          `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/?session=${sessionToken}&protocol=http&port=${TTYD_PORT}`,
+          "_blank",
+        );
+      } else {
+      }
     },
     [relayEnvironment, deviceId],
   );
