@@ -18,7 +18,7 @@
 
 services:
   postgres:
-    image: postgres:18.4
+    image: postgres:18.6
     environment:
       POSTGRES_USER: edgehog
       POSTGRES_PASSWORD: edgehog
@@ -252,7 +252,7 @@ services:
       - registry-auth:/auth
 
   registry-init:
-    image: docker:29.6.1-dind
+    image: docker:29.6.2-dind
     depends_on:
       - registry
     privileged: true
