@@ -66,15 +66,19 @@ const columns = [
     ),
     meta: {
       label: "Name",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.containersEdit}
+          params={{ containerId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.containersEdit}
-        params={{ containerId: row.original.id }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("image.reference", {
     header: () => (

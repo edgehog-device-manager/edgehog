@@ -74,15 +74,19 @@ const ReleaseSystemModelsTable = ({
       ),
       meta: {
         label: "System Model Name",
+        isPrimaryLink: true,
+        getLink: (row, children) => (
+          <Link
+            route={Route.systemModelsEdit}
+            params={{ systemModelId: row.original.id }}
+            className="row-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </Link>
+        ),
       },
-      cell: ({ row, getValue }) => (
-        <Link
-          route={Route.systemModelsEdit}
-          params={{ systemModelId: row.original.id }}
-        >
-          {getValue()}
-        </Link>
-      ),
+      cell: ({ getValue }) => getValue(),
     }),
   ];
 

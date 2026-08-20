@@ -92,15 +92,19 @@ const ApplicationsTable = ({
       ),
       meta: {
         label: "Application Name",
+        isPrimaryLink: true,
+        getLink: (row, children) => (
+          <Link
+            route={Route.application}
+            params={{ applicationId: row.original.id }}
+            className="row-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </Link>
+        ),
       },
-      cell: ({ row, getValue }) => (
-        <Link
-          route={Route.application}
-          params={{ applicationId: row.original.id }}
-        >
-          {getValue()}
-        </Link>
-      ),
+      cell: ({ getValue }) => getValue(),
     }),
     columnHelper.accessor((row) => row, {
       id: "action",

@@ -90,18 +90,22 @@ const columns = [
     ),
     meta: {
       label: "Device",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.devicesEdit}
+          params={{
+            deviceId: row.original.device.id,
+            activeTab: "device-file-management-tab",
+          }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.devicesEdit}
-        params={{
-          deviceId: row.original.device.id,
-          activeTab: "device-file-management-tab",
-        }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor(
     (target) => target.fileDownloadRequest?.status ?? null,
