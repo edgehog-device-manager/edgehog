@@ -276,7 +276,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
 
       error = extract_error!(response)
 
-      assert error.code == "invalid_attribute"
+      assert error.code == "invalid_argument"
       assert error.fields == [:container_dependencies]
       assert error.message == "circular dependencies detected"
     end
