@@ -156,15 +156,19 @@ const columns = [
     ),
     meta: {
       label: "Deployment Campaign Name",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.deploymentCampaignsEdit}
+          params={{ deploymentCampaignId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.deploymentCampaignsEdit}
-        params={{ deploymentCampaignId: row.original.id }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("campaignMechanism.__typename", {
     header: () => (
@@ -221,6 +225,28 @@ const columns = [
     ),
     meta: {
       label: "Application Name",
+      getLink: (row, children) => {
+        const mechanism = row.original.campaignMechanism;
+        if (
+          !mechanism ||
+          !("release" in mechanism) ||
+          !mechanism.release?.application?.id
+        ) {
+          return null;
+        }
+        return (
+          <Link
+            route={Route.application}
+            params={{
+              applicationId: mechanism.release.application.id,
+            }}
+            className="row-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </Link>
+        );
+      },
     },
     cell: ({ row, getValue }) => {
       const mechanism = row.original.campaignMechanism;
@@ -229,16 +255,7 @@ const columns = [
         return null;
       }
 
-      return (
-        <Link
-          route={Route.application}
-          params={{
-            applicationId: mechanism.release?.application?.id || "",
-          }}
-        >
-          {getValue()}
-        </Link>
-      );
+      return getValue();
     },
   }),
 

@@ -39,6 +39,7 @@ import {
   stateMessages,
 } from "@/components/apps/deployments/deployment-state/DeploymentState";
 import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
+import "@/components/apps/releases/deployed-applications-table/DeployedApplicationsTable.scss";
 
 // We use graphql fields below in columns configuration
 
@@ -190,7 +191,7 @@ const DeployedApplicationsTable = ({
   }
 
   return (
-    <div className="d-flex flex-column gap-2">
+    <div className="d-flex flex-column gap-2 deployed-applications-table">
       {groupedDeployments.map((app) => {
         const latest = app.releases[0];
         const isOpen = expandedApps.has(app.applicationId);
@@ -209,8 +210,7 @@ const DeployedApplicationsTable = ({
                   <strong className="me-2">v{latest.releaseVersion}</strong>
                   {getStatusBadge(latest.state)}
                   <Button
-                    variant="link"
-                    className="p-0 ms-2 hover-scale"
+                    className="row-navigate-btn ms-2"
                     onClick={(e: MouseEvent) =>
                       handleNavigate(e, latest.id, latest.deviceId)
                     }
@@ -232,7 +232,17 @@ const DeployedApplicationsTable = ({
                       }
                     >
                       <td className="align-middle text-secondary">
-                        v{rel.releaseVersion}
+                        <div className="d-inline-flex align-items-center gap-2">
+                          <span>v{rel.releaseVersion}</span>
+                          <Button
+                            className="row-navigate-btn"
+                            onClick={(e: MouseEvent) =>
+                              handleNavigate(e, rel.id, rel.deviceId)
+                            }
+                          >
+                            <Icon icon="arrowUpRightFromSquare" />
+                          </Button>
+                        </div>
                       </td>
                       <td className="text-end align-middle">
                         <div className="d-flex justify-content-end align-items-center gap-2">
@@ -245,15 +255,6 @@ const DeployedApplicationsTable = ({
                             </Badge>
                           )}
                           {getStatusBadge(rel.state)}
-                          <Button
-                            variant="link"
-                            className="p-0"
-                            onClick={(e: MouseEvent) =>
-                              handleNavigate(e, rel.id, rel.deviceId)
-                            }
-                          >
-                            <Icon icon="arrowUpRightFromSquare" />
-                          </Button>
                         </div>
                       </td>
                     </tr>

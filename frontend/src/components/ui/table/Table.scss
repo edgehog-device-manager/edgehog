@@ -29,3 +29,41 @@
     cursor: pointer;
   }
 }
+
+.row-link-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 0.5rem;
+  visibility: hidden;
+  opacity: 0;
+  color: var(--bs-primary);
+  font-size: 0.8rem;
+  vertical-align: middle;
+  transition: opacity 0.15s ease;
+}
+
+tr:hover .row-link-icon {
+  visibility: visible;
+  opacity: 1;
+}
+
+.row-link {
+  display: inline-flex;
+  align-items: center;
+  color: inherit;
+}
+
+.row-link-header {
+  width: 2.5rem;
+  padding: 0 !important;
+}
+
+.row-link-cell {
+  width: 2.5rem;
+  padding: 0 !important;
+  vertical-align: middle !important;
+}
+
+.row-link-cell .row-link-icon {
+  margin-left: 0;
+}

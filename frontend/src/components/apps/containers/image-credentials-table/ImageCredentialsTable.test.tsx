@@ -112,11 +112,12 @@ it("renders Image Credentials data", () => {
 
   const record = data.edges[0];
 
-  expect(screen.getByRole("cell", { name: record.node.label })).toBeVisible();
-  expect(screen.getByRole("link", { name: record.node.label })).toHaveAttribute(
-    "href",
-    `/image-credentials/${record.node.id}/edit`,
-  );
+  expect(
+    screen.getByRole("cell", { name: new RegExp(record.node.label) }),
+  ).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Edit image credentials" }),
+  ).toHaveAttribute("href", `/image-credentials/${record.node.id}/edit`);
   expect(
     screen.getByRole("cell", { name: record.node.username }),
   ).toBeVisible();
