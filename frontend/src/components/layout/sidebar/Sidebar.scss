@@ -136,27 +136,77 @@ $text-muted: #667085;
     min-height: $sidebar-footer-min-height;
     overflow: hidden;
 
-    .sidebar-logout-wrapper {
-      display: flex;
-      width: 100%;
+    .sidebar-footer-actions {
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
     }
 
-    .sidebar-item-label {
-      margin-left: 0.25rem;
-    }
-
-    .sidebar-meta {
-      font-size: 0.875rem;
-      transition: all $transition-speed $transition-curve;
-      white-space: nowrap;
-    }
-
-    .sidebar-app-name {
-      display: inline-block;
+    .sidebar-info-button {
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+      border: none;
+      border-radius: 0.5rem;
+      color: $item-color;
+      background-color: transparent;
       transition:
-        opacity 0.1s,
-        width $transition-speed,
-        visibility $transition-speed;
+        background-color 0.15s ease,
+        transform 0.15s ease;
+
+      &:hover {
+        background-color: $item-hover-bg;
+      }
+
+      &:focus {
+        box-shadow: none;
+      }
+    }
+
+    .sidebar-logout {
+      .sidebar-link {
+        height: 2.5rem;
+        padding: 0 0.625rem;
+      }
+
+      .sidebar-item-label {
+        margin-left: 0;
+        max-width: 0;
+        opacity: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        transition:
+          max-width 0.75s $transition-curve,
+          opacity 0.15s ease,
+          margin-left 0.75s $transition-curve;
+      }
+
+      &:hover .sidebar-item-label {
+        max-width: 8rem;
+        opacity: 1;
+        margin-left: 0.5rem;
+      }
+    }
+
+    .sidebar-footer-popover {
+      --bs-popover-border-color: $sidebar-border;
+      --bs-popover-header-bg: $sidebar-bg;
+      --bs-popover-header-color: $item-color;
+      font-size: 0.875rem;
+
+      .sidebar-app-name {
+        font-size: 0.9375rem;
+        font-weight: 600;
+      }
+
+      .sidebar-footer-link {
+        color: $item-color;
+        font-weight: 500;
+        transition: background-color 0.15s ease;
+
+        &:hover {
+          background-color: $item-hover-bg;
+        }
+      }
     }
   }
 
@@ -199,22 +249,30 @@ $text-muted: #667085;
       }
 
       .sidebar-footer {
-        .sidebar-logout-wrapper {
-          .sidebar-link {
-            width: auto !important;
-            flex-grow: 1;
-          }
+        .sidebar-footer-actions {
+          flex-direction: column;
+          margin-left: auto;
+          margin-right: auto;
+          gap: 0.25rem;
+          padding: 0;
+          justify-content: center;
         }
 
-        .sidebar-meta {
-          text-align: center;
+        .sidebar-logout {
+          .sidebar-link {
+            margin: 0;
+          }
 
-          .sidebar-app-name {
+          .sidebar-item-label {
             opacity: 0;
             width: 0;
             visibility: hidden;
-            margin: 0 !important;
-            transition: opacity 0.1s;
+            max-width: 0;
+            margin-left: 0;
+            transition:
+              max-width $transition-speed $transition-curve,
+              opacity 0.15s ease,
+              margin-left $transition-speed $transition-curve;
           }
         }
       }

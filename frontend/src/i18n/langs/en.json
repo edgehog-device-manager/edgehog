@@ -466,42 +466,6 @@
   "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.title": {
     "defaultMessage": "Edit Deployment Campaign"
   },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.deployButton": {
-    "defaultMessage": "Deploy"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.deployErrorFeedback": {
-    "defaultMessage": "Could not deploy the Application, please try again."
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.deviceOfflineError": {
-    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsAvailable": {
-    "defaultMessage": "No applications available"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noApplicationsFoundMatching": {
-    "defaultMessage": "No applications found matching \"{inputValue}\""
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesAvailable": {
-    "defaultMessage": "No releases available for this application"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.noReleasesFoundMatching": {
-    "defaultMessage": "No releases found matching \"{inputValue}\""
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.searchPlaceholder": {
-    "defaultMessage": "Search or select an application..."
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectARelease": {
-    "defaultMessage": "Select a release"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplication": {
-    "defaultMessage": "Select Application"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectApplicationFirst": {
-    "defaultMessage": "Please select an application first"
-  },
-  "components.apps.releases.add-available-applications.AddAvailableApplications.selectRelease": {
-    "defaultMessage": "Select Release"
-  },
   "components.apps.releases.application-devices-table.ApplicationDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the application devices table"
@@ -587,6 +551,45 @@
   },
   "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.deployButton": {
+    "defaultMessage": "Deploy"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.deployErrorFeedback": {
+    "defaultMessage": "Could not deploy the Application, please try again."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.deviceOfflineError": {
+    "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable": {
+    "defaultMessage": "No applications available"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching": {
+    "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable": {
+    "defaultMessage": "No releases available for this application"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesFoundMatching": {
+    "defaultMessage": "No releases found matching \"{inputValue}\""
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.searchPlaceholder": {
+    "defaultMessage": "Search or select an application..."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectARelease": {
+    "defaultMessage": "Select a release"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication": {
+    "defaultMessage": "Select Application"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst": {
+    "defaultMessage": "Please select an application first"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease": {
+    "defaultMessage": "Select Release"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.title": {
+    "defaultMessage": "Install Application"
   },
   "components.apps.releases.release-devices-table.ReleaseDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
@@ -1210,6 +1213,53 @@
   "components.fleet.devices.connection-status.ConnectionStatus.statusDisconnected": {
     "defaultMessage": "Offline"
   },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.checkMyDevice": {
+    "defaultMessage": "Check my Device"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.connectionStatus": {
+    "defaultMessage": "Connection"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.deviceId": {
+    "defaultMessage": "Device ID"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.groups": {
+    "defaultMessage": "Groups"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.hardwareType": {
+    "defaultMessage": "Hardware Type"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.lastSeen": {
+    "defaultMessage": "Last seen"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.name": {
+    "defaultMessage": "Name"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.openRemoteTerminalErrorFeedback": {
+    "defaultMessage": "Could not access the remote terminal, please try again.",
+    "description": "Feedback for unknown error while opening a remote terminal session"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.partNumber": {
+    "defaultMessage": "Part Number"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.remoteTerminal.label": {
+    "defaultMessage": "Remote Terminal"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.remoteTerminal.openTerminalButton": {
+    "defaultMessage": "Open"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.serialNumber": {
+    "defaultMessage": "Serial Number"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.systemModel": {
+    "defaultMessage": "System Model"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.tags": {
+    "defaultMessage": "Tags"
+  },
+  "components.fleet.devices.device-info-card.DeviceInfoCard.updateDeviceErrorFeedback": {
+    "defaultMessage": "Could not update the device, please try again.",
+    "description": "Feedback for unknown error while updating a device"
+  },
   "components.fleet.devices.devices-table.DevicesTable.deviceIdTitle": {
     "defaultMessage": "Device ID",
     "description": "Title for the Device ID column of the devices table"
@@ -1302,11 +1352,8 @@
   "components.fleet.devices.storage-table.StorageTable.totalSpaceTitle": {
     "defaultMessage": "Total Space"
   },
-  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.DeployedApplications": {
-    "defaultMessage": "Deployed Applications"
-  },
-  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.InstallNewApp": {
-    "defaultMessage": "Install Applications"
+  "components.fleet.devices.tabs.applications-tab.ApplicationsTab.installNewApplication": {
+    "defaultMessage": "Install"
   },
   "components.fleet.devices.tabs.applications-tab.ApplicationsTab.title": {
     "defaultMessage": "Applications"
@@ -1605,8 +1652,20 @@
   "components.layout.sidebar.groups.ota-sidebar-group.OtaSidebarGroup.updateCampaignsLabel": {
     "defaultMessage": "Update Campaigns"
   },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.documentationLabel": {
+    "defaultMessage": "Documentation"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.infoLabel": {
+    "defaultMessage": "About"
+  },
   "components.layout.sidebar.sidebar-footer.SidebarFooter.logoutLabel": {
     "defaultMessage": "Logout"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.sourceCodeLabel": {
+    "defaultMessage": "Source code"
+  },
+  "components.layout.sidebar.sidebar-footer.SidebarFooter.versionLabel": {
+    "defaultMessage": "Version {appVersion}"
   },
   "components.ota.operation-table.OperationTable.baseImage": {
     "defaultMessage": "Base Image"
@@ -3657,58 +3716,11 @@
   "pages.Deployments.title": {
     "defaultMessage": "Deployments"
   },
-  "pages.Device.checkMyDevice": {
-    "defaultMessage": "Check my Device"
-  },
-  "pages.Device.connectionStatus": {
-    "defaultMessage": "Connection"
-  },
-  "pages.Device.deviceId": {
-    "defaultMessage": "Device ID"
-  },
   "pages.Device.deviceNotFound.message": {
     "defaultMessage": "Return to the device list."
   },
   "pages.Device.deviceNotFound.title": {
     "defaultMessage": "Device not found."
-  },
-  "pages.Device.groups": {
-    "defaultMessage": "Groups"
-  },
-  "pages.Device.hardwareType": {
-    "defaultMessage": "Hardware Type"
-  },
-  "pages.Device.lastSeen": {
-    "defaultMessage": "Last seen"
-  },
-  "pages.Device.name": {
-    "defaultMessage": "Name"
-  },
-  "pages.Device.openRemoteTerminalErrorFeedback": {
-    "defaultMessage": "Could not access the remote terminal, please try again.",
-    "description": "Feedback for unknown error while opening a remote terminal session"
-  },
-  "pages.Device.partNumber": {
-    "defaultMessage": "Part Number"
-  },
-  "pages.Device.remoteTerminal.label": {
-    "defaultMessage": "Remote Terminal"
-  },
-  "pages.Device.remoteTerminal.openTerminalButton": {
-    "defaultMessage": "Open"
-  },
-  "pages.Device.serialNumber": {
-    "defaultMessage": "Serial Number"
-  },
-  "pages.Device.systemModel": {
-    "defaultMessage": "System Model"
-  },
-  "pages.Device.tags": {
-    "defaultMessage": "Tags"
-  },
-  "pages.Device.updateDeviceErrorFeedback": {
-    "defaultMessage": "Could not update the device, please try again.",
-    "description": "Feedback for unknown error while updating a device"
   },
   "pages.DeviceGroup.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Group <bold>{deviceGroup}</bold>.",

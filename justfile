@@ -78,7 +78,7 @@ _init-astarte:
     #!/usr/bin/env bash
     echo "🌟 Initializing Astarte..."
     if [ ! -d astarte ]; then
-        git clone --depth=1 https://github.com/astarte-platform/astarte.git -b release-1.3
+        git clone --depth=1 https://github.com/astarte-platform/astarte.git -b v1.3.2
         ( cd astarte && echo '*' > .gitignore )
         ( cd astarte && docker run --rm --user $(id -u):$(id -g) -v "$(pwd)/compose:/compose:z" astarte/docker-compose-initializer:1.2.0 )
     fi

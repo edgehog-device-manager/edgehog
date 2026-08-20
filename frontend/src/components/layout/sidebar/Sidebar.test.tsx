@@ -126,31 +126,52 @@ describe("Sidebar Component", () => {
     expect(toggleButton).toBeUndefined();
   });
 
-  it("displays repository and documentation links when provided", () => {
+  it("displays repository and documentation links when the info button is pressed", () => {
     const repoUrl = "https://github.com/example/repo";
     const docsUrl = "https://docs.example.com";
 
     renderSidebar(undefined, { repoUrl, docsUrl });
 
-    const links = screen.getAllByRole("link");
-    const repoLink = links.find(
-      (link) => link.getAttribute("href") === repoUrl,
-    );
-    const docsLink = links.find(
-      (link) => link.getAttribute("href") === docsUrl,
-    );
+    expect(screen.queryByText("Source code")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "About" }));
+
+    const repoLink = screen.getByRole("link", { name: "Source code" });
+    const docsLink = screen.getByRole("link", { name: "Documentation" });
 
     expect(repoLink).toBeInTheDocument();
+    expect(repoLink).toHaveAttribute("href", repoUrl);
     expect(docsLink).toBeInTheDocument();
+    expect(docsLink).toHaveAttribute("href", docsUrl);
   });
 
-  it("displays app name and version", () => {
+  it("displays app name and version when the info button is pressed", () => {
     renderSidebar(undefined, {
       appName: "Custom Test App",
       appVersion: "v9.9.9",
     });
 
+    fireEvent.click(screen.getByRole("button", { name: "About" }));
+
     expect(screen.getByText("Custom Test App")).toBeInTheDocument();
-    expect(screen.getByText("vv9.9.9")).toBeInTheDocument();
+    expect(screen.getByText("Version v9.9.9")).toBeInTheDocument();
+  });
+
+  it("aligns footer buttons to the right when expanded", () => {
+    renderSidebar();
+
+    const actions = screen.getByTestId("sidebar-footer-actions");
+    expect(actions).toHaveClass("flex-row");
+    expect(actions).toHaveClass("justify-content-between");
+  });
+
+  it("stacks footer buttons vertically when collapsed", () => {
+    renderSidebar(undefined, {
+      isDesktopCollapsed: true,
+    });
+
+    const actions = screen.getByTestId("sidebar-footer-actions");
+    expect(actions).toHaveClass("flex-column");
+    expect(actions).toHaveClass("align-items-center");
   });
 });

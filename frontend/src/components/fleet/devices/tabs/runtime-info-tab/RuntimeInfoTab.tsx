@@ -25,7 +25,7 @@ import type { RuntimeInfoTab_runtimeInfo$key } from "@/api/__generated__/Runtime
 import Form from "@/components/ui/form/Form";
 import Stack from "@/components/ui/stack/Stack";
 import { Tab } from "@/components/ui/tabs/Tabs";
-import { FormRow } from "@/pages/Device";
+import { FormRow } from "@/components/ui/form-row/FormRow";
 
 const DEVICE_RUNTIME_INFO_FRAGMENT = graphql`
   fragment RuntimeInfoTab_runtimeInfo on Device {
@@ -69,6 +69,8 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
         <Stack gap={3}>
           {runtimeInfo.name !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-runtime-info-name"
               label={
                 <FormattedMessage
@@ -82,6 +84,8 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
           )}
           {runtimeInfo.version !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-runtime-info-version"
               label={
                 <FormattedMessage
@@ -95,6 +99,8 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
           )}
           {runtimeInfo.environment !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-runtime-info-environment"
               label={
                 <FormattedMessage
@@ -112,6 +118,8 @@ const DeviceRuntimeInfoTab = ({ deviceRef }: DeviceRuntimeInfoTabProps) => {
           )}
           {runtimeInfo.url !== null && (
             <FormRow
+              labelCol={3}
+              valueCol={9}
               id="device-runtime-info-url"
               label={
                 <FormattedMessage
