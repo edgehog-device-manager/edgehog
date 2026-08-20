@@ -99,6 +99,7 @@ const CreateRelease = ({
     register,
     handleSubmit,
     control,
+    setValue,
     formState: { errors },
   } = useForm<ReleaseFormData>({
     mode: "onTouched",
@@ -265,6 +266,12 @@ const CreateRelease = ({
                         control={control}
                         options={availableContainers}
                         name={`containerDependencies.${i}.containerId`}
+                        onChange={() => {
+                          setValue(
+                            `containerDependencies.${i}.dependencies`,
+                            [],
+                          );
+                        }}
                       />
                       <FormFeedback feedback={error?.containerId?.message} />
                     </Col>
