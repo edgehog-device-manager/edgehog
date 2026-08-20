@@ -77,6 +77,7 @@ defmodule Edgehog.Containers.Provisioner do
 
       alias Edgehog.Config
       alias Edgehog.Containers.Provisioner
+      alias Edgehog.Containers.Telemetry
       alias unquote(core_module), as: Core
       alias unquote(resource_module), as: Resource
 
@@ -165,6 +166,8 @@ defmodule Edgehog.Containers.Provisioner do
 
         %{id: id, device: %{id: device_id, online: device_online?}} = resource
 
+        started_at = Telemetry.provisioning_started(resource, context)
+
         state = %{
           resource: resource,
           tenant: tenant,
@@ -172,7 +175,8 @@ defmodule Edgehog.Containers.Provisioner do
           device_online?: device_online?,
           state: :init,
           mode: mode,
-          retries: 0
+          retries: 0,
+          started_at: started_at
         }
 
         topic = Core.subscribe_topic(resource)
@@ -212,7 +216,8 @@ defmodule Edgehog.Containers.Provisioner do
       @impl GenServer
       def handle_continue(:check_state, %{resource: resource} = state) do
         if Core.ready?(resource) do
-          {:stop, :normal, state}
+          new_state = Map.put(state, :result, :already_ready)
+          {:stop, :normal, new_state}
         else
           {:noreply, state, {:continue, :send}}
         end
@@ -272,6 +277,7 @@ defmodule Edgehog.Containers.Provisioner do
         # The resource has been updated, check if it's ready and, in that case,
         # terminate gracefully. Otherwise keep waiting with a new timeout.
         if Core.ready?(resource) do
+          new_state = Map.put(new_state, :result, :ready)
           {:stop, :normal, new_state}
         else
           {:noreply, new_state, timeout(new_state)}
@@ -289,11 +295,19 @@ defmodule Edgehog.Containers.Provisioner do
 
       @impl GenServer
       def terminate(:normal, state) do
-        %{resource: %{id: id, device_id: device_id} = resource} = state
+        %{
+          resource: %{id: id, device_id: device_id} = resource,
+          context: context,
+          started_at: started_at,
+          retries: retries,
+          result: result
+        } = state
 
         Logger.info("""
-        Resource #{id} successfully provisioned after #{state.retries} retries.
+        Resource #{id} successfully provisioned after #{retries} retries.
         """)
+
+        Telemetry.provisioning_completed(resource, context, started_at, retries, result)
 
         # Broadcast readiness so that the orchestrator can proceed
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:ready, resource})
@@ -304,13 +318,20 @@ defmodule Edgehog.Containers.Provisioner do
       end
 
       @impl GenServer
-      def terminate({:shutdown, reason}, %{resource: resource})
+      def terminate({:shutdown, reason}, state)
           when reason in @known_shutdown_reasons do
-        %{id: id, device_id: device_id} = resource
+        %{
+          resource: %{id: id, device_id: device_id} = resource,
+          context: context,
+          started_at: started_at,
+          retries: retries
+        } = state
 
         Logger.info("""
         Provisioner for resource #{id} gave up with reason #{inspect(reason)}.
         """)
+
+        Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
 
         # Broadcast failure so that the orchestrator can react
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:failure, resource})
@@ -322,7 +343,14 @@ defmodule Edgehog.Containers.Provisioner do
 
       @impl GenServer
       def terminate(reason, state) do
-        %{resource: %{id: id, device: %{id: device_id}}} = state
+        %{
+          resource: %{id: id, device: %{id: device_id}} = resource,
+          context: context,
+          started_at: started_at,
+          retries: retries
+        } = state
+
+        Telemetry.provisioning_failed(resource, context, started_at, retries, :unexpected)
 
         Logger.warning(
           """

@@ -1,7 +1,6 @@
-#
 # This file is part of Edgehog.
 #
-# Copyright 2022 SECO Mind Srl
+# Copyright 2022 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +15,6 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
 defmodule Edgehog.PromEx do
   @moduledoc """
@@ -86,11 +84,10 @@ defmodule Edgehog.PromEx do
       Plugins.Ecto,
       # Plugins.Oban,
       # Plugins.PhoenixLiveView,
-      Plugins.Absinthe
+      Plugins.Absinthe,
       # Plugins.Broadway,
 
-      # Add your own PromEx metrics plugins
-      # Edgehog.Users.PromExPlugin
+      Edgehog.Containers.PromExPlugin
     ]
   end
 

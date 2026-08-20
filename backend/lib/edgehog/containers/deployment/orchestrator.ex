@@ -49,6 +49,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Deployment.Orchestrator.Core
   alias Edgehog.Containers.Deployment.Orchestrator.Registry, as: DeploymentOrchestratorRegistry
+  alias Edgehog.Containers.Telemetry
 
   require Logger
 
@@ -139,10 +140,13 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     mode = Keyword.get(args, :mode, :auto)
 
+    started_at = Telemetry.deployment_started(deployment)
+
     state = %{
       deployment: deployment,
       tenant: tenant,
-      mode: mode
+      mode: mode,
+      started_at: started_at
     }
 
     %{id: id} = deployment
@@ -262,7 +266,8 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   def terminate(:normal, state) do
     %{
       deployment: deployment,
-      tenant: tenant
+      tenant: tenant,
+      started_at: started_at
     } = state
 
     %{id: id} = deployment
@@ -270,6 +275,8 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
     Logger.debug(
       "Terminating deployment orchestrator for deployment #{id}. The deployment is ready."
     )
+
+    Telemetry.deployment_completed(deployment, started_at)
 
     readiness_topic = topic(deployment)
 
@@ -314,12 +321,15 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   defp fail_deployment(state) do
     %{
       deployment: deployment,
-      tenant: tenant
+      tenant: tenant,
+      started_at: started_at
     } = state
 
     %{id: id} = deployment
 
     Logger.warning("Deployment #{id} provisioning failed. Marking it as timed out.")
+
+    Telemetry.deployment_failed(deployment, started_at)
 
     # Mark the deployment as timed out. This also publishes on the
     # deployments:timeout:id topic through the Ash notifier.

@@ -53,6 +53,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Telemetry
   alias Edgehog.Containers.Volume
 
   require Logger
@@ -142,11 +143,14 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
     mode = Keyword.get(args, :mode, :auto)
 
+    started_at = Telemetry.container_deployment_started(container_deployment, deployment)
+
     state = %{
       container_deployment: container_deployment,
       deployment: deployment,
       tenant: tenant,
-      mode: mode
+      mode: mode,
+      started_at: started_at
     }
 
     {:ok, state, {:continue, :maybe_load_resources}}
@@ -206,6 +210,12 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
     } = state
 
     if Core.ready?(state) do
+      Telemetry.container_deployment_completed(
+        state.container_deployment,
+        state.deployment,
+        state.started_at
+      )
+
       topic = topic(container_deployment)
 
       event = %Phoenix.Socket.Broadcast{
@@ -281,12 +291,16 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
   defp fail_container(state) do
     %{
-      container_deployment: container_deployment
+      container_deployment: container_deployment,
+      deployment: deployment,
+      started_at: started_at
     } = state
 
     %{id: id} = container_deployment
 
     Logger.warning("Container deployment #{id} provisioning failed.")
+
+    Telemetry.container_deployment_failed(container_deployment, deployment, started_at)
 
     topic = topic(container_deployment)
 
