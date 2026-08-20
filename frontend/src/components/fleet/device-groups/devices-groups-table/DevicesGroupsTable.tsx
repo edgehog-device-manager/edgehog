@@ -83,11 +83,21 @@ const columns = [
         description="Title for the Name column of the devices table"
       />
     ),
-    cell: ({ row, getValue }) => (
-      <Link route={Route.devicesEdit} params={{ deviceId: row.original.id }}>
-        {getValue()}
-      </Link>
-    ),
+    meta: {
+      label: "Device Name",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.devicesEdit}
+          params={{ deviceId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
+    },
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("deviceId", {
     header: () => (

@@ -76,18 +76,22 @@ const columns = [
     ),
     meta: {
       label: "Deployment on Device",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.deploymentEdit}
+          params={{
+            deviceId: row.original.device?.id || "",
+            deploymentId: row.original.id,
+          }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.deploymentEdit}
-        params={{
-          deviceId: row.original.device?.id || "",
-          deploymentId: row.original.id,
-        }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("release.application.name", {
     header: () => (
@@ -99,15 +103,20 @@ const columns = [
     ),
     meta: {
       label: "Application Name",
+      getLink: (row, children) => (
+        <Link
+          route={Route.application}
+          params={{
+            applicationId: row.original.release?.application?.id || "",
+          }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.application}
-        params={{ applicationId: row.original.release?.application?.id || "" }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("release.version", {
     header: () => (
@@ -119,18 +128,21 @@ const columns = [
     ),
     meta: {
       label: "Release Version",
+      getLink: (row, children) => (
+        <Link
+          route={Route.release}
+          params={{
+            applicationId: row.original.release?.application?.id || "",
+            releaseId: row.original.release?.id || "",
+          }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.release}
-        params={{
-          applicationId: row.original.release?.application?.id || "",
-          releaseId: row.original.release?.id || "",
-        }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("state", {
     header: () => (

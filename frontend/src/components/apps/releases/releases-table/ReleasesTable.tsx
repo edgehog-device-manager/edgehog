@@ -94,18 +94,22 @@ const ReleasesTable = ({
       ),
       meta: {
         label: "Release Version",
+        isPrimaryLink: true,
+        getLink: (row, children) => (
+          <Link
+            route={Route.release}
+            params={{
+              applicationId: row.original.application?.id ?? "",
+              releaseId: row.original.id,
+            }}
+            className="row-link"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {children}
+          </Link>
+        ),
       },
-      cell: ({ row, getValue }) => (
-        <Link
-          route={Route.release}
-          params={{
-            applicationId: row.original.application?.id ?? "",
-            releaseId: row.original.id,
-          }}
-        >
-          {getValue()}
-        </Link>
-      ),
+      cell: ({ getValue }) => getValue(),
     }),
     columnHelper.accessor((row) => row, {
       id: "action",

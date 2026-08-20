@@ -37,6 +37,7 @@ import { FormattedMessage } from "react-intl";
 import RBTable from "react-bootstrap/Table";
 
 import ColumnVisibilityDropdown from "@/components/ui/column-visibility-dropdown/ColumnVisibilityDropdown";
+import Icon from "@/components/ui/icon/Icon";
 import InfiniteScroll from "@/components/ui/infinite-scroll/InfiniteScroll";
 import SearchBox from "@/components/ui/search-box/SearchBox";
 import { SortDirectionIndicator } from "@/components/ui/table/Table";
@@ -48,6 +49,8 @@ declare module "@tanstack/table-core" {
   interface ColumnMeta<TData extends RowData, TValue> {
     className?: string;
     label?: string;
+    getLink?: (row: Row<TData>, children: React.ReactNode) => React.ReactNode;
+    isPrimaryLink?: boolean;
   }
 }
 
@@ -113,6 +116,14 @@ const InfiniteTable = <T extends RowData>({
   });
 
   const leafColumns = table.getAllLeafColumns();
+
+  const primaryLinkColumn = leafColumns.find(
+    (column) => column.columnDef.meta?.isPrimaryLink,
+  );
+
+  const showPrimaryLinkAtEnd =
+    primaryLinkColumn != null && !primaryLinkColumn.getIsVisible();
+
   const showColumnVisibilityDropdown =
     !hideColumnVisibility && leafColumns.some((column) => column.getCanHide());
   const getSearchElement = () => {
@@ -128,6 +139,21 @@ const InfiniteTable = <T extends RowData>({
   };
 
   const searchElement = getSearchElement();
+
+  const renderRowLink = (
+    column: (typeof leafColumns)[number] | undefined,
+    row: Row<T>,
+  ) => {
+    const getLink = column?.columnDef.meta?.getLink;
+
+    if (!getLink) return null;
+
+    return (
+      <span className="row-link-icon">
+        {getLink(row, <Icon icon="arrowUpRightFromSquare" />)}
+      </span>
+    );
+  };
 
   return (
     <div className={`${className}`}>
@@ -181,6 +207,7 @@ const InfiniteTable = <T extends RowData>({
                     </th>
                   );
                 })}
+                {showPrimaryLinkAtEnd && <th className="row-link-header" />}
               </tr>
             ))}
           </thead>
@@ -191,12 +218,22 @@ const InfiniteTable = <T extends RowData>({
                   <tr {...(getRowProps ? getRowProps(row) : {})}>
                     {row.getVisibleCells().map((cell) => (
                       <td key={cell.id} className="table-cell">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
+                        <div className="d-flex align-items-center">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                          {renderRowLink(cell.column, row)}
+                        </div>
                       </td>
                     ))}
+                    {showPrimaryLinkAtEnd && (
+                      <td className="table-cell row-link-cell align-middle">
+                        <div className="d-flex align-items-center justify-content-center">
+                          {renderRowLink(primaryLinkColumn, row)}
+                        </div>
+                      </td>
+                    )}
                   </tr>
                 </Fragment>
               ))

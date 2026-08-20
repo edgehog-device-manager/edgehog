@@ -64,15 +64,19 @@ const getColumnsDefinition = (baseImageCollectionId: string) => [
     ),
     meta: {
       label: "Base Image Version",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.baseImagesEdit}
+          params={{ baseImageCollectionId, baseImageId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.baseImagesEdit}
-        params={{ baseImageCollectionId, baseImageId: row.original.id }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("localizedReleaseDisplayNames", {
     header: () => (
