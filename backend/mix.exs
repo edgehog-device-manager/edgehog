@@ -81,7 +81,7 @@ defmodule Edgehog.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.8.5"},
+      {:phoenix, "~> 1.8.6"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_ecto, "~> 4.7"},
       {:ecto_sql, "~> 3.13"},
@@ -99,8 +99,8 @@ defmodule Edgehog.MixProject do
       {:cors_plug, "~> 3.0"},
       {:x509, "~> 0.9"},
       {:mimic, "~> 2.3", only: :test},
-      {:tesla, "~> 1.17"},
-      {:finch, "~> 0.21", override: true},
+      {:tesla, "~> 1.18"},
+      {:finch, "~> 0.22", override: true},
       {:waffle, "~> 2.0.0-rc.1", override: true},
       {:req, "~> 0.7"},
       {:envar, "~> 1.1"},
@@ -117,7 +117,7 @@ defmodule Edgehog.MixProject do
       {:excoveralls, "~> 0.18", only: :test},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
       {:pretty_log, "~> 0.9"},
-      {:prom_ex, "~> 1.11"},
+      {:prom_ex, "~> 1.12"},
       {:plug_heartbeat, "~> 1.0"},
       {:gen_state_machine, "~> 3.0"},
       {:recon, "~> 2.5"},
@@ -127,7 +127,7 @@ defmodule Edgehog.MixProject do
       {:ash_postgres, "~> 2.9"},
       {:ash_graphql, "~> 1.9"},
       {:ash_json_api, "~> 1.6"},
-      {:oban, "~> 2.0"},
+      {:oban, "~> 2.1"},
       {:igniter, "~> 0.7", only: [:dev, :test]},
       {:picosat_elixir, "~> 0.2"},
       {:open_api_spex, "~> 3.22"},
@@ -148,7 +148,7 @@ defmodule Edgehog.MixProject do
        subdir: "clients/gax",
        ref: "f1b24276c28a2943dde36cd82c2a7ff2a4a1ee1a",
        override: true},
-      {:poison, "~>4.0", override: true},
+      {:poison, "~> 4.0", override: true},
       # NOTE:
       # This project intentionally pins nimble_lz4 to v1.1.0 because it depends on lz4_flex v0.9.0,
       # which uses a fixed default block size of 64kB — this matches our device/protocol requirement.
@@ -158,7 +158,7 @@ defmodule Edgehog.MixProject do
       # break interoperability.
       #
       # Do not upgrade this dependency unless the underlying block size behavior is verified and updated.
-      {:nimble_lz4, "1.1.0"},
+      {:nimble_lz4, "== 1.2.0"},
       {:grpc, "~> 1.0"},
       {:mint, "~> 1.5"},
       {:libgraph, "~> 0.16"},
