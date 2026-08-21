@@ -107,7 +107,8 @@ The content of `admin_public.pem` will instead be used by Edgehog to validate in
 To provide Edgehog's backend with the public key, create a Kubernetes secret containing the key which will be used later on in the deployment.
 
 ```bash
-kubectl create secret generic edgehog-admin-api-public-key --from-file=admin_public.pem=./admin_public.pem
+$ kubectl create secret generic -n edgehog edgehog-admin-api-public-key \
+  --from-file=admin_public.pem=./admin_public.pem
 ```
 
 #### Database connection
@@ -188,6 +189,9 @@ Values to be replaced
 
 Consult the documentation of your cloud provider for more details about obtaining an access key ID
 and a secret access key for your S3-compatible storage.
+
+Make sure the bucket used by Edgehog is created in advance on your provider, since Edgehog expects
+it to already exist.
 
 This command creates the secret containing the S3 credentials:
 
@@ -446,7 +450,8 @@ Values to be replaced
 - `MAX-UPLOAD-SIZE-BYTES`: the maximum dimension for uploads, particularly relevant for OTA updates.
   If omitted, it defaults to 4 Gigabytes.
 - `S3-SCHEME`: the scheme (`http` or `https`) for the S3 storage.
-- `S3-HOST`: the host for the S3 storage.
+- `S3-HOST`: the host for the S3 storage. If you're using Google Cloud Storage, this must be
+  `storage.googleapis.com`, so that Edgehog uses its native Cloud Storage adapter.
 - `S3-PORT`: the port for the S3 storage. This has to be put in double quotes to force it to be
   interpreted as a string.
 - `S3-BUCKET`: the bucket name for the S3 storage.
@@ -459,6 +464,11 @@ Values to be replaced
 
 The optional env variable in the `yaml` also have to be uncommented where relevant (see comments
 above the commented blocks for more information).
+
+_Note: by default, Edgehog allows every request that passes authentication. To enable fine-grained
+authorization, deploy [OpenFGA](https://openfga.dev/) and set the `EDGEHOG_AUTHZ_PROVIDER` environment
+variable to `openfga`, together with the `EDGEHOG_OPENFGA_GRPC_ENDPOINT`,
+`EDGEHOG_OPENFGA_STORE_ID` and `EDGEHOG_OPENFGA_AUTH_MODEL_ID` environment variables._
 
 #### Frontend
 
@@ -490,7 +500,7 @@ spec:
       containers:
         - env:
             - name: BACKEND_URL
-              value: <BACKEND-HOST>
+              value: <BACKEND-URL>
             - name: HIDE_NAVIGATION_ELEMENTS
               value: <HIDE-NAVIGATION-ELEMENTS>
           image: edgehogdevicemanager/edgehog-frontend:0.13.1
@@ -504,7 +514,7 @@ spec:
 
 Values to be replaced
 
-- `BACKEND-URL`: the API base URL of the Edgehog backend (see the [Creating DNS entries](#creating-dns-entries) section). This should be, e.g., `https://<BACKEND-HOST>`.
+- `BACKEND-URL`: the API base URL of the Edgehog backend (see the [Creating DNS entries](#creating-dns-entries) section). It must be a full URL, including the `https://` scheme, e.g. `https://<BACKEND-HOST>`.
 - `HIDE-NAVIGATION-ELEMENTS`: can be `true|false`. `true` disable navigation elements, such as the navigation bar, the footer and the top bar.
 
 #### Device Forwarder
@@ -717,6 +727,10 @@ This is an example Ingress configuration for Edgehog. This is provided as a star
 uses the NGINX Ingress Controller. All advanced topics (e.g. certificate management) are not discussed here
 and are outside the scope of this guide.
 
+Note that the Ingress does not carry any cert-manager annotation: the TLS certificate it references is
+the one requested in the [previous step](#ssl-certificates) with the `Certificate` resource, so no
+additional certificate needs to be provisioned here.
+
 Copy this `yaml` snippet to `ingress.yaml` and execute
 
 ```bash
@@ -728,14 +742,13 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/proxy-body-size: <MAX-UPLOAD-SIZE>
     nginx.ingress.kubernetes.io/proxy-read-timeout: "120"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "120"
   name: edgehog-ingress
   namespace: edgehog
 spec:
+  ingressClassName: nginx
   rules:
     - host: <FRONTEND-HOST>
       http:
@@ -780,7 +793,7 @@ Values to be replaced
 - `FRONTEND-HOST`: the frontend host.
 - `BACKEND-HOST`: the backend host.
 - `DEVICE-FORWARDER-HOST`: the device forwarder host.
-- `MAX-UPLOAD-SIZE`: the maximum upload size that you defined in the [Edgehog backend deployment](https://edgehog-device-manager.github.io/docs/0.9/deploying_with_kubernetes.html#deployments).
+- `MAX-UPLOAD-SIZE`: the maximum upload size that you defined in the [Edgehog backend deployment](#backend).
   Note that NGINX accepts also size suffixes, so you can put, e.g., `4G` for 4 gigabytes. Also note
   that, differently from the value in the Deployment, this is required because NGINX default is 1
   megabyte.
@@ -812,7 +825,7 @@ $ openssl ec -in tenant_private.pem -pubout > tenant_public.pem
 
 The next step is generating a token to access Edgehog Admin Rest API. You can do so using the `gen-edgehog-jwt` tool contained in the
 `tools` directory of the [Edgehog repo](https://github.com/edgehog-device-manager/edgehog/tree/main/tools).
-Starting from the private key we generated earlier in the deployment process for the Admin API, `admin_public.pem`, this command should give you a valid auth token to access the API. The tool requires Elixir in your system, which you can install with `asdf install` using the [asdf](https://asdf-vm.com/) version manager.
+Starting from the private key we generated earlier in the deployment process for the Admin API, `admin_private.pem`, this command should give you a valid auth token to access the API. The tool requires Elixir in your system, which you can install with `asdf install` using the [asdf](https://asdf-vm.com/) version manager.
 
 ```bash
 $ ./tools/gen-edgehog-jwt -t admin -k <PATH-TO-ADMIN-PRIVATE-KEY>
@@ -828,29 +841,40 @@ curl -X GET --location 'https://<EDGEHOG-API-HOST>/admin-api/v1/tenants' \
 --header 'Authorization: Bearer <ADMIN-TOKEN>'
 ```
 
-Then, to actually create the tenant:
+Then, to actually create the tenant. Note that both the tenant public key and the Astarte realm
+private key are multi-line PEM files, so they cannot be pasted directly into a JSON payload: we use
+`jq` to build a valid request body, which takes care of quoting and escaping their content.
 
 ```bash
-curl -X POST --location 'https://<BACKEND-HOST>/admin-api/v1/tenants' \
---header 'Content-Type: application/vnd.api+json' \
---header 'Authorization: Bearer <ADMIN-TOKEN>' \
---data '{
-  "data": {
-    "attributes": {
-      "astarte_config": {
-        "base_api_url": "<ASTARTE-BASE-API-URL>",
-        "realm_name": "<ASTARTE-REALM-NAME>",
-        "realm_private_key": <ASTARTE-REALM-PRIVATE-KEY>
-      },
-      "default_locale": "en-US",
-      "name": "<TENANT-NAME>",
-      "public_key": "<TENANT-PUBLIC-KEY>",
-      "slug": "<TENANT-SLUG>"
-    },
-    "relationships": {},
-    "type": "tenant"
-  }
-}'
+$ jq -n \
+  --arg name '<TENANT-NAME>' \
+  --arg slug '<TENANT-SLUG>' \
+  --arg public_key "$(cat tenant_public.pem)" \
+  --arg base_api_url '<ASTARTE-BASE-API-URL>' \
+  --arg realm_name '<ASTARTE-REALM-NAME>' \
+  --arg realm_private_key "$(cat <REALM-PRIVATE-KEY-FILE>)" \
+  '{
+    data: {
+      type: "tenant",
+      relationships: {},
+      attributes: {
+        name: $name,
+        slug: $slug,
+        public_key: $public_key,
+        default_locale: "en-US",
+        astarte_config: {
+          base_api_url: $base_api_url,
+          realm_name: $realm_name,
+          realm_private_key: $realm_private_key
+        }
+      }
+    }
+  }' > tenant_payload.json
+
+$ curl -X POST --location 'https://<BACKEND-HOST>/admin-api/v1/tenants' \
+  --header 'Content-Type: application/vnd.api+json' \
+  --header 'Authorization: Bearer <ADMIN-TOKEN>' \
+  --data @tenant_payload.json
 ```
 
 Values to be replaced
@@ -859,12 +883,10 @@ Values to be replaced
 - `ADMIN-TOKEN`: the auth token generated from the admin private key to access Edgehog Admin API.
 - `TENANT-NAME`: the name of the new tenant.
 - `TENANT-SLUG`: the slug of the tenant, must contain only lowercase letters and hyphens.
-- `TENANT-PUBLIC-KEY`: the content of `tenant_public.pem` created in the previous
-  step.
 - `ASTARTE-BASE-API-URL`: the base API url of the Astarte instance (e.g.
   https://api.astarte.example.com).
 - `ASTARTE-REALM-NAME`: the name of the Astarte realm you're using.
-- `ASTARTE-REALM-PRIVATE-KEY`: the content of the Astarte realm's private key.
+- `REALM-PRIVATE-KEY-FILE`: the path to the file containing the Astarte realm's private key.
 
 ### Creating a tenant with an iEx session
 
@@ -911,7 +933,7 @@ Values to be replaced
 
 - `TENANT-NAME`: the name of the new tenant.
 - `TENANT-SLUG`: the slug of the tenant, must contain only lowercase letters and hyphens.
-- `TENANT-PUBLIC-KEY`: the content of `tenant_public.pem` created in the [previous step](#creating-a-keypair). Open a multiline string with `"""`, press Enter, paste the content of
+- `TENANT-PUBLIC-KEY`: the content of `tenant_public.pem` created in the [previous step](#creating-a-key-pair-for-the-tenant). Open a multiline string with `"""`, press Enter, paste the content of
   the file in the `iex` shell and then close the multiline string with `"""` on a new line.
 - `ASTARTE-BASE-API-URL`: the base API url of the Astarte instance (e.g.
   https://api.astarte.example.com).
