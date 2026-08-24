@@ -75,7 +75,7 @@ import {
   type ContainerInputData,
 } from "@/forms/validation";
 
-export const restartPolicyOptions = [
+const restartPolicyOptions = [
   { value: "no", label: "No" },
   { value: "always", label: "Always" },
   { value: "on_failure", label: "On Failure" },
@@ -3400,3 +3400,20 @@ const CreateContainer = ({
 };
 
 export default CreateContainer;
+
+export {
+  mapCreateContainerToInput,
+  restartPolicyOptions,
+  mapEnv,
+  type BaseSectionProps,
+  type SectionWithQueryProps,
+  NameSection,
+  ImageSection,
+  NetworkSection,
+  StorageSection,
+  DeviceRequestsSection,
+  RuntimeSection,
+  DeviceMappingsSection,
+  ResourceLimitsSection,
+  SecuritySection,
+};
