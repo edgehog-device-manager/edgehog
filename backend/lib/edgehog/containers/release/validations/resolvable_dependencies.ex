@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release.Validations.NoCircularDependencies do
+defmodule Edgehog.Containers.Release.Validations.ResolvableDependencies do
   @moduledoc false
 
   use Ash.Resource.Validation
@@ -31,27 +31,25 @@ defmodule Edgehog.Containers.Release.Validations.NoCircularDependencies do
     container_dependencies = Ash.Changeset.get_argument(changeset, :container_dependencies) || []
 
     with {:ok, resolved} <- Dependencies.resolve_containers(containers, tenant) do
-      pairs = Dependencies.dependency_pairs(containers, container_dependencies, resolved)
-      graph = build_graph(resolved, pairs)
+      known_names = MapSet.new(resolved, & &1.name)
 
-      case Graph.topsort(graph) do
-        false ->
-          {:error, field: :container_dependencies, message: "circular dependencies detected"}
+      unknown =
+        containers
+        |> Dependencies.dependency_pairs(container_dependencies, resolved)
+        |> Enum.flat_map(fn {container_name, dependency_name} ->
+          [container_name, dependency_name]
+        end)
+        |> Enum.uniq()
+        |> Enum.reject(&MapSet.member?(known_names, &1))
+        |> Enum.sort()
 
-        _sorted ->
+      case unknown do
+        [] ->
           :ok
+
+        unknown ->
+          {:error, field: :containers, message: "unknown containers: #{Enum.join(unknown, ", ")}"}
       end
     end
-  end
-
-  defp build_graph(resolved_containers, dependency_pairs) do
-    graph =
-      Enum.reduce(resolved_containers, Graph.new(), fn container, graph ->
-        Graph.add_vertex(graph, container.name)
-      end)
-
-    Enum.reduce(dependency_pairs, graph, fn {container_name, dependency_name}, graph ->
-      Graph.add_edge(graph, dependency_name, container_name)
-    end)
   end
 end
