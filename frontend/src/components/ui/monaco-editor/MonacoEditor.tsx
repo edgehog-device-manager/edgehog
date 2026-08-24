@@ -33,6 +33,7 @@ type MonacoEditorProps = {
   initialLines?: number;
   autoFormat?: boolean;
   error?: string;
+  fillHeight?: boolean;
 };
 
 const MonacoEditor = ({
@@ -44,6 +45,7 @@ const MonacoEditor = ({
   initialLines = 5,
   autoFormat = true,
   error,
+  fillHeight = false,
 }: MonacoEditorProps) => {
   const intl = useIntl();
   const fmt = intl.formatMessage;
@@ -70,13 +72,13 @@ const MonacoEditor = ({
   }, [autoFormat, language]);
 
   const updateHeight = useCallback(() => {
-    if (editorRef.current) {
+    if (!fillHeight && editorRef.current) {
       const contentHeight = editorRef.current.getContentHeight();
       const minHeight = initialLines * lineHeight;
       setHeight(Math.max(contentHeight, minHeight));
       editorRef.current.layout();
     }
-  }, [initialLines]);
+  }, [initialLines, fillHeight]);
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
@@ -88,23 +90,25 @@ const MonacoEditor = ({
   };
 
   return (
-    <div className="border rounded bg-white p-2 overflow-hidden">
+    <div
+      className={`border rounded bg-white p-2 overflow-hidden ${fillHeight ? "h-100" : ""}`}
+    >
       <Editor
-        height={height}
+        height={fillHeight ? "100%" : height}
         defaultLanguage={language}
         value={value}
         onChange={onChange}
         defaultValue={defaultValue}
         onMount={handleEditorDidMount}
         options={{
-          automaticLayout: false,
+          automaticLayout: fillHeight,
           minimap: { enabled: false },
           scrollBeyondLastLine: false,
           wordWrap: "off",
           readOnly: readonly,
           lineNumbers: "off",
           scrollbar: {
-            vertical: "hidden",
+            vertical: fillHeight ? "auto" : "hidden",
             horizontal: "hidden",
             alwaysConsumeMouseWheel: false,
           },
