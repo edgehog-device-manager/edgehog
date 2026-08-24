@@ -400,10 +400,6 @@ defmodule Edgehog.Containers.Container do
               {Edgehog.Containers.Calculations.Dangling, [parent: :releases]}
   end
 
-  identities do
-    identity :name, [:name]
-  end
-
   postgres do
     table "containers"
   end
