@@ -147,11 +147,12 @@ defmodule Edgehog.Containers do
                                 application_id: :application,
                                 containers: [
                                   id: :container,
-                                  volumes: [
-                                    id: :volume
-                                  ],
+                                  image: [image_credentials_id: :image_credentials],
                                   networks: [
                                     id: :network
+                                  ],
+                                  volumes: [
+                                    id: :volume
                                   ]
                                 ],
                                 container_dependencies: [
