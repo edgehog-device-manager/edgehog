@@ -2365,6 +2365,18 @@
   "components.ui.infinite-table.InfiniteTable.noRecords": {
     "defaultMessage": "No records to display."
   },
+  "components.ui.monaco-editor.MonacoEditor.vimToggle": {
+    "defaultMessage": "Toggle Vim mode"
+  },
+  "components.ui.monaco-editor.MonacoEditor.zoomIn": {
+    "defaultMessage": "Increase font size"
+  },
+  "components.ui.monaco-editor.MonacoEditor.zoomOut": {
+    "defaultMessage": "Decrease font size"
+  },
+  "components.ui.monaco-editor.MonacoEditor.zoomReset": {
+    "defaultMessage": "Reset font size"
+  },
   "components.ui.page.Page.loadingError.feedback": {
     "defaultMessage": "The page couldn't load."
   },
