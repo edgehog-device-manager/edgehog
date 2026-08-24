@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release.Validations.NoCircularDependencies do
+defmodule Edgehog.Containers.Release.Validations.UniqueContainerNames do
   @moduledoc false
 
   use Ash.Resource.Validation
@@ -28,30 +28,25 @@ defmodule Edgehog.Containers.Release.Validations.NoCircularDependencies do
   @impl Ash.Resource.Validation
   def validate(changeset, _opts, %{tenant: tenant}) do
     containers = Ash.Changeset.get_argument(changeset, :containers) || []
-    container_dependencies = Ash.Changeset.get_argument(changeset, :container_dependencies) || []
 
     with {:ok, resolved} <- Dependencies.resolve_containers(containers, tenant) do
-      pairs = Dependencies.dependency_pairs(containers, container_dependencies, resolved)
-      graph = build_graph(resolved, pairs)
-
-      case Graph.topsort(graph) do
-        false ->
-          {:error, field: :container_dependencies, message: "circular dependencies detected"}
-
-        _sorted ->
+      case duplicated_names(resolved) do
+        [] ->
           :ok
+
+        duplicates ->
+          {:error,
+           field: :containers,
+           message: "duplicate container names: #{Enum.join(duplicates, ", ")}"}
       end
     end
   end
 
-  defp build_graph(resolved_containers, dependency_pairs) do
-    graph =
-      Enum.reduce(resolved_containers, Graph.new(), fn container, graph ->
-        Graph.add_vertex(graph, container.name)
-      end)
-
-    Enum.reduce(dependency_pairs, graph, fn {container_name, dependency_name}, graph ->
-      Graph.add_edge(graph, dependency_name, container_name)
-    end)
+  defp duplicated_names(resolved_containers) do
+    resolved_containers
+    |> Enum.frequencies_by(& &1.name)
+    |> Map.filter(fn {_name, count} -> count > 1 end)
+    |> Map.keys()
+    |> Enum.sort()
   end
 end

@@ -138,7 +138,14 @@ defmodule Edgehog.Containers do
         relay_id_translations input: [
                                 application_id: :application,
                                 containers: [
-                                  id: :container
+                                  id: :container,
+                                  image: [image_credentials_id: :image_credentials],
+                                  networks: [
+                                    id: :network
+                                  ],
+                                  volumes: [
+                                    id: :volume
+                                  ]
                                 ],
                                 container_dependencies: [
                                   container_id: :container,
@@ -150,7 +157,7 @@ defmodule Edgehog.Containers do
                               ]
       end
 
-      create Container, :create_container, :create_with_nested do
+      create Container, :create_container, :create_from_release do
         description "Create a new container"
 
         relay_id_translations input: [

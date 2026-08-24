@@ -119,23 +119,38 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
 
       application_id = AshGraphql.Resource.encode_relay_id(application)
 
-      container = container_fixture(tenant: tenant)
+      container = container_fixture(tenant: tenant, name: "original-name")
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            containers {
+              edges { node { id name } }
+            }
+          }
+        }
+      }
+      """
 
       input = %{
         "application_id" => application_id,
-        "version" => "1.0.1",
         "containers" => [
           %{
-            "id" => container.id,
+            "id" => AshGraphql.Resource.encode_relay_id(container),
             "name" => "hacked-name"
           }
         ]
       }
 
-      response = create_release(tenant: tenant, input: input)
+      response = create_release(tenant: tenant, input: input, document: document)
 
-      assert %{errors: [error | _]} = response
-      assert error.message =~ "Unknown field"
+      result = extract_result!(response)
+
+      # referencing an existing container ignores any provided attributes
+      [node] = extract_relay_nodes(result, "containers")
+      assert node["id"] == AshGraphql.Resource.encode_relay_id(container)
+      assert node["name"] == "original-name"
     end
 
     test "links a container that already has volumes", %{tenant: tenant} do
@@ -279,6 +294,310 @@ defmodule EdgehogWeb.Schema.Mutation.CreateReleaseTest do
       assert error.code == "invalid_argument"
       assert error.fields == [:container_dependencies]
       assert error.message == "circular dependencies detected"
+    end
+  end
+
+  describe "createRelease mutation with inline containers" do
+    test "creates a release with inline containers and dependencies by name", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            id
+            containers {
+              edges { node { id name restartPolicy } }
+            }
+            containerDependencies {
+              edges { node { container { name } dependency { name } } }
+            }
+          }
+        }
+      }
+      """
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{
+            "name" => "backend",
+            "restart_policy" => "ALWAYS",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["database"]
+          },
+          %{
+            "name" => "database",
+            "image" => %{"reference" => unique_image_reference()}
+          }
+        ]
+      }
+
+      response =
+        create_release(
+          tenant: tenant,
+          application_id: application_id,
+          input: input,
+          document: document
+        )
+
+      result = extract_result!(response)
+
+      nodes = extract_relay_nodes(result, "containers")
+      names = nodes |> Enum.map(& &1["name"]) |> Enum.sort()
+      assert names == ["backend", "database"]
+
+      backend = Enum.find(nodes, &(&1["name"] == "backend"))
+      assert backend["restartPolicy"] == "always"
+
+      [dependency] = extract_relay_nodes(result, "containerDependencies")
+      assert dependency["container"]["name"] == "backend"
+      assert dependency["dependency"]["name"] == "database"
+
+      # containers must be persisted and linked to the release
+      {:ok, %{id: release_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+      release =
+        release_id
+        |> Containers.fetch_release!(tenant: tenant)
+        |> Ash.load!(:containers)
+
+      assert length(release.containers) == 2
+    end
+
+    test "creates inline containers with nested networks, volumes and device mappings", %{
+      tenant: tenant
+    } do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      network = network_fixture(tenant: tenant)
+      volume = volume_fixture(tenant: tenant)
+      image_credentials = image_credentials_fixture(tenant: tenant)
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            containers {
+              edges {
+                node {
+                  name
+                  networks { edges { node { id } } }
+                  containerVolumes { edges { node { target } } }
+                  deviceMappings { edges { node { pathOnHost pathInContainer } } }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{
+            "name" => "worker",
+            "image" => %{
+              "reference" => unique_image_reference(),
+              "image_credentials_id" => AshGraphql.Resource.encode_relay_id(image_credentials)
+            },
+            "networks" => [%{"id" => AshGraphql.Resource.encode_relay_id(network)}],
+            "volumes" => [
+              %{
+                "id" => AshGraphql.Resource.encode_relay_id(volume),
+                "target" => "/var/data"
+              }
+            ],
+            "device_mappings" => [
+              %{
+                "path_on_host" => "/dev/ttyUSB0",
+                "path_in_container" => "/dev/ttyUSB0",
+                "cgroup_permissions" => "rwm"
+              }
+            ]
+          }
+        ]
+      }
+
+      response =
+        create_release(
+          tenant: tenant,
+          application_id: application_id,
+          input: input,
+          document: document
+        )
+
+      result = extract_result!(response)
+
+      [worker] = extract_relay_nodes(result, "containers")
+
+      assert worker["name"] == "worker"
+      assert [%{"id" => _}] = extract_relay_nodes(worker, "networks")
+      assert [%{"target" => "/var/data"}] = extract_relay_nodes(worker, "containerVolumes")
+
+      assert [%{"pathOnHost" => "/dev/ttyUSB0", "pathInContainer" => "/dev/ttyUSB0"}] =
+               extract_relay_nodes(worker, "deviceMappings")
+    end
+
+    test "resolves depends_on against existing containers linked by id", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      database = container_fixture(tenant: tenant, name: "database")
+
+      document = """
+      mutation CreateRelease($input: CreateReleaseInput!) {
+        createRelease(input: $input) {
+          result {
+            containerDependencies {
+              edges { node { container { name } dependency { id } } }
+            }
+          }
+        }
+      }
+      """
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{
+            "name" => "backend",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["database"]
+          },
+          %{"id" => AshGraphql.Resource.encode_relay_id(database)}
+        ]
+      }
+
+      response =
+        create_release(
+          tenant: tenant,
+          application_id: application_id,
+          input: input,
+          document: document
+        )
+
+      result = extract_result!(response)
+
+      [dependency] = extract_relay_nodes(result, "containerDependencies")
+      assert dependency["container"]["name"] == "backend"
+      assert dependency["dependency"]["id"] == AshGraphql.Resource.encode_relay_id(database)
+    end
+
+    test "returns error when depends_on references an unknown container", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{
+            "name" => "backend",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["nonexistent"]
+          }
+        ]
+      }
+
+      response =
+        create_release(tenant: tenant, application_id: application_id, input: input)
+
+      error = extract_error!(response)
+
+      assert error.code == "invalid_argument"
+      assert [:containers] = error.fields
+      assert error.message =~ "nonexistent"
+    end
+
+    test "returns error when inline containers have duplicate names", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{"name" => "app", "image" => %{"reference" => unique_image_reference()}},
+          %{"name" => "app", "image" => %{"reference" => unique_image_reference()}},
+          %{
+            "name" => "frontend",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["app"]
+          }
+        ]
+      }
+
+      response =
+        create_release(tenant: tenant, application_id: application_id, input: input)
+
+      error = extract_error!(response)
+
+      assert error.code == "invalid_argument"
+      assert [:containers] = error.fields
+      assert error.message =~ "duplicate container names"
+    end
+
+    test "returns error when inline depends_on has circular dependencies", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{
+            "name" => "a",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["b"]
+          },
+          %{
+            "name" => "b",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["a"]
+          }
+        ]
+      }
+
+      response =
+        create_release(tenant: tenant, application_id: application_id, input: input)
+
+      error = extract_error!(response)
+
+      assert error.code == "invalid_argument"
+      assert error.fields == [:container_dependencies]
+      assert error.message == "circular dependencies detected"
+    end
+
+    test "rolls back created containers when dependency resolution fails", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      application_id = AshGraphql.Resource.encode_relay_id(application)
+
+      input = %{
+        "application_id" => application_id,
+        "containers" => [
+          %{
+            "name" => "doomed-container",
+            "image" => %{"reference" => unique_image_reference()},
+            "depends_on" => ["ghost"]
+          }
+        ]
+      }
+
+      response =
+        create_release(tenant: tenant, application_id: application_id, input: input)
+
+      assert %{errors: [_error | _]} = response
+
+      require Ash.Query
+
+      no_container? =
+        Edgehog.Containers.Container
+        |> Ash.Query.filter(name: "doomed-container")
+        |> Ash.read_one!(tenant: tenant)
+        |> is_nil()
+
+      assert no_container?
     end
   end
 
