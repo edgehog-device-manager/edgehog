@@ -46,7 +46,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       openfga:
-        image: openfga/openfga:v1.18.2
+        image: openfga/openfga:v1.18.3
         command: run
         ports:
           - 8080:8080
