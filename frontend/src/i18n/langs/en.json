@@ -1,4 +1,37 @@
 {
+  "components.ReleaseComposer.addContainer": {
+    "defaultMessage": "Add Container"
+  },
+  "components.ReleaseComposer.createRelease": {
+    "defaultMessage": "Create Release"
+  },
+  "components.ReleaseComposer.dependsOnLabel": {
+    "defaultMessage": "Depends on"
+  },
+  "components.ReleaseComposer.invalidYamlPrefix": {
+    "defaultMessage": "Invalid docker-compose file:"
+  },
+  "components.ReleaseComposer.noServicesHint": {
+    "defaultMessage": "No containers yet. Add one or paste a docker-compose file on the left."
+  },
+  "components.ReleaseComposer.removeService": {
+    "defaultMessage": "Remove"
+  },
+  "components.ReleaseComposer.requiredSystemModelsLabel": {
+    "defaultMessage": "Required System Models"
+  },
+  "components.ReleaseComposer.unnamedService": {
+    "defaultMessage": "Unnamed container"
+  },
+  "components.ReleaseComposer.versionLabel": {
+    "defaultMessage": "Release Version"
+  },
+  "components.ReleaseComposer.versionRequired": {
+    "defaultMessage": "This field is required"
+  },
+  "components.ReleaseComposer.warningsTitle": {
+    "defaultMessage": "Some settings could not be represented:"
+  },
   "components.apps.containers.container-details.ContainerDetails.bindsLabel": {
     "defaultMessage": "Binds"
   },
@@ -2316,30 +2349,6 @@
   },
   "forms.CreateNetwork.submitButton": {
     "defaultMessage": "Create"
-  },
-  "forms.CreateRelease.addDependenciesButton": {
-    "defaultMessage": "Add Dependencies"
-  },
-  "forms.CreateRelease.containerDependenciesLabel": {
-    "defaultMessage": "Container Dependencies"
-  },
-  "forms.CreateRelease.containerLabel": {
-    "defaultMessage": "Container"
-  },
-  "forms.CreateRelease.containersLabel": {
-    "defaultMessage": "Containers"
-  },
-  "forms.CreateRelease.dependsOnLabel": {
-    "defaultMessage": "Depends on"
-  },
-  "forms.CreateRelease.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "forms.CreateRelease.supportedSystemModelsLabels": {
-    "defaultMessage": "Supported System Models"
-  },
-  "forms.CreateRelease.versionLabel": {
-    "defaultMessage": "Version"
   },
   "forms.CreateRepository.descriptionLabel": {
     "defaultMessage": "Description"
