@@ -404,10 +404,6 @@ defmodule Edgehog.Containers.Container do
     calculate :env_encoding, :vector, EnvEncoding
   end
 
-  identities do
-    identity :name, [:name]
-  end
-
   postgres do
     table "containers"
   end
