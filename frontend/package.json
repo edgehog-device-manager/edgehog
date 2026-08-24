@@ -73,6 +73,7 @@
     "typescript": "^6.0.3",
     "vite": "^8.1.3",
     "vite-plugin-checker": "^0.14.5",
+    "yaml": "^2.9.0",
     "zod": "^4.5.0"
   },
   "scripts": {
@@ -102,11 +103,7 @@
     "i18n:fix-paths": "node ../tools/langs_updater.js --fix-paths src/i18n/langs"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
+    "production": [">0.2%", "not dead", "not op_mini all"],
     "development": [
       "last 1 chrome version",
       "last 1 firefox version",
