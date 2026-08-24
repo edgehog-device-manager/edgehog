@@ -1,4 +1,16 @@
 {
+  "components.MonacoEditor.vimToggle": {
+    "defaultMessage": "Toggle Vim mode"
+  },
+  "components.MonacoEditor.zoomIn": {
+    "defaultMessage": "Increase font size"
+  },
+  "components.MonacoEditor.zoomOut": {
+    "defaultMessage": "Decrease font size"
+  },
+  "components.MonacoEditor.zoomReset": {
+    "defaultMessage": "Reset font size"
+  },
   "components.ReleaseComposer.addContainer": {
     "defaultMessage": "Add Container"
   },
