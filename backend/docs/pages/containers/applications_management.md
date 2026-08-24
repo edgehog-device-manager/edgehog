@@ -13,30 +13,22 @@ To create a Release in Edgehog:
 1. Navigate to the **Applications** section in the Edgehog web interface
 2. Open the app for which you want to create a release
 3. Click on **Create Release** action button
-4. Fill in the release form:
+4. Fill in the release composer:
    - **Version**: Enter a unique version number that follows the [Semantic Versioning](https://semver.org) spec
-   - **Supported System Models**: Choose system model(s) which the release should support. If left blank, the release supports all devices
-5. Add container(s) by clicking **Add Container** button (see [Container creation](applications_management.html#container-creation) for more details)
-6. Click **Create** to create the release
+   - **Required System Models**: Choose system model(s) which the release should support. If left blank, the release supports all devices
+5. Add one or more containers with the **Add Container** button (see [Container creation](applications_management.html#container-creation) for more details), or paste an existing `docker-compose` file in the editor on the left
+6. Click **Create Release** to create the release: containers, their dependencies and the release are created atomically
 
-![Creating Release](assets/release_create.png)
+The release composer keeps a docker-compose representation of the release in sync with the per-container forms:
 
-## Reuse Release Configuration
-
-Edgehog also let's you reuse existing containers and their configurations from the same or some other application.
-
-To reuse a Release:
-
-1. Click on **Reuse Release** button in the Create Release page
-2. Choose application and release from which you want to copy containers and their configurations
-3. Click **Confirm** to import release configuration
-
-![Reusing Release](assets/release_create_reuse.png)
+- editing a container form regenerates the compose file
+- pasting or editing the compose file parses it back into the forms (services are matched by name)
+- unsupported compose keys and network/volume names that don't match existing Edgehog resources are reported as warnings
+- the `depends_on` key maps to the container dependencies of the release
 
 ## Container Creation
 
-By clicking the **Add Container** button on the **Create Release** page, a form for specifying container configuration is displayed.
-The form is organized into logical sections:
+Each container of the release is configured through a form, organized into logical sections:
 
 - **Image Configuration**
 - **Network Configuration**
