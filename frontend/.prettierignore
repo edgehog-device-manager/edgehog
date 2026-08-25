@@ -1,8 +1,8 @@
-# SPDX-FileCopyrightText: 2021-2023 SECO Mind Srl
-# SPDX-License-Identifier: CC0-1.0
 build
 coverage
 node_modules
 src/api/__generated__
 src/i18n/langs-compiled
+src/components/apps/releases/release-composer/composeSpecSchema.generated.ts
+src/components/apps/releases/release-composer/compose-spec.json
 CHANGELOG.md

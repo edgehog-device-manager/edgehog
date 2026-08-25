@@ -984,39 +984,6 @@
   "components.apps.releases.install-application-modal.InstallApplicationModal.title": {
     "defaultMessage": "Install Application"
   },
-  "components.apps.releases.release-composer.ReleaseComposer.addContainer": {
-    "defaultMessage": "Add Container"
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.createRelease": {
-    "defaultMessage": "Create Release"
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.invalidYamlPrefix": {
-    "defaultMessage": "Invalid docker-compose file:"
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.noServicesHint": {
-    "defaultMessage": "No containers yet. Add one or paste a docker-compose file on the left."
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.requiredSystemModelsLabel": {
-    "defaultMessage": "Required System Models"
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.versionLabel": {
-    "defaultMessage": "Release Version"
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.versionRequired": {
-    "defaultMessage": "This field is required"
-  },
-  "components.apps.releases.release-composer.ReleaseComposer.warningsTitle": {
-    "defaultMessage": "Some settings could not be represented:"
-  },
-  "components.apps.releases.release-composer.ServicePane.dependsOnLabel": {
-    "defaultMessage": "Depends on"
-  },
-  "components.apps.releases.release-composer.ServicePane.removeService": {
-    "defaultMessage": "Remove"
-  },
-  "components.apps.releases.release-composer.ServicePane.unnamedService": {
-    "defaultMessage": "Unnamed container"
-  },
   "components.apps.releases.release-devices-table.ReleaseDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the release devices table"
