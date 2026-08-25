@@ -33,8 +33,6 @@ defmodule Edgehog.Containers.Deployment.Starter do
   alias Edgehog.Devices.Device
   alias Edgehog.Tenants.Tenant
 
-  require Logger
-
   # the state struct, we can reference it with the %Data{} struct
   defstruct [
     :device,
@@ -157,18 +155,14 @@ defmodule Edgehog.Containers.Deployment.Starter do
   def terminate(:normal, state) do
     %{device: %{device_id: device_id}} = state
 
-    Logger.info("""
-    Successfully started provisioning of all pending deployments on device #{device_id}
-    """)
+    Core.log_start_completed(device_id)
   end
 
   @impl GenServer
   def terminate({:shutdown, {:start_errors, errors}}, state) do
     %{device: device} = state
 
-    Logger.warning("""
-    It was not possible to start all the deployments for the device #{device.device_id}. Further details will be logged.
-    """)
+    Core.log_start_errors(device)
 
     Core.log_errors(errors, device)
   end
@@ -178,17 +172,13 @@ defmodule Edgehog.Containers.Deployment.Starter do
     %{device: %{device_id: device_id}} = state
     error = with {:error, error} <- error, do: error
 
-    Logger.error("""
-    Unexpected error while starting deployments for device #{device_id}: #{inspect(error)}. Shutting down the starter.
-    """)
+    Core.log_start_unexpected_error(device_id, error)
   end
 
   @impl GenServer
   def terminate(reason, state) do
     %{device: %{device_id: device_id}} = state
 
-    Logger.debug("""
-    Terminating deployments starter server for device #{device_id} with reason #{inspect(reason)}.
-    """)
+    Core.log_start_terminated(device_id, reason)
   end
 end

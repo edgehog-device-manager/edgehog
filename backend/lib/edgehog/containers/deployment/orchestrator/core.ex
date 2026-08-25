@@ -108,9 +108,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator.Core do
         Map.update(state, :containers_waitlist, [], &[container_deployment | &1])
 
       {:error, reason} ->
-        Logger.warning(
-          "Error while starting the supervisor for container deployment #{container_deployment.id}: #{inspect(reason)}"
-        )
+        log_provision_container_start_failed(container_deployment.id, reason)
 
         state
     end
@@ -132,11 +130,101 @@ defmodule Edgehog.Containers.Deployment.Orchestrator.Core do
         Map.put(state, :deployment_provisioning, :started)
 
       {:error, reason} ->
-        Logger.warning(
-          "Error while starting the provisioner for deployment #{deployment.id}: #{inspect(reason)}"
-        )
+        log_provision_deployment_start_failed(deployment.id, reason)
 
         Map.put(state, :deployment_provisioning, :started)
     end
+  end
+
+  # Logging functions
+
+  def log_orchestrator_started(deployment_id, mode) do
+    Logger.debug(
+      "Starting an orchestrator for deployment #{deployment_id}, in #{inspect(mode)} mode"
+    )
+  end
+
+  def log_resources_loaded(deployment_id) do
+    Logger.debug("Loaded resources for deployment #{deployment_id}")
+  end
+
+  def log_load_resources_failed(deployment_id, reason) do
+    Logger.error("""
+    Error while loading the resources for deployment #{deployment_id}: #{inspect(reason)}.
+
+    The deployment will be marked as failed.
+    """)
+  end
+
+  def log_provisioning_started(deployment_id) do
+    Logger.debug("Provisioned resources for deployment #{deployment_id}")
+  end
+
+  def log_readiness_check(deployment_id, ready) do
+    Logger.debug("Deployment #{deployment_id} ready?: #{ready}")
+  end
+
+  def log_deployment_ready(deployment_id) do
+    Logger.debug(
+      "Orchestrator for deployment #{deployment_id} received a readiness event for the deployment."
+    )
+  end
+
+  def log_container_ready(deployment_id, container_deployment_id) do
+    Logger.debug(
+      "Orchestrator for deployment #{deployment_id} received a readiness event for the container deployment #{container_deployment_id}"
+    )
+  end
+
+  def log_deployment_failure(deployment_id) do
+    Logger.warning(
+      "Orchestrator for deployment #{deployment_id} received a failure event for the deployment. Failing the deployment."
+    )
+  end
+
+  def log_container_failure(deployment_id, container_deployment_id) do
+    Logger.warning(
+      "Orchestrator for deployment #{deployment_id} received a failure event for the container deployment #{container_deployment_id}. Failing the deployment."
+    )
+  end
+
+  def log_orchestrator_completed(deployment_id) do
+    Logger.debug(
+      "Terminating deployment orchestrator for deployment #{deployment_id}. The deployment is ready."
+    )
+  end
+
+  def log_broadcasting_readiness(deployment_id, topic) do
+    Logger.debug("Broadcasting readiness for deployment #{deployment_id}", topic: topic)
+  end
+
+  def log_running_ready_actions(deployment_id) do
+    Logger.debug("Running ready actions for deployment #{deployment_id}")
+  end
+
+  def log_ready_actions_failed(deployment_id, reason) do
+    Logger.warning(
+      "Could not run ready actions for deployment #{deployment_id}: #{inspect(reason)}"
+    )
+  end
+
+  def log_deployment_provisioned(deployment_id) do
+    Logger.info("Deployment #{deployment_id} successfully provisioned.")
+  end
+
+  def log_provisioning_failed(deployment_id) do
+    Logger.warning("Deployment #{deployment_id} provisioning failed. Marking it as timed out.")
+  end
+
+  def log_provision_container_start_failed(container_deployment_id, reason) do
+    Logger.warning(
+      "Error while starting the supervisor for container deployment #{container_deployment_id}: #{inspect(reason)}"
+    )
+  end
+
+  def log_provision_deployment_start_failed(deployment_id, reason) do
+    Logger.warning(
+      "Error while starting the provisioner for deployment #{deployment_id}: #{inspect(reason)}"
+    )
   end
 end

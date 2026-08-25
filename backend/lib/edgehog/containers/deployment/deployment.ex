@@ -222,7 +222,12 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:state, :started)
       change set_attribute(:context, nil)
 
-      change Changes.LogStarted
+      change {Edgehog.Changes.Log, message: "Deployment successfully started."} do
+        where [
+          data_one_of(:context, [:start_message_sent])
+        ]
+      end
+
       require_atomic? false
     end
 
@@ -230,7 +235,13 @@ defmodule Edgehog.Containers.Deployment do
       change set_attribute(:state, :stopped)
       change set_attribute(:context, nil)
 
-      change Changes.LogStopped
+      change {Edgehog.Changes.Log, message: "Deployment successfully stopped."} do
+        where [
+          data_one_of(:context, [:stop_message_sent]),
+          {Validations.Event, type: "Info"}
+        ]
+      end
+
       require_atomic? false
     end
 
@@ -259,6 +270,13 @@ defmodule Edgehog.Containers.Deployment do
         ]
       end
 
+      change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
+        where [
+          data_one_of(:context, [:upgrade_message_sent]),
+          {Validations.Event, type: "Info"}
+        ]
+      end
+
       change {Edgehog.Changes.Log, message: "Deployment deletion failed."} do
         where [
           data_one_of(:context, [:delete_message_sent]),
@@ -269,13 +287,6 @@ defmodule Edgehog.Containers.Deployment do
       change {Edgehog.Changes.Log, message: "Deployment upgrade failed."} do
         where [
           data_one_of(:context, [:upgrade_message_sent]),
-          {Validations.Event, type: "Error"}
-        ]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment provisioning failed."} do
-        where [
-          data_one_of(:state, [:pending, :sent]),
           {Validations.Event, type: "Error"}
         ]
       end

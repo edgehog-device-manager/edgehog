@@ -56,8 +56,6 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   alias Edgehog.Containers.Telemetry
   alias Edgehog.Containers.Volume
 
-  require Logger
-
   @test Mix.env() == :test
 
   @sup Edgehog.Containers.Container.Deployment.Orchestrator.Supervisor
@@ -174,18 +172,12 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   def handle_continue(:load_resources, state) do
     case Core.load_resources(state) do
       {:ok, new_state} ->
-        Logger.debug(
-          "Loading resources for container deployment #{state.container_deployment.id}"
-        )
+        Core.log_resources_loading(state.container_deployment.id)
 
         {:noreply, new_state, {:continue, :provision_deployments}}
 
       {:error, reason} ->
-        Logger.error("""
-        Error while loading the resources for container deployment #{state.container_deployment.id}: #{inspect(reason)}.
-
-        The container deployment will be marked as failed.
-        """)
+        Core.log_load_resources_failed(state.container_deployment.id, reason)
 
         fail_container(state)
     end
@@ -280,9 +272,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
   @impl GenServer
   def handle_info({:failure, _deployment}, state) do
-    Logger.warning(
-      "A provisioner for container deployment #{state.container_deployment.id} gave up. Failing the container deployment."
-    )
+    Core.log_provisioner_failed(state.container_deployment.id)
 
     fail_container(state)
   end
@@ -298,7 +288,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
     %{id: id} = container_deployment
 
-    Logger.warning("Container deployment #{id} provisioning failed.")
+    Core.log_provisioning_failed(id)
 
     Telemetry.container_deployment_failed(container_deployment, deployment, started_at)
 

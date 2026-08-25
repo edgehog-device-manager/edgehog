@@ -56,11 +56,7 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner.Core do
          {:ok, device} <- Map.fetch(resource, :device),
          {:ok, device} <-
            Devices.send_create_volume_request(device, actual_resource, deployment, tenant: tenant) do
-      Logger.info("""
-      Volume #{actual_resource.id} provisioned on device #{device.device_id}. Waiting events
-      """)
-
-      :ok
+      log_provisioning_started(actual_resource, device)
     end
   end
 
@@ -93,4 +89,36 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner.Core do
   end
 
   def maybe_update(other, _resource, _tenant), do: other
+
+  # Logging functions
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_provisioning_started(resource, device) do
+    Logger.info("""
+    Volume #{resource.id} provisioned on device #{device.device_id}. Waiting events
+    """)
+  end
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_api_error(resource, error) do
+    if temporary_error?(error) do
+      Logger.warning(
+        "Error while sending the volume #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
+      )
+    else
+      Logger.error(
+        "Unrecoverable error while sending the volume #{resource.id}: #{inspect(error)}. Terminating."
+      )
+    end
+  end
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_provisioning_failed(resource, reason) do
+    Logger.info("Provisioner for volume #{resource.id} gave up with reason #{inspect(reason)}.")
+  end
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_provisioning_completed(resource, retries) do
+    Logger.info("Volume #{resource.id} successfully provisioned after #{retries} retries.")
+  end
 end

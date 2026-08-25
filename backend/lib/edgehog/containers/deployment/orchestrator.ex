@@ -51,8 +51,6 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   alias Edgehog.Containers.Deployment.Orchestrator.Registry, as: DeploymentOrchestratorRegistry
   alias Edgehog.Containers.Telemetry
 
-  require Logger
-
   @test Mix.env() == :test
 
   @sup Edgehog.Containers.Deployment.Orchestrator.Supervisor
@@ -151,7 +149,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     %{id: id} = deployment
 
-    Logger.debug("Starting an orchestrator for deployment #{id}, in #{inspect(mode)} mode")
+    Core.log_orchestrator_started(id, mode)
 
     {:ok, state, {:continue, :maybe_load_resources}}
   end
@@ -174,16 +172,12 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   def handle_continue(:load_resources, state) do
     case Core.load_resources(state) do
       {:ok, new_state} ->
-        Logger.debug("Loaded resources for deployment #{state.deployment.id}")
+        Core.log_resources_loaded(state.deployment.id)
 
         {:noreply, new_state, {:continue, :provision_deployments}}
 
       {:error, reason} ->
-        Logger.error("""
-        Error while loading the resources for deployment #{state.deployment.id}: #{inspect(reason)}.
-
-        The deployment will be marked as failed.
-        """)
+        Core.log_load_resources_failed(state.deployment.id, reason)
 
         fail_deployment(state)
     end
@@ -197,7 +191,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
     if Map.get(new_state, :provisioning_failed, false) do
       fail_deployment(new_state)
     else
-      Logger.debug("Provisioned resources for deployment #{state.deployment.id}")
+      Core.log_provisioning_started(state.deployment.id)
 
       {:noreply, new_state}
     end
@@ -207,7 +201,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   def handle_continue(:maybe_ready, state) do
     ready? = Core.ready?(state)
 
-    Logger.debug("Deployment #{state.deployment.id} ready?: #{ready?}")
+    Core.log_readiness_check(state.deployment.id, ready?)
 
     if ready?,
       do: {:stop, :normal, state},
@@ -218,9 +212,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
   @impl GenServer
   def handle_info({:ready, %Deployment{} = deployment}, state) do
-    Logger.debug(
-      "Orchestrator for deployment #{state.deployment.id} received a readiness event for the deployment."
-    )
+    Core.log_deployment_ready(state.deployment.id)
 
     new_state = Core.deployment_ready(state, deployment)
 
@@ -232,9 +224,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
         %Phoenix.Socket.Broadcast{event: :ready, payload: %Container.Deployment{id: id}},
         state
       ) do
-    Logger.debug(
-      "Orchestrator for deployment #{state.deployment.id} received a readiness event for the container deployment #{id}"
-    )
+    Core.log_container_ready(state.deployment.id, id)
 
     new_state = Core.container_ready(id, state)
 
@@ -243,9 +233,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
   @impl GenServer
   def handle_info({:failure, %Deployment{}}, state) do
-    Logger.warning(
-      "Orchestrator for deployment #{state.deployment.id} received a failure event for the deployment. Failing the deployment."
-    )
+    Core.log_deployment_failure(state.deployment.id)
 
     fail_deployment(state)
   end
@@ -255,9 +243,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
         %Phoenix.Socket.Broadcast{event: :failure, payload: %Container.Deployment{id: id}},
         state
       ) do
-    Logger.warning(
-      "Orchestrator for deployment #{state.deployment.id} received a failure event for the container deployment #{id}. Failing the deployment."
-    )
+    Core.log_container_failure(state.deployment.id, id)
 
     fail_deployment(state)
   end
@@ -272,9 +258,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     %{id: id} = deployment
 
-    Logger.debug(
-      "Terminating deployment orchestrator for deployment #{id}. The deployment is ready."
-    )
+    Core.log_orchestrator_completed(id)
 
     Telemetry.deployment_completed(deployment, started_at)
 
@@ -286,12 +270,12 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
       payload: deployment
     }
 
-    Logger.debug("Broadcasting readiness", topic: readiness_topic, event: event)
+    Core.log_broadcasting_readiness(id, readiness_topic)
 
     # Broadcast readiness
     Phoenix.PubSub.broadcast(Edgehog.PubSub, readiness_topic, event)
 
-    Logger.debug("Running ready actions", deployment: deployment)
+    Core.log_running_ready_actions(id)
 
     # Run ready actions. This cannot raise, otherwise the orchestrator would
     # terminate abnormally even if the deployment was successfully provisioned.
@@ -305,10 +289,10 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
         :ok
 
       {:error, reason} ->
-        Logger.warning("Could not run ready actions for deployment #{id}: #{inspect(reason)}")
+        Core.log_ready_actions_failed(id, reason)
     end
 
-    Logger.info("Deployment #{id} successfully provisioned.")
+    Core.log_deployment_provisioned(id)
 
     :ok
   end
@@ -327,7 +311,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     %{id: id} = deployment
 
-    Logger.warning("Deployment #{id} provisioning failed. Marking it as timed out.")
+    Core.log_provisioning_failed(id)
 
     Telemetry.deployment_failed(deployment, started_at)
 
