@@ -27,5 +27,7 @@ yarn-error.log*
 translations.generated.json
 src/i18n/langs-compiled
 src/api/__generated__
+src/components/apps/releases/release-composer/compose-spec.json
+src/components/apps/releases/release-composer/composeSpecSchema.generated.ts
 
 .DS_Store
