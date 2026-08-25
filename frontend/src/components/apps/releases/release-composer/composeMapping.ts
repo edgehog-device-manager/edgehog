@@ -19,13 +19,29 @@
  */
 
 import { parse, stringify } from "yaml";
+import type { ZodError } from "zod";
 
+import { composeSpecSchema } from "./composeSpecSchema.generated";
 import type { ContainerInputData } from "@/forms/validation";
+
+export type ComposeServiceExtras = {
+  /** Service keys that are not supported by Edgehog, preserved verbatim. */
+  keys: Record<string, unknown>;
+  /** Original map-form depends_on, restored when the extracted names did not change. */
+  dependsOnRaw?: Record<string, unknown>;
+  /** Service names extracted from dependsOnRaw. */
+  dependsOnExtracted?: string[];
+  /** Original map-form networks, restored when the matched networks did not change. */
+  networksRaw?: Record<string, unknown>;
+  /** Network labels that matched an Edgehog network at parse time. */
+  networksMatchedLabels?: string[];
+};
 
 export type ComposeServiceData = {
   name: string;
   dependsOn: string[];
   container: ContainerInputData;
+  extras?: ComposeServiceExtras;
 };
 
 export type ReleaseComposeData = {
@@ -49,10 +65,20 @@ export type MappingContext = {
 };
 
 export type ComposeMappingResult =
-  | { ok: true; data: ReleaseComposeData; warnings: string[] }
+  | {
+      ok: true;
+      data: ReleaseComposeData;
+      topLevelExtras: Record<string, unknown>;
+      warnings: string[];
+    }
   | { ok: false; error: string };
 
 /* ------------------------------ helpers ------------------------------ */
+
+const clone = <T>(value: T): T =>
+  typeof structuredClone === "function"
+    ? structuredClone(value)
+    : (JSON.parse(JSON.stringify(value)) as T);
 
 const asRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -65,6 +91,9 @@ const asStringArray = (value: unknown): string[] => {
 
   return value.flatMap((item) => (typeof item === "string" ? [item] : []));
 };
+
+const sameStrings = (a: string[], b: string[]) =>
+  a.length === b.length && a.every((item, index) => item === b[index]);
 
 const parseMemory = (value: unknown): number | undefined => {
   if (typeof value === "number") return value;
@@ -87,7 +116,8 @@ const parseMemory = (value: unknown): number | undefined => {
   return Math.round(amount * multipliers[unit]);
 };
 
-const parseIntValue = (value: unknown): number | undefined => parseMemory(value);
+const parseIntValue = (value: unknown): number | undefined =>
+  parseMemory(value);
 
 const restartPolicyToEdgehog = (
   value: unknown,
@@ -106,8 +136,13 @@ const restartPolicyToEdgehog = (
 
   const policy = mapping[rawPolicy.trim().toLowerCase()];
 
-  if (!policy) return { warning: `unsupported value '${value}'` };
-  if (arg) return { policy, warning: `restart argument '${arg}' ignored` };
+  if (!policy)
+    return { policy: undefined, warning: `unsupported value '${value}'` };
+  if (arg)
+    return {
+      policy,
+      warning: `restart argument '${arg}' is not supported and will be ignored`,
+    };
 
   return { policy };
 };
@@ -127,8 +162,6 @@ const restartPolicyToCompose = (policy?: string): string | undefined => {
 
 const envToKeyValuePairs = (
   value: unknown,
-  context: string,
-  warnings: string[],
 ): { key: string; value: string }[] => {
   if (!value) return [];
 
@@ -151,14 +184,12 @@ const envToKeyValuePairs = (
     });
   }
 
-  if (value && typeof value === "object") {
+  if (typeof value === "object") {
     return Object.entries(asRecord(value)).map(([key, val]) => ({
       key,
       value: val == null ? "" : String(val),
     }));
   }
-
-  warnings.push(`${context}: unsupported environment format ignored`);
 
   return [];
 };
@@ -185,11 +216,7 @@ const isBindSource = (source: string) =>
   source.startsWith("~") ||
   /^[A-Za-z]:[\\/]/.test(source);
 
-const deviceMappingFromEntry = (
-  entry: string,
-  context: string,
-  warnings: string[],
-): DeviceMappingData | null => {
+const deviceMappingFromEntry = (entry: string): DeviceMappingData | null => {
   const parts = entry.split(":").map((part) => part.trim());
 
   if (parts.length === 2 && parts.every((part) => part !== "")) {
@@ -208,25 +235,98 @@ const deviceMappingFromEntry = (
     };
   }
 
-  warnings.push(`${context}: unsupported device entry '${entry}' ignored`);
-
   return null;
+};
+
+const portBindingFromEntry = (
+  entry: unknown,
+  context: string,
+  warnings: string[],
+): string | null => {
+  if (typeof entry === "string") {
+    return entry === "" ? null : entry;
+  }
+
+  if (typeof entry === "number") {
+    return String(entry);
+  }
+
+  const port = asRecord(entry);
+  const target = port.target != null ? String(port.target) : "";
+  const published = port.published != null ? String(port.published) : "";
+  const protocol = typeof port.protocol === "string" ? port.protocol : "";
+
+  if (target === "") {
+    warnings.push(
+      `${context}: port without a target is not supported and will be ignored`,
+    );
+
+    return null;
+  }
+
+  const unsupportedOptions = ["mode", "name", "app_protocol"].filter(
+    (key) => port[key] != null,
+  );
+
+  if (unsupportedOptions.length > 0) {
+    warnings.push(
+      `${context}: port option(s) ${unsupportedOptions.join(", ")} are not supported and will be ignored`,
+    );
+  }
+
+  const targetWithProtocol =
+    protocol && protocol !== "tcp" ? `${target}/${protocol}` : target;
+
+  if (port.host_ip != null && published !== "") {
+    return `${String(port.host_ip)}:${published}:${targetWithProtocol}`;
+  }
+
+  if (published !== "") {
+    return `${published}:${targetWithProtocol}`;
+  }
+
+  return targetWithProtocol;
+};
+
+const extraHostsFromValue = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.flatMap((entry) => (typeof entry === "string" ? [entry] : []));
+  }
+
+  return Object.entries(asRecord(value)).flatMap(([host, address]) => {
+    if (typeof address === "string") {
+      return [`${host}:${address}`];
+    }
+
+    if (Array.isArray(address)) {
+      return address.flatMap((ip) =>
+        typeof ip === "string" ? [`${host}:${ip}`] : [],
+      );
+    }
+
+    return [];
+  });
 };
 
 const labelToId = (
   options: LabelOption[] | undefined,
   label: string,
-): string | null => options?.find((option) => option.label === label)?.value ?? null;
+): string | null =>
+  options?.find((option) => option.label === label)?.value ?? null;
 
 const idToLabel = (
   options: LabelOption[] | undefined,
   id: string,
-): string | null => options?.find((option) => option.value === id)?.label ?? null;
+): string | null =>
+  options?.find((option) => option.value === id)?.label ?? null;
 
+/**
+ * Service keys that Edgehog can represent in its containers. Anything else is
+ * kept in the compose file and reported as a warning.
+ */
 const SUPPORTED_SERVICE_KEYS = new Set([
   "image",
   "environment",
-  "env_file",
   "ports",
   "networks",
   "network_mode",
@@ -251,9 +351,22 @@ const SUPPORTED_SERVICE_KEYS = new Set([
   "cpu_rt_runtime",
   "devices",
   "depends_on",
+  "deploy",
 ]);
 
-const SUPPORTED_TOP_LEVEL_KEYS = new Set(["services"]);
+const formatSchemaIssues = (error: ZodError): string => {
+  const parts = error.issues.slice(0, 5).map((issue) => {
+    const location = issue.path.length > 0 ? issue.path.join(".") : "document";
+
+    return `${location}: ${issue.message}`;
+  });
+
+  if (error.issues.length > 5) {
+    parts.push(`…and ${error.issues.length - 5} more`);
+  }
+
+  return parts.join("; ");
+};
 
 /* ------------------------- YAML -> form data ------------------------- */
 
@@ -273,47 +386,66 @@ export const composeToFormData = (
   }
 
   if (document == null) {
-    return { ok: true, data: { services: [] }, warnings: [] };
+    return {
+      ok: true,
+      data: { services: [] },
+      topLevelExtras: {},
+      warnings: [],
+    };
+  }
+
+  const validated = composeSpecSchema.safeParse(document);
+
+  if (!validated.success) {
+    return { ok: false, error: formatSchemaIssues(validated.error) };
   }
 
   const root = asRecord(document);
   const warnings: string[] = [];
+  const topLevelExtras: Record<string, unknown> = {};
 
   for (const key of Object.keys(root)) {
-    if (!SUPPORTED_TOP_LEVEL_KEYS.has(key)) {
-      warnings.push(`top-level key '${key}' is not supported and was ignored`);
+    if (key !== "services") {
+      topLevelExtras[key] = clone(root[key]);
+      warnings.push(
+        `top-level key '${key}' is not supported by Edgehog and will be ignored`,
+      );
     }
   }
 
-  const servicesRoot = root.services;
-
-  if (servicesRoot == null) {
-    return { ok: true, data: { services: [] }, warnings };
-  }
-
-  const servicesRecord = asRecord(servicesRoot);
+  const servicesRecord = asRecord(root.services);
   const services: ComposeServiceData[] = [];
 
   for (const [name, rawService] of Object.entries(servicesRecord)) {
     const service = asRecord(rawService);
     const ctx = `service '${name}'`;
+    const extras: ComposeServiceExtras = { keys: {} };
 
     for (const key of Object.keys(service)) {
       if (!SUPPORTED_SERVICE_KEYS.has(key)) {
-        warnings.push(`${ctx}: key '${key}' is not supported and was ignored`);
+        extras.keys[key] = clone(service[key]);
+
+        warnings.push(
+          key === "env_file"
+            ? `${ctx}: env_file entries cannot be resolved by Edgehog and will be ignored`
+            : `${ctx}: key '${key}' is not supported by Edgehog and will be ignored`,
+        );
       }
     }
 
     const container: ContainerInputData = {
       name,
       image: { reference: "" },
-      hostname: typeof service.hostname === "string" ? service.hostname : undefined,
+      hostname:
+        typeof service.hostname === "string" ? service.hostname : undefined,
       networkMode:
-        typeof service.network_mode === "string" ? service.network_mode : undefined,
-      portBindings: asStringArray(service.ports),
+        typeof service.network_mode === "string"
+          ? service.network_mode
+          : undefined,
+      portBindings: [],
       binds: [],
       volumes: [],
-      extraHosts: asStringArray(service.extra_hosts),
+      extraHosts: extraHostsFromValue(service.extra_hosts),
       tmpfs: asStringArray(service.tmpfs),
       readOnlyRootfs: service.read_only === true,
       privileged: service.privileged === true,
@@ -326,7 +458,7 @@ export const composeToFormData = (
       storageOpt: Object.entries(asRecord(service.storage_opt)).map(
         ([key, value]) => `${key}=${String(value)}`,
       ),
-      env: envToKeyValuePairs(service.environment, ctx, warnings),
+      env: envToKeyValuePairs(service.environment),
       restartPolicy: undefined,
       networks: [],
       deviceMappings: [],
@@ -339,7 +471,9 @@ export const composeToFormData = (
     } else if (service.image == null) {
       warnings.push(`${ctx}: 'image' is missing`);
     } else {
-      warnings.push(`${ctx}: unsupported image definition ignored`);
+      warnings.push(
+        `${ctx}: unsupported image definition is not supported and will be ignored`,
+      );
     }
 
     // restart policy
@@ -361,6 +495,15 @@ export const composeToFormData = (
     container.cpuRealtimePeriod = parseIntValue(service.cpu_rt_period);
     container.cpuRealtimeRuntime = parseIntValue(service.cpu_rt_runtime);
 
+    // ports
+    if (Array.isArray(service.ports)) {
+      for (const entry of service.ports) {
+        const binding = portBindingFromEntry(entry, ctx, warnings);
+
+        if (binding) container.portBindings?.push(binding);
+      }
+    }
+
     // volumes and binds
     const volumeEntries = Array.isArray(service.volumes)
       ? service.volumes
@@ -375,7 +518,9 @@ export const composeToFormData = (
         const parsed = splitVolumeShortSyntax(entry);
 
         if (!parsed) {
-          warnings.push(`${ctx}: unsupported volume entry '${entry}' ignored`);
+          warnings.push(
+            `${ctx}: unsupported volume entry '${entry}' is not supported and will be ignored`,
+          );
 
           continue;
         }
@@ -384,6 +529,12 @@ export const composeToFormData = (
           container.binds?.push(entry);
 
           continue;
+        }
+
+        if (parsed.mode) {
+          warnings.push(
+            `${ctx}: volume option '${parsed.mode}' is not supported and will be ignored`,
+          );
         }
 
         const volumeId = labelToId(context.volumeOptions, parsed.source);
@@ -408,15 +559,37 @@ export const composeToFormData = (
       const ctxVolume = `${ctx} volume '${source || target}'`;
 
       if (type !== "bind" && type !== "volume") {
-        warnings.push(`${ctxVolume}: unsupported volume type ignored`);
+        warnings.push(
+          `${ctxVolume}: volume type '${type}' is not supported and will be ignored`,
+        );
 
         continue;
       }
 
       if (type === "bind") {
+        const unsupportedVolumeOptions = Object.keys(volume).filter(
+          (key) => !["type", "source", "target"].includes(key),
+        );
+
+        if (unsupportedVolumeOptions.length > 0) {
+          warnings.push(
+            `${ctxVolume}: bind option(s) ${unsupportedVolumeOptions.join(", ")} are not supported and will be ignored`,
+          );
+        }
+
         container.binds?.push(`${source}:${target}`);
 
         continue;
+      }
+
+      const unsupportedVolumeOptions = Object.keys(volume).filter(
+        (key) => !["type", "source", "target"].includes(key),
+      );
+
+      if (unsupportedVolumeOptions.length > 0) {
+        warnings.push(
+          `${ctxVolume}: volume option(s) ${unsupportedVolumeOptions.join(", ")} are not supported and will be ignored`,
+        );
       }
 
       const volumeId = labelToId(context.volumeOptions, source);
@@ -431,47 +604,37 @@ export const composeToFormData = (
     }
 
     // networks
-    const networkEntries = Array.isArray(service.networks)
-      ? service.networks
-      : typeof service.networks === "string"
-        ? [service.networks]
-        : [];
+    const matchedNetworkLabels: string[] = [];
 
-    for (const entry of networkEntries) {
-      let label: unknown = entry;
+    if (Array.isArray(service.networks)) {
+      for (const label of service.networks) {
+        if (typeof label !== "string") continue;
 
-      if (entry != null && typeof entry === "object") {
-        const network = asRecord(entry);
+        const networkId = labelToId(context.networkOptions, label);
 
-        label = typeof network.name === "string" ? network.name : undefined;
+        if (networkId == null) {
+          warnings.push(
+            `${ctx}: network '${label}' does not match any Edgehog network`,
+          );
 
-        warnings.push(`${ctx}: network configuration details were ignored`);
+          continue;
+        }
+
+        matchedNetworkLabels.push(label);
+        container.networks?.push({ id: networkId });
       }
-
-      if (typeof label !== "string") continue;
-
-      const networkId = labelToId(context.networkOptions, label);
-
-      if (networkId == null) {
-        warnings.push(
-          `${ctx}: network '${label}' does not match any Edgehog network`,
-        );
-
-        continue;
-      }
-
-      container.networks?.push({ id: networkId });
-    }
-
-    if (
-      !Array.isArray(service.networks) &&
+    } else if (
       service.networks != null &&
       typeof service.networks === "object"
     ) {
+      extras.networksRaw = clone(service.networks) as Record<string, unknown>;
+
       for (const key of Object.keys(asRecord(service.networks))) {
-        warnings.push(
-          `${ctx}: network '${key}' configuration details were ignored`,
-        );
+        if (Object.keys(asRecord(asRecord(service.networks)[key])).length > 0) {
+          warnings.push(
+            `${ctx}: configuration details of network '${key}' are not supported and will be ignored`,
+          );
+        }
 
         const networkId = labelToId(context.networkOptions, key);
 
@@ -483,15 +646,112 @@ export const composeToFormData = (
           continue;
         }
 
+        matchedNetworkLabels.push(key);
         container.networks?.push({ id: networkId });
       }
+
+      extras.networksMatchedLabels = [...matchedNetworkLabels];
     }
 
     // devices
-    for (const entry of asStringArray(service.devices)) {
-      const mapping = deviceMappingFromEntry(entry, ctx, warnings);
+    if (Array.isArray(service.devices)) {
+      for (const entry of service.devices) {
+        if (typeof entry === "string") {
+          const mapping = deviceMappingFromEntry(entry);
 
-      if (mapping) container.deviceMappings?.push(mapping);
+          if (mapping) {
+            container.deviceMappings?.push(mapping);
+          } else {
+            warnings.push(
+              `${ctx}: unsupported device entry '${entry}' is not supported and will be ignored`,
+            );
+          }
+
+          continue;
+        }
+
+        const device = asRecord(entry);
+        const source = typeof device.source === "string" ? device.source : "";
+        const target =
+          typeof device.target === "string" ? device.target : source;
+        const permissions =
+          typeof device.permissions === "string" ? device.permissions : "rwm";
+
+        if (source === "") {
+          warnings.push(
+            `${ctx}: device entry without a source is not supported and will be ignored`,
+          );
+
+          continue;
+        }
+
+        container.deviceMappings?.push({
+          pathOnHost: source,
+          pathInContainer: target,
+          cgroupPermissions: permissions,
+        });
+      }
+    }
+    // deploy (device requests only; other deploy keys are not supported)
+    if (service.deploy != null && typeof service.deploy === "object") {
+      const deploy = asRecord(service.deploy);
+      const unsupportedDeployOptions = Object.keys(deploy).filter(
+        (key) => key !== "resources",
+      );
+
+      if (unsupportedDeployOptions.length > 0) {
+        warnings.push(
+          `${ctx}: deploy option(s) ${unsupportedDeployOptions.join(", ")} are not supported and will be ignored`,
+        );
+      }
+
+      const resources = asRecord(deploy.resources);
+      const unsupportedResourceOptions = Object.keys(resources).filter(
+        (key) => key !== "reservations",
+      );
+
+      if (unsupportedResourceOptions.length > 0) {
+        warnings.push(
+          `${ctx}: deploy.resources option(s) ${unsupportedResourceOptions.join(", ")} are not supported and will be ignored`,
+        );
+      }
+
+      const reservations = asRecord(resources.reservations);
+      const unsupportedReservationOptions = Object.keys(reservations).filter(
+        (key) => key !== "devices",
+      );
+
+      if (unsupportedReservationOptions.length > 0) {
+        warnings.push(
+          `${ctx}: deploy.resources.reservations option(s) ${unsupportedReservationOptions.join(", ")} are not supported and will be ignored`,
+        );
+      }
+      if (Array.isArray(reservations.devices)) {
+        for (const entry of reservations.devices) {
+          const device = asRecord(entry);
+          const unsupportedDeviceOptions = Object.keys(device).filter(
+            (key) =>
+              !["driver", "count", "device_ids", "capabilities"].includes(key),
+          );
+
+          if (unsupportedDeviceOptions.length > 0) {
+            warnings.push(
+              `${ctx}: deploy device request option(s) ${unsupportedDeviceOptions.join(", ")} are not supported and will be ignored`,
+            );
+          }
+          container.deviceRequests?.push({
+            driver:
+              typeof device.driver === "string" ? device.driver : undefined,
+            count: typeof device.count === "number" ? device.count : undefined,
+            deviceIds: asStringArray(device.device_ids),
+            capabilities: Array.isArray(device.capabilities)
+              ? device.capabilities.flatMap((capability) =>
+                  Array.isArray(capability) ? asStringArray(capability) : [],
+                )
+              : [],
+          });
+        }
+      }
     }
 
     // depends_on
@@ -502,22 +762,43 @@ export const composeToFormData = (
       typeof service.depends_on === "string"
     ) {
       dependsOn = asStringArray(service.depends_on);
-    } else if (service.depends_on != null && typeof service.depends_on === "object") {
-      for (const [key, rawCondition] of Object.entries(
-        asRecord(service.depends_on),
-      )) {
-        if (asRecord(rawCondition).condition) {
-          warnings.push(`${ctx}: depends_on condition for '${key}' ignored`);
-        }
-      }
+    } else if (
+      service.depends_on != null &&
+      typeof service.depends_on === "object"
+    ) {
+      extras.dependsOnRaw = clone(service.depends_on) as Record<
+        string,
+        unknown
+      >;
 
       dependsOn = Object.keys(asRecord(service.depends_on));
+      extras.dependsOnExtracted = [...dependsOn];
+
+      if (
+        Object.values(asRecord(service.depends_on)).some(
+          (condition) => Object.keys(asRecord(condition)).length > 0,
+        )
+      ) {
+        warnings.push(
+          `${ctx}: depends_on conditions are not supported and will be ignored`,
+        );
+      }
     }
 
-    services.push({ name, dependsOn, container });
+    services.push({
+      name,
+      dependsOn,
+      container,
+      extras:
+        Object.keys(extras.keys).length > 0 ||
+        extras.dependsOnRaw != null ||
+        extras.networksRaw != null
+          ? extras
+          : undefined,
+    });
   }
 
-  return { ok: true, data: { services }, warnings };
+  return { ok: true, data: { services }, topLevelExtras, warnings };
 };
 
 /* ------------------------- form data -> YAML ------------------------- */
@@ -527,9 +808,15 @@ export type SerializeResult = {
   warnings: string[];
 };
 
+export type SerializeOptions = {
+  /** Unsupported top-level keys preserved from the original document. */
+  topLevelExtras?: Record<string, unknown>;
+};
+
 export const formDataToCompose = (
   data: ReleaseComposeData,
   context: MappingContext = {},
+  options: SerializeOptions = {},
 ): SerializeResult => {
   const warnings: string[] = [];
   const services: Record<string, Record<string, unknown>> = {};
@@ -563,23 +850,21 @@ export const formDataToCompose = (
       output.extra_hosts = [...container.extraHosts];
     }
 
-    if (container.networks?.length) {
-      const labels: string[] = [];
+    const networkLabels: string[] = [];
 
-      for (const network of container.networks) {
-        const label = idToLabel(context.networkOptions, network.id);
+    for (const network of container.networks ?? []) {
+      const label = idToLabel(context.networkOptions, network.id);
 
-        if (label == null) {
-          warnings.push(`${ctx}: unlinked network could not be serialized`);
+      if (label == null) {
+        warnings.push(`${ctx}: unlinked network could not be serialized`);
 
-          continue;
-        }
-
-        labels.push(label);
+        continue;
       }
 
-      if (labels.length) output.networks = labels;
+      networkLabels.push(label);
     }
+
+    if (networkLabels.length) output.networks = networkLabels;
 
     const volumeEntries: string[] = [];
     const bindEntries: string[] = [];
@@ -609,10 +894,7 @@ export const formDataToCompose = (
         container.storageOpt.map((entry) => {
           const separator = entry.indexOf("=");
 
-          return [
-            entry.slice(0, separator),
-            entry.slice(separator + 1),
-          ];
+          return [entry.slice(0, separator), entry.slice(separator + 1)];
         }),
       );
     }
@@ -622,7 +904,8 @@ export const formDataToCompose = (
     if (container.memory != null) output.mem_limit = container.memory;
     if (container.memoryReservation != null)
       output.mem_reservation = container.memoryReservation;
-    if (container.memorySwap != null) output.memswap_limit = container.memorySwap;
+    if (container.memorySwap != null)
+      output.memswap_limit = container.memorySwap;
     if (container.memorySwappiness != null)
       output.mem_swappiness = container.memorySwappiness;
     if (container.cpuPeriod != null) output.cpu_period = container.cpuPeriod;
@@ -661,9 +944,26 @@ export const formDataToCompose = (
     }
 
     if (container.deviceRequests?.length) {
-      warnings.push(
-        `${ctx}: device requests are configured from the form only and are not part of the compose file`,
-      );
+      output.deploy = {
+        resources: {
+          reservations: {
+            devices: container.deviceRequests.map((request) => {
+              const device: Record<string, unknown> = {};
+
+              if (request.driver) device.driver = request.driver;
+              if (request.count != null) device.count = request.count;
+              if (request.deviceIds?.length) {
+                device.device_ids = [...request.deviceIds];
+              }
+              if (request.capabilities?.length) {
+                device.capabilities = [[...request.capabilities]];
+              }
+
+              return device;
+            }),
+          },
+        },
+      };
     }
 
     if (container.image?.imageCredentialsId) {
@@ -672,15 +972,48 @@ export const formDataToCompose = (
       );
     }
 
+    if (container.deviceRequests?.length) {
+      warnings.push(
+        `${ctx}: device requests are configured from the form only and are not part of the compose file`,
+      );
+    }
+
     if (service.dependsOn.length) {
       output.depends_on = [...service.dependsOn];
+    }
+
+    // restore preserved fields; untouched partially-supported keys win over
+    // their canonical serialization
+    const extras = service.extras;
+
+    if (extras) {
+      if (
+        extras.dependsOnRaw &&
+        extras.dependsOnExtracted &&
+        sameStrings(service.dependsOn, extras.dependsOnExtracted)
+      ) {
+        output.depends_on = clone(extras.dependsOnRaw);
+      }
+
+      if (
+        extras.networksRaw &&
+        extras.networksMatchedLabels &&
+        sameStrings(networkLabels, extras.networksMatchedLabels)
+      ) {
+        output.networks = clone(extras.networksRaw);
+      }
+
+      Object.assign(output, clone(extras.keys));
     }
 
     services[service.name] = output;
   }
 
   return {
-    text: stringify({ services }, { sortMapEntries: false }),
+    text: stringify(
+      { ...clone(options.topLevelExtras), services },
+      { sortMapEntries: false },
+    ),
     warnings,
   };
 };
