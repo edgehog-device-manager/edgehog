@@ -23,8 +23,9 @@ The release composer keeps a docker-compose representation of the release in syn
 
 - editing a container form regenerates the compose file
 - pasting or editing the compose file parses it back into the forms (services are matched by name)
-- unsupported compose keys and network/volume names that don't match existing Edgehog resources are reported as warnings
-- the `depends_on` key maps to the container dependencies of the release
+- the pasted file must be a valid [Compose Specification](https://compose-spec.io) document: violations (unknown keys, wrong value types, malformed services) are reported as errors and block the parsing
+- compose keys that are valid but not supported by Edgehog are kept in the file and reported as warnings: they are preserved when the file is regenerated from the forms, but they are ignored when the release is deployed. Network/volume names that don't match existing Edgehog resources are reported as warnings as well
+- the `depends_on` key maps to the container dependencies of the release; `depends_on` conditions are not supported and are ignored
 
 ## Container Creation
 

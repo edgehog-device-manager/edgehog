@@ -20,17 +20,23 @@
   "components.ReleaseComposer.dependsOnLabel": {
     "defaultMessage": "Depends on"
   },
+  "components.ReleaseComposer.invalidServiceBadge": {
+    "defaultMessage": "This container has missing or invalid settings"
+  },
   "components.ReleaseComposer.invalidYamlPrefix": {
     "defaultMessage": "Invalid docker-compose file:"
   },
   "components.ReleaseComposer.noServicesHint": {
-    "defaultMessage": "No containers yet. Add one or paste a docker-compose file on the left."
+    "defaultMessage": "No containers yet. Add one or paste a docker-compose file on the right."
   },
   "components.ReleaseComposer.removeService": {
     "defaultMessage": "Remove"
   },
   "components.ReleaseComposer.requiredSystemModelsLabel": {
     "defaultMessage": "Required System Models"
+  },
+  "components.ReleaseComposer.toggleService": {
+    "defaultMessage": "Toggle container details"
   },
   "components.ReleaseComposer.unnamedService": {
     "defaultMessage": "Unnamed container"

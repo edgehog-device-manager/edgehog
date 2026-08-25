@@ -27,6 +27,12 @@ import {
   type MappingContext,
 } from "./composeMapping";
 
+type TestServiceDoc = Record<string, unknown>;
+
+type TestDoc = {
+  services: Record<string, TestServiceDoc>;
+} & Record<string, unknown>;
+
 const context: MappingContext = {
   networkOptions: [
     { label: "frontend-net", value: "network-1" },
@@ -120,11 +126,13 @@ services:
 
     const app = result.data.services[0];
 
-    expect(app.container.volumes).toEqual([{ id: "volume-1", target: "/var/lib/app" }]);
+    expect(app.container.volumes).toEqual([
+      { id: "volume-1", target: "/var/lib/app" },
+    ]);
     expect(app.container.binds).toEqual(["/host/config:/etc/app:ro"]);
   });
 
-  it("collects warnings for unsupported keys and unknown references", () => {
+  it("warns about unsupported keys but keeps them as extras", () => {
     const yaml = `
 version: "3.9"
 volumes:
@@ -150,14 +158,88 @@ services:
     const { warnings } = result;
 
     expect(warnings.some((w) => w.includes("'build'"))).toBe(true);
+    expect(warnings.some((w) => w.includes("not supported by Edgehog"))).toBe(
+      true,
+    );
     expect(warnings.some((w) => w.includes("'healthcheck'"))).toBe(true);
-    expect(warnings.some((w) => w.includes("top-level key 'version'"))).toBe(true);
+    expect(warnings.some((w) => w.includes("top-level key 'version'"))).toBe(
+      true,
+    );
+    expect(warnings.some((w) => w.includes("top-level key 'volumes'"))).toBe(
+      true,
+    );
     expect(
       warnings.some((w) => w.includes("'missing-network' does not match")),
     ).toBe(true);
     expect(
       warnings.some((w) => w.includes("'unknown-volume' does not match")),
     ).toBe(true);
+
+    expect(result.topLevelExtras).toEqual({
+      version: "3.9",
+      volumes: { "unused-volume": {} },
+    });
+    expect(result.data.services[0].extras?.keys).toMatchObject({
+      build: "./web",
+    });
+    expect(result.data.services[0].extras?.keys).toHaveProperty("healthcheck");
+  });
+
+  it("rejects documents violating the Compose Specification", () => {
+    const wrongImageType = composeToFormData(`
+services:
+  web:
+    image: 123
+`);
+
+    expect(wrongImageType.ok).toBe(false);
+
+    const unknownTopLevelKey = composeToFormData(`
+services: {}
+services:
+  web:
+    image: nginx
+`);
+
+    expect(unknownTopLevelKey.ok).toBe(false);
+
+    const unknownServiceKey = composeToFormData(`
+services:
+  web:
+    image: nginx
+    not_a_compose_key: true
+`);
+
+    expect(unknownServiceKey.ok).toBe(false);
+  });
+
+  it("keeps x- extensions as warnings without failing validation", () => {
+    const yaml = `
+x-common: &common
+  restart: always
+services:
+  web:
+    image: nginx
+    x-custom: hello
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.topLevelExtras["x-common"]).toEqual({ restart: "always" });
+    expect(result.data.services[0].extras?.keys["x-custom"]).toBe("hello");
+
+    const serialized = formDataToCompose(result.data, context, {
+      topLevelExtras: result.topLevelExtras,
+    });
+
+    const doc = parse(serialized.text) as TestDoc;
+
+    expect(doc["x-common"]).toEqual({ restart: "always" });
+    expect(doc.services.web["x-custom"]).toBe("hello");
   });
 
   it("supports long syntax for volumes and map form for environment", () => {
@@ -181,10 +263,108 @@ services:
 
     const app = result.data.services[0];
 
-    expect(app.container.volumes).toEqual([{ id: "volume-1", target: "/data" }]);
+    expect(app.container.volumes).toEqual([
+      { id: "volume-1", target: "/data" },
+    ]);
   });
 
-  it("parses map-form networks ignoring configuration details", () => {
+  it("converts long-syntax ports and warns about unsupported port options", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    ports:
+      - target: 80
+        published: "8080"
+        protocol: udp
+        mode: host
+      - 9999
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.data.services[0].container.portBindings).toEqual([
+      "8080:80/udp",
+      "9999",
+    ]);
+    expect(result.warnings.some((w) => w.includes("mode"))).toBe(true);
+  });
+
+  it("converts map-form extra_hosts", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    extra_hosts:
+      db-host: "192.168.1.10"
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.data.services[0].container.extraHosts).toEqual([
+      "db-host:192.168.1.10",
+    ]);
+  });
+
+  it("warns that env_file entries cannot be resolved", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    env_file:
+      - .env
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.warnings.some((w) => w.includes("env_file"))).toBe(true);
+    expect(result.data.services[0].extras?.keys.env_file).toEqual([".env"]);
+  });
+
+  it("extracts depends_on names and keeps conditions as extras", () => {
+    const yaml = `
+services:
+  web:
+    image: nginx
+    depends_on:
+      api:
+        condition: service_healthy
+      worker:
+        condition: service_started
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    const web = result.data.services[0];
+
+    expect(web.dependsOn).toEqual(["api", "worker"]);
+    expect(
+      result.warnings.some((w) => w.includes("depends_on conditions")),
+    ).toBe(true);
+    expect(web.extras?.dependsOnRaw).toEqual({
+      api: { condition: "service_healthy" },
+      worker: { condition: "service_started" },
+    });
+    expect(web.extras?.dependsOnExtracted).toEqual(["api", "worker"]);
+  });
+
+  it("parses map-form networks keeping configuration as extras", () => {
     const yaml = `
 services:
   app:
@@ -193,6 +373,7 @@ services:
       backend-net:
         aliases:
           - api
+      mystery-net: {}
 `;
 
     const result = composeToFormData(yaml, context);
@@ -207,6 +388,13 @@ services:
     expect(
       result.warnings.some((w) => w.includes("configuration details")),
     ).toBe(true);
+    expect(
+      result.warnings.some((w) => w.includes("'mystery-net' does not match")),
+    ).toBe(true);
+    expect(result.data.services[0].extras?.networksRaw).toEqual({
+      "backend-net": { aliases: ["api"] },
+      "mystery-net": {},
+    });
   });
 
   it("returns an error for invalid YAML", () => {
@@ -257,6 +445,101 @@ describe("formDataToCompose", () => {
     expect(api.environment).toEqual({ NODE_ENV: "production" });
     expect(api.cap_add).toEqual(["CAP_SYS_TIME"]);
     expect(api.depends_on).toEqual(["db"]);
+  });
+
+  it("restores unsupported fields when serializing", () => {
+    const yaml = `
+version: "3.9"
+services:
+  web:
+    image: nginx
+    build: ./web
+    healthcheck:
+      test: echo ok
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    // simulate a form edit on a supported field
+    parsed.data.services[0].container.image!.reference = "nginx:1.27";
+
+    const { text } = formDataToCompose(parsed.data, context, {
+      topLevelExtras: parsed.topLevelExtras,
+    });
+
+    const doc = parse(text) as TestDoc;
+
+    expect(doc.version).toBe("3.9");
+    expect(doc.services.web.build).toBe("./web");
+    expect(doc.services.web.healthcheck).toEqual({ test: "echo ok" });
+    expect(doc.services.web.image).toBe("nginx:1.27");
+  });
+
+  it("restores depends_on conditions when unchanged and drops them when edited", () => {
+    const yaml = `
+services:
+  web:
+    image: nginx
+    depends_on:
+      api:
+        condition: service_healthy
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    const untouched = parse(formDataToCompose(parsed.data).text) as TestDoc;
+
+    expect(untouched.services.web.depends_on).toEqual({
+      api: { condition: "service_healthy" },
+    });
+
+    parsed.data.services[0].dependsOn = ["worker"];
+
+    const edited = parse(formDataToCompose(parsed.data).text) as TestDoc;
+
+    expect(edited.services.web.depends_on).toEqual(["worker"]);
+  });
+
+  it("restores network configuration details when unchanged and canonicalizes when edited", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    networks:
+      backend-net:
+        aliases:
+          - api
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    const untouched = parse(
+      formDataToCompose(parsed.data, context).text,
+    ) as TestDoc;
+
+    expect(untouched.services.app.networks).toEqual({
+      "backend-net": { aliases: ["api"] },
+    });
+
+    parsed.data.services[0].container.networks = [];
+
+    const edited = parse(
+      formDataToCompose(parsed.data, context).text,
+    ) as TestDoc;
+
+    expect(edited.services.app.networks).toBeUndefined();
   });
 
   it("warns about form-only settings that cannot be serialized", () => {
@@ -325,5 +608,37 @@ services:
     if (!reparsed.ok) return;
 
     expect(reparsed.data).toEqual(parsed.data);
+  });
+
+  it("is stable with unsupported fields through repeated round trips", () => {
+    const yaml = `
+version: "3.8"
+services:
+  web:
+    image: nginx
+    build:
+      context: ./web
+    depends_on:
+      api:
+        condition: service_started
+`;
+
+    const first = composeToFormData(yaml, context);
+
+    expect(first.ok).toBe(true);
+
+    if (!first.ok) return;
+
+    const secondPass = formDataToCompose(first.data, context, {
+      topLevelExtras: first.topLevelExtras,
+    });
+    const second = composeToFormData(secondPass.text, context);
+
+    expect(second.ok).toBe(true);
+
+    if (!second.ok) return;
+
+    expect(second.data).toEqual(first.data);
+    expect(second.topLevelExtras).toEqual(first.topLevelExtras);
   });
 });

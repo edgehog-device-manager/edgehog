@@ -1107,10 +1107,10 @@ const DeviceRequestsSection = ({ form, open, onToggle }: BaseSectionProps) => {
                   onClick={() => {
                     deviceRequests.append({
                       driver: "",
-                      count: -1,
+                      count: undefined,
                       deviceIds: [],
                       capabilities: [],
-                      options: "{}",
+                      options: undefined,
                     });
 
                     setSelectedRequest(0);

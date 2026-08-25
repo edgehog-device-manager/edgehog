@@ -18,11 +18,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
 import Button from "react-bootstrap/Button";
+import Collapse from "react-bootstrap/Collapse";
 import Stack from "react-bootstrap/Stack";
 
 import type { ReleaseCreate_getOptions_Query$data } from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
@@ -43,6 +44,7 @@ import {
 import { containerSchema, type ContainerInputData } from "@/forms/validation";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import { useCollapsibleSections } from "@/components/ui/collapse-item/CollapseItem";
+import stableStringify from "./stableStringify";
 import "@/components/apps/containers/container-details/ContainerDetails.scss";
 
 type ServicePaneProps = {
@@ -51,6 +53,7 @@ type ServicePaneProps = {
   dependsOn: string[];
   otherServiceNames: string[];
   syncVersion: number;
+  isValid: boolean;
   onContainerChange: (data: ContainerInputData, isValid: boolean) => void;
   onDependsOnChange: (values: string[]) => void;
   onRemove: () => void;
@@ -62,41 +65,51 @@ const ServicePane = ({
   dependsOn,
   otherServiceNames,
   syncVersion,
+  isValid,
   onContainerChange,
   onDependsOnChange,
   onRemove,
 }: ServicePaneProps) => {
   const intl = useIntl();
+  const [open, setOpen] = useState(true);
   const form = useForm<ContainerInputData>({
     resolver: zodResolver(containerSchema),
-    defaultValues: container,
+    // detach from the parent-owned object: react-hook-form mutates nested
+    // values in place
+    defaultValues: structuredClone(container),
     mode: "onChange",
   });
 
-  const { toggleSection, isSectionOpen } =
-    useCollapsibleSections<string>(["image"]);
-
-  const isValid = form.formState.isValid;
+  const { toggleSection, isSectionOpen } = useCollapsibleSections<string>([
+    "image",
+  ]);
 
   useEffect(() => {
     const subscription = form.watch(() => {
-      onContainerChange(form.getValues(), form.formState.isValid);
+      const values = form.getValues();
+
+      // ignore echoes of parent-driven resets: they carry exactly the
+      // values this pane was just reset to
+      if (stableStringify(values) === stableStringify(container)) {
+        return;
+      }
+
+      onContainerChange(values, containerSchema.safeParse(values).success);
     });
 
     return () => subscription.unsubscribe();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [form]);
+  }, [form, container]);
 
   useEffect(() => {
-    onContainerChange(form.getValues(), isValid);
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isValid]);
-
-  useEffect(() => {
-    if (syncVersion > 0) {
-      form.reset(container);
+    // only reset panes whose data actually changed: keeps unrelated panes
+    // (and their inputs) undisturbed while typing in the editor
+    if (
+      syncVersion > 0 &&
+      stableStringify(form.getValues()) !== stableStringify(container)
+    ) {
+      form.reset(structuredClone(container));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [syncVersion]);
@@ -110,6 +123,27 @@ const ServicePane = ({
     <div className="border rounded-3 p-2 mb-3 bg-light">
       <Stack gap={2}>
         <Stack direction="horizontal" gap={2} className="align-items-center">
+          <Button
+            variant="light"
+            size="sm"
+            onClick={() => setOpen((previous) => !previous)}
+            aria-expanded={open}
+            title={intl.formatMessage({
+              id: "components.ReleaseComposer.toggleService",
+              defaultMessage: "Toggle container details",
+            })}
+            className="border-0 d-inline-flex align-items-center p-1"
+          >
+            <span
+              style={{
+                display: "inline-flex",
+                transition: "transform 0.2s ease-in-out",
+                transform: open ? "rotate(0deg)" : "rotate(-180deg)",
+              }}
+            >
+              <Icon icon={"caretDown"} />
+            </span>
+          </Button>
           <span className="fw-bold flex-grow-1 text-truncate">
             {container.name || (
               <FormattedMessage
@@ -118,6 +152,18 @@ const ServicePane = ({
               />
             )}
           </span>
+          {!isValid && (
+            <span
+              title={intl.formatMessage({
+                id: "components.ReleaseComposer.invalidServiceBadge",
+                defaultMessage:
+                  "This container has missing or invalid settings",
+              })}
+              className="d-inline-flex"
+            >
+              <Icon icon={"warning"} className="text-warning" />
+            </span>
+          )}
           <Button
             variant="danger"
             size="sm"
@@ -131,71 +177,80 @@ const ServicePane = ({
           </Button>
         </Stack>
 
-        <NameSection form={form} />
+        <Collapse in={open}>
+          <div data-testid="service-pane-body">
+            <Stack gap={2}>
+              <NameSection form={form} />
 
-        <div className="bg-white border rounded-3 p-3">
-          <FormRow
-            id="release-composer-depends-on"
-            label={
-              <FormattedMessage
-                id="components.ReleaseComposer.dependsOnLabel"
-                defaultMessage="Depends on"
+              <div className="bg-white border rounded-3 p-3">
+                <FormRow
+                  id="release-composer-depends-on"
+                  label={
+                    <FormattedMessage
+                      id="components.ReleaseComposer.dependsOnLabel"
+                      defaultMessage="Depends on"
+                    />
+                  }
+                >
+                  <MultiSelect
+                    value={dependsOn.map((name) => ({
+                      value: name,
+                      label: name,
+                    }))}
+                    options={dependsOnOptions}
+                    onChange={(options) =>
+                      onDependsOnChange(options.map((option) => option.value))
+                    }
+                  />
+                </FormRow>
+              </div>
+
+              <ImageSection
+                form={form}
+                queryRef={queryRef}
+                open={isSectionOpen("image")}
+                onToggle={() => toggleSection("image")}
               />
-            }
-          >
-            <MultiSelect
-              value={dependsOn.map((name) => ({ value: name, label: name }))}
-              options={dependsOnOptions}
-              onChange={(options) =>
-                onDependsOnChange(options.map((option) => option.value))
-              }
-            />
-          </FormRow>
-        </div>
-
-        <ImageSection
-          form={form}
-          queryRef={queryRef}
-          open={isSectionOpen("image")}
-          onToggle={() => toggleSection("image")}
-        />
-        <NetworkSection
-          form={form}
-          queryRef={queryRef}
-          open={isSectionOpen("network")}
-          onToggle={() => toggleSection("network")}
-        />
-        <StorageSection
-          form={form}
-          queryRef={queryRef}
-          open={isSectionOpen("storage")}
-          onToggle={() => toggleSection("storage")}
-        />
-        <ResourceLimitsSection
-          form={form}
-          open={isSectionOpen("resourceLimits")}
-          onToggle={() => toggleSection("resourceLimits")}
-        />
-        <SecuritySection
-          form={form}
-          open={isSectionOpen("securityCapabilities")}
-          onToggle={() => toggleSection("securityCapabilities")}
-        />
-        <RuntimeSection
-          form={form}
-          open={isSectionOpen("runtimeEnvironment")}
-          onToggle={() => toggleSection("runtimeEnvironment")}
-        />
-        <DeviceMappingsSection
-          form={form}
-          open={isSectionOpen("deviceMappings")}
-          onToggle={() => toggleSection("deviceMappings")}
-        />
-        <DeviceRequestsSection
-          form={form}
-          open={isSectionOpen("deviceRequests")}
-          onToggle={() => toggleSection("deviceRequests")}
-        />
+              <NetworkSection
+                form={form}
+                queryRef={queryRef}
+                open={isSectionOpen("network")}
+                onToggle={() => toggleSection("network")}
+              />
+              <StorageSection
+                form={form}
+                queryRef={queryRef}
+                open={isSectionOpen("storage")}
+                onToggle={() => toggleSection("storage")}
+              />
+              <ResourceLimitsSection
+                form={form}
+                open={isSectionOpen("resourceLimits")}
+                onToggle={() => toggleSection("resourceLimits")}
+              />
+              <SecuritySection
+                form={form}
+                open={isSectionOpen("securityCapabilities")}
+                onToggle={() => toggleSection("securityCapabilities")}
+              />
+              <RuntimeSection
+                form={form}
+                open={isSectionOpen("runtimeEnvironment")}
+                onToggle={() => toggleSection("runtimeEnvironment")}
+              />
+              <DeviceMappingsSection
+                form={form}
+                open={isSectionOpen("deviceMappings")}
+                onToggle={() => toggleSection("deviceMappings")}
+              />
+              <DeviceRequestsSection
+                form={form}
+                open={isSectionOpen("deviceRequests")}
+                onToggle={() => toggleSection("deviceRequests")}
+              />
+            </Stack>
+          </div>
+        </Collapse>
       </Stack>
     </div>
   );

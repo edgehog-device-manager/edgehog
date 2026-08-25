@@ -38,7 +38,11 @@ const compat = new FlatCompat({
 
 export default [
   {
-    ignores: ["**/build", "**/.eslintrc.cjs"],
+    ignores: [
+      "**/build",
+      "**/.eslintrc.cjs",
+      "src/components/apps/releases/release-composer/composeSpecSchema.generated.ts",
+    ],
   },
   ...fixupConfigRules(
     compat.extends(
