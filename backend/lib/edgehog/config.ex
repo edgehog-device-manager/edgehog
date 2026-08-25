@@ -61,6 +61,22 @@ defmodule Edgehog.Config do
     type: :boolean,
     default: false
 
+  @envdoc """
+  Whether containers telemetry events should include high-cardinality
+  identifier labels (deployment_id, resource_id, device_id).
+
+  These labels allow filtering the metrics per specific deployment, resource or
+  device (e.g. in Grafana), at the cost of a higher number of Prometheus time
+  series. Disable them if you are not filtering on them and want to keep the
+  cardinality low.
+  """
+  app_env :containers_telemetry_include_identifiers,
+          :edgehog,
+          :containers_telemetry_include_identifiers,
+          os_env: "CONTAINERS_TELEMETRY_INCLUDE_IDENTIFIERS",
+          type: :boolean,
+          default: true
+
   @envdoc "The API key for the ipbase.com geolocation provider."
   app_env :ipbase_api_key, :edgehog, :ipbase_api_key,
     os_env: "IPBASE_API_KEY",
