@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import Alert from "react-bootstrap/Alert";
 import Button from "react-bootstrap/Button";
@@ -27,9 +27,7 @@ import Form from "react-bootstrap/Form";
 import Row from "react-bootstrap/Row";
 import Stack from "react-bootstrap/Stack";
 
-import type {
-  ReleaseCreate_getOptions_Query$data,
-} from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
+import type { ReleaseCreate_getOptions_Query$data } from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
 import type { CreateReleaseInput } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 
 import {
@@ -47,9 +45,11 @@ import { containerSchema, type ContainerInputData } from "@/forms/validation";
 import {
   composeToFormData,
   formDataToCompose,
+  type ComposeServiceExtras,
   type MappingContext,
 } from "./composeMapping";
 import ServicePane from "./ServicePane";
+import stableStringify from "./stableStringify";
 
 type ServiceEntry = {
   key: string;
@@ -59,6 +59,8 @@ type ComposerState = {
   services: ServiceEntry[];
   serviceData: Record<string, ContainerInputData>;
   dependsOnByKey: Record<string, string[]>;
+  extrasByKey: Record<string, ComposeServiceExtras>;
+  topLevelExtras: Record<string, unknown>;
 };
 
 type ReleaseComposerProps = {
@@ -89,46 +91,11 @@ const emptyContainer = (): ContainerInputData => ({
   deviceRequests: [],
 });
 
-const stableStringify = (value: unknown) =>
-  JSON.stringify(value, (_key, nestedValue) => {
-    if (
-      nestedValue &&
-      typeof nestedValue === "object" &&
-      !Array.isArray(nestedValue)
-    ) {
-      return Object.fromEntries(
-        Object.entries(nestedValue as Record<string, unknown>).filter(
-          ([, v]) => v !== undefined,
-        ),
-      );
-    }
-
-    return nestedValue;
-  });
-
-const useDebouncedCallback = <A extends unknown[]>(
-  callback: (...args: A) => void,
-  delay: number,
-) => {
-  const timeoutRef = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const callbackRef = useRef(callback);
-
-  useEffect(() => {
-    callbackRef.current = callback;
-  }, [callback]);
-
-  const debounced = useCallback(
-    (...args: A) => {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(() => callbackRef.current(...args), delay);
-    },
-    [delay],
-  );
-
-  return debounced;
-};
-
-const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps) => {
+const ReleaseComposer = ({
+  queryRef,
+  onSubmit,
+  isLoading,
+}: ReleaseComposerProps) => {
   const intl = useIntl();
 
   const networkOptions = useNetworkOptions(queryRef);
@@ -146,6 +113,8 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
     services: [],
     serviceData: {},
     dependsOnByKey: {},
+    extrasByKey: {},
+    topLevelExtras: {},
   });
   const [validity, setValidity] = useState<Record<string, boolean>>({});
   const [yamlText, setYamlText] = useState("services: {}\n");
@@ -153,40 +122,30 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
   const [parseError, setParseError] = useState<string | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
 
-  const lastSourceRef = useRef<"form" | "yaml">("form");
   const stateRef = useRef(state);
-
-  useEffect(() => {
-    // keep the ref in sync when state is replaced outside of updateState
-    stateRef.current = state;
-  }, [state]);
 
   const regenerateYaml = useCallback(
     (nextState: ComposerState) => {
-      if (lastSourceRef.current !== "form") {
-        return;
-      }
-
       const { text, warnings: serializeWarnings } = formDataToCompose(
         {
           services: nextState.services.map((entry) => ({
             name: nextState.serviceData[entry.key]?.name ?? "",
             dependsOn: nextState.dependsOnByKey[entry.key] ?? [],
-            container:
-              nextState.serviceData[entry.key] ?? emptyContainer(),
+            container: nextState.serviceData[entry.key] ?? emptyContainer(),
+            extras: nextState.extrasByKey[entry.key],
           })),
         },
         mappingContext,
+        { topLevelExtras: nextState.topLevelExtras },
       );
 
-      setYamlText(text);
+      // skip identical output: avoids pointless buffer rewrites
+      setYamlText((previous) => (previous === text ? previous : text));
       setParseError(null);
       setWarnings(serializeWarnings);
     },
     [mappingContext],
   );
-
-  const scheduleRegenerateYaml = useDebouncedCallback(regenerateYaml, 300);
 
   const updateState = useCallback(
     (updater: (prev: ComposerState) => ComposerState, source?: "form") => {
@@ -201,23 +160,25 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
       setState(next);
 
       if (source === "form") {
-        scheduleRegenerateYaml(next);
+        regenerateYaml(next);
       }
     },
-    [scheduleRegenerateYaml],
+    [regenerateYaml],
   );
 
   const handleContainerChange = useCallback(
     (key: string, data: ContainerInputData, isValid: boolean) => {
-      lastSourceRef.current = "form";
-
       const current = stateRef.current.serviceData[key];
 
       if (!current || stableStringify(current) !== stableStringify(data)) {
-        updateState((prev) => ({
-          ...prev,
-          serviceData: { ...prev.serviceData, [key]: data },
-        }), "form");
+        updateState(
+          (prev) => ({
+            ...prev,
+            // detach from the live react-hook-form values
+            serviceData: { ...prev.serviceData, [key]: structuredClone(data) },
+          }),
+          "form",
+        );
       }
 
       setValidity((prev) =>
@@ -227,12 +188,8 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
     [updateState],
   );
 
-  const applyParsedYaml = useCallback(
+  const commitParsedYaml = useCallback(
     (text: string) => {
-      if (lastSourceRef.current !== "yaml") {
-        return;
-      }
-
       const result = composeToFormData(text, mappingContext);
 
       if (!result.ok) {
@@ -259,12 +216,15 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
       const nextData: Record<string, ContainerInputData> = {};
       const nextDeps: Record<string, string[]> = {};
       const nextValidity: Record<string, boolean> = {};
+      const nextExtras: Record<string, ComposeServiceExtras> = {};
 
       result.data.services.forEach((service) => {
         const existingKey =
           service.name !== "" ? keyByName.get(service.name) : undefined;
         const key = existingKey ?? newKey();
-        const existing = existingKey ? prevState.serviceData[existingKey] : undefined;
+        const existing = existingKey
+          ? prevState.serviceData[existingKey]
+          : undefined;
 
         const container: ContainerInputData = existing
           ? {
@@ -281,56 +241,77 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
         nextData[key] = container;
         nextDeps[key] = service.dependsOn;
         nextValidity[key] = containerSchema.safeParse(container).success;
+
+        if (service.extras) {
+          nextExtras[key] = service.extras;
+        }
       });
 
       const nextState: ComposerState = {
         services: nextEntries,
         serviceData: nextData,
         dependsOnByKey: nextDeps,
+        extrasByKey: nextExtras,
+        topLevelExtras: result.topLevelExtras,
       };
 
       const changed =
         stableStringify(nextState.services.map((e) => e.key)) !==
           stableStringify(prevState.services.map((e) => e.key)) ||
         stableStringify(nextData) !== stableStringify(prevState.serviceData) ||
-        stableStringify(nextDeps) !== stableStringify(prevState.dependsOnByKey);
+        stableStringify(nextDeps) !==
+          stableStringify(prevState.dependsOnByKey) ||
+        stableStringify(nextExtras) !==
+          stableStringify(prevState.extrasByKey) ||
+        stableStringify(result.topLevelExtras) !==
+          stableStringify(prevState.topLevelExtras);
 
       setWarnings(result.warnings);
+      setSyncVersion((prev) => (changed ? prev + 1 : prev));
 
-      if (!changed) {
-        return;
-      }
+      // mirror the parsed validity into state: without this, services coming
+      // straight from the editor keep the orange badge because the form's
+      // watch never fires
+      setValidity((prev) => {
+        const next = { ...prev };
 
-      stateRef.current = nextState;
-      setState(nextState);
-      setValidity(nextValidity);
-      setSyncVersion((prev) => prev + 1);
+        for (const key of Object.keys(prev)) {
+          if (!nextData[key]) delete next[key];
+        }
+
+        for (const [key, value] of Object.entries(nextValidity)) {
+          next[key] = value;
+        }
+
+        return next;
+      });
+
+      // commit without regenerating: the editor already holds this content
+      updateState(() => nextState);
     },
-    [mappingContext],
+    [mappingContext, updateState],
   );
-
-  const scheduleApplyParsedYaml = useDebouncedCallback(applyParsedYaml, 500);
 
   const handleYamlChange = useCallback(
     (text?: string) => {
-      lastSourceRef.current = "yaml";
       setYamlText(text ?? "");
-      setWarnings([]);
-      scheduleApplyParsedYaml(text ?? "");
+      commitParsedYaml(text ?? "");
     },
-    [scheduleApplyParsedYaml],
+    [commitParsedYaml],
   );
 
   const handleAddService = useCallback(() => {
     const key = newKey();
 
-    lastSourceRef.current = "form";
-
-    updateState((prev) => ({
-      services: [...prev.services, { key }],
-      serviceData: { ...prev.serviceData, [key]: emptyContainer() },
-      dependsOnByKey: { ...prev.dependsOnByKey, [key]: [] },
-    }));
+    updateState(
+      (prev) => ({
+        ...prev,
+        services: [...prev.services, { key }],
+        serviceData: { ...prev.serviceData, [key]: emptyContainer() },
+        dependsOnByKey: { ...prev.dependsOnByKey, [key]: [] },
+      }),
+      "form",
+    );
 
     setValidity((prev) => ({ ...prev, [key]: false }));
   }, [updateState]);
@@ -339,14 +320,14 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
     (key: string) => {
       const removedName = stateRef.current.serviceData[key]?.name;
 
-      lastSourceRef.current = "form";
-
       updateState((prev) => {
         const restData = { ...prev.serviceData };
         const restDeps = { ...prev.dependsOnByKey };
+        const restExtras = { ...prev.extrasByKey };
 
         delete restData[key];
         delete restDeps[key];
+        delete restExtras[key];
 
         if (removedName) {
           for (const otherKey of Object.keys(restDeps)) {
@@ -360,6 +341,8 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
           services: prev.services.filter((entry) => entry.key !== key),
           serviceData: restData,
           dependsOnByKey: restDeps,
+          extrasByKey: restExtras,
+          topLevelExtras: prev.topLevelExtras,
         };
       }, "form");
 
@@ -376,8 +359,6 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
 
   const handleDependsOnChange = useCallback(
     (key: string, values: string[]) => {
-      lastSourceRef.current = "form";
-
       updateState(
         (prev) => ({
           ...prev,
@@ -390,7 +371,8 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
   );
 
   const allServicesValid =
-    state.services.length > 0 && state.services.every((entry) => validity[entry.key]);
+    state.services.length > 0 &&
+    state.services.every((entry) => validity[entry.key]);
 
   const canSubmit = version.trim() !== "" && allServicesValid && !isLoading;
 
@@ -399,13 +381,17 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
       return;
     }
 
+    const currentState = stateRef.current;
+
     onSubmit({
       version: version.trim(),
       requiredSystemModels:
-        systemModels.length > 0 ? systemModels.map((id) => ({ id })) : undefined,
-      containers: state.services.map((entry) => ({
-        ...mapCreateContainerToInput(state.serviceData[entry.key]),
-        dependsOn: state.dependsOnByKey[entry.key] ?? [],
+        systemModels.length > 0
+          ? systemModels.map((id) => ({ id }))
+          : undefined,
+      containers: currentState.services.map((entry) => ({
+        ...mapCreateContainerToInput(currentState.serviceData[entry.key]),
+        dependsOn: currentState.dependsOnByKey[entry.key] ?? [],
       })),
     });
   };
@@ -468,8 +454,8 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
               value={systemModels.map((id) => ({
                 value: id,
                 label:
-                  systemModelOptions.find((option) => option.value === id)?.label ??
-                  id,
+                  systemModelOptions.find((option) => option.value === id)
+                    ?.label ?? id,
               }))}
               options={systemModelOptions}
               onChange={(options) =>
@@ -491,23 +477,50 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
         </Form>
       </div>
 
-      {warnings.length > 0 && (
-        <Alert variant="warning" className="mb-0">
-          <strong>
-            <FormattedMessage
-              id="components.ReleaseComposer.warningsTitle"
-              defaultMessage="Some settings could not be represented:"
-            />
-          </strong>
-          <ul className="mb-0 mt-1">
-            {Array.from(new Set(warnings)).map((warning) => (
-              <li key={warning}>{warning}</li>
-            ))}
-          </ul>
-        </Alert>
-      )}
-
       <Row className="g-3">
+        <Col lg={5}>
+          <div className="overflow-auto pe-1" style={{ maxHeight: "70vh" }}>
+            {state.services.length === 0 && (
+              <div className="border rounded-3 p-4 text-center text-muted bg-light mb-3">
+                <FormattedMessage
+                  id="components.ReleaseComposer.noServicesHint"
+                  defaultMessage="No containers yet. Add one or paste a docker-compose file on the right."
+                />
+              </div>
+            )}
+            {state.services.map((entry) => {
+              const ownName = state.serviceData[entry.key]?.name ?? "";
+
+              return (
+                <ServicePane
+                  key={entry.key}
+                  queryRef={queryRef}
+                  container={state.serviceData[entry.key] ?? emptyContainer()}
+                  dependsOn={state.dependsOnByKey[entry.key] ?? []}
+                  otherServiceNames={serviceNames.filter(
+                    (name) => name !== ownName,
+                  )}
+                  syncVersion={syncVersion}
+                  isValid={validity[entry.key] ?? false}
+                  onContainerChange={(data, isValid) =>
+                    handleContainerChange(entry.key, data, isValid)
+                  }
+                  onDependsOnChange={(values) =>
+                    handleDependsOnChange(entry.key, values)
+                  }
+                  onRemove={() => handleRemoveService(entry.key)}
+                />
+              );
+            })}
+            <Button variant="secondary" onClick={handleAddService}>
+              <Icon icon={"plus"} className="me-1" />
+              <FormattedMessage
+                id="components.ReleaseComposer.addContainer"
+                defaultMessage="Add Container"
+              />
+            </Button>
+          </div>
+        </Col>
         <Col lg={7}>
           <div style={{ position: "sticky", top: 0, height: "70vh" }}>
             <MonacoEditor
@@ -527,44 +540,21 @@ const ReleaseComposer = ({ queryRef, onSubmit, isLoading }: ReleaseComposerProps
                 {parseError}
               </Alert>
             )}
-          </div>
-        </Col>
-        <Col lg={5}>
-          <div className="overflow-auto pe-1" style={{ maxHeight: "70vh" }}>
-            {state.services.length === 0 && (
-              <div className="border rounded-3 p-4 text-center text-muted bg-light mb-3">
-                <FormattedMessage
-                  id="components.ReleaseComposer.noServicesHint"
-                  defaultMessage="No containers yet. Add one or paste a docker-compose file on the left."
-                />
-              </div>
+            {warnings.length > 0 && (
+              <Alert variant="warning" className="mt-2 mb-0">
+                <strong>
+                  <FormattedMessage
+                    id="components.ReleaseComposer.warningsTitle"
+                    defaultMessage="Some settings could not be represented:"
+                  />
+                </strong>
+                <ul className="mb-0 mt-1">
+                  {Array.from(new Set(warnings)).map((warning) => (
+                    <li key={warning}>{warning}</li>
+                  ))}
+                </ul>
+              </Alert>
             )}
-            {state.services.map((entry) => {
-              const ownName = state.serviceData[entry.key]?.name ?? "";
-
-              return (
-                <ServicePane
-                  key={entry.key}
-                  queryRef={queryRef}
-                  container={state.serviceData[entry.key] ?? emptyContainer()}
-                  dependsOn={state.dependsOnByKey[entry.key] ?? []}
-                  otherServiceNames={serviceNames.filter((name) => name !== ownName)}
-                  syncVersion={syncVersion}
-                  onContainerChange={(data, isValid) =>
-                    handleContainerChange(entry.key, data, isValid)
-                  }
-                  onDependsOnChange={(values) => handleDependsOnChange(entry.key, values)}
-                  onRemove={() => handleRemoveService(entry.key)}
-                />
-              );
-            })}
-            <Button variant="secondary" onClick={handleAddService}>
-              <Icon icon={"plus"} className="me-1" />
-              <FormattedMessage
-                id="components.ReleaseComposer.addContainer"
-                defaultMessage="Add Container"
-              />
-            </Button>
           </div>
         </Col>
       </Row>

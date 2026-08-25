@@ -78,7 +78,7 @@
     "zod": "^4.5.0"
   },
   "scripts": {
-    "init": "npm run relay:compile && npm run i18n:compile",
+    "init": "npm run relay:compile && npm run i18n:compile && npm run compose-schema:update && npm run compose-schema:generate",
     "start": "vite",
     "prestart": "npm run init",
     "build": "tsc -p tsconfig.build.json && vite build",
@@ -101,7 +101,9 @@
     "i18n:check": "node ../tools/langs_updater.js --check src/i18n/langs",
     "i18n:reorder": "node ../tools/langs_updater.js --reorder src/i18n/langs",
     "i18n:check-paths": "node ../tools/langs_updater.js --check-paths src/i18n/langs",
-    "i18n:fix-paths": "node ../tools/langs_updater.js --fix-paths src/i18n/langs"
+    "i18n:fix-paths": "node ../tools/langs_updater.js --fix-paths src/i18n/langs",
+    "compose-schema:update": "curl -sL https://raw.githubusercontent.com/compose-spec/compose-spec/main/schema/compose-spec.json -o src/components/apps/releases/release-composer/compose-spec.json",
+    "compose-schema:generate": "node scripts/generate-compose-schema.mjs"
   },
   "browserslist": {
     "production": [">0.2%", "not dead", "not op_mini all"],
@@ -130,6 +132,7 @@
     "eslint-plugin-relay": "^2.1.0",
     "eslint-plugin-testing-library": "^7.16.2",
     "jsdom": "^29.1.1",
+    "json-schema-to-zod": "^2.8.1",
     "monaco-editor": "^0.56.0",
     "prettier": "^3.9.2",
     "react-select-event": "^5.5.1",
