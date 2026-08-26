@@ -63,12 +63,19 @@ const columns = [
     ),
     meta: {
       label: "Label",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.networksEdit}
+          params={{ networkId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link route={Route.networksEdit} params={{ networkId: row.original.id }}>
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("driver", {
     header: () => (

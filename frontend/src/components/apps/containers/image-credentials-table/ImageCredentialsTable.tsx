@@ -61,17 +61,20 @@ const columns = [
     ),
     meta: {
       label: "Label",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.imageCredentialsEdit}
+          params={{ imageCredentialId: row.original.id }}
+          className="row-link"
+          aria-label="Edit image credentials"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({
-      row: {
-        original: { id: imageCredentialId },
-      },
-      getValue,
-    }) => (
-      <Link route={Route.imageCredentialsEdit} params={{ imageCredentialId }}>
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("username", {
     header: () => (

@@ -80,15 +80,19 @@ const columns = [
     ),
     meta: {
       label: "Update Campaign Name",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.updateCampaignsEdit}
+          params={{ updateCampaignId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link
-        route={Route.updateCampaignsEdit}
-        params={{ updateCampaignId: row.original.id }}
-      >
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("status", {
     header: () => (

@@ -115,11 +115,10 @@ it("renders System Model data", async () => {
     },
   ]);
 
-  expect(screen.getByRole("cell", { name: "SM name" })).toBeVisible();
-  expect(screen.getByRole("link", { name: "SM name" })).toHaveAttribute(
-    "href",
-    "/system-models/SM-ID/edit",
-  );
+  expect(screen.getByRole("cell", { name: /SM name/ })).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Edit system model" }),
+  ).toHaveAttribute("href", "/system-models/SM-ID/edit");
   expect(screen.getByRole("cell", { name: "sm-handle" })).toBeVisible();
   expect(screen.getByRole("cell", { name: "HW name" })).toBeVisible();
   expect(screen.getByRole("cell", { name: "SM-PN1" })).toBeVisible();

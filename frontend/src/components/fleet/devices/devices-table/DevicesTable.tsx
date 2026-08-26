@@ -79,9 +79,6 @@ const columns = [
         description="Title for the Status column of the devices table"
       />
     ),
-    meta: {
-      label: "Status",
-    },
     cell: ({ getValue }) => <ConnectionStatus connected={getValue()} />,
     sortingFn: "basic",
   }),
@@ -95,12 +92,19 @@ const columns = [
     ),
     meta: {
       label: "Device Name",
+      isPrimaryLink: true,
+      getLink: (row, children) => (
+        <Link
+          route={Route.devicesEdit}
+          params={{ deviceId: row.original.id }}
+          className="row-link"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {children}
+        </Link>
+      ),
     },
-    cell: ({ row, getValue }) => (
-      <Link route={Route.devicesEdit} params={{ deviceId: row.original.id }}>
-        {getValue()}
-      </Link>
-    ),
+    cell: ({ getValue }) => getValue(),
   }),
   columnHelper.accessor("deviceId", {
     header: () => (

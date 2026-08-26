@@ -104,11 +104,10 @@ it("renders Hardware Type data", () => {
     },
   ]);
 
-  expect(screen.getByRole("cell", { name: "HW name" })).toBeVisible();
-  expect(screen.getByRole("link", { name: "HW name" })).toHaveAttribute(
-    "href",
-    "/hardware-types/HW-ID/edit",
-  );
+  expect(screen.getByRole("cell", { name: /HW name/ })).toBeVisible();
+  expect(
+    screen.getByRole("link", { name: "Edit hardware type" }),
+  ).toHaveAttribute("href", "/hardware-types/HW-ID/edit");
   expect(screen.getByRole("cell", { name: "hw-handle" })).toBeVisible();
   expect(screen.getByRole("cell", { name: "HW-PN1" })).toBeVisible();
 });
