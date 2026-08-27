@@ -14,12 +14,12 @@ it's recommended to setup Astarte locally for full functionality.
 
 ### Setup your local Astarte instance
 
-The easiest way to setup local Astarte instance is to follow the [Astarte in 5 minutes](https://docs.astarte-platform.org/astarte/latest/010-astarte_in_5_minutes.html) guide, up until the creation of a `test` realm.
+The easiest way to setup local Astarte instance is to follow the ["Astarte in 5 minutes"](https://docs.astarte-platform.org/astarte/latest/010-astarte_in_5_minutes.html) guide, up until the creation of a `test` realm.
 
 To make sure your astarte instance is working and up to date, try running this command:
 
 ```sh
-$ curl api.astarte.localhost &> /dev/null && echo 'Connected!' || echo 'Astarte is unreachable'
+$ curl -s -o /dev/null http://api.astarte.localhost && echo 'Connected!' || echo 'Astarte is unreachable'
 ```
 
 If you get "Astarte is unreachable", make sure your running astarte version is >= v1.1.0
@@ -43,14 +43,6 @@ $ git clone --recurse-submodules git@github.com:edgehog-device-manager/edgehog.g
 >
 > Then jump to the [populate the database section](#populate-the-database-and-log-in-to-edgehog).
 
-Run Edgehog along with a local instance of Astarte with
-
-```sh
-$ docker compose up -d
-```
-
-Try navigating to `http://edgehog.localhost`: you should be presented with a login screen!
-
 ## Setup the environment
 
 Open the `.env` file in your favorite text editor.
@@ -70,6 +62,12 @@ environment variables of the same name.
 `SEEDS_REALM` and `SEEDS_ASTARTE_BASE_API_URL` should already be set for you, so only edit those if
 needed.
 
+`SEEDS_REALM_PRIVATE_KEY_FILE` must point to the private key of the `test` realm you created in
+Astarte. If you followed the "Astarte in 5 minutes" guide, `astartectl` generated the key as
+`test_private.pem` in the astarte repository, so set this variable to its full path, for example
+`../astarte/test_private.pem`. Keeping the default value (the bundled `realm_private.pem`) would
+prevent Edgehog from communicating with your Astarte instance.
+
 ### Generate a key pair for the tenant
 
 Although it is possible to use a default key, it is recommended to have your own key pair for the
@@ -82,7 +80,29 @@ installed from the Astarte in 5 minutes guide.
 $ astartectl utils gen-keypair acme
 ```
 
-**Remember to update** the `.env` file with the `acme_private.pem` location!
+This creates `acme_private.pem` and `acme_public.pem` in the current working directory.
+
+**Remember to update** the `.env` file, setting `SEEDS_TENANT_PRIVATE_KEY_FILE` to the location of
+`acme_private.pem` (e.g. `./acme_private.pem` if you ran the command in the edgehog directory)!
+
+> The `SEEDS_*` variables and the key files are read by Docker Compose when the containers are
+> created, so make sure to edit `.env` and generate your key pairs **before** starting the
+> containers. If you already ran `docker compose up -d`, recreate the containers for the changes to
+> take effect:
+>
+> ```sh
+> $ docker compose up -d --force-recreate
+> ```
+
+## Start Edgehog
+
+Run Edgehog along with a local instance of Astarte with
+
+```sh
+$ docker compose up -d
+```
+
+Try navigating to `http://edgehog.localhost`: you should be presented with a login screen!
 
 ## Populate the database and log in to Edgehog
 
@@ -114,13 +134,13 @@ $ asdf install
 Now you can generate the login token with
 
 ```sh
-$ ./tools/gen-edgehog-jwt -t tenant -k ../acme_private.pem
+$ ./tools/gen-edgehog-jwt -t tenant -k ./acme_private.pem
 ```
 
 > If in the previous section you had decided not to use a custom key, use this command instead
 >
 > ```sh
-> $ ./tools/gen-edgehog-jwt -t tenant -k ../backend/priv/repo/seeds/keys/tenant_private.pem
+> $ ./tools/gen-edgehog-jwt -t tenant -k ./backend/priv/repo/seeds/keys/tenant_private.pem
 > ```
 
 You can finally navigate to [`http://edgehog.localhost`](http://edgehog.localhost) in your browser and login to the
