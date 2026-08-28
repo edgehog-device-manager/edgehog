@@ -101,22 +101,6 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
-            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.containersLabel"
-            defaultMessage="Containers"
-          />
-        }
-        icon="containers"
-        route={Route.containers}
-        activeRoutes={[
-          Route.containers,
-          Route.containersEdit,
-          Route.containersNew,
-        ]}
-      />
-
-      <SidebarItem
-        label={
-          <FormattedMessage
             id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel"
             defaultMessage="Applications"
           />
