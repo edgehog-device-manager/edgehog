@@ -423,4 +423,41 @@ describe("ReleaseComposer collapsible panes", () => {
 
     expect(screen.getByTitle(badge)).toBeInTheDocument();
   });
+
+  it("shows an error alert when the YAML is invalid", () => {
+    renderComposer();
+
+    expect(
+      screen.queryByText(/Invalid docker-compose file:/i),
+    ).not.toBeInTheDocument();
+
+    fireEvent.change(getYamlEditor(), {
+      target: {
+        value: "services:\n  nginx: [unclosed",
+      },
+    });
+
+    expect(
+      screen.getByText(/Invalid docker-compose file:/i),
+    ).toBeInTheDocument();
+  });
+
+  it("shows a warning alert when settings cannot be represented", () => {
+    renderComposer();
+
+    expect(
+      screen.queryByText(/Some settings could not be represented:/i),
+    ).not.toBeInTheDocument();
+
+    fireEvent.change(getYamlEditor(), {
+      target: {
+        value:
+          'services:\n  nginx:\n    image: nginx:latest\n    healthcheck:\n      test: ["CMD", "curl", "-f", "http://localhost"]\n',
+      },
+    });
+
+    expect(
+      screen.getByText(/Some settings could not be represented:/i),
+    ).toBeInTheDocument();
+  });
 });
