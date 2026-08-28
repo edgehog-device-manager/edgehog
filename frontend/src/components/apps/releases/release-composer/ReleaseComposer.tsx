@@ -483,7 +483,7 @@ const ReleaseComposer = ({
             {state.services.length === 0 && (
               <div className="border rounded-3 p-4 text-center text-muted bg-light mb-3">
                 <FormattedMessage
-                  id="components.ReleaseComposer.noServicesHint"
+                  id="components.apps.releases.release-composer.ReleaseComposer.noServicesHint"
                   defaultMessage="No containers yet. Add one or paste a docker-compose file on the right."
                 />
               </div>
@@ -522,14 +522,16 @@ const ReleaseComposer = ({
           </div>
         </Col>
         <Col lg={7}>
-          <div style={{ position: "sticky", top: 0, height: "70vh" }}>
-            <MonacoEditor
-              value={yamlText}
-              language="yaml"
-              autoFormat={false}
-              fillHeight
-              onChange={handleYamlChange}
-            />
+          <div style={{ position: "sticky", top: 0 }}>
+            <div style={{ height: "70vh" }}>
+              <MonacoEditor
+                value={yamlText}
+                language="yaml"
+                autoFormat={false}
+                fillHeight
+                onChange={handleYamlChange}
+              />
+            </div>
             {parseError && (
               <Alert variant="danger" className="mt-2 mb-0">
                 <Icon icon={"warning"} className="me-2" />
