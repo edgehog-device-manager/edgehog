@@ -690,7 +690,7 @@ type Modem {
   "The cell tower's Mobile Network Code."
   mobileNetworkCode: Int
 
-  "The GSM\/LTE registration status of the modem."
+  "The GSM/LTE registration status of the modem."
   registrationStatus: ModemRegistrationStatus
 
   "Signal strength in dBm."
@@ -713,7 +713,14 @@ input CampaignMechanismInput {
   firmwareUpgrade: CampaignCampaignMechanismFirmwareUpgradeInput
 }
 
-union CampaignMechanism = DeploymentDelete | DeploymentDeploy | DeploymentStart | DeploymentStop | DeploymentUpgrade | FileDownload | FirmwareUpgrade
+union CampaignMechanism =
+  | DeploymentDelete
+  | DeploymentDeploy
+  | DeploymentStart
+  | DeploymentStop
+  | DeploymentUpgrade
+  | FileDownload
+  | FirmwareUpgrade
 
 enum CampaignTargetStatus {
   "Something went wrong while attempting operation on the target."
@@ -844,7 +851,7 @@ enum FileUploadRequestStatus {
   "Transfer failed (response_code != 0 or timeout)"
   FAILED
 
-  "Device is actively downloading\/uploading (progress updates received)"
+  "Device is actively downloading/uploading (progress updates received)"
   IN_PROGRESS
 
   "Request created in database, not yet sent to device"
@@ -872,7 +879,7 @@ enum FileDownloadRequestStatus {
   "Transfer failed (response_code != 0 or timeout)"
   FAILED
 
-  "Device is actively downloading\/uploading (progress updates received)"
+  "Device is actively downloading/uploading (progress updates received)"
   IN_PROGRESS
 
   "Request created in database, not yet sent to device"
@@ -946,7 +953,7 @@ enum ModemRegistrationStatus {
   "Not registered, but modem is currently searching a new operator to register to."
   SEARCHING_OPERATOR
 
-  "Unknown (e.g. out of GERAN\/UTRAN\/E-UTRAN coverage)."
+  "Unknown (e.g. out of GERAN/UTRAN/E-UTRAN coverage)."
   UNKNOWN
 }
 
@@ -1547,7 +1554,9 @@ type BaseImage implements Node {
   localizedDescriptions(preferredLanguageTags: [String!]): [LocalizedAttribute!]
 
   "A list of release display names in different languages."
-  localizedReleaseDisplayNames(preferredLanguageTags: [String!]): [LocalizedAttribute!]
+  localizedReleaseDisplayNames(
+    preferredLanguageTags: [String!]
+  ): [LocalizedAttribute!]
 
   "Derived Base Image Name from version and localized release display name"
   name: String
@@ -9177,10 +9186,7 @@ type Campaign implements Node {
 
 type RootQueryType {
   "Returns the desired campaign."
-  campaign(
-    "The id of the record"
-    id: ID!
-  ): Campaign
+  campaign("The id of the record" id: ID!): Campaign
 
   "Returns all update campaigns."
   updateCampaigns(
@@ -9267,10 +9273,7 @@ type RootQueryType {
   ): CampaignConnection
 
   "Returns a single channel."
-  channel(
-    "The id of the record"
-    id: ID!
-  ): Channel
+  channel("The id of the record" id: ID!): Channel
 
   "Returns a list of channels."
   channels(
@@ -9318,10 +9321,7 @@ type RootQueryType {
   ): TagConnection
 
   "Returns a single device group."
-  deviceGroup(
-    "The id of the record"
-    id: ID!
-  ): DeviceGroup
+  deviceGroup("The id of the record" id: ID!): DeviceGroup
 
   "Returns a list of device groups."
   deviceGroups(
@@ -9354,10 +9354,7 @@ type RootQueryType {
   forwarderSession(token: String!, deviceId: ID!): ForwarderSession
 
   "Returns a single repository."
-  repository(
-    "The id of the record"
-    id: ID!
-  ): Repository
+  repository("The id of the record" id: ID!): Repository
 
   "Returns a list of repositories."
   repositories(
@@ -9381,10 +9378,7 @@ type RootQueryType {
   ): RepositoryConnection
 
   "Returns a single device."
-  device(
-    "The id of the record"
-    id: ID!
-  ): Device
+  device("The id of the record" id: ID!): Device
 
   "Returns a list of devices."
   devices(
@@ -9408,10 +9402,7 @@ type RootQueryType {
   ): DeviceConnection
 
   "Returns a single hardware type."
-  hardwareType(
-    "The id of the record"
-    id: ID!
-  ): HardwareType
+  hardwareType("The id of the record" id: ID!): HardwareType
 
   "Returns a list of hardware types."
   hardwareTypes(
@@ -9435,10 +9426,7 @@ type RootQueryType {
   ): HardwareTypeConnection
 
   "Returns a single system model."
-  systemModel(
-    "The id of the record"
-    id: ID!
-  ): SystemModel
+  systemModel("The id of the record" id: ID!): SystemModel
 
   "Returns a list of system models."
   systemModels(
@@ -9483,10 +9471,7 @@ type RootQueryType {
   ): ApplicationConnection
 
   "Returns the desired application."
-  application(
-    "The id of the record"
-    id: ID!
-  ): Application
+  application("The id of the record" id: ID!): Application
 
   "Returns all available containers"
   containers(
@@ -9510,10 +9495,7 @@ type RootQueryType {
   ): ContainerConnection
 
   "Returns the desired container"
-  container(
-    "The id of the record"
-    id: ID!
-  ): Container
+  container("The id of the record" id: ID!): Container
 
   "Returns all available deployments."
   deployments(
@@ -9537,16 +9519,10 @@ type RootQueryType {
   ): DeploymentConnection
 
   "Returns the desired deployment."
-  deployment(
-    "The id of the record"
-    id: ID!
-  ): Deployment
+  deployment("The id of the record" id: ID!): Deployment
 
   "Returns the desired image credentials."
-  imageCredentials(
-    "The id of the record"
-    id: ID!
-  ): ImageCredentials
+  imageCredentials("The id of the record" id: ID!): ImageCredentials
 
   "Returns all available image credentials."
   listImageCredentials(
@@ -9570,16 +9546,10 @@ type RootQueryType {
   ): ImageCredentialsConnection
 
   "Returns the desired release."
-  release(
-    "The id of the record"
-    id: ID!
-  ): Release
+  release("The id of the record" id: ID!): Release
 
   "Returns the desired network."
-  network(
-    "The id of the record"
-    id: ID!
-  ): Network
+  network("The id of the record" id: ID!): Network
 
   "Returns all available networks."
   networks(
@@ -9603,10 +9573,7 @@ type RootQueryType {
   ): NetworkConnection
 
   "Returns the desired volume."
-  volume(
-    "The id of the record"
-    id: ID!
-  ): Volume
+  volume("The id of the record" id: ID!): Volume
 
   "Returns all available volumes."
   volumes(
@@ -9630,22 +9597,13 @@ type RootQueryType {
   ): VolumeConnection
 
   "Retrieves a Node from its global id"
-  node(
-    "The Node unique identifier"
-    id: ID!
-  ): Node!
+  node("The Node unique identifier" id: ID!): Node!
 
   "Returns a single base image."
-  baseImage(
-    "The id of the record"
-    id: ID!
-  ): BaseImage
+  baseImage("The id of the record" id: ID!): BaseImage
 
   "Returns a single base image collection."
-  baseImageCollection(
-    "The id of the record"
-    id: ID!
-  ): BaseImageCollection
+  baseImageCollection("The id of the record" id: ID!): BaseImageCollection
 
   "Returns a list of base image collections."
   baseImageCollections(
@@ -9698,7 +9656,9 @@ type RootMutationType {
   Initiates an OTA update, with a user provided OS image.
   It can be either uploaded directly, or chosen from a base image collection via its URL.
   """
-  createManualOtaOperation(input: CreateManualOtaOperationInput!): CreateManualOtaOperationResult
+  createManualOtaOperation(
+    input: CreateManualOtaOperationInput!
+  ): CreateManualOtaOperationResult
 
   "Cancels an OTA update operation"
   cancelOtaOperation(id: ID!): CancelOtaOperationResult
@@ -9707,7 +9667,10 @@ type RootMutationType {
   createDeviceGroup(input: CreateDeviceGroupInput!): CreateDeviceGroupResult
 
   "Updates a device group."
-  updateDeviceGroup(id: ID!, input: UpdateDeviceGroupInput): UpdateDeviceGroupResult
+  updateDeviceGroup(
+    id: ID!
+    input: UpdateDeviceGroupInput
+  ): UpdateDeviceGroupResult
 
   "Deletes a device group."
   deleteDeviceGroup(id: ID!): DeleteDeviceGroupResult
@@ -9728,19 +9691,30 @@ type RootMutationType {
   createRepository(input: CreateRepositoryInput!): CreateRepositoryResult
 
   "Updates a repository."
-  updateRepository(id: ID!, input: UpdateRepositoryInput): UpdateRepositoryResult
+  updateRepository(
+    id: ID!
+    input: UpdateRepositoryInput
+  ): UpdateRepositoryResult
 
   "Deletes a repository"
   deleteRepository(id: ID!): DeleteRepositoryResult
 
   "Initiates an file download request, with a user provided file."
-  createManualFileDownloadRequest(input: CreateManualFileDownloadRequestInput!): CreateManualFileDownloadRequestResult
+  createManualFileDownloadRequest(
+    input: CreateManualFileDownloadRequestInput!
+  ): CreateManualFileDownloadRequestResult
 
-  createManagedFileDownloadRequest(input: CreateManagedFileDownloadRequestInput!): CreateManagedFileDownloadRequestResult
+  createManagedFileDownloadRequest(
+    input: CreateManagedFileDownloadRequestInput!
+  ): CreateManagedFileDownloadRequestResult
 
-  createFileUploadRequest(input: CreateFileUploadRequestInput!): CreateFileUploadRequestResult
+  createFileUploadRequest(
+    input: CreateFileUploadRequestInput!
+  ): CreateFileUploadRequestResult
 
-  createFileDeleteRequest(input: CreateFileDeleteRequestInput!): CreateFileDeleteRequestResult
+  createFileDeleteRequest(
+    input: CreateFileDeleteRequestInput!
+  ): CreateFileDeleteRequestResult
 
   "Updates a device."
   updateDevice(id: ID!, input: UpdateDeviceInput): UpdateDeviceResult
@@ -9749,16 +9723,25 @@ type RootMutationType {
   addDeviceTags(id: ID!, input: AddDeviceTagsInput!): AddDeviceTagsResult
 
   "Remove tags from a device."
-  removeDeviceTags(id: ID!, input: RemoveDeviceTagsInput!): RemoveDeviceTagsResult
+  removeDeviceTags(
+    id: ID!
+    input: RemoveDeviceTagsInput!
+  ): RemoveDeviceTagsResult
 
   "Sets led behavior."
-  setDeviceLedBehavior(id: ID!, input: SetDeviceLedBehaviorInput!): SetDeviceLedBehaviorResult
+  setDeviceLedBehavior(
+    id: ID!
+    input: SetDeviceLedBehaviorInput!
+  ): SetDeviceLedBehaviorResult
 
   "Creates a hardware type."
   createHardwareType(input: CreateHardwareTypeInput!): CreateHardwareTypeResult
 
   "Updates a hardware type."
-  updateHardwareType(id: ID!, input: UpdateHardwareTypeInput): UpdateHardwareTypeResult
+  updateHardwareType(
+    id: ID!
+    input: UpdateHardwareTypeInput
+  ): UpdateHardwareTypeResult
 
   "Deletes a hardware type."
   deleteHardwareType(id: ID!): DeleteHardwareTypeResult
@@ -9767,7 +9750,10 @@ type RootMutationType {
   createSystemModel(input: CreateSystemModelInput!): CreateSystemModelResult
 
   "Updates an system model."
-  updateSystemModel(id: ID!, input: UpdateSystemModelInput): UpdateSystemModelResult
+  updateSystemModel(
+    id: ID!
+    input: UpdateSystemModelInput
+  ): UpdateSystemModelResult
 
   "Deletes a system model."
   deleteSystemModel(id: ID!): DeleteSystemModelResult
@@ -9801,10 +9787,15 @@ type RootMutationType {
   """
   sendDeployment(id: ID!): SendDeploymentResult
 
-  upgradeDeployment(id: ID!, input: UpgradeDeploymentInput!): UpgradeDeploymentResult
+  upgradeDeployment(
+    id: ID!
+    input: UpgradeDeploymentInput!
+  ): UpgradeDeploymentResult
 
   "Create image credentials."
-  createImageCredentials(input: CreateImageCredentialsInput!): CreateImageCredentialsResult
+  createImageCredentials(
+    input: CreateImageCredentialsInput!
+  ): CreateImageCredentialsResult
 
   deleteImageCredentials(id: ID!): DeleteImageCredentialsResult
 
@@ -9836,10 +9827,15 @@ type RootMutationType {
   deleteBaseImage(id: ID!): DeleteBaseImageResult
 
   "Creates a new base image collection."
-  createBaseImageCollection(input: CreateBaseImageCollectionInput!): CreateBaseImageCollectionResult
+  createBaseImageCollection(
+    input: CreateBaseImageCollectionInput!
+  ): CreateBaseImageCollectionResult
 
   "Updates a base image collection."
-  updateBaseImageCollection(id: ID!, input: UpdateBaseImageCollectionInput): UpdateBaseImageCollectionResult
+  updateBaseImageCollection(
+    id: ID!
+    input: UpdateBaseImageCollectionInput
+  ): UpdateBaseImageCollectionResult
 
   "Deletes a base image collection."
   deleteBaseImageCollection(id: ID!): DeleteBaseImageCollectionResult
@@ -9970,10 +9966,7 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: DeploymentEventFilterInput
   ): deployment_event_result
-  image(
-    "A filter to limit the results"
-    filter: ImageFilterInput
-  ): image_result
+  image("A filter to limit the results" filter: ImageFilterInput): image_result
   imageCredentials(
     "A filter to limit the results"
     filter: ImageCredentialsFilterInput

@@ -220,19 +220,19 @@ const MonacoEditor = ({
   }, [updatePreferences]);
 
   const vimToggleTitle = intl.formatMessage({
-    id: "components.MonacoEditor.vimToggle",
+    id: "components.ui.monaco-editor.MonacoEditor.vimToggle",
     defaultMessage: "Toggle Vim mode",
   });
   const zoomOutTitle = intl.formatMessage({
-    id: "components.MonacoEditor.zoomOut",
+    id: "components.ui.monaco-editor.MonacoEditor.zoomOut",
     defaultMessage: "Decrease font size",
   });
   const zoomInTitle = intl.formatMessage({
-    id: "components.MonacoEditor.zoomIn",
+    id: "components.ui.monaco-editor.MonacoEditor.zoomIn",
     defaultMessage: "Increase font size",
   });
   const zoomResetTitle = intl.formatMessage({
-    id: "components.MonacoEditor.zoomReset",
+    id: "components.ui.monaco-editor.MonacoEditor.zoomReset",
     defaultMessage: "Reset font size",
   });
 

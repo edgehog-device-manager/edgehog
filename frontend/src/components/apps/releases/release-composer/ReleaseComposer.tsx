@@ -417,7 +417,7 @@ const ReleaseComposer = ({
               id="release-composer-version"
               label={
                 <FormattedMessage
-                  id="components.ReleaseComposer.versionLabel"
+                  id="components.apps.releases.release-composer.ReleaseComposer.versionLabel"
                   defaultMessage="Release Version"
                 />
               }
@@ -432,7 +432,7 @@ const ReleaseComposer = ({
                 feedback={
                   version.trim() === ""
                     ? intl.formatMessage({
-                        id: "components.ReleaseComposer.versionRequired",
+                        id: "components.apps.releases.release-composer.ReleaseComposer.versionRequired",
                         defaultMessage: "This field is required",
                       })
                     : undefined
@@ -445,7 +445,7 @@ const ReleaseComposer = ({
             className="mt-2"
             label={
               <FormattedMessage
-                id="components.ReleaseComposer.requiredSystemModelsLabel"
+                id="components.apps.releases.release-composer.ReleaseComposer.requiredSystemModelsLabel"
                 defaultMessage="Required System Models"
               />
             }
@@ -470,7 +470,7 @@ const ReleaseComposer = ({
             onClick={handleSubmit}
           >
             <FormattedMessage
-              id="components.ReleaseComposer.createRelease"
+              id="components.apps.releases.release-composer.ReleaseComposer.createRelease"
               defaultMessage="Create Release"
             />
           </Button>
@@ -483,7 +483,7 @@ const ReleaseComposer = ({
             {state.services.length === 0 && (
               <div className="border rounded-3 p-4 text-center text-muted bg-light mb-3">
                 <FormattedMessage
-                  id="components.ReleaseComposer.noServicesHint"
+                  id="components.apps.releases.release-composer.ReleaseComposer.noServicesHint"
                   defaultMessage="No containers yet. Add one or paste a docker-compose file on the right."
                 />
               </div>
@@ -515,26 +515,28 @@ const ReleaseComposer = ({
             <Button variant="secondary" onClick={handleAddService}>
               <Icon icon={"plus"} className="me-1" />
               <FormattedMessage
-                id="components.ReleaseComposer.addContainer"
+                id="components.apps.releases.release-composer.ReleaseComposer.addContainer"
                 defaultMessage="Add Container"
               />
             </Button>
           </div>
         </Col>
         <Col lg={7}>
-          <div style={{ position: "sticky", top: 0, height: "70vh" }}>
-            <MonacoEditor
-              value={yamlText}
-              language="yaml"
-              autoFormat={false}
-              fillHeight
-              onChange={handleYamlChange}
-            />
+          <div style={{ position: "sticky", top: 0 }}>
+            <div style={{ height: "70vh" }}>
+              <MonacoEditor
+                value={yamlText}
+                language="yaml"
+                autoFormat={false}
+                fillHeight
+                onChange={handleYamlChange}
+              />
+            </div>
             {parseError && (
               <Alert variant="danger" className="mt-2 mb-0">
                 <Icon icon={"warning"} className="me-2" />
                 <FormattedMessage
-                  id="components.ReleaseComposer.invalidYamlPrefix"
+                  id="components.apps.releases.release-composer.ReleaseComposer.invalidYamlPrefix"
                   defaultMessage="Invalid docker-compose file:"
                 />{" "}
                 {parseError}
@@ -544,7 +546,7 @@ const ReleaseComposer = ({
               <Alert variant="warning" className="mt-2 mb-0">
                 <strong>
                   <FormattedMessage
-                    id="components.ReleaseComposer.warningsTitle"
+                    id="components.apps.releases.release-composer.ReleaseComposer.warningsTitle"
                     defaultMessage="Some settings could not be represented:"
                   />
                 </strong>

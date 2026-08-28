@@ -129,7 +129,7 @@ const ServicePane = ({
             onClick={() => setOpen((previous) => !previous)}
             aria-expanded={open}
             title={intl.formatMessage({
-              id: "components.ReleaseComposer.toggleService",
+              id: "components.apps.releases.release-composer.ServicePane.toggleService",
               defaultMessage: "Toggle container details",
             })}
             className="border-0 d-inline-flex align-items-center p-1"
@@ -147,7 +147,7 @@ const ServicePane = ({
           <span className="fw-bold flex-grow-1 text-truncate">
             {container.name || (
               <FormattedMessage
-                id="components.ReleaseComposer.unnamedService"
+                id="components.apps.releases.release-composer.ServicePane.unnamedService"
                 defaultMessage="Unnamed container"
               />
             )}
@@ -155,7 +155,7 @@ const ServicePane = ({
           {!isValid && (
             <span
               title={intl.formatMessage({
-                id: "components.ReleaseComposer.invalidServiceBadge",
+                id: "components.apps.releases.release-composer.ServicePane.invalidServiceBadge",
                 defaultMessage:
                   "This container has missing or invalid settings",
               })}
@@ -169,7 +169,7 @@ const ServicePane = ({
             size="sm"
             onClick={onRemove}
             title={intl.formatMessage({
-              id: "components.ReleaseComposer.removeService",
+              id: "components.apps.releases.release-composer.ServicePane.removeService",
               defaultMessage: "Remove",
             })}
           >
@@ -187,7 +187,7 @@ const ServicePane = ({
                   id="release-composer-depends-on"
                   label={
                     <FormattedMessage
-                      id="components.ReleaseComposer.dependsOnLabel"
+                      id="components.apps.releases.release-composer.ServicePane.dependsOnLabel"
                       defaultMessage="Depends on"
                     />
                   }
