@@ -60,9 +60,6 @@ enum Route {
   application = "/applications/:applicationId/:activeTab?",
   release = "/applications/:applicationId/release/:releaseId/:activeTab?",
   releaseNew = "/applications/:applicationId/release/new",
-  containers = "/containers",
-  containersEdit = "/containers/:containerId",
-  containersNew = "/containers/new",
   imageCredentials = "/image-credentials",
   imageCredentialsEdit = "/image-credentials/:imageCredentialId/edit",
   imageCredentialsNew = "/image-credentials/new",
@@ -146,8 +143,6 @@ const matchingParametricRoute = (
     case Route.volumesNew:
     case Route.networks:
     case Route.networksNew:
-    case Route.containers:
-    case Route.containersNew:
     case Route.deployments:
     case Route.deploymentCampaigns:
     case Route.deploymentCampaignsNew:
@@ -306,14 +301,6 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { networkId: params.networkId },
-          }
-        : null;
-
-    case Route.containersEdit:
-      return params && typeof params["containerId"] === "string"
-        ? {
-            route,
-            params: { containerId: params.containerId },
           }
         : null;
 
@@ -551,18 +538,6 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.networksNew]: {
     id: "navigation.routeTitle.NetworksNew",
     defaultMessage: "Create Networks",
-  },
-  [Route.containers]: {
-    id: "navigation.routeTitle.Containers",
-    defaultMessage: "Containers",
-  },
-  [Route.containersEdit]: {
-    id: "navigation.routeTitle.ContainersEdit",
-    defaultMessage: "Container Details",
-  },
-  [Route.containersNew]: {
-    id: "navigation.routeTitle.ContainersNew",
-    defaultMessage: "Create Containers",
   },
   [Route.deployments]: {
     id: "navigation.routeTitle.Deployments",
