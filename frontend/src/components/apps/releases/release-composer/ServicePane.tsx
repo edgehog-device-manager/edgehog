@@ -182,28 +182,25 @@ const ServicePane = ({
             <Stack gap={2}>
               <NameSection form={form} />
 
-              <div className="bg-white border rounded-3 p-3">
-                <FormRow
-                  id="release-composer-depends-on"
-                  label={
-                    <FormattedMessage
-                      id="components.apps.releases.release-composer.ServicePane.dependsOnLabel"
-                      defaultMessage="Depends on"
-                    />
-                  }
-                >
-                  <MultiSelect
-                    value={dependsOn.map((name) => ({
-                      value: name,
-                      label: name,
-                    }))}
-                    options={dependsOnOptions}
-                    onChange={(options) =>
-                      onDependsOnChange(options.map((option) => option.value))
-                    }
-                  />
-                </FormRow>
-              </div>
+        <div className="bg-white border rounded-3 p-3">
+          <FormRow
+            id="release-composer-depends-on"
+            label={
+              <FormattedMessage
+                id="components.apps.releases.release-composer.ServicePane.dependsOnLabel"
+                defaultMessage="Depends on"
+              />
+            }
+          >
+            <MultiSelect
+              value={dependsOn.map((name) => ({ value: name, label: name }))}
+              options={dependsOnOptions}
+              onChange={(options) =>
+                onDependsOnChange(options.map((option) => option.value))
+              }
+            />
+          </FormRow>
+        </div>
 
               <ImageSection
                 form={form}
