@@ -67,8 +67,9 @@ const readStoredPreferences = (): EditorPreferences => {
 };
 
 export default function useEditorPreferences() {
-  const [preferences, setPreferences] =
-    useState<EditorPreferences>(readStoredPreferences);
+  const [preferences, setPreferences] = useState<EditorPreferences>(
+    readStoredPreferences,
+  );
 
   const updatePreferences = useCallback(
     (updater: (previous: EditorPreferences) => EditorPreferences) => {
