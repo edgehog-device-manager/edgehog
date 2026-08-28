@@ -8,7 +8,10 @@ import { fileURLToPath } from "node:url";
 // physical files.
 const monacoAlias = (relativePath: string) =>
   fileURLToPath(
-    new URL(`./node_modules/monaco-editor/esm/vs/${relativePath}`, import.meta.url),
+    new URL(
+      `./node_modules/monaco-editor/esm/vs/${relativePath}`,
+      import.meta.url,
+    ),
   );
 
 export default defineConfig(({ mode }) => {
@@ -19,8 +22,9 @@ export default defineConfig(({ mode }) => {
         "monaco-editor/esm/vs/editor/editor.api": monacoAlias(
           "editor/editor.api.js",
         ),
-        "monaco-editor/esm/vs/editor/common/commands/shiftCommand":
-          monacoAlias("editor/common/commands/shiftCommand.js"),
+        "monaco-editor/esm/vs/editor/common/commands/shiftCommand": monacoAlias(
+          "editor/common/commands/shiftCommand.js",
+        ),
       },
     },
     server: {
