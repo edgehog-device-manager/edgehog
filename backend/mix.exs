@@ -81,7 +81,7 @@ defmodule Edgehog.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.8.7"},
+      {:phoenix, "~> 1.8.8"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_ecto, "~> 4.7"},
       {:ecto_sql, "~> 3.13"},
@@ -130,7 +130,7 @@ defmodule Edgehog.MixProject do
       {:ash_postgres, "~> 2.9"},
       {:ash_graphql, "~> 1.9"},
       {:ash_json_api, "~> 1.6"},
-      {:oban, "~> 2.2"},
+      {:oban, "~> 2.3"},
       {:igniter, "~> 0.7", only: [:dev, :test]},
       {:picosat_elixir, "~> 0.2"},
       {:open_api_spex, "~> 3.22"},
