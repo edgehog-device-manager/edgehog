@@ -177,6 +177,13 @@
       "matchUpdateTypes": ["major"],
       "dependencyDashboardApproval": true,
       "addLabels": ["dependencies", "tools", "major"]
+    },
+    // Exclusions:
+    // - exclude nimble_lz4, the reason is specified in `mix.exs`.
+    {
+      "matchPackageNames": ["nimble_lz4"],
+      "matchManagers": ["mix"],
+      "enabled": false
     }
   ]
 }
