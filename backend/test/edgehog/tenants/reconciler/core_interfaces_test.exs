@@ -30,7 +30,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreInterfacesTest do
   alias Edgehog.Tenants.Reconciler.Core.Interfaces, as: Core
 
   @astarte_resources_dir "priv/astarte_resources"
-  @interfaces_dir "#{@astarte_resources_dir}/interfaces"
+  @interfaces_dir "#{@astarte_resources_dir}/interfaces/majors"
   @default_astarte_version "1.3.0-rc.0"
 
   describe "list_interfaces/0" do
@@ -44,7 +44,8 @@ defmodule Edgehog.Tenants.Reconciler.CoreInterfacesTest do
 
       for interface <- interfaces do
         interface_name = Map.fetch!(interface, "interface_name")
-        assert File.exists?("#{@interfaces_dir}/#{interface_name}.json")
+        major = Map.fetch!(interface, "version_major")
+        assert File.exists?("#{@interfaces_dir}/#{interface_name}.v#{major}.json")
       end
     end
   end
