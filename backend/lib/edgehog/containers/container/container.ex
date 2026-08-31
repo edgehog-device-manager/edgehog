@@ -62,16 +62,36 @@ defmodule Edgehog.Containers.Container do
       :destroy,
       create: [
         :name,
-        :port_bindings,
-        :restart_policy,
-        :hostname,
-        :network_mode,
-        :env,
-        :privileged,
-        :extra_hosts,
         :image_id,
+        :hostname,
+        :domainname,
+        :user,
+        :command,
+        :healthcheck_test,
+        :healthcheck_interval,
+        :healthcheck_timeout,
+        :healthcheck_retries,
+        :healthcheck_start_period,
+        :healthcheck_start_interval,
+        :working_directory,
+        :entrypoint,
+        :network_disabled,
+        :label_keys,
+        :label_values,
+        :stop_signal,
+        :stop_timeout,
+        :restart_policy,
+        :restart_policy_maximum_retry_count,
+        :env,
+        :binds,
+        :network_mode,
+        :port_bindings,
+        :exposed_ports,
+        :extra_hosts,
         :cap_add,
         :cap_drop,
+        :cpu_shares,
+        :cpuset_cpus,
         :cpu_period,
         :cpu_quota,
         :cpu_realtime_period,
@@ -80,27 +100,83 @@ defmodule Edgehog.Containers.Container do
         :memory_reservation,
         :memory_swap,
         :memory_swappiness,
+        :device_cgroup_rules,
+        :ulimits_name,
+        :ulimits_soft,
+        :ulimits_hard,
+        :auto_remove,
         :volume_driver,
-        :storage_opt,
+        :storage_opt_keys,
+        :storage_opt_values,
         :read_only_rootfs,
-        :tmpfs,
-        :binds,
-        :image_id
+        :tmpfs_paths,
+        :tmpfs_options,
+        :cgroups_mode,
+        :dns,
+        :dns_options,
+        :dns_search,
+        :group_add,
+        :ipc_mode,
+        :oom_score_adjustment,
+        :userns_mode,
+        :sysctls_keys,
+        :sysctls_values,
+        :shm_size,
+        :runtime,
+        :privileged,
+        :log_type,
+        :log_config_keys,
+        :log_config_values,
+        :blkio_weight,
+        :blkio_weight_device_path,
+        :blkio_weight_device_weight,
+        :blkio_device_read_bps_path,
+        :blkio_device_read_bps_rate,
+        :blkio_device_write_bps_path,
+        :blkio_device_write_bps_rate,
+        :blkio_device_read_iops_path,
+        :blkio_device_read_iops_rate,
+        :blkio_device_write_iops_path,
+        :blkio_device_write_iops_rate,
+        :securityopt,
+        :pid_mode,
+        :masked_paths,
+        :readonly_paths
       ]
     ]
 
     create :create_with_nested do
       accept [
         :name,
-        :restart_policy,
         :hostname,
+        :domainname,
+        :user,
+        :command,
+        :healthcheck_test,
+        :healthcheck_interval,
+        :healthcheck_timeout,
+        :healthcheck_retries,
+        :healthcheck_start_period,
+        :healthcheck_start_interval,
+        :working_directory,
+        :entrypoint,
+        :network_disabled,
+        :label_keys,
+        :label_values,
+        :stop_signal,
+        :stop_timeout,
+        :restart_policy,
+        :restart_policy_maximum_retry_count,
         :env,
-        :privileged,
-        :port_bindings,
+        :binds,
         :network_mode,
+        :port_bindings,
+        :exposed_ports,
         :extra_hosts,
         :cap_add,
         :cap_drop,
+        :cpu_shares,
+        :cpuset_cpus,
         :cpu_period,
         :cpu_quota,
         :cpu_realtime_period,
@@ -109,11 +185,48 @@ defmodule Edgehog.Containers.Container do
         :memory_reservation,
         :memory_swap,
         :memory_swappiness,
+        :device_cgroup_rules,
+        :ulimits_name,
+        :ulimits_soft,
+        :ulimits_hard,
+        :auto_remove,
         :volume_driver,
-        :storage_opt,
+        :storage_opt_keys,
+        :storage_opt_values,
         :read_only_rootfs,
-        :tmpfs,
-        :binds
+        :tmpfs_paths,
+        :tmpfs_options,
+        :cgroups_mode,
+        :dns,
+        :dns_options,
+        :dns_search,
+        :group_add,
+        :ipc_mode,
+        :oom_score_adjustment,
+        :userns_mode,
+        :sysctls_keys,
+        :sysctls_values,
+        :shm_size,
+        :runtime,
+        :privileged,
+        :log_type,
+        :log_config_keys,
+        :log_config_values,
+        :blkio_weight,
+        :blkio_weight_device_path,
+        :blkio_weight_device_weight,
+        :blkio_device_read_bps_path,
+        :blkio_device_read_bps_rate,
+        :blkio_device_write_bps_path,
+        :blkio_device_write_bps_rate,
+        :blkio_device_read_iops_path,
+        :blkio_device_read_iops_rate,
+        :blkio_device_write_iops_path,
+        :blkio_device_write_iops_rate,
+        :securityopt,
+        :pid_mode,
+        :masked_paths,
+        :readonly_paths
       ]
 
       argument :image, :map
@@ -151,16 +264,36 @@ defmodule Edgehog.Containers.Container do
     create :create_fixture do
       accept [
         :name,
-        :port_bindings,
-        :restart_policy,
-        :hostname,
-        :network_mode,
-        :env,
-        :privileged,
         :image_id,
+        :hostname,
+        :domainname,
+        :user,
+        :command,
+        :healthcheck_test,
+        :healthcheck_interval,
+        :healthcheck_timeout,
+        :healthcheck_retries,
+        :healthcheck_start_period,
+        :healthcheck_start_interval,
+        :working_directory,
+        :entrypoint,
+        :network_disabled,
+        :label_keys,
+        :label_values,
+        :stop_signal,
+        :stop_timeout,
+        :restart_policy,
+        :restart_policy_maximum_retry_count,
+        :env,
+        :binds,
+        :network_mode,
+        :port_bindings,
+        :exposed_ports,
         :extra_hosts,
         :cap_add,
         :cap_drop,
+        :cpu_shares,
+        :cpuset_cpus,
         :cpu_period,
         :cpu_quota,
         :cpu_realtime_period,
@@ -169,12 +302,48 @@ defmodule Edgehog.Containers.Container do
         :memory_reservation,
         :memory_swap,
         :memory_swappiness,
+        :device_cgroup_rules,
+        :ulimits_name,
+        :ulimits_soft,
+        :ulimits_hard,
+        :auto_remove,
         :volume_driver,
-        :storage_opt,
+        :storage_opt_keys,
+        :storage_opt_values,
         :read_only_rootfs,
-        :tmpfs,
-        :binds,
-        :image_id
+        :tmpfs_paths,
+        :tmpfs_options,
+        :cgroups_mode,
+        :dns,
+        :dns_options,
+        :dns_search,
+        :group_add,
+        :ipc_mode,
+        :oom_score_adjustment,
+        :userns_mode,
+        :sysctls_keys,
+        :sysctls_values,
+        :shm_size,
+        :runtime,
+        :privileged,
+        :log_type,
+        :log_config_keys,
+        :log_config_values,
+        :blkio_weight,
+        :blkio_weight_device_path,
+        :blkio_weight_device_weight,
+        :blkio_device_read_bps_path,
+        :blkio_device_read_bps_rate,
+        :blkio_device_write_bps_path,
+        :blkio_device_write_bps_rate,
+        :blkio_device_read_iops_path,
+        :blkio_device_read_iops_rate,
+        :blkio_device_write_iops_path,
+        :blkio_device_write_iops_rate,
+        :securityopt,
+        :pid_mode,
+        :masked_paths,
+        :readonly_paths
       ]
 
       argument :volumes, {:array, :map}
@@ -229,20 +398,88 @@ defmodule Edgehog.Containers.Container do
       public? true
     end
 
-    attribute :restart_policy, RestartPolicy do
-      public? true
-    end
-
-    attribute :port_bindings, {:array, :string} do
-      default []
-      allow_nil? false
-      public? true
-    end
-
     attribute :hostname, :string do
       constraints allow_empty?: true
       default ""
       allow_nil? false
+      public? true
+    end
+
+    attribute :domainname, :string do
+      public? true
+    end
+
+    attribute :user, :string do
+      public? true
+    end
+
+    attribute :command, {:array, :string} do
+      public? true
+    end
+
+    attribute :healthcheck_test, {:array, :string} do
+      public? true
+    end
+
+    attribute :healthcheck_interval, :integer do
+      public? true
+      constraints min: 0
+    end
+
+    attribute :healthcheck_timeout, :integer do
+      public? true
+      constraints min: 0
+    end
+
+    attribute :healthcheck_retries, :integer do
+      public? true
+      constraints min: 0
+    end
+
+    attribute :healthcheck_start_period, :integer do
+      public? true
+      constraints min: 0
+    end
+
+    attribute :healthcheck_start_interval, :integer do
+      public? true
+      constraints min: 0
+    end
+
+    attribute :working_directory, :string do
+      public? true
+    end
+
+    attribute :entrypoint, {:array, :string} do
+      public? true
+    end
+
+    attribute :network_disabled, :boolean do
+      public? true
+    end
+
+    attribute :label_keys, {:array, :string} do
+      public? true
+    end
+
+    attribute :label_values, {:array, :string} do
+      public? true
+    end
+
+    attribute :stop_signal, :string do
+      public? true
+    end
+
+    attribute :stop_timeout, :integer do
+      default 10
+      public? true
+    end
+
+    attribute :restart_policy, RestartPolicy do
+      public? true
+    end
+
+    attribute :restart_policy_maximum_retry_count, :integer do
       public? true
     end
 
@@ -252,15 +489,26 @@ defmodule Edgehog.Containers.Container do
       public? true
     end
 
-    attribute :privileged, :boolean do
-      default false
+    attribute :binds, {:array, :string} do
+      default []
       public? true
+      allow_nil? false
     end
 
     attribute :network_mode, :string do
       default "bridge"
       public? true
       allow_nil? false
+    end
+
+    attribute :port_bindings, {:array, :string} do
+      default []
+      allow_nil? false
+      public? true
+    end
+
+    attribute :exposed_ports, {:array, :string} do
+      public? true
     end
 
     attribute :extra_hosts, {:array, :string} do
@@ -278,6 +526,14 @@ defmodule Edgehog.Containers.Container do
     attribute :cap_drop, {:array, :string} do
       default []
       allow_nil? false
+      public? true
+    end
+
+    attribute :cpu_shares, :integer do
+      public? true
+    end
+
+    attribute :cpuset_cpus, :string do
       public? true
     end
 
@@ -316,6 +572,26 @@ defmodule Edgehog.Containers.Container do
       constraints min: 0, max: 100
     end
 
+    attribute :device_cgroup_rules, {:array, :string} do
+      public? true
+    end
+
+    attribute :ulimits_name, {:array, :string} do
+      public? true
+    end
+
+    attribute :ulimits_soft, {:array, :integer} do
+      public? true
+    end
+
+    attribute :ulimits_hard, {:array, :integer} do
+      public? true
+    end
+
+    attribute :auto_remove, :boolean do
+      public? true
+    end
+
     attribute :volume_driver, :string do
       default ""
       public? true
@@ -323,10 +599,12 @@ defmodule Edgehog.Containers.Container do
       constraints allow_empty?: true
     end
 
-    attribute :storage_opt, {:array, :string} do
-      default []
+    attribute :storage_opt_keys, {:array, :string} do
       public? true
-      allow_nil? false
+    end
+
+    attribute :storage_opt_values, {:array, :string} do
+      public? true
     end
 
     attribute :read_only_rootfs, :boolean do
@@ -335,16 +613,141 @@ defmodule Edgehog.Containers.Container do
       allow_nil? false
     end
 
-    attribute :tmpfs, {:array, :string} do
-      default []
+    attribute :tmpfs_paths, {:array, :string} do
       public? true
-      allow_nil? false
     end
 
-    attribute :binds, {:array, :string} do
-      default []
+    attribute :tmpfs_options, {:array, :string} do
       public? true
-      allow_nil? false
+    end
+
+    attribute :cgroups_mode, :string do
+      public? true
+      constraints match: ~r/(host|private)/
+    end
+
+    attribute :dns, {:array, :string} do
+      public? true
+    end
+
+    attribute :dns_options, {:array, :string} do
+      public? true
+    end
+
+    attribute :dns_search, {:array, :string} do
+      public? true
+    end
+
+    attribute :group_add, {:array, :string} do
+      public? true
+    end
+
+    attribute :ipc_mode, :string do
+      public? true
+    end
+
+    attribute :oom_score_adjustment, :integer do
+      public? true
+    end
+
+    attribute :userns_mode, :string do
+      public? true
+    end
+
+    attribute :sysctls_keys, {:array, :string} do
+      public? true
+    end
+
+    attribute :sysctls_values, {:array, :string} do
+      public? true
+    end
+
+    attribute :shm_size, :integer do
+      public? true
+      constraints min: 0
+    end
+
+    attribute :runtime, :string do
+      public? true
+    end
+
+    attribute :privileged, :boolean do
+      default false
+      public? true
+    end
+
+    attribute :log_type, :string do
+      public? true
+    end
+
+    attribute :log_config_keys, {:array, :string} do
+      public? true
+    end
+
+    attribute :log_config_values, {:array, :string} do
+      public? true
+    end
+
+    attribute :blkio_weight, :integer do
+      public? true
+      constraints min: 0, max: 1_000
+    end
+
+    attribute :blkio_weight_device_path, {:array, :string} do
+      public? true
+    end
+
+    attribute :blkio_weight_device_weight, {:array, :integer} do
+      public? true
+    end
+
+    attribute :blkio_device_read_bps_path, {:array, :string} do
+      public? true
+    end
+
+    attribute :blkio_device_read_bps_rate, {:array, :integer} do
+      public? true
+    end
+
+    attribute :blkio_device_write_bps_path, {:array, :string} do
+      public? true
+    end
+
+    attribute :blkio_device_write_bps_rate, {:array, :integer} do
+      public? true
+    end
+
+    attribute :blkio_device_read_iops_path, {:array, :string} do
+      public? true
+    end
+
+    attribute :blkio_device_read_iops_rate, {:array, :integer} do
+      public? true
+    end
+
+    attribute :blkio_device_write_iops_path, {:array, :string} do
+      public? true
+    end
+
+    attribute :blkio_device_write_iops_rate, {:array, :integer} do
+      public? true
+    end
+
+    attribute :securityopt, {:array, :string} do
+      public? true
+    end
+
+    attribute :pid_mode, :string do
+      public? true
+      constraints match: ~r/(container:.+|host)/
+    end
+
+    attribute :masked_paths, {:array, :string} do
+      public? true
+    end
+
+    attribute :readonly_paths, {:array, :string} do
+      public? true
     end
 
     timestamps()
