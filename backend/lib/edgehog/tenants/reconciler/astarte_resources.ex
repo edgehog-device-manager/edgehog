@@ -20,7 +20,7 @@
 
 defmodule Edgehog.Tenants.Reconciler.AstarteResources do
   @moduledoc false
-  @interfaces Path.wildcard("priv/astarte_resources/interfaces/*.json")
+  @interfaces Path.wildcard("priv/astarte_resources/interfaces/major/*.json")
   @delivery_policies Path.wildcard("priv/astarte_resources/delivery_policies/*.json.eex")
   @trigger_templates Path.wildcard("priv/astarte_resources/trigger_templates/*.json.eex")
 
