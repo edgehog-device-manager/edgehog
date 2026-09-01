@@ -23,13 +23,24 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
   use Ash.Resource.Change
 
+  alias Edgehog.Containers.Container.Env
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
          {:ok, device} <- Ash.Changeset.fetch_argument(changeset, :device),
          {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
          {:ok, container} <-
-           Ash.load(container, [:image, :volumes, :networks, :device_mappings, :device_requests],
+           Ash.load(
+             container,
+             [
+               :image,
+               :volumes,
+               :networks,
+               :device_mappings,
+               :device_requests,
+               file_mounts: [:default_file]
+             ],
              tenant: tenant
            ) do
       image = container.image
@@ -90,7 +101,13 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
           }
         end)
 
+      {env, env_strategy} = resolve_env(changeset, container)
+
+      file_binds_input = Ash.Changeset.get_argument(changeset, :file_binds)
+
       changeset
+      |> Ash.Changeset.change_attribute(:env, env)
+      |> Ash.Changeset.change_attribute(:env_strategy, env_strategy)
       |> Ash.Changeset.manage_relationship(:image_deployment, image_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
@@ -106,16 +123,32 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         on_lookup: :relate,
         use_identities: [:volume_instance]
       )
-      |> Ash.Changeset.manage_relationship(:device_mapping_deployments, device_mappings_input,
+      |> Ash.Changeset.manage_relationship(
+        :device_mapping_deployments,
+        device_mappings_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_mapping_instance]
       )
-      |> Ash.Changeset.manage_relationship(:device_request_deployments, device_requests_input,
+      |> Ash.Changeset.manage_relationship(
+        :device_request_deployments,
+        device_requests_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_request_instance]
       )
+      |> Ash.Changeset.manage_relationship(:file_binds, file_binds_input,
+        on_no_match: :create,
+        on_match: :ignore,
+        on_lookup: :ignore
+      )
     end
+  end
+
+  defp resolve_env(changeset, container) do
+    deploy_env = Ash.Changeset.get_argument(changeset, :env) || []
+    env_strategy = Ash.Changeset.get_argument(changeset, :env_strategy) || :merge
+    resolved = Env.resolve(container.env || [], deploy_env, env_strategy)
+    {resolved, env_strategy}
   end
 end

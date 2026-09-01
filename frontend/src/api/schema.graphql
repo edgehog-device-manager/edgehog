@@ -1109,6 +1109,53 @@ type FileData {
   digest: String!
 }
 
+input FileBindSpecInput {
+  fileMountId: ID
+  fileDownloadRequestId: ID
+  deviceFileId: ID
+}
+
+input DeploymentConfigSpecInput {
+  fileBinds: [FileBindSpecInput]
+  envStrategy: String
+  env: [ContainerEnvVarInput]
+  containerId: ID!
+}
+
+input DeviceRequestDescInput {
+  options: JsonString
+  driver: String
+  deviceIds: [String!]
+  count: Int
+  capabilities: [[String!]!]
+}
+
+input DeviceMappingDescInput {
+  pathOnHost: String!
+  pathInContainer: String!
+  cgroupPermissions: String!
+}
+
+input FileMountDescInput {
+  required: Boolean
+  mountpoint: String!
+  defaultFileId: ID
+}
+
+input VolumeDescInput {
+  target: String!
+  id: ID!
+}
+
+input NetworkDescInput {
+  id: ID!
+}
+
+input ImageDescInput {
+  reference: String!
+  imageCredentialsId: ID
+}
+
 input ContainerEnvVarInput {
   value: String!
   key: String!
@@ -1620,62 +1667,6 @@ input ApplicationCreateInitialReleaseInput {
   version: String!
 }
 
-input ContainerCreateWithNestedImageInput {
-  id: ID
-  imageCredentialsId: ID
-  reference: String
-}
-
-input ContainerCreateWithNestedNetworksInput {
-  id: ID
-}
-
-input ContainerCreateWithNestedVolumesInput {
-  id: ID
-  target: String
-}
-
-input ContainerCreateWithNestedDeviceMappingsInput {
-  cgroupPermissions: String!
-  pathInContainer: String!
-  pathOnHost: String!
-}
-
-input ContainerCreateWithNestedDeviceRequestsInput {
-  """
-  A list of capabilities; an OR list of AND lists of capabilities.
-
-  Note that if a driver is specified, the capabilities have no effect
-  on selecting a driver, as the driver name is used directly.
-
-  If no driver is specified, the capabilities are used to select a
-  driver with the required capabilities.
-  """
-  capabilities: [[String!]!]
-
-  """
-  Count for the device to request for the container.
-  Default value is -1.
-  """
-  count: Int
-
-  "IDs of the devices to request for the container."
-  deviceIds: [String!]
-
-  """
-  The name of the device driver to use for this request.
-  Note that if this is specified, the capabilities are ignored
-  when selecting a device driver. Default value is an empty string.
-  """
-  driver: String
-
-  """
-  Driver-specific options, specified as key/value pairs.
-  These options are passed directly to the driver.
-  """
-  options: JsonString
-}
-
 input ReleaseCreateContainersInput {
   id: ID
 }
@@ -1687,6 +1678,39 @@ input ReleaseCreateContainerDependenciesInput {
 
 input ReleaseCreateRequiredSystemModelsInput {
   id: ID
+}
+
+enum FileBindSortField {
+  ID
+}
+
+input FileBindFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input FileBindFilterInput {
+  and: [FileBindFilterInput!]
+  or: [FileBindFilterInput!]
+  not: [FileBindFilterInput!]
+  id: FileBindFilterId
+}
+
+input FileBindSortInput {
+  order: SortOrder
+  field: FileBindSortField!
+}
+
+type FileBind {
+  id: ID!
 }
 
 ":release_container_dependencies connection"
@@ -3689,7 +3713,17 @@ type DeployReleaseResult {
 
 input DeployReleaseInput {
   releaseId: ID
+
   deviceId: ID!
+
+  """
+  Per-container configuration overrides to apply at deployment time.
+  Each override is keyed by the container id and may include:
+    - env: a list of key/value pairs
+    - env_strategy: either :merge or :override
+    - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+  """
+  configs: [DeploymentConfigSpecInput!]
 }
 
 enum DeploymentSortField {
@@ -3892,6 +3926,7 @@ type Deployment implements Node {
 enum ContainerDeploymentSortField {
   ID
   STATE
+  ENV_STRATEGY
   CONTAINER_ID
   DEVICE_ID
   IMAGE_DEPLOYMENT_ID
@@ -3957,6 +3992,19 @@ input ContainerDeploymentFilterContainerId {
   isNotDistinctFrom: ID
 }
 
+input ContainerDeploymentFilterEnvStrategy {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
 input ContainerDeploymentFilterState {
   isNil: Boolean
   eq: String
@@ -3989,6 +4037,7 @@ input ContainerDeploymentFilterInput {
   not: [ContainerDeploymentFilterInput!]
   id: ContainerDeploymentFilterId
   state: ContainerDeploymentFilterState
+  envStrategy: ContainerDeploymentFilterEnvStrategy
   containerId: ContainerDeploymentFilterContainerId
   deviceId: ContainerDeploymentFilterDeviceId
   imageDeploymentId: ContainerDeploymentFilterImageDeploymentId
@@ -3999,6 +4048,7 @@ input ContainerDeploymentFilterInput {
   volumeDeployments: VolumeDeploymentFilterInput
   deviceMappingDeployments: DeviceMappingDeploymentFilterInput
   deviceRequestDeployments: DeviceRequestDeploymentFilterInput
+  fileBinds: FileBindFilterInput
 }
 
 input ContainerDeploymentSortInput {
@@ -4009,6 +4059,8 @@ input ContainerDeploymentSortInput {
 type ContainerDeployment {
   id: ID!
   state: String
+  env: [ContainerEnvVar!]!
+  envStrategy: String!
   containerId: ID
   deviceId: Int
   imageDeploymentId: ID
@@ -4091,7 +4143,147 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceRequestDeploymentConnection!
+  fileBinds(
+    "How to sort the records in the response"
+    sort: [FileBindSortInput]
+
+    "A filter to limit the results"
+    filter: FileBindFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [FileBind!]!
   isReady: Boolean
+}
+
+enum ContainerFileMountSortField {
+  ID
+  MOUNTPOINT
+  REQUIRED
+  CONTAINER_ID
+  DEFAULT_FILE_ID
+}
+
+":container_file_mount connection"
+type ContainerFileMountConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":container_file_mount edges"
+  edges: [ContainerFileMountEdge!]
+}
+
+":container_file_mount edge"
+type ContainerFileMountEdge {
+  "Cursor"
+  cursor: String!
+
+  ":container_file_mount node"
+  node: ContainerFileMount!
+}
+
+input ContainerFileMountFilterDefaultFileId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input ContainerFileMountFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input ContainerFileMountFilterRequired {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input ContainerFileMountFilterMountpoint {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFileMountFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input ContainerFileMountFilterInput {
+  and: [ContainerFileMountFilterInput!]
+  or: [ContainerFileMountFilterInput!]
+  not: [ContainerFileMountFilterInput!]
+  id: ContainerFileMountFilterId
+  mountpoint: ContainerFileMountFilterMountpoint
+  required: ContainerFileMountFilterRequired
+  containerId: ContainerFileMountFilterContainerId
+  defaultFileId: ContainerFileMountFilterDefaultFileId
+  container: ContainerFilterInput
+  defaultFile: FileFilterInput
+}
+
+input ContainerFileMountSortInput {
+  order: SortOrder
+  field: ContainerFileMountSortField!
+}
+
+type ContainerFileMount {
+  id: ID!
+  mountpoint: String!
+  required: Boolean!
+  containerId: ID!
+  defaultFileId: ID
+  container: Container!
+  defaultFile: File
 }
 
 type container_result {
@@ -4146,11 +4338,12 @@ input CreateContainerInput {
   readOnlyRootfs: Boolean
   tmpfs: [String!]
   binds: [String!]
-  image: ContainerCreateWithNestedImageInput
-  networks: [ContainerCreateWithNestedNetworksInput!]
-  volumes: [ContainerCreateWithNestedVolumesInput!]
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  deviceRequests: [ContainerCreateWithNestedDeviceRequestsInput!]
+  image: ImageDescInput
+  networks: [NetworkDescInput!]
+  volumes: [VolumeDescInput!]
+  fileMounts: [FileMountDescInput!]
+  deviceMappings: [DeviceMappingDescInput!]
+  deviceRequests: [DeviceRequestDescInput!]
 }
 
 enum ContainerSortField {
@@ -4461,6 +4654,7 @@ input ContainerFilterInput {
   networks: NetworkFilterInput
   devices: DeviceFilterInput
   containerVolumes: ContainerVolumeFilterInput
+  fileMounts: ContainerFileMountFilterInput
   deviceMappings: DeviceMappingFilterInput
   deviceRequests: DeviceRequestFilterInput
 }
@@ -4573,6 +4767,25 @@ type Container implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerVolumeConnection!
+  fileMounts(
+    "How to sort the records in the response"
+    sort: [ContainerFileMountSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerFileMountFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerFileMountConnection!
   deviceMappings(
     "How to sort the records in the response"
     sort: [DeviceMappingSortInput]

@@ -255,6 +255,7 @@ defmodule Edgehog.ContainersFixtures do
     {networks, opts} = Keyword.pop(opts, :networks, [])
     {device_mappings, opts} = Keyword.pop(opts, :device_mappings, [])
     {device_requests, opts} = Keyword.pop(opts, :device_requests, [])
+    {file_mounts, opts} = Keyword.pop(opts, :file_mounts, [])
 
     {name, opts} =
       Keyword.pop_lazy(opts, :name, fn ->
@@ -268,7 +269,8 @@ defmodule Edgehog.ContainersFixtures do
         volumes: volumes,
         networks: networks,
         device_mappings: device_mappings,
-        device_requests: device_requests
+        device_requests: device_requests,
+        file_mounts: file_mounts
       })
 
     Container

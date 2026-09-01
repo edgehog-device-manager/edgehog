@@ -344,10 +344,12 @@ defmodule Edgehog.Devices.Device do
     update :send_create_container_request do
       description "Sends a create container request to the device."
 
-      argument :container, :struct,
-        constraints: [instance_of: Edgehog.Containers.Container],
-        description: "The Container the device has to initiate.",
-        allow_nil?: false
+      argument :container_deployment, :struct do
+        constraints instance_of: Edgehog.Containers.Container.Deployment
+
+        description "The container deployment the device has to initiate"
+        allow_nil? false
+      end
 
       argument :deployment, :struct do
         constraints instance_of: Deployment

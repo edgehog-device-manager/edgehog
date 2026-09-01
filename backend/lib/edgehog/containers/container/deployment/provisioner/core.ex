@@ -51,9 +51,8 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.Core do
     tenant = Keyword.fetch!(opts, :tenant)
     deployment = Keyword.fetch!(opts, :deployment)
 
-    with {:ok, resource} <- Ash.load(resource, [:container, :device], tenant: tenant),
-         {:ok, actual_resource} <- Map.fetch(resource, :container),
-         {:ok, device} <- Map.fetch(resource, :device),
+    with {:ok, actual_resource} <- Ash.load(resource, [:container, :device], tenant: tenant),
+         {:ok, device} <- Map.fetch(actual_resource, :device),
          {:ok, device} <-
            Devices.send_create_container_request(device, actual_resource, deployment,
              tenant: tenant

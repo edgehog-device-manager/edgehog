@@ -99,7 +99,7 @@ defmodule Edgehog.Devices do
 
       define :send_create_container_request,
         action: :send_create_container_request,
-        args: [:container, :deployment]
+        args: [:container_deployment, :deployment]
 
       define :send_create_network_request,
         action: :send_create_network_request,
