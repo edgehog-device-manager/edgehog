@@ -375,5 +375,6 @@ defmodule Edgehog.Containers do
     resource Upgrade
     resource DeploymentContainerDeployment
     resource Edgehog.Containers.ReleaseContainerDependencies
+    resource Edgehog.Containers.FileBind
   end
 end
