@@ -212,6 +212,43 @@ should_skip_file() {
 
 # ------------------------ REUSE.toml HELPERS ------------------------
 
+# Check if a file format cannot support inline comment headers
+is_non_headerable_file() {
+  local file="$1"
+  local ext="${file##*.}"
+
+  case "$ext" in
+    json|png|jpg|jpeg|gif|svg|ico|webp|lock|po|pot|drawio|woff|woff2|ttf|eot|txt|csv|pdf|mp4|mp3|zip|tar|gz)
+      return 0
+      ;;
+  esac
+
+  case "$file" in
+    *.json|*.lock|*.sobelow-conf|.sobelow-conf)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+# Add a new annotation entry to REUSE.toml for a non-headerable file
+add_to_reuse_toml() {
+  local file="$1"
+  local license="${2:-Apache-2.0}"
+
+  echo "  -> Adding entry to REUSE.toml for non-headerable file: [$file]"
+
+  cat <<EOF >> "$REUSE_CONFIG"
+
+[[annotations]]
+path = "$file"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "$CURRENT_YEAR SECO Mind Srl"
+SPDX-License-Identifier = "$license"
+EOF
+}
+
 # Find matching pattern in REUSE.toml for a given file
 get_matching_reuse_pattern() {
   local file="$1"
@@ -283,30 +320,6 @@ update_reuse_toml_year() {
 }
 
 # ------------------------ INLINE HEADER HELPERS ------------------------
-
-# Extract year from .license sidecar file
-get_license_file_year() {
-  local file="$1"
-  local license_file="$PROJECT_ROOT/${file}.license"
-
-  # Check if .license file exists
-  if [[ ! -f "$license_file" ]]; then
-    return 1
-  fi
-
-  # Look for copyright patterns in the license file
-  local year_match
-  year_match=$(grep -iE "(copyright|©|SPDX-FileCopyrightText)" "$license_file" 2>/dev/null \
-    | grep -oE '[0-9]{4}(-[0-9]{4})?' \
-    | tail -1 || true)
-
-  if [[ -z "$year_match" ]]; then
-    echo "missing"
-  else
-    echo "$year_match"
-  fi
-  return 0
-}
 
 # Extract year from inline file header
 get_inline_header_year() {
@@ -387,8 +400,6 @@ check_file() {
   if [[ -n "$matched_pattern" ]]; then
     source="REUSE.toml"
     found_year=$(get_reuse_year_for_pattern "$matched_pattern")
-  elif found_year=$(get_license_file_year "$file" 2>/dev/null); then
-    source=".license"
   else
     source="inline"
     found_year=$(get_inline_header_year "$file")
@@ -443,14 +454,9 @@ fix_file() {
     return 0
   fi
 
-  # Check .license file or inline header
-  local source=""
-  if found_year=$(get_license_file_year "$file" 2>/dev/null); then
-    source=".license"
-  else
-    found_year=$(get_inline_header_year "$file")
-    source="inline"
-  fi
+  # Check inline header
+  local source="inline"
+  found_year=$(get_inline_header_year "$file")
 
   if year_contains_current "$found_year"; then
     emit_result "PASS" "$file"
@@ -458,6 +464,16 @@ fix_file() {
     return 0
   fi
 
+  # If file cannot support inline comment headers, add it to REUSE.toml
+  if is_non_headerable_file "$file"; then
+    add_to_reuse_toml "$file"
+    emit_result "FIXED" "$file" "source:REUSE.toml"
+    FIXED_FILES+=("$file")
+    ((++FILES_FIXED))
+    return 0
+  fi
+
+  # For headerable files, annotate inline
   uv run reuse annotate \
     --copyright 'SECO Mind Srl' \
     --copyright-style string \
