@@ -82,8 +82,35 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   `{:error, error, deployment}` convention, so that it's understandable for which
   deployment the error was generated.
   """
+
+  # Logging functions
+
+  def log_start_completed(device_id) do
+    Logger.info("""
+    Successfully started provisioning of all pending deployments on device #{device_id}
+    """)
+  end
+
+  def log_start_errors(device) do
+    Logger.warning("""
+    It was not possible to start all the deployments for the device #{device.device_id}. Further details will be logged.
+    """)
+  end
+
   def log_errors(errors, device) do
     Enum.each(errors, &log_error(&1, device))
+  end
+
+  def log_start_unexpected_error(device_id, error) do
+    Logger.error("""
+    Unexpected error while starting deployments for device #{device_id}: #{inspect(error)}. Shutting down the starter.
+    """)
+  end
+
+  def log_start_terminated(device_id, reason) do
+    Logger.debug("""
+    Terminating deployments starter server for device #{device_id} with reason #{inspect(reason)}.
+    """)
   end
 
   defp log_error({:error, error, deployment}, device) do

@@ -82,6 +82,43 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   @callback ready?(resource()) :: boolean()
 
   @doc """
+  Logs when subscribing to resource events on the given topic.
+  """
+  @callback log_subscribing_to_events(String.t()) :: :ok
+
+  @doc """
+  Logs when subscribing to device status events.
+  """
+  @callback log_subscribing_to_device_status(String.t()) :: :ok
+
+  @doc """
+  Logs the current device online/offline status.
+  """
+  @callback log_device_status(String.t(), boolean()) :: :ok
+
+  @doc """
+  Logs when provisioning starts for a resource.
+
+  Receives the actual resource that was sent and the device it was sent to.
+  """
+  @callback log_provisioning_started(resource(), resource()) :: :ok
+
+  @doc """
+  Logs when a send to device operation fails.
+  """
+  @callback log_api_error(resource(), error()) :: :ok
+
+  @doc """
+  Logs when provisioning fails for a resource.
+  """
+  @callback log_provisioning_failed(resource(), term()) :: :ok
+
+  @doc """
+  Logs when provisioning completes successfully for a resource.
+  """
+  @callback log_provisioning_completed(resource(), non_neg_integer()) :: :ok
+
+  @doc """
   Returns the via tuple used as the name for the provisioner on its registry.
   """
   @callback name(resource()) :: {:via, Registry, {provisioner_registry(), id()}}

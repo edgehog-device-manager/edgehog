@@ -58,11 +58,7 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
            Devices.send_create_network_request(device, actual_resource, deployment,
              tenant: tenant
            ) do
-      Logger.info("""
-      Network #{actual_resource.id} provisioned on device #{device.device_id}. Waiting events
-      """)
-
-      :ok
+      log_provisioning_started(actual_resource, device)
     end
   end
 
@@ -95,4 +91,36 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.Core do
   end
 
   defp maybe_update(other, _resource, _tenant), do: other
+
+  # Logging functions
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_provisioning_started(resource, device) do
+    Logger.info("""
+    Network #{resource.id} provisioned on device #{device.device_id}. Waiting events
+    """)
+  end
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_api_error(resource, error) do
+    if temporary_error?(error) do
+      Logger.warning(
+        "Error while sending the network #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
+      )
+    else
+      Logger.error(
+        "Unrecoverable error while sending the network #{resource.id}: #{inspect(error)}. Terminating."
+      )
+    end
+  end
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_provisioning_failed(resource, reason) do
+    Logger.info("Provisioner for network #{resource.id} gave up with reason #{inspect(reason)}.")
+  end
+
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def log_provisioning_completed(resource, retries) do
+    Logger.info("Network #{resource.id} successfully provisioned after #{retries} retries.")
+  end
 end

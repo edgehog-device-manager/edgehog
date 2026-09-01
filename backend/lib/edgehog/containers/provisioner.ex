@@ -81,8 +81,6 @@ defmodule Edgehog.Containers.Provisioner do
       alias unquote(core_module), as: Core
       alias unquote(resource_module), as: Resource
 
-      require Logger
-
       @before_compile unquote(__MODULE__)
 
       # credo:disable-for-lines:2
@@ -181,16 +179,13 @@ defmodule Edgehog.Containers.Provisioner do
 
         topic = Core.subscribe_topic(resource)
 
-        Logger.info("Subscribing to events on #{topic}")
         Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
-
-        Logger.info("Subscribing to status events of device #{device_id}")
 
         Phoenix.PubSub.subscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
 
-        Logger.debug(
-          "Device #{device_id} is currently #{if device_online?, do: "online", else: "offline"}"
-        )
+        Core.log_subscribing_to_events(topic)
+        Core.log_subscribing_to_device_status(device_id)
+        Core.log_device_status(device_id, device_online?)
 
         # If the provisioning does not complete within the deadline, the
         # provisioner gives up and broadcasts a failure that the orchestrator reacts
@@ -257,9 +252,7 @@ defmodule Edgehog.Containers.Provisioner do
       # failure so that the orchestrator can react
       @impl GenServer
       def handle_info(:give_up, state) do
-        Logger.warning("""
-        Resource #{state.resource.id} provisioning timed out. Giving up.
-        """)
+        Core.log_provisioning_failed(state.resource, :timeout_hit)
 
         {:stop, {:shutdown, :timeout_hit}, state}
       end
@@ -303,18 +296,16 @@ defmodule Edgehog.Containers.Provisioner do
           result: result
         } = state
 
-        Logger.info("""
-        Resource #{id} successfully provisioned after #{retries} retries.
-        """)
-
         Telemetry.provisioning_completed(resource, context, started_at, retries, result)
+
+        Core.log_provisioning_completed(resource, retries)
 
         # Broadcast readiness so that the orchestrator can proceed
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:ready, resource})
 
         # Unsubscribe from events, we're terminating
         Phoenix.PubSub.unsubscribe(Edgehog.PubSub, Core.subscribe_topic(resource))
-        Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
+        Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "devices:offline:#{resource.device_id}")
       end
 
       @impl GenServer
@@ -327,9 +318,7 @@ defmodule Edgehog.Containers.Provisioner do
           retries: retries
         } = state
 
-        Logger.info("""
-        Provisioner for resource #{id} gave up with reason #{inspect(reason)}.
-        """)
+        Core.log_provisioning_failed(resource, reason)
 
         Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
 
@@ -352,14 +341,7 @@ defmodule Edgehog.Containers.Provisioner do
 
         Telemetry.provisioning_failed(resource, context, started_at, retries, :unexpected)
 
-        Logger.warning(
-          """
-          Unexpectedly terminating provisioner for resource #{id} on device #{device_id}.
-          Reason: #{inspect(reason)}
-          """,
-          reason: reason,
-          provisioner_state: state
-        )
+        Core.log_provisioning_failed(resource, reason)
       end
 
       defp maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
@@ -395,24 +377,12 @@ defmodule Edgehog.Containers.Provisioner do
             {:noreply, new_state, timeout}
 
           error ->
-            log_api_error(error, resource.id)
+            Core.log_api_error(resource, error)
             timeout = timeout(state)
 
             if Core.temporary_error?(error),
               do: {:noreply, state, timeout},
               else: {:stop, {:shutdown, :unsolvable_api_error}, state}
-        end
-      end
-
-      defp log_api_error(error, resource_id) do
-        if Core.temporary_error?(error) do
-          Logger.warning(
-            "Error while sending the resource #{resource_id}: #{inspect(error)}. The operation will be retried shortly."
-          )
-        else
-          Logger.error(
-            "Unrecoverable error while sending the resource #{resource_id}: #{inspect(error)}. Terminating."
-          )
         end
       end
 

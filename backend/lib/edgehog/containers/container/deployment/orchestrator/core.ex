@@ -241,7 +241,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
         Map.put(state, :image_provisioning, :started)
 
       {:error, reason} ->
-        Logger.warning("Error while starting image #{id} provisioner: #{inspect(reason)}")
+        log_provisioner_start_failed("image", id, reason)
 
         state
         |> Map.put(:image_provisioning, :failed)
@@ -280,7 +280,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
         Map.update(state, :volumes_to_provision, [], &[volume_deployment | &1])
 
       {:error, reason} ->
-        Logger.warning("Error while starting volume #{id} provisioner: #{inspect(reason)}")
+        log_provisioner_start_failed("volume", id, reason)
 
         state
         |> Map.put(:volume_provisioning, :failed)
@@ -319,7 +319,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
         Map.update(state, :networks_to_provision, [], &[network_deployment | &1])
 
       {:error, reason} ->
-        Logger.warning("Error while starting network #{id} provisioner: #{inspect(reason)}")
+        log_provisioner_start_failed("network", id, reason)
 
         state
         |> Map.put(:network_provisioning, :failed)
@@ -363,9 +363,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
         Map.update(state, :device_mappings_to_provision, [], &[device_mapping_deployment | &1])
 
       {:error, reason} ->
-        Logger.warning(
-          "Error while starting device_mapping #{id} provisioner: #{inspect(reason)}"
-        )
+        log_provisioner_start_failed("device_mapping", id, reason)
 
         state
         |> Map.put(:device_mapping_provisioning, :failed)
@@ -409,9 +407,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
         Map.update(state, :device_requests_to_provision, [], &[device_request_deployment | &1])
 
       {:error, reason} ->
-        Logger.warning(
-          "Error while starting device_request #{id} provisioner: #{inspect(reason)}"
-        )
+        log_provisioner_start_failed("device_request", id, reason)
 
         state
         |> Map.put(:device_request_provisioning, :failed)
@@ -444,11 +440,41 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
         |> Map.put(:container_provisioning, :started)
 
       {:error, reason} ->
-        Logger.warning("Error while starting container #{id} provisioner: #{inspect(reason)}")
+        log_provisioner_start_failed("container", id, reason)
 
         state
         |> Map.put(:container_provisioning, :failed)
         |> Map.put(:provisioning_failed, true)
     end
+  end
+
+  # Logging functions
+
+  def log_resources_loading(container_deployment_id) do
+    Logger.debug("Loading resources for container deployment #{container_deployment_id}")
+  end
+
+  def log_load_resources_failed(container_deployment_id, reason) do
+    Logger.error("""
+    Error while loading the resources for container deployment #{container_deployment_id}: #{inspect(reason)}.
+
+    The container deployment will be marked as failed.
+    """)
+  end
+
+  def log_provisioner_failed(container_deployment_id) do
+    Logger.warning(
+      "A provisioner for container deployment #{container_deployment_id} gave up. Failing the container deployment."
+    )
+  end
+
+  def log_provisioning_failed(container_deployment_id) do
+    Logger.warning("Container deployment #{container_deployment_id} provisioning failed.")
+  end
+
+  def log_provisioner_start_failed(resource_type, resource_id, reason) do
+    Logger.warning(
+      "Error while starting #{resource_type} #{resource_id} provisioner: #{inspect(reason)}"
+    )
   end
 end
