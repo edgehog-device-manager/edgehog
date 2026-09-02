@@ -98,3 +98,105 @@ path = "frontend/.watchmanconfig"
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 Seco Mind Srl"
 SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ".github/pull_request_template.md"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2022-2026 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "dprint.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/.sobelow-conf"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "backend/mix.lock"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "CC0-1.0"
+
+[[annotations]]
+path = "backend/flake.lock"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/docs/image_sources/edgehog_architecture.drawio"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/priv/gettext/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "backend/rel/overlays/bin/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/components.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2025-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = ["frontend/package.json", "frontend/package-lock.json"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/public/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/relay.config.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/src/api/schema.graphql"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/src/assets/images/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/src/i18n/langs/**"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/tsconfig*.json"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2021-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
+
+[[annotations]]
+path = "frontend/vite.config.ts"
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2023-2026 SECO Mind Srl"
+SPDX-License-Identifier = "Apache-2.0"
