@@ -81,7 +81,7 @@ defmodule Edgehog.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.8.12"},
+      {:phoenix, "~> 1.8.13"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_ecto, "~> 4.7"},
       {:ecto_sql, "~> 3.13"},
