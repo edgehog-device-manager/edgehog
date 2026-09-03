@@ -34,7 +34,7 @@ defmodule Edgehog.Containers.Validations.Dangling do
 
       if dangling?,
         do: :ok,
-        else: {:error, :resource_in_use}
+        else: {:error, message: "The resource is in use and cannot be deleted."}
     end
   end
 

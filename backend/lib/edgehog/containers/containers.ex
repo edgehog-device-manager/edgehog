@@ -166,6 +166,8 @@ defmodule Edgehog.Containers do
 
       update Container, :update_container, :update
 
+      destroy Container, :delete_container, :destroy
+
       create ImageCredentials, :create_image_credentials, :create do
         description "Create image credentials."
       end
@@ -214,7 +216,6 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.Container do
       define :fetch_container, action: :read, get_by: [:id]
       define :containers_with_image, action: :filter_by_image, args: [:image_id]
-      define :destroy_container_if_dangling, action: :destroy_if_dangling
     end
 
     resource Edgehog.Containers.Container.Deployment do

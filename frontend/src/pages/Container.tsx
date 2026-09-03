@@ -17,6 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Suspense, useCallback, useEffect, useState } from "react";
+import { Stack } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -34,12 +35,14 @@ import type {
   Container_getContainer_Query$data,
 } from "@/api/__generated__/Container_getContainer_Query.graphql";
 import { Container_updateContainer_Mutation } from "@/api/__generated__/Container_updateContainer_Mutation.graphql";
+import type { Container_deleteContainer_Mutation } from "@/api/__generated__/Container_deleteContainer_Mutation.graphql";
 
-import { Link, Route } from "@/Navigation";
+import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
 import ContainerDetails from "@/components/apps/containers/container-details/ContainerDetails";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import Icon from "@/components/ui/icon/Icon";
@@ -71,13 +74,25 @@ const UPDATE_CONTAINER_MUTATION = graphql`
   }
 `;
 
+const DELETE_CONTAINER_MUTATION = graphql`
+  mutation Container_deleteContainer_Mutation($containerId: ID!) {
+    deleteContainer(id: $containerId) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
 interface ContainerContentProps {
   container: NonNullable<Container_getContainer_Query$data["container"]>;
 }
 
 const ContainerContent = ({ container }: ContainerContentProps) => {
   const { containerId = "" } = useParams();
+  const navigate = useNavigate();
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
   const [containerDraftName, setContainerDraftName] = useState(
@@ -90,6 +105,9 @@ const ContainerContent = ({ container }: ContainerContentProps) => {
     UPDATE_CONTAINER_MUTATION,
   );
 
+  const [deleteContainer, isDeletingContainer] =
+    useMutation<Container_deleteContainer_Mutation>(DELETE_CONTAINER_MUTATION);
+
   const handleAPIErrors = useCallback((errors: PayloadError[]) => {
     const errorFeedback = errors
       .map(({ fields, message }) =>
@@ -99,6 +117,38 @@ const ContainerContent = ({ container }: ContainerContentProps) => {
 
     setErrorFeedback(errorFeedback);
   }, []);
+
+  const handleShowDeleteModal = useCallback(() => {
+    setShowDeleteModal(true);
+  }, []);
+
+  const handleDeleteContainer = useCallback(() => {
+    deleteContainer({
+      variables: { containerId },
+      onCompleted(_data, errors) {
+        if (!errors || errors.length === 0 || errors[0].code === "not_found") {
+          return navigate({ route: Route.containers });
+        }
+
+        const errorFeedback = errors
+          .map(({ fields, message }) =>
+            fields.length ? `${fields.join(" ")} ${message}` : message,
+          )
+          .join(". \n");
+        setErrorFeedback(errorFeedback);
+        setShowDeleteModal(false);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="pages.Container.deletionErrorFeedback"
+            defaultMessage="Could not delete the Container, please try again."
+          />,
+        );
+        setShowDeleteModal(false);
+      },
+    });
+  }, [deleteContainer, containerId, navigate]);
 
   const handleEditClick = useCallback(() => {
     setIsSavingName(true);
@@ -206,6 +256,45 @@ const ContainerContent = ({ container }: ContainerContentProps) => {
 
           <ContainerDetails container={container} />
         </div>
+
+        {showDeleteModal && (
+          <DeleteModal
+            confirmText={container.name}
+            onCancel={() => setShowDeleteModal(false)}
+            onConfirm={handleDeleteContainer}
+            isDeleting={isDeletingContainer}
+            title={
+              <FormattedMessage
+                id="pages.Container.deleteModal.title"
+                defaultMessage="Delete Container"
+              />
+            }
+          >
+            <p>
+              <FormattedMessage
+                id="pages.Container.deleteModal.description"
+                defaultMessage="This action cannot be undone. This will permanently delete the Container <bold>{name}</bold>."
+                values={{
+                  name: container.name,
+                  bold: (chunks) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
+          </DeleteModal>
+        )}
+
+        <Stack
+          direction="horizontal"
+          gap={3}
+          className="justify-content-end align-items-center mt-2"
+        >
+          <Button variant="danger" onClick={handleShowDeleteModal}>
+            <FormattedMessage
+              id="pages.Container.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        </Stack>
       </Page.Main>
     </Page>
   );

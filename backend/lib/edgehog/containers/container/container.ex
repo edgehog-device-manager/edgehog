@@ -31,11 +31,11 @@ defmodule Edgehog.Containers.Container do
   alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Container.Validations.BindsFormat
   alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
+  alias Edgehog.Containers.Container.Validations.NoRefs
   alias Edgehog.Containers.Container.Validations.VolumeTargetUniqueness
   alias Edgehog.Containers.ContainerVolume
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Types.RestartPolicy
-  alias Edgehog.Containers.Validations
 
   graphql do
     type :container
@@ -59,7 +59,6 @@ defmodule Edgehog.Containers.Container do
   actions do
     defaults [
       :read,
-      :destroy,
       create: [
         :name,
         :port_bindings,
@@ -205,12 +204,16 @@ defmodule Edgehog.Containers.Container do
       accept [:name]
     end
 
-    destroy :destroy_if_dangling do
-      description "Destroys the container if it's dangling (not referenced by any release)"
+    destroy :destroy do
+      primary? true
+
+      description "Destroys the container if it's dangling (not referenced by any release or deployment)"
 
       require_atomic? false
-      validate Validations.Dangling
-      change {Changes.MaybeDestroyChildren, children: [:image, :device_mappings]}
+      validate NoRefs
+
+      change {Changes.MaybeDestroyChildren,
+              children: [:image, :device_mappings, :device_requests]}
     end
   end
 
@@ -366,6 +369,7 @@ defmodule Edgehog.Containers.Container do
     many_to_many :volumes, Edgehog.Containers.Volume do
       through ContainerVolume
       join_relationship :container_volumes
+      public? true
     end
 
     many_to_many :networks, Edgehog.Containers.Network do
@@ -390,14 +394,14 @@ defmodule Edgehog.Containers.Container do
     has_many :device_requests, Edgehog.Containers.DeviceRequest do
       public? true
     end
+
+    has_many :container_deployments, Edgehog.Containers.Container.Deployment do
+      public? true
+    end
   end
 
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
-
-    calculate :dangling?,
-              :boolean,
-              {Edgehog.Containers.Calculations.Dangling, [parent: :releases]}
   end
 
   identities do

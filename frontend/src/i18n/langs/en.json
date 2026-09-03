@@ -168,6 +168,18 @@
     "defaultMessage": "Name",
     "description": "Title for the Name column of the containers table"
   },
+  "components.apps.containers.containers-table.ContainersTable.actionsTitle": {
+    "defaultMessage": "Actions"
+  },
+  "components.apps.containers.containers-table.ContainersTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Container <bold>{name}</bold>."
+  },
+  "components.apps.containers.containers-table.ContainersTable.deleteModal.title": {
+    "defaultMessage": "Delete Container"
+  },
+  "components.apps.containers.containers-table.ContainersTable.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the container, please try again."
+  },
   "components.apps.containers.containers-table.ContainersTable.imageTitle": {
     "defaultMessage": "Image",
     "description": "Title for the Image column of the containers table"
@@ -3604,6 +3616,18 @@
   },
   "pages.Container.containerNotFound.title": {
     "defaultMessage": "Container not found."
+  },
+  "pages.Container.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "pages.Container.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Container <bold>{name}</bold>."
+  },
+  "pages.Container.deleteModal.title": {
+    "defaultMessage": "Delete Container"
+  },
+  "pages.Container.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Container, please try again."
   },
   "pages.Container.name": {
     "defaultMessage": "Container Name"

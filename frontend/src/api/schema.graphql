@@ -4100,6 +4100,15 @@ type container_result {
   destroyed: ID
 }
 
+"The result of the :delete_container mutation"
+type DeleteContainerResult {
+  "The record that was successfully deleted"
+  result: Container
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 "The result of the :update_container mutation"
 type UpdateContainerResult {
   "The successful result of the mutation"
@@ -4458,11 +4467,13 @@ input ContainerFilterInput {
   imageId: ContainerFilterImageId
   image: ImageFilterInput
   releases: ReleaseFilterInput
+  volumes: VolumeFilterInput
   networks: NetworkFilterInput
   devices: DeviceFilterInput
   containerVolumes: ContainerVolumeFilterInput
   deviceMappings: DeviceMappingFilterInput
   deviceRequests: DeviceRequestFilterInput
+  containerDeployments: ContainerDeploymentFilterInput
 }
 
 input ContainerSortInput {
@@ -4516,6 +4527,19 @@ type Container implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ReleaseConnection!
+  volumes(
+    "How to sort the records in the response"
+    sort: [VolumeSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [Volume!]!
   networks(
     "How to sort the records in the response"
     sort: [NetworkSortInput]
@@ -4611,6 +4635,19 @@ type Container implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceRequestConnection!
+  containerDeployments(
+    "How to sort the records in the response"
+    sort: [ContainerDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerDeploymentFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [ContainerDeployment!]!
 }
 
 type application_result {
@@ -9738,6 +9775,9 @@ type RootMutationType {
 
   "Updates a container."
   updateContainer(id: ID!, input: UpdateContainerInput): UpdateContainerResult
+
+  "Destroys the container if it's dangling (not referenced by any release or deployment)"
+  deleteContainer(id: ID!): DeleteContainerResult
 
   "Deploy the application on a device"
   deployRelease(input: DeployReleaseInput!): DeployReleaseResult

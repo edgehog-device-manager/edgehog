@@ -17,17 +17,21 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import compact from "lodash/compact";
-import { useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, useFragment, useMutation } from "react-relay/hooks";
 
 import type {
   ContainersTable_ContainerEdgeFragment$data,
   ContainersTable_ContainerEdgeFragment$key,
 } from "@/api/__generated__/ContainersTable_ContainerEdgeFragment.graphql";
+import type { ContainersTable_deleteContainer_Mutation } from "@/api/__generated__/ContainersTable_deleteContainer_Mutation.graphql";
 
 import { Link, Route } from "@/Navigation";
 import { createColumnHelper } from "@tanstack/react-table";
+import Button from "@/components/ui/button/Button";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import Icon from "@/components/ui/icon/Icon";
 import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 
 /* eslint-disable relay/unused-fields */
@@ -50,12 +54,24 @@ const CONTAINERS_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const DELETE_CONTAINER_MUTATION = graphql`
+  mutation ContainersTable_deleteContainer_Mutation($containerId: ID!) {
+    deleteContainer(id: $containerId) {
+      result {
+        id
+      }
+    }
+  }
+`;
+
 type TableRecord = NonNullable<
   NonNullable<ContainersTable_ContainerEdgeFragment$data>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<TableRecord>();
-const columns = [
+const getColumnsDefinition = (
+  onDeleteClick: (container: TableRecord) => void,
+) => [
   columnHelper.accessor("name", {
     header: () => (
       <FormattedMessage
@@ -92,6 +108,30 @@ const columns = [
       label: "Image",
     },
   }),
+  columnHelper.accessor((row) => row, {
+    id: "action",
+    header: () => (
+      <FormattedMessage
+        id="components.apps.containers.containers-table.ContainersTable.actionsTitle"
+        defaultMessage="Actions"
+      />
+    ),
+    meta: {
+      label: "Actions",
+    },
+    cell: ({ row }) => {
+      const container = row.original;
+
+      return (
+        <Button
+          className="btn p-0 border-0 bg-transparent"
+          onClick={() => onDeleteClick(container)}
+        >
+          <Icon className="text-danger" icon="delete" />
+        </Button>
+      );
+    },
+  }),
 ];
 
 type ContainersTableProps = {
@@ -120,17 +160,95 @@ const ContainersTable = ({
     return compact(containersFragment?.edges?.map((e) => e?.node)) ?? [];
   }, [containersFragment]);
 
+  const [containerToDelete, setContainerToDelete] =
+    useState<TableRecord | null>(null);
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const columns = useMemo(() => getColumnsDefinition(setContainerToDelete), []);
+
+  const handleCancelDelete = useCallback(() => {
+    setContainerToDelete(null);
+    setErrorFeedback(null);
+  }, []);
+
+  const [deleteContainer, isDeletingContainer] =
+    useMutation<ContainersTable_deleteContainer_Mutation>(
+      DELETE_CONTAINER_MUTATION,
+    );
+
+  const handleDeleteContainer = useCallback(() => {
+    if (!containerToDelete) return;
+
+    deleteContainer({
+      variables: { containerId: containerToDelete.id },
+      onCompleted(_data, errors) {
+        if (errors) {
+          const errorMessages = errors
+            .map((error) => error.message)
+            .join(". \n");
+          setErrorFeedback(errorMessages);
+          return;
+        }
+
+        setErrorFeedback(null);
+        setContainerToDelete(null);
+      },
+      onError() {
+        setErrorFeedback(
+          <FormattedMessage
+            id="components.apps.containers.containers-table.ContainersTable.deletionErrorFeedback"
+            defaultMessage="Could not delete the container, please try again."
+          />,
+        );
+      },
+      updater(store, response) {
+        const deletedId = response?.deleteContainer?.result?.id;
+        if (!deletedId) return;
+
+        store.delete(deletedId);
+      },
+    });
+  }, [deleteContainer, containerToDelete]);
+
   return (
-    <InfiniteTable
-      className={className}
-      columns={columns}
-      data={containers}
-      loading={loading}
-      onLoadMore={onLoadMore}
-      columnVisibilityKey="containers-table"
-      onSearchChange={onSearchChange}
-      searchText={searchText}
-    />
+    <>
+      <InfiniteTable
+        className={className}
+        columns={columns}
+        data={containers}
+        loading={loading}
+        onLoadMore={onLoadMore}
+        columnVisibilityKey="containers-table"
+        onSearchChange={onSearchChange}
+        searchText={searchText}
+      />
+      {containerToDelete && (
+        <DeleteModal
+          confirmText={containerToDelete.name}
+          onCancel={handleCancelDelete}
+          onConfirm={handleDeleteContainer}
+          isDeleting={isDeletingContainer}
+          title={
+            <FormattedMessage
+              id="components.apps.containers.containers-table.ContainersTable.deleteModal.title"
+              defaultMessage="Delete Container"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.apps.containers.containers-table.ContainersTable.deleteModal.description"
+              defaultMessage="This action cannot be undone. This will permanently delete the Container <bold>{name}</bold>."
+              values={{
+                name: containerToDelete.name,
+                bold: (chunks) => <strong>{chunks}</strong>,
+              }}
+            />
+          </p>
+          {errorFeedback && <p className="text-danger">{errorFeedback}</p>}
+        </DeleteModal>
+      )}
+    </>
   );
 };
 
