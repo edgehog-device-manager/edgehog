@@ -1,15 +1,45 @@
 {
+  "components.apps.containers.container-details.ContainerDetails.autoRemoveLabel": {
+    "defaultMessage": "Auto Remove"
+  },
   "components.apps.containers.container-details.ContainerDetails.bindsLabel": {
     "defaultMessage": "Binds"
   },
+  "components.apps.containers.container-details.ContainerDetails.blkioDeviceReadBpsLabel": {
+    "defaultMessage": "Block I/O Device Read Limit Bps"
+  },
+  "components.apps.containers.container-details.ContainerDetails.blkioDeviceReadIopsLabel": {
+    "defaultMessage": "Block I/O Device Read Limit Iops"
+  },
+  "components.apps.containers.container-details.ContainerDetails.blkioDeviceWriteBpsLabel": {
+    "defaultMessage": "Block I/O Device Write Limit Bps"
+  },
+  "components.apps.containers.container-details.ContainerDetails.blkioDeviceWriteIopsLabel": {
+    "defaultMessage": "Block I/O Device Write Limit Iops"
+  },
+  "components.apps.containers.container-details.ContainerDetails.blkioSection": {
+    "defaultMessage": "Block I/O"
+  },
+  "components.apps.containers.container-details.ContainerDetails.blkioWeightDeviceLabel": {
+    "defaultMessage": "Block I/O Device Weight"
+  },
+  "components.apps.containers.container-details.ContainerDetails.blkioWeightLabel": {
+    "defaultMessage": "Block I/O Weight (0-1000)"
+  },
   "components.apps.containers.container-details.ContainerDetails.capAdd": {
-    "defaultMessage": "Cap Add"
+    "defaultMessage": "Add Capabilities"
   },
   "components.apps.containers.container-details.ContainerDetails.capDrop": {
-    "defaultMessage": "Cap Drop"
+    "defaultMessage": "Drop Capabilities"
   },
   "components.apps.containers.container-details.ContainerDetails.capabilities": {
     "defaultMessage": "Capabilities"
+  },
+  "components.apps.containers.container-details.ContainerDetails.cgroupsModeLabel": {
+    "defaultMessage": "Cgroups Mode"
+  },
+  "components.apps.containers.container-details.ContainerDetails.commandLabel": {
+    "defaultMessage": "Command"
   },
   "components.apps.containers.container-details.ContainerDetails.count": {
     "defaultMessage": "Count"
@@ -26,6 +56,15 @@
   "components.apps.containers.container-details.ContainerDetails.cpuRealtimeRuntimeLabel": {
     "defaultMessage": "CPU Realtime Runtime (microseconds)"
   },
+  "components.apps.containers.container-details.ContainerDetails.cpuSharesLabel": {
+    "defaultMessage": "CPU Shares"
+  },
+  "components.apps.containers.container-details.ContainerDetails.cpusetCpusLabel": {
+    "defaultMessage": "Cpu Sets"
+  },
+  "components.apps.containers.container-details.ContainerDetails.deviceCgroupRulesLabel": {
+    "defaultMessage": "Device Cgroup Rules"
+  },
   "components.apps.containers.container-details.ContainerDetails.deviceIDs": {
     "defaultMessage": "Device IDs"
   },
@@ -38,17 +77,59 @@
   "components.apps.containers.container-details.ContainerDetails.deviceRequestLabel": {
     "defaultMessage": "Device Requests"
   },
+  "components.apps.containers.container-details.ContainerDetails.dnsLabel": {
+    "defaultMessage": "DNS"
+  },
+  "components.apps.containers.container-details.ContainerDetails.dnsOptionsLabel": {
+    "defaultMessage": "DNS Options"
+  },
+  "components.apps.containers.container-details.ContainerDetails.dnsSearchLabel": {
+    "defaultMessage": "DNS Search"
+  },
+  "components.apps.containers.container-details.ContainerDetails.domainnameLabel": {
+    "defaultMessage": "Domainname"
+  },
   "components.apps.containers.container-details.ContainerDetails.driver": {
     "defaultMessage": "Driver"
   },
   "components.apps.containers.container-details.ContainerDetails.driverOptions": {
     "defaultMessage": "Driver Options"
   },
+  "components.apps.containers.container-details.ContainerDetails.entrypointLabel": {
+    "defaultMessage": "Entrypoint"
+  },
   "components.apps.containers.container-details.ContainerDetails.envLabel": {
     "defaultMessage": "Environment (JSON String)"
   },
+  "components.apps.containers.container-details.ContainerDetails.exposedPortsLabel": {
+    "defaultMessage": "Exposed Ports"
+  },
   "components.apps.containers.container-details.ContainerDetails.extraHostsLabel": {
     "defaultMessage": "Extra Hosts"
+  },
+  "components.apps.containers.container-details.ContainerDetails.groupAddLabel": {
+    "defaultMessage": "Group Add"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckIntervalLabel": {
+    "defaultMessage": "Healthcheck Interval (ns)"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckRetriesLabel": {
+    "defaultMessage": "Healthcheck Retries"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckSection": {
+    "defaultMessage": "Healthcheck"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckStartIntervalLabel": {
+    "defaultMessage": "Healthcheck Start Interval (ns)"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckStartPeriodLabel": {
+    "defaultMessage": "Healthcheck Start Period (ns)"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckTestLabel": {
+    "defaultMessage": "Healthcheck Test"
+  },
+  "components.apps.containers.container-details.ContainerDetails.healthcheckTimeoutLabel": {
+    "defaultMessage": "Healthcheck Timeout (ns)"
   },
   "components.apps.containers.container-details.ContainerDetails.hostnameLabel": {
     "defaultMessage": "Hostname"
@@ -61,6 +142,24 @@
   },
   "components.apps.containers.container-details.ContainerDetails.imageReferenceLabel": {
     "defaultMessage": "Image Reference"
+  },
+  "components.apps.containers.container-details.ContainerDetails.ipcModeLabel": {
+    "defaultMessage": "Ipc Mode"
+  },
+  "components.apps.containers.container-details.ContainerDetails.labelsLabel": {
+    "defaultMessage": "Labels"
+  },
+  "components.apps.containers.container-details.ContainerDetails.logConfigLabel": {
+    "defaultMessage": "Log Config"
+  },
+  "components.apps.containers.container-details.ContainerDetails.logTypeLabel": {
+    "defaultMessage": "Log Type"
+  },
+  "components.apps.containers.container-details.ContainerDetails.loggingSection": {
+    "defaultMessage": "Logging"
+  },
+  "components.apps.containers.container-details.ContainerDetails.maskedPathsLabel": {
+    "defaultMessage": "Masked Paths"
   },
   "components.apps.containers.container-details.ContainerDetails.memoryLabel": {
     "defaultMessage": "Memory (bytes)"
@@ -79,6 +178,9 @@
   },
   "components.apps.containers.container-details.ContainerDetails.networkConfigSection": {
     "defaultMessage": "Network Configuration"
+  },
+  "components.apps.containers.container-details.ContainerDetails.networkDisabledLabel": {
+    "defaultMessage": "Network Disabled"
   },
   "components.apps.containers.container-details.ContainerDetails.networkDriverLabel": {
     "defaultMessage": "Driver"
@@ -113,8 +215,14 @@
   "components.apps.containers.container-details.ContainerDetails.noVolumes": {
     "defaultMessage": "No volumes assigned."
   },
+  "components.apps.containers.container-details.ContainerDetails.oomScoreAdjustmentLabel": {
+    "defaultMessage": "OOM Score Adjustment"
+  },
   "components.apps.containers.container-details.ContainerDetails.options": {
     "defaultMessage": "Options"
+  },
+  "components.apps.containers.container-details.ContainerDetails.pidModeLabel": {
+    "defaultMessage": "PID Mode"
   },
   "components.apps.containers.container-details.ContainerDetails.portBindingsLabel": {
     "defaultMessage": "Port Bindings"
@@ -122,8 +230,14 @@
   "components.apps.containers.container-details.ContainerDetails.privilegedLabel": {
     "defaultMessage": "Privileged"
   },
+  "components.apps.containers.container-details.ContainerDetails.processSection": {
+    "defaultMessage": "Process Configuration"
+  },
   "components.apps.containers.container-details.ContainerDetails.readOnlyRootfsLabel": {
     "defaultMessage": "Read-Only Root Filesystem"
+  },
+  "components.apps.containers.container-details.ContainerDetails.readonlyPathsLabel": {
+    "defaultMessage": "Readonly Paths"
   },
   "components.apps.containers.container-details.ContainerDetails.resourceLimitsSection": {
     "defaultMessage": "Resource Limits"
@@ -131,11 +245,29 @@
   "components.apps.containers.container-details.ContainerDetails.restartPolicyLabel": {
     "defaultMessage": "Restart Policy"
   },
+  "components.apps.containers.container-details.ContainerDetails.restartPolicyMaximumRetryCountLabel": {
+    "defaultMessage": "Restart Policy Max Retry Count"
+  },
+  "components.apps.containers.container-details.ContainerDetails.runtimeLabel": {
+    "defaultMessage": "Runtime"
+  },
   "components.apps.containers.container-details.ContainerDetails.runtimeSection": {
     "defaultMessage": "Runtime & Environment"
   },
   "components.apps.containers.container-details.ContainerDetails.securitySection": {
     "defaultMessage": "Security & Capabilities"
+  },
+  "components.apps.containers.container-details.ContainerDetails.securityoptLabel": {
+    "defaultMessage": "Security Opt"
+  },
+  "components.apps.containers.container-details.ContainerDetails.shmSizeLabel": {
+    "defaultMessage": "Shm Size (bytes)"
+  },
+  "components.apps.containers.container-details.ContainerDetails.stopSignalLabel": {
+    "defaultMessage": "Stop Signal"
+  },
+  "components.apps.containers.container-details.ContainerDetails.stopTimeoutLabel": {
+    "defaultMessage": "Stop Timeout"
   },
   "components.apps.containers.container-details.ContainerDetails.storageConfigSection": {
     "defaultMessage": "Storage Configuration"
@@ -143,11 +275,23 @@
   "components.apps.containers.container-details.ContainerDetails.storageOptLabel": {
     "defaultMessage": "Storage Options"
   },
+  "components.apps.containers.container-details.ContainerDetails.sysctlsLabel": {
+    "defaultMessage": "Sysctls"
+  },
   "components.apps.containers.container-details.ContainerDetails.targetLabel": {
     "defaultMessage": "Target"
   },
   "components.apps.containers.container-details.ContainerDetails.tmpfsLabel": {
     "defaultMessage": "Tmpfs"
+  },
+  "components.apps.containers.container-details.ContainerDetails.ulimitsLabel": {
+    "defaultMessage": "Ulimits"
+  },
+  "components.apps.containers.container-details.ContainerDetails.userLabel": {
+    "defaultMessage": "User"
+  },
+  "components.apps.containers.container-details.ContainerDetails.usernsModeLabel": {
+    "defaultMessage": "User Namespace Mode"
   },
   "components.apps.containers.container-details.ContainerDetails.volumeDriver": {
     "defaultMessage": "Volume Driver"
@@ -160,6 +304,9 @@
   },
   "components.apps.containers.container-details.ContainerDetails.volumesLabel": {
     "defaultMessage": "Volumes"
+  },
+  "components.apps.containers.container-details.ContainerDetails.workingDirectoryLabel": {
+    "defaultMessage": "Working Directory"
   },
   "components.apps.containers.containers-overview.ContainersOverview.noContainers": {
     "defaultMessage": "No containers available."
@@ -1969,6 +2116,39 @@
   "forms.CreateContainer.ReferenceLabel": {
     "defaultMessage": "Image Reference"
   },
+  "forms.CreateContainer.blkioAddRateLimitButton": {
+    "defaultMessage": "Add Rate Limit"
+  },
+  "forms.CreateContainer.blkioAddWeightButton": {
+    "defaultMessage": "Add Weight"
+  },
+  "forms.CreateContainer.blkioDeviceReadBpsLabel": {
+    "defaultMessage": "Block I/O Device Read Limit Bps"
+  },
+  "forms.CreateContainer.blkioDeviceReadIopsLabel": {
+    "defaultMessage": "Block I/O Device Read Limit Iops"
+  },
+  "forms.CreateContainer.blkioDeviceWriteBpsLabel": {
+    "defaultMessage": "Block I/O Device Write Limit Bps"
+  },
+  "forms.CreateContainer.blkioDeviceWriteIopsLabel": {
+    "defaultMessage": "Block I/O Device Write Limit Iops"
+  },
+  "forms.CreateContainer.blkioPathLabel": {
+    "defaultMessage": "Path"
+  },
+  "forms.CreateContainer.blkioRateValueLabel": {
+    "defaultMessage": "Rate"
+  },
+  "forms.CreateContainer.blkioWeightDeviceLabel": {
+    "defaultMessage": "Block I/O Device Weight"
+  },
+  "forms.CreateContainer.blkioWeightLabel": {
+    "defaultMessage": "Block I/O Weight (0-1000)"
+  },
+  "forms.CreateContainer.blkioWeightValueLabel": {
+    "defaultMessage": "Weight"
+  },
   "forms.CreateContainer.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
   },
@@ -1981,17 +2161,86 @@
   "forms.CreateContainer.driverOptionsLabel": {
     "defaultMessage": "Driver Options (JSON String)"
   },
+  "forms.CreateContainer.healthcheckIntervalLabel": {
+    "defaultMessage": "Healthcheck Interval (ns)"
+  },
+  "forms.CreateContainer.healthcheckRetriesLabel": {
+    "defaultMessage": "Healthcheck Retries"
+  },
+  "forms.CreateContainer.healthcheckStartIntervalLabel": {
+    "defaultMessage": "Healthcheck Start Interval (ns)"
+  },
+  "forms.CreateContainer.healthcheckStartPeriodLabel": {
+    "defaultMessage": "Healthcheck Start Period (ns)"
+  },
+  "forms.CreateContainer.healthcheckTestLabel": {
+    "defaultMessage": "Healthcheck Test"
+  },
+  "forms.CreateContainer.healthcheckTimeoutLabel": {
+    "defaultMessage": "Healthcheck Timeout (ns)"
+  },
   "forms.CreateContainer.imageCredentialsLabel": {
     "defaultMessage": "Image Credentials"
   },
+  "forms.CreateContainer.keyValuePairsKeyLabel": {
+    "defaultMessage": "Key"
+  },
+  "forms.CreateContainer.keyValuePairsValueLabel": {
+    "defaultMessage": "Value"
+  },
+  "forms.CreateContainer.labelsKeyLabel": {
+    "defaultMessage": "Key"
+  },
+  "forms.CreateContainer.labelsValueLabel": {
+    "defaultMessage": "Value"
+  },
+  "forms.CreateContainer.loggingAddLogConfigButton": {
+    "defaultMessage": "Add Log Config"
+  },
+  "forms.CreateContainer.loggingLogConfigLabel": {
+    "defaultMessage": "Log Config"
+  },
+  "forms.CreateContainer.loggingLogTypeLabel": {
+    "defaultMessage": "Log Type"
+  },
   "forms.CreateContainer.nameLabel": {
     "defaultMessage": "Container Name"
+  },
+  "forms.CreateContainer.networkAddDnsButton": {
+    "defaultMessage": "Add DNS"
+  },
+  "forms.CreateContainer.networkAddDnsOptionsButton": {
+    "defaultMessage": "Add DNS Option"
+  },
+  "forms.CreateContainer.networkAddDnsSearchButton": {
+    "defaultMessage": "Add DNS Search"
+  },
+  "forms.CreateContainer.networkAddExposedPortButton": {
+    "defaultMessage": "Add Exposed Port"
   },
   "forms.CreateContainer.networkAddExtraHostButton": {
     "defaultMessage": "Add Extra Host"
   },
   "forms.CreateContainer.networkAddPortBindingButton": {
     "defaultMessage": "Add Port Binding"
+  },
+  "forms.CreateContainer.networkDisabledLabel": {
+    "defaultMessage": "Network Disabled"
+  },
+  "forms.CreateContainer.networkDnsLabel": {
+    "defaultMessage": "DNS"
+  },
+  "forms.CreateContainer.networkDnsOptionsLabel": {
+    "defaultMessage": "DNS Options"
+  },
+  "forms.CreateContainer.networkDnsSearchLabel": {
+    "defaultMessage": "DNS Search"
+  },
+  "forms.CreateContainer.networkDomainnameLabel": {
+    "defaultMessage": "Domainname"
+  },
+  "forms.CreateContainer.networkExposedPortsLabel": {
+    "defaultMessage": "Exposed Ports"
   },
   "forms.CreateContainer.networkExtraHostsLabel": {
     "defaultMessage": "Extra Hosts"
@@ -2008,6 +2257,18 @@
   "forms.CreateContainer.networkPortBindingsLabel": {
     "defaultMessage": "Port Bindings"
   },
+  "forms.CreateContainer.processCommandLabel": {
+    "defaultMessage": "Command"
+  },
+  "forms.CreateContainer.processEntrypointLabel": {
+    "defaultMessage": "Entrypoint"
+  },
+  "forms.CreateContainer.processUserLabel": {
+    "defaultMessage": "User"
+  },
+  "forms.CreateContainer.processWorkingDirectoryLabel": {
+    "defaultMessage": "Working Directory"
+  },
   "forms.CreateContainer.removeDeviceRequestButton": {
     "defaultMessage": "Remove Request"
   },
@@ -2021,10 +2282,16 @@
     "defaultMessage": "CPU Quota (microseconds)"
   },
   "forms.CreateContainer.resourceLimitsCpuRealtimePeriodLabel": {
-    "defaultMessage": "CPU Real-Time Period (microseconds)"
+    "defaultMessage": "CPU Real Time Period (microseconds)"
   },
   "forms.CreateContainer.resourceLimitsCpuRealtimeRuntimeLabel": {
-    "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+    "defaultMessage": "CPU Realtime Runtime (microseconds)"
+  },
+  "forms.CreateContainer.resourceLimitsCpuSharesLabel": {
+    "defaultMessage": "CPU Shares"
+  },
+  "forms.CreateContainer.resourceLimitsCpusetCpusLabel": {
+    "defaultMessage": "Cpu Sets"
   },
   "forms.CreateContainer.resourceLimitsMemoryLabel": {
     "defaultMessage": "Memory (bytes)"
@@ -2033,10 +2300,22 @@
     "defaultMessage": "Memory Reservation (bytes)"
   },
   "forms.CreateContainer.resourceLimitsMemorySwapLabel": {
-    "defaultMessage": "Memory Swap (bytes)"
+    "defaultMessage": "Memory + Swap (bytes)"
   },
   "forms.CreateContainer.resourceLimitsMemorySwappinessLabel": {
     "defaultMessage": "Memory Swappiness (0-100)"
+  },
+  "forms.CreateContainer.resourceLimitsOomScoreAdjLabel": {
+    "defaultMessage": "OOM Score Adjustment"
+  },
+  "forms.CreateContainer.resourceLimitsShmSizeLabel": {
+    "defaultMessage": "Shm Size (bytes)"
+  },
+  "forms.CreateContainer.runtimeAddLabelButton": {
+    "defaultMessage": "Add Label"
+  },
+  "forms.CreateContainer.runtimeAddSysctlButton": {
+    "defaultMessage": "Add Sysctl"
   },
   "forms.CreateContainer.runtimeEnvironmentEnvLabel": {
     "defaultMessage": "Environment (JSON String)"
@@ -2044,14 +2323,74 @@
   "forms.CreateContainer.runtimeEnvironmentRestartPolicyLabel": {
     "defaultMessage": "Restart Policy"
   },
+  "forms.CreateContainer.runtimeEnvironmentRuntimeLabel": {
+    "defaultMessage": "Runtime"
+  },
+  "forms.CreateContainer.runtimeLabelsLabel": {
+    "defaultMessage": "Labels"
+  },
+  "forms.CreateContainer.runtimeRestartPolicyMaxRetryLabel": {
+    "defaultMessage": "Restart Policy Max Retry Count"
+  },
+  "forms.CreateContainer.runtimeStopSignalLabel": {
+    "defaultMessage": "Stop Signal"
+  },
+  "forms.CreateContainer.runtimeStopTimeoutLabel": {
+    "defaultMessage": "Stop Timeout"
+  },
+  "forms.CreateContainer.runtimeSysctlsLabel": {
+    "defaultMessage": "Sysctls"
+  },
+  "forms.CreateContainer.securityAddDeviceCgroupRuleButton": {
+    "defaultMessage": "Add Rule"
+  },
+  "forms.CreateContainer.securityAddGroupAddButton": {
+    "defaultMessage": "Add Group"
+  },
+  "forms.CreateContainer.securityAddMaskedPathButton": {
+    "defaultMessage": "Add Masked Path"
+  },
+  "forms.CreateContainer.securityAddReadonlyPathButton": {
+    "defaultMessage": "Add Readonly Path"
+  },
+  "forms.CreateContainer.securityAddSecurityOptButton": {
+    "defaultMessage": "Add Security Opt"
+  },
   "forms.CreateContainer.securityCapabilitiesCapAddLabel": {
-    "defaultMessage": "Cap Add"
+    "defaultMessage": "Add Capabilities"
   },
   "forms.CreateContainer.securityCapabilitiesCapDropLabel": {
-    "defaultMessage": "Cap Drop"
+    "defaultMessage": "Drop Capabilities"
   },
   "forms.CreateContainer.securityCapabilitiesPrivilegedLabel": {
     "defaultMessage": "Privileged"
+  },
+  "forms.CreateContainer.securityCgroupsModeLabel": {
+    "defaultMessage": "Cgroups Mode"
+  },
+  "forms.CreateContainer.securityDeviceCgroupRulesLabel": {
+    "defaultMessage": "Device Cgroup Rules"
+  },
+  "forms.CreateContainer.securityGroupAddLabel": {
+    "defaultMessage": "Additional groups"
+  },
+  "forms.CreateContainer.securityIpcModeLabel": {
+    "defaultMessage": "Ipc Mode"
+  },
+  "forms.CreateContainer.securityMaskedPathsLabel": {
+    "defaultMessage": "Masked Paths"
+  },
+  "forms.CreateContainer.securityPidModeLabel": {
+    "defaultMessage": "PID Mode"
+  },
+  "forms.CreateContainer.securityReadonlyPathsLabel": {
+    "defaultMessage": "Readonly Paths"
+  },
+  "forms.CreateContainer.securitySecurityOptLabel": {
+    "defaultMessage": "Security Opt"
+  },
+  "forms.CreateContainer.securityUsernsModeLabel": {
+    "defaultMessage": "User Namespace Mode"
   },
   "forms.CreateContainer.storageAddBindsButton": {
     "defaultMessage": "Add Binds"
@@ -2065,11 +2404,20 @@
   "forms.CreateContainer.storageAddVolumeButton": {
     "defaultMessage": "Add Volume"
   },
+  "forms.CreateContainer.storageAutoRemoveLabel": {
+    "defaultMessage": "Auto Remove"
+  },
   "forms.CreateContainer.storageBindsLabel": {
     "defaultMessage": "Binds"
   },
   "forms.CreateContainer.storageOptLabel": {
     "defaultMessage": "Storage Options"
+  },
+  "forms.CreateContainer.storageOptsKeyLabel": {
+    "defaultMessage": "Key"
+  },
+  "forms.CreateContainer.storageOptsValueLabel": {
+    "defaultMessage": "Value"
   },
   "forms.CreateContainer.storageReadOnlyRootfsLabel": {
     "defaultMessage": "Read-Only Root Filesystem"
@@ -2091,6 +2439,27 @@
   },
   "forms.CreateContainer.submitButton": {
     "defaultMessage": "Create Container"
+  },
+  "forms.CreateContainer.tmpfsOptionsLabel": {
+    "defaultMessage": "Options"
+  },
+  "forms.CreateContainer.tmpfsPathLabel": {
+    "defaultMessage": "Path"
+  },
+  "forms.CreateContainer.ulimitsAddButton": {
+    "defaultMessage": "Add Ulimit"
+  },
+  "forms.CreateContainer.ulimitsHardLabel": {
+    "defaultMessage": "Hard"
+  },
+  "forms.CreateContainer.ulimitsLabel": {
+    "defaultMessage": "Ulimits"
+  },
+  "forms.CreateContainer.ulimitsNameLabel": {
+    "defaultMessage": "Name"
+  },
+  "forms.CreateContainer.ulimitsSoftLabel": {
+    "defaultMessage": "Soft"
   },
   "forms.CreateDeploymentCampaign.applicationLabel": {
     "defaultMessage": "Application"
@@ -2924,6 +3293,12 @@
   "forms.UpdateSystemModel.submitButton": {
     "defaultMessage": "Update"
   },
+  "forms.fieldExplanation.autoRemove.description": {
+    "defaultMessage": "Automatically remove the container filesystem when it exits."
+  },
+  "forms.fieldExplanation.autoRemove.title": {
+    "defaultMessage": "Auto Remove"
+  },
   "forms.fieldExplanation.binds.description": {
     "defaultMessage": "Maps host directories to container directories for persistent storage or sharing. Format: /host/path:/container/path[:ro|rw]"
   },
@@ -2932,6 +3307,60 @@
   },
   "forms.fieldExplanation.binds.title": {
     "defaultMessage": "Binds"
+  },
+  "forms.fieldExplanation.blkioDeviceReadBps.description": {
+    "defaultMessage": "Per-device read rate limit in bytes per second."
+  },
+  "forms.fieldExplanation.blkioDeviceReadBps.example": {
+    "defaultMessage": "10485760 (10 MB/s on /dev/sda)"
+  },
+  "forms.fieldExplanation.blkioDeviceReadBps.title": {
+    "defaultMessage": "Device Read Bps"
+  },
+  "forms.fieldExplanation.blkioDeviceReadIops.description": {
+    "defaultMessage": "Per-device read rate limit in I/O operations per second."
+  },
+  "forms.fieldExplanation.blkioDeviceReadIops.example": {
+    "defaultMessage": "1000"
+  },
+  "forms.fieldExplanation.blkioDeviceReadIops.title": {
+    "defaultMessage": "Device Read IOPS"
+  },
+  "forms.fieldExplanation.blkioDeviceWriteBps.description": {
+    "defaultMessage": "Per-device write rate limit in bytes per second."
+  },
+  "forms.fieldExplanation.blkioDeviceWriteBps.example": {
+    "defaultMessage": "5242880 (5 MB/s on /dev/sda)"
+  },
+  "forms.fieldExplanation.blkioDeviceWriteBps.title": {
+    "defaultMessage": "Device Write Bps"
+  },
+  "forms.fieldExplanation.blkioDeviceWriteIops.description": {
+    "defaultMessage": "Per-device write rate limit in I/O operations per second."
+  },
+  "forms.fieldExplanation.blkioDeviceWriteIops.example": {
+    "defaultMessage": "1000"
+  },
+  "forms.fieldExplanation.blkioDeviceWriteIops.title": {
+    "defaultMessage": "Device Write IOPS"
+  },
+  "forms.fieldExplanation.blkioWeight.description": {
+    "defaultMessage": "Block I/O weight (relative weight) for the container. Range: 0 to 1000."
+  },
+  "forms.fieldExplanation.blkioWeight.example": {
+    "defaultMessage": "300"
+  },
+  "forms.fieldExplanation.blkioWeight.title": {
+    "defaultMessage": "Block I/O Weight"
+  },
+  "forms.fieldExplanation.blkioWeightDevice.description": {
+    "defaultMessage": "Per-device block I/O weight. Each entry maps a device path to a weight."
+  },
+  "forms.fieldExplanation.blkioWeightDevice.example": {
+    "defaultMessage": "/dev/sda:500"
+  },
+  "forms.fieldExplanation.blkioWeightDevice.title": {
+    "defaultMessage": "Block I/O Weight Device"
   },
   "forms.fieldExplanation.capAdd.description": {
     "defaultMessage": "Add Linux kernel capabilities to the container, e.g., 'NET_ADMIN' for network management."
@@ -2950,6 +3379,24 @@
   },
   "forms.fieldExplanation.capDrop.title": {
     "defaultMessage": "Drop Capabilities (Cap Drop)"
+  },
+  "forms.fieldExplanation.cgroupsMode.description": {
+    "defaultMessage": "Cgroup namespace mode: host (use host cgroup namespace) or private (use a new cgroup namespace)."
+  },
+  "forms.fieldExplanation.cgroupsMode.example": {
+    "defaultMessage": "private"
+  },
+  "forms.fieldExplanation.cgroupsMode.title": {
+    "defaultMessage": "Cgroups Mode"
+  },
+  "forms.fieldExplanation.command.description": {
+    "defaultMessage": "Command to run as the container's main process, passed to the entrypoint. Space-separated arguments."
+  },
+  "forms.fieldExplanation.command.example": {
+    "defaultMessage": "cmd '<arg1> <arg2>' ..."
+  },
+  "forms.fieldExplanation.command.title": {
+    "defaultMessage": "Command"
   },
   "forms.fieldExplanation.cpuPeriod.description": {
     "defaultMessage": "Duration of a CPU scheduling period. Used with CPU Quota to limit CPU usage."
@@ -2986,6 +3433,33 @@
   },
   "forms.fieldExplanation.cpuRealtimeRuntime.title": {
     "defaultMessage": "CPU Real-Time Runtime (microseconds)"
+  },
+  "forms.fieldExplanation.cpuShares.description": {
+    "defaultMessage": "Relative CPU weight for the container compared to other containers."
+  },
+  "forms.fieldExplanation.cpuShares.example": {
+    "defaultMessage": "512"
+  },
+  "forms.fieldExplanation.cpuShares.title": {
+    "defaultMessage": "CPU Shares"
+  },
+  "forms.fieldExplanation.cpusetCpus.description": {
+    "defaultMessage": "CPUs on which to allow execution (e.g. 0-3,0,1)."
+  },
+  "forms.fieldExplanation.cpusetCpus.example": {
+    "defaultMessage": "0-3,0,1"
+  },
+  "forms.fieldExplanation.cpusetCpus.title": {
+    "defaultMessage": "Allowed CPUs sets"
+  },
+  "forms.fieldExplanation.deviceCgroupRules.description": {
+    "defaultMessage": "Device cgroup rules for the container (e.g. a *:* rwm)."
+  },
+  "forms.fieldExplanation.deviceCgroupRules.example": {
+    "defaultMessage": "a *:* rwm"
+  },
+  "forms.fieldExplanation.deviceCgroupRules.title": {
+    "defaultMessage": "Device Cgroup Rules"
   },
   "forms.fieldExplanation.deviceMappings.description": {
     "defaultMessage": "Maps host devices to container paths with specific access permissions."
@@ -3041,6 +3515,42 @@
   "forms.fieldExplanation.deviceRequest.title": {
     "defaultMessage": "Device Requests"
   },
+  "forms.fieldExplanation.dns.description": {
+    "defaultMessage": "Custom DNS servers for the container."
+  },
+  "forms.fieldExplanation.dns.example": {
+    "defaultMessage": "8.8.8.8"
+  },
+  "forms.fieldExplanation.dns.title": {
+    "defaultMessage": "DNS Servers"
+  },
+  "forms.fieldExplanation.dnsOptions.description": {
+    "defaultMessage": "DNS resolver options (e.g. ndots:5)."
+  },
+  "forms.fieldExplanation.dnsOptions.example": {
+    "defaultMessage": "ndots:5"
+  },
+  "forms.fieldExplanation.dnsOptions.title": {
+    "defaultMessage": "DNS Options"
+  },
+  "forms.fieldExplanation.dnsSearch.description": {
+    "defaultMessage": "DNS search domains for short name resolution."
+  },
+  "forms.fieldExplanation.dnsSearch.example": {
+    "defaultMessage": "example.com"
+  },
+  "forms.fieldExplanation.dnsSearch.title": {
+    "defaultMessage": "DNS Search"
+  },
+  "forms.fieldExplanation.domainname.description": {
+    "defaultMessage": "Domain name to set for the container."
+  },
+  "forms.fieldExplanation.domainname.example": {
+    "defaultMessage": "example.com"
+  },
+  "forms.fieldExplanation.domainname.title": {
+    "defaultMessage": "Domainname"
+  },
   "forms.fieldExplanation.driverOptions.description": {
     "defaultMessage": "A key-value map passed directly to the underlying device driver plugin for runtime-specific constraints (such as minimum driver versions or environmental bindings)"
   },
@@ -3049,6 +3559,15 @@
   },
   "forms.fieldExplanation.driverOptions.title": {
     "defaultMessage": "Driver Options"
+  },
+  "forms.fieldExplanation.entrypoint.description": {
+    "defaultMessage": "Override the default entry point of the container image."
+  },
+  "forms.fieldExplanation.entrypoint.example": {
+    "defaultMessage": "/path/to/entrypoint"
+  },
+  "forms.fieldExplanation.entrypoint.title": {
+    "defaultMessage": "Entrypoint"
   },
   "forms.fieldExplanation.env.description": {
     "defaultMessage": "JSON array of environment variables in 'KEY=VALUE' format, used to pass config to the containerized app."
@@ -3059,6 +3578,15 @@
   "forms.fieldExplanation.env.title": {
     "defaultMessage": "Environment Variables (JSON String)"
   },
+  "forms.fieldExplanation.exposedPorts.description": {
+    "defaultMessage": "Ports to expose without publishing. Format: '<port>'/'<tcp|udp|sctp>'."
+  },
+  "forms.fieldExplanation.exposedPorts.example": {
+    "defaultMessage": "80/tcp"
+  },
+  "forms.fieldExplanation.exposedPorts.title": {
+    "defaultMessage": "Exposed Ports"
+  },
   "forms.fieldExplanation.extraHosts.description": {
     "defaultMessage": "List of hostname/IP mappings added to the container's /etc/hosts for custom DNS resolution. 'host-gateway' resolves to the host IP."
   },
@@ -3067,6 +3595,69 @@
   },
   "forms.fieldExplanation.extraHosts.title": {
     "defaultMessage": "Extra Hosts"
+  },
+  "forms.fieldExplanation.groupAdd.description": {
+    "defaultMessage": "Additional groups the container process should belong to."
+  },
+  "forms.fieldExplanation.groupAdd.example": {
+    "defaultMessage": "staff"
+  },
+  "forms.fieldExplanation.groupAdd.title": {
+    "defaultMessage": "Group Add"
+  },
+  "forms.fieldExplanation.healthcheckInterval.description": {
+    "defaultMessage": "Time between health checks in nanoseconds. Must be 0 or at least 1,000,000 (1 ms). 0 means inherit the default."
+  },
+  "forms.fieldExplanation.healthcheckInterval.example": {
+    "defaultMessage": "30000000000 (30s)"
+  },
+  "forms.fieldExplanation.healthcheckInterval.title": {
+    "defaultMessage": "Healthcheck Interval"
+  },
+  "forms.fieldExplanation.healthcheckRetries.description": {
+    "defaultMessage": "Consecutive failures needed to mark the container as unhealthy. 0 means inherit."
+  },
+  "forms.fieldExplanation.healthcheckRetries.example": {
+    "defaultMessage": "3"
+  },
+  "forms.fieldExplanation.healthcheckRetries.title": {
+    "defaultMessage": "Healthcheck Retries"
+  },
+  "forms.fieldExplanation.healthcheckStartInterval.description": {
+    "defaultMessage": "Time between checks during the start period, in nanoseconds. Must be 0 or at least 1,000,000. 0 means inherit."
+  },
+  "forms.fieldExplanation.healthcheckStartInterval.example": {
+    "defaultMessage": "5000000000 (5s)"
+  },
+  "forms.fieldExplanation.healthcheckStartInterval.title": {
+    "defaultMessage": "Healthcheck Start Interval"
+  },
+  "forms.fieldExplanation.healthcheckStartPeriod.description": {
+    "defaultMessage": "Grace period after container start before health check retries begin, in nanoseconds. Must be 0 or at least 1,000,000. 0 means inherit."
+  },
+  "forms.fieldExplanation.healthcheckStartPeriod.example": {
+    "defaultMessage": "5000000000 (5s)"
+  },
+  "forms.fieldExplanation.healthcheckStartPeriod.title": {
+    "defaultMessage": "Healthcheck Start Period"
+  },
+  "forms.fieldExplanation.healthcheckTest.description": {
+    "defaultMessage": "Test command to check container health. A non-zero exit code indicates the container is unhealthy."
+  },
+  "forms.fieldExplanation.healthcheckTest.example": {
+    "defaultMessage": "CMD curl -f http://localhost"
+  },
+  "forms.fieldExplanation.healthcheckTest.title": {
+    "defaultMessage": "Healthcheck Test"
+  },
+  "forms.fieldExplanation.healthcheckTimeout.description": {
+    "defaultMessage": "Time to wait before considering a health check hung, in nanoseconds. Must be 0 or at least 1,000,000. 0 means inherit."
+  },
+  "forms.fieldExplanation.healthcheckTimeout.example": {
+    "defaultMessage": "10000000000 (10s)"
+  },
+  "forms.fieldExplanation.healthcheckTimeout.title": {
+    "defaultMessage": "Healthcheck Timeout"
   },
   "forms.fieldExplanation.hostname.description": {
     "defaultMessage": "The network hostname to assign to the container, which must comply with RFC 1123."
@@ -3091,6 +3682,51 @@
   },
   "forms.fieldExplanation.imageReference.title": {
     "defaultMessage": "Image Reference"
+  },
+  "forms.fieldExplanation.ipcMode.description": {
+    "defaultMessage": "IPC namespace mode to use for the container."
+  },
+  "forms.fieldExplanation.ipcMode.example": {
+    "defaultMessage": "host"
+  },
+  "forms.fieldExplanation.ipcMode.title": {
+    "defaultMessage": "IPC Mode"
+  },
+  "forms.fieldExplanation.labels.description": {
+    "defaultMessage": "Key-value metadata labels for the container."
+  },
+  "forms.fieldExplanation.labels.example": {
+    "defaultMessage": "env=production"
+  },
+  "forms.fieldExplanation.labels.title": {
+    "defaultMessage": "Labels"
+  },
+  "forms.fieldExplanation.logConfig.description": {
+    "defaultMessage": "Configuration options for the logging driver."
+  },
+  "forms.fieldExplanation.logConfig.example": {
+    "defaultMessage": "max-size=10m"
+  },
+  "forms.fieldExplanation.logConfig.title": {
+    "defaultMessage": "Log Config"
+  },
+  "forms.fieldExplanation.logType.description": {
+    "defaultMessage": "Logging driver name (e.g. json-file, syslog) or none."
+  },
+  "forms.fieldExplanation.logType.example": {
+    "defaultMessage": "json-file"
+  },
+  "forms.fieldExplanation.logType.title": {
+    "defaultMessage": "Log Type"
+  },
+  "forms.fieldExplanation.maskedPaths.description": {
+    "defaultMessage": "Paths inside the container to mask, making them inaccessible."
+  },
+  "forms.fieldExplanation.maskedPaths.example": {
+    "defaultMessage": "/proc/kcore"
+  },
+  "forms.fieldExplanation.maskedPaths.title": {
+    "defaultMessage": "Masked Paths"
   },
   "forms.fieldExplanation.memory.description": {
     "defaultMessage": "Maximum physical memory the container can use. Set 0 for unlimited memory."
@@ -3128,6 +3764,12 @@
   "forms.fieldExplanation.memorySwappiness.title": {
     "defaultMessage": "Memory Swappiness (0-100)"
   },
+  "forms.fieldExplanation.networkDisabled.description": {
+    "defaultMessage": "Disable all networking for the container."
+  },
+  "forms.fieldExplanation.networkDisabled.title": {
+    "defaultMessage": "Disable Networking"
+  },
   "forms.fieldExplanation.networkMode.description": {
     "defaultMessage": "Supported standard values are: bridge, host, none, and container:'<name|id>'. Any other value is treated as the name of a user-defined network. Other container engines may support additional modes."
   },
@@ -3142,6 +3784,24 @@
   },
   "forms.fieldExplanation.networks.title": {
     "defaultMessage": "Attached Networks"
+  },
+  "forms.fieldExplanation.oomScoreAdjustment.description": {
+    "defaultMessage": "Adjust the OOM killer preference score. Range: -1000 to 1000."
+  },
+  "forms.fieldExplanation.oomScoreAdjustment.example": {
+    "defaultMessage": "500"
+  },
+  "forms.fieldExplanation.oomScoreAdjustment.title": {
+    "defaultMessage": "OOM Score Adjustment"
+  },
+  "forms.fieldExplanation.pidMode.description": {
+    "defaultMessage": "PID namespace mode: host or container:'<name|id>'."
+  },
+  "forms.fieldExplanation.pidMode.example": {
+    "defaultMessage": "host"
+  },
+  "forms.fieldExplanation.pidMode.title": {
+    "defaultMessage": "PID Mode"
   },
   "forms.fieldExplanation.portBindings.description": {
     "defaultMessage": "Maps host ports to container ports for external access. Format: [host_port:]container_port[/protocol]. Protocol defaults to TCP."
@@ -3164,6 +3824,15 @@
   "forms.fieldExplanation.readOnlyRootfs.title": {
     "defaultMessage": "Read-Only Root Filesystem"
   },
+  "forms.fieldExplanation.readonlyPaths.description": {
+    "defaultMessage": "Paths inside the container to make read-only."
+  },
+  "forms.fieldExplanation.readonlyPaths.example": {
+    "defaultMessage": "/proc/bus/usb"
+  },
+  "forms.fieldExplanation.readonlyPaths.title": {
+    "defaultMessage": "Read-only Paths"
+  },
   "forms.fieldExplanation.restartPolicy.description": {
     "defaultMessage": "Defines container restart behavior. Options: 'no' (never restart), 'always', 'unless-stopped', 'on-failure'."
   },
@@ -3172,6 +3841,51 @@
   },
   "forms.fieldExplanation.restartPolicy.title": {
     "defaultMessage": "Restart Policy"
+  },
+  "forms.fieldExplanation.runtime.description": {
+    "defaultMessage": "OCI runtime to use for the container."
+  },
+  "forms.fieldExplanation.runtime.example": {
+    "defaultMessage": "nvidia"
+  },
+  "forms.fieldExplanation.runtime.title": {
+    "defaultMessage": "Runtime"
+  },
+  "forms.fieldExplanation.securityopt.description": {
+    "defaultMessage": "Security options for the container (e.g. SELinux labels)."
+  },
+  "forms.fieldExplanation.securityopt.example": {
+    "defaultMessage": "label:level:s0:c100,c200"
+  },
+  "forms.fieldExplanation.securityopt.title": {
+    "defaultMessage": "Security Options"
+  },
+  "forms.fieldExplanation.shmSize.description": {
+    "defaultMessage": "Size of /dev/shm in bytes. Default is 64 MB."
+  },
+  "forms.fieldExplanation.shmSize.example": {
+    "defaultMessage": "67108864"
+  },
+  "forms.fieldExplanation.shmSize.title": {
+    "defaultMessage": "Shared Memory Size"
+  },
+  "forms.fieldExplanation.stopSignal.description": {
+    "defaultMessage": "Signal to send to the container to stop it."
+  },
+  "forms.fieldExplanation.stopSignal.example": {
+    "defaultMessage": "SIGTERM"
+  },
+  "forms.fieldExplanation.stopSignal.title": {
+    "defaultMessage": "Stop Signal"
+  },
+  "forms.fieldExplanation.stopTimeout.description": {
+    "defaultMessage": "Timeout in seconds to wait for the container to stop gracefully."
+  },
+  "forms.fieldExplanation.stopTimeout.example": {
+    "defaultMessage": "30"
+  },
+  "forms.fieldExplanation.stopTimeout.title": {
+    "defaultMessage": "Stop Timeout"
   },
   "forms.fieldExplanation.storageOpt.description": {
     "defaultMessage": "Driver-specific storage options, such as limiting the size of the writable layer."
@@ -3182,6 +3896,15 @@
   "forms.fieldExplanation.storageOpt.title": {
     "defaultMessage": "Storage Options"
   },
+  "forms.fieldExplanation.sysctls.description": {
+    "defaultMessage": "Kernel parameters (sysctls) to set in the container."
+  },
+  "forms.fieldExplanation.sysctls.example": {
+    "defaultMessage": "net.core.somaxconn=1024"
+  },
+  "forms.fieldExplanation.sysctls.title": {
+    "defaultMessage": "Sysctls"
+  },
   "forms.fieldExplanation.tmpfs.description": {
     "defaultMessage": "In-memory filesystems mounted at specified container paths. Data is fast but lost on container restart."
   },
@@ -3190,6 +3913,33 @@
   },
   "forms.fieldExplanation.tmpfs.title": {
     "defaultMessage": "Tmpfs Mounts"
+  },
+  "forms.fieldExplanation.ulimits.description": {
+    "defaultMessage": "Override container ulimit options (e.g. nofile, nproc)."
+  },
+  "forms.fieldExplanation.ulimits.example": {
+    "defaultMessage": "nofile soft=1024 hard=65536"
+  },
+  "forms.fieldExplanation.ulimits.title": {
+    "defaultMessage": "Ulimits"
+  },
+  "forms.fieldExplanation.user.description": {
+    "defaultMessage": "User to run the container process as. Format: '<user-name|UID>'[:'<group-name|GID>']."
+  },
+  "forms.fieldExplanation.user.example": {
+    "defaultMessage": "1000:1000"
+  },
+  "forms.fieldExplanation.user.title": {
+    "defaultMessage": "User"
+  },
+  "forms.fieldExplanation.usernsMode.description": {
+    "defaultMessage": "User namespace mode for the container."
+  },
+  "forms.fieldExplanation.usernsMode.example": {
+    "defaultMessage": "host"
+  },
+  "forms.fieldExplanation.usernsMode.title": {
+    "defaultMessage": "User Namespace Mode"
   },
   "forms.fieldExplanation.volumeDriver.description": {
     "defaultMessage": "Driver/plugin used to manage and mount volumes."
@@ -3209,6 +3959,15 @@
   "forms.fieldExplanation.volumes.title": {
     "defaultMessage": "Volume Mounts"
   },
+  "forms.fieldExplanation.workingDirectory.description": {
+    "defaultMessage": "Working directory inside the container for command execution."
+  },
+  "forms.fieldExplanation.workingDirectory.example": {
+    "defaultMessage": "/app"
+  },
+  "forms.fieldExplanation.workingDirectory.title": {
+    "defaultMessage": "Working Directory"
+  },
   "forms.validation.baseImageFile.required": {
     "defaultMessage": "Required."
   },
@@ -3221,11 +3980,20 @@
   "forms.validation.binds.format": {
     "defaultMessage": "Invalid bind mount format. Use '/host/path:/container/path[:ro|rw]'."
   },
+  "forms.validation.blkioWeight": {
+    "defaultMessage": "Must be between 0 and 1000."
+  },
+  "forms.validation.cgroupsMode": {
+    "defaultMessage": "Must be 'host' or 'private'."
+  },
   "forms.validation.circularDependency": {
     "defaultMessage": "Circular dependency detected."
   },
   "forms.validation.cpuQuotaPeriod.format": {
     "defaultMessage": "CPU Period and CPU Quota must be either both set or both unset"
+  },
+  "forms.validation.cpusetCpus": {
+    "defaultMessage": "Invalid cpuset format. Use a list of comma-separated ranges, i.e.: '0-3,0,1'."
   },
   "forms.validation.duplicateContainer": {
     "defaultMessage": "Duplicate container in dependencies."
@@ -3235,6 +4003,9 @@
   },
   "forms.validation.handle.format": {
     "defaultMessage": "The handle must start with a letter and only contain lower case characters, numbers or the hyphen symbol -"
+  },
+  "forms.validation.healthcheckInterval": {
+    "defaultMessage": "Must be 0 or at least 1000000."
   },
   "forms.validation.invalidJson": {
     "defaultMessage": "Must be a valid JSON string."
@@ -3265,6 +4036,12 @@
   },
   "forms.validation.number.positive": {
     "defaultMessage": "Must be a positive number."
+  },
+  "forms.validation.oomScoreAdj": {
+    "defaultMessage": "Must be between -1000 and 1000."
+  },
+  "forms.validation.pidMode": {
+    "defaultMessage": "Must be 'host' or 'container:'<name|id>''."
   },
   "forms.validation.portBindings.format": {
     "defaultMessage": "Invalid port binding format. Use [host_port:]container_port[/protocol]."
