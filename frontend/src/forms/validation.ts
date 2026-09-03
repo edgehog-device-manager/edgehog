@@ -137,6 +137,31 @@ const messages = defineMessages({
     id: "forms.validation.duplicateContainer",
     defaultMessage: "Duplicate container in dependencies.",
   },
+  healthcheckInterval: {
+    id: "forms.validation.healthcheckInterval",
+    defaultMessage: "Must be 0 or at least 1000000.",
+  },
+  cgroupsMode: {
+    id: "forms.validation.cgroupsMode",
+    defaultMessage: "Must be 'host' or 'private'.",
+  },
+  pidMode: {
+    id: "forms.validation.pidMode",
+    defaultMessage: "Must be 'host' or 'container:'<name|id>''.",
+  },
+  blkioWeight: {
+    id: "forms.validation.blkioWeight",
+    defaultMessage: "Must be between 0 and 1000.",
+  },
+  cpusetCpus: {
+    id: "forms.validation.cpusetCpus",
+    defaultMessage:
+      "Invalid cpuset format. Use a list of comma-separated ranges, i.e.: '0-3,0,1'.",
+  },
+  oomScoreAdj: {
+    id: "forms.validation.oomScoreAdj",
+    defaultMessage: "Must be between -1000 and 1000.",
+  },
 });
 
 /* ----------------------------- Constants ----------------------------- */
@@ -878,25 +903,78 @@ const bindingsSchema = z.array(
     ),
 );
 
-const tmpfsOptSchema = z.array(
-  z
-    .string()
-    .min(1)
-    .refine(
-      (value) => /^\/[A-Za-z0-9/_-]+=[A-Za-z0-9,=:_-]+$/.test(value.trim()),
-      { message: messages.tmpfsFormat.id },
-    ),
+const commandSchema = z.string();
+const entrypointSchema = z.string();
+const healthcheckTestSchema = z.string();
+const healthcheckIntervalSchema = z
+  .number(messages.number.id)
+  .int()
+  .refine((v) => v === 0 || v >= 1_000_000, {
+    message: messages.healthcheckInterval.id,
+  });
+const exposedPortsSchema = z.array(z.string().min(1));
+const cpusetCpusSchema = z.string().refine(
+  (v) => {
+    const pattern = /^[0-9,\- ]+$/;
+    const trimmed = v.trim();
+    return trimmed === "" || pattern.test(trimmed);
+  },
+  {
+    message: messages.cpusetCpus.id,
+  },
 );
+const deviceCgroupRulesSchema = z.array(z.string().min(1));
+const groupAddSchema = z.array(z.string().min(1));
+const dnsSchema = z.array(z.string().min(1));
+const securityoptSchema = z.array(z.string().min(1));
+const maskedPathsSchema = z.array(z.string().min(1));
+const readonlyPathsSchema = z.array(z.string().min(1));
+const cgroupsModeSchema = z
+  .string()
+  .refine((v) => v === "host" || v === "private", {
+    message: messages.cgroupsMode.id,
+  });
+const pidModeSchema = z.string().refine(
+  (v) => {
+    const pattern = /^(host|container:.+)$/;
+    const trimmed = v.trim();
+    return trimmed === "" || pattern.test(trimmed);
+  },
+  {
+    message: messages.pidMode.id,
+  },
+);
+const cpusSharesSchema = z.number(messages.number.id).int();
+const shmSizeSchema = z.number(messages.number.id).int().min(0);
+const oomScoreAdjSchema = z
+  .number(messages.number.id)
+  .int()
+  .min(-1000)
+  .max(1000);
+const blkioWeightSchema = z.number(messages.number.id).int().min(0).max(1000);
 
-const storageOptSchema = z.array(
-  z
-    .string()
-    .min(1)
-    .refine(
-      (value) => /^[A-Za-z0-9_.-]+=[A-Za-z0-9_.:-]+$/.test(value.trim()),
-      { message: messages.storageFormat.id },
-    ),
-);
+const keyValuePairSchema = z.object({
+  key: z.string().trim().min(1),
+  value: z.string().trim().min(1),
+});
+
+const tmpfsPairSchema = z.object({
+  path: z.string().trim().min(1),
+  options: z.string().trim().optional(),
+});
+const ulimitSchema = z.object({
+  name: z.string().trim().min(1),
+  soft: z.number(messages.number.id).int(),
+  hard: z.number(messages.number.id).int(),
+});
+const blkioWeightDeviceSchema = z.object({
+  path: z.string().trim().min(1),
+  weight: z.number(messages.number.id).int().min(0).max(1000),
+});
+const blkioLimitSchema = z.object({
+  path: z.string().trim().min(1),
+  rate: z.number(messages.number.id).int().min(0),
+});
 
 const extraHostsSchema = z.array(
   z
@@ -1083,29 +1161,78 @@ const containerSchema = z
     name: z.string().min(1),
     image: imageSchema.optional(),
     hostname: nullableTrimString.optional(),
-    networkMode: nullableTrimString.optional(),
-    networks: networksSchema.optional(),
-    extraHosts: extraHostsSchema.optional(),
-    portBindings: portBindingsSchema.optional(),
+    domainname: nullableTrimString.optional(),
+    user: nullableTrimString.optional(),
+    command: commandSchema.optional(),
+    healthcheckTest: healthcheckTestSchema.optional(),
+    healthcheckInterval: healthcheckIntervalSchema.optional(),
+    healthcheckTimeout: healthcheckIntervalSchema.optional(),
+    healthcheckRetries: z.number(messages.number.id).int().min(0).optional(),
+    healthcheckStartPeriod: healthcheckIntervalSchema.optional(),
+    healthcheckStartInterval: healthcheckIntervalSchema.optional(),
+    workingDirectory: nullableTrimString.optional(),
+    entrypoint: entrypointSchema.optional(),
+    networkDisabled: z.boolean().optional(),
+    labels: z.array(keyValuePairSchema).optional(),
+    stopSignal: nullableTrimString.optional(),
+    stopTimeout: z.number(messages.number.id).int().min(0).optional(),
+    restartPolicy: nullableTrimString.optional(),
+    restartPolicyMaximumRetryCount: z
+      .number(messages.number.id)
+      .int()
+      .min(0)
+      .optional(),
+    env: envSchema.optional(),
     binds: bindingsSchema.optional(),
-    volumes: volumesSchema.optional(),
-    volumeDriver: nullableTrimString.optional(),
-    storageOpt: storageOptSchema.optional(),
-    tmpfs: tmpfsOptSchema.optional(),
-    readOnlyRootfs: z.boolean().optional(),
-    memory: memorySchema.optional(),
-    memoryReservation: memoryReservationSchema.optional(),
-    memorySwap: memorySwapSchema.optional(),
-    memorySwappiness: memorySwappinessSchema.optional(),
+    networkMode: nullableTrimString.optional(),
+    portBindings: portBindingsSchema.optional(),
+    exposedPorts: exposedPortsSchema.optional(),
+    extraHosts: extraHostsSchema.optional(),
+    capAdd: capAddSchema.optional(),
+    capDrop: capDropSchema.optional(),
+    cpuShares: cpusSharesSchema.optional(),
+    cpusetCpus: cpusetCpusSchema.optional(),
     cpuPeriod: cpuPeriodSchema.optional(),
     cpuQuota: cpuQuotaSchema.optional(),
     cpuRealtimePeriod: cpuRealtimePeriodSchema.optional(),
     cpuRealtimeRuntime: cpuRealtimeRuntimeSchema.optional(),
+    memory: memorySchema.optional(),
+    memoryReservation: memoryReservationSchema.optional(),
+    memorySwap: memorySwapSchema.optional(),
+    memorySwappiness: memorySwappinessSchema.optional(),
+    deviceCgroupRules: deviceCgroupRulesSchema.optional(),
+    ulimits: z.array(ulimitSchema).optional(),
+    autoRemove: z.boolean().optional(),
+    volumeDriver: nullableTrimString.optional(),
+    storageOpts: z.array(keyValuePairSchema).optional(),
+    readOnlyRootfs: z.boolean().optional(),
+    tmpfs: z.array(tmpfsPairSchema).optional(),
+    cgroupsMode: cgroupsModeSchema.optional(),
+    dns: dnsSchema.optional(),
+    dnsOptions: dnsSchema.optional(),
+    dnsSearch: dnsSchema.optional(),
+    groupAdd: groupAddSchema.optional(),
+    ipcMode: nullableTrimString.optional(),
+    oomScoreAdjustment: oomScoreAdjSchema.optional(),
+    usernsMode: nullableTrimString.optional(),
+    sysctls: z.array(keyValuePairSchema).optional(),
+    shmSize: shmSizeSchema.optional(),
+    runtime: nullableTrimString.optional(),
     privileged: z.boolean().optional(),
-    capAdd: capAddSchema.optional(),
-    capDrop: capDropSchema.optional(),
-    restartPolicy: nullableTrimString.optional(),
-    env: envSchema.optional(),
+    logType: nullableTrimString.optional(),
+    logConfig: z.array(keyValuePairSchema).optional(),
+    blkioWeight: blkioWeightSchema.optional(),
+    blkioWeightDevice: z.array(blkioWeightDeviceSchema).optional(),
+    blkioDeviceReadBps: z.array(blkioLimitSchema).optional(),
+    blkioDeviceWriteBps: z.array(blkioLimitSchema).optional(),
+    blkioDeviceReadIops: z.array(blkioLimitSchema).optional(),
+    blkioDeviceWriteIops: z.array(blkioLimitSchema).optional(),
+    securityopt: securityoptSchema.optional(),
+    pidMode: pidModeSchema.optional(),
+    maskedPaths: maskedPathsSchema.optional(),
+    readonlyPaths: readonlyPathsSchema.optional(),
+    networks: networksSchema.optional(),
+    volumes: volumesSchema.optional(),
     deviceMappings: deviceMappingsSchema.optional(),
     deviceRequests: z.array(deviceRequestSchema).optional(),
   })

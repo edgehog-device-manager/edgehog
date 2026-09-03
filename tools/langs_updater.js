@@ -205,7 +205,7 @@ const findTranslationIds = (source) => {
   let match;
 
   // 1. FormattedMessage components
-  const regexJSX = /<FormattedMessage\b[\s\S]*?\bid\s*=\s*(['"])(.*?)\1/g;
+  const regexJSX = /<FormattedMessage\b[^>]*?\bid\s*=\s*(['"])(.*?)\1/g;
   while ((match = regexJSX.exec(source)) !== null) {
     const idPositionIndex = match.index + match[0].length;
     const line = source.slice(0, idPositionIndex).split("\n").length;
@@ -216,7 +216,7 @@ const findTranslationIds = (source) => {
 
   // 2. formatMessage calls (e.g., intl.formatMessage({ id: "..." }))
   const regexFormatMsg =
-    /formatMessage\s*\(\s*\{[\s\S]*?\bid\s*:\s*(['"])(.*?)\1/g;
+    /formatMessage\s*\(\s*\{[^}]*?\bid\s*:\s*(['"])(.*?)\1/g;
   while ((match = regexFormatMsg.exec(source)) !== null) {
     const idPositionIndex = match.index + match[0].length;
     const line = source.slice(0, idPositionIndex).split("\n").length;
