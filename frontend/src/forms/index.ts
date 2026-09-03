@@ -440,6 +440,544 @@ const fieldExplanations = defineMessages({
     id: "forms.fieldExplanation.deviceRequest.example",
     defaultMessage: "GPU device request: driver=nvidia, count=1",
   },
+  commandTitle: {
+    id: "forms.fieldExplanation.command.title",
+    defaultMessage: "Command",
+  },
+  commandDescription: {
+    id: "forms.fieldExplanation.command.description",
+    defaultMessage:
+      "Command to run as the container's main process, passed to the entrypoint. Space-separated arguments.",
+  },
+  commandExample: {
+    id: "forms.fieldExplanation.command.example",
+    defaultMessage: "cmd '<arg1> <arg2>' ...",
+  },
+  entrypointTitle: {
+    id: "forms.fieldExplanation.entrypoint.title",
+    defaultMessage: "Entrypoint",
+  },
+  entrypointDescription: {
+    id: "forms.fieldExplanation.entrypoint.description",
+    defaultMessage: "Override the default entry point of the container image.",
+  },
+  entrypointExample: {
+    id: "forms.fieldExplanation.entrypoint.example",
+    defaultMessage: "/path/to/entrypoint",
+  },
+  healthcheckTestTitle: {
+    id: "forms.fieldExplanation.healthcheckTest.title",
+    defaultMessage: "Healthcheck Test",
+  },
+  healthcheckTestDescription: {
+    id: "forms.fieldExplanation.healthcheckTest.description",
+    defaultMessage:
+      "Test command to check container health. A non-zero exit code indicates the container is unhealthy.",
+  },
+  healthcheckTestExample: {
+    id: "forms.fieldExplanation.healthcheckTest.example",
+    defaultMessage: "CMD curl -f http://localhost",
+  },
+  healthcheckIntervalTitle: {
+    id: "forms.fieldExplanation.healthcheckInterval.title",
+    defaultMessage: "Healthcheck Interval",
+  },
+  healthcheckIntervalDescription: {
+    id: "forms.fieldExplanation.healthcheckInterval.description",
+    defaultMessage:
+      "Time between health checks in nanoseconds. Must be 0 or at least 1,000,000 (1 ms). 0 means inherit the default.",
+  },
+  healthcheckIntervalExample: {
+    id: "forms.fieldExplanation.healthcheckInterval.example",
+    defaultMessage: "30000000000 (30s)",
+  },
+  healthcheckTimeoutTitle: {
+    id: "forms.fieldExplanation.healthcheckTimeout.title",
+    defaultMessage: "Healthcheck Timeout",
+  },
+  healthcheckTimeoutDescription: {
+    id: "forms.fieldExplanation.healthcheckTimeout.description",
+    defaultMessage:
+      "Time to wait before considering a health check hung, in nanoseconds. Must be 0 or at least 1,000,000. 0 means inherit.",
+  },
+  healthcheckTimeoutExample: {
+    id: "forms.fieldExplanation.healthcheckTimeout.example",
+    defaultMessage: "10000000000 (10s)",
+  },
+  healthcheckRetriesTitle: {
+    id: "forms.fieldExplanation.healthcheckRetries.title",
+    defaultMessage: "Healthcheck Retries",
+  },
+  healthcheckRetriesDescription: {
+    id: "forms.fieldExplanation.healthcheckRetries.description",
+    defaultMessage:
+      "Consecutive failures needed to mark the container as unhealthy. 0 means inherit.",
+  },
+  healthcheckRetriesExample: {
+    id: "forms.fieldExplanation.healthcheckRetries.example",
+    defaultMessage: "3",
+  },
+  healthcheckStartPeriodTitle: {
+    id: "forms.fieldExplanation.healthcheckStartPeriod.title",
+    defaultMessage: "Healthcheck Start Period",
+  },
+  healthcheckStartPeriodDescription: {
+    id: "forms.fieldExplanation.healthcheckStartPeriod.description",
+    defaultMessage:
+      "Grace period after container start before health check retries begin, in nanoseconds. Must be 0 or at least 1,000,000. 0 means inherit.",
+  },
+  healthcheckStartPeriodExample: {
+    id: "forms.fieldExplanation.healthcheckStartPeriod.example",
+    defaultMessage: "5000000000 (5s)",
+  },
+  healthcheckStartIntervalTitle: {
+    id: "forms.fieldExplanation.healthcheckStartInterval.title",
+    defaultMessage: "Healthcheck Start Interval",
+  },
+  healthcheckStartIntervalDescription: {
+    id: "forms.fieldExplanation.healthcheckStartInterval.description",
+    defaultMessage:
+      "Time between checks during the start period, in nanoseconds. Must be 0 or at least 1,000,000. 0 means inherit.",
+  },
+  healthcheckStartIntervalExample: {
+    id: "forms.fieldExplanation.healthcheckStartInterval.example",
+    defaultMessage: "5000000000 (5s)",
+  },
+  workingDirectoryTitle: {
+    id: "forms.fieldExplanation.workingDirectory.title",
+    defaultMessage: "Working Directory",
+  },
+  workingDirectoryDescription: {
+    id: "forms.fieldExplanation.workingDirectory.description",
+    defaultMessage:
+      "Working directory inside the container for command execution.",
+  },
+  workingDirectoryExample: {
+    id: "forms.fieldExplanation.workingDirectory.example",
+    defaultMessage: "/app",
+  },
+  userTitle: {
+    id: "forms.fieldExplanation.user.title",
+    defaultMessage: "User",
+  },
+  userDescription: {
+    id: "forms.fieldExplanation.user.description",
+    defaultMessage:
+      "User to run the container process as. Format: '<user-name|UID>'[:'<group-name|GID>'].",
+  },
+  userExample: {
+    id: "forms.fieldExplanation.user.example",
+    defaultMessage: "1000:1000",
+  },
+  domainnameTitle: {
+    id: "forms.fieldExplanation.domainname.title",
+    defaultMessage: "Domainname",
+  },
+  domainnameDescription: {
+    id: "forms.fieldExplanation.domainname.description",
+    defaultMessage: "Domain name to set for the container.",
+  },
+  domainnameExample: {
+    id: "forms.fieldExplanation.domainname.example",
+    defaultMessage: "example.com",
+  },
+  networkDisabledTitle: {
+    id: "forms.fieldExplanation.networkDisabled.title",
+    defaultMessage: "Disable Networking",
+  },
+  networkDisabledDescription: {
+    id: "forms.fieldExplanation.networkDisabled.description",
+    defaultMessage: "Disable all networking for the container.",
+  },
+  dnsTitle: {
+    id: "forms.fieldExplanation.dns.title",
+    defaultMessage: "DNS Servers",
+  },
+  dnsDescription: {
+    id: "forms.fieldExplanation.dns.description",
+    defaultMessage: "Custom DNS servers for the container.",
+  },
+  dnsExample: {
+    id: "forms.fieldExplanation.dns.example",
+    defaultMessage: "8.8.8.8",
+  },
+  dnsOptionsTitle: {
+    id: "forms.fieldExplanation.dnsOptions.title",
+    defaultMessage: "DNS Options",
+  },
+  dnsOptionsDescription: {
+    id: "forms.fieldExplanation.dnsOptions.description",
+    defaultMessage: "DNS resolver options (e.g. ndots:5).",
+  },
+  dnsOptionsExample: {
+    id: "forms.fieldExplanation.dnsOptions.example",
+    defaultMessage: "ndots:5",
+  },
+  dnsSearchTitle: {
+    id: "forms.fieldExplanation.dnsSearch.title",
+    defaultMessage: "DNS Search",
+  },
+  dnsSearchDescription: {
+    id: "forms.fieldExplanation.dnsSearch.description",
+    defaultMessage: "DNS search domains for short name resolution.",
+  },
+  dnsSearchExample: {
+    id: "forms.fieldExplanation.dnsSearch.example",
+    defaultMessage: "example.com",
+  },
+  exposedPortsTitle: {
+    id: "forms.fieldExplanation.exposedPorts.title",
+    defaultMessage: "Exposed Ports",
+  },
+  exposedPortsDescription: {
+    id: "forms.fieldExplanation.exposedPorts.description",
+    defaultMessage:
+      "Ports to expose without publishing. Format: '<port>'/'<tcp|udp|sctp>'.",
+  },
+  exposedPortsExample: {
+    id: "forms.fieldExplanation.exposedPorts.example",
+    defaultMessage: "80/tcp",
+  },
+  autoRemoveTitle: {
+    id: "forms.fieldExplanation.autoRemove.title",
+    defaultMessage: "Auto Remove",
+  },
+  autoRemoveDescription: {
+    id: "forms.fieldExplanation.autoRemove.description",
+    defaultMessage:
+      "Automatically remove the container filesystem when it exits.",
+  },
+  cpuSharesTitle: {
+    id: "forms.fieldExplanation.cpuShares.title",
+    defaultMessage: "CPU Shares",
+  },
+  cpuSharesDescription: {
+    id: "forms.fieldExplanation.cpuShares.description",
+    defaultMessage:
+      "Relative CPU weight for the container compared to other containers.",
+  },
+  cpuSharesExample: {
+    id: "forms.fieldExplanation.cpuShares.example",
+    defaultMessage: "512",
+  },
+  cpusetCpusTitle: {
+    id: "forms.fieldExplanation.cpusetCpus.title",
+    defaultMessage: "Allowed CPUs sets",
+  },
+  cpusetCpusDescription: {
+    id: "forms.fieldExplanation.cpusetCpus.description",
+    defaultMessage: "CPUs on which to allow execution (e.g. 0-3,0,1).",
+  },
+  cpusetCpusExample: {
+    id: "forms.fieldExplanation.cpusetCpus.example",
+    defaultMessage: "0-3,0,1",
+  },
+  shmSizeTitle: {
+    id: "forms.fieldExplanation.shmSize.title",
+    defaultMessage: "Shared Memory Size",
+  },
+  shmSizeDescription: {
+    id: "forms.fieldExplanation.shmSize.description",
+    defaultMessage: "Size of /dev/shm in bytes. Default is 64 MB.",
+  },
+  shmSizeExample: {
+    id: "forms.fieldExplanation.shmSize.example",
+    defaultMessage: "67108864",
+  },
+  oomScoreAdjustmentTitle: {
+    id: "forms.fieldExplanation.oomScoreAdjustment.title",
+    defaultMessage: "OOM Score Adjustment",
+  },
+  oomScoreAdjustmentDescription: {
+    id: "forms.fieldExplanation.oomScoreAdjustment.description",
+    defaultMessage:
+      "Adjust the OOM killer preference score. Range: -1000 to 1000.",
+  },
+  oomScoreAdjustmentExample: {
+    id: "forms.fieldExplanation.oomScoreAdjustment.example",
+    defaultMessage: "500",
+  },
+  blkioWeightTitle: {
+    id: "forms.fieldExplanation.blkioWeight.title",
+    defaultMessage: "Block I/O Weight",
+  },
+  blkioWeightDescription: {
+    id: "forms.fieldExplanation.blkioWeight.description",
+    defaultMessage:
+      "Block I/O weight (relative weight) for the container. Range: 0 to 1000.",
+  },
+  blkioWeightExample: {
+    id: "forms.fieldExplanation.blkioWeight.example",
+    defaultMessage: "300",
+  },
+  blkioWeightDeviceTitle: {
+    id: "forms.fieldExplanation.blkioWeightDevice.title",
+    defaultMessage: "Block I/O Weight Device",
+  },
+  blkioWeightDeviceDescription: {
+    id: "forms.fieldExplanation.blkioWeightDevice.description",
+    defaultMessage:
+      "Per-device block I/O weight. Each entry maps a device path to a weight.",
+  },
+  blkioWeightDeviceExample: {
+    id: "forms.fieldExplanation.blkioWeightDevice.example",
+    defaultMessage: "/dev/sda:500",
+  },
+  blkioDeviceReadBpsTitle: {
+    id: "forms.fieldExplanation.blkioDeviceReadBps.title",
+    defaultMessage: "Device Read Bps",
+  },
+  blkioDeviceReadBpsDescription: {
+    id: "forms.fieldExplanation.blkioDeviceReadBps.description",
+    defaultMessage: "Per-device read rate limit in bytes per second.",
+  },
+  blkioDeviceReadBpsExample: {
+    id: "forms.fieldExplanation.blkioDeviceReadBps.example",
+    defaultMessage: "10485760 (10 MB/s on /dev/sda)",
+  },
+  blkioDeviceWriteBpsTitle: {
+    id: "forms.fieldExplanation.blkioDeviceWriteBps.title",
+    defaultMessage: "Device Write Bps",
+  },
+  blkioDeviceWriteBpsDescription: {
+    id: "forms.fieldExplanation.blkioDeviceWriteBps.description",
+    defaultMessage: "Per-device write rate limit in bytes per second.",
+  },
+  blkioDeviceWriteBpsExample: {
+    id: "forms.fieldExplanation.blkioDeviceWriteBps.example",
+    defaultMessage: "5242880 (5 MB/s on /dev/sda)",
+  },
+  blkioDeviceReadIopsTitle: {
+    id: "forms.fieldExplanation.blkioDeviceReadIops.title",
+    defaultMessage: "Device Read IOPS",
+  },
+  blkioDeviceReadIopsDescription: {
+    id: "forms.fieldExplanation.blkioDeviceReadIops.description",
+    defaultMessage: "Per-device read rate limit in I/O operations per second.",
+  },
+  blkioDeviceReadIopsExample: {
+    id: "forms.fieldExplanation.blkioDeviceReadIops.example",
+    defaultMessage: "1000",
+  },
+  blkioDeviceWriteIopsTitle: {
+    id: "forms.fieldExplanation.blkioDeviceWriteIops.title",
+    defaultMessage: "Device Write IOPS",
+  },
+  blkioDeviceWriteIopsDescription: {
+    id: "forms.fieldExplanation.blkioDeviceWriteIops.description",
+    defaultMessage: "Per-device write rate limit in I/O operations per second.",
+  },
+  blkioDeviceWriteIopsExample: {
+    id: "forms.fieldExplanation.blkioDeviceWriteIops.example",
+    defaultMessage: "1000",
+  },
+  ulimitsTitle: {
+    id: "forms.fieldExplanation.ulimits.title",
+    defaultMessage: "Ulimits",
+  },
+  ulimitsDescription: {
+    id: "forms.fieldExplanation.ulimits.description",
+    defaultMessage: "Override container ulimit options (e.g. nofile, nproc).",
+  },
+  ulimitsExample: {
+    id: "forms.fieldExplanation.ulimits.example",
+    defaultMessage: "nofile soft=1024 hard=65536",
+  },
+  cgroupsModeTitle: {
+    id: "forms.fieldExplanation.cgroupsMode.title",
+    defaultMessage: "Cgroups Mode",
+  },
+  cgroupsModeDescription: {
+    id: "forms.fieldExplanation.cgroupsMode.description",
+    defaultMessage:
+      "Cgroup namespace mode: host (use host cgroup namespace) or private (use a new cgroup namespace).",
+  },
+  cgroupsModeExample: {
+    id: "forms.fieldExplanation.cgroupsMode.example",
+    defaultMessage: "private",
+  },
+  ipcModeTitle: {
+    id: "forms.fieldExplanation.ipcMode.title",
+    defaultMessage: "IPC Mode",
+  },
+  ipcModeDescription: {
+    id: "forms.fieldExplanation.ipcMode.description",
+    defaultMessage: "IPC namespace mode to use for the container.",
+  },
+  ipcModeExample: {
+    id: "forms.fieldExplanation.ipcMode.example",
+    defaultMessage: "host",
+  },
+  usernsModeTitle: {
+    id: "forms.fieldExplanation.usernsMode.title",
+    defaultMessage: "User Namespace Mode",
+  },
+  usernsModeDescription: {
+    id: "forms.fieldExplanation.usernsMode.description",
+    defaultMessage: "User namespace mode for the container.",
+  },
+  usernsModeExample: {
+    id: "forms.fieldExplanation.usernsMode.example",
+    defaultMessage: "host",
+  },
+  pidModeTitle: {
+    id: "forms.fieldExplanation.pidMode.title",
+    defaultMessage: "PID Mode",
+  },
+  pidModeDescription: {
+    id: "forms.fieldExplanation.pidMode.description",
+    defaultMessage: "PID namespace mode: host or container:'<name|id>'.",
+  },
+  pidModeExample: {
+    id: "forms.fieldExplanation.pidMode.example",
+    defaultMessage: "host",
+  },
+  securityoptTitle: {
+    id: "forms.fieldExplanation.securityopt.title",
+    defaultMessage: "Security Options",
+  },
+  securityoptDescription: {
+    id: "forms.fieldExplanation.securityopt.description",
+    defaultMessage: "Security options for the container (e.g. SELinux labels).",
+  },
+  securityoptExample: {
+    id: "forms.fieldExplanation.securityopt.example",
+    defaultMessage: "label:level:s0:c100,c200",
+  },
+  maskedPathsTitle: {
+    id: "forms.fieldExplanation.maskedPaths.title",
+    defaultMessage: "Masked Paths",
+  },
+  maskedPathsDescription: {
+    id: "forms.fieldExplanation.maskedPaths.description",
+    defaultMessage:
+      "Paths inside the container to mask, making them inaccessible.",
+  },
+  maskedPathsExample: {
+    id: "forms.fieldExplanation.maskedPaths.example",
+    defaultMessage: "/proc/kcore",
+  },
+  readonlyPathsTitle: {
+    id: "forms.fieldExplanation.readonlyPaths.title",
+    defaultMessage: "Read-only Paths",
+  },
+  readonlyPathsDescription: {
+    id: "forms.fieldExplanation.readonlyPaths.description",
+    defaultMessage: "Paths inside the container to make read-only.",
+  },
+  readonlyPathsExample: {
+    id: "forms.fieldExplanation.readonlyPaths.example",
+    defaultMessage: "/proc/bus/usb",
+  },
+  groupAddTitle: {
+    id: "forms.fieldExplanation.groupAdd.title",
+    defaultMessage: "Group Add",
+  },
+  groupAddDescription: {
+    id: "forms.fieldExplanation.groupAdd.description",
+    defaultMessage: "Additional groups the container process should belong to.",
+  },
+  groupAddExample: {
+    id: "forms.fieldExplanation.groupAdd.example",
+    defaultMessage: "staff",
+  },
+  deviceCgroupRulesTitle: {
+    id: "forms.fieldExplanation.deviceCgroupRules.title",
+    defaultMessage: "Device Cgroup Rules",
+  },
+  deviceCgroupRulesDescription: {
+    id: "forms.fieldExplanation.deviceCgroupRules.description",
+    defaultMessage: "Device cgroup rules for the container (e.g. a *:* rwm).",
+  },
+  deviceCgroupRulesExample: {
+    id: "forms.fieldExplanation.deviceCgroupRules.example",
+    defaultMessage: "a *:* rwm",
+  },
+  runtimeTitle: {
+    id: "forms.fieldExplanation.runtime.title",
+    defaultMessage: "Runtime",
+  },
+  runtimeDescription: {
+    id: "forms.fieldExplanation.runtime.description",
+    defaultMessage: "OCI runtime to use for the container.",
+  },
+  runtimeExample: {
+    id: "forms.fieldExplanation.runtime.example",
+    defaultMessage: "nvidia",
+  },
+  stopSignalTitle: {
+    id: "forms.fieldExplanation.stopSignal.title",
+    defaultMessage: "Stop Signal",
+  },
+  stopSignalDescription: {
+    id: "forms.fieldExplanation.stopSignal.description",
+    defaultMessage: "Signal to send to the container to stop it.",
+  },
+  stopSignalExample: {
+    id: "forms.fieldExplanation.stopSignal.example",
+    defaultMessage: "SIGTERM",
+  },
+  stopTimeoutTitle: {
+    id: "forms.fieldExplanation.stopTimeout.title",
+    defaultMessage: "Stop Timeout",
+  },
+  stopTimeoutDescription: {
+    id: "forms.fieldExplanation.stopTimeout.description",
+    defaultMessage:
+      "Timeout in seconds to wait for the container to stop gracefully.",
+  },
+  stopTimeoutExample: {
+    id: "forms.fieldExplanation.stopTimeout.example",
+    defaultMessage: "30",
+  },
+  labelsTitle: {
+    id: "forms.fieldExplanation.labels.title",
+    defaultMessage: "Labels",
+  },
+  labelsDescription: {
+    id: "forms.fieldExplanation.labels.description",
+    defaultMessage: "Key-value metadata labels for the container.",
+  },
+  labelsExample: {
+    id: "forms.fieldExplanation.labels.example",
+    defaultMessage: "env=production",
+  },
+  sysctlsTitle: {
+    id: "forms.fieldExplanation.sysctls.title",
+    defaultMessage: "Sysctls",
+  },
+  sysctlsDescription: {
+    id: "forms.fieldExplanation.sysctls.description",
+    defaultMessage: "Kernel parameters (sysctls) to set in the container.",
+  },
+  sysctlsExample: {
+    id: "forms.fieldExplanation.sysctls.example",
+    defaultMessage: "net.core.somaxconn=1024",
+  },
+  logTypeTitle: {
+    id: "forms.fieldExplanation.logType.title",
+    defaultMessage: "Log Type",
+  },
+  logTypeDescription: {
+    id: "forms.fieldExplanation.logType.description",
+    defaultMessage: "Logging driver name (e.g. json-file, syslog) or none.",
+  },
+  logTypeExample: {
+    id: "forms.fieldExplanation.logType.example",
+    defaultMessage: "json-file",
+  },
+  logConfigTitle: {
+    id: "forms.fieldExplanation.logConfig.title",
+    defaultMessage: "Log Config",
+  },
+  logConfigDescription: {
+    id: "forms.fieldExplanation.logConfig.description",
+    defaultMessage: "Configuration options for the logging driver.",
+  },
+  logConfigExample: {
+    id: "forms.fieldExplanation.logConfig.example",
+    defaultMessage: "max-size=10m",
+  },
 });
 
 export { fieldExplanations };
