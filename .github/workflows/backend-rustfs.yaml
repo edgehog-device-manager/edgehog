@@ -85,7 +85,7 @@ jobs:
           ./mc mb rustfs/edgehog;
           ./mc anonymous set download rustfs/edgehog;
 
-      - uses: team-alembic/staple-actions/actions/mix-task@488c794f93225c358bbec47152620a59c6f53e6a # main
+      - uses: team-alembic/staple-actions/actions/mix-task@eb07547a6626ccf508fb4b293b821fde0253ed4f # main
         with:
           mix-env: test
           working-directory: backend
