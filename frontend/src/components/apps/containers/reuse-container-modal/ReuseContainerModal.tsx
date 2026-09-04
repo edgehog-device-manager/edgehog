@@ -51,6 +51,24 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
     container(id: $id) {
       id
       name
+      domainname
+      user
+      command
+      healthcheckTest
+      healthcheckInterval
+      healthcheckTimeout
+      healthcheckRetries
+      healthcheckStartPeriod
+      healthcheckStartInterval
+      workingDirectory
+      entrypoint
+      networkDisabled
+      labelKeys
+      labelValues
+      stopSignal
+      stopTimeout
+      restartPolicy
+      restartPolicyMaximumRetryCount
       env {
         key
         value
@@ -59,6 +77,7 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
       hostname
       networkMode
       portBindings
+      exposedPorts
       binds
       restartPolicy
       privileged
@@ -66,15 +85,54 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
       memorySwap
       memoryReservation
       memorySwappiness
+      cpuShares
+      cpusetCpus
       cpuPeriod
       cpuQuota
       cpuRealtimePeriod
       cpuRealtimeRuntime
-      tmpfs
-      storageOpt
+      shmSize
+      oomScoreAdjustment
+      blkioWeight
+      blkioWeightDevicePath
+      blkioWeightDeviceWeight
+      blkioDeviceReadBpsPath
+      blkioDeviceReadBpsRate
+      blkioDeviceWriteBpsPath
+      blkioDeviceWriteBpsRate
+      blkioDeviceReadIopsPath
+      blkioDeviceReadIopsRate
+      blkioDeviceWriteIopsPath
+      blkioDeviceWriteIopsRate
+      tmpfsPaths
+      tmpfsOptions
+      storageOptKeys
+      storageOptValues
       readOnlyRootfs
+      autoRemove
+      cgroupsMode
+      dns
+      dnsOptions
+      dnsSearch
+      groupAdd
+      ipcMode
+      usernsMode
+      sysctlsKeys
+      sysctlsValues
+      runtime
+      logType
+      logConfigKeys
+      logConfigValues
       capAdd
       capDrop
+      securityopt
+      pidMode
+      maskedPaths
+      readonlyPaths
+      deviceCgroupRules
+      ulimitsName
+      ulimitsSoft
+      ulimitsHard
       volumeDriver
       image {
         reference
@@ -247,9 +305,116 @@ const ReuseContainerModal = ({
                   }, [])
                 : undefined,
               volumeDriver: c.volumeDriver ?? undefined,
-              storageOpt: c.storageOpt ? [...c.storageOpt] : undefined,
-              tmpfs: c.tmpfs ? [...c.tmpfs] : undefined,
+              storageOpts: c.storageOptKeys
+                ? c.storageOptKeys.map((k, i) => ({
+                    key: k,
+                    value: c.storageOptValues?.[i] ?? "",
+                  }))
+                : undefined,
+              tmpfs: c.tmpfsPaths
+                ? c.tmpfsPaths.map((p, i) => ({
+                    path: p,
+                    options: c.tmpfsOptions?.[i] ?? "",
+                  }))
+                : undefined,
               readOnlyRootfs: c.readOnlyRootfs ?? undefined,
+              autoRemove: c.autoRemove ?? undefined,
+              domainname: c.domainname ?? undefined,
+              user: c.user ?? undefined,
+              command: c.command?.join(" ") ?? undefined,
+              healthcheckTest: c.healthcheckTest?.join(" ") ?? undefined,
+              healthcheckInterval: c.healthcheckInterval ?? undefined,
+              healthcheckTimeout: c.healthcheckTimeout ?? undefined,
+              healthcheckRetries: c.healthcheckRetries ?? undefined,
+              healthcheckStartPeriod: c.healthcheckStartPeriod ?? undefined,
+              healthcheckStartInterval: c.healthcheckStartInterval ?? undefined,
+              workingDirectory: c.workingDirectory ?? undefined,
+              entrypoint: c.entrypoint?.join(" ") ?? undefined,
+              networkDisabled: c.networkDisabled ?? undefined,
+              labels: c.labelKeys
+                ? c.labelKeys.map((k, i) => ({
+                    key: k,
+                    value: c.labelValues?.[i] ?? "",
+                  }))
+                : undefined,
+              stopSignal: c.stopSignal ?? undefined,
+              stopTimeout: c.stopTimeout ?? undefined,
+              restartPolicyMaximumRetryCount:
+                c.restartPolicyMaximumRetryCount ?? undefined,
+              exposedPorts: c.exposedPorts ? [...c.exposedPorts] : undefined,
+              cpuShares: c.cpuShares ?? undefined,
+              cpusetCpus: c.cpusetCpus ?? undefined,
+              shmSize: c.shmSize ?? undefined,
+              oomScoreAdjustment: c.oomScoreAdjustment ?? undefined,
+              deviceCgroupRules: c.deviceCgroupRules
+                ? [...c.deviceCgroupRules]
+                : undefined,
+              ulimits: c.ulimitsName
+                ? c.ulimitsName.map((n, i) => ({
+                    name: n,
+                    soft: c.ulimitsSoft?.[i] ?? 0,
+                    hard: c.ulimitsHard?.[i] ?? 0,
+                  }))
+                : undefined,
+              cgroupsMode: c.cgroupsMode as
+                | string
+                | null
+                | undefined as unknown as ContainerInputData["cgroupsMode"],
+              dns: c.dns ? [...c.dns] : undefined,
+              dnsOptions: c.dnsOptions ? [...c.dnsOptions] : undefined,
+              dnsSearch: c.dnsSearch ? [...c.dnsSearch] : undefined,
+              groupAdd: c.groupAdd ? [...c.groupAdd] : undefined,
+              ipcMode: c.ipcMode ?? undefined,
+              usernsMode: c.usernsMode ?? undefined,
+              sysctls: c.sysctlsKeys
+                ? c.sysctlsKeys.map((k, i) => ({
+                    key: k,
+                    value: c.sysctlsValues?.[i] ?? "",
+                  }))
+                : undefined,
+              runtime: c.runtime ?? undefined,
+              logType: c.logType ?? undefined,
+              logConfig: c.logConfigKeys
+                ? c.logConfigKeys.map((k, i) => ({
+                    key: k,
+                    value: c.logConfigValues?.[i] ?? "",
+                  }))
+                : undefined,
+              blkioWeight: c.blkioWeight ?? undefined,
+              blkioWeightDevice: c.blkioWeightDevicePath
+                ? c.blkioWeightDevicePath.map((p, i) => ({
+                    path: p,
+                    weight: c.blkioWeightDeviceWeight?.[i] ?? 0,
+                  }))
+                : undefined,
+              blkioDeviceReadBps: c.blkioDeviceReadBpsPath
+                ? c.blkioDeviceReadBpsPath.map((p, i) => ({
+                    path: p,
+                    rate: c.blkioDeviceReadBpsRate?.[i] ?? 0,
+                  }))
+                : undefined,
+              blkioDeviceWriteBps: c.blkioDeviceWriteBpsPath
+                ? c.blkioDeviceWriteBpsPath.map((p, i) => ({
+                    path: p,
+                    rate: c.blkioDeviceWriteBpsRate?.[i] ?? 0,
+                  }))
+                : undefined,
+              blkioDeviceReadIops: c.blkioDeviceReadIopsPath
+                ? c.blkioDeviceReadIopsPath.map((p, i) => ({
+                    path: p,
+                    rate: c.blkioDeviceReadIopsRate?.[i] ?? 0,
+                  }))
+                : undefined,
+              blkioDeviceWriteIops: c.blkioDeviceWriteIopsPath
+                ? c.blkioDeviceWriteIopsPath.map((p, i) => ({
+                    path: p,
+                    rate: c.blkioDeviceWriteIopsRate?.[i] ?? 0,
+                  }))
+                : undefined,
+              securityopt: c.securityopt ? [...c.securityopt] : undefined,
+              pidMode: c.pidMode ?? undefined,
+              maskedPaths: c.maskedPaths ? [...c.maskedPaths] : undefined,
+              readonlyPaths: c.readonlyPaths ? [...c.readonlyPaths] : undefined,
               memory: c.memory ?? undefined,
               memoryReservation: c.memoryReservation ?? undefined,
               memorySwap: c.memorySwap ?? undefined,

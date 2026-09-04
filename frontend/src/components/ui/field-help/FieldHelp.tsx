@@ -28,46 +28,100 @@ type FieldKey =
   | "imageReference"
   | "imageCredentials"
   | "hostname"
-  | "restartPolicy"
+  | "domainname"
+  | "networkDisabled"
   | "networkMode"
   | "networks"
-  | "portBindings"
-  | "binds"
+  | "dns"
+  | "dnsOptions"
+  | "dnsSearch"
   | "extraHosts"
+  | "portBindings"
+  | "exposedPorts"
+  | "binds"
+  | "volumes"
+  | "volumeDriver"
+  | "storageOpts"
+  | "tmpfs"
+  | "readOnlyRootfs"
+  | "autoRemove"
   | "memory"
   | "memoryReservation"
   | "memorySwap"
   | "memorySwappiness"
+  | "cpuShares"
+  | "cpusetCpus"
   | "cpuPeriod"
   | "cpuQuota"
   | "cpuRealtimePeriod"
   | "cpuRealtimeRuntime"
-  | "env"
-  | "volumes"
+  | "shmSize"
+  | "oomScoreAdjustment"
+  | "ulimits"
   | "privileged"
-  | "readOnlyRootfs"
-  | "storageOpt"
-  | "tmpfs"
   | "capAdd"
   | "capDrop"
-  | "volumeDriver"
+  | "cgroupsMode"
+  | "ipcMode"
+  | "usernsMode"
+  | "pidMode"
+  | "securityopt"
+  | "maskedPaths"
+  | "readonlyPaths"
+  | "groupAdd"
+  | "deviceCgroupRules"
+  | "runtime"
+  | "restartPolicy"
+  | "restartPolicyMaximumRetryCount"
+  | "stopSignal"
+  | "stopTimeout"
+  | "labels"
+  | "sysctls"
+  | "env"
   | "deviceMappings"
   | "driver"
   | "count"
   | "deviceIDs"
   | "capabilities"
   | "driverOptions"
-  | "deviceRequests";
+  | "deviceRequests"
+  | "user"
+  | "workingDirectory"
+  | "command"
+  | "entrypoint"
+  | "healthcheckTest"
+  | "healthcheckInterval"
+  | "healthcheckTimeout"
+  | "healthcheckRetries"
+  | "healthcheckStartPeriod"
+  | "healthcheckStartInterval"
+  | "blkioWeight"
+  | "blkioWeightDevice"
+  | "blkioDeviceReadBps"
+  | "blkioDeviceWriteBps"
+  | "blkioDeviceReadIops"
+  | "blkioDeviceWriteIops"
+  | "logType"
+  | "logConfig";
 
 function getFieldExplanation(field: FieldKey) {
+  const titleKey = `${field}Title` as keyof typeof fieldExplanations;
+  const descKey = `${field}Description` as keyof typeof fieldExplanations;
+  const exampleKey = `${field}Example` as keyof typeof fieldExplanations;
   return {
-    title: fieldExplanations[`${field}Title` as keyof typeof fieldExplanations],
+    title:
+      fieldExplanations[titleKey] ??
+      ({
+        id: `forms.fieldExplanation.${field}.title`,
+        defaultMessage: field,
+      } as unknown as (typeof fieldExplanations)[keyof typeof fieldExplanations]),
     description:
-      fieldExplanations[
-        `${field}Description` as keyof typeof fieldExplanations
-      ],
-    example:
-      fieldExplanations[`${field}Example` as keyof typeof fieldExplanations],
+      fieldExplanations[descKey] ??
+      ({
+        id: `forms.fieldExplanation.${field}.description`,
+        defaultMessage: "",
+      } as unknown as (typeof fieldExplanations)[keyof typeof fieldExplanations]),
+    example: fieldExplanations[exampleKey],
   };
 }
 interface FieldHelpProps {

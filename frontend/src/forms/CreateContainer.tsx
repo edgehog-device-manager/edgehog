@@ -77,6 +77,11 @@ export const restartPolicyOptions = [
   { value: "unless_stopped", label: "Unless Stopped" },
 ];
 
+export const cgroupsModeOptions = [
+  { value: "host", label: "Host" },
+  { value: "private", label: "Private" },
+];
+
 const mapEnv = (
   env?: KeyValue<string>[] | null,
 ): ContainerEnvVarInput[] | undefined => {
@@ -102,26 +107,157 @@ const reduceEnv = (env: ContainerEnvVarInput[]) =>
 const envToString = (env: ContainerEnvVarInput[]) =>
   JSON.stringify(reduceEnv(env), null, 2);
 
+const mapKeyValuePairs = (pairs?: { key: string; value: string }[] | null) => {
+  if (!pairs?.length) return { keys: undefined, values: undefined };
+  const keys = pairs.map((p) => p.key);
+  const values = pairs.map((p) => p.value);
+  return { keys, values };
+};
+
+const splitBySpace = (value: string) => value.split(" ").filter(Boolean);
+
+const mapDeviceRequests = (requests: ContainerInputData["deviceRequests"]) =>
+  requests?.map((request) => ({
+    driver: request.driver,
+    count: request.count,
+    deviceIds: request.deviceIds ?? [],
+    capabilities:
+      request.capabilities?.map((group) =>
+        group
+          .split(",")
+          .map((c) => c.trim())
+          .filter(Boolean),
+      ) ?? [],
+    options: request.options,
+  })) ?? [];
+
+const omit = <T extends Record<string, unknown>, K extends keyof T>(
+  obj: T,
+  ...keys: K[]
+): Omit<T, K> => {
+  const copy = { ...obj } as Record<string, unknown>;
+  for (const k of keys) delete copy[k as string];
+  return copy as Omit<T, K>;
+};
+
 const mapCreateContainerToInput = (
   data: ContainerInputData,
-): CreateContainerInput => ({
-  ...data,
-  env: mapEnv(data.env),
-  deviceRequests:
-    data.deviceRequests?.map((request) => ({
-      driver: request.driver,
-      count: request.count,
-      deviceIds: request.deviceIds ?? [],
-      capabilities:
-        request.capabilities?.map((group) =>
-          group
-            .split(",")
-            .map((capability) => capability.trim())
-            .filter(Boolean),
-        ) ?? [],
-      options: request.options,
-    })) ?? [],
-});
+): CreateContainerInput => {
+  const { keys: labelKeys, values: labelValues } = mapKeyValuePairs(
+    data.labels,
+  );
+  const { keys: storageOptKeys, values: storageOptValues } = mapKeyValuePairs(
+    data.storageOpts,
+  );
+  const { keys: sysctlsKeys, values: sysctlsValues } = mapKeyValuePairs(
+    data.sysctls,
+  );
+  const { keys: logConfigKeys, values: logConfigValues } = mapKeyValuePairs(
+    data.logConfig,
+  );
+  const tmpfsPaths = data.tmpfs?.map((p) => p.path);
+  const tmpfsOptions = data.tmpfs?.map((p) => p.options ?? "");
+  const ulimitsName = data.ulimits?.map((u) => u.name);
+  const ulimitsSoft = data.ulimits?.map((u) => u.soft);
+  const ulimitsHard = data.ulimits?.map((u) => u.hard);
+  const blkioWeightDevicePath = data.blkioWeightDevice?.map((d) => d.path);
+  const blkioWeightDeviceWeight = data.blkioWeightDevice?.map((d) => d.weight);
+  const blkioDeviceReadBpsPath = data.blkioDeviceReadBps?.map((d) => d.path);
+  const blkioDeviceReadBpsRate = data.blkioDeviceReadBps?.map((d) => d.rate);
+  const blkioDeviceWriteBpsPath = data.blkioDeviceWriteBps?.map((d) => d.path);
+  const blkioDeviceWriteBpsRate = data.blkioDeviceWriteBps?.map((d) => d.rate);
+  const blkioDeviceReadIopsPath = data.blkioDeviceReadIops?.map((d) => d.path);
+  const blkioDeviceReadIopsRate = data.blkioDeviceReadIops?.map((d) => d.rate);
+  const blkioDeviceWriteIopsPath = data.blkioDeviceWriteIops?.map(
+    (d) => d.path,
+  );
+  const blkioDeviceWriteIopsRate = data.blkioDeviceWriteIops?.map(
+    (d) => d.rate,
+  );
+
+  const {
+    env,
+    image,
+    deviceRequests,
+    command,
+    entrypoint,
+    healthcheckTest,
+    ...restWithPairs
+  } = data;
+  const rest = omit(
+    restWithPairs as Record<string, unknown>,
+    "labels",
+    "storageOpts",
+    "tmpfs",
+    "sysctls",
+    "logConfig",
+    "ulimits",
+    "blkioWeightDevice",
+    "blkioDeviceReadBps",
+    "blkioDeviceWriteBps",
+    "blkioDeviceReadIops",
+    "blkioDeviceWriteIops",
+  ) as Omit<
+    ContainerInputData,
+    | "labels"
+    | "storageOpts"
+    | "tmpfs"
+    | "sysctls"
+    | "logConfig"
+    | "ulimits"
+    | "blkioWeightDevice"
+    | "blkioDeviceReadBps"
+    | "blkioDeviceWriteBps"
+    | "blkioDeviceReadIops"
+    | "blkioDeviceWriteIops"
+    | "env"
+    | "image"
+    | "deviceRequests"
+    | "command"
+    | "entrypoint"
+    | "healthcheckTest"
+  >;
+
+  return {
+    ...rest,
+    command: command ? splitBySpace(command) : undefined,
+    entrypoint: entrypoint ? splitBySpace(entrypoint) : undefined,
+    healthcheckTest: healthcheckTest
+      ? splitBySpace(healthcheckTest)
+      : undefined,
+    env: mapEnv(env),
+    image: image
+      ? {
+          reference: image.reference,
+          imageCredentialsId: image.imageCredentialsId,
+        }
+      : undefined,
+    deviceRequests: mapDeviceRequests(deviceRequests),
+    labelKeys,
+    labelValues,
+    storageOptKeys,
+    storageOptValues,
+    tmpfsPaths: tmpfsPaths?.length ? tmpfsPaths : undefined,
+    tmpfsOptions: tmpfsOptions?.length ? tmpfsOptions : undefined,
+    sysctlsKeys,
+    sysctlsValues,
+    logConfigKeys,
+    logConfigValues,
+    ulimitsName,
+    ulimitsSoft,
+    ulimitsHard,
+    blkioWeightDevicePath,
+    blkioWeightDeviceWeight,
+    blkioDeviceReadBpsPath,
+    blkioDeviceReadBpsRate,
+    blkioDeviceWriteBpsPath,
+    blkioDeviceWriteBpsRate,
+    blkioDeviceReadIopsPath,
+    blkioDeviceReadIopsRate,
+    blkioDeviceWriteIopsPath,
+    blkioDeviceWriteIopsRate,
+  };
+};
 
 type BaseSectionProps = {
   form: UseFormReturn<ContainerInputData>;
@@ -255,6 +391,48 @@ const NetworkSection = ({
       </FormRow>
 
       <FormRow
+        id="domainname"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.networkDomainnameLabel"
+            defaultMessage="Domainname"
+          />
+        }
+      >
+        <FieldHelp id="domainname">
+          <Form.Control
+            {...register("domainname")}
+            isInvalid={!!errors.domainname}
+          />
+          <FormFeedback feedback={errors.domainname?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="networkDisabled"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.networkDisabledLabel"
+            defaultMessage="Network Disabled"
+          />
+        }
+      >
+        <FieldHelp id="networkDisabled">
+          <div
+            className="d-flex align-items-center"
+            style={{ minHeight: "38px" }}
+          >
+            <Form.Check
+              type="checkbox"
+              {...register("networkDisabled")}
+              isInvalid={!!errors.networkDisabled}
+            />
+          </div>
+          <FormFeedback feedback={errors.networkDisabled?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
         id="networkMode"
         label={
           <FormattedMessage
@@ -286,6 +464,102 @@ const NetworkSection = ({
             control={control}
             name="networks"
             options={networkOptions}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="dns"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.networkDnsLabel"
+            defaultMessage="DNS"
+          />
+        }
+      >
+        <FieldHelp id="dns" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="dns"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={Array.isArray(errors.dns) ? errors.dns : undefined}
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.networkAddDnsButton"
+                    defaultMessage="Add DNS"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="dnsOptions"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.networkDnsOptionsLabel"
+            defaultMessage="DNS Options"
+          />
+        }
+      >
+        <FieldHelp id="dnsOptions" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="dnsOptions"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.dnsOptions)
+                    ? errors.dnsOptions
+                    : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.networkAddDnsOptionsButton"
+                    defaultMessage="Add DNS Option"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="dnsSearch"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.networkDnsSearchLabel"
+            defaultMessage="DNS Search"
+          />
+        }
+      >
+        <FieldHelp id="dnsSearch" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="dnsSearch"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.dnsSearch) ? errors.dnsSearch : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.networkAddDnsSearchButton"
+                    defaultMessage="Add DNS Search"
+                  />
+                }
+              />
+            )}
           />
         </FieldHelp>
       </FormRow>
@@ -357,7 +631,208 @@ const NetworkSection = ({
           />
         </FieldHelp>
       </FormRow>
+
+      <FormRow
+        id={`exposedPorts`}
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.networkExposedPortsLabel"
+            defaultMessage="Exposed Ports"
+          />
+        }
+      >
+        <FieldHelp id="exposedPorts" itemsAlignment="center">
+          <Controller
+            control={control}
+            name={`exposedPorts`}
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.exposedPorts)
+                    ? errors.exposedPorts
+                    : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.networkAddExposedPortButton"
+                    defaultMessage="Add Exposed Port"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
     </Section>
+  );
+};
+
+const KeyValuePairsInput = ({
+  control,
+  name,
+  errors,
+  keyLabel = (
+    <FormattedMessage
+      id="forms.CreateContainer.keyValuePairsKeyLabel"
+      defaultMessage="Key"
+    />
+  ),
+  valueLabel = (
+    <FormattedMessage
+      id="forms.CreateContainer.keyValuePairsValueLabel"
+      defaultMessage="Value"
+    />
+  ),
+  addLabel,
+}: {
+  control: UseFormReturn<ContainerInputData>["control"];
+  name: `labels` | `storageOpts` | `sysctls` | `logConfig`;
+  errors: unknown;
+  keyLabel?: React.ReactNode;
+  valueLabel?: React.ReactNode;
+  addLabel: React.ReactNode;
+}) => {
+  const pairs = useFieldArray({ control, name, keyName: "id" });
+  const watched = (useWatch({ control, name }) as unknown[]) ?? [];
+  const canAdd =
+    watched.length === 0 ||
+    watched.every(
+      (p: unknown) =>
+        (p as { key?: string; value?: string })?.key?.trim() &&
+        (p as { key?: string; value?: string })?.value?.trim(),
+    );
+  const fieldErrors = errors as
+    { key?: { message?: string }; value?: { message?: string } }[] | undefined;
+  return (
+    <div className="p-3 border rounded">
+      <Stack gap={3}>
+        {pairs.fields.map((field, i) => {
+          const err = fieldErrors?.[i];
+          return (
+            <Stack
+              key={field.id}
+              direction="horizontal"
+              gap={3}
+              className="align-items-start"
+            >
+              <FormRow id={`${name}-key-${i}`} label={keyLabel}>
+                <Form.Control
+                  {...((control.register as unknown as (n: string) => unknown)(
+                    `${name}.${i}.key` as const,
+                  ) as object)}
+                  isInvalid={!!err?.key}
+                />
+                <FormFeedback feedback={err?.key?.message} />
+              </FormRow>
+              <FormRow id={`${name}-value-${i}`} label={valueLabel}>
+                <Form.Control
+                  {...((control.register as unknown as (n: string) => unknown)(
+                    `${name}.${i}.value` as const,
+                  ) as object)}
+                  isInvalid={!!err?.value}
+                />
+                <FormFeedback feedback={err?.value?.message} />
+              </FormRow>
+              <Button variant="shadow-danger" onClick={() => pairs.remove(i)}>
+                <Icon className="text-danger" icon="delete" />
+              </Button>
+            </Stack>
+          );
+        })}
+        <Button
+          className="me-auto"
+          variant="outline-primary"
+          type="button"
+          disabled={!canAdd}
+          onClick={() => pairs.append({ key: "", value: "" } as never)}
+        >
+          {addLabel}
+        </Button>
+      </Stack>
+    </div>
+  );
+};
+
+const TmpfsInput = ({
+  control,
+  register,
+  errors,
+}: {
+  control: UseFormReturn<ContainerInputData>["control"];
+  register: UseFormReturn<ContainerInputData>["register"];
+  errors: unknown;
+}) => {
+  const arr = useFieldArray({ control, name: "tmpfs", keyName: "id" });
+  const watched =
+    (useWatch({ control, name: "tmpfs" }) as { path?: string }[] | undefined) ??
+    [];
+  const canAdd = watched.length === 0 || watched.every((t) => t?.path?.trim());
+  const errs = errors as
+    | { path?: { message?: string }; options?: { message?: string } }[]
+    | undefined;
+  return (
+    <div className="p-3 border rounded">
+      <Stack gap={3}>
+        {arr.fields.map((field, i) => {
+          const err = errs?.[i];
+          return (
+            <Stack
+              key={field.id}
+              direction="horizontal"
+              gap={3}
+              className="align-items-start"
+            >
+              <FormRow
+                id={`tmpfs-path-${i}`}
+                label={
+                  <FormattedMessage
+                    id="forms.CreateContainer.tmpfsPathLabel"
+                    defaultMessage="Path"
+                  />
+                }
+              >
+                <Form.Control
+                  {...register(`tmpfs.${i}.path` as const)}
+                  isInvalid={!!err?.path}
+                />
+                <FormFeedback feedback={err?.path?.message} />
+              </FormRow>
+              <FormRow
+                id={`tmpfs-options-${i}`}
+                label={
+                  <FormattedMessage
+                    id="forms.CreateContainer.tmpfsOptionsLabel"
+                    defaultMessage="Options"
+                  />
+                }
+              >
+                <Form.Control
+                  {...register(`tmpfs.${i}.options` as const)}
+                  isInvalid={!!err?.options}
+                />
+                <FormFeedback feedback={err?.options?.message} />
+              </FormRow>
+              <Button variant="shadow-danger" onClick={() => arr.remove(i)}>
+                <Icon className="text-danger" icon="delete" />
+              </Button>
+            </Stack>
+          );
+        })}
+        <Button
+          className="me-auto"
+          variant="outline-primary"
+          disabled={!canAdd}
+          onClick={() => arr.append({ path: "", options: "" } as never)}
+        >
+          <FormattedMessage
+            id="forms.CreateContainer.storageAddTmpfsButton"
+            defaultMessage="Add Tmpfs Mount"
+          />
+        </Button>
+      </Stack>
+    </div>
   );
 };
 
@@ -437,7 +912,14 @@ const StorageSection = ({
           <div className="p-3 border rounded">
             <Stack gap={3}>
               {volumes.fields.map((volume, i) => {
-                const error = errors.volumes?.[i];
+                const error = (
+                  errors.volumes as unknown as
+                    | {
+                        id?: { message?: string };
+                        target?: { message?: string };
+                      }[]
+                    | undefined
+                )?.[i];
 
                 const excludedIds = watched.flatMap((v, idx) =>
                   idx !== i && v.id ? [v.id] : [],
@@ -499,24 +981,23 @@ const StorageSection = ({
                 );
               })}
 
-              <div>
-                <Button
-                  variant="outline-primary"
-                  type="button"
-                  disabled={!canAddVolume}
-                  onClick={() =>
-                    volumes.append({
-                      id: "",
-                      target: "",
-                    })
-                  }
-                >
-                  <FormattedMessage
-                    id="forms.CreateContainer.storageAddVolumeButton"
-                    defaultMessage="Add Volume"
-                  />
-                </Button>
-              </div>
+              <Button
+                className="me-auto"
+                variant="outline-primary"
+                type="button"
+                disabled={!canAddVolume}
+                onClick={() =>
+                  volumes.append({
+                    id: "",
+                    target: "",
+                  })
+                }
+              >
+                <FormattedMessage
+                  id="forms.CreateContainer.storageAddVolumeButton"
+                  defaultMessage="Add Volume"
+                />
+              </Button>
             </Stack>
           </div>
         </FieldHelp>
@@ -541,7 +1022,7 @@ const StorageSection = ({
       </FormRow>
 
       <FormRow
-        id={`storageOpt`}
+        id={`storageOpts`}
         label={
           <FormattedMessage
             id="forms.CreateContainer.storageOptLabel"
@@ -549,27 +1030,29 @@ const StorageSection = ({
           />
         }
       >
-        <FieldHelp id="storageOpt" itemsAlignment="center">
-          <Controller
+        <FieldHelp id="storageOpts" itemsAlignment="center">
+          <KeyValuePairsInput
             control={control}
-            name={`storageOpt`}
-            render={({ field }) => (
-              <StringArrayFormInput
-                value={field.value || []}
-                onChange={field.onChange}
-                errors={
-                  Array.isArray(errors.storageOpt)
-                    ? errors.storageOpt
-                    : undefined
-                }
-                addButtonLabel={
-                  <FormattedMessage
-                    id="forms.CreateContainer.storageAddStorageOptButton"
-                    defaultMessage="Add Storage Option"
-                  />
-                }
+            name="storageOpts"
+            errors={errors.storageOpts}
+            keyLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.storageOptsKeyLabel"
+                defaultMessage="Key"
               />
-            )}
+            }
+            valueLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.storageOptsValueLabel"
+                defaultMessage="Value"
+              />
+            }
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.storageAddStorageOptButton"
+                defaultMessage="Add Storage Option"
+              />
+            }
           />
         </FieldHelp>
       </FormRow>
@@ -584,22 +1067,10 @@ const StorageSection = ({
         }
       >
         <FieldHelp id="tmpfs" itemsAlignment="center">
-          <Controller
+          <TmpfsInput
             control={control}
-            name={`tmpfs`}
-            render={({ field }) => (
-              <StringArrayFormInput
-                value={field.value || []}
-                onChange={field.onChange}
-                errors={Array.isArray(errors.tmpfs) ? errors.tmpfs : undefined}
-                addButtonLabel={
-                  <FormattedMessage
-                    id="forms.CreateContainer.storageAddTmpfsButton"
-                    defaultMessage="Add Tmpfs Mount"
-                  />
-                }
-              />
-            )}
+            register={register}
+            errors={errors.tmpfs}
           />
         </FieldHelp>
       </FormRow>
@@ -627,12 +1098,140 @@ const StorageSection = ({
           <FormFeedback feedback={errors.readOnlyRootfs?.message} />
         </FieldHelp>
       </FormRow>
+
+      <FormRow
+        id={`autoRemove`}
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.storageAutoRemoveLabel"
+            defaultMessage="Auto Remove"
+          />
+        }
+      >
+        <FieldHelp id="autoRemove">
+          <div
+            className="d-flex align-items-center"
+            style={{ minHeight: "38px" }}
+          >
+            <Form.Check
+              type="checkbox"
+              {...register(`autoRemove` as const)}
+              isInvalid={!!errors.autoRemove}
+            />
+          </div>
+          <FormFeedback feedback={errors.autoRemove?.message} />
+        </FieldHelp>
+      </FormRow>
     </Section>
+  );
+};
+
+const UlimitsInput = ({
+  control,
+  register,
+  errors,
+}: {
+  control: UseFormReturn<ContainerInputData>["control"];
+  register: UseFormReturn<ContainerInputData>["register"];
+  errors: unknown;
+}) => {
+  const arr = useFieldArray({ control, name: "ulimits", keyName: "id" });
+  const watched =
+    (useWatch({ control, name: "ulimits" }) as
+      { name?: string }[] | undefined) ?? [];
+  const canAdd = watched.every((u) => u?.name?.trim());
+  const errs = errors as
+    | {
+        name?: { message?: string };
+        soft?: { message?: string };
+        hard?: { message?: string };
+      }[]
+    | undefined;
+  return (
+    <div className="p-3 border rounded">
+      <Stack gap={3}>
+        {arr.fields.map((f, i) => (
+          <Stack
+            key={f.id}
+            direction="horizontal"
+            gap={3}
+            className="align-items-start"
+          >
+            <FormRow
+              id={`ulimits-name-${i}`}
+              label={
+                <FormattedMessage
+                  id="forms.CreateContainer.ulimitsNameLabel"
+                  defaultMessage="Name"
+                />
+              }
+            >
+              <Form.Control
+                {...register(`ulimits.${i}.name` as const)}
+                isInvalid={!!errs?.[i]?.name}
+              />
+              <FormFeedback feedback={errs?.[i]?.name?.message} />
+            </FormRow>
+            <FormRow
+              id={`ulimits-soft-${i}`}
+              label={
+                <FormattedMessage
+                  id="forms.CreateContainer.ulimitsSoftLabel"
+                  defaultMessage="Soft"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                {...register(`ulimits.${i}.soft` as const, {
+                  setValueAs: (v: string) => (v === "" ? undefined : Number(v)),
+                })}
+                isInvalid={!!errs?.[i]?.soft}
+              />
+              <FormFeedback feedback={errs?.[i]?.soft?.message} />
+            </FormRow>
+            <FormRow
+              id={`ulimits-hard-${i}`}
+              label={
+                <FormattedMessage
+                  id="forms.CreateContainer.ulimitsHardLabel"
+                  defaultMessage="Hard"
+                />
+              }
+            >
+              <Form.Control
+                type="text"
+                {...register(`ulimits.${i}.hard` as const, {
+                  setValueAs: (v: string) => (v === "" ? undefined : Number(v)),
+                })}
+                isInvalid={!!errs?.[i]?.hard}
+              />
+              <FormFeedback feedback={errs?.[i]?.hard?.message} />
+            </FormRow>
+            <Button variant="shadow-danger" onClick={() => arr.remove(i)}>
+              <Icon className="text-danger" icon="delete" />
+            </Button>
+          </Stack>
+        ))}
+        <Button
+          className="me-auto"
+          variant="outline-primary"
+          disabled={!canAdd && watched.length > 0}
+          onClick={() => arr.append({ name: "", soft: "", hard: "" } as never)}
+        >
+          <FormattedMessage
+            id="forms.CreateContainer.ulimitsAddButton"
+            defaultMessage="Add Ulimit"
+          />
+        </Button>
+      </Stack>
+    </div>
   );
 };
 
 const ResourceLimitsSection = ({ form, open, onToggle }: BaseSectionProps) => {
   const {
+    control,
     register,
     formState: { errors },
   } = form;
@@ -691,7 +1290,7 @@ const ResourceLimitsSection = ({ form, open, onToggle }: BaseSectionProps) => {
           label={
             <FormattedMessage
               id="forms.CreateContainer.resourceLimitsMemorySwapLabel"
-              defaultMessage="Memory Swap (bytes)"
+              defaultMessage="Memory + Swap (bytes)"
             />
           }
         >
@@ -725,6 +1324,45 @@ const ResourceLimitsSection = ({ form, open, onToggle }: BaseSectionProps) => {
               isInvalid={!!errors.memorySwappiness}
             />
             <FormFeedback feedback={errors.memorySwappiness?.message} />
+          </FieldHelp>
+        </FormRow>
+
+        <FormRow
+          id={`cpuShares`}
+          label={
+            <FormattedMessage
+              id="forms.CreateContainer.resourceLimitsCpuSharesLabel"
+              defaultMessage="CPU Shares"
+            />
+          }
+        >
+          <FieldHelp id="cpuShares">
+            <Form.Control
+              type="text"
+              {...register(`cpuShares` as const, {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+              isInvalid={!!errors.cpuShares}
+            />
+            <FormFeedback feedback={errors.cpuShares?.message} />
+          </FieldHelp>
+        </FormRow>
+
+        <FormRow
+          id={`cpusetCpus`}
+          label={
+            <FormattedMessage
+              id="forms.CreateContainer.resourceLimitsCpusetCpusLabel"
+              defaultMessage="Cpu Sets"
+            />
+          }
+        >
+          <FieldHelp id="cpusetCpus">
+            <Form.Control
+              {...register(`cpusetCpus` as const)}
+              isInvalid={!!errors.cpusetCpus}
+            />
+            <FormFeedback feedback={errors.cpusetCpus?.message} />
           </FieldHelp>
         </FormRow>
 
@@ -775,7 +1413,7 @@ const ResourceLimitsSection = ({ form, open, onToggle }: BaseSectionProps) => {
           label={
             <FormattedMessage
               id="forms.CreateContainer.resourceLimitsCpuRealtimePeriodLabel"
-              defaultMessage="CPU Real-Time Period (microseconds)"
+              defaultMessage="CPU Real Time Period (microseconds)"
             />
           }
         >
@@ -796,7 +1434,7 @@ const ResourceLimitsSection = ({ form, open, onToggle }: BaseSectionProps) => {
           label={
             <FormattedMessage
               id="forms.CreateContainer.resourceLimitsCpuRealtimeRuntimeLabel"
-              defaultMessage="CPU Real-Time Runtime (microseconds)"
+              defaultMessage="CPU Realtime Runtime (microseconds)"
             />
           }
         >
@@ -809,6 +1447,66 @@ const ResourceLimitsSection = ({ form, open, onToggle }: BaseSectionProps) => {
               isInvalid={!!errors.cpuRealtimeRuntime}
             />
             <FormFeedback feedback={errors.cpuRealtimeRuntime?.message} />
+          </FieldHelp>
+        </FormRow>
+
+        <FormRow
+          id={`shmSize`}
+          label={
+            <FormattedMessage
+              id="forms.CreateContainer.resourceLimitsShmSizeLabel"
+              defaultMessage="Shm Size (bytes)"
+            />
+          }
+        >
+          <FieldHelp id="shmSize">
+            <Form.Control
+              type="text"
+              {...register(`shmSize` as const, {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+              isInvalid={!!errors.shmSize}
+            />
+            <FormFeedback feedback={errors.shmSize?.message} />
+          </FieldHelp>
+        </FormRow>
+
+        <FormRow
+          id={`oomScoreAdjustment`}
+          label={
+            <FormattedMessage
+              id="forms.CreateContainer.resourceLimitsOomScoreAdjLabel"
+              defaultMessage="OOM Score Adjustment"
+            />
+          }
+        >
+          <FieldHelp id="oomScoreAdjustment">
+            <Form.Control
+              type="text"
+              {...register(`oomScoreAdjustment` as const, {
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
+              isInvalid={!!errors.oomScoreAdjustment}
+            />
+            <FormFeedback feedback={errors.oomScoreAdjustment?.message} />
+          </FieldHelp>
+        </FormRow>
+
+        <FormRow
+          id="ulimits"
+          label={
+            <FormattedMessage
+              id="forms.CreateContainer.ulimitsLabel"
+              defaultMessage="Ulimits"
+            />
+          }
+        >
+          <FieldHelp id="ulimits" itemsAlignment="center">
+            <UlimitsInput
+              control={control}
+              register={register}
+              errors={errors.ulimits}
+            />
           </FieldHelp>
         </FormRow>
       </Stack>
@@ -854,7 +1552,7 @@ const SecuritySection = ({ form, open, onToggle }: BaseSectionProps) => {
         label={
           <FormattedMessage
             id="forms.CreateContainer.securityCapabilitiesCapAddLabel"
-            defaultMessage="Cap Add"
+            defaultMessage="Add Capabilities"
           />
         }
       >
@@ -897,7 +1595,7 @@ const SecuritySection = ({ form, open, onToggle }: BaseSectionProps) => {
         label={
           <FormattedMessage
             id="forms.CreateContainer.securityCapabilitiesCapDropLabel"
-            defaultMessage="Cap Drop"
+            defaultMessage="Drop Capabilities"
           />
         }
       >
@@ -934,15 +1632,269 @@ const SecuritySection = ({ form, open, onToggle }: BaseSectionProps) => {
           />
         </FieldHelp>
       </FormRow>
+
+      <FormRow
+        id="cgroupsMode"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityCgroupsModeLabel"
+            defaultMessage="Cgroups Mode"
+          />
+        }
+      >
+        <FieldHelp id="cgroupsMode">
+          <SelectFormField
+            control={control}
+            name="cgroupsMode"
+            options={cgroupsModeOptions}
+          />
+          <FormFeedback feedback={errors.cgroupsMode?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="ipcMode"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityIpcModeLabel"
+            defaultMessage="Ipc Mode"
+          />
+        }
+      >
+        <FieldHelp id="ipcMode">
+          <Form.Control {...register("ipcMode")} isInvalid={!!errors.ipcMode} />
+          <FormFeedback feedback={errors.ipcMode?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="usernsMode"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityUsernsModeLabel"
+            defaultMessage="User Namespace Mode"
+          />
+        }
+      >
+        <FieldHelp id="usernsMode">
+          <Form.Control
+            {...register("usernsMode")}
+            isInvalid={!!errors.usernsMode}
+          />
+          <FormFeedback feedback={errors.usernsMode?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="pidMode"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityPidModeLabel"
+            defaultMessage="PID Mode"
+          />
+        }
+      >
+        <FieldHelp id="pidMode">
+          <Form.Control {...register("pidMode")} isInvalid={!!errors.pidMode} />
+          <FormFeedback feedback={errors.pidMode?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="securityopt"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securitySecurityOptLabel"
+            defaultMessage="Security Opt"
+          />
+        }
+      >
+        <FieldHelp id="securityopt" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="securityopt"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.securityopt)
+                    ? errors.securityopt
+                    : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.securityAddSecurityOptButton"
+                    defaultMessage="Add Security Opt"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="maskedPaths"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityMaskedPathsLabel"
+            defaultMessage="Masked Paths"
+          />
+        }
+      >
+        <FieldHelp id="maskedPaths" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="maskedPaths"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.maskedPaths)
+                    ? errors.maskedPaths
+                    : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.securityAddMaskedPathButton"
+                    defaultMessage="Add Masked Path"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="readonlyPaths"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityReadonlyPathsLabel"
+            defaultMessage="Readonly Paths"
+          />
+        }
+      >
+        <FieldHelp id="readonlyPaths" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="readonlyPaths"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.readonlyPaths)
+                    ? errors.readonlyPaths
+                    : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.securityAddReadonlyPathButton"
+                    defaultMessage="Add Readonly Path"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="groupAdd"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityGroupAddLabel"
+            defaultMessage="Additional groups"
+          />
+        }
+      >
+        <FieldHelp id="groupAdd" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="groupAdd"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.groupAdd) ? errors.groupAdd : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.securityAddGroupAddButton"
+                    defaultMessage="Add Group"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="deviceCgroupRules"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.securityDeviceCgroupRulesLabel"
+            defaultMessage="Device Cgroup Rules"
+          />
+        }
+      >
+        <FieldHelp id="deviceCgroupRules" itemsAlignment="center">
+          <Controller
+            control={control}
+            name="deviceCgroupRules"
+            render={({ field }) => (
+              <StringArrayFormInput
+                value={field.value || []}
+                onChange={field.onChange}
+                errors={
+                  Array.isArray(errors.deviceCgroupRules)
+                    ? errors.deviceCgroupRules
+                    : undefined
+                }
+                addButtonLabel={
+                  <FormattedMessage
+                    id="forms.CreateContainer.securityAddDeviceCgroupRuleButton"
+                    defaultMessage="Add Rule"
+                  />
+                }
+              />
+            )}
+          />
+        </FieldHelp>
+      </FormRow>
     </Section>
   );
 };
 
 const RuntimeSection = ({ form, open, onToggle }: BaseSectionProps) => {
-  const { control } = form;
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
 
   return (
     <Section open={open} onToggle={onToggle} label={messages.runtimeSection}>
+      <FormRow
+        id="runtime"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.runtimeEnvironmentRuntimeLabel"
+            defaultMessage="Runtime"
+          />
+        }
+      >
+        <FieldHelp id="runtime">
+          <Form.Control {...register("runtime")} isInvalid={!!errors.runtime} />
+          <FormFeedback feedback={errors.runtime?.message} />
+        </FieldHelp>
+      </FormRow>
+
       <FormRow
         id="restartPolicy"
         label={
@@ -958,6 +1910,128 @@ const RuntimeSection = ({ form, open, onToggle }: BaseSectionProps) => {
             name="restartPolicy"
             options={restartPolicyOptions}
             valueType="object"
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="restartPolicyMaximumRetryCount"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.runtimeRestartPolicyMaxRetryLabel"
+            defaultMessage="Restart Policy Max Retry Count"
+          />
+        }
+      >
+        <FieldHelp id="restartPolicyMaximumRetryCount">
+          <Form.Control
+            type="text"
+            {...register("restartPolicyMaximumRetryCount", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.restartPolicyMaximumRetryCount}
+          />
+          <FormFeedback
+            feedback={errors.restartPolicyMaximumRetryCount?.message}
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="stopSignal"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.runtimeStopSignalLabel"
+            defaultMessage="Stop Signal"
+          />
+        }
+      >
+        <FieldHelp id="stopSignal">
+          <Form.Control
+            {...register("stopSignal")}
+            isInvalid={!!errors.stopSignal}
+          />
+          <FormFeedback feedback={errors.stopSignal?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="stopTimeout"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.runtimeStopTimeoutLabel"
+            defaultMessage="Stop Timeout"
+          />
+        }
+      >
+        <FieldHelp id="stopTimeout">
+          <Form.Control
+            type="text"
+            {...register("stopTimeout", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.stopTimeout}
+          />
+          <FormFeedback feedback={errors.stopTimeout?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="labels"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.runtimeLabelsLabel"
+            defaultMessage="Labels"
+          />
+        }
+      >
+        <FieldHelp id="labels" itemsAlignment="center">
+          <KeyValuePairsInput
+            control={control}
+            name="labels"
+            errors={errors.labels}
+            keyLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.labelsKeyLabel"
+                defaultMessage="Key"
+              />
+            }
+            valueLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.labelsValueLabel"
+                defaultMessage="Value"
+              />
+            }
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.runtimeAddLabelButton"
+                defaultMessage="Add Label"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="sysctls"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.runtimeSysctlsLabel"
+            defaultMessage="Sysctls"
+          />
+        }
+      >
+        <FieldHelp id="sysctls" itemsAlignment="center">
+          <KeyValuePairsInput
+            control={control}
+            name="sysctls"
+            errors={errors.sysctls}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.runtimeAddSysctlButton"
+                defaultMessage="Add Sysctl"
+              />
+            }
           />
         </FieldHelp>
       </FormRow>
@@ -1173,7 +2247,17 @@ const DeviceRequestsSection = ({ form, open, onToggle }: BaseSectionProps) => {
           <div className="flex-grow-1 ps-2 w-75" style={{ minWidth: 0 }}>
             {deviceRequests.fields[selectedRequest] &&
               (() => {
-                const error = errors.deviceRequests?.[selectedRequest];
+                const error = (
+                  errors.deviceRequests as unknown as
+                    | {
+                        driver?: { message?: string };
+                        count?: { message?: string };
+                        deviceIds?: { message?: string }[];
+                        capabilities?: { message?: string }[];
+                        options?: { message?: string };
+                      }[]
+                    | undefined
+                )?.[selectedRequest];
 
                 return (
                   <Stack
@@ -1328,6 +2412,543 @@ const DeviceRequestsSection = ({ form, open, onToggle }: BaseSectionProps) => {
   );
 };
 
+const ProcessSection = ({ form, open, onToggle }: BaseSectionProps) => {
+  const {
+    register,
+    formState: { errors },
+  } = form;
+  return (
+    <Section open={open} onToggle={onToggle} label={messages.processSection}>
+      <FormRow
+        id="user"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.processUserLabel"
+            defaultMessage="User"
+          />
+        }
+      >
+        <FieldHelp id="user">
+          <Form.Control {...register("user")} isInvalid={!!errors.user} />
+          <FormFeedback feedback={errors.user?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="workingDirectory"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.processWorkingDirectoryLabel"
+            defaultMessage="Working Directory"
+          />
+        }
+      >
+        <FieldHelp id="workingDirectory">
+          <Form.Control
+            {...register("workingDirectory")}
+            isInvalid={!!errors.workingDirectory}
+          />
+          <FormFeedback feedback={errors.workingDirectory?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="command"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.processCommandLabel"
+            defaultMessage="Command"
+          />
+        }
+      >
+        <FieldHelp id="command">
+          <Form.Control {...register("command")} isInvalid={!!errors.command} />
+          <FormFeedback feedback={errors.command?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="entrypoint"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.processEntrypointLabel"
+            defaultMessage="Entrypoint"
+          />
+        }
+      >
+        <FieldHelp id="entrypoint">
+          <Form.Control
+            {...register("entrypoint")}
+            isInvalid={!!errors.entrypoint}
+          />
+          <FormFeedback feedback={errors.entrypoint?.message} />
+        </FieldHelp>
+      </FormRow>
+    </Section>
+  );
+};
+
+const HealthcheckSection = ({ form, open, onToggle }: BaseSectionProps) => {
+  const {
+    register,
+    formState: { errors },
+  } = form;
+  return (
+    <Section
+      open={open}
+      onToggle={onToggle}
+      label={messages.healthcheckSection}
+    >
+      <FormRow
+        id="healthcheckTest"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.healthcheckTestLabel"
+            defaultMessage="Healthcheck Test"
+          />
+        }
+      >
+        <FieldHelp id="healthcheckTest">
+          <Form.Control
+            {...register("healthcheckTest")}
+            isInvalid={!!errors.healthcheckTest}
+          />
+          <FormFeedback feedback={errors.healthcheckTest?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="healthcheckInterval"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.healthcheckIntervalLabel"
+            defaultMessage="Healthcheck Interval (ns)"
+          />
+        }
+      >
+        <FieldHelp id="healthcheckInterval">
+          <Form.Control
+            type="text"
+            {...register("healthcheckInterval", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.healthcheckInterval}
+          />
+          <FormFeedback feedback={errors.healthcheckInterval?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="healthcheckTimeout"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.healthcheckTimeoutLabel"
+            defaultMessage="Healthcheck Timeout (ns)"
+          />
+        }
+      >
+        <FieldHelp id="healthcheckTimeout">
+          <Form.Control
+            type="text"
+            {...register("healthcheckTimeout", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.healthcheckTimeout}
+          />
+          <FormFeedback feedback={errors.healthcheckTimeout?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="healthcheckRetries"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.healthcheckRetriesLabel"
+            defaultMessage="Healthcheck Retries"
+          />
+        }
+      >
+        <FieldHelp id="healthcheckRetries">
+          <Form.Control
+            type="text"
+            {...register("healthcheckRetries", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.healthcheckRetries}
+          />
+          <FormFeedback feedback={errors.healthcheckRetries?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="healthcheckStartPeriod"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.healthcheckStartPeriodLabel"
+            defaultMessage="Healthcheck Start Period (ns)"
+          />
+        }
+      >
+        <FieldHelp id="healthcheckStartPeriod">
+          <Form.Control
+            type="text"
+            {...register("healthcheckStartPeriod", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.healthcheckStartPeriod}
+          />
+          <FormFeedback feedback={errors.healthcheckStartPeriod?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="healthcheckStartInterval"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.healthcheckStartIntervalLabel"
+            defaultMessage="Healthcheck Start Interval (ns)"
+          />
+        }
+      >
+        <FieldHelp id="healthcheckStartInterval">
+          <Form.Control
+            type="text"
+            {...register("healthcheckStartInterval", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.healthcheckStartInterval}
+          />
+          <FormFeedback feedback={errors.healthcheckStartInterval?.message} />
+        </FieldHelp>
+      </FormRow>
+    </Section>
+  );
+};
+
+type BlkioError = {
+  path?: { message?: string };
+  weight?: { message?: string };
+  rate?: { message?: string };
+};
+
+const BlkioInput = ({
+  control,
+  register,
+  name,
+  valueField,
+  errors,
+  addLabel,
+}: {
+  control: UseFormReturn<ContainerInputData>["control"];
+  register: UseFormReturn<ContainerInputData>["register"];
+  name:
+    | "blkioWeightDevice"
+    | "blkioDeviceReadBps"
+    | "blkioDeviceWriteBps"
+    | "blkioDeviceReadIops"
+    | "blkioDeviceWriteIops";
+  valueField: "weight" | "rate";
+  errors: unknown;
+  addLabel: React.ReactNode;
+}) => {
+  const arr = useFieldArray({ control, name, keyName: "id" });
+  const watched =
+    (useWatch({ control, name }) as
+      | { path?: string; weight?: number; rate?: number | string }[]
+      | undefined) ?? [];
+  const canAdd = watched.every((b) => {
+    const hasPath = !!b?.path?.trim();
+    const raw = (b as Record<string, unknown>)[valueField];
+    const hasValue =
+      raw !== undefined && raw !== null && String(raw).trim() !== "";
+    return hasPath && hasValue;
+  });
+
+  const blkioErrors = errors as BlkioError[] | undefined;
+  type RegisterType = (
+    n: string,
+    opts: Parameters<typeof register>[1],
+  ) => ReturnType<typeof register>;
+
+  const blkioFieldHasErrors = (
+    error: BlkioError | undefined,
+    field: typeof valueField,
+  ): boolean => !!error?.[field];
+
+  return (
+    <div className="p-3 border rounded">
+      <Stack gap={3}>
+        {arr.fields.map((f, i) => (
+          <Stack
+            key={f.id}
+            direction="horizontal"
+            gap={3}
+            className="align-items-start"
+          >
+            <FormRow
+              id={`${name}-path-${i}`}
+              label={
+                <FormattedMessage
+                  id="forms.CreateContainer.blkioPathLabel"
+                  defaultMessage="Path"
+                />
+              }
+            >
+              <Form.Control
+                {...register(`${name}.${i}.path` as never)}
+                isInvalid={!!blkioErrors?.[i]?.path}
+              />
+              <FormFeedback feedback={blkioErrors?.[i]?.path?.message} />
+            </FormRow>
+            <FormRow
+              id={`${name}-${valueField}-${i}`}
+              label={
+                valueField === "weight" ? (
+                  <FormattedMessage
+                    id="forms.CreateContainer.blkioWeightValueLabel"
+                    defaultMessage="Weight"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="forms.CreateContainer.blkioRateValueLabel"
+                    defaultMessage="Rate"
+                  />
+                )
+              }
+            >
+              <Form.Control
+                type="text"
+                {...(register as RegisterType)(`${name}.${i}.${valueField}`, {
+                  setValueAs: (v: string) => (v === "" ? undefined : Number(v)),
+                })}
+                isInvalid={blkioFieldHasErrors(blkioErrors?.[i], valueField)}
+              />
+              <FormFeedback
+                feedback={
+                  (
+                    blkioErrors?.[i] as
+                      Record<string, { message?: string }> | undefined
+                  )?.[valueField]?.message
+                }
+              />
+            </FormRow>
+            <Button variant="shadow-danger" onClick={() => arr.remove(i)}>
+              <Icon className="text-danger" icon="delete" />
+            </Button>
+          </Stack>
+        ))}
+        <Button
+          className="me-auto"
+          variant="outline-primary"
+          disabled={!canAdd && watched.length > 0}
+          onClick={() => arr.append({ path: "", [valueField]: "" } as never)}
+        >
+          {addLabel}
+        </Button>
+      </Stack>
+    </div>
+  );
+};
+
+const BlkioSection = ({ form, open, onToggle }: BaseSectionProps) => {
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
+  return (
+    <Section open={open} onToggle={onToggle} label={messages.blkioSection}>
+      <FormRow
+        id="blkioWeight"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.blkioWeightLabel"
+            defaultMessage="Block I/O Weight (0-1000)"
+          />
+        }
+      >
+        <FieldHelp id="blkioWeight">
+          <Form.Control
+            type="text"
+            {...register("blkioWeight", {
+              setValueAs: (v) => (v === "" ? undefined : Number(v)),
+            })}
+            isInvalid={!!errors.blkioWeight}
+          />
+          <FormFeedback feedback={errors.blkioWeight?.message} />
+        </FieldHelp>
+      </FormRow>
+
+      <FormRow
+        id="blkioWeightDevice"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.blkioWeightDeviceLabel"
+            defaultMessage="Block I/O Device Weight"
+          />
+        }
+      >
+        <FieldHelp id="blkioWeightDevice" itemsAlignment="center">
+          <BlkioInput
+            control={control}
+            register={register}
+            name="blkioWeightDevice"
+            valueField="weight"
+            errors={errors.blkioWeightDevice}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.blkioAddWeightButton"
+                defaultMessage="Add Weight"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="blkioDeviceReadBps"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.blkioDeviceReadBpsLabel"
+            defaultMessage="Block I/O Device Read Limit Bps"
+          />
+        }
+      >
+        <FieldHelp id="blkioDeviceReadBps" itemsAlignment="center">
+          <BlkioInput
+            control={control}
+            register={register}
+            name="blkioDeviceReadBps"
+            valueField="rate"
+            errors={errors.blkioDeviceReadBps}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.blkioAddRateLimitButton"
+                defaultMessage="Add Rate Limit"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="blkioDeviceWriteBps"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.blkioDeviceWriteBpsLabel"
+            defaultMessage="Block I/O Device Write Limit Bps"
+          />
+        }
+      >
+        <FieldHelp id="blkioDeviceWriteBps" itemsAlignment="center">
+          <BlkioInput
+            control={control}
+            register={register}
+            name="blkioDeviceWriteBps"
+            valueField="rate"
+            errors={errors.blkioDeviceWriteBps}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.blkioAddRateLimitButton"
+                defaultMessage="Add Rate Limit"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="blkioDeviceReadIops"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.blkioDeviceReadIopsLabel"
+            defaultMessage="Block I/O Device Read Limit Iops"
+          />
+        }
+      >
+        <FieldHelp id="blkioDeviceReadIops" itemsAlignment="center">
+          <BlkioInput
+            control={control}
+            register={register}
+            name="blkioDeviceReadIops"
+            valueField="rate"
+            errors={errors.blkioDeviceReadIops}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.blkioAddRateLimitButton"
+                defaultMessage="Add Rate Limit"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="blkioDeviceWriteIops"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.blkioDeviceWriteIopsLabel"
+            defaultMessage="Block I/O Device Write Limit Iops"
+          />
+        }
+      >
+        <FieldHelp id="blkioDeviceWriteIops" itemsAlignment="center">
+          <BlkioInput
+            control={control}
+            register={register}
+            name="blkioDeviceWriteIops"
+            valueField="rate"
+            errors={errors.blkioDeviceWriteIops}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.blkioAddRateLimitButton"
+                defaultMessage="Add Rate Limit"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+    </Section>
+  );
+};
+
+const LoggingSection = ({ form, open, onToggle }: BaseSectionProps) => {
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
+  return (
+    <Section open={open} onToggle={onToggle} label={messages.loggingSection}>
+      <FormRow
+        id="logType"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.loggingLogTypeLabel"
+            defaultMessage="Log Type"
+          />
+        }
+      >
+        <FieldHelp id="logType">
+          <Form.Control {...register("logType")} isInvalid={!!errors.logType} />
+          <FormFeedback feedback={errors.logType?.message} />
+        </FieldHelp>
+      </FormRow>
+      <FormRow
+        id="logConfig"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.loggingLogConfigLabel"
+            defaultMessage="Log Config"
+          />
+        }
+      >
+        <FieldHelp id="logConfig" itemsAlignment="center">
+          <KeyValuePairsInput
+            control={control}
+            name="logConfig"
+            errors={errors.logConfig}
+            addLabel={
+              <FormattedMessage
+                id="forms.CreateContainer.loggingAddLogConfigButton"
+                defaultMessage="Add Log Config"
+              />
+            }
+          />
+        </FieldHelp>
+      </FormRow>
+    </Section>
+  );
+};
+
 type CreateContainerProps = {
   queryRef: ContainerCreate_getOptions_Query$data;
   isLoading?: boolean;
@@ -1343,7 +2964,7 @@ const CreateContainer = ({
 }: CreateContainerProps) => {
   const form = useForm<ContainerInputData>({
     mode: "onTouched",
-    resolver: zodResolver(containerSchema),
+    resolver: zodResolver(containerSchema) as never,
   });
 
   const { handleSubmit, reset } = form;
@@ -1408,10 +3029,35 @@ const CreateContainer = ({
           open={isSectionOpen("deviceMappings")}
           onToggle={() => toggleSection("deviceMappings")}
         />
+
         <DeviceRequestsSection
           form={form}
           open={isSectionOpen("deviceRequests")}
           onToggle={() => toggleSection("deviceRequests")}
+        />
+
+        <ProcessSection
+          form={form}
+          open={isSectionOpen("process")}
+          onToggle={() => toggleSection("process")}
+        />
+
+        <HealthcheckSection
+          form={form}
+          open={isSectionOpen("healthcheck")}
+          onToggle={() => toggleSection("healthcheck")}
+        />
+
+        <BlkioSection
+          form={form}
+          open={isSectionOpen("blkio")}
+          onToggle={() => toggleSection("blkio")}
+        />
+
+        <LoggingSection
+          form={form}
+          open={isSectionOpen("logging")}
+          onToggle={() => toggleSection("logging")}
         />
       </div>
 
