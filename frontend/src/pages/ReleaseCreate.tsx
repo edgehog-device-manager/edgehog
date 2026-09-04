@@ -29,7 +29,6 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import { Card } from "react-bootstrap";
 
 import type {
   CreateReleaseInput,
@@ -44,7 +43,7 @@ import Alert from "@/components/ui/alert/Alert";
 import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
 import Spinner from "@/components/ui/spinner/Spinner";
-import CreateRelease from "@/forms/CreateRelease";
+import ReleaseComposer from "@/components/apps/releases/release-composer/ReleaseComposer";
 import { Route, useNavigate } from "@/Navigation";
 
 const CREATE_RELEASE_PAGE_QUERY = graphql`
@@ -53,7 +52,9 @@ const CREATE_RELEASE_PAGE_QUERY = graphql`
       name
     }
     ...hooks_SystemModelsOptionsFragment
-    ...hooks_ContainersOptionsFragment
+    ...hooks_NetworksOptionsFragment
+    ...hooks_VolumesOptionsFragment
+    ...hooks_ImageCredentialsOptionsFragment
   }
 `;
 
@@ -70,19 +71,16 @@ const CREATE_RELEASE_MUTATION = graphql`
             }
           }
         }
-        systemModels {
-          id
-        }
       }
     }
   }
 `;
 
-type ReleaseOptions = {
+type ReleaseProps = {
   releaseOptions: ReleaseCreate_getOptions_Query$data;
 };
 
-const Release = ({ releaseOptions }: ReleaseOptions) => {
+const Release = ({ releaseOptions }: ReleaseProps) => {
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
   const navigate = useNavigate();
   const { applicationId = "" } = useParams();
@@ -120,22 +118,6 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
             />,
           );
         },
-        updater(store, data) {
-          if (!data?.createRelease?.result?.id) {
-            return;
-          }
-
-          const release = store
-            .getRootField("createRelease")
-            .getLinkedRecord("result");
-          const root = store.getRoot();
-
-          const releases = root.getLinkedRecords("releases");
-
-          if (releases) {
-            root.setLinkedRecords([...releases, release], "releases");
-          }
-        },
       });
     },
     [createRelease, navigate, applicationId],
@@ -151,9 +133,8 @@ const Release = ({ releaseOptions }: ReleaseOptions) => {
       >
         {errorFeedback}
       </Alert>
-      <CreateRelease
-        requiredSystemModelsOptionsRef={releaseOptions}
-        containersOptionsRef={releaseOptions}
+      <ReleaseComposer
+        queryRef={releaseOptions}
         onSubmit={handleCreateRelease}
         isLoading={isCreatingRelease}
       />
@@ -185,9 +166,9 @@ const ReleaseWrapper = ({ getReleaseOptionsQuery }: ReleaseWrapperProps) => {
         }
       />
       <Page.Main>
-        <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
+        <div className="bg-white border-0 shadow-sm flex-grow-1 p-4 rounded-3">
           <Release releaseOptions={releaseOptions} />
-        </Card>
+        </div>
       </Page.Main>
     </Page>
   );

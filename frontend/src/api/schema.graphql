@@ -1620,28 +1620,28 @@ input ApplicationCreateInitialReleaseInput {
   version: String!
 }
 
-input ContainerCreateWithNestedImageInput {
+input ContainerCreateFromReleaseImageInput {
   id: ID
   imageCredentialsId: ID
   reference: String
 }
 
-input ContainerCreateWithNestedNetworksInput {
+input ContainerCreateFromReleaseNetworksInput {
   id: ID
 }
 
-input ContainerCreateWithNestedVolumesInput {
+input ContainerCreateFromReleaseVolumesInput {
   id: ID
   target: String
 }
 
-input ContainerCreateWithNestedDeviceMappingsInput {
+input ContainerCreateFromReleaseDeviceMappingsInput {
   cgroupPermissions: String!
   pathInContainer: String!
   pathOnHost: String!
 }
 
-input ContainerCreateWithNestedDeviceRequestsInput {
+input ContainerCreateFromReleaseDeviceRequestsInput {
   """
   A list of capabilities; an OR list of AND lists of capabilities.
 
@@ -1677,7 +1677,36 @@ input ContainerCreateWithNestedDeviceRequestsInput {
 }
 
 input ReleaseCreateContainersInput {
+  binds: [String!]
+  capAdd: [String!]
+  capDrop: [String!]
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  dependsOn: [String!]
+  deviceMappings: [ContainerCreateFromReleaseDeviceMappingsInput!]
+  deviceRequests: [ContainerCreateFromReleaseDeviceRequestsInput!]
+  env: [ContainerEnvVarInput!]
+  extraHosts: [String!]
+  hostname: String
   id: ID
+  image: ContainerCreateFromReleaseImageInput
+  memory: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
+  name: String
+  networkMode: String
+  networks: [ContainerCreateFromReleaseNetworksInput!]
+  portBindings: [String!]
+  privileged: Boolean
+  readOnlyRootfs: Boolean
+  restartPolicy: String
+  storageOpt: [String!]
+  tmpfs: [String!]
+  volumeDriver: String
+  volumes: [ContainerCreateFromReleaseVolumesInput!]
 }
 
 input ReleaseCreateContainerDependenciesInput {
@@ -4146,11 +4175,12 @@ input CreateContainerInput {
   readOnlyRootfs: Boolean
   tmpfs: [String!]
   binds: [String!]
-  image: ContainerCreateWithNestedImageInput
-  networks: [ContainerCreateWithNestedNetworksInput!]
-  volumes: [ContainerCreateWithNestedVolumesInput!]
-  deviceMappings: [ContainerCreateWithNestedDeviceMappingsInput!]
-  deviceRequests: [ContainerCreateWithNestedDeviceRequestsInput!]
+  image: ContainerCreateFromReleaseImageInput
+  networks: [ContainerCreateFromReleaseNetworksInput!]
+  volumes: [ContainerCreateFromReleaseVolumesInput!]
+  deviceMappings: [ContainerCreateFromReleaseDeviceMappingsInput!]
+  deviceRequests: [ContainerCreateFromReleaseDeviceRequestsInput!]
+  dependsOn: [String!]
 }
 
 enum ContainerSortField {

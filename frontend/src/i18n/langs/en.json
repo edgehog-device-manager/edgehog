@@ -164,14 +164,6 @@
   "components.apps.containers.containers-overview.ContainersOverview.noContainers": {
     "defaultMessage": "No containers available."
   },
-  "components.apps.containers.containers-table.ContainersTable.Name": {
-    "defaultMessage": "Name",
-    "description": "Title for the Name column of the containers table"
-  },
-  "components.apps.containers.containers-table.ContainersTable.imageTitle": {
-    "defaultMessage": "Image",
-    "description": "Title for the Image column of the containers table"
-  },
   "components.apps.containers.image-credentials-table.ImageCredentialsTable.labelTitle": {
     "defaultMessage": "Label"
   },
@@ -193,18 +185,6 @@
   "components.apps.containers.networks-table.NetworksTable.label": {
     "defaultMessage": "Label",
     "description": "Title for the Label column of the networks table"
-  },
-  "components.apps.containers.reuse-container-modal.ReuseContainerModal.confirmButton": {
-    "defaultMessage": "Confirm"
-  },
-  "components.apps.containers.reuse-container-modal.ReuseContainerModal.confirmPrompt": {
-    "defaultMessage": "Choose a container from which you want to copy configuration."
-  },
-  "components.apps.containers.reuse-container-modal.ReuseContainerModal.reuseResourcesTitle": {
-    "defaultMessage": "Reuse Resources"
-  },
-  "components.apps.containers.reuse-container-modal.ReuseContainerModal.selectContainer": {
-    "defaultMessage": "Select Container"
   },
   "components.apps.containers.string-array-form-input.StringArrayFormInput.addButton": {
     "defaultMessage": "Add Item"
@@ -590,6 +570,45 @@
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.title": {
     "defaultMessage": "Install Application"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.addContainer": {
+    "defaultMessage": "Add Container"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.createRelease": {
+    "defaultMessage": "Create Release"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.invalidYamlPrefix": {
+    "defaultMessage": "Invalid docker-compose file:"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.noServicesHint": {
+    "defaultMessage": "No containers yet. Add one or paste a docker-compose file on the right."
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.requiredSystemModelsLabel": {
+    "defaultMessage": "Required System Models"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.versionLabel": {
+    "defaultMessage": "Release Version"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.versionRequired": {
+    "defaultMessage": "This field is required"
+  },
+  "components.apps.releases.release-composer.ReleaseComposer.warningsTitle": {
+    "defaultMessage": "Some settings could not be represented:"
+  },
+  "components.apps.releases.release-composer.ServicePane.dependsOnLabel": {
+    "defaultMessage": "Depends on"
+  },
+  "components.apps.releases.release-composer.ServicePane.invalidServiceBadge": {
+    "defaultMessage": "This container has missing or invalid settings"
+  },
+  "components.apps.releases.release-composer.ServicePane.removeService": {
+    "defaultMessage": "Remove"
+  },
+  "components.apps.releases.release-composer.ServicePane.toggleService": {
+    "defaultMessage": "Toggle container details"
+  },
+  "components.apps.releases.release-composer.ServicePane.unnamedService": {
+    "defaultMessage": "Unnamed container"
   },
   "components.apps.releases.release-devices-table.ReleaseDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
@@ -1604,9 +1623,6 @@
   "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.campaignsLabel": {
     "defaultMessage": "Application Campaigns"
   },
-  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.containersLabel": {
-    "defaultMessage": "Containers"
-  },
   "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.deploymentsLabel": {
     "defaultMessage": "Deployments"
   },
@@ -1875,6 +1891,18 @@
   },
   "components.ui.infinite-table.InfiniteTable.noRecords": {
     "defaultMessage": "No records to display."
+  },
+  "components.ui.monaco-editor.MonacoEditor.vimToggle": {
+    "defaultMessage": "Toggle Vim mode"
+  },
+  "components.ui.monaco-editor.MonacoEditor.zoomIn": {
+    "defaultMessage": "Increase font size"
+  },
+  "components.ui.monaco-editor.MonacoEditor.zoomOut": {
+    "defaultMessage": "Decrease font size"
+  },
+  "components.ui.monaco-editor.MonacoEditor.zoomReset": {
+    "defaultMessage": "Reset font size"
   },
   "components.ui.page.Page.loadingError.feedback": {
     "defaultMessage": "The page couldn't load."
@@ -2316,30 +2344,6 @@
   },
   "forms.CreateNetwork.submitButton": {
     "defaultMessage": "Create"
-  },
-  "forms.CreateRelease.addDependenciesButton": {
-    "defaultMessage": "Add Dependencies"
-  },
-  "forms.CreateRelease.containerDependenciesLabel": {
-    "defaultMessage": "Container Dependencies"
-  },
-  "forms.CreateRelease.containerLabel": {
-    "defaultMessage": "Container"
-  },
-  "forms.CreateRelease.containersLabel": {
-    "defaultMessage": "Containers"
-  },
-  "forms.CreateRelease.dependsOnLabel": {
-    "defaultMessage": "Depends on"
-  },
-  "forms.CreateRelease.submitButton": {
-    "defaultMessage": "Create"
-  },
-  "forms.CreateRelease.supportedSystemModelsLabels": {
-    "defaultMessage": "Supported System Models"
-  },
-  "forms.CreateRelease.versionLabel": {
-    "defaultMessage": "Version"
   },
   "forms.CreateRepository.descriptionLabel": {
     "defaultMessage": "Description"
@@ -3320,15 +3324,6 @@
   "navigation.routeTitle.ChannelsNew": {
     "defaultMessage": "Create Channel"
   },
-  "navigation.routeTitle.Containers": {
-    "defaultMessage": "Containers"
-  },
-  "navigation.routeTitle.ContainersEdit": {
-    "defaultMessage": "Container Details"
-  },
-  "navigation.routeTitle.ContainersNew": {
-    "defaultMessage": "Create Containers"
-  },
   "navigation.routeTitle.DeploymentCampaigns": {
     "defaultMessage": "Campaigns"
   },
@@ -3598,36 +3593,6 @@
   },
   "pages.Channels.title": {
     "defaultMessage": "Channels"
-  },
-  "pages.Container.containerNotFound.message": {
-    "defaultMessage": "Return to the containers list."
-  },
-  "pages.Container.containerNotFound.title": {
-    "defaultMessage": "Container not found."
-  },
-  "pages.Container.name": {
-    "defaultMessage": "Container Name"
-  },
-  "pages.Container.updateContainerErrorFeedback": {
-    "defaultMessage": "Could not update the container, please try again."
-  },
-  "pages.ContainerCreate.creationErrorFeedback": {
-    "defaultMessage": "Could not create the Container, please try again."
-  },
-  "pages.ContainerCreate.reuseContainerButton": {
-    "defaultMessage": "Reuse Container"
-  },
-  "pages.ContainerCreate.reuseContainerTitleButton": {
-    "defaultMessage": "Copy configuration from an existing container"
-  },
-  "pages.ContainerCreate.title": {
-    "defaultMessage": "Create Container"
-  },
-  "pages.Containers.createButton": {
-    "defaultMessage": "Create Container"
-  },
-  "pages.Containers.title": {
-    "defaultMessage": "Containers"
   },
   "pages.Deployment.deleteErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot delete an application while it is offline."

@@ -89,7 +89,13 @@ defmodule Edgehog.Containers.Container do
       ]
     ]
 
-    create :create_with_nested do
+    create :create_from_release do
+      description """
+      Creates a container on behalf of a release, allowing inline
+      definition of the container configuration together with the
+      names of the containers it depends on.
+      """
+
       accept [
         :name,
         :restart_policy,
@@ -121,6 +127,7 @@ defmodule Edgehog.Containers.Container do
       argument :volumes, {:array, :map}
       argument :device_mappings, {:array, :map}
       argument :device_requests, {:array, :map}
+      argument :depends_on, {:array, :string}
 
       change manage_relationship(:volumes,
                on_no_match: :error,
@@ -398,10 +405,6 @@ defmodule Edgehog.Containers.Container do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :releases]}
-  end
-
-  identities do
-    identity :name, [:name]
   end
 
   postgres do
