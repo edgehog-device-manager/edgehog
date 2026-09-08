@@ -65,14 +65,17 @@ defmodule Edgehog.Containers.FileBind do
 
     belongs_to :file_mount, Edgehog.Containers.Container.FileMount do
       attribute_type :uuid_v7
+      public? true
     end
 
     belongs_to :file_download_request, Edgehog.Files.FileDownloadRequest do
       attribute_type :uuid_v7
+      public? true
     end
 
     belongs_to :device_file, Edgehog.Files.DeviceFile do
       attribute_type :uuid_v7
+      public? true
     end
   end
 

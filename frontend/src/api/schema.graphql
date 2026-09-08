@@ -1682,6 +1682,48 @@ input ReleaseCreateRequiredSystemModelsInput {
 
 enum FileBindSortField {
   ID
+  FILE_MOUNT_ID
+  FILE_DOWNLOAD_REQUEST_ID
+  DEVICE_FILE_ID
+}
+
+input FileBindFilterDeviceFileId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input FileBindFilterFileDownloadRequestId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input FileBindFilterFileMountId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input FileBindFilterId {
@@ -1702,6 +1744,12 @@ input FileBindFilterInput {
   or: [FileBindFilterInput!]
   not: [FileBindFilterInput!]
   id: FileBindFilterId
+  fileMountId: FileBindFilterFileMountId
+  fileDownloadRequestId: FileBindFilterFileDownloadRequestId
+  deviceFileId: FileBindFilterDeviceFileId
+  fileMount: ContainerFileMountFilterInput
+  fileDownloadRequest: FileDownloadRequestFilterInput
+  deviceFile: DeviceFileFilterInput
 }
 
 input FileBindSortInput {
@@ -1711,6 +1759,12 @@ input FileBindSortInput {
 
 type FileBind {
   id: ID!
+  fileMountId: ID
+  fileDownloadRequestId: ID
+  deviceFileId: ID
+  fileMount: ContainerFileMount
+  fileDownloadRequest: FileDownloadRequest
+  deviceFile: DeviceFile
 }
 
 ":release_container_dependencies connection"
