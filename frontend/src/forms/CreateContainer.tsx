@@ -26,7 +26,7 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
-import { Card } from "react-bootstrap";
+import { Card, Col, Container, Row } from "react-bootstrap";
 
 import type {
   ContainerEnvVarInput,
@@ -53,6 +53,7 @@ import Icon from "@/components/ui/icon/Icon";
 import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
 import MultiSelect from "@/components/ui/multi-select/MultiSelect";
 import {
+  useFilesOptions,
   useImageCredentialOptions,
   useNetworkOptions,
   useVolumeOptions,
@@ -120,6 +121,16 @@ const mapCreateContainerToInput = (
             .filter(Boolean),
         ) ?? [],
       options: request.options,
+    })) ?? [],
+  fileMounts:
+    data.fileMounts?.map((mount) => ({
+      mountpoint: mount.mountpoint,
+      required: mount.required,
+      defaultFileId:
+        (typeof mount.defaultFileId === "object" && mount.defaultFileId !== null
+          ? ((mount.defaultFileId as { id?: string; value?: string }).value ??
+            (mount.defaultFileId as { id?: string; value?: string }).id)
+          : mount.defaultFileId) || undefined,
     })) ?? [],
 });
 
@@ -1328,6 +1339,167 @@ const DeviceRequestsSection = ({ form, open, onToggle }: BaseSectionProps) => {
   );
 };
 
+const FileMountsSection = ({
+  form,
+  queryRef,
+  open,
+  onToggle,
+}: SectionWithQueryProps) => {
+  const {
+    control,
+    register,
+    formState: { errors },
+  } = form;
+
+  const fileMounts = useFieldArray({
+    control,
+    name: "fileMounts",
+    keyName: "key",
+  });
+
+  const fileOptions = useFilesOptions(queryRef);
+
+  return (
+    <Section open={open} onToggle={onToggle} label={messages.fileMountsLabel}>
+      <FormRow
+        id="fileMounts"
+        label={
+          <FormattedMessage
+            id="forms.CreateContainer.fileMountsLabel"
+            defaultMessage="File Mounts"
+          />
+        }
+      >
+        <FieldHelp id="fileMounts" itemsAlignment="center">
+          <div className="p-3 border rounded">
+            <Container fluid>
+              {fileMounts.fields.length > 0 && (
+                <Row className="mb-2">
+                  <Col>
+                    <FormattedMessage
+                      id="forms.CreateContainer.fileMountMountpointLabel"
+                      defaultMessage="Mountpoint"
+                    />
+                  </Col>
+                  <Col>
+                    <FormattedMessage
+                      id="forms.CreateContainer.fileMountDefaultFileLabel"
+                      defaultMessage="Default File"
+                    />
+                  </Col>
+                  <Col
+                    xs="auto"
+                    style={{ visibility: "hidden" }}
+                    aria-hidden="true"
+                  >
+                    <div
+                      className="d-flex align-items-center"
+                      style={{ minHeight: "38px" }}
+                    >
+                      <Form.Check
+                        type="checkbox"
+                        className="text-nowrap"
+                        label={
+                          <FormattedMessage
+                            id="forms.CreateContainer.fileMountRequiredLabel"
+                            defaultMessage="Required"
+                          />
+                        }
+                      />
+                    </div>
+                  </Col>
+                  <Col
+                    xs="auto"
+                    style={{ visibility: "hidden" }}
+                    aria-hidden="true"
+                  >
+                    <Button variant="shadow-danger" type="button">
+                      <Icon className="text-danger" icon="delete" />
+                    </Button>
+                  </Col>
+                </Row>
+              )}
+
+              {fileMounts.fields.map((field, i) => {
+                const error = errors.fileMounts?.[i];
+
+                return (
+                  <Row className="mb-3 align-items-start" key={field.key}>
+                    <Col>
+                      <Form.Control
+                        {...register(`fileMounts.${i}.mountpoint`)}
+                        isInvalid={!!error?.mountpoint}
+                        placeholder="e.g., /mnt/data"
+                      />
+                      <FormFeedback feedback={error?.mountpoint?.message} />
+                    </Col>
+
+                    <Col>
+                      <SelectFormField
+                        control={control}
+                        options={fileOptions}
+                        name={`fileMounts.${i}.defaultFileId`}
+                        isClearable
+                      />
+                    </Col>
+
+                    <Col xs="auto">
+                      <div
+                        className="d-flex align-items-center"
+                        style={{ minHeight: "38px" }}
+                      >
+                        <Form.Check
+                          type="checkbox"
+                          className="text-nowrap"
+                          id={`fileMount-required-${i}`}
+                          label={
+                            <FormattedMessage
+                              id="forms.CreateContainer.fileMountRequiredLabel"
+                              defaultMessage="Required"
+                            />
+                          }
+                          {...register(`fileMounts.${i}.required`)}
+                        />
+                      </div>
+                    </Col>
+
+                    <Col xs="auto">
+                      <Button
+                        variant="shadow-danger"
+                        type="button"
+                        onClick={() => fileMounts.remove(i)}
+                      >
+                        <Icon className="text-danger" icon="delete" />
+                      </Button>
+                    </Col>
+                  </Row>
+                );
+              })}
+            </Container>
+
+            <Button
+              variant="outline-primary"
+              type="button"
+              onClick={() =>
+                fileMounts.append({
+                  mountpoint: "",
+                  required: true,
+                  defaultFileId: undefined,
+                })
+              }
+            >
+              <FormattedMessage
+                id="forms.CreateContainer.addFileMountButton"
+                defaultMessage="Add File Mount"
+              />
+            </Button>
+          </div>
+        </FieldHelp>
+      </FormRow>
+    </Section>
+  );
+};
+
 type CreateContainerProps = {
   queryRef: ContainerCreate_getOptions_Query$data;
   isLoading?: boolean;
@@ -1401,6 +1573,13 @@ const CreateContainer = ({
           form={form}
           open={isSectionOpen("runtimeEnvironment")}
           onToggle={() => toggleSection("runtimeEnvironment")}
+        />
+
+        <FileMountsSection
+          form={form}
+          queryRef={queryRef}
+          open={isSectionOpen("fileMounts")}
+          onToggle={() => toggleSection("fileMounts")}
         />
 
         <DeviceMappingsSection
