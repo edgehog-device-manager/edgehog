@@ -62,6 +62,54 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.imageCredentialsLabel",
     defaultMessage: "Image Credentials",
   },
+  processSection: {
+    id: "components.apps.containers.container-details.ContainerDetails.processSection",
+    defaultMessage: "Process Configuration",
+  },
+  user: {
+    id: "components.apps.containers.container-details.ContainerDetails.userLabel",
+    defaultMessage: "User",
+  },
+  workingDirectory: {
+    id: "components.apps.containers.container-details.ContainerDetails.workingDirectoryLabel",
+    defaultMessage: "Working Directory",
+  },
+  command: {
+    id: "components.apps.containers.container-details.ContainerDetails.commandLabel",
+    defaultMessage: "Command",
+  },
+  entrypoint: {
+    id: "components.apps.containers.container-details.ContainerDetails.entrypointLabel",
+    defaultMessage: "Entrypoint",
+  },
+  healthcheckSection: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckSection",
+    defaultMessage: "Healthcheck",
+  },
+  healthcheckTest: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckTestLabel",
+    defaultMessage: "Healthcheck Test",
+  },
+  healthcheckInterval: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckIntervalLabel",
+    defaultMessage: "Healthcheck Interval (ns)",
+  },
+  healthcheckTimeout: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckTimeoutLabel",
+    defaultMessage: "Healthcheck Timeout (ns)",
+  },
+  healthcheckRetries: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckRetriesLabel",
+    defaultMessage: "Healthcheck Retries",
+  },
+  healthcheckStartPeriod: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckStartPeriodLabel",
+    defaultMessage: "Healthcheck Start Period (ns)",
+  },
+  healthcheckStartInterval: {
+    id: "components.apps.containers.container-details.ContainerDetails.healthcheckStartIntervalLabel",
+    defaultMessage: "Healthcheck Start Interval (ns)",
+  },
   networkConfigSection: {
     id: "components.apps.containers.container-details.ContainerDetails.networkConfigSection",
     defaultMessage: "Network Configuration",
@@ -70,9 +118,29 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.hostnameLabel",
     defaultMessage: "Hostname",
   },
+  domainname: {
+    id: "components.apps.containers.container-details.ContainerDetails.domainnameLabel",
+    defaultMessage: "Domainname",
+  },
+  networkDisabled: {
+    id: "components.apps.containers.container-details.ContainerDetails.networkDisabledLabel",
+    defaultMessage: "Network Disabled",
+  },
   networkMode: {
     id: "components.apps.containers.container-details.ContainerDetails.networkModeLabel",
     defaultMessage: "Network Mode",
+  },
+  dns: {
+    id: "components.apps.containers.container-details.ContainerDetails.dnsLabel",
+    defaultMessage: "DNS",
+  },
+  dnsOptions: {
+    id: "components.apps.containers.container-details.ContainerDetails.dnsOptionsLabel",
+    defaultMessage: "DNS Options",
+  },
+  dnsSearch: {
+    id: "components.apps.containers.container-details.ContainerDetails.dnsSearchLabel",
+    defaultMessage: "DNS Search",
   },
   extraHosts: {
     id: "components.apps.containers.container-details.ContainerDetails.extraHostsLabel",
@@ -81,6 +149,10 @@ const messages = defineMessages({
   portBindings: {
     id: "components.apps.containers.container-details.ContainerDetails.portBindingsLabel",
     defaultMessage: "Port Bindings",
+  },
+  exposedPorts: {
+    id: "components.apps.containers.container-details.ContainerDetails.exposedPortsLabel",
+    defaultMessage: "Exposed Ports",
   },
   storageConfigSection: {
     id: "components.apps.containers.container-details.ContainerDetails.storageConfigSection",
@@ -106,6 +178,10 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.readOnlyRootfsLabel",
     defaultMessage: "Read-Only Root Filesystem",
   },
+  autoRemove: {
+    id: "components.apps.containers.container-details.ContainerDetails.autoRemoveLabel",
+    defaultMessage: "Auto Remove",
+  },
   resourceLimitsSection: {
     id: "components.apps.containers.container-details.ContainerDetails.resourceLimitsSection",
     defaultMessage: "Resource Limits",
@@ -126,6 +202,14 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.memorySwappinessLabel",
     defaultMessage: "Memory Swappiness (0-100)",
   },
+  cpuShares: {
+    id: "components.apps.containers.container-details.ContainerDetails.cpuSharesLabel",
+    defaultMessage: "CPU Shares",
+  },
+  cpusetCpus: {
+    id: "components.apps.containers.container-details.ContainerDetails.cpusetCpusLabel",
+    defaultMessage: "Cpu Sets",
+  },
   cpuPeriod: {
     id: "components.apps.containers.container-details.ContainerDetails.cpuPeriodLabel",
     defaultMessage: "CPU Period (microseconds)",
@@ -142,6 +226,46 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.cpuRealtimeRuntimeLabel",
     defaultMessage: "CPU Realtime Runtime (microseconds)",
   },
+  shmSize: {
+    id: "components.apps.containers.container-details.ContainerDetails.shmSizeLabel",
+    defaultMessage: "Shm Size (bytes)",
+  },
+  oomScoreAdjustment: {
+    id: "components.apps.containers.container-details.ContainerDetails.oomScoreAdjustmentLabel",
+    defaultMessage: "OOM Score Adjustment",
+  },
+  blkioSection: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioSection",
+    defaultMessage: "Block I/O",
+  },
+  blkioWeight: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioWeightLabel",
+    defaultMessage: "Block I/O Weight (0-1000)",
+  },
+  blkioWeightDevice: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioWeightDeviceLabel",
+    defaultMessage: "Block I/O Device Weight",
+  },
+  blkioDeviceReadBps: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioDeviceReadBpsLabel",
+    defaultMessage: "Block I/O Device Read Limit Bps",
+  },
+  blkioDeviceWriteBps: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioDeviceWriteBpsLabel",
+    defaultMessage: "Block I/O Device Write Limit Bps",
+  },
+  blkioDeviceReadIops: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioDeviceReadIopsLabel",
+    defaultMessage: "Block I/O Device Read Limit Iops",
+  },
+  blkioDeviceWriteIops: {
+    id: "components.apps.containers.container-details.ContainerDetails.blkioDeviceWriteIopsLabel",
+    defaultMessage: "Block I/O Device Write Limit Iops",
+  },
+  ulimits: {
+    id: "components.apps.containers.container-details.ContainerDetails.ulimitsLabel",
+    defaultMessage: "Ulimits",
+  },
   securitySection: {
     id: "components.apps.containers.container-details.ContainerDetails.securitySection",
     defaultMessage: "Security & Capabilities",
@@ -152,23 +276,95 @@ const messages = defineMessages({
   },
   capAdd: {
     id: "components.apps.containers.container-details.ContainerDetails.capAdd",
-    defaultMessage: "Cap Add",
+    defaultMessage: "Add Capabilities",
   },
   capDrop: {
     id: "components.apps.containers.container-details.ContainerDetails.capDrop",
-    defaultMessage: "Cap Drop",
+    defaultMessage: "Drop Capabilities",
+  },
+  cgroupsMode: {
+    id: "components.apps.containers.container-details.ContainerDetails.cgroupsModeLabel",
+    defaultMessage: "Cgroups Mode",
+  },
+  ipcMode: {
+    id: "components.apps.containers.container-details.ContainerDetails.ipcModeLabel",
+    defaultMessage: "Ipc Mode",
+  },
+  usernsMode: {
+    id: "components.apps.containers.container-details.ContainerDetails.usernsModeLabel",
+    defaultMessage: "User Namespace Mode",
+  },
+  pidMode: {
+    id: "components.apps.containers.container-details.ContainerDetails.pidModeLabel",
+    defaultMessage: "PID Mode",
+  },
+  securityopt: {
+    id: "components.apps.containers.container-details.ContainerDetails.securityoptLabel",
+    defaultMessage: "Security Opt",
+  },
+  maskedPaths: {
+    id: "components.apps.containers.container-details.ContainerDetails.maskedPathsLabel",
+    defaultMessage: "Masked Paths",
+  },
+  readonlyPaths: {
+    id: "components.apps.containers.container-details.ContainerDetails.readonlyPathsLabel",
+    defaultMessage: "Readonly Paths",
+  },
+  groupAdd: {
+    id: "components.apps.containers.container-details.ContainerDetails.groupAddLabel",
+    defaultMessage: "Group Add",
+  },
+  deviceCgroupRules: {
+    id: "components.apps.containers.container-details.ContainerDetails.deviceCgroupRulesLabel",
+    defaultMessage: "Device Cgroup Rules",
   },
   runtimeSection: {
     id: "components.apps.containers.container-details.ContainerDetails.runtimeSection",
     defaultMessage: "Runtime & Environment",
   },
+  runtime: {
+    id: "components.apps.containers.container-details.ContainerDetails.runtimeLabel",
+    defaultMessage: "Runtime",
+  },
   restartPolicy: {
     id: "components.apps.containers.container-details.ContainerDetails.restartPolicyLabel",
     defaultMessage: "Restart Policy",
   },
+  restartPolicyMaximumRetryCount: {
+    id: "components.apps.containers.container-details.ContainerDetails.restartPolicyMaximumRetryCountLabel",
+    defaultMessage: "Restart Policy Max Retry Count",
+  },
+  stopSignal: {
+    id: "components.apps.containers.container-details.ContainerDetails.stopSignalLabel",
+    defaultMessage: "Stop Signal",
+  },
+  stopTimeout: {
+    id: "components.apps.containers.container-details.ContainerDetails.stopTimeoutLabel",
+    defaultMessage: "Stop Timeout",
+  },
+  labels: {
+    id: "components.apps.containers.container-details.ContainerDetails.labelsLabel",
+    defaultMessage: "Labels",
+  },
+  sysctls: {
+    id: "components.apps.containers.container-details.ContainerDetails.sysctlsLabel",
+    defaultMessage: "Sysctls",
+  },
   env: {
     id: "components.apps.containers.container-details.ContainerDetails.envLabel",
     defaultMessage: "Environment (JSON String)",
+  },
+  loggingSection: {
+    id: "components.apps.containers.container-details.ContainerDetails.loggingSection",
+    defaultMessage: "Logging",
+  },
+  logType: {
+    id: "components.apps.containers.container-details.ContainerDetails.logTypeLabel",
+    defaultMessage: "Log Type",
+  },
+  logConfig: {
+    id: "components.apps.containers.container-details.ContainerDetails.logConfigLabel",
+    defaultMessage: "Log Config",
   },
   volumesLabel: {
     id: "components.apps.containers.container-details.ContainerDetails.volumesLabel",
@@ -264,6 +460,24 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
   fragment ContainerDetailsFragment on Container {
     id
     name
+    domainname
+    user
+    command
+    healthcheckTest
+    healthcheckInterval
+    healthcheckTimeout
+    healthcheckRetries
+    healthcheckStartPeriod
+    healthcheckStartInterval
+    workingDirectory
+    entrypoint
+    networkDisabled
+    labelKeys
+    labelValues
+    stopSignal
+    stopTimeout
+    restartPolicy
+    restartPolicyMaximumRetryCount
     env {
       key
       value
@@ -272,6 +486,7 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
     hostname
     networkMode
     portBindings
+    exposedPorts
     binds
     restartPolicy
     privileged
@@ -279,15 +494,54 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
     memorySwap
     memoryReservation
     memorySwappiness
+    cpuShares
+    cpusetCpus
     cpuPeriod
     cpuQuota
     cpuRealtimePeriod
     cpuRealtimeRuntime
-    tmpfs
-    storageOpt
+    shmSize
+    oomScoreAdjustment
+    blkioWeight
+    blkioWeightDevicePath
+    blkioWeightDeviceWeight
+    blkioDeviceReadBpsPath
+    blkioDeviceReadBpsRate
+    blkioDeviceWriteBpsPath
+    blkioDeviceWriteBpsRate
+    blkioDeviceReadIopsPath
+    blkioDeviceReadIopsRate
+    blkioDeviceWriteIopsPath
+    blkioDeviceWriteIopsRate
+    tmpfsPaths
+    tmpfsOptions
+    storageOptKeys
+    storageOptValues
     readOnlyRootfs
+    autoRemove
+    cgroupsMode
+    dns
+    dnsOptions
+    dnsSearch
+    groupAdd
+    ipcMode
+    usernsMode
+    sysctlsKeys
+    sysctlsValues
+    runtime
+    logType
+    logConfigKeys
+    logConfigValues
     capAdd
     capDrop
+    securityopt
+    pidMode
+    maskedPaths
+    readonlyPaths
+    deviceCgroupRules
+    ulimitsName
+    ulimitsSoft
+    ulimitsHard
     volumeDriver
     image {
       reference
@@ -364,11 +618,15 @@ const formatJson = (value: unknown) => {
 
 type SectionKey =
   | "image"
+  | "process"
+  | "healthcheck"
   | "network"
   | "storage"
   | "resourceLimits"
+  | "blkio"
   | "securityCapabilities"
   | "runtimeEnvironment"
+  | "logging"
   | "deviceMappings"
   | "deviceRequests";
 
@@ -381,6 +639,10 @@ const sectionsList: SectionKey[] = [
   "runtimeEnvironment",
   "deviceMappings",
   "deviceRequests",
+  "process",
+  "healthcheck",
+  "blkio",
+  "logging",
 ];
 
 type SectionProps = {
@@ -479,6 +741,91 @@ const CapabilityField = ({ id, label, value }: CapabilityFieldProps) => {
       )}
     </FormRow>
   );
+};
+
+type KeyValuePairsFieldProps = {
+  id: string;
+  label: MessageDescriptor;
+  keys?: readonly string[] | null;
+  values?: readonly string[] | null;
+};
+const KeyValuePairsField = ({
+  id,
+  label,
+  keys,
+  values,
+}: KeyValuePairsFieldProps) => {
+  const pairs = (keys ?? []).map((k, i) => `${k}=${values?.[i] ?? ""}`);
+  return <StringArrayField id={id} label={label} value={pairs} />;
+};
+
+type PathOptionFieldProps = {
+  id: string;
+  label: MessageDescriptor;
+  paths?: readonly string[] | null;
+  options?: readonly string[] | null;
+};
+const PathOptionField = ({
+  id,
+  label,
+  paths,
+  options,
+}: PathOptionFieldProps) => {
+  const pairs = (paths ?? []).map((p, i) => `${p}:${options?.[i] ?? ""}`);
+  return <StringArrayField id={id} label={label} value={pairs} />;
+};
+
+type UlimitsFieldProps = {
+  ulimitsName?: readonly string[] | null;
+  ulimitsSoft?: readonly number[] | null;
+  ulimitsHard?: readonly number[] | null;
+};
+const UlimitsField = ({
+  ulimitsName,
+  ulimitsSoft,
+  ulimitsHard,
+}: UlimitsFieldProps) => {
+  const rows = (ulimitsName ?? []).map(
+    (name, i) =>
+      `${name} soft=${ulimitsSoft?.[i] ?? ""} hard=${ulimitsHard?.[i] ?? ""}`,
+  );
+  return (
+    <StringArrayField id="ulimits" label={messages.ulimits} value={rows} />
+  );
+};
+
+type BlkioWeightDeviceFieldProps = {
+  paths?: readonly string[] | null;
+  weights?: readonly number[] | null;
+};
+const BlkioWeightDeviceField = ({
+  paths,
+  weights,
+}: BlkioWeightDeviceFieldProps) => {
+  const rows = (paths ?? []).map((p, i) => `${p}:${weights?.[i] ?? ""}`);
+  return (
+    <StringArrayField
+      id="blkioWeightDevice"
+      label={messages.blkioWeightDevice}
+      value={rows}
+    />
+  );
+};
+
+type BlkioPathRateFieldProps = {
+  id: string;
+  label: MessageDescriptor;
+  paths?: readonly string[] | null;
+  rates?: readonly (number | string)[] | null;
+};
+const BlkioPathRateField = ({
+  id,
+  label,
+  paths,
+  rates,
+}: BlkioPathRateFieldProps) => {
+  const rows = (paths ?? []).map((p, i) => `${p}:${rates?.[i] ?? ""}`);
+  return <StringArrayField id={id} label={label} value={rows} />;
 };
 
 const VolumeDetails = ({
@@ -742,6 +1089,66 @@ const ImageSection = ({ data, open, onToggle }: SectionComponentProps) => (
   </Section>
 );
 
+const ProcessSection = ({ data, open, onToggle }: SectionComponentProps) => (
+  <Section label={messages.processSection} open={open} onToggle={onToggle}>
+    <PrimitiveField id={`user`} label={messages.user} value={data.user} />
+    <PrimitiveField
+      id={`workingDirectory`}
+      label={messages.workingDirectory}
+      value={data.workingDirectory}
+    />
+    <PrimitiveField
+      id={`command`}
+      label={messages.command}
+      value={data.command?.join(" ")}
+    />
+    <PrimitiveField
+      id={`entrypoint`}
+      label={messages.entrypoint}
+      value={data.entrypoint?.join(" ")}
+    />
+  </Section>
+);
+
+const HealthcheckSection = ({
+  data,
+  open,
+  onToggle,
+}: SectionComponentProps) => (
+  <Section label={messages.healthcheckSection} open={open} onToggle={onToggle}>
+    <PrimitiveField
+      id={`healthcheckTest`}
+      label={messages.healthcheckTest}
+      value={data.healthcheckTest?.join(" ")}
+    />
+    <PrimitiveField
+      id={`healthcheckInterval`}
+      label={messages.healthcheckInterval}
+      value={data.healthcheckInterval}
+    />
+    <PrimitiveField
+      id={`healthcheckTimeout`}
+      label={messages.healthcheckTimeout}
+      value={data.healthcheckTimeout}
+    />
+    <PrimitiveField
+      id={`healthcheckRetries`}
+      label={messages.healthcheckRetries}
+      value={data.healthcheckRetries}
+    />
+    <PrimitiveField
+      id={`healthcheckStartPeriod`}
+      label={messages.healthcheckStartPeriod}
+      value={data.healthcheckStartPeriod}
+    />
+    <PrimitiveField
+      id={`healthcheckStartInterval`}
+      label={messages.healthcheckStartInterval}
+      value={data.healthcheckStartInterval}
+    />
+  </Section>
+);
+
 const NetworkSection = ({ data, open, onToggle }: SectionComponentProps) => (
   <Section
     label={messages.networkConfigSection}
@@ -755,9 +1162,35 @@ const NetworkSection = ({ data, open, onToggle }: SectionComponentProps) => (
     />
 
     <PrimitiveField
+      id={`domainname`}
+      label={messages.domainname}
+      value={data.domainname}
+    />
+
+    <CheckboxField
+      id={`networkDisabled`}
+      label={messages.networkDisabled}
+      checked={data.networkDisabled ?? false}
+    />
+
+    <PrimitiveField
       id={`networkMode`}
       label={messages.networkMode}
       value={data.networkMode}
+    />
+
+    <StringArrayField id={`dns`} label={messages.dns} value={data.dns} />
+
+    <StringArrayField
+      id={`dnsOptions`}
+      label={messages.dnsOptions}
+      value={data.dnsOptions}
+    />
+
+    <StringArrayField
+      id={`dnsSearch`}
+      label={messages.dnsSearch}
+      value={data.dnsSearch}
     />
 
     <StringArrayField
@@ -770,6 +1203,12 @@ const NetworkSection = ({ data, open, onToggle }: SectionComponentProps) => (
       id={`portBindings`}
       label={messages.portBindings}
       value={data.portBindings}
+    />
+
+    <StringArrayField
+      id={`exposedPorts`}
+      label={messages.exposedPorts}
+      value={data.exposedPorts}
     />
     <NetworkDetails networks={data.networks} />
   </Section>
@@ -789,18 +1228,30 @@ const StorageSection = ({ data, open, onToggle }: SectionComponentProps) => (
       value={data.volumeDriver}
     />
 
-    <StringArrayField
+    <KeyValuePairsField
       id={`storageOpt`}
       label={messages.storageOpt}
-      value={data.storageOpt}
+      keys={data.storageOptKeys}
+      values={data.storageOptValues}
     />
 
-    <StringArrayField id={`tmpfs`} label={messages.tmpfs} value={data.tmpfs} />
+    <PathOptionField
+      id={`tmpfs`}
+      label={messages.tmpfs}
+      paths={data.tmpfsPaths}
+      options={data.tmpfsOptions}
+    />
 
     <CheckboxField
       id={`readOnlyRootfs`}
       label={messages.readOnlyRootfs}
       checked={data.readOnlyRootfs}
+    />
+
+    <CheckboxField
+      id={`autoRemove`}
+      label={messages.autoRemove}
+      checked={data.autoRemove ?? false}
     />
 
     <VolumeDetails containerVolumes={data.containerVolumes} />
@@ -838,6 +1289,17 @@ const ResourceLimitsSection = ({
     />
 
     <PrimitiveField
+      id={`cpuShares`}
+      label={messages.cpuShares}
+      value={data.cpuShares}
+    />
+    <PrimitiveField
+      id={`cpusetCpus`}
+      label={messages.cpusetCpus}
+      value={data.cpusetCpus}
+    />
+
+    <PrimitiveField
       id={`cpuPeriod`}
       label={messages.cpuPeriod}
       value={data.cpuPeriod}
@@ -859,6 +1321,60 @@ const ResourceLimitsSection = ({
       id={`cpuRealtimeRuntime`}
       label={messages.cpuRealtimeRuntime}
       value={data.cpuRealtimeRuntime}
+    />
+
+    <PrimitiveField
+      id={`shmSize`}
+      label={messages.shmSize}
+      value={data.shmSize}
+    />
+    <PrimitiveField
+      id={`oomScoreAdjustment`}
+      label={messages.oomScoreAdjustment}
+      value={data.oomScoreAdjustment}
+    />
+    <UlimitsField
+      ulimitsName={data.ulimitsName}
+      ulimitsSoft={data.ulimitsSoft}
+      ulimitsHard={data.ulimitsHard}
+    />
+  </Section>
+);
+
+const BlkioSection = ({ data, open, onToggle }: SectionComponentProps) => (
+  <Section label={messages.blkioSection} open={open} onToggle={onToggle}>
+    <PrimitiveField
+      id={`blkioWeight`}
+      label={messages.blkioWeight}
+      value={data.blkioWeight}
+    />
+    <BlkioWeightDeviceField
+      paths={data.blkioWeightDevicePath}
+      weights={data.blkioWeightDeviceWeight}
+    />
+    <BlkioPathRateField
+      id={`blkioDeviceReadBps`}
+      label={messages.blkioDeviceReadBps}
+      paths={data.blkioDeviceReadBpsPath}
+      rates={data.blkioDeviceReadBpsRate}
+    />
+    <BlkioPathRateField
+      id={`blkioDeviceWriteBps`}
+      label={messages.blkioDeviceWriteBps}
+      paths={data.blkioDeviceWriteBpsPath}
+      rates={data.blkioDeviceWriteBpsRate}
+    />
+    <BlkioPathRateField
+      id={`blkioDeviceReadIops`}
+      label={messages.blkioDeviceReadIops}
+      paths={data.blkioDeviceReadIopsPath}
+      rates={data.blkioDeviceReadIopsRate}
+    />
+    <BlkioPathRateField
+      id={`blkioDeviceWriteIops`}
+      label={messages.blkioDeviceWriteIops}
+      paths={data.blkioDeviceWriteIopsPath}
+      rates={data.blkioDeviceWriteIopsRate}
     />
   </Section>
 );
@@ -882,6 +1398,52 @@ const SecuritySection = ({ data, open, onToggle }: SectionComponentProps) => (
       label={messages.capDrop}
       value={data.capDrop}
     />
+
+    <PrimitiveField
+      id={`cgroupsMode`}
+      label={messages.cgroupsMode}
+      value={data.cgroupsMode}
+    />
+    <PrimitiveField
+      id={`ipcMode`}
+      label={messages.ipcMode}
+      value={data.ipcMode}
+    />
+    <PrimitiveField
+      id={`usernsMode`}
+      label={messages.usernsMode}
+      value={data.usernsMode}
+    />
+    <PrimitiveField
+      id={`pidMode`}
+      label={messages.pidMode}
+      value={data.pidMode}
+    />
+    <StringArrayField
+      id={`securityopt`}
+      label={messages.securityopt}
+      value={data.securityopt}
+    />
+    <StringArrayField
+      id={`maskedPaths`}
+      label={messages.maskedPaths}
+      value={data.maskedPaths}
+    />
+    <StringArrayField
+      id={`readonlyPaths`}
+      label={messages.readonlyPaths}
+      value={data.readonlyPaths}
+    />
+    <StringArrayField
+      id={`groupAdd`}
+      label={messages.groupAdd}
+      value={data.groupAdd}
+    />
+    <StringArrayField
+      id={`deviceCgroupRules`}
+      label={messages.deviceCgroupRules}
+      value={data.deviceCgroupRules}
+    />
   </Section>
 );
 
@@ -894,6 +1456,11 @@ const RuntimeSection = ({ data, open, onToggle }: SectionComponentProps) => {
   return (
     <Section label={messages.runtimeSection} open={open} onToggle={onToggle}>
       <PrimitiveField
+        id={`runtime`}
+        label={messages.runtime}
+        value={data.runtime}
+      />
+      <PrimitiveField
         id={`restartPolicy`}
         label={messages.restartPolicy}
         value={
@@ -901,10 +1468,53 @@ const RuntimeSection = ({ data, open, onToggle }: SectionComponentProps) => {
             ?.label
         }
       />
+      <PrimitiveField
+        id={`restartPolicyMaximumRetryCount`}
+        label={messages.restartPolicyMaximumRetryCount}
+        value={data.restartPolicyMaximumRetryCount}
+      />
+      <PrimitiveField
+        id={`stopSignal`}
+        label={messages.stopSignal}
+        value={data.stopSignal}
+      />
+      <PrimitiveField
+        id={`stopTimeout`}
+        label={messages.stopTimeout}
+        value={data.stopTimeout}
+      />
+      <KeyValuePairsField
+        id={`labels`}
+        label={messages.labels}
+        keys={data.labelKeys}
+        values={data.labelValues}
+      />
+      <KeyValuePairsField
+        id={`sysctls`}
+        label={messages.sysctls}
+        keys={data.sysctlsKeys}
+        values={data.sysctlsValues}
+      />
       <JsonEditorField id={`env`} label={messages.env} value={env} />
     </Section>
   );
 };
+
+const LoggingSection = ({ data, open, onToggle }: SectionComponentProps) => (
+  <Section label={messages.loggingSection} open={open} onToggle={onToggle}>
+    <PrimitiveField
+      id={`logType`}
+      label={messages.logType}
+      value={data.logType}
+    />
+    <KeyValuePairsField
+      id={`logConfig`}
+      label={messages.logConfig}
+      keys={data.logConfigKeys}
+      values={data.logConfigValues}
+    />
+  </Section>
+);
 
 const DeviceMappingsSection = ({
   data,
@@ -990,6 +1600,30 @@ const ContainerDetails = ({ container }: ContainerDetailsProps) => {
         data={data}
         open={isSectionOpen("deviceRequests")}
         onToggle={() => toggleSection("deviceRequests")}
+      />
+
+      <ProcessSection
+        data={data}
+        open={isSectionOpen("process")}
+        onToggle={() => toggleSection("process")}
+      />
+
+      <HealthcheckSection
+        data={data}
+        open={isSectionOpen("healthcheck")}
+        onToggle={() => toggleSection("healthcheck")}
+      />
+
+      <BlkioSection
+        data={data}
+        open={isSectionOpen("blkio")}
+        onToggle={() => toggleSection("blkio")}
+      />
+
+      <LoggingSection
+        data={data}
+        open={isSectionOpen("logging")}
+        onToggle={() => toggleSection("logging")}
       />
     </div>
   );

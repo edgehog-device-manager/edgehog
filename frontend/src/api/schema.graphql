@@ -4133,15 +4133,35 @@ type CreateContainerResult {
 
 input CreateContainerInput {
   name: String!
-  restartPolicy: String
-  portBindings: [String!]
   hostname: String
+  domainname: String
+  user: String
+  command: [String!]
+  healthcheckTest: [String!]
+  healthcheckInterval: Int
+  healthcheckTimeout: Int
+  healthcheckRetries: Int
+  healthcheckStartPeriod: Int
+  healthcheckStartInterval: Int
+  workingDirectory: String
+  entrypoint: [String!]
+  networkDisabled: Boolean
+  labelKeys: [String!]
+  labelValues: [String!]
+  stopSignal: String
+  stopTimeout: Int
+  restartPolicy: String
+  restartPolicyMaximumRetryCount: Int
   env: [ContainerEnvVarInput!]
-  privileged: Boolean
+  binds: [String!]
   networkMode: String
+  portBindings: [String!]
+  exposedPorts: [String!]
   extraHosts: [String!]
   capAdd: [String!]
   capDrop: [String!]
+  cpuShares: Int
+  cpusetCpus: String
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
@@ -4150,11 +4170,48 @@ input CreateContainerInput {
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
+  deviceCgroupRules: [String!]
+  ulimitsName: [String!]
+  ulimitsSoft: [Int!]
+  ulimitsHard: [Int!]
+  autoRemove: Boolean
   volumeDriver: String
-  storageOpt: [String!]
+  storageOptKeys: [String!]
+  storageOptValues: [String!]
   readOnlyRootfs: Boolean
-  tmpfs: [String!]
-  binds: [String!]
+  tmpfsPaths: [String!]
+  tmpfsOptions: [String!]
+  cgroupsMode: String
+  dns: [String!]
+  dnsOptions: [String!]
+  dnsSearch: [String!]
+  groupAdd: [String!]
+  ipcMode: String
+  oomScoreAdjustment: Int
+  usernsMode: String
+  sysctlsKeys: [String!]
+  sysctlsValues: [String!]
+  shmSize: Int
+  runtime: String
+  privileged: Boolean
+  logType: String
+  logConfigKeys: [String!]
+  logConfigValues: [String!]
+  blkioWeight: Int
+  blkioWeightDevicePath: [String!]
+  blkioWeightDeviceWeight: [Int!]
+  blkioDeviceReadBpsPath: [String!]
+  blkioDeviceReadBpsRate: [Int!]
+  blkioDeviceWriteBpsPath: [String!]
+  blkioDeviceWriteBpsRate: [Int!]
+  blkioDeviceReadIopsPath: [String!]
+  blkioDeviceReadIopsRate: [Int!]
+  blkioDeviceWriteIopsPath: [String!]
+  blkioDeviceWriteIopsRate: [Int!]
+  securityopt: [String!]
+  pidMode: String
+  maskedPaths: [String!]
+  readonlyPaths: [String!]
   image: ContainerCreateWithNestedImageInput
   networks: [ContainerCreateWithNestedNetworksInput!]
   volumes: [ContainerCreateWithNestedVolumesInput!]
@@ -4165,10 +4222,23 @@ input CreateContainerInput {
 enum ContainerSortField {
   ID
   NAME
-  RESTART_POLICY
   HOSTNAME
-  PRIVILEGED
+  DOMAINNAME
+  USER
+  HEALTHCHECK_INTERVAL
+  HEALTHCHECK_TIMEOUT
+  HEALTHCHECK_RETRIES
+  HEALTHCHECK_START_PERIOD
+  HEALTHCHECK_START_INTERVAL
+  WORKING_DIRECTORY
+  NETWORK_DISABLED
+  STOP_SIGNAL
+  STOP_TIMEOUT
+  RESTART_POLICY
+  RESTART_POLICY_MAXIMUM_RETRY_COUNT
   NETWORK_MODE
+  CPU_SHARES
+  CPUSET_CPUS
   CPU_PERIOD
   CPU_QUOTA
   CPU_REALTIME_PERIOD
@@ -4177,8 +4247,19 @@ enum ContainerSortField {
   MEMORY_RESERVATION
   MEMORY_SWAP
   MEMORY_SWAPPINESS
+  AUTO_REMOVE
   VOLUME_DRIVER
   READ_ONLY_ROOTFS
+  CGROUPS_MODE
+  IPC_MODE
+  OOM_SCORE_ADJUSTMENT
+  USERNS_MODE
+  SHM_SIZE
+  RUNTIME
+  PRIVILEGED
+  LOG_TYPE
+  BLKIO_WEIGHT
+  PID_MODE
   IMAGE_ID
 }
 
@@ -4216,6 +4297,166 @@ input ContainerFilterImageId {
   isNotDistinctFrom: ID
 }
 
+input ContainerFilterPidMode {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterBlkioWeight {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterLogType {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterPrivileged {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input ContainerFilterRuntime {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterShmSize {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterUsernsMode {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterOomScoreAdjustment {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterIpcMode {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterCgroupsMode {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
 input ContainerFilterReadOnlyRootfs {
   isNil: Boolean
   eq: Boolean
@@ -4245,6 +4486,19 @@ input ContainerFilterVolumeDriver {
   stringStartsWith: String
   like: String
   ilike: String
+}
+
+input ContainerFilterAutoRemove {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input ContainerFilterMemorySwappiness {
@@ -4351,6 +4605,37 @@ input ContainerFilterCpuPeriod {
   isNotDistinctFrom: Int
 }
 
+input ContainerFilterCpusetCpus {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterCpuShares {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
 input ContainerFilterNetworkMode {
   isNil: Boolean
   eq: String
@@ -4369,7 +4654,64 @@ input ContainerFilterNetworkMode {
   ilike: String
 }
 
-input ContainerFilterPrivileged {
+input ContainerFilterRestartPolicyMaximumRetryCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterRestartPolicy {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
+input ContainerFilterStopTimeout {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterStopSignal {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterNetworkDisabled {
   isNil: Boolean
   eq: Boolean
   notEq: Boolean
@@ -4380,6 +4722,125 @@ input ContainerFilterPrivileged {
   greaterThanOrEqual: Boolean
   isDistinctFrom: Boolean
   isNotDistinctFrom: Boolean
+}
+
+input ContainerFilterWorkingDirectory {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterHealthcheckStartInterval {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterHealthcheckStartPeriod {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterHealthcheckRetries {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterHealthcheckTimeout {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterHealthcheckInterval {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFilterUser {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ContainerFilterDomainname {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
 }
 
 input ContainerFilterHostname {
@@ -4398,19 +4859,6 @@ input ContainerFilterHostname {
   stringStartsWith: String
   like: String
   ilike: String
-}
-
-input ContainerFilterRestartPolicy {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  isDistinctFrom: String
-  isNotDistinctFrom: String
 }
 
 input ContainerFilterName {
@@ -4450,10 +4898,23 @@ input ContainerFilterInput {
   not: [ContainerFilterInput!]
   id: ContainerFilterId
   name: ContainerFilterName
-  restartPolicy: ContainerFilterRestartPolicy
   hostname: ContainerFilterHostname
-  privileged: ContainerFilterPrivileged
+  domainname: ContainerFilterDomainname
+  user: ContainerFilterUser
+  healthcheckInterval: ContainerFilterHealthcheckInterval
+  healthcheckTimeout: ContainerFilterHealthcheckTimeout
+  healthcheckRetries: ContainerFilterHealthcheckRetries
+  healthcheckStartPeriod: ContainerFilterHealthcheckStartPeriod
+  healthcheckStartInterval: ContainerFilterHealthcheckStartInterval
+  workingDirectory: ContainerFilterWorkingDirectory
+  networkDisabled: ContainerFilterNetworkDisabled
+  stopSignal: ContainerFilterStopSignal
+  stopTimeout: ContainerFilterStopTimeout
+  restartPolicy: ContainerFilterRestartPolicy
+  restartPolicyMaximumRetryCount: ContainerFilterRestartPolicyMaximumRetryCount
   networkMode: ContainerFilterNetworkMode
+  cpuShares: ContainerFilterCpuShares
+  cpusetCpus: ContainerFilterCpusetCpus
   cpuPeriod: ContainerFilterCpuPeriod
   cpuQuota: ContainerFilterCpuQuota
   cpuRealtimePeriod: ContainerFilterCpuRealtimePeriod
@@ -4462,8 +4923,19 @@ input ContainerFilterInput {
   memoryReservation: ContainerFilterMemoryReservation
   memorySwap: ContainerFilterMemorySwap
   memorySwappiness: ContainerFilterMemorySwappiness
+  autoRemove: ContainerFilterAutoRemove
   volumeDriver: ContainerFilterVolumeDriver
   readOnlyRootfs: ContainerFilterReadOnlyRootfs
+  cgroupsMode: ContainerFilterCgroupsMode
+  ipcMode: ContainerFilterIpcMode
+  oomScoreAdjustment: ContainerFilterOomScoreAdjustment
+  usernsMode: ContainerFilterUsernsMode
+  shmSize: ContainerFilterShmSize
+  runtime: ContainerFilterRuntime
+  privileged: ContainerFilterPrivileged
+  logType: ContainerFilterLogType
+  blkioWeight: ContainerFilterBlkioWeight
+  pidMode: ContainerFilterPidMode
   imageId: ContainerFilterImageId
   image: ImageFilterInput
   releases: ReleaseFilterInput
@@ -4484,15 +4956,35 @@ input ContainerSortInput {
 type Container implements Node {
   id: ID!
   name: String!
-  restartPolicy: String
-  portBindings: [String!]!
   hostname: String!
+  domainname: String
+  user: String
+  command: [String!]
+  healthcheckTest: [String!]
+  healthcheckInterval: Int
+  healthcheckTimeout: Int
+  healthcheckRetries: Int
+  healthcheckStartPeriod: Int
+  healthcheckStartInterval: Int
+  workingDirectory: String
+  entrypoint: [String!]
+  networkDisabled: Boolean
+  labelKeys: [String!]
+  labelValues: [String!]
+  stopSignal: String
+  stopTimeout: Int
+  restartPolicy: String
+  restartPolicyMaximumRetryCount: Int
   env: [ContainerEnvVar!]!
-  privileged: Boolean
+  binds: [String!]!
   networkMode: String!
+  portBindings: [String!]!
+  exposedPorts: [String!]
   extraHosts: [String!]!
   capAdd: [String!]!
   capDrop: [String!]!
+  cpuShares: Int
+  cpusetCpus: String
   cpuPeriod: Int
   cpuQuota: Int
   cpuRealtimePeriod: Int
@@ -4501,11 +4993,48 @@ type Container implements Node {
   memoryReservation: Int
   memorySwap: Int
   memorySwappiness: Int
+  deviceCgroupRules: [String!]
+  ulimitsName: [String!]
+  ulimitsSoft: [Int!]
+  ulimitsHard: [Int!]
+  autoRemove: Boolean
   volumeDriver: String!
-  storageOpt: [String!]!
+  storageOptKeys: [String!]
+  storageOptValues: [String!]
   readOnlyRootfs: Boolean!
-  tmpfs: [String!]!
-  binds: [String!]!
+  tmpfsPaths: [String!]
+  tmpfsOptions: [String!]
+  cgroupsMode: String
+  dns: [String!]
+  dnsOptions: [String!]
+  dnsSearch: [String!]
+  groupAdd: [String!]
+  ipcMode: String
+  oomScoreAdjustment: Int
+  usernsMode: String
+  sysctlsKeys: [String!]
+  sysctlsValues: [String!]
+  shmSize: Int
+  runtime: String
+  privileged: Boolean
+  logType: String
+  logConfigKeys: [String!]
+  logConfigValues: [String!]
+  blkioWeight: Int
+  blkioWeightDevicePath: [String!]
+  blkioWeightDeviceWeight: [Int!]
+  blkioDeviceReadBpsPath: [String!]
+  blkioDeviceReadBpsRate: [Int!]
+  blkioDeviceWriteBpsPath: [String!]
+  blkioDeviceWriteBpsRate: [Int!]
+  blkioDeviceReadIopsPath: [String!]
+  blkioDeviceReadIopsRate: [Int!]
+  blkioDeviceWriteIopsPath: [String!]
+  blkioDeviceWriteIopsRate: [Int!]
+  securityopt: [String!]
+  pidMode: String
+  maskedPaths: [String!]
+  readonlyPaths: [String!]
   imageId: ID!
   image: Image!
   releases(
