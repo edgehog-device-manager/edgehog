@@ -137,6 +137,14 @@ const messages = defineMessages({
     id: "forms.validation.duplicateContainer",
     defaultMessage: "Duplicate container in dependencies.",
   },
+  mountpointFormat: {
+    id: "forms.validation.mountpoint.format",
+    defaultMessage: "Mountpoint must start with '/'.",
+  },
+  mountpointDuplicate: {
+    id: "forms.validation.mountpoint.duplicate",
+    defaultMessage: "Duplicate mountpoint value.",
+  },
 });
 
 /* ----------------------------- Constants ----------------------------- */
@@ -1078,6 +1086,51 @@ const deviceRequestSchema = z
     },
   );
 
+const fileMountSchema = z.object({
+  mountpoint: z
+    .string()
+    .trim()
+    .min(1)
+    .refine((val) => val.startsWith("/"), {
+      message: messages.mountpointFormat.id,
+    }),
+  required: z.boolean(),
+  defaultFileId: z
+    .union([
+      z.string(),
+      z.object({
+        id: z.string().optional(),
+        value: z.string().optional(),
+        label: z.string().optional(),
+      }),
+    ])
+    .nullable()
+    .optional(),
+});
+
+const fileMountsSchema = z
+  .array(fileMountSchema)
+  .superRefine((fileMounts, ctx) => {
+    if (!fileMounts) return;
+
+    const seen = new Set<string>();
+
+    fileMounts.forEach((entry, index) => {
+      const mp = entry.mountpoint?.trim();
+      if (!mp) return;
+
+      if (seen.has(mp)) {
+        ctx.addIssue({
+          path: [index, "mountpoint"],
+          code: "custom",
+          message: messages.mountpointDuplicate.id,
+        });
+      } else {
+        seen.add(mp);
+      }
+    });
+  });
+
 const containerSchema = z
   .object({
     name: z.string().min(1),
@@ -1108,6 +1161,7 @@ const containerSchema = z
     env: envSchema.optional(),
     deviceMappings: deviceMappingsSchema.optional(),
     deviceRequests: z.array(deviceRequestSchema).optional(),
+    fileMounts: fileMountsSchema.optional(),
   })
   .superRefine((container, ctx) => {
     const cpuPeriod = container.cpuPeriod;

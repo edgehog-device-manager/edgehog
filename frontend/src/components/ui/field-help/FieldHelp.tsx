@@ -57,7 +57,8 @@ type FieldKey =
   | "deviceIDs"
   | "capabilities"
   | "driverOptions"
-  | "deviceRequests";
+  | "deviceRequests"
+  | "fileMounts";
 
 function getFieldExplanation(field: FieldKey) {
   return {

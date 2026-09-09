@@ -49,12 +49,31 @@ const SelectFormField = <T extends FieldValues>({
     [options],
   );
 
-  const getValue = (fieldValue: { id: string } | string | null) => {
+  const getValue = (
+    fieldValue:
+      | { id?: string; value?: string; label?: string; name?: string }
+      | string
+      | null
+      | undefined,
+  ) => {
     if (!fieldValue) return null;
 
-    const id = typeof fieldValue === "string" ? fieldValue : fieldValue.id;
+    const id =
+      typeof fieldValue === "string"
+        ? fieldValue
+        : (fieldValue.id ?? fieldValue.value);
 
-    return optionsMap.get(id) ?? null;
+    const existing = id ? optionsMap.get(id) : null;
+    if (existing) return existing;
+
+    if (typeof fieldValue === "object") {
+      const label = fieldValue.label ?? fieldValue.name;
+      if (id && label) {
+        return { value: id, label };
+      }
+    }
+
+    return null;
   };
   const formatValue = (option: Option | null) => {
     if (!option) return null;
