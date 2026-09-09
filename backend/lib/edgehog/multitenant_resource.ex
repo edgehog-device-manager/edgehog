@@ -49,6 +49,7 @@ defmodule Edgehog.MultitenantResource do
             opts
             |> Keyword.drop(@custom_opts)
             |> Keyword.put_new(:data_layer, AshPostgres.DataLayer)
+            |> Keyword.put_new(:authorizers, [Ash.Policy.Authorizer])
           )
 
       relationships do
