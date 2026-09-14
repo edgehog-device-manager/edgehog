@@ -31,6 +31,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
     domain: Edgehog.Campaigns,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Types.DeploymentConfig
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.Campaigns.CampaignMechanism.FileDownload
   alias Edgehog.Campaigns.CampaignTarget
@@ -238,6 +239,11 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       argument :release, :struct do
         constraints instance_of: Release
         allow_nil? false
+      end
+
+      argument :configs, {:array, DeploymentConfig} do
+        allow_nil? false
+        default []
       end
 
       require_atomic? false
