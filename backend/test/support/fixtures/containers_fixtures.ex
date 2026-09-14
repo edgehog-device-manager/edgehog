@@ -302,8 +302,9 @@ defmodule Edgehog.ContainersFixtures do
   @doc """
   Generate a %FileBind{}.
 
-  Exactly one between `:file_download_request_id` and `:device_file_id` must be
-  provided (it acts as the file target of the bind).
+  At most one between `:file_download_request_id` and `:device_file_id` can be
+  provided (it acts as the file target of the bind). When neither is provided,
+  the bind represents a pending upload.
   """
   def file_bind_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)

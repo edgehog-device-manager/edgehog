@@ -30,10 +30,10 @@ defmodule Edgehog.Devices.Device.Changes.DeployPending do
   @cook_module Application.compile_env(:edgehog, :container_starter, Starter)
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, %{tenant: tenant}) do
+  def change(changeset, _opts, _context) do
     Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
       with {:ok, device} <- result,
-           {:ok, _pid} <- @cook_module.cook(device, tenant) do
+           {:ok, _pid} <- @cook_module.cook(device) do
         {:ok, device}
       end
     end)

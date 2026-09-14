@@ -18,26 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Astarte.Device.CreateBind do
-  @moduledoc false
-  @behaviour Edgehog.Astarte.Device.CreateBind.Behaviour
+defmodule Edgehog.Files.FileDownloadRequest.Provisioner do
+  @moduledoc """
+  The provisioner for file download requests backing container file binds.
 
-  alias Astarte.Client.AppEngine
-  alias Edgehog.Error
+  It waits until the device reports the download as completed, so the
+  container deployment orchestrator can treat files like any other
+  provisioned resource.
 
-  @interface "io.edgehog.devicemanager.apps.CreateFileBindRequest"
+  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  """
+  use Edgehog.Containers.Provisioner,
+    resource: Edgehog.Files.FileDownloadRequest,
+    core: Edgehog.Files.FileDownloadRequest.Provisioner.Core
 
-  @impl Edgehog.Astarte.Device.CreateBind.Behaviour
-  def send_bind(%AppEngine{} = client, device_id, request_data) do
-    request_data = Map.from_struct(request_data)
-
-    client
-    |> AppEngine.Devices.send_datastream(
-      device_id,
-      @interface,
-      "/bind",
-      request_data
-    )
-    |> Error.maybe_match_error(device_id, @interface)
-  end
+  @sup Edgehog.Containers.File.Provisioner.Supervisor
 end

@@ -29,8 +29,8 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
 
   alias Edgehog.Containers.Deployment
 
-  require Ash.Query
   require Logger
+  import Ecto.Query
 
   @doc """
   Loads pending deployments into the state.
@@ -51,13 +51,11 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   ]
   ```
   """
-  def load(device, tenant) do
+  def load(device) do
     device_id = device.id
 
-    Deployment
-    |> Ash.Query.filter(state: :pending)
-    |> Ash.Query.filter(device_id: device_id)
-    |> Ash.read(tenant: tenant)
+    with {:ok, device} <- Ash.load(device, application_deployments: :tenant),
+         do: device.application_deployments
   end
 
   @doc """
@@ -66,12 +64,13 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   returns the list of errors generated while starting each deployment in the shape
   `{:error, error, deployment}`.
   """
-  def start(deployments, tenant) do
-    Enum.reduce(deployments, [], &start_deployment(&1, tenant, &2))
+  def start(deployments) do
+    Enum.reduce(deployments, [], &start_deployment/2)
   end
 
-  defp start_deployment(deployment, tenant, errors) do
-    case Deployment.Orchestrator.conduct(deployment, tenant) do
+  defp start_deployment(deployment, errors) do
+    # tenant previously loaded in load/1
+    case Deployment.Orchestrator.conduct(deployment, deployment.tenant) do
       {:ok, _pid} -> errors
       {:error, error} -> [{:error, error, deployment} | errors]
     end

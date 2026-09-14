@@ -55,7 +55,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
       # Append container binds to volume binds
       binds = volume_binds ++ container.binds
 
-      binds_request = build_binds_request(container_deployment.file_binds)
+      binds_request = build_binds_request(container_deployment.file_binds, deployment)
 
       data = %RequestData{
         id: container.id,
@@ -102,7 +102,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
     end
   end
 
-  defp build_binds_request(file_binds) do
+  defp build_binds_request(file_binds, deployment) do
     Enum.map(file_binds, fn file_bind ->
       file_bind = Ash.load!(file_bind, file_mount: :mountpoint)
 
@@ -110,6 +110,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         id: file_bind.id,
         targetId: bind_target_id(file_bind),
         targetType: bind_target_type(file_bind),
+        deploymentId: deployment.id,
         mountpoint: file_bind.file_mount.mountpoint,
         options: ""
       }
@@ -128,7 +129,9 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
   end
 
   defp bind_target_id(%{file_download_request_id: id} = file_bind) do
-    id || file_bind.device_file_id
+    id || file_bind.device_file_id ||
+      raise ArgumentError,
+            "file bind #{file_bind.id} has no target: the uploaded file was not provisioned"
   end
 
   defp bind_target_type(%{device_file_id: device_file_id}) when is_nil(device_file_id),

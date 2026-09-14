@@ -106,6 +106,10 @@ defmodule Edgehog.Containers do
       get Container, :container, :read do
         description "Returns the desired container"
       end
+
+      get Edgehog.Containers.FileBind, :file_bind, :read do
+        description "Returns the desired file bind, including the presigned upload URL for target-less binds."
+      end
     end
 
     mutations do
@@ -210,7 +214,7 @@ defmodule Edgehog.Containers do
                                   file_binds: [
                                     device_file_id: :device_file,
                                     file_download_request_id: :file_download_request,
-                                    file_mount_id: :file_mount
+                                    file_mount_id: :container_file_mount
                                   ]
                                 ]
                               ]
@@ -223,6 +227,10 @@ defmodule Edgehog.Containers do
 
       update Deployment, :upgrade_deployment, :upgrade_release do
         relay_id_translations input: [target: :release]
+      end
+
+      update Edgehog.Containers.FileBind, :mark_file_bind_as_uploaded, :mark_as_uploaded do
+        description "Marks the file uploaded through the presigned upload URL as uploaded."
       end
 
       destroy Release, :delete_release, :destroy do
@@ -399,6 +407,10 @@ defmodule Edgehog.Containers do
     resource Upgrade
     resource DeploymentContainerDeployment
     resource Edgehog.Containers.ReleaseContainerDependencies
-    resource Edgehog.Containers.FileBind
+
+    resource Edgehog.Containers.FileBind do
+      define :fetch_file_bind, action: :read, get_by: [:id]
+      define :mark_file_bind_as_uploaded, action: :mark_as_uploaded
+    end
   end
 end

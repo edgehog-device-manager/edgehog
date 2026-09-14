@@ -18,32 +18,31 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Types.FileBind do
+defmodule Edgehog.Files.Supervisor do
   @moduledoc """
-  Input type to represent a file bind.
+  Files registries and dynaimc supervisors.
+
+  Adds registries and dynamic supervisors needed for provisioners and device
+  communication.
   """
+  use Supervisor
 
-  use AshGraphql.Type
+  alias Edgehog.Files
 
-  use Ash.Type.NewType,
-    subtype_of: :map,
-    constraints: [
-      fields: [
-        device_file_id: [
-          type: :uuid
-        ],
-        file_download_request_id: [
-          type: :uuid
-        ],
-        file_mount_id: [
-          type: :uuid
-        ]
-      ]
+  def start_link(args) do
+    Supervisor.start_link(__MODULE__, args, name: __MODULE__)
+  end
+
+  @impl Supervisor
+  def init(_args) do
+    children = [
+      # Registries
+      {Registry, keys: :unique, name: Edgehog.Files.FileDownloadRequest.Provisioner.Registry},
+
+      # Supervisors
+      {DynamicSupervisor, name: Containers.File.Provisioner.Supervisor, strategy: :one_for_one}
     ]
 
-  @impl AshGraphql.Type
-  def graphql_input_type(_), do: :file_bind_spec_input
-
-  @impl AshGraphql.Type
-  def graphql_type(_), do: :file_bind_spec
+    Supervisor.init(children, strategy: :one_for_one)
+  end
 end
