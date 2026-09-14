@@ -21,7 +21,6 @@ import { graphql, useFragment } from "react-relay/hooks";
 import type { hooks_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/hooks_ImageCredentialsOptionsFragment.graphql";
 import type { hooks_NetworksOptionsFragment$key } from "@/api/__generated__/hooks_NetworksOptionsFragment.graphql";
 import type { hooks_VolumesOptionsFragment$key } from "@/api/__generated__/hooks_VolumesOptionsFragment.graphql";
-import { hooks_ContainersOptionsFragment$key } from "@/api/__generated__/hooks_ContainersOptionsFragment.graphql";
 import { hooks_SystemModelsOptionsFragment$key } from "@/api/__generated__/hooks_SystemModelsOptionsFragment.graphql";
 
 type Option = {
@@ -73,19 +72,6 @@ export const VOLUMES_OPTIONS_FRAGMENT = graphql`
 export const SYSTEM_MODELS_OPTIONS_FRAGMENT = graphql`
   fragment hooks_SystemModelsOptionsFragment on RootQueryType {
     systemModels {
-      edges {
-        node {
-          id
-          name
-        }
-      }
-    }
-  }
-`;
-
-export const CONTAINERS_OPTIONS_FRAGMENT = graphql`
-  fragment hooks_ContainersOptionsFragment on RootQueryType {
-    containers {
       edges {
         node {
           id
@@ -167,27 +153,6 @@ export const useSystemModelOptions = (
   return (
     data.systemModels?.edges?.flatMap((edge) => {
       if (!edge?.node) return [];
-
-      return [
-        {
-          value: edge.node.id,
-          label: edge.node.name,
-        },
-      ];
-    }) ?? []
-  );
-};
-
-export const useContainerOptions = (
-  queryRef: hooks_ContainersOptionsFragment$key,
-): Option[] => {
-  const data = useFragment(CONTAINERS_OPTIONS_FRAGMENT, queryRef);
-
-  return (
-    data.containers?.edges?.flatMap((edge) => {
-      if (!edge?.node) {
-        return [];
-      }
 
       return [
         {
