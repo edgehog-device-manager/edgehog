@@ -92,6 +92,9 @@ defmodule Edgehog.Containers.Deployment do
           - env_strategy: either :merge or :override
           - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
         """
+
+        allow_nil? false
+        default []
       end
 
       validate Validations.DeviceIsCompatible
@@ -113,6 +116,16 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
+      argument :configs, {:array, Types.DeploymentConfig} do
+        description """
+        Per-container configuration overrides to apply at deployment time.
+        The same as for :deploy action.
+        """
+
+        allow_nil? false
+        default []
+      end
+
       validate Validations.DeviceIsCompatible
 
       change manage_relationship(:device_id, :device, type: :append)
@@ -130,6 +143,11 @@ defmodule Edgehog.Containers.Deployment do
 
         argument :device_id, :id do
           allow_nil? false
+        end
+
+        argument :configs, {:array, Types.DeploymentConfig} do
+          allow_nil? false
+          default []
         end
 
         change manage_relationship(:device_id, :device, type: :append)
