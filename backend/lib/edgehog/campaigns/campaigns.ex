@@ -85,7 +85,16 @@ defmodule Edgehog.Campaigns do
         relay_id_translations input: [
                                 channel_id: :channel,
                                 campaign_mechanism: [
-                                  deployment_deploy: [release_id: :release],
+                                  deployment_deploy: [
+                                    release_id: :release,
+                                    configs: [
+                                      container_id: :container,
+                                      file_binds: [
+                                        file_id: :file,
+                                        file_mount_id: :container_file_mount
+                                      ]
+                                    ]
+                                  ],
                                   deployment_start: [release_id: :release],
                                   deployment_stop: [release_id: :release],
                                   deployment_delete: [release_id: :release],
@@ -114,6 +123,13 @@ defmodule Edgehog.Campaigns do
                                 base_image_id: :base_image,
                                 release_id: :release,
                                 target_release_id: :release,
+                                configs: [
+                                  container_id: :container,
+                                  file_binds: [
+                                    file_id: :file,
+                                    file_mount_id: :container_file_mount
+                                  ]
+                                ],
                                 file_id: :file
                               ]
       end
@@ -191,7 +207,7 @@ defmodule Edgehog.Campaigns do
         action: :update_latest_attempt,
         args: [:latest_attempt]
 
-      define :link_deployment, action: :link_deployment, args: [:release]
+      define :link_deployment, action: :link_deployment, args: [:release, {:optional, :configs}]
       define :start_fw_upgrade, action: :start_fw_upgrade, args: [:base_image]
       define :start_file_download, action: :start_file_download, args: [:file, :mechanism]
 
