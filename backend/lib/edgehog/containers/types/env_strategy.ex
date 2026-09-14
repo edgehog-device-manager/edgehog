@@ -18,35 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Types.FileBind do
+defmodule Edgehog.Containers.Types.EnvStrategy do
   @moduledoc """
-  Input type to represent a file bind.
+  The environment strategy to apply to a deployment configuration.
+
+  Accepts both the lowercase atoms (`:merge`/`:override`) and the
+  upper-case string forms (e.g. `"MERGE"`) used by GraphQL clients.
   """
 
-  use AshGraphql.Type
-
-  use Ash.Type.NewType,
-    subtype_of: :map,
-    constraints: [
-      fields: [
-        file_id: [
-          type: :uuid
-        ],
-        device_file_id: [
-          type: :uuid
-        ],
-        file_download_request_id: [
-          type: :uuid
-        ],
-        file_mount_id: [
-          type: :uuid
-        ]
-      ]
-    ]
-
-  @impl AshGraphql.Type
-  def graphql_input_type(_), do: :file_bind_spec_input
-
-  @impl AshGraphql.Type
-  def graphql_type(_), do: :file_bind_spec
+  use Ash.Type.Enum, values: [:merge, :override]
 end

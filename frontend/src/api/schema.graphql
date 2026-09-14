@@ -517,6 +517,15 @@ type DeploymentStart {
 
 input CampaignCampaignMechanismDeploymentDeployInput {
   """
+  Per-container configuration overrides to apply at deployment time.
+    Each override is keyed by the container id and may include:
+      - env: a list of key/value pairs
+      - env_strategy: either :merge or :override
+      - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+  """
+  configs: [DeploymentConfigSpecInput!]
+
+  """
   The maximum percentage of failures allowed over the number of total targets.
   If the failures exceed this threshold, the Deployment Campaign terminates with
   a failure.
@@ -576,6 +585,15 @@ type DeploymentDeploy {
   Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int!
+
+  """
+  Per-container configuration overrides to apply at deployment time.
+    Each override is keyed by the container id and may include:
+      - env: a list of key/value pairs
+      - env_strategy: either :merge or :override
+      - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+  """
+  configs: [DeploymentConfigSpec!]!
 
   releaseId: ID
 
@@ -1111,6 +1129,7 @@ type FileData {
 
 input FileBindSpecInput {
   fileMountId: ID
+  fileId: ID
   fileDownloadRequestId: ID
   deviceFileId: ID
 }
@@ -1119,6 +1138,20 @@ input DeploymentConfigSpecInput {
   fileBinds: [FileBindSpecInput]
   envStrategy: String
   env: [ContainerEnvVarInput]
+  containerId: ID!
+}
+
+type FileBindSpec {
+  fileMountId: ID
+  fileId: ID
+  fileDownloadRequestId: ID
+  deviceFileId: ID
+}
+
+type DeploymentConfigSpec {
+  fileBinds: [FileBindSpec]
+  envStrategy: String
+  env: [ContainerEnvVar]
   containerId: ID!
 }
 
@@ -1680,11 +1713,55 @@ input ReleaseCreateRequiredSystemModelsInput {
   id: ID
 }
 
+"The result of the :mark_file_bind_as_uploaded mutation"
+type MarkFileBindAsUploadedResult {
+  "The successful result of the mutation"
+  result: FileBind
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input MarkFileBindAsUploadedInput {
+  "The name of the file uploaded for a target-less file bind."
+  fileName: String
+
+  "The size of the uploaded file, in bytes, before compression."
+  uncompressedFileSizeBytes: Int
+
+  "The digest of the uploaded file, used for integrity verification."
+  digest: String
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
+}
+
 enum FileBindSortField {
   ID
+  FILE_NAME
+  UNCOMPRESSED_FILE_SIZE_BYTES
+  DIGEST
+  ENCODING
+  UPLOADED
+  STATE
+  LAST_MESSAGE
   FILE_MOUNT_ID
   FILE_DOWNLOAD_REQUEST_ID
   DEVICE_FILE_ID
+  IS_READY
+}
+
+input FileBindFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
 }
 
 input FileBindFilterDeviceFileId {
@@ -1717,13 +1794,124 @@ input FileBindFilterFileMountId {
   isNil: Boolean
   eq: ID
   notEq: ID
-  in: [ID]
+  in: [ID!]
   lessThan: ID
   greaterThan: ID
   lessThanOrEqual: ID
   greaterThanOrEqual: ID
   isDistinctFrom: ID
   isNotDistinctFrom: ID
+}
+
+input FileBindFilterLastMessage {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input FileBindFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
+input FileBindFilterUploaded {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input FileBindFilterEncoding {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input FileBindFilterDigest {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input FileBindFilterUncompressedFileSizeBytes {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input FileBindFilterFileName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
 }
 
 input FileBindFilterId {
@@ -1741,15 +1929,46 @@ input FileBindFilterId {
 
 input FileBindFilterInput {
   and: [FileBindFilterInput!]
+
   or: [FileBindFilterInput!]
+
   not: [FileBindFilterInput!]
+
   id: FileBindFilterId
+
+  "The name of the file uploaded for a target-less file bind."
+  fileName: FileBindFilterFileName
+
+  "The size of the uploaded file, in bytes, before compression."
+  uncompressedFileSizeBytes: FileBindFilterUncompressedFileSizeBytes
+
+  "The digest of the uploaded file, used for integrity verification."
+  digest: FileBindFilterDigest
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: FileBindFilterEncoding
+
+  "Whether the file for a target-less file bind has been uploaded."
+  uploaded: FileBindFilterUploaded
+
+  "The provisioning state of the file bind on the device."
+  state: FileBindFilterState
+
+  lastMessage: FileBindFilterLastMessage
+
   fileMountId: FileBindFilterFileMountId
+
   fileDownloadRequestId: FileBindFilterFileDownloadRequestId
+
   deviceFileId: FileBindFilterDeviceFileId
+
   fileMount: ContainerFileMountFilterInput
+
   fileDownloadRequest: FileDownloadRequestFilterInput
+
   deviceFile: DeviceFileFilterInput
+
+  isReady: FileBindFilterIsReady
 }
 
 input FileBindSortInput {
@@ -1757,14 +1976,45 @@ input FileBindSortInput {
   field: FileBindSortField!
 }
 
-type FileBind {
+type FileBind implements Node {
   id: ID!
-  fileMountId: ID
+
+  "The name of the file uploaded for a target-less file bind."
+  fileName: String
+
+  "The size of the uploaded file, in bytes, before compression."
+  uncompressedFileSizeBytes: Int
+
+  "The digest of the uploaded file, used for integrity verification."
+  digest: String
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
+
+  "Whether the file for a target-less file bind has been uploaded."
+  uploaded: Boolean!
+
+  "The provisioning state of the file bind on the device."
+  state: String!
+
+  lastMessage: String
+
+  fileMountId: ID!
+
   fileDownloadRequestId: ID
+
   deviceFileId: ID
-  fileMount: ContainerFileMount
+
+  fileMount: ContainerFileMount!
+
   fileDownloadRequest: FileDownloadRequest
+
   deviceFile: DeviceFile
+
+  "Presigned URL the client can use to upload the file for a target-less file bind."
+  uploadUrl: String
+
+  isReady: Boolean
 }
 
 ":release_container_dependencies connection"
@@ -6253,6 +6503,8 @@ type Device implements Node {
 
   availableDeviceRequests: [DeviceRequestStatus!]
 
+  availableFileBinds: [FileBindStatus!]
+
   batteryStatus: [BatterySlot!]
 
   hardwareInfo: HardwareInfo
@@ -9143,6 +9395,8 @@ input UpdateCampaignInput {
   destinationType: FileDestination
 
   destination: String
+
+  configs: [DeploymentConfigSpecInput!]
 }
 
 "The result of the :resume_campaign mutation"
@@ -9870,6 +10124,9 @@ type RootQueryType {
     last: Int
   ): VolumeConnection
 
+  "Returns the desired file bind, including the presigned upload URL for target-less binds."
+  fileBind("The id of the record" id: ID!): FileBind
+
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
 
@@ -10093,6 +10350,12 @@ type RootMutationType {
 
   "Delete a volume if not used by any container."
   deleteVolume(id: ID!): DeleteVolumeResult
+
+  "Marks the file uploaded through the presigned upload URL as uploaded."
+  markFileBindAsUploaded(
+    id: ID!
+    input: MarkFileBindAsUploadedInput
+  ): MarkFileBindAsUploadedResult
 
   "Create a new base image in a base image collection."
   createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
@@ -10492,4 +10755,25 @@ type DeviceRequestStatus {
 
   "Whether the device referenced in the request is present or not."
   present: Boolean
+}
+
+"Describe the available file binds on the device."
+type FileBindStatus {
+  "The file bind id."
+  id: String
+
+  "The target file id."
+  targetId: String
+
+  "The id of the deployment the file bind belongs to."
+  deploymentId: String
+
+  "The target file type."
+  targetType: String
+
+  "Where the file is mounted onto the container."
+  mountpoint: String
+
+  "The binding options."
+  options: String
 }

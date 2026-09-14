@@ -39,7 +39,7 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
     device = Ash.get!(Device, device_id, tenant: tenant)
 
     containers = release.containers
-    configs = Ash.Changeset.get_argument(changeset, :configs) || []
+    configs = Ash.Changeset.get_argument(changeset, :configs)
 
     inputs = Enum.map(containers, &container_deployment_input(&1, device, deployment, configs))
 

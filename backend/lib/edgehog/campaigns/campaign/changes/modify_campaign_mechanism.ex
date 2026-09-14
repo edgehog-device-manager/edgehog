@@ -66,9 +66,10 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ModifyCampaignMechanism do
     ] ++ @common_keys
   end
 
+  defp keys_for_type(:deployment_deploy), do: [:release_id, :configs] ++ @common_keys
+
   defp keys_for_type(type)
        when type in [
-              :deployment_deploy,
               :deployment_start,
               :deployment_stop,
               :deployment_delete

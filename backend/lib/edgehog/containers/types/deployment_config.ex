@@ -38,10 +38,7 @@ defmodule Edgehog.Containers.Types.DeploymentConfig do
           allow_nil?: true
         ],
         env_strategy: [
-          type: :atom,
-          constraints: [
-            one_of: [:merge, :override]
-          ],
+          type: Edgehog.Containers.Types.EnvStrategy,
           allow_nil?: true
         ],
         file_binds: [

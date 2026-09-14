@@ -31,6 +31,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy do
     data_layer: :embedded
 
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Types
 
   resource do
     description """
@@ -112,6 +113,20 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy do
       allow_nil? false
       default 300
       constraints min: 30
+    end
+
+    attribute :configs, {:array, Types.DeploymentConfig} do
+      description """
+        Per-container configuration overrides to apply at deployment time.
+        Each override is keyed by the container id and may include:
+          - env: a list of key/value pairs
+          - env_strategy: either :merge or :override
+          - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+      """
+
+      public? true
+      allow_nil? false
+      default []
     end
   end
 
