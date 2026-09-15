@@ -17,14 +17,14 @@ _check-system-prereqs:
     @command -v docker >/dev/null || { echo "❌ docker is required"; exit 1; }
     @docker compose version >/dev/null || { echo "❌ docker compose is required"; exit 1; }
 
-# Check Astarte prerequisites  
+# Check Astarte prerequisites
 [private]
 _check-astarte-prereqs:
     @echo "🔍 Checking Astarte prerequisites..."
     @command -v astartectl >/dev/null || { echo "❌ astartectl is required. Install from https://github.com/astarte-platform/astartectl"; exit 1; }
 
 # Check Rust prerequisites for device runtime
-[private]  
+[private]
 _check-rust-prereqs:
     @echo "🔍 Checking Rust prerequisites..."
     @command -v cargo >/dev/null || { echo "❌ cargo is required. Install Rust from https://rustup.rs/"; exit 1; }
@@ -87,7 +87,7 @@ _init-astarte:
     ( cd astarte && docker compose up -d )
 
 # Create Astarte realm
-[private]  
+[private]
 _create-astarte-realm:
     @echo "🏠 Creating Astarte realm..."
     astartectl housekeeping realms create test --astarte-url http://api.astarte.localhost --realm-public-key backend/priv/repo/seeds/keys/realm_public.pem -k astarte/compose/astarte-keys/housekeeping_private.pem -y
@@ -113,7 +113,7 @@ _create-edgehog-tenant edgehog-hostname="api.edgehog.localhost":
              "type": "tenant",
              "attributes": {
                "name": "Test",
-               "slug": "test", 
+               "slug": "test",
                "default_locale": "en-US",
                "public_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEhV0KI4hByk0uDkCg4yZImMTiAtz2\nazmpbh0sLAKOESdlRYOFw90Up4F9fRRV5Li6Pn5XZiMCZhVkS/PoUbIKpA==\n-----END PUBLIC KEY-----",
                "astarte_config": {
@@ -152,7 +152,7 @@ _ensure-astarte-running:
 
 # Init an edgehog dev environment
 [private]
-_edgehog-dev-backend: 
+_edgehog-dev-backend:
     #!/usr/bin/env bash
     echo "🚀 Initializing Edgehog backend in dev environment..."
     export EDGEHOG_IP=$(docker network inspect astarte --format="{{{{(index .IPAM.Config 0).Gateway}}")
@@ -255,7 +255,7 @@ _init-device-runtime:
         git clone --depth=1 https://github.com/edgehog-device-manager/edgehog-device-runtime.git -b main
         ( cd edgehog-device-runtime && echo '*' > .gitignore )
     fi
-    
+
     edgehog_device_runtime_store_directory="$(pwd)/edgehog-device-runtime/.store/"
     edgehog_device_runtime_download_directory="$(pwd)/edgehog-device-runtime/.updates/"
     rm -rf $store_directory
@@ -266,12 +266,12 @@ _init-device-runtime:
 _register-device:
     #!/usr/bin/env bash
     echo "📝 Registering a new device in Astarte..."
-    
+
     device_id="$(astartectl utils device-id generate-random)"
     credentials_secret="$(astartectl pairing agent register --compact-output -r test -u http://api.astarte.localhost -k backend/priv/repo/seeds/keys/realm_private.pem -- "$device_id")"
-    
+
     echo "⚙️ Writing Edgehog Device Runtime configuration..."
-    
+
     cat <<EOF > edgehog-device-runtime/edgehog-config.toml
     astarte_library = "astarte-device-sdk"
     interfaces_directory = "$(pwd)/backend/priv/astarte_resources/interfaces"
@@ -432,7 +432,7 @@ logs:
     @echo "📋 Showing service logs..."
     docker compose logs --tail=50 -f
 
-# Show logs for Astarte services  
+# Show logs for Astarte services
 logs-astarte:
     @echo "📋 Showing Astarte service logs..."
     @if [ -d astarte ]; then (cd astarte && docker compose logs --tail=50 -f); else echo "❌ Astarte not initialized"; fi
