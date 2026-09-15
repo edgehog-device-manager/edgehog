@@ -79,11 +79,12 @@ jobs:
 
       - name: Bucket setup
         run: |
-          wget https://dl.min.io/client/mc/release/linux-amd64/mc
-          chmod +x ./mc
-          ./mc alias set rustfs http://localhost:9000 rustfsadmin rustfsadmin;
-          ./mc mb rustfs/edgehog;
-          ./mc anonymous set download rustfs/edgehog;
+          aws --endpoint-url http://localhost:9000 s3 mb s3://edgehog --region local 2>/dev/null || true
+          aws --endpoint-url http://localhost:9000 s3api put-bucket-policy --bucket edgehog --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::edgehog/*"]}]}'
+        env:
+          AWS_ACCESS_KEY_ID: rustfsadmin
+          AWS_SECRET_ACCESS_KEY: rustfsadmin
+          AWS_DEFAULT_REGION: local
 
       - uses: team-alembic/staple-actions/actions/mix-task@eb07547a6626ccf508fb4b293b821fde0253ed4f # main
         with:
