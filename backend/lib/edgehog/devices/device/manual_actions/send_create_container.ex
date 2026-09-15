@@ -22,8 +22,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
   @moduledoc false
   use Ash.Resource.ManualUpdate
 
-  alias Edgehog.Astarte.Device.CreateBind
-  alias Edgehog.Astarte.Device.CreateBind.RequestData, as: BindRequestData
   alias Edgehog.Astarte.Device.CreateContainerRequest
   alias Edgehog.Astarte.Device.CreateContainerRequest.RequestData
   alias Edgehog.Containers.Container.Env
@@ -54,8 +52,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
 
       # Append container binds to volume binds
       binds = volume_binds ++ container.binds
-
-      binds_request = build_binds_request(container_deployment.file_binds, deployment)
 
       data = %RequestData{
         id: container.id,
@@ -90,8 +86,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         deviceRequestIds: Enum.map(container.device_requests, & &1.id)
       }
 
-      with :ok <- send_binds(binds_request, device),
-           :ok <-
+      with :ok <-
              CreateContainerRequest.send_create_container_request(
                device.appengine_client,
                device.device_id,
@@ -101,43 +96,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
       end
     end
   end
-
-  defp build_binds_request(file_binds, deployment) do
-    Enum.map(file_binds, fn file_bind ->
-      file_bind = Ash.load!(file_bind, file_mount: :mountpoint)
-
-      %BindRequestData{
-        id: file_bind.id,
-        targetId: bind_target_id(file_bind),
-        targetType: bind_target_type(file_bind),
-        deploymentId: deployment.id,
-        mountpoint: file_bind.file_mount.mountpoint,
-        options: ""
-      }
-    end)
-  end
-
-  defp send_binds([], _device), do: :ok
-
-  defp send_binds(binds, device) do
-    Enum.reduce_while(binds, :ok, fn bind, :ok ->
-      case CreateBind.send_bind(device.appengine_client, device.device_id, bind) do
-        :ok -> {:cont, :ok}
-        {:error, _reason} = error -> {:halt, error}
-      end
-    end)
-  end
-
-  defp bind_target_id(%{file_download_request_id: id} = file_bind) do
-    id || file_bind.device_file_id ||
-      raise ArgumentError,
-            "file bind #{file_bind.id} has no target: the uploaded file was not provisioned"
-  end
-
-  defp bind_target_type(%{device_file_id: device_file_id}) when is_nil(device_file_id),
-    do: "request"
-
-  defp bind_target_type(_file_bind), do: "storage"
 
   defp to_correct_string(atom) do
     atom |> to_string() |> String.replace("_", "-")

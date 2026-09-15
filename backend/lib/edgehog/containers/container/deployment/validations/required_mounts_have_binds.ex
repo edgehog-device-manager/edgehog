@@ -32,7 +32,7 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
       |> Ash.Changeset.get_argument(:container)
       |> Ash.load!(:file_mounts)
       |> Map.fetch!(:file_mounts)
-      |> Enum.filter(& &1.required)
+      |> Enum.filter(&required_and_not_bound/1)
 
     assoc_file_mounts =
       changeset
@@ -45,4 +45,11 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
       do: :ok,
       else: {:error, field: :file_binds, message: "Some required mountpoints are not being set."}
   end
+
+  # If they are not required -> skip
+  defp required_and_not_bound(%{required: false}), do: false
+  # If they are required and there is no default file -> keep
+  defp required_and_not_bound(%{default_file_id: nil}), do: true
+  # If they are required but there is a default file -> skip
+  defp required_and_not_bound(%{default_file_id: _}), do: false
 end

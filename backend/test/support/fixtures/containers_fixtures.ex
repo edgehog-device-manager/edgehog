@@ -318,8 +318,15 @@ defmodule Edgehog.ContainersFixtures do
     {file_download_request_id, opts} = Keyword.pop(opts, :file_download_request_id, nil)
     {device_file_id, opts} = Keyword.pop(opts, :device_file_id, nil)
 
+    {device_id, opts} =
+      Keyword.pop_lazy(opts, :device_id, fn ->
+        Edgehog.Containers.Container.Deployment
+        |> Ash.get!(container_deployment_id, tenant: tenant)
+        |> Map.fetch!(:device_id)
+      end)
+
     params =
-      [container_deployment_id: container_deployment_id]
+      [container_deployment_id: container_deployment_id, device_id: device_id]
       |> maybe_put(:file_mount_id, file_mount_id)
       |> maybe_put(:file_download_request_id, file_download_request_id)
       |> maybe_put(:device_file_id, device_file_id)
