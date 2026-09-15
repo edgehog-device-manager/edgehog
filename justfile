@@ -252,9 +252,10 @@ _init-device-runtime:
     #!/usr/bin/env bash
     echo "🔧 Initializing Edgehog Device Runtime..."
     if [ ! -d edgehog-device-runtime ]; then
-        git clone --depth=1 https://github.com/edgehog-device-manager/edgehog-device-runtime.git -b main
+        git clone --depth=1 --recurse-submodules https://github.com/edgehog-device-manager/edgehog-device-runtime.git -b main edgehog-device-runtime
         ( cd edgehog-device-runtime && echo '*' > .gitignore )
     fi
+    ( cd edgehog-device-runtime && git submodule update --init --recursive )
 
     edgehog_device_runtime_store_directory="$(pwd)/edgehog-device-runtime/.store/"
     edgehog_device_runtime_download_directory="$(pwd)/edgehog-device-runtime/.updates/"
