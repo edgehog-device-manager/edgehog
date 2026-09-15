@@ -29,21 +29,20 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
 
   alias Edgehog.Containers.Deployment
 
+  require Ash.Query
   require Logger
-  import Ecto.Query
 
   @doc """
   Loads pending deployments into the state.
 
-  given a device and a tenant scope returns the list of deployments `:pending`
-  for that device and tenant.
+  given a device returns the list of deployments `:pending`
+  for that device.
 
   Example:
   ```elixir
   > device = %Device{device_id: "some-device-id"}
-  > tenant = %Tenant{}
 
-  > Core.load(device, tenant)
+  > Core.load(device)
   [
     %Deployment{},
     %Deployment{},
@@ -52,9 +51,12 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   ```
   """
   def load(device) do
-    device_id = device.id
+    query =
+      Deployment
+      |> Ash.Query.filter(state == :pending)
+      |> Ash.Query.load(:tenant)
 
-    with {:ok, device} <- Ash.load(device, application_deployments: :tenant),
+    with {:ok, device} <- Ash.load(device, application_deployments: query),
          do: device.application_deployments
   end
 

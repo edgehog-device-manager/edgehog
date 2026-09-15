@@ -37,7 +37,9 @@ defmodule Edgehog.Containers.Container.Deployment.FileBindUploadTest do
   alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Container.Deployment.Orchestrator.Core, as: OrchestratorCore
   alias Edgehog.Containers.FileBind
+  alias Edgehog.Containers.FileBind.Provisioner.Core, as: FileBindProvisionerCore
   alias Edgehog.Files.FileDownloadRequest, as: StoredFileDownloadRequest
+  alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
   alias Edgehog.Files.FileDownloadRequest.Provisioner.Core, as: FileProvisionerCore
   alias Edgehog.Storage
 
@@ -55,6 +57,13 @@ defmodule Edgehog.Containers.Container.Deployment.FileBindUploadTest do
                                                                  _device_id,
                                                                  _request_data ->
       :ok
+    end)
+
+    # Don't start a real download request provisioner: these tests only cover
+    # request creation and linking, and async tests cannot share the SQL
+    # sandbox connection with spawned provisioner processes.
+    Mimic.stub(FileDownloadRequestProvisioner, :provision, fn _request, _tenant ->
+      {:ok, self()}
     end)
 
     :ok
@@ -111,6 +120,8 @@ defmodule Edgehog.Containers.Container.Deployment.FileBindUploadTest do
       assert file_bind.file_download_request_id == nil
       assert file_bind.device_file_id == nil
       refute file_bind.uploaded
+      assert file_bind.device_id == device.id
+      assert file_bind.state == :created
     end
 
     test "returns a presigned upload URL for a target-less file bind", context do
@@ -305,17 +316,34 @@ defmodule Edgehog.Containers.Container.Deployment.FileBindUploadTest do
       assert FileProvisionerCore.subscribe_topic(%{id: id}) == "file_download_requests:#{id}"
     end
 
-    test "orchestrator tracks file readiness like other resources" do
+    test "orchestrator tracks file bind readiness like other resources" do
       first = %{id: Ash.UUIDv7.generate()}
       second = %{id: Ash.UUIDv7.generate()}
 
-      state = %{files_to_provision: [first, second]}
+      state = %{file_binds_to_provision: [first, second]}
 
-      state = OrchestratorCore.file_ready(first.id, state)
-      assert state.files_to_provision == [second]
+      state = OrchestratorCore.file_bind_ready(first.id, state)
+      assert state.file_binds_to_provision == [second]
 
-      state = OrchestratorCore.file_ready(second.id, state)
-      assert state.files_to_provision == []
+      state = OrchestratorCore.file_bind_ready(second.id, state)
+      assert state.file_binds_to_provision == []
+    end
+
+    test "file bind provisioner is ready only when the device reports it" do
+      assert FileBindProvisionerCore.ready?(%{state: :available})
+      assert FileBindProvisionerCore.ready?(%{state: :unavailable})
+      refute FileBindProvisionerCore.ready?(%{state: :created})
+      refute FileBindProvisionerCore.ready?(%{state: :sent})
+    end
+
+    test "file bind provisioner topics are distinct from resource topics" do
+      id = Ash.UUIDv7.generate()
+
+      assert FileBindProvisionerCore.topic(%{id: id}) == "ready:file_binds:#{id}"
+      assert FileBindProvisionerCore.subscribe_topic(%{id: id}) == "file_binds:#{id}"
+
+      assert FileBindProvisionerCore.name(%{id: id}) ==
+               {:via, Registry, {Edgehog.Containers.FileBind.Provisioner.Registry, id}}
     end
   end
 end

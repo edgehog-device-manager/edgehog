@@ -30,6 +30,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
   alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
+  alias Edgehog.Containers.FileBind
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Volume
@@ -852,6 +853,67 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
 
       assert {:error, _} =
                Ash.get(DeviceRequest.Deployment, device_request_deployment.id, tenant: tenant)
+    end
+
+    test "AvailableFileBinds marks file bind as available", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      container_deployment =
+        container_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      file_bind =
+        file_bind_fixture(tenant: tenant, container_deployment_id: container_deployment.id)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableFileBinds",
+          path: "/" <> file_bind.id <> "/targetId",
+          value: file_bind.id
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated = Ash.get!(FileBind, file_bind.id, tenant: tenant)
+      assert updated.state == :available
+    end
+
+    test "AvailableFileBinds with nil destroys file bind", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      container_deployment =
+        container_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      file_bind =
+        file_bind_fixture(tenant: tenant, container_deployment_id: container_deployment.id)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableFileBinds",
+          path: "/" <> file_bind.id <> "/targetId",
+          value: nil
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      assert {:error, _} = Ash.get(FileBind, file_bind.id, tenant: tenant)
     end
 
     test "AvailableContainers with Received status marks container as received", context do

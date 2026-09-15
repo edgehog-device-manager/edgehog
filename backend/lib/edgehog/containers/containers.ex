@@ -411,6 +411,11 @@ defmodule Edgehog.Containers do
     resource Edgehog.Containers.FileBind do
       define :fetch_file_bind, action: :read, get_by: [:id]
       define :mark_file_bind_as_uploaded, action: :mark_as_uploaded
+      define :mark_file_bind_as_sent, action: :mark_as_sent
+      define :mark_file_bind_as_available, action: :mark_as_available
+      define :mark_file_bind_as_unavailable, action: :mark_as_unavailable
+      define :mark_file_bind_as_errored, action: :mark_as_errored, args: [:message]
+      define :destroy_file_bind, action: :destroy
     end
   end
 end

@@ -31,7 +31,6 @@ defmodule Edgehog.Containers.Deployment.Starter do
   alias __MODULE__, as: Data
   alias Edgehog.Containers.Deployment.Starter.Core
   alias Edgehog.Devices.Device
-  alias Edgehog.Tenants.Tenant
 
   # the state struct, we can reference it with the %Data{} struct
   defstruct [
@@ -124,7 +123,7 @@ defmodule Edgehog.Containers.Deployment.Starter do
   def handle_continue(:load, %{device: device} = state) do
     case Core.load(device) do
       {:error, error} ->
-        {:stop, state, {:shutdown, error}}
+        {:stop, {:shutdown, error}, state}
 
       deployments ->
         state
@@ -134,7 +133,7 @@ defmodule Edgehog.Containers.Deployment.Starter do
   end
 
   @impl GenServer
-  def handle_continue(:start_deployments, %{deployments: deployments, tenant: tenant} = state) do
+  def handle_continue(:start_deployments, %{deployments: deployments} = state) do
     case Core.start(deployments) do
       [] -> {:stop, :normal, state}
       errors -> {:stop, {:shutdown, {:start_errors, errors}}, state}

@@ -18,30 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Files.Supervisor do
+defmodule Edgehog.Containers.FileBind.Provisioner do
   @moduledoc """
-  Files registries and dynaimc supervisors.
+  The provisioner for file binds.
 
-  Adds registries and dynamic supervisors needed for provisioners and device
-  communication.
+  Provisioning a file bind means ensuring the backing file is available on
+  the device (creating a file download request for uploaded files when
+  needed) and then sending a `CreateFileBindRequest` to the device.
+
+  For more information, check the `Edgehog.Containers.Provisioner` docs.
   """
-  use Supervisor
+  use Edgehog.Containers.Provisioner,
+    resource: Edgehog.Containers.FileBind,
+    core: Edgehog.Containers.FileBind.Provisioner.Core
 
-  def start_link(args) do
-    Supervisor.start_link(__MODULE__, args, name: __MODULE__)
-  end
-
-  @impl Supervisor
-  def init(_args) do
-    children = [
-      # Registries
-      {Registry, keys: :unique, name: Edgehog.Files.FileDownloadRequest.Provisioner.Registry},
-
-      # Supervisors
-      {DynamicSupervisor,
-       name: Edgehog.Containers.File.Provisioner.Supervisor, strategy: :one_for_one}
-    ]
-
-    Supervisor.init(children, strategy: :one_for_one)
-  end
+  @sup Edgehog.Containers.FileBind.Provisioner.Supervisor
 end

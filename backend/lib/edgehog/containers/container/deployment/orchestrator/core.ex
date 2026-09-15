@@ -26,12 +26,11 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
   alias Edgehog.Containers.Container.Deployment.Provisioner, as: ContainerProvisioner
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
-  alias Edgehog.Containers.FileBind.Storage, as: FileBindStorage
+  alias Edgehog.Containers.FileBind
+  alias Edgehog.Containers.FileBind.Provisioner, as: FileBindProvisioner
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Volume
-  alias Edgehog.Files
-  alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileProvisioner
 
   require Logger
 
@@ -102,9 +101,9 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
       |> Map.fetch!(:device_requests_to_provision)
       |> Enum.empty?()
 
-    files_ready =
+    file_binds_ready =
       state
-      |> Map.fetch!(:files_to_provision)
+      |> Map.fetch!(:file_binds_to_provision)
       |> Enum.empty?()
 
     image_ready and
@@ -113,7 +112,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
       networks_ready and
       device_mappings_ready and
       device_requests_ready and
-      files_ready
+      file_binds_ready
   end
 
   @doc """
@@ -219,17 +218,22 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
   end
 
   @doc """
-  Removes a file download request from the list of files that need to be provisioned.
+  Removes a file bind from the list of file binds that need to be provisioned.
 
-  The list of files to be provisioned is expected to be a list of file
-  download requests in the key `:files_to_provision` into the state.
+  The list of file binds to be provisioned is expected to be a list of file
+  binds in the key `:file_binds_to_provision` into the state.
+
+  Example:
+  if id matches bind2
+
+  (id, %{file_binds_to_provision: [bind1, bind2, bind3, ...]}) -> %{file_binds_to_provision: [bind1, bind3, ...]}
   """
-  def file_ready(id, state) do
+  def file_bind_ready(id, state) do
     id_matches = &(&1.id == id)
 
-    remove_matching_file = &Enum.reject(&1, id_matches)
+    remove_matching_file_bind = &Enum.reject(&1, id_matches)
 
-    Map.update!(state, :files_to_provision, remove_matching_file)
+    Map.update!(state, :file_binds_to_provision, remove_matching_file_bind)
   end
 
   def provision(state) do
@@ -239,7 +243,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     |> provision_networks()
     |> provision_device_mappings()
     |> provision_device_requests()
-    |> provision_files()
+    |> provision_file_binds()
     |> provision_container()
   end
 
@@ -442,129 +446,44 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     end
   end
 
-  defp provision_files(state) do
-    new_state = Map.put(state, :files_to_provision, [])
+  defp provision_file_binds(state) do
+    new_state = Map.put(state, :file_binds_to_provision, [])
 
     new_state
     |> Map.get(:file_binds, [])
-    |> Enum.reduce(new_state, &provision_file/2)
+    |> Enum.reduce(new_state, &provision_file_bind/2)
   end
 
-  # No explicit target: the file was uploaded through the presigned upload
-  # URL. Create a file download request for it, link it to the bind and
-  # track it like any other provisioned resource.
-  defp provision_file(%{file_download_request_id: nil, file_device_id: nil} = file_bind, state) do
-    %{tenant: tenant, deployment: deployment} = state
+  defp provision_file_bind(%FileBind{} = file_bind, state) do
+    %{
+      deployment: deployment,
+      tenant: tenant
+    } = state
 
-    with {:ok, file_download_request} <- create_file_download_request(file_bind, state),
-         {:ok, _file_bind} <- link_file_bind(file_bind, file_download_request, tenant) do
-      track_file(file_download_request, state, deployment, tenant)
-    else
-      {:error, reason} ->
-        log_provisioner_start_failed("file", file_bind.id, reason)
+    %{id: id} = file_bind
 
-        state
-        |> Map.put(:file_provisioning, :failed)
-        |> Map.put(:provisioning_failed, true)
-    end
-  end
-
-  # The file is already on the device, nothing to provision.
-  defp provision_file(
-         %{device_file_id: _device_file_id, file_download_request_id: nil} = _file_bind,
-         state
-       ) do
-    state
-  end
-
-  # The bind already references a file download request: track it like any
-  # other provisioned resource.
-  defp provision_file(
-         %{file_download_request_id: request_id, file_device_id: nil} = _file_bind,
-         state
-       ) do
-    %{tenant: tenant, deployment: deployment} = state
-
-    case Files.fetch_file_download_request(request_id, tenant: tenant) do
-      {:ok, file_download_request} ->
-        track_file(file_download_request, state, deployment, tenant)
-
-      {:error, reason} ->
-        log_provisioner_start_failed("file", request_id, reason)
-
-        state
-        |> Map.put(:file_provisioning, :failed)
-        |> Map.put(:provisioning_failed, true)
-    end
-  end
-
-  defp create_file_download_request(%{uploaded: false} = _file_bind, _state) do
-    {:error, :file_not_uploaded}
-  end
-
-  defp create_file_download_request(file_bind, state) do
-    %{container_deployment: container_deployment, tenant: tenant} = state
-    tenant_id = tenant_id(tenant)
-
-    file_path = FileBindStorage.file_path(tenant_id, file_bind.id, file_bind.file_name)
-
-    with {:ok, %{get_url: url}} <- FileBindStorage.read_presigned_url(file_path) do
-      params = %{
-        url: url,
-        file_name: file_bind.file_name,
-        uncompressed_file_size_bytes: file_bind.uncompressed_file_size_bytes,
-        digest: file_bind.digest,
-        encoding: file_bind.encoding || "",
-        destination_type: :storage,
-        device_id: container_deployment.device_id
-      }
-
-      case Files.create_file_bind_file_download_request(params, tenant: tenant) do
-        {:ok, file_download_request} -> {:ok, file_download_request}
-        {:error, reason} -> {:error, reason}
-      end
-    end
-  end
-
-  defp link_file_bind(file_bind, file_download_request, tenant) do
-    case file_bind
-         |> Ash.Changeset.for_update(:link_file_download_request, %{
-           file_download_request_id: file_download_request.id
-         })
-         |> Ash.update(tenant: tenant) do
-      {:ok, file_bind} -> {:ok, file_bind}
-      {:error, reason} -> {:error, reason}
-    end
-  end
-
-  defp track_file(file_download_request, state, deployment, tenant) do
-    %{id: id} = file_download_request
-
-    # Subscribe to the file download request readiness
+    # Subscribe to the file bind readiness
     Phoenix.PubSub.subscribe(
       Edgehog.PubSub,
-      FileProvisioner.Core.topic(file_download_request)
+      FileBindProvisioner.Core.topic(file_bind)
     )
 
     # Start the provisioner
-    case FileProvisioner.provision(file_download_request, tenant,
+    case FileBindProvisioner.provision(file_bind, tenant,
            deployment: deployment,
            mode: state.mode
          ) do
       {:ok, _pid} ->
-        Map.update(state, :files_to_provision, [], &[file_download_request | &1])
+        Map.update(state, :file_binds_to_provision, [], &[file_bind | &1])
 
       {:error, reason} ->
-        log_provisioner_start_failed("file", id, reason)
+        log_provisioner_start_failed("file_bind", id, reason)
 
         state
-        |> Map.put(:file_provisioning, :failed)
+        |> Map.put(:file_bind_provisioning, :failed)
         |> Map.put(:provisioning_failed, true)
     end
   end
-
-  defp tenant_id(%{tenant_id: tenant_id}), do: tenant_id
-  defp tenant_id(tenant_id), do: tenant_id
 
   defp provision_container(state) do
     %{

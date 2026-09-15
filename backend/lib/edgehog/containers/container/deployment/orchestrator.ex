@@ -51,11 +51,11 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   alias Edgehog.Containers.Container.Deployment.Orchestrator.Registry, as: ContainerRegistry
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
+  alias Edgehog.Containers.FileBind
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Telemetry
   alias Edgehog.Containers.Volume
-  alias Edgehog.Files.FileDownloadRequest
 
   @test Mix.env() == :test
 
@@ -265,8 +265,8 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   end
 
   @impl GenServer
-  def handle_info({:ready, %FileDownloadRequest{id: id}}, state) do
-    new_state = Core.file_ready(id, state)
+  def handle_info({:ready, %FileBind{id: id}}, state) do
+    new_state = Core.file_bind_ready(id, state)
 
     {:noreply, new_state, {:continue, :maybe_ready}}
   end
