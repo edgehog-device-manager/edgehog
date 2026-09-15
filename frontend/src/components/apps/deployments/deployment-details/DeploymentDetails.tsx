@@ -33,6 +33,7 @@ import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
 } from "@/api/__generated__/DeploymentDetails_events.graphql";
+import type { DeploymentDetails_fileBinds$key } from "@/api/__generated__/DeploymentDetails_fileBinds.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
@@ -98,7 +99,29 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
           ...DeploymentDetails_deviceMappingDeployments
           ...DeploymentDetails_networkDeployments
           ...DeploymentDetails_volumeDeployments
+          ...DeploymentDetails_fileBinds
         }
+      }
+    }
+  }
+`;
+
+const DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT = graphql`
+  fragment DeploymentDetails_fileBinds on ContainerDeployment {
+    id
+    fileBinds {
+      id
+      fileMount {
+        id
+        mountpoint
+      }
+      fileDownloadRequest {
+        id
+        status
+      }
+      deviceFile {
+        id
+        pathOnDevice
       }
     }
   }
@@ -216,7 +239,7 @@ type TreeNode = {
 const buildSubTree = (
   prefix: string,
   category: string,
-  nodes: any[],
+  nodes: readonly any[],
   labelExtractor: (node: any) => string,
   intlLabels: { title: string; empty: string; unnamed: string },
 ): TreeNode => {
@@ -253,7 +276,8 @@ interface ContainerDeploymentItemProps {
   containerFragmentKey: DeploymentDetails_networkDeployments$key &
     DeploymentDetails_volumeDeployments$key &
     DeploymentDetails_deviceMappingDeployments$key &
-    DeploymentDetails_deviceRequestDeployments$key;
+    DeploymentDetails_deviceRequestDeployments$key &
+    DeploymentDetails_fileBinds$key;
   imageDeployment: any;
   containerState: string;
   isReady: boolean | null;
@@ -268,6 +292,11 @@ const ContainerDeploymentItem = ({
 }: ContainerDeploymentItemProps) => {
   const intl = useIntl();
   const prefix = `container-${index}`;
+
+  const fileBindsData = useFragment<DeploymentDetails_fileBinds$key>(
+    DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT,
+    containerFragmentKey,
+  );
 
   const networkData = useFragment<DeploymentDetails_networkDeployments$key>(
     DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT,
@@ -384,6 +413,26 @@ const ContainerDeploymentItem = ({
       },
     );
 
+    const fileBindsSubTree = buildSubTree(
+      prefix,
+      "file-bind",
+      fileBindsData?.fileBinds ?? [],
+      (fb) =>
+        `${fb.fileMount?.mountpoint ?? unnamed} → ${
+          fb.deviceFile?.pathOnDevice ??
+          fb.fileDownloadRequest?.status ??
+          "Unknown source"
+        }`,
+      {
+        title: intl.formatMessage({
+          id: "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds",
+          defaultMessage: "File Binds",
+        }),
+        empty,
+        unnamed,
+      },
+    );
+
     const imageTreeNode: TreeNode = {
       id: `${prefix}-image-${imageDeployment?.image?.id}`,
       name:
@@ -417,10 +466,12 @@ const ContainerDeploymentItem = ({
           deviceMappingsSubTree,
           volumeSubTree,
           networkSubTree,
+          fileBindsSubTree,
         ],
       },
     ];
   }, [
+    fileBindsData,
     networkData,
     volumeData,
     deviceMappingData,
