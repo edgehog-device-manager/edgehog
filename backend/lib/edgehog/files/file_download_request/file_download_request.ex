@@ -394,7 +394,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
     publish :managed, [[:id, "*"]]
     publish :manual, [[:id, "*"]]
 
-    publish :set_response, [[:id, "*"]]
+    publish :set_response, [[:status, nil], [:id, "*"]]
   end
 
   postgres do
