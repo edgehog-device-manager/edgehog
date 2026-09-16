@@ -55,10 +55,7 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
-    case Files.send_file_download_request(resource, tenant: tenant) do
-      {:ok, _} -> :ok
-      {:error, _reason} = error -> error
-    end
+    Files.send_file_download_request(resource, tenant: tenant)
   end
 
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
