@@ -125,11 +125,27 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   defp check_still_needs_target(%{file_download_request_id: nil, device_file_id: nil}), do: :needs_target
   defp check_still_needs_target(_), do: :already_has_target
 
-  defp create_file_download_request(%{uploaded: false}, _tenant) do
-    {:error, :file_not_uploaded}
+  defp create_file_download_request(%{uploaded: false} = file_bind, tenant) do
+    with {:ok, %{file_mount: file_mount} = file_bind} <-
+           Ash.load(file_bind, [:container_deployment, file_mount: [:default_file]], tenant: tenant),
+         %{default_file_id: id, default_file: file} when not is_nil(id) and not is_nil(file) <- file_mount do
+      create_managed_from_default(file, file_bind, tenant)
+    else
+      _ -> {:error, :file_not_uploaded}
+    end
   end
 
   defp create_file_download_request(file_bind, tenant) do
+    file_bind =
+      case Map.get(file_bind, :container_deployment) do
+        nil ->
+          {:ok, loaded} = Ash.load(file_bind, [:container_deployment], tenant: tenant)
+          loaded
+
+        _ ->
+          file_bind
+      end
+
     %{container_deployment: container_deployment} = file_bind
     tenant_id = tenant_id(tenant)
 
@@ -150,6 +166,22 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
         {:ok, file_download_request} -> {:ok, file_download_request}
         {:error, reason} -> {:error, reason}
       end
+    end
+  end
+
+  defp create_managed_from_default(file, file_bind, tenant) do
+    %{container_deployment: container_deployment} = file_bind
+
+    Edgehog.Files.FileDownloadRequest
+    |> Ash.Changeset.for_create(
+      :managed,
+      %{destination_type: :storage, file_id: file.id, device_id: container_deployment.device_id},
+      tenant: tenant
+    )
+    |> Ash.create(tenant: tenant)
+    |> case do
+      {:ok, request} -> {:ok, request}
+      {:error, reason} -> {:error, reason}
     end
   end
 
