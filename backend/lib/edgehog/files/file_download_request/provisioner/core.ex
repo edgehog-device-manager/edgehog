@@ -62,10 +62,8 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
   def reconcile(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
-    case Files.fetch_file_download_request(resource.id, tenant: tenant) do
-      {:ok, fresh_resource} -> {:ok, fresh_resource}
-      {:error, _} -> :not_found
-    end
+    with {:error, _} <- Files.fetch_file_download_request(resource.id, tenant: tenant),
+         do: :not_found
   end
 
   # Logging functions
