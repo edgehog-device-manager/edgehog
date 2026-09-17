@@ -54,17 +54,11 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   def name(%{id: id}),
     do: {:via, Registry, {Edgehog.Containers.FileBind.Provisioner.Registry, id}}
 
-  # TODO: this makes the provisioner poll for the file being marked as
-  # uploaded (trought the `ensure_.../2`). This is not really ideal,
-  # but is an easy solution:
-  # - the provisioner fails to send the file to the device
-  # - a timeout starts
-  # - after timeout, the provisioner retries to send the file.
-  # 
-  # It uses an exponential bakoff timeout, so even large files should
-  # be covered. Ideally however, we should be able to listen for files
-  # being uploaded, and only then start the provisioning (maybe a new
-  # mode?)
+  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  def temporary_error?(:file_not_uploaded), do: true
+  def temporary_error?({:error, :file_not_uploaded}), do: true
+  def temporary_error?(error), do: super(error)
+
   @impl Edgehog.Containers.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
