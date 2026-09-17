@@ -30,6 +30,7 @@ import type { PayloadError } from "relay-runtime";
 import { Card } from "react-bootstrap";
 import { FormattedMessage } from "react-intl";
 
+import { forwarderVersion } from "@/api";
 import type { DeviceInfoCard_device$key } from "@/api/__generated__/DeviceInfoCard_device.graphql";
 import type { DeviceInfoCard_connectionStatus$key } from "@/api/__generated__/DeviceInfoCard_connectionStatus.graphql";
 import type { DeviceInfoCard_getForwarderSession_Query } from "@/api/__generated__/DeviceInfoCard_getForwarderSession_Query.graphql";
@@ -54,6 +55,7 @@ import Row from "@/components/ui/row/Row";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import assets from "@/assets";
+import semver from "semver";
 
 const DEVICE_INFO_CARD_FRAGMENT = graphql`
   fragment DeviceInfoCard_device on Device {
@@ -337,10 +339,17 @@ const DeviceInfoCard = ({
 
       const forwarderProtocol = secure ? "https" : "http";
 
-      window.open(
-        `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/v1/${sessionToken}/http/${TTYD_PORT}`,
-        "_blank",
-      );
+      if (semver.satisfies(forwarderVersion, "0.1.x")) {
+        window.open(
+          `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/${sessionToken}/http/${TTYD_PORT}`,
+          "_blank",
+        );
+      } else if (semver.satisfies(forwarderVersion, "0.2.x")) {
+        window.open(
+          `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/?session=${sessionToken}&protocol=http&port=${TTYD_PORT}`,
+          "_blank",
+        );
+      }
     },
     [relayEnvironment, deviceId],
   );
