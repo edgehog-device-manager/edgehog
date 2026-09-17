@@ -46,8 +46,7 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
   end
 
   defp get_file_binds(changeset) do
-    with nil <- Ash.Changeset.get_argument(changeset, :file_binds),
-         do: []
+    Ash.Changeset.get_argument(changeset, :file_binds) || []
   end
 
   defp validate_unique_mounts(file_binds) do

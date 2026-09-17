@@ -120,7 +120,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   defp ensure_file_download_request(file_bind, _tenant), do: {:ok, file_bind}
 
   # No file download request or device file id, the target is a file
-  # uploaded asyncronously
+  # uploaded asynchronously
   defp check_still_needs_target(%{file_download_request_id: nil, device_file_id: nil}),
     do: :needs_target
 
