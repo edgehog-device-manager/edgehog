@@ -5,8 +5,11 @@ defmodule Edgehog.Containers.Container.FileMount.Changes.NormalizeMountpoint do
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     case Ash.Changeset.get_attribute(changeset, :mountpoint) do
-      nil -> changeset
-      mountpoint -> Ash.Changeset.force_change_attribute(changeset, :mountpoint, normalize(mountpoint))
+      nil ->
+        changeset
+
+      mountpoint ->
+        Ash.Changeset.force_change_attribute(changeset, :mountpoint, normalize(mountpoint))
     end
   end
 

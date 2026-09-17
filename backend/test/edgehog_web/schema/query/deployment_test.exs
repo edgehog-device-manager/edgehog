@@ -162,11 +162,18 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
       |> Ash.load!(:container_deployments, tenant: tenant)
       |> Map.fetch!(:container_deployments)
 
-    file_mount =
+    file_mount_1 =
       file_mount_fixture(
         tenant: tenant,
         container_id: container_deployment.container_id,
         mountpoint: "/etc/app.conf"
+      )
+
+    file_mount_2 =
+      file_mount_fixture(
+        tenant: tenant,
+        container_id: container_deployment.container_id,
+        mountpoint: "/etc/another_app.conf"
       )
 
     file_download_request = manual_file_download_request_fixture(tenant: tenant)
@@ -174,7 +181,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
     file_bind_fixture(
       tenant: tenant,
       container_deployment_id: container_deployment.id,
-      file_mount_id: file_mount.id,
+      file_mount_id: file_mount_1.id,
       file_download_request_id: file_download_request.id
     )
 
@@ -183,7 +190,8 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
     file_bind_fixture(
       tenant: tenant,
       container_deployment_id: container_deployment.id,
-      device_file_id: device_file.id
+      device_file_id: device_file.id,
+      file_mount_id: file_mount_2.id
     )
 
     document = """
@@ -233,7 +241,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
     assert %{"fileMount" => %{"id" => file_mount_id, "mountpoint" => "/etc/app.conf"}} =
              file_bind
 
-    assert file_mount_id == AshGraphql.Resource.encode_relay_id(file_mount)
+    assert file_mount_id == AshGraphql.Resource.encode_relay_id(file_mount_1)
 
     assert %{
              "fileDownloadRequest" => %{

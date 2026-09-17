@@ -858,11 +858,22 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
     test "AvailableFileBinds marks file bind as available", context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
+      container = container_fixture(tenant: tenant)
+      file_mount = file_mount_fixture(tenant: tenant, container_id: container.id)
+
       container_deployment =
-        container_deployment_fixture(tenant: tenant, device_id: device.id)
+        container_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          container_id: container.id
+        )
 
       file_bind =
-        file_bind_fixture(tenant: tenant, container_deployment_id: container_deployment.id)
+        file_bind_fixture(
+          tenant: tenant,
+          container_deployment_id: container_deployment.id,
+          file_mount_id: file_mount.id
+        )
 
       deployment_event = %{
         device_id: device.device_id,
@@ -889,11 +900,22 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
     test "AvailableFileBinds with nil destroys file bind", context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
+      container = container_fixture(tenant: tenant)
+      file_mount = file_mount_fixture(tenant: tenant, container_id: container.id)
+
       container_deployment =
-        container_deployment_fixture(tenant: tenant, device_id: device.id)
+        container_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          container_id: container.id
+        )
 
       file_bind =
-        file_bind_fixture(tenant: tenant, container_deployment_id: container_deployment.id)
+        file_bind_fixture(
+          tenant: tenant,
+          container_deployment_id: container_deployment.id,
+          file_mount_id: file_mount.id
+        )
 
       deployment_event = %{
         device_id: device.device_id,

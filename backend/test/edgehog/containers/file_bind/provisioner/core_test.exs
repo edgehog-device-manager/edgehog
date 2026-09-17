@@ -245,10 +245,22 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
     test "reconcile/2 marks the bind as available when the device reports it", context do
       %{tenant: tenant, device: device} = context
 
-      container_deployment = container_deployment_fixture(tenant: tenant, device_id: device.id)
+      container = container_fixture(tenant: tenant)
+      file_mount = file_mount_fixture(tenant: tenant, container_id: container.id)
+
+      container_deployment =
+        container_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          container_id: container.id
+        )
 
       file_bind =
-        file_bind_fixture(tenant: tenant, container_deployment_id: container_deployment.id)
+        file_bind_fixture(
+          tenant: tenant,
+          container_deployment_id: container_deployment.id,
+          file_mount_id: file_mount.id
+        )
 
       expect(AvailableFileBinds, :get, fn _client, _device_id ->
         {:ok, [%FileBindStatus{id: file_bind.id}]}
@@ -263,10 +275,16 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
          context do
       %{tenant: tenant, device: device} = context
 
+      container = container_fixture(tenant: tenant)
+      file_mount = file_mount_fixture(tenant: tenant, container_id: container.id)
       container_deployment = container_deployment_fixture(tenant: tenant, device_id: device.id)
 
       file_bind =
-        file_bind_fixture(tenant: tenant, container_deployment_id: container_deployment.id)
+        file_bind_fixture(
+          tenant: tenant,
+          container_deployment_id: container_deployment.id,
+          file_mount_id: file_mount.id
+        )
 
       expect(AvailableFileBinds, :get, fn _client, _device_id ->
         {:ok, []}

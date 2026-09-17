@@ -192,6 +192,7 @@ defmodule Edgehog.Containers.FileBind do
     belongs_to :file_mount, Edgehog.Containers.Container.FileMount do
       attribute_type :uuid_v7
       public? true
+      allow_nil? false
     end
 
     belongs_to :file_download_request, Edgehog.Files.FileDownloadRequest do

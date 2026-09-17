@@ -148,13 +148,9 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
     end
   end
 
-  defp relate_file_binds(nil, device, container, _tenant),
-    do: relate_file_binds([], device, container, nil)
-
   defp relate_file_binds(file_binds, device, container, _tenant) do
-    explicit =
-      (file_binds || [])
-      |> Enum.map(&Map.put(&1, :device_id, device.id))
+    file_binds = file_binds || []
+    explicit = Enum.map(file_binds, &Map.put(&1, :device_id, device.id))
 
     explicit_ids =
       explicit
@@ -164,8 +160,7 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
     default_binds =
       container.file_mounts
-      |> Enum.reject(&MapSet.member?(explicit_ids, &1.id))
-      |> Enum.filter(& &1.default_file_id)
+      |> Enum.filter(&(not MapSet.member?(explicit_ids, &1.id) and &1.default_file_id))
       |> Enum.map(&default_file_bind(&1, device))
       |> Enum.reject(&is_nil/1)
 
