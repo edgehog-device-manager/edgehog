@@ -27,19 +27,64 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
 
   @impl Ash.Resource.Validation
   def validate(changeset, _opts, _context) do
+    # NOTE: `container` is required: `allow_nil: false`
+    {:ok, container} = Ash.Changeset.fetch_argument(changeset, :container)
+
+    loaded_container = Ash.load!(container, :file_mounts)
+
     required_file_mounts =
-      changeset
-      |> Ash.Changeset.get_argument(:container)
+      container
       |> Ash.load!(:file_mounts)
       |> Map.fetch!(:file_mounts)
       |> Enum.filter(&required_and_not_bound/1)
 
-    assoc_file_mounts =
-      changeset
-      |> Ash.Changeset.get_argument(:file_binds)
-      |> Enum.map(& &1.file_mount_id)
+    file_binds = get_file_binds(changeset)
 
-    required_ok? = Enum.all?(required_file_mounts, &(&1.id in assoc_file_mounts))
+    with :ok <- validate_unique_mounts(file_binds),
+         :ok <- validate_mounts_belong_to_container(file_binds, container),
+         :ok <- validate_required_mounts(required_file_mounts, file_binds) do
+      :ok
+    end
+  end
+
+  defp get_file_binds(changeset) do
+    with nil <- Ash.Changeset.get_argument(changeset, :file_binds),
+         do: []
+  end
+
+  defp validate_unique_mounts(file_binds) do
+    mount_ids = Enum.map(file_binds, & &1.file_mount_id) |> Enum.reject(&is_nil/1)
+
+    if mount_ids != Enum.uniq(mount_ids),
+      do: {:error, field: :file_binds, message: "Duplicate file mounts are not allowed."},
+      else: :ok
+  end
+
+  defp validate_mounts_belong_to_container(file_binds, container) do
+    allowed_ids =
+      container
+      |> Map.fetch!(:file_mounts)
+      |> Enum.map(& &1.id)
+      |> MapSet.new()
+
+    invalid =
+      file_binds
+      |> Enum.map(& &1.file_mount_id)
+      |> Enum.reject(&is_nil/1)
+      |> Enum.reject(&MapSet.member?(allowed_ids, &1))
+
+    case invalid do
+      [] ->
+        :ok
+
+      _ ->
+        {:error, field: :file_binds, message: "Some file mounts do not belong to the container."}
+    end
+  end
+
+  defp validate_required_mounts(required_file_mounts, file_binds) do
+    assoc_ids = Enum.map(file_binds, & &1.file_mount_id)
+    required_ok? = Enum.all?(required_file_mounts, &(&1.id in assoc_ids))
 
     if required_ok?,
       do: :ok,
