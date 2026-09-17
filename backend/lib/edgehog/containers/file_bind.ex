@@ -206,6 +206,12 @@ defmodule Edgehog.Containers.FileBind do
     end
   end
 
+  identities do
+    identity :unique_file_mount_per_deployment, [:container_deployment_id, :file_mount_id] do
+      pre_check_with Edgehog.Repo
+    end
+  end
+
   pub_sub do
     prefix "file_binds"
     module EdgehogWeb.Endpoint
