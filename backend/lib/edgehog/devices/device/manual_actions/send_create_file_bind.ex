@@ -50,8 +50,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateFileBind do
     end
   end
 
-  defp fetch_bind_target_id(%{file_download_request_id: id} = file_bind)
-       when not is_nil(id),
+  defp fetch_bind_target_id(%{file_download_request_id: id}) when not is_nil(id),
        do: {:ok, id}
 
   defp fetch_bind_target_id(%{device_file_id: id}) when not is_nil(id), do: {:ok, id}

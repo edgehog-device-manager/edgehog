@@ -25,6 +25,8 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
   alias Edgehog.Containers.Container.Env
 
+  require Logger
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
@@ -106,7 +108,7 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
       file_binds_input =
         changeset
         |> Ash.Changeset.get_argument(:file_binds)
-        |> relate_file_binds(device)
+        |> relate_file_binds(device, container, tenant)
 
       changeset
       |> Ash.Changeset.change_attribute(:env, env)
@@ -148,9 +150,59 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
     end
   end
 
-  defp relate_file_binds(nil, _device), do: nil
-  defp relate_file_binds(file_binds, device) do
-    Enum.map(file_binds, &Map.put(&1, :device_id, device.id))
+  defp relate_file_binds(nil, device, container, tenant),
+    do: relate_file_binds([], device, container, tenant)
+
+  defp relate_file_binds(file_binds, device, container, tenant) do
+    explicit =
+      (file_binds || [])
+      |> Enum.map(&Map.put(&1, :device_id, device.id))
+
+    explicit_ids =
+      explicit
+      |> Enum.map(& &1.file_mount_id)
+      |> Enum.reject(&is_nil/1)
+      |> MapSet.new()
+
+    default_binds =
+      container.file_mounts
+      |> Enum.reject(&MapSet.member?(explicit_ids, &1.id))
+      |> Enum.filter(& &1.default_file_id)
+      |> Enum.map(&default_file_bind(&1, device, tenant))
+      |> Enum.reject(&is_nil/1)
+
+    explicit ++ default_binds
+  end
+
+  defp default_file_bind(%{default_file: nil} = file_mount, _device, _tenant) do
+    Logger.error("File mount #{file_mount.id} has default_file_id but default_file not loaded")
+    nil
+  end
+
+  defp default_file_bind(file_mount, device, tenant) do
+    file = file_mount.default_file
+
+    case create_managed_download_request(file, device, tenant) do
+      {:ok, request} ->
+        %{
+          file_mount_id: file_mount.id,
+          file_download_request_id: request.id,
+          device_id: device.id
+        }
+
+      {:error, reason} ->
+        raise "Failed to create download request for default file #{file_mount.id}: #{inspect(reason)}"
+    end
+  end
+
+  defp create_managed_download_request(file, device, tenant) do
+    Edgehog.Files.FileDownloadRequest
+    |> Ash.Changeset.for_create(
+      :managed,
+      %{destination_type: :storage, file_id: file.id, device_id: device.id},
+      tenant: tenant
+    )
+    |> Ash.create(tenant: tenant)
   end
 
   defp resolve_env(changeset, container) do
