@@ -109,6 +109,21 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
 
       [file_bind] = container_deployment.file_binds
       assert file_bind.file_mount.mountpoint == "/etc/default.conf"
+      # Lazy: FileBind is created without a target at deploy time
+      assert is_nil(file_bind.file_download_request_id)
+      assert is_nil(file_bind.device_file_id)
+
+      Mimic.stub(Edgehog.Astarte.Device.CreateBind, :send_bind, fn _, _, _ -> :ok end)
+
+      :ok =
+        Edgehog.Containers.FileBind.Provisioner.Core.send_to_device(file_bind,
+          tenant: tenant,
+          deployment: deployment
+        )
+
+      file_bind = Ash.get!(Edgehog.Containers.FileBind, file_bind.id, tenant: tenant)
+
+      assert file_bind.file_download_request_id != nil
 
       request =
         Ash.get!(StoredFileDownloadRequest, file_bind.file_download_request_id, tenant: tenant)
