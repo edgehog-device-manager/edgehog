@@ -36,6 +36,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   alias Edgehog.Containers.FileBind.Storage, as: FileBindStorage
   alias Edgehog.Devices
   alias Edgehog.Files
+  alias Edgehog.Files.FileDownloadRequest
 
   require Logger
 
@@ -106,7 +107,12 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
          %{file_download_request_id: nil, device_file_id: nil} = file_bind,
          tenant
        ) do
-    with {:ok, file_bind} <- Ash.load(file_bind, [:container_deployment, :file_download_request_id, :device_file_id], tenant: tenant),
+    with {:ok, file_bind} <-
+           Ash.load(
+             file_bind,
+             [:container_deployment, :file_download_request_id, :device_file_id],
+             tenant: tenant
+           ),
          :needs_target <- check_still_needs_target(file_bind),
          {:ok, file_download_request} <- create_file_download_request(file_bind, tenant) do
       link_file_bind(file_bind, file_download_request, tenant)
@@ -122,13 +128,18 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   # The bind already has a target, nothing to create.
   defp ensure_file_download_request(file_bind, _tenant), do: {:ok, file_bind}
 
-  defp check_still_needs_target(%{file_download_request_id: nil, device_file_id: nil}), do: :needs_target
+  defp check_still_needs_target(%{file_download_request_id: nil, device_file_id: nil}),
+    do: :needs_target
+
   defp check_still_needs_target(_), do: :already_has_target
 
   defp create_file_download_request(%{uploaded: false} = file_bind, tenant) do
     with {:ok, %{file_mount: file_mount} = file_bind} <-
-           Ash.load(file_bind, [:container_deployment, file_mount: [:default_file]], tenant: tenant),
-         %{default_file_id: id, default_file: file} when not is_nil(id) and not is_nil(file) <- file_mount do
+           Ash.load(file_bind, [:container_deployment, file_mount: [:default_file]],
+             tenant: tenant
+           ),
+         %{default_file_id: default_file_id, default_file: %{} = file}
+         when is_binary(default_file_id) <- file_mount do
       create_managed_from_default(file, file_bind, tenant)
     else
       _ -> {:error, :file_not_uploaded}
@@ -162,53 +173,44 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
         device_id: container_deployment.device_id
       }
 
-      case Files.create_file_bind_file_download_request(params, tenant: tenant) do
-        {:ok, file_download_request} -> {:ok, file_download_request}
-        {:error, reason} -> {:error, reason}
-      end
+      Files.create_file_bind_file_download_request(params, tenant: tenant)
     end
   end
 
   defp create_managed_from_default(file, file_bind, tenant) do
     %{container_deployment: container_deployment} = file_bind
 
-    Edgehog.Files.FileDownloadRequest
+    FileDownloadRequest
     |> Ash.Changeset.for_create(
       :managed,
       %{destination_type: :storage, file_id: file.id, device_id: container_deployment.device_id},
       tenant: tenant
     )
     |> Ash.create(tenant: tenant)
-    |> case do
-      {:ok, request} -> {:ok, request}
-      {:error, reason} -> {:error, reason}
-    end
   end
 
   defp link_file_bind(file_bind, file_download_request, tenant) do
-    with {:ok, fresh} <- Ash.load(file_bind, [:file_download_request_id, :device_file_id], tenant: tenant) do
+    with {:ok, fresh} <-
+           Ash.load(file_bind, [:file_download_request_id, :device_file_id], tenant: tenant) do
       case fresh do
-        %{file_download_request_id: id} when not is_nil(id) and id != file_download_request.id ->
+        %{file_download_request_id: id} when id == file_download_request.id ->
+          {:ok, fresh}
+
+        %{file_download_request_id: file_id} when is_binary(file_id) ->
           # Another provisioner already linked a different request; clean up the new one
           _ = Ash.destroy(file_download_request, tenant: tenant)
           {:ok, fresh}
 
-        %{file_download_request_id: id} when id == file_download_request.id ->
-          {:ok, fresh}
-
-        %{device_file_id: id} when not is_nil(id) ->
+        %{device_file_id: device_file_id} when is_binary(device_file_id) ->
           _ = Ash.destroy(file_download_request, tenant: tenant)
           {:ok, fresh}
 
         _ ->
           action_opts = %{file_download_request_id: file_download_request.id}
 
-          case fresh
-               |> Ash.Changeset.for_update(:link_file_download_request, action_opts)
-               |> Ash.update(tenant: tenant) do
-            {:ok, file_bind} -> {:ok, file_bind}
-            {:error, reason} -> {:error, reason}
-          end
+          fresh
+          |> Ash.Changeset.for_update(:link_file_download_request, action_opts)
+          |> Ash.update(tenant: tenant)
       end
     end
   end

@@ -40,9 +40,8 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
     file_binds = get_file_binds(changeset)
 
     with :ok <- validate_unique_mounts(file_binds),
-         :ok <- validate_mounts_belong_to_container(file_binds, loaded_container),
-         :ok <- validate_required_mounts(required_file_mounts, file_binds) do
-      :ok
+         :ok <- validate_mounts_belong_to_container(file_binds, loaded_container) do
+      validate_required_mounts(required_file_mounts, file_binds)
     end
   end
 
@@ -52,7 +51,10 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
   end
 
   defp validate_unique_mounts(file_binds) do
-    mount_ids = Enum.map(file_binds, & &1.file_mount_id) |> Enum.reject(&is_nil/1)
+    mount_ids =
+      file_binds
+      |> Enum.map(& &1.file_mount_id)
+      |> Enum.reject(&(&1 == nil))
 
     if mount_ids != Enum.uniq(mount_ids),
       do: {:error, field: :file_binds, message: "Duplicate file mounts are not allowed."},
@@ -69,8 +71,7 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
     invalid =
       file_binds
       |> Enum.map(& &1.file_mount_id)
-      |> Enum.reject(&is_nil/1)
-      |> Enum.reject(&MapSet.member?(allowed_ids, &1))
+      |> Enum.reject(&(&1 == nil || MapSet.member?(allowed_ids, &1)))
 
     case invalid do
       [] ->
