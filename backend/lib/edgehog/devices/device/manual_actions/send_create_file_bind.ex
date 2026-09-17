@@ -32,11 +32,13 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateFileBind do
     with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
          {:ok, file_bind} <- Ash.Changeset.fetch_argument(changeset, :file_bind),
          {:ok, file_bind} <- Ash.load(file_bind, file_mount: :mountpoint),
-         {:ok, device} <- Ash.load(device, :appengine_client) do
+         {:ok, device} <- Ash.load(device, :appengine_client),
+         {:ok, target_id} <- fetch_bind_target_id(file_bind),
+         {:ok, target_type} <- fetch_bind_target_type(file_bind) do
       data = %BindRequestData{
         id: file_bind.id,
-        targetId: bind_target_id(file_bind),
-        targetType: bind_target_type(file_bind),
+        targetId: target_id,
+        targetType: target_type,
         deploymentId: deployment.id,
         mountpoint: file_bind.file_mount.mountpoint,
         options: ""
@@ -48,14 +50,17 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateFileBind do
     end
   end
 
-  defp bind_target_id(%{file_download_request_id: id} = file_bind) do
-    id || file_bind.device_file_id ||
-      raise ArgumentError,
-            "file bind #{file_bind.id} has no target: the uploaded file was not provisioned"
-  end
+  defp fetch_bind_target_id(%{file_download_request_id: id} = file_bind)
+       when not is_nil(id),
+       do: {:ok, id}
 
-  defp bind_target_type(%{device_file_id: device_file_id}) when is_nil(device_file_id),
-    do: "request"
+  defp fetch_bind_target_id(%{device_file_id: id}) when not is_nil(id), do: {:ok, id}
 
-  defp bind_target_type(_file_bind), do: "storage"
+  defp fetch_bind_target_id(%{id: id}),
+    do: {:error, "file bind #{id} has no target: the uploaded file was not provisioned"}
+
+  defp fetch_bind_target_type(%{device_file_id: device_file_id}) when is_nil(device_file_id),
+    do: {:ok, "request"}
+
+  defp fetch_bind_target_type(_file_bind), do: {:ok, "storage"}
 end
