@@ -31,9 +31,14 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
   import Edgehog.FilesFixtures
   import Edgehog.TenantsFixtures
 
+  alias Ash.Error.Changes.InvalidArgument
+  alias Ash.Error.Invalid
+  alias Edgehog.Astarte.Device.CreateBind
   alias Edgehog.Astarte.Device.FileDownloadRequest
   alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Containers.Container.Deployment
+  alias Edgehog.Containers.FileBind
+  alias Edgehog.Containers.FileBind.Provisioner.Core
   alias Edgehog.Files.FileDownloadRequest, as: StoredFileDownloadRequest
 
   setup do
@@ -113,15 +118,15 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
       assert is_nil(file_bind.file_download_request_id)
       assert is_nil(file_bind.device_file_id)
 
-      Mimic.stub(Edgehog.Astarte.Device.CreateBind, :send_bind, fn _, _, _ -> :ok end)
+      Mimic.stub(CreateBind, :send_bind, fn _, _, _ -> :ok end)
 
       :ok =
-        Edgehog.Containers.FileBind.Provisioner.Core.send_to_device(file_bind,
+        Core.send_to_device(file_bind,
           tenant: tenant,
           deployment: deployment
         )
 
-      file_bind = Ash.get!(Edgehog.Containers.FileBind, file_bind.id, tenant: tenant)
+      file_bind = Ash.get!(FileBind, file_bind.id, tenant: tenant)
 
       assert file_bind.file_download_request_id != nil
 
@@ -190,11 +195,11 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
         )
         |> Ash.create()
 
-      assert {:error, %Ash.Error.Invalid{errors: errors}} = result
+      assert {:error, %Invalid{errors: errors}} = result
 
       [error] = errors
 
-      assert %Ash.Error.Changes.InvalidArgument{field: :file_binds} = error
+      assert %InvalidArgument{field: :file_binds} = error
     end
 
     test "skips non-required mounts without a file", context do
