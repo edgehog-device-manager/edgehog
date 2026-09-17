@@ -33,15 +33,14 @@ defmodule Edgehog.Containers.Container.Deployment.Validations.RequiredMountsHave
     loaded_container = Ash.load!(container, :file_mounts)
 
     required_file_mounts =
-      container
-      |> Ash.load!(:file_mounts)
+      loaded_container
       |> Map.fetch!(:file_mounts)
       |> Enum.filter(&required_and_not_bound/1)
 
     file_binds = get_file_binds(changeset)
 
     with :ok <- validate_unique_mounts(file_binds),
-         :ok <- validate_mounts_belong_to_container(file_binds, container),
+         :ok <- validate_mounts_belong_to_container(file_binds, loaded_container),
          :ok <- validate_required_mounts(required_file_mounts, file_binds) do
       :ok
     end

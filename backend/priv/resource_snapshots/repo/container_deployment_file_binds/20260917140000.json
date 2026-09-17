@@ -394,7 +394,7 @@
       "include": null,
       "include_base_filter?": true,
       "message": null,
-      "name": "container_deployment_file_binds_unique_mount_per_deployment_index",
+      "name": "file_binds_unique_mount_idx",
       "nulls_distinct": true,
       "prefix": null,
       "table": null,
@@ -410,7 +410,7 @@
     {
       "all_tenants?": false,
       "base_filter": null,
-      "index_name": "container_deployment_file_binds_unique_mount_per_deployment_index",
+      "index_name": "file_binds_unique_mount_idx",
       "keys": [
         {
           "type": "atom",

@@ -24,7 +24,7 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
   Container.Deployment created through the deploy action.
   """
 
-  use Edgehog.DataCase, async: true
+  use Edgehog.DataCase, async: false
 
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
@@ -84,7 +84,6 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
       }
     end
 
-    @tag skip: "TODO: update/unskip the test when we support this flow"
     test "creates a managed file bind for a mount with a default file", context do
       %{tenant: tenant, device: device, default_file: file, deployment: deployment} = context
 

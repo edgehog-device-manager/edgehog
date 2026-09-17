@@ -69,6 +69,8 @@ defmodule Edgehog.Containers.FileBind do
       storing the client-supplied metadata.
       """
 
+      require_atomic? false
+
       accept [:file_name, :uncompressed_file_size_bytes, :digest, :encoding]
 
       validate present(:file_name)
@@ -81,6 +83,8 @@ defmodule Edgehog.Containers.FileBind do
       description """
       Links a file bind to the file download request created for its uploaded file.
       """
+
+      require_atomic? false
 
       accept [:file_download_request_id]
     end
@@ -95,18 +99,23 @@ defmodule Edgehog.Containers.FileBind do
     end
 
     update :mark_as_sent do
+      require_atomic? false
       change set_attribute(:state, :sent)
     end
 
     update :mark_as_available do
+      require_atomic? false
       change set_attribute(:state, :available)
     end
 
     update :mark_as_unavailable do
+      require_atomic? false
       change set_attribute(:state, :unavailable)
     end
 
     update :mark_as_errored do
+      require_atomic? false
+
       argument :message, :string do
         allow_nil? false
       end
@@ -116,6 +125,7 @@ defmodule Edgehog.Containers.FileBind do
     end
 
     update :set_state do
+      require_atomic? false
       accept [:state]
     end
   end
@@ -231,5 +241,7 @@ defmodule Edgehog.Containers.FileBind do
       reference :container_deployment, on_delete: :delete
       reference :device, on_delete: :delete
     end
+
+    identity_index_names unique_file_mount_per_deployment: "file_binds_unique_mount_idx"
   end
 end

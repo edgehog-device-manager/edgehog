@@ -57,6 +57,14 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableFileBinds do
     {:ok, file_bind}
   end
 
+  defp update_file_bind(file_bind, true, tenant) do
+    Containers.mark_file_bind_as_available(file_bind, tenant: tenant)
+  end
+
+  defp update_file_bind(file_bind, false, tenant) do
+    Containers.mark_file_bind_as_unavailable(file_bind, tenant: tenant)
+  end
+
   defp update_file_bind(file_bind, _value, tenant) do
     Containers.mark_file_bind_as_available(file_bind, tenant: tenant)
   end

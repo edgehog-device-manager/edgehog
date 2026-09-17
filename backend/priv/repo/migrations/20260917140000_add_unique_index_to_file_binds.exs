@@ -10,14 +10,14 @@ defmodule Edgehog.Repo.Migrations.AddUniqueIndexToFileBinds do
   def up do
     create unique_index(:container_deployment_file_binds,
              [:container_deployment_id, :file_mount_id],
-             name: "container_deployment_file_binds_unique_mount_per_deployment_index"
+             name: "file_binds_unique_mount_idx"
            )
   end
 
   def down do
     drop_if_exists unique_index(:container_deployment_file_binds,
                      [:container_deployment_id, :file_mount_id],
-                     name: "container_deployment_file_binds_unique_mount_per_deployment_index"
+                     name: "file_binds_unique_mount_idx"
                    )
   end
 end
