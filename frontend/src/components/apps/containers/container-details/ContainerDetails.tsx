@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useMemo, useState } from "react";
-import { Button, Stack } from "react-bootstrap";
+import { Button, Col, Container, Row, Stack } from "react-bootstrap";
 import {
   FormattedMessage,
   MessageDescriptor,
@@ -234,6 +234,26 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.deviceRequestLabel",
     defaultMessage: "Device Requests",
   },
+  fileMountsLabel: {
+    id: "components.apps.containers.container-details.ContainerDetails.fileMountsLabel",
+    defaultMessage: "File Mounts",
+  },
+  noFileMounts: {
+    id: "components.apps.containers.container-details.ContainerDetails.noFileMounts",
+    defaultMessage: "No file mounts configured.",
+  },
+  fileMountMountpointLabel: {
+    id: "components.apps.containers.container-details.ContainerDetails.fileMountMountpointLabel",
+    defaultMessage: "Mountpoint",
+  },
+  fileMountRequiredLabel: {
+    id: "components.apps.containers.container-details.ContainerDetails.fileMountRequiredLabel",
+    defaultMessage: "Required",
+  },
+  fileMountDefaultFileLabel: {
+    id: "components.apps.containers.container-details.ContainerDetails.fileMountDefaultFileLabel",
+    defaultMessage: "Default File",
+  },
   noDeviceRequests: {
     id: "components.apps.containers.container-details.ContainerDetails.noDeviceRequests",
     defaultMessage: "No device requests assigned.",
@@ -344,6 +364,22 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
         }
       }
     }
+    fileMounts {
+      edges {
+        node {
+          id
+          mountpoint
+          required
+          defaultFile {
+            id
+            name
+            repository {
+              name
+            }
+          }
+        }
+      }
+    }
   }
 `;
 
@@ -370,7 +406,8 @@ type SectionKey =
   | "securityCapabilities"
   | "runtimeEnvironment"
   | "deviceMappings"
-  | "deviceRequests";
+  | "deviceRequests"
+  | "fileMounts";
 
 const sectionsList: SectionKey[] = [
   "image",
@@ -381,6 +418,7 @@ const sectionsList: SectionKey[] = [
   "runtimeEnvironment",
   "deviceMappings",
   "deviceRequests",
+  "fileMounts",
 ];
 
 type SectionProps = {
@@ -932,6 +970,95 @@ const DeviceRequestsSection = ({
   </Section>
 );
 
+const FileMountDetails = ({
+  fileMounts,
+}: {
+  fileMounts: ContainerDetailsFragment$data["fileMounts"];
+}) => {
+  const edges = fileMounts?.edges ?? [];
+
+  if (!edges.length) {
+    return (
+      <p className="fst-italic mb-0">
+        <FormattedMessage {...messages.noFileMounts} />
+      </p>
+    );
+  }
+
+  return (
+    <div className="p-2 mb-2 border rounded">
+      <Container fluid>
+        <Row className="mb-2">
+          <Col>
+            <FormattedMessage {...messages.fileMountMountpointLabel} />
+          </Col>
+          <Col>
+            <FormattedMessage {...messages.fileMountDefaultFileLabel} />
+          </Col>
+          <Col xs="auto" style={{ visibility: "hidden" }} aria-hidden="true">
+            <div
+              className="d-flex align-items-center"
+              style={{ minHeight: "38px" }}
+            >
+              <Form.Check
+                type="checkbox"
+                className="text-nowrap"
+                label={
+                  <FormattedMessage {...messages.fileMountRequiredLabel} />
+                }
+              />
+            </div>
+          </Col>
+        </Row>
+
+        {edges.map((edge, index) => {
+          const mount = edge.node;
+          const defaultFileLabel = mount.defaultFile
+            ? mount.defaultFile.repository?.name
+              ? `${mount.defaultFile.repository.name} / ${mount.defaultFile.name}`
+              : mount.defaultFile.name
+            : "";
+
+          return (
+            <Row className="mb-3 align-items-start" key={mount.id}>
+              <Col>
+                <Form.Control readOnly value={mount.mountpoint} />
+              </Col>
+
+              <Col>
+                <Form.Control readOnly value={defaultFileLabel} />
+              </Col>
+
+              <Col xs="auto">
+                <div
+                  className="d-flex align-items-center"
+                  style={{ minHeight: "38px" }}
+                >
+                  <Form.Check
+                    type="checkbox"
+                    className="text-nowrap"
+                    id={`fileMount-required-${index}`}
+                    label={
+                      <FormattedMessage {...messages.fileMountRequiredLabel} />
+                    }
+                    checked={mount.required}
+                  />
+                </div>
+              </Col>
+            </Row>
+          );
+        })}
+      </Container>
+    </div>
+  );
+};
+
+const FileMountsSection = ({ data, open, onToggle }: SectionComponentProps) => (
+  <Section label={messages.fileMountsLabel} open={open} onToggle={onToggle}>
+    <FileMountDetails fileMounts={data.fileMounts} />
+  </Section>
+);
+
 type ContainerDetailsProps = {
   container: ContainerDetailsFragment$key;
 };
@@ -978,6 +1105,12 @@ const ContainerDetails = ({ container }: ContainerDetailsProps) => {
         data={data}
         open={isSectionOpen("runtimeEnvironment")}
         onToggle={() => toggleSection("runtimeEnvironment")}
+      />
+
+      <FileMountsSection
+        data={data}
+        open={isSectionOpen("fileMounts")}
+        onToggle={() => toggleSection("fileMounts")}
       />
 
       <DeviceMappingsSection

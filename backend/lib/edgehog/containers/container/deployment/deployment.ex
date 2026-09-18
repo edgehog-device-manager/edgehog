@@ -28,8 +28,11 @@ defmodule Edgehog.Containers.Container.Deployment do
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Container.Deployment.Calculations
   alias Edgehog.Containers.Container.Deployment.Changes
+  alias Edgehog.Containers.Container.Deployment.Validations
+  alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Validations
+  alias Edgehog.Containers.Types
+  alias Edgehog.Containers.Validations.Dangling
   alias Edgehog.Devices.Device
 
   graphql do
@@ -67,6 +70,16 @@ defmodule Edgehog.Containers.Container.Deployment do
         constraints instance_of: Deployment
         allow_nil? false
       end
+
+      argument :env, {:array, EnvVar}
+
+      argument :env_strategy, :atom do
+        constraints one_of: [:merge, :override]
+      end
+
+      argument :file_binds, {:array, Types.FileBind}
+
+      validate Validations.RequiredMountsHaveBinds
 
       change set_attribute(:state, :created)
       change manage_relationship(:container, type: :append)
@@ -125,7 +138,7 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     destroy :destroy_if_dangling do
       require_atomic? false
-      validate Validations.Dangling
+      validate Dangling
 
       change {Edgehog.Containers.Changes.MaybeDestroyChildren,
               children: [
@@ -147,6 +160,19 @@ defmodule Edgehog.Containers.Container.Deployment do
         one_of: [:created, :sent, :received, :device_created, :stopped, :running, :error]
       ],
       public?: true
+
+    attribute :env, {:array, EnvVar} do
+      default []
+      allow_nil? false
+      public? true
+    end
+
+    attribute :env_strategy, :atom do
+      constraints one_of: [:merge, :override]
+      default :merge
+      allow_nil? false
+      public? true
+    end
 
     timestamps()
   end
@@ -197,6 +223,11 @@ defmodule Edgehog.Containers.Container.Deployment do
       through Edgehog.Containers.ContainerDeploymentDeviceRequestDeployment
       source_attribute_on_join_resource :container_deployment_id
       destination_attribute_on_join_resource :device_request_deployment_id
+      public? true
+    end
+
+    has_many :file_binds, Edgehog.Containers.FileBind do
+      destination_attribute :container_deployment_id
       public? true
     end
   end

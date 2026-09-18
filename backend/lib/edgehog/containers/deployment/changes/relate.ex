@@ -39,19 +39,9 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
     device = Ash.get!(Device, device_id, tenant: tenant)
 
     containers = release.containers
+    configs = Ash.Changeset.get_argument(changeset, :configs) || []
 
-    inputs =
-      Enum.map(
-        containers,
-        &%{
-          container: &1,
-          device: device,
-          deployment: deployment,
-          # Needed for container_instance identity
-          container_id: &1.id,
-          device_id: device.id
-        }
-      )
+    inputs = Enum.map(containers, &container_deployment_input(&1, device, deployment, configs))
 
     Ash.Changeset.manage_relationship(
       changeset,
@@ -62,5 +52,23 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
       on_lookup: {:relate, :create},
       use_identities: [:container_instance]
     )
+  end
+
+  defp container_deployment_input(container, device, deployment, configs) do
+    container_id = container.id
+
+    config = Enum.find(configs, %{}, &match?(^container_id, &1.id))
+
+    %{
+      container: container,
+      device: device,
+      deployment: deployment,
+      # Needed for container_instance identity
+      container_id: container.id,
+      device_id: device.id,
+      env: Map.get(config, :env),
+      env_strategy: Map.get(config, :env_strategy),
+      file_binds: Map.get(config, :file_binds, [])
+    }
   end
 end

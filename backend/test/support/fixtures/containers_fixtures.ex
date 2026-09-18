@@ -255,6 +255,7 @@ defmodule Edgehog.ContainersFixtures do
     {networks, opts} = Keyword.pop(opts, :networks, [])
     {device_mappings, opts} = Keyword.pop(opts, :device_mappings, [])
     {device_requests, opts} = Keyword.pop(opts, :device_requests, [])
+    {file_mounts, opts} = Keyword.pop(opts, :file_mounts, [])
 
     {name, opts} =
       Keyword.pop_lazy(opts, :name, fn ->
@@ -268,13 +269,69 @@ defmodule Edgehog.ContainersFixtures do
         volumes: volumes,
         networks: networks,
         device_mappings: device_mappings,
-        device_requests: device_requests
+        device_requests: device_requests,
+        file_mounts: file_mounts
       })
 
     Container
     |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
     |> Ash.create!()
   end
+
+  @doc """
+  Generate a %Container.FileMount{}.
+  """
+  def file_mount_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {container_id, opts} =
+      Keyword.pop_lazy(opts, :container_id, fn -> container_fixture(tenant: tenant).id end)
+
+    params =
+      Enum.into(opts, %{
+        mountpoint: "/etc/fixture_#{System.unique_integer([:positive])}.conf",
+        required: true,
+        container_id: container_id
+      })
+
+    Edgehog.Containers.Container.FileMount
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  @doc """
+  Generate a %FileBind{}.
+
+  Exactly one between `:file_download_request_id` and `:device_file_id` must be
+  provided (it acts as the file target of the bind).
+  """
+  def file_bind_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {container_deployment_id, opts} =
+      Keyword.pop_lazy(opts, :container_deployment_id, fn ->
+        container_deployment_fixture(tenant: tenant).id
+      end)
+
+    {file_mount_id, opts} = Keyword.pop(opts, :file_mount_id, nil)
+    {file_download_request_id, opts} = Keyword.pop(opts, :file_download_request_id, nil)
+    {device_file_id, opts} = Keyword.pop(opts, :device_file_id, nil)
+
+    params =
+      [container_deployment_id: container_deployment_id]
+      |> maybe_put(:file_mount_id, file_mount_id)
+      |> maybe_put(:file_download_request_id, file_download_request_id)
+      |> maybe_put(:device_file_id, device_file_id)
+      |> Keyword.merge(opts)
+      |> Enum.into(%{})
+
+    Edgehog.Containers.FileBind
+    |> Ash.Changeset.for_create(:create, params, tenant: tenant)
+    |> Ash.create!()
+  end
+
+  defp maybe_put(keyword, _key, nil), do: keyword
+  defp maybe_put(keyword, key, value), do: Keyword.put(keyword, key, value)
 
   @doc """
   Generate an %Application{}.

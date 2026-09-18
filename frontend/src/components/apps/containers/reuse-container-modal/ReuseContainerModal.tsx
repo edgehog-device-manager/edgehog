@@ -121,6 +121,22 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
           }
         }
       }
+      fileMounts {
+        edges {
+          node {
+            mountpoint
+            required
+            defaultFileId
+            defaultFile {
+              id
+              name
+              repository {
+                name
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;
@@ -318,6 +334,42 @@ const ReuseContainerModal = ({
                     }
 
                     return deviceRequests;
+                  }, [])
+                : undefined,
+              fileMounts: c.fileMounts?.edges
+                ? c.fileMounts.edges.reduce<
+                    {
+                      mountpoint: string;
+                      required: boolean;
+                      defaultFileId?:
+                        string | { id: string; value: string; label: string };
+                    }[]
+                  >((fileMounts, edge) => {
+                    const node = edge?.node;
+
+                    if (node) {
+                      const fileId =
+                        node.defaultFileId ?? node.defaultFile?.id ?? undefined;
+
+                      const repoName = node.defaultFile?.repository?.name;
+                      const fileName = node.defaultFile?.name;
+                      const fileLabel =
+                        repoName && fileName
+                          ? `${repoName} / ${fileName}`
+                          : (fileName ?? undefined);
+
+                      fileMounts.push({
+                        mountpoint: node.mountpoint,
+                        required: node.required,
+                        defaultFileId: fileId
+                          ? fileLabel
+                            ? { id: fileId, value: fileId, label: fileLabel }
+                            : fileId
+                          : undefined,
+                      });
+                    }
+
+                    return fileMounts;
                   }, [])
                 : undefined,
             };

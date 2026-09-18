@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
 
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.FilesFixtures
 
   setup %{tenant: tenant} do
     app = application_fixture(tenant: tenant)
@@ -150,6 +151,114 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
 
     assert device_mapping_deployment["state"] == "created"
     refute device_mapping_deployment["isReady"]
+  end
+
+  test "can access file binds and their relationships through container deployments", %{
+    tenant: tenant,
+    deployment: deployment
+  } do
+    [container_deployment] =
+      deployment
+      |> Ash.load!(:container_deployments, tenant: tenant)
+      |> Map.fetch!(:container_deployments)
+
+    file_mount =
+      file_mount_fixture(
+        tenant: tenant,
+        container_id: container_deployment.container_id,
+        mountpoint: "/etc/app.conf"
+      )
+
+    file_download_request = manual_file_download_request_fixture(tenant: tenant)
+
+    file_bind_fixture(
+      tenant: tenant,
+      container_deployment_id: container_deployment.id,
+      file_mount_id: file_mount.id,
+      file_download_request_id: file_download_request.id
+    )
+
+    device_file = device_file_fixture(tenant: tenant)
+
+    file_bind_fixture(
+      tenant: tenant,
+      container_deployment_id: container_deployment.id,
+      device_file_id: device_file.id
+    )
+
+    document = """
+    query($id:ID!) {
+      deployment(id:$id) {
+        containerDeployments {
+          edges {
+            node {
+              fileBinds {
+                fileMount {
+                  id
+                  mountpoint
+                }
+                fileDownloadRequest {
+                  id
+                  status
+                }
+                deviceFile {
+                  id
+                  pathOnDevice
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    """
+
+    id = AshGraphql.Resource.encode_relay_id(deployment)
+
+    deployment_result =
+      [tenant: tenant, id: id, document: document]
+      |> get_deployment()
+      |> extract_result!()
+
+    assert [%{"node" => %{"fileBinds" => file_binds}}] =
+             deployment_result["containerDeployments"]["edges"]
+
+    file_binds_by_id = Map.new(file_binds, &{&1["fileDownloadRequest"]["id"], &1})
+
+    assert file_bind =
+             file_binds_by_id[
+               AshGraphql.Resource.encode_relay_id(file_download_request)
+             ]
+
+    assert %{"fileMount" => %{"id" => file_mount_id, "mountpoint" => "/etc/app.conf"}} =
+             file_bind
+
+    assert file_mount_id == AshGraphql.Resource.encode_relay_id(file_mount)
+
+    assert %{
+             "fileDownloadRequest" => %{
+               "id" => file_download_request_id,
+               "status" => status
+             }
+           } = file_bind
+
+    assert file_download_request_id ==
+             AshGraphql.Resource.encode_relay_id(file_download_request)
+
+    refute is_nil(status)
+
+    assert [file_bind] =
+             Enum.filter(file_binds, &(&1["deviceFile"]["id"] != nil))
+
+    assert %{
+             "deviceFile" => %{
+               "id" => device_file_id,
+               "pathOnDevice" => path_on_device
+             }
+           } = file_bind
+
+    assert device_file_id == AshGraphql.Resource.encode_relay_id(device_file)
+    assert path_on_device == device_file.path_on_device
   end
 
   defp get_deployment(opts) do
