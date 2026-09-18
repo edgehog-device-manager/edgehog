@@ -27,6 +27,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL
+  alias Edgehog.Astarte.Device.FileDownloadRequest, as: AstarteFileDownloadRequest
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
@@ -34,6 +36,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy.Executor
   alias Edgehog.Containers
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Files.FileDownloadRequest
 
   setup do
     stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
@@ -81,6 +84,99 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
       %{pid: pid, ref: ref} = start_and_monitor_executor!(campaign)
 
       assert_normal_exit(pid, ref)
+    end
+  end
+
+  describe "Executor deploys with file binds" do
+    setup %{tenant: tenant} do
+      stub(FileTransferCapabilities, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           unix_permissions: false,
+           server_to_device: %{storage: ["tar.gz"], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
+         }}
+      end)
+
+      stub(AstarteFileDownloadRequest, :request_download, fn _client, _device_id, _request_data ->
+        :ok
+      end)
+
+      file_binds_fixture = deployment_deploy_file_bind_config_fixture(tenant: tenant)
+
+      campaign =
+        campaign_with_targets_fixture(1,
+          release_id: file_binds_fixture.release.id,
+          campaign_mechanism: [
+            configs: [file_binds_fixture.config],
+            max_in_progress_operations: 1
+          ],
+          tenant: tenant
+        )
+
+      %{campaign: campaign, file_binds_fixture: file_binds_fixture}
+    end
+
+    test "creates a FileDownloadRequest per target and resolves the binds on the deployment",
+         ctx do
+      %{campaign: campaign, file_binds_fixture: file_binds_fixture} = ctx
+      tenant = ctx.tenant
+
+      parent = self()
+      ref = make_ref()
+
+      expect(
+        Deployment.Orchestrator,
+        :conduct,
+        1,
+        fn _deployment, _tenant ->
+          send_sync(parent, ref)
+          :ok
+        end
+      )
+
+      %{pid: pid, ref: monitor_ref} = start_and_monitor_executor!(campaign)
+
+      wait_for_sync!(ref)
+
+      # Wait for the Executor to arrive at :wait_for_campaign_completion
+      wait_for_state(pid, :wait_for_campaign_completion)
+
+      tenant
+      |> mark_all_pending_deployments_with_state(campaign.id, :stopped)
+      |> Enum.each(&broadcast_readiness/1)
+
+      assert_normal_exit(pid, monitor_ref)
+      assert_campaign_outcome(tenant, campaign.id, :success)
+
+      campaign =
+        Ash.load!(
+          campaign,
+          [
+            campaign_targets: [
+              device: [],
+              deployment: [container_deployments: [:file_binds]]
+            ]
+          ],
+          tenant: tenant.tenant_id
+        )
+
+      [target] = campaign.campaign_targets
+      [container_deployment] = target.deployment.container_deployments
+      [file_bind] = container_deployment.file_binds
+
+      assert file_bind.file_mount_id == file_binds_fixture.file_mount.id
+      refute is_nil(file_bind.file_download_request_id)
+
+      request =
+        Ash.get!(
+          FileDownloadRequest,
+          file_bind.file_download_request_id,
+          tenant: tenant.tenant_id
+        )
+
+      assert request.device_id == target.device.id
+      assert request.file_name == file_binds_fixture.file.name
     end
   end
 
@@ -802,6 +898,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatus,
+    Edgehog.Astarte.Device.FileDownloadRequest,
+    Edgehog.Astarte.Device.FileTransferCapabilities,
     Deployment.Orchestrator
   ]
 

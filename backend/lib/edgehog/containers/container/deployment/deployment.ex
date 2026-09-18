@@ -73,9 +73,7 @@ defmodule Edgehog.Containers.Container.Deployment do
 
       argument :env, {:array, EnvVar}
 
-      argument :env_strategy, :atom do
-        constraints one_of: [:merge, :override]
-      end
+      argument :env_strategy, Types.EnvStrategy
 
       argument :file_binds, {:array, Types.FileBind}
 
@@ -167,8 +165,7 @@ defmodule Edgehog.Containers.Container.Deployment do
       public? true
     end
 
-    attribute :env_strategy, :atom do
-      constraints one_of: [:merge, :override]
+    attribute :env_strategy, Types.EnvStrategy do
       default :merge
       allow_nil? false
       public? true

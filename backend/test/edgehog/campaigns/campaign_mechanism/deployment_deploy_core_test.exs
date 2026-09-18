@@ -28,12 +28,15 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
   alias Ash.Error.Invalid
   alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Device.FileDownloadRequest, as: AstarteFileDownloadRequest
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Files.FileDownloadRequest
   alias Phoenix.Socket.Broadcast
 
   setup do
@@ -182,6 +185,149 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
 
       # Now retry the operation
       assert :ok = MechanismCore.retry_operation(mechanism, target)
+    end
+  end
+
+  describe "do_operation/2 with file binds" do
+    setup %{tenant: tenant} do
+      stub(FileTransferCapabilities, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           unix_permissions: false,
+           server_to_device: %{storage: ["tar.gz"], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
+         }}
+      end)
+
+      stub(AstarteFileDownloadRequest, :request_download, fn _client, _device_id, _request_data ->
+        :ok
+      end)
+
+      file_binds_fixture = deployment_deploy_file_bind_config_fixture(tenant: tenant)
+
+      target =
+        target_fixture(
+          tenant: tenant,
+          release_id: file_binds_fixture.release.id,
+          campaign_mechanism: [configs: [file_binds_fixture.config]]
+        )
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.fetch!(:campaign)
+        |> Ash.load!(
+          [campaign_mechanism: [deployment_deploy: [:release]]],
+          tenant: tenant.tenant_id
+        )
+
+      %{target: target, campaign: campaign, file_binds_fixture: file_binds_fixture}
+    end
+
+    test "creates a FileDownloadRequest for each managed file bind before deploying", ctx do
+      %{target: target, campaign: campaign, file_binds_fixture: file_binds_fixture} = ctx
+      tenant = ctx.tenant
+
+      mechanism = campaign.campaign_mechanism.value
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, _updated_target} = MechanismCore.do_operation(mechanism, target)
+
+      requests = Ash.read!(FileDownloadRequest, tenant: tenant.tenant_id)
+
+      assert [request] = Enum.filter(requests, &(&1.device_id == target.device_id))
+      assert request.file_name == file_binds_fixture.file.name
+    end
+
+    test "the created deployment has file binds referencing the download requests", ctx do
+      %{target: target, campaign: campaign, file_binds_fixture: file_binds_fixture} = ctx
+      tenant = ctx.tenant
+
+      mechanism = campaign.campaign_mechanism.value
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
+
+      requests = Ash.read!(FileDownloadRequest, tenant: tenant.tenant_id)
+      [request] = Enum.filter(requests, &(&1.device_id == target.device_id))
+
+      deployment = Ash.load!(updated_target, :deployment, tenant: tenant.tenant_id).deployment
+      deployment = Ash.load!(deployment, :container_deployments, tenant: tenant.tenant_id)
+
+      [container_deployment] = deployment.container_deployments
+
+      file_binds =
+        Ash.load!(container_deployment, :file_binds, tenant: tenant.tenant_id).file_binds
+
+      assert [file_bind] = file_binds
+      assert file_bind.file_mount_id == file_binds_fixture.file_mount.id
+      assert file_bind.file_download_request_id == request.id
+    end
+
+    test "campaigns with an empty configs list continue to work unchanged", %{tenant: tenant} do
+      target = target_fixture(tenant: tenant, mechanism_type: :deployment_deploy)
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.fetch!(:campaign)
+        |> Ash.load!(
+          [campaign_mechanism: [deployment_deploy: [:release]]],
+          tenant: tenant.tenant_id
+        )
+
+      mechanism = campaign.campaign_mechanism.value
+
+      assert mechanism.configs == []
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, _updated_target} = MechanismCore.do_operation(mechanism, target)
+
+      assert Ash.read!(FileDownloadRequest, tenant: tenant.tenant_id) == []
+    end
+  end
+
+  describe "RequiredMountsHaveBinds validation in the campaign path" do
+    test "fails when a required file mount has no matching file bind in the mechanism configs", %{
+      tenant: tenant
+    } do
+      file_binds_fixture = deployment_deploy_file_bind_config_fixture(tenant: tenant)
+
+      config_without_binds = %{
+        file_binds_fixture.config
+        | file_binds: []
+      }
+
+      target =
+        target_fixture(
+          tenant: tenant,
+          release_id: file_binds_fixture.release.id,
+          campaign_mechanism: [configs: [config_without_binds]]
+        )
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.fetch!(:campaign)
+        |> Ash.load!(
+          [campaign_mechanism: [deployment_deploy: [:release]]],
+          tenant: tenant.tenant_id
+        )
+
+      mechanism = campaign.campaign_mechanism.value
+
+      assert_raise Invalid, fn ->
+        MechanismCore.do_operation(mechanism, target)
+      end
     end
   end
 
@@ -356,7 +502,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
         tenant: tenant
       } = ctx
 
-      {:ok, target} = Campaigns.link_deployment(target, release, tenant: tenant.tenant_id)
+      {:ok, target} = Campaigns.link_deployment(target, release, [], tenant: tenant.tenant_id)
       target_id = target.id
 
       assert %CampaignTarget{id: ^target_id} =
