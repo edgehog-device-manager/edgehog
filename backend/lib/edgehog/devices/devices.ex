@@ -117,6 +117,10 @@ defmodule Edgehog.Devices do
         action: :send_create_device_request_request,
         args: [:device_request, :deployment]
 
+      define :send_create_file_bind_request,
+        action: :send_create_file_bind_request,
+        args: [:file_bind, :deployment]
+
       define :send_create_deployment_request,
         action: :send_create_deployment_request,
         args: [:deployment]

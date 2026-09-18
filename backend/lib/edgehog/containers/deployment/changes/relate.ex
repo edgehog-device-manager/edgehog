@@ -55,9 +55,12 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
   end
 
   defp container_deployment_input(container, device, deployment, configs) do
-    container_id = container.id
+    container_id = to_string(container.id)
 
-    config = Enum.find(configs, %{}, &match?(^container_id, &1.id))
+    config =
+      Enum.find(configs, %{}, fn entry ->
+        to_string(config_value(entry, :container_id)) == container_id
+      end)
 
     %{
       container: container,
@@ -66,9 +69,15 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
       # Needed for container_instance identity
       container_id: container.id,
       device_id: device.id,
-      env: Map.get(config, :env),
-      env_strategy: Map.get(config, :env_strategy),
-      file_binds: Map.get(config, :file_binds, [])
+      env: config_value(config, :env),
+      env_strategy: config_value(config, :env_strategy),
+      file_binds: config_value(config, :file_binds) || []
     }
   end
+
+  defp config_value(config, key) when is_map(config) and is_atom(key) do
+    Map.get(config, key, Map.get(config, Atom.to_string(key)))
+  end
+
+  defp config_value(_config, _key), do: nil
 end

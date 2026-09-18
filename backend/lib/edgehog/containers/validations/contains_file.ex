@@ -22,11 +22,9 @@ defmodule Edgehog.Containers.Validations.ContainsFile do
   @moduledoc """
   Edgehog validation on FileBind input types.
 
-  Checks that a file bind (or a list of file binds) actually contains a valid
-  file reference. Either:
-  - a file url
-  - a file download request id
-  - a device file id
+  Checks that a file bind (or a list of file binds) does not reference both
+  a file download request and a device file at the same time. A file bind
+  without any target is valid and represents a pending upload.
   """
 
   use Ash.Resource.Validation
@@ -58,14 +56,15 @@ defmodule Edgehog.Containers.Validations.ContainsFile do
   end
 
   defp check(bind, _opts) do
-    device_file_id = Map.fetch(bind, :device_file_id)
-    file_download_request_id = Map.fetch(bind, :file_download_request_id)
-    file_url = Map.fetch(bind, :file_url)
+    device_file_id = Map.get(bind, :device_file_id)
+    file_download_request_id = Map.get(bind, :file_download_request_id)
 
-    with {:error, :error, :error} <- {device_file_id, file_download_request_id, file_url} do
+    if device_file_id not in [nil, ""] and file_download_request_id not in [nil, ""] do
       {:error,
        message:
-         "File binds require at least one between a device file id, a file download request id or a file url to be defined."}
+         "File binds cannot reference both a device file id and a file download request id."}
+    else
+      :ok
     end
   end
 end

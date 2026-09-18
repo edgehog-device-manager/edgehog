@@ -39,7 +39,7 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
                :networks,
                :device_mappings,
                :device_requests,
-               file_mounts: [:default_file]
+               :file_mounts
              ],
              tenant: tenant
            ) do
@@ -103,7 +103,10 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
       {env, env_strategy} = resolve_env(changeset, container)
 
-      file_binds_input = Ash.Changeset.get_argument(changeset, :file_binds)
+      file_binds_input =
+        changeset
+        |> Ash.Changeset.get_argument(:file_binds)
+        |> relate_file_binds(device, container, tenant)
 
       changeset
       |> Ash.Changeset.change_attribute(:env, env)
@@ -143,6 +146,32 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         on_lookup: :ignore
       )
     end
+  end
+
+  defp relate_file_binds(file_binds, device, container, _tenant) do
+    file_binds = file_binds || []
+    explicit = Enum.map(file_binds, &Map.put(&1, :device_id, device.id))
+
+    explicit_ids =
+      explicit
+      |> Enum.map(& &1.file_mount_id)
+      |> Enum.reject(&is_nil/1)
+      |> MapSet.new()
+
+    default_binds =
+      container.file_mounts
+      |> Enum.filter(&(not MapSet.member?(explicit_ids, &1.id) and &1.default_file_id))
+      |> Enum.map(&default_file_bind(&1, device))
+      |> Enum.reject(&is_nil/1)
+
+    explicit ++ default_binds
+  end
+
+  defp default_file_bind(file_mount, device) do
+    %{
+      file_mount_id: file_mount.id,
+      device_id: device.id
+    }
   end
 
   defp resolve_env(changeset, container) do

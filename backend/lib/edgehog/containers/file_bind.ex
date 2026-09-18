@@ -25,16 +25,19 @@ defmodule Edgehog.Containers.FileBind do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.FileBind.Calculations
+  alias Edgehog.Containers.FileBind.Changes
+
   graphql do
     type :file_bind
   end
 
   actions do
-    defaults [:read, :destroy]
+    defaults [:read]
 
     create :create do
       primary? true
-      accept [:container_deployment_id, :file_mount_id]
+      accept [:container_deployment_id, :device_id, :file_mount_id, :file_name]
 
       argument :file_download_request_id, :uuid
       argument :device_file_id, :uuid
@@ -47,12 +50,131 @@ defmodule Edgehog.Containers.FileBind do
     end
 
     create :create_fixture do
-      accept [:container_deployment_id, :file_download_request_id, :device_file_id]
+      accept [
+        :container_deployment_id,
+        :file_download_request_id,
+        :device_file_id,
+        :file_name,
+        :uncompressed_file_size_bytes,
+        :digest,
+        :encoding,
+        :uploaded,
+        :state
+      ]
+    end
+
+    update :mark_as_uploaded do
+      description """
+      Marks the file uploaded through the presigned upload URL as uploaded,
+      storing the client-supplied metadata.
+      """
+
+      require_atomic? false
+
+      accept [:file_name, :uncompressed_file_size_bytes, :digest, :encoding]
+
+      validate present(:file_name)
+      validate present(:digest)
+
+      change set_attribute(:uploaded, true)
+    end
+
+    update :link_file_download_request do
+      description """
+      Links a file bind to the file download request created for its uploaded file.
+      """
+
+      require_atomic? false
+
+      accept [:file_download_request_id]
+    end
+
+    destroy :destroy do
+      require_atomic? false
+      change Changes.HandleFileBindDeletion
+    end
+
+    destroy :destroy_fixture do
+      require_atomic? false
+    end
+
+    update :mark_as_sent do
+      require_atomic? false
+      change set_attribute(:state, :sent)
+    end
+
+    update :mark_as_available do
+      require_atomic? false
+      change set_attribute(:state, :available)
+    end
+
+    update :mark_as_unavailable do
+      require_atomic? false
+      change set_attribute(:state, :unavailable)
+    end
+
+    update :mark_as_errored do
+      require_atomic? false
+
+      argument :message, :string do
+        allow_nil? false
+      end
+
+      change set_attribute(:last_message, arg(:message))
+      change set_attribute(:state, :error)
+    end
+
+    update :set_state do
+      require_atomic? false
+      accept [:state]
     end
   end
 
   attributes do
     uuid_v7_primary_key :id
+
+    attribute :file_name, :string do
+      description "The name of the file uploaded for a target-less file bind."
+      public? true
+    end
+
+    attribute :uncompressed_file_size_bytes, :integer do
+      description "The size of the uploaded file, in bytes, before compression."
+      public? true
+    end
+
+    attribute :digest, :string do
+      description "The digest of the uploaded file, used for integrity verification."
+      public? true
+    end
+
+    attribute :encoding, :string do
+      description "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+      public? true
+
+      default ""
+    end
+
+    attribute :uploaded, :boolean do
+      description "Whether the file for a target-less file bind has been uploaded."
+      public? true
+
+      allow_nil? false
+      default false
+    end
+
+    attribute :state, :atom do
+      description "The provisioning state of the file bind on the device."
+      public? true
+
+      constraints one_of: [:created, :sent, :available, :unavailable, :error]
+      allow_nil? false
+      default :created
+    end
+
+    attribute :last_message, :string do
+      public? true
+    end
 
     timestamps()
   end
@@ -60,6 +182,10 @@ defmodule Edgehog.Containers.FileBind do
   relationships do
     belongs_to :container_deployment, Edgehog.Containers.Container.Deployment do
       attribute_type :uuid
+      allow_nil? false
+    end
+
+    belongs_to :device, Edgehog.Devices.Device do
       allow_nil? false
     end
 
@@ -79,9 +205,32 @@ defmodule Edgehog.Containers.FileBind do
     end
   end
 
+  calculations do
+    calculate :upload_url, :string, Calculations.GetUploadUrl do
+      description "Presigned URL the client can use to upload the file for a target-less file bind."
+      public? true
+    end
+
+    calculate :is_ready, :boolean, expr(state in [:available, :unavailable]) do
+      public? true
+    end
+  end
+
+  identities do
+    identity :unique_file_mount_per_deployment, [:container_deployment_id, :file_mount_id] do
+      pre_check_with Edgehog.Repo
+    end
+  end
+
   pub_sub do
     prefix "file_binds"
     module EdgehogWeb.Endpoint
+
+    publish :mark_as_sent, [[:id, "*"]]
+    publish :mark_as_available, [[:id, "*"]]
+    publish :mark_as_unavailable, [[:id, "*"]]
+    publish :mark_as_errored, [[:id, "*"]]
+    publish :set_state, [[:id, "*"]]
   end
 
   postgres do
@@ -90,6 +239,9 @@ defmodule Edgehog.Containers.FileBind do
 
     references do
       reference :container_deployment, on_delete: :delete
+      reference :device, on_delete: :delete
     end
+
+    identity_index_names unique_file_mount_per_deployment: "file_binds_unique_mount_idx"
   end
 end

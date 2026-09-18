@@ -34,7 +34,7 @@ defmodule Edgehog.Containers.Deployment.StarterTest do
     tenant = tenant_fixture()
     device = device_fixture(tenant: tenant)
 
-    {:ok, starter} = Starter.cook(device, tenant, mode: :manual)
+    {:ok, starter} = Starter.cook(device, mode: :manual)
     ref = Process.monitor(starter)
 
     %{tenant: tenant, device: device, starter: starter, starter_ref: ref}
@@ -54,10 +54,10 @@ defmodule Edgehog.Containers.Deployment.StarterTest do
 
       Core
       |> allow(self(), starter)
-      |> expect(:load, fn ^device, ^tenant ->
-        {:ok, deployments}
+      |> expect(:load, fn ^device ->
+        deployments
       end)
-      |> expect(:start, fn ^deployments, ^tenant ->
+      |> expect(:start, fn ^deployments ->
         []
       end)
 
@@ -81,10 +81,10 @@ defmodule Edgehog.Containers.Deployment.StarterTest do
 
       Core
       |> allow(self(), starter)
-      |> expect(:load, fn ^device, ^tenant ->
-        {:ok, deployments}
+      |> expect(:load, fn ^device ->
+        deployments
       end)
-      |> expect(:start, fn ^deployments, ^tenant ->
+      |> expect(:start, fn ^deployments ->
         errors
       end)
 

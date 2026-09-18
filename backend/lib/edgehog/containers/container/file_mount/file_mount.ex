@@ -34,7 +34,11 @@ defmodule Edgehog.Containers.Container.FileMount do
   end
 
   validations do
-    validate match(:mountpoint, ~r{^/})
+    validate match(:mountpoint, ~r{^\/(?!.*\/\/)[^\0]*$}) do
+      message "must be an absolute path without consecutive slashes"
+    end
+
+    validate present(:mountpoint)
   end
 
   attributes do
@@ -71,6 +75,10 @@ defmodule Edgehog.Containers.Container.FileMount do
 
   identities do
     identity :container_mountpoint, [:container_id, :mountpoint]
+  end
+
+  changes do
+    change Edgehog.Containers.Container.FileMount.Changes.NormalizeMountpoint
   end
 
   pub_sub do

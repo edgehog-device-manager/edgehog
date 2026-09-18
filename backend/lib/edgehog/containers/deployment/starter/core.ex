@@ -35,15 +35,14 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   @doc """
   Loads pending deployments into the state.
 
-  given a device and a tenant scope returns the list of deployments `:pending`
-  for that device and tenant.
+  given a device returns the list of deployments `:pending`
+  for that device.
 
   Example:
   ```elixir
   > device = %Device{device_id: "some-device-id"}
-  > tenant = %Tenant{}
 
-  > Core.load(device, tenant)
+  > Core.load(device)
   [
     %Deployment{},
     %Deployment{},
@@ -51,13 +50,14 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   ]
   ```
   """
-  def load(device, tenant) do
-    device_id = device.id
+  def load(device) do
+    query =
+      Deployment
+      |> Ash.Query.filter(state == :pending)
+      |> Ash.Query.load(:tenant)
 
-    Deployment
-    |> Ash.Query.filter(state: :pending)
-    |> Ash.Query.filter(device_id: device_id)
-    |> Ash.read(tenant: tenant)
+    with {:ok, device} <- Ash.load(device, application_deployments: query),
+         do: device.application_deployments
   end
 
   @doc """
@@ -66,12 +66,13 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   returns the list of errors generated while starting each deployment in the shape
   `{:error, error, deployment}`.
   """
-  def start(deployments, tenant) do
-    Enum.reduce(deployments, [], &start_deployment(&1, tenant, &2))
+  def start(deployments) do
+    Enum.reduce(deployments, [], &start_deployment/2)
   end
 
-  defp start_deployment(deployment, tenant, errors) do
-    case Deployment.Orchestrator.conduct(deployment, tenant) do
+  defp start_deployment(deployment, errors) do
+    # tenant previously loaded in load/1
+    case Deployment.Orchestrator.conduct(deployment, deployment.tenant) do
       {:ok, _pid} -> errors
       {:error, error} -> [{:error, error, deployment} | errors]
     end

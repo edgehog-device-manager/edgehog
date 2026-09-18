@@ -26,8 +26,17 @@ defmodule Edgehog.Containers.FileBind.Validations.HasTarget do
 
   @impl Validation
   def validate(changeset, _opts, _context) do
-    file_request_id = Ash.Changeset.fetch_argument(changeset, :file_download_request_id)
-    device_file_id = Ash.Changeset.fetch_argument(changeset, :device_file_id)
+    file_request_id =
+      case Ash.Changeset.fetch_argument(changeset, :file_download_request_id) do
+        {:ok, nil} -> :error
+        other -> other
+      end
+
+    device_file_id =
+      case Ash.Changeset.fetch_argument(changeset, :device_file_id) do
+        {:ok, nil} -> :error
+        other -> other
+      end
 
     case {file_request_id, device_file_id} do
       {{:ok, _}, {:ok, _}} ->
@@ -35,10 +44,11 @@ defmodule Edgehog.Containers.FileBind.Validations.HasTarget do
          message:
            "Ambiguous file bind setting. either use a file download request id or a device file id."}
 
+      # No target: valid pending-upload state. The file is uploaded through
+      # the presigned upload URL and marked as uploaded, and the file
+      # download request is created at deployment time.
       {:error, :error} ->
-        {:error,
-         message:
-           "The file bind needs a file target. either set a file download request id or a device file id."}
+        :ok
 
       _ ->
         :ok

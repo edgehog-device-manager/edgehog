@@ -25,6 +25,7 @@ defmodule Edgehog.Astarte.Device.CreateBind.RequestData do
     :id,
     :targetId,
     :targetType,
+    :deploymentId,
     :mountpoint,
     :options
   ]
@@ -33,6 +34,7 @@ defmodule Edgehog.Astarte.Device.CreateBind.RequestData do
           id: String.t(),
           targetId: String.t(),
           targetType: String.t(),
+          deploymentId: String.t(),
           mountpoint: String.t(),
           options: String.t()
         }

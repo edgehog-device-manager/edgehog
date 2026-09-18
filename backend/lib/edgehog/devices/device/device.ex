@@ -413,6 +413,24 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SendCreateDeviceRequest
     end
 
+    update :send_create_file_bind_request do
+      description "Send a create file bind request to the device."
+
+      argument :file_bind, :struct do
+        constraints instance_of: Edgehog.Containers.FileBind
+        description "The new file bind for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this file bind is used."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateFileBind
+    end
+
     update :send_release_command do
       description "Sends a command for the given application release."
 
@@ -633,6 +651,11 @@ defmodule Edgehog.Devices.Device do
     calculate :available_device_requests, {:array, Types.DeviceRequestStatus} do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_requests}
+    end
+
+    calculate :available_file_binds, {:array, Types.FileBindStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_file_binds}
     end
 
     calculate :battery_status, {:array, BatterySlot} do
