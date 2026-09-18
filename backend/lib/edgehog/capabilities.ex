@@ -25,6 +25,116 @@ defmodule Edgehog.Capabilities do
 
   alias Edgehog.Astarte
 
+  @container_management_v0_interfaces [
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableContainers",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableDeployments",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableImages",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableNetworks",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableVolumes",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateContainerRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateDeploymentRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateImageRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateNetworkRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateVolumeRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.CreateDeviceRequest",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.DeploymentCommand",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.DeploymentEvent",
+      major: 0,
+      minor: 1
+    },
+    %Astarte.InterfaceID{
+      name: "io.edgehog.devicemanager.apps.DeploymentUpdate",
+      major: 0,
+      minor: 1
+    }
+  ]
+
+  @container_management_v1_interfaces @container_management_v0_interfaces
+                                      |> Enum.reject(
+                                        &(&1.name in [
+                                            "io.edgehog.devicemanager.apps.CreateContainerRequest",
+                                            "io.edgehog.devicemanager.apps.CreateDeviceRequest"
+                                          ])
+                                      )
+                                      |> Enum.concat([
+                                        %Astarte.InterfaceID{
+                                          name:
+                                            "io.edgehog.devicemanager.apps.CreateContainerRequest",
+                                          major: 1,
+                                          minor: 0
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name:
+                                            "io.edgehog.devicemanager.apps.CreateDeviceRequest",
+                                          major: 1,
+                                          minor: 0
+                                        }
+                                      ])
+
   # This is a keyword list that maps a capability, represented as an atom, to the set of all
   # interfaces that the device must support to claim to support the capability.
   # This needs to be a keyword list because a capability key can appear multiple times, because we
@@ -66,93 +176,8 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
-    container_management: [
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableContainers",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableDeployments",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableImages",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableNetworks",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableVolumes",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateContainerRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateDeploymentRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateImageRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateNetworkRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateVolumeRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.CreateDeviceRequest",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.DeploymentCommand",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.DeploymentEvent",
-        major: 0,
-        minor: 1
-      },
-      %Astarte.InterfaceID{
-        name: "io.edgehog.devicemanager.apps.DeploymentUpdate",
-        major: 0,
-        minor: 1
-      }
-    ],
+    container_management: @container_management_v0_interfaces,
+    container_management: @container_management_v1_interfaces,
     file_transfer_stream: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.fileTransfer.ServerToDevice",
