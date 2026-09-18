@@ -81,5 +81,3 @@ jobs:
       release-made: false
       release-version: snapshot
       publish: false
-    secrets:
-      publish-key: ${{ secrets.DOCS_DEPLOY_KEY }}
