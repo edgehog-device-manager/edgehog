@@ -35,6 +35,8 @@ on:
     secrets:
       token:
         required: false
+      EDGEHOG_APP_PRIVATE_KEY:
+        required: false
 
 defaults:
   run:
@@ -76,6 +78,15 @@ jobs:
           path: edgehog-astarte-interfaces
           show-progress: false
           fetch-depth: 1
+      - name: Generate App token for docs push
+        id: app-token
+        if: ${{ inputs.publish }}
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
+        with:
+          app-id: ${{ vars.EDGEHOG_APP_APP_ID }}
+          private-key: ${{ secrets.EDGEHOG_APP_PRIVATE_KEY }}
+          owner: edgehog-device-manager
+          repositories: docs
       - name: Compute docs version
         id: compute-version
         run: |
@@ -91,13 +102,17 @@ jobs:
         if: ${{ inputs.publish }}
         working-directory: docs
         run: |
-          git config --local user.email "edgehog-machine@ispirata.com"
-          git config --local user.name "Edgehog Bot"
+          git config --local user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
+          git config --local user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
           git add .
           git commit -m "Update Documentation"
       - name: Push changes
         if: ${{ inputs.publish }}
         working-directory: docs
         run: |
-          git remote set-url origin https://x-access-token:${{ secrets.token }}@github.com/edgehog-device-manager/docs.git
+          # Clear checkout extraheader/includeIf and staple global url rewrites that would shadow the App token
+          git config --local --get-regexp 'includeIf' | cut -d' ' -f1 | while read -r key; do git config --local --unset "$key" || true; done
+          git config --local --unset http.https://github.com/.extraheader || true
+          git config --global --get-regexp 'url\.' | cut -d' ' -f1 | while read -r key; do git config --global --unset "$key" || true; done
+          git remote set-url origin https://x-access-token:${{ steps.app-token.outputs.token }}@github.com/edgehog-device-manager/docs.git
           git push origin main
