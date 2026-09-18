@@ -34,7 +34,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
          {:ok, container_deployment} <-
            Ash.Changeset.fetch_argument(changeset, :container_deployment),
          {:ok, container_deployment} <-
-           Ash.load(container_deployment, [:container, :file_binds]),
+           Ash.load(container_deployment, [:container, :file_binds, :env_files]),
          {:ok, container} <- Map.fetch(container_deployment, :container),
          {:ok, container} <-
            Ash.load(container, [
@@ -70,6 +70,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         capDrop: container.cap_drop,
         deviceMappingIds: Enum.map(container.device_mappings, & &1.id),
         fileBindIds: Enum.map(container_deployment.file_binds, & &1.id),
+        envFileIds: Enum.map(container_deployment.env_files, & &1.id),
         cpuPeriod: normalize(container.cpu_period),
         cpuQuota: normalize(container.cpu_quota),
         cpuRealtimePeriod: normalize(container.cpu_realtime_period),

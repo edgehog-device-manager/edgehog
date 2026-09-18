@@ -26,6 +26,8 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
   alias Edgehog.Containers.Container.Deployment.Provisioner, as: ContainerProvisioner
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
+  alias Edgehog.Containers.EnvFile
+  alias Edgehog.Containers.EnvFile.Provisioner, as: EnvFileProvisioner
   alias Edgehog.Containers.FileBind
   alias Edgehog.Containers.FileBind.Provisioner, as: FileBindProvisioner
   alias Edgehog.Containers.Image
@@ -51,7 +53,8 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
       :volume_deployments,
       :device_mapping_deployments,
       :device_request_deployments,
-      :file_binds
+      :file_binds,
+      :env_files
     ]
 
     with {:ok, container_deployment} <- Ash.load(container_deployment, to_load, tenant: tenant) do
@@ -64,6 +67,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
       device_mapping_deployments = Map.get(container_deployment, :device_mapping_deployments, [])
       device_request_deployments = Map.get(container_deployment, :device_request_deployments, [])
       file_binds = Map.get(container_deployment, :file_binds, [])
+      env_files = Map.get(container_deployment, :env_files, [])
 
       {:ok,
        state
@@ -73,7 +77,8 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
        |> Map.put(:volume_deployments, volume_deployments)
        |> Map.put(:device_mapping_deployments, device_mapping_deployments)
        |> Map.put(:device_request_deployments, device_request_deployments)
-       |> Map.put(:file_binds, file_binds)}
+       |> Map.put(:file_binds, file_binds)
+       |> Map.put(:env_files, env_files)}
     end
   end
 
@@ -106,13 +111,19 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
       |> Map.fetch!(:file_binds_to_provision)
       |> Enum.empty?()
 
+    env_files_ready =
+      state
+      |> Map.fetch!(:env_files_to_provision)
+      |> Enum.empty?()
+
     image_ready and
       container_ready and
       volumes_ready and
       networks_ready and
       device_mappings_ready and
       device_requests_ready and
-      file_binds_ready
+      file_binds_ready and
+      env_files_ready
   end
 
   @doc """
@@ -236,6 +247,25 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     Map.update!(state, :file_binds_to_provision, remove_matching_file_bind)
   end
 
+  @doc """
+  Removes an env file from the list of env files that need to be provisioned.
+
+  The list of env files to be provisioned is expected to be a list of env
+  files in the key `:env_files_to_provision` into the state.
+
+  Example:
+  if id matches env2
+
+  (id, %{env_files_to_provision: [env1, env2, env3, ...]}) -> %{env_files_to_provision: [env1, env3, ...]}
+  """
+  def env_file_ready(id, state) do
+    id_matches = &(&1.id == id)
+
+    remove_matching_env_file = &Enum.reject(&1, id_matches)
+
+    Map.update!(state, :env_files_to_provision, remove_matching_env_file)
+  end
+
   def provision(state) do
     state
     |> provision_image()
@@ -244,6 +274,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
     |> provision_device_mappings()
     |> provision_device_requests()
     |> provision_file_binds()
+    |> provision_env_files()
     |> provision_container()
   end
 
@@ -481,6 +512,45 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator.Core do
 
         state
         |> Map.put(:file_bind_provisioning, :failed)
+        |> Map.put(:provisioning_failed, true)
+    end
+  end
+
+  defp provision_env_files(state) do
+    new_state = Map.put(state, :env_files_to_provision, [])
+
+    new_state
+    |> Map.get(:env_files, [])
+    |> Enum.reduce(new_state, &provision_env_file/2)
+  end
+
+  defp provision_env_file(%EnvFile{} = env_file, state) do
+    %{
+      deployment: deployment,
+      tenant: tenant
+    } = state
+
+    %{id: id} = env_file
+
+    # Subscribe to the env file readiness
+    Phoenix.PubSub.subscribe(
+      Edgehog.PubSub,
+      EnvFileProvisioner.Core.topic(env_file)
+    )
+
+    # Start the provisioner
+    case EnvFileProvisioner.provision(env_file, tenant,
+           deployment: deployment,
+           mode: state.mode
+         ) do
+      {:ok, _pid} ->
+        Map.update(state, :env_files_to_provision, [], &[env_file | &1])
+
+      {:error, reason} ->
+        log_provisioner_start_failed("env_file", id, reason)
+
+        state
+        |> Map.put(:env_file_provisioning, :failed)
         |> Map.put(:provisioning_failed, true)
     end
   end

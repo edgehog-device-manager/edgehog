@@ -110,6 +110,10 @@ defmodule Edgehog.Containers do
       get Edgehog.Containers.FileBind, :file_bind, :read do
         description "Returns the desired file bind, including the presigned upload URL for target-less binds."
       end
+
+      get Edgehog.Containers.EnvFile, :env_file, :read do
+        description "Returns the desired env file, including the presigned upload URL for target-less env files."
+      end
     end
 
     mutations do
@@ -215,6 +219,10 @@ defmodule Edgehog.Containers do
                                     device_file_id: :device_file,
                                     file_download_request_id: :file_download_request,
                                     file_mount_id: :container_file_mount
+                                  ],
+                                  env_files: [
+                                    device_file_id: :device_file,
+                                    file_download_request_id: :file_download_request
                                   ]
                                 ]
                               ]
@@ -230,6 +238,10 @@ defmodule Edgehog.Containers do
       end
 
       update Edgehog.Containers.FileBind, :mark_file_bind_as_uploaded, :mark_as_uploaded do
+        description "Marks the file uploaded through the presigned upload URL as uploaded."
+      end
+
+      update Edgehog.Containers.EnvFile, :mark_env_file_as_uploaded, :mark_as_uploaded do
         description "Marks the file uploaded through the presigned upload URL as uploaded."
       end
 
@@ -416,6 +428,16 @@ defmodule Edgehog.Containers do
       define :mark_file_bind_as_unavailable, action: :mark_as_unavailable
       define :mark_file_bind_as_errored, action: :mark_as_errored, args: [:message]
       define :destroy_file_bind, action: :destroy
+    end
+
+    resource Edgehog.Containers.EnvFile do
+      define :fetch_env_file, action: :read, get_by: [:id]
+      define :mark_env_file_as_uploaded, action: :mark_as_uploaded
+      define :mark_env_file_as_sent, action: :mark_as_sent
+      define :mark_env_file_as_available, action: :mark_as_available
+      define :mark_env_file_as_unavailable, action: :mark_as_unavailable
+      define :mark_env_file_as_errored, action: :mark_as_errored, args: [:message]
+      define :destroy_env_file, action: :destroy
     end
   end
 end

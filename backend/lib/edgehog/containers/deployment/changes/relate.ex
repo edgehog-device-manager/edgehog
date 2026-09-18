@@ -71,7 +71,8 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
       device_id: device.id,
       env: config_value(config, :env),
       env_strategy: config_value(config, :env_strategy),
-      file_binds: config_value(config, :file_binds) || []
+      file_binds: config_value(config, :file_binds) || [],
+      env_files: config_value(config, :env_files) || []
     }
   end
 

@@ -76,8 +76,10 @@ defmodule Edgehog.Containers.Container.Deployment do
       argument :env_strategy, Types.EnvStrategy
 
       argument :file_binds, {:array, Types.FileBind}
+      argument :env_files, {:array, Types.EnvFile}
 
       validate Validations.RequiredMountsHaveBinds
+      validate Validations.EnvOrEnvFile
 
       change set_attribute(:state, :created)
       change manage_relationship(:container, type: :append)
@@ -224,6 +226,11 @@ defmodule Edgehog.Containers.Container.Deployment do
     end
 
     has_many :file_binds, Edgehog.Containers.FileBind do
+      destination_attribute :container_deployment_id
+      public? true
+    end
+
+    has_many :env_files, Edgehog.Containers.EnvFile do
       destination_attribute :container_deployment_id
       public? true
     end

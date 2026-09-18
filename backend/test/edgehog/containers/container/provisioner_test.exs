@@ -437,6 +437,7 @@ defmodule Edgehog.Containers.Container.Deployment.ProvisionerTest do
       deviceMappingIds: device_mapping_ids,
       deviceRequestIds: device_request_ids,
       fileBindIds: [],
+      envFileIds: [],
       cpuPeriod: normalize(container.cpu_period),
       cpuQuota: normalize(container.cpu_quota),
       cpuRealtimePeriod: normalize(container.cpu_realtime_period),

@@ -41,7 +41,8 @@ defmodule Edgehog.Containers.Container.Deployment.Calculations.Ready do
       network_deployments: :is_ready,
       device_mapping_deployments: :is_ready,
       device_request_deployments: :is_ready,
-      file_binds: :is_ready
+      file_binds: :is_ready,
+      env_files: :is_ready
     ]
 
   @impl Calculation
@@ -66,12 +67,15 @@ defmodule Edgehog.Containers.Container.Deployment.Calculations.Ready do
 
     file_binds? = deployment.file_binds |> Enum.map(& &1.is_ready) |> Enum.all?()
 
+    env_files? = deployment.env_files |> Enum.map(& &1.is_ready) |> Enum.all?()
+
     self and
       image_deployment? and
       volume_deployments? and
       network_deployments? and
       device_mapping_deployments? and
       device_request_deployments? and
-      file_binds?
+      file_binds? and
+      env_files?
   end
 end

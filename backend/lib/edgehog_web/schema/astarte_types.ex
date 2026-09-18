@@ -256,4 +256,10 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The binding options."
     field :options, :string
   end
+
+  @desc "Describe the available env files on the device."
+  object :env_file_status do
+    @desc "The env file id."
+    field :id, :string
+  end
 end

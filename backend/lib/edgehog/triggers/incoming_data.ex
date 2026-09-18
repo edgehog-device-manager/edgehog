@@ -26,6 +26,7 @@ defmodule Edgehog.Triggers.IncomingData do
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableDeployments
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableDeviceMappings
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableDeviceRequests
+  alias Edgehog.Triggers.IncomingData.Handlers.AvailableEnvFiles
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableFileBinds
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableImages
   alias Edgehog.Triggers.IncomingData.Handlers.AvailableNetworks
@@ -61,6 +62,10 @@ defmodule Edgehog.Triggers.IncomingData do
 
     handler AvailableFileBinds do
       filter interface: "io.edgehog.devicemanager.apps.AvailableFileBinds"
+    end
+
+    handler AvailableEnvFiles do
+      filter interface: "io.edgehog.devicemanager.apps.AvailableEnvFiles"
     end
 
     handler AvailableContainers do

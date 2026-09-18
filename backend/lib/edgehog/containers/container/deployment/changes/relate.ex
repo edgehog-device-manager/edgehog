@@ -108,6 +108,11 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         |> Ash.Changeset.get_argument(:file_binds)
         |> relate_file_binds(device, container, tenant)
 
+      env_files_input =
+        changeset
+        |> Ash.Changeset.get_argument(:env_files)
+        |> relate_env_files(device)
+
       changeset
       |> Ash.Changeset.change_attribute(:env, env)
       |> Ash.Changeset.change_attribute(:env_strategy, env_strategy)
@@ -145,7 +150,17 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         on_match: :ignore,
         on_lookup: :ignore
       )
+      |> Ash.Changeset.manage_relationship(:env_files, env_files_input,
+        on_no_match: :create,
+        on_match: :ignore,
+        on_lookup: :ignore
+      )
     end
+  end
+
+  defp relate_env_files(env_files, device) do
+    env_files = env_files || []
+    Enum.map(env_files, &Map.put(&1, :device_id, device.id))
   end
 
   defp relate_file_binds(file_binds, device, container, _tenant) do

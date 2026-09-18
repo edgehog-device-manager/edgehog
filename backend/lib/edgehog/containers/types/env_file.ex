@@ -16,11 +16,10 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-#
 
-defmodule Edgehog.Containers.Types.DeploymentConfig do
+defmodule Edgehog.Containers.Types.EnvFile do
   @moduledoc """
-  A deployment configuration map.
+  Input type to represent an env file.
   """
 
   use AshGraphql.Type
@@ -29,32 +28,18 @@ defmodule Edgehog.Containers.Types.DeploymentConfig do
     subtype_of: :map,
     constraints: [
       fields: [
-        container_id: [
-          type: :uuid,
-          allow_nil?: false
+        device_file_id: [
+          type: :uuid
         ],
-        env: [
-          type: {:array, Edgehog.Containers.Container.Types.EnvVar},
-          allow_nil?: true
-        ],
-        env_strategy: [
-          type: Edgehog.Containers.Types.EnvStrategy,
-          allow_nil?: true
-        ],
-        file_binds: [
-          type: {:array, Edgehog.Containers.Types.FileBind},
-          allow_nil?: true
-        ],
-        env_files: [
-          type: {:array, Edgehog.Containers.Types.EnvFile},
-          allow_nil?: true
+        file_download_request_id: [
+          type: :uuid
         ]
       ]
     ]
 
   @impl AshGraphql.Type
-  def graphql_input_type(_), do: :deployment_config_spec_input
+  def graphql_input_type(_), do: :env_file_spec_input
 
   @impl AshGraphql.Type
-  def graphql_type(_), do: :deployment_config_spec
+  def graphql_type(_), do: :env_file_spec
 end

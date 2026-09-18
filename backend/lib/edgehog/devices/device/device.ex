@@ -431,6 +431,24 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SendCreateFileBind
     end
 
+    update :send_create_env_file_request do
+      description "Send a create env file request to the device."
+
+      argument :env_file, :struct do
+        constraints instance_of: Edgehog.Containers.EnvFile
+        description "The new env file for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this env file is used."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateEnvFile
+    end
+
     update :send_release_command do
       description "Sends a command for the given application release."
 
@@ -656,6 +674,11 @@ defmodule Edgehog.Devices.Device do
     calculate :available_file_binds, {:array, Types.FileBindStatus} do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :available_file_binds}
+    end
+
+    calculate :available_env_files, {:array, Types.EnvFileStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_env_files}
     end
 
     calculate :battery_status, {:array, BatterySlot} do
