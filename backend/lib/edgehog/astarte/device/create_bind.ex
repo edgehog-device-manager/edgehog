@@ -25,7 +25,7 @@ defmodule Edgehog.Astarte.Device.CreateBind do
   alias Astarte.Client.AppEngine
   alias Edgehog.Error
 
-  @interface "io.edgehog.devicemanager.apps.CreateBind"
+  @interface "io.edgehog.devicemanager.apps.CreateFileBindRequest"
 
   @impl Edgehog.Astarte.Device.CreateBind.Behaviour
   def send_bind(%AppEngine{} = client, device_id, request_data) do

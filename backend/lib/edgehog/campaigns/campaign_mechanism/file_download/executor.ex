@@ -45,11 +45,45 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FileDownload.Executor do
   # Common event handling
 
   @impl LazyBatch
-  def handle_info(%Phoenix.Socket.Broadcast{} = notification, state, data) do
-    case notification.payload.action.type do
-      :update -> handle_update(notification, state, data)
-      _ -> :keep_state_and_data
-    end
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "file_download_requests:completed:" <> _id} =
+          notification,
+        _state,
+        data
+      ) do
+    file_download_request = notification.payload.data
+
+    actions = [
+      cancel_retry_timeout(data.tenant_id, file_download_request.id),
+      internal_event({:operation_success, file_download_request})
+    ]
+
+    {:keep_state_and_data, actions}
+  end
+
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "file_download_requests:failed:" <> _id} =
+          notification,
+        _state,
+        data
+      ) do
+    file_download_request = notification.payload.data
+
+    actions = [
+      cancel_retry_timeout(data.tenant_id, file_download_request.id),
+      internal_event({:operation_failure_event, file_download_request})
+    ]
+
+    {:keep_state_and_data, actions}
+  end
+
+  @impl LazyBatch
+  def handle_info(
+        %Phoenix.Socket.Broadcast{topic: "campaigns:" <> _id, event: "pause"} = _notification,
+        state,
+        data
+      ) do
+    handle_pausing(state, data)
   end
 
   def handle_info(_message, _state, _data) do
@@ -57,44 +91,11 @@ defmodule Edgehog.Campaigns.CampaignMechanism.FileDownload.Executor do
     :keep_state_and_data
   end
 
-  defp handle_update(notification, state, data) do
-    case notification.payload.action.name do
-      :set_response -> handle_file_download_response(notification, data)
-      :pause -> handle_mark_as_paused(state, data)
-      _ -> :keep_state_and_data
-    end
-  end
-
-  defp handle_file_download_response(notification, data) do
-    file_download_request = notification.payload.data
-
-    # We always cancel the retry timeout for every kind of update we see on a FileDownloadRequest.
-    # This ensures we don't resend the request even if we accidentally miss the acknowledge.
-    # If the timeout does not exist, this is a no-op anyway.
-    actions = [
-      cancel_retry_timeout(data.tenant_id, file_download_request.id)
-    ]
-
-    case file_download_request.status do
-      :completed ->
-        {:keep_state_and_data,
-         actions ++ [internal_event({:operation_success, file_download_request})]}
-
-      :failed ->
-        {:keep_state_and_data,
-         actions ++ [internal_event({:operation_failure_event, file_download_request})]}
-
-      _ ->
-        # For other statuses (sent, in_progress), just cancel the timeout
-        {:keep_state_and_data, actions}
-    end
-  end
-
-  defp handle_mark_as_paused(state, data) when state in @pauseable_states do
+  defp handle_pausing(state, data) when state in @pauseable_states do
     {:next_state, :wait_for_campaign_paused, data, []}
   end
 
-  defp handle_mark_as_paused(_state, _data) do
+  defp handle_pausing(_state, _data) do
     # Ignore pause requests in non-pauseable states (terminal states, already pausing, etc.)
     :keep_state_and_data
   end

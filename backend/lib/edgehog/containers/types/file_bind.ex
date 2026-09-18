@@ -41,28 +41,6 @@ defmodule Edgehog.Containers.Types.FileBind do
       ]
     ]
 
-  @required_keys [:file_download_request_id, :device_file_id]
-
-  @impl Ash.Type
-  def apply_constraints(value, constraints) do
-    with {:ok, value} <- super(value, constraints) do
-      required_keys? = Enum.any?(@required_keys, &Map.get(value, &1))
-
-      cond do
-        value in [nil, %{}] ->
-          {:ok, value}
-
-        required_keys? ->
-          {:ok, value}
-
-        true ->
-          {:error,
-           message:
-             "at least one of file_url, file_download_request_id or device_file_id must be set"}
-      end
-    end
-  end
-
   @impl AshGraphql.Type
   def graphql_input_type(_), do: :file_bind_spec_input
 

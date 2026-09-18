@@ -25,6 +25,8 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
   alias Edgehog.Assets
   alias Edgehog.BaseImages.BaseImage
   alias Edgehog.BaseImages.BucketStorage, as: BaseImageStorage
+  alias Edgehog.Containers.FileBind
+  alias Edgehog.Containers.FileBind.Storage, as: FileBindStorage
   alias Edgehog.Devices.SystemModel
   alias Edgehog.Files.EphemeralFile
   alias Edgehog.Files.File
@@ -59,6 +61,11 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
       |> Ash.Query.filter(manual?)
       |> Ash.read!(tenant: tenant)
 
+    uploaded_file_binds =
+      FileBind
+      |> Ash.Query.filter(uploaded)
+      |> Ash.read!(tenant: tenant)
+
     Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
       with {:ok, tenant} <- result do
         try do
@@ -67,6 +74,7 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
           cleanup_repository_files(repository_files)
           cleanup_ephemeral_files(manual_file_download_requests, tenant.tenant_id)
           cleanup_ephemeral_images(manual_otas, tenant.tenant_id)
+          cleanup_file_binds(uploaded_file_binds, tenant.tenant_id)
         catch
           signal, error ->
             Logger.error("""
@@ -118,6 +126,13 @@ defmodule Edgehog.Tenants.Tenant.Changes.HandleCleanup do
           file_download_request.id,
           file_download_request.url
         )
+    end)
+  end
+
+  defp cleanup_file_binds(file_binds, tenant_id) do
+    Enum.each(file_binds, fn file_bind ->
+      file_path = FileBindStorage.file_path(tenant_id, file_bind.id, file_bind.file_name)
+      _ = FileBindStorage.delete(file_path)
     end)
   end
 
