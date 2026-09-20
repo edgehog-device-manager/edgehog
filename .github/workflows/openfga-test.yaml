@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       openfga:
-        image: openfga/openfga:v1.20.0
+        image: openfga/openfga:v1.21.0
         command: run
         ports:
           - 8080:8080
