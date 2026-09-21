@@ -73,6 +73,7 @@ const ConfirmModal = ({
       if (
         event.key === "Enter" &&
         confirmOnEnter &&
+        (event.ctrlKey || event.metaKey) &&
         !isConfirming &&
         !disabled
       ) {
@@ -97,11 +98,11 @@ const ConfirmModal = ({
 
   return (
     <div onKeyDown={handleKeyDown} {...restProps}>
-      <Modal show={show} centered size={size} onHide={handleHide}>
+      <Modal show={show} centered size={size} onHide={handleHide} scrollable>
         <Modal.Header closeButton onClick={onCancel}>
           <Modal.Title>{title}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>{children}</Modal.Body>
+        <Modal.Body style={{ overflowX: "hidden" }}>{children}</Modal.Body>
         <Modal.Footer>
           {onCancel && (
             <Button

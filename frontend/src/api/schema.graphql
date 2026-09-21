@@ -1127,6 +1127,11 @@ type FileData {
   digest: String!
 }
 
+input EnvFileSpecInput {
+  fileDownloadRequestId: ID
+  deviceFileId: ID
+}
+
 input FileBindSpecInput {
   fileMountId: ID
   fileId: ID
@@ -1137,8 +1142,14 @@ input FileBindSpecInput {
 input DeploymentConfigSpecInput {
   fileBinds: [FileBindSpecInput]
   envStrategy: String
+  envFiles: [EnvFileSpecInput]
   env: [ContainerEnvVarInput]
   containerId: ID!
+}
+
+type EnvFileSpec {
+  fileDownloadRequestId: ID
+  deviceFileId: ID
 }
 
 type FileBindSpec {
@@ -1151,6 +1162,7 @@ type FileBindSpec {
 type DeploymentConfigSpec {
   fileBinds: [FileBindSpec]
   envStrategy: String
+  envFiles: [EnvFileSpec]
   env: [ContainerEnvVar]
   containerId: ID!
 }
@@ -1711,6 +1723,288 @@ input ReleaseCreateContainerDependenciesInput {
 
 input ReleaseCreateRequiredSystemModelsInput {
   id: ID
+}
+
+"The result of the :mark_env_file_as_uploaded mutation"
+type MarkEnvFileAsUploadedResult {
+  "The successful result of the mutation"
+  result: EnvFile
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input MarkEnvFileAsUploadedInput {
+  "The name of the file uploaded for a target-less env file."
+  fileName: String
+
+  "The size of the uploaded file, in bytes, before compression."
+  uncompressedFileSizeBytes: Int
+
+  "The digest of the uploaded file, used for integrity verification."
+  digest: String
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
+}
+
+enum EnvFileSortField {
+  ID
+  FILE_NAME
+  UNCOMPRESSED_FILE_SIZE_BYTES
+  DIGEST
+  ENCODING
+  UPLOADED
+  STATE
+  LAST_MESSAGE
+  FILE_DOWNLOAD_REQUEST_ID
+  DEVICE_FILE_ID
+  IS_READY
+}
+
+input EnvFileFilterIsReady {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input EnvFileFilterDeviceFileId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input EnvFileFilterFileDownloadRequestId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input EnvFileFilterLastMessage {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input EnvFileFilterState {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
+input EnvFileFilterUploaded {
+  isNil: Boolean
+  eq: Boolean
+  notEq: Boolean
+  in: [Boolean!]
+  lessThan: Boolean
+  greaterThan: Boolean
+  lessThanOrEqual: Boolean
+  greaterThanOrEqual: Boolean
+  isDistinctFrom: Boolean
+  isNotDistinctFrom: Boolean
+}
+
+input EnvFileFilterEncoding {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input EnvFileFilterDigest {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input EnvFileFilterUncompressedFileSizeBytes {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input EnvFileFilterFileName {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input EnvFileFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input EnvFileFilterInput {
+  and: [EnvFileFilterInput!]
+
+  or: [EnvFileFilterInput!]
+
+  not: [EnvFileFilterInput!]
+
+  id: EnvFileFilterId
+
+  "The name of the file uploaded for a target-less env file."
+  fileName: EnvFileFilterFileName
+
+  "The size of the uploaded file, in bytes, before compression."
+  uncompressedFileSizeBytes: EnvFileFilterUncompressedFileSizeBytes
+
+  "The digest of the uploaded file, used for integrity verification."
+  digest: EnvFileFilterDigest
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: EnvFileFilterEncoding
+
+  "Whether the file for a target-less env file has been uploaded."
+  uploaded: EnvFileFilterUploaded
+
+  "The provisioning state of the env file on the device."
+  state: EnvFileFilterState
+
+  lastMessage: EnvFileFilterLastMessage
+
+  fileDownloadRequestId: EnvFileFilterFileDownloadRequestId
+
+  deviceFileId: EnvFileFilterDeviceFileId
+
+  fileDownloadRequest: FileDownloadRequestFilterInput
+
+  deviceFile: DeviceFileFilterInput
+
+  isReady: EnvFileFilterIsReady
+}
+
+input EnvFileSortInput {
+  order: SortOrder
+  field: EnvFileSortField!
+}
+
+type EnvFile implements Node {
+  id: ID!
+
+  "The name of the file uploaded for a target-less env file."
+  fileName: String
+
+  "The size of the uploaded file, in bytes, before compression."
+  uncompressedFileSizeBytes: Int
+
+  "The digest of the uploaded file, used for integrity verification."
+  digest: String
+
+  "Optional enum string for the file encoding with default value empty, other values are: [gz, lz4, tar, tar.gz, tar.lz4]"
+  encoding: String
+
+  "Whether the file for a target-less env file has been uploaded."
+  uploaded: Boolean!
+
+  "The provisioning state of the env file on the device."
+  state: String!
+
+  lastMessage: String
+
+  fileDownloadRequestId: ID
+
+  deviceFileId: ID
+
+  fileDownloadRequest: FileDownloadRequest
+
+  deviceFile: DeviceFile
+
+  "Presigned URL the client can use to upload the file for a target-less env file."
+  uploadUrl: String
+
+  isReady: Boolean
 }
 
 "The result of the :mark_file_bind_as_uploaded mutation"
@@ -4353,6 +4647,7 @@ input ContainerDeploymentFilterInput {
   deviceMappingDeployments: DeviceMappingDeploymentFilterInput
   deviceRequestDeployments: DeviceRequestDeploymentFilterInput
   fileBinds: FileBindFilterInput
+  envFiles: EnvFileFilterInput
 }
 
 input ContainerDeploymentSortInput {
@@ -4460,6 +4755,19 @@ type ContainerDeployment {
     "The number of records to skip."
     offset: Int
   ): [FileBind!]!
+  envFiles(
+    "How to sort the records in the response"
+    sort: [EnvFileSortInput]
+
+    "A filter to limit the results"
+    filter: EnvFileFilterInput
+
+    "The number of records to return."
+    limit: Int
+
+    "The number of records to skip."
+    offset: Int
+  ): [EnvFile!]!
   isReady: Boolean
 }
 
@@ -6504,6 +6812,8 @@ type Device implements Node {
   availableDeviceRequests: [DeviceRequestStatus!]
 
   availableFileBinds: [FileBindStatus!]
+
+  availableEnvFiles: [EnvFileStatus!]
 
   batteryStatus: [BatterySlot!]
 
@@ -10127,6 +10437,9 @@ type RootQueryType {
   "Returns the desired file bind, including the presigned upload URL for target-less binds."
   fileBind("The id of the record" id: ID!): FileBind
 
+  "Returns the desired env file, including the presigned upload URL for target-less env files."
+  envFile("The id of the record" id: ID!): EnvFile
+
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
 
@@ -10356,6 +10669,12 @@ type RootMutationType {
     id: ID!
     input: MarkFileBindAsUploadedInput
   ): MarkFileBindAsUploadedResult
+
+  "Marks the file uploaded through the presigned upload URL as uploaded."
+  markEnvFileAsUploaded(
+    id: ID!
+    input: MarkEnvFileAsUploadedInput
+  ): MarkEnvFileAsUploadedResult
 
   "Create a new base image in a base image collection."
   createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
@@ -10776,4 +11095,10 @@ type FileBindStatus {
 
   "The binding options."
   options: String
+}
+
+"Describe the available env files on the device."
+type EnvFileStatus {
+  "The env file id."
+  id: String
 }

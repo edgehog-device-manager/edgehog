@@ -33,6 +33,7 @@ import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
 } from "@/api/__generated__/DeploymentDetails_events.graphql";
+import type { DeploymentDetails_envFiles$key } from "@/api/__generated__/DeploymentDetails_envFiles.graphql";
 import type { DeploymentDetails_fileBinds$key } from "@/api/__generated__/DeploymentDetails_fileBinds.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
@@ -100,6 +101,7 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
           ...DeploymentDetails_networkDeployments
           ...DeploymentDetails_volumeDeployments
           ...DeploymentDetails_fileBinds
+          ...DeploymentDetails_envFiles
         }
       }
     }
@@ -211,6 +213,24 @@ const DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
+const DEPLOYMENT_DETAILS_ENV_FILES_FRAGMENT = graphql`
+  fragment DeploymentDetails_envFiles on ContainerDeployment {
+    id
+    envFiles {
+      id
+      fileName
+      state
+      isReady
+      deviceFile {
+        pathOnDevice
+      }
+      fileDownloadRequest {
+        fileName
+      }
+    }
+  }
+`;
+
 type UpgradeTargetRelease = {
   id: string;
   version: string;
@@ -278,7 +298,8 @@ interface ContainerDeploymentItemProps {
     DeploymentDetails_volumeDeployments$key &
     DeploymentDetails_deviceMappingDeployments$key &
     DeploymentDetails_deviceRequestDeployments$key &
-    DeploymentDetails_fileBinds$key;
+    DeploymentDetails_fileBinds$key &
+    DeploymentDetails_envFiles$key;
   imageDeployment: any;
   containerState: string;
   isReady: boolean | null;
@@ -320,6 +341,11 @@ const ContainerDeploymentItem = ({
       DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT,
       containerFragmentKey,
     );
+
+  const envFilesData = useFragment<DeploymentDetails_envFiles$key>(
+    DEPLOYMENT_DETAILS_ENV_FILES_FRAGMENT,
+    containerFragmentKey,
+  );
 
   const treeData: TreeNode[] = useMemo(() => {
     const unnamed = intl.formatMessage({
@@ -442,6 +468,25 @@ const ContainerDeploymentItem = ({
       },
     );
 
+    const envFilesSubTree = buildSubTree(
+      prefix,
+      "env-file",
+      (envFilesData as unknown as { envFiles: any[] })?.envFiles ?? [],
+      (f) =>
+        f.fileName ||
+        f.deviceFile?.pathOnDevice ||
+        f.fileDownloadRequest?.fileName ||
+        f.id?.slice(0, 8) ||
+        unnamed,
+      {
+        title: intl.formatMessage({
+          id: "components.apps.deployments.deployment-details.DeploymentDetails.envFiles",
+          defaultMessage: "Env Files",
+        }),
+        empty,
+        unnamed,
+      },
+    );
     const imageTreeNode: TreeNode = {
       id: `${prefix}-image-${imageDeployment?.image?.id}`,
       name:
@@ -471,6 +516,7 @@ const ContainerDeploymentItem = ({
         isReady,
         children: [
           imageTreeNode,
+          envFilesSubTree,
           deviceRequestsSubTree,
           deviceMappingsSubTree,
           volumeSubTree,
@@ -484,6 +530,8 @@ const ContainerDeploymentItem = ({
     networkData,
     volumeData,
     deviceMappingData,
+    deviceRequestData,
+    envFilesData,
     imageDeployment,
     containerState,
     isReady,

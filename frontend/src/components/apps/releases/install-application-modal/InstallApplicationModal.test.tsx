@@ -20,9 +20,8 @@
 
 import { Suspense, type ReactNode } from "react";
 import { it, expect, vi } from "vitest";
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import selectEvent from "react-select-event";
 import { createMockEnvironment } from "relay-test-utils";
 
 import { renderWithProviders } from "@/setupTests";
@@ -30,6 +29,8 @@ import InstallApplicationModal from "./InstallApplicationModal";
 
 const APPLICATIONS_QUERY_NAME =
   "InstallApplicationModal_GetApplicationsWithReleases_Query";
+const RELEASE_CONTAINERS_QUERY_NAME =
+  "InstallApplicationModal_GetReleaseContainers_Query";
 const DEPLOY_RELEASE_MUTATION_NAME =
   "InstallApplicationModal_DeployRelease_Mutation";
 
@@ -105,7 +106,36 @@ const resolveApplicationsQuery = (
   });
 };
 
-it("renders the selects and disables the deploy button until a release is selected", async () => {
+const resolveReleaseContainersQuery = (
+  relayEnvironment: ReturnType<typeof createMockEnvironment>,
+  containers: { id: string; name: string }[] = [],
+) => {
+  act(() => {
+    const op = relayEnvironment.mock.findOperation(
+      (o) => o.request.node.params.name === RELEASE_CONTAINERS_QUERY_NAME,
+    );
+    if (!op) return;
+    relayEnvironment.mock.resolve(op, {
+      data: {
+        release: {
+          id: "rel-2",
+          containers: {
+            edges: containers.map((c) => ({ node: c })),
+          },
+        },
+      },
+    });
+  });
+};
+
+const selectOption = async (combobox: HTMLElement, text: string) => {
+  await userEvent.click(combobox);
+  // menu is portaled to document.body, so query within body
+  const option = await within(document.body).findByText(text);
+  await userEvent.click(option);
+};
+
+it("renders the selects and disables deploy until a release is selected", async () => {
   const { relayEnvironment } = renderModal();
   resolveApplicationsQuery(relayEnvironment);
 
@@ -122,8 +152,11 @@ it("enables deploy after selecting an application and a release, then deploys", 
   await screen.findByText("Install Application");
 
   const [appCombobox] = screen.getAllByRole("combobox");
-  await selectEvent.select(appCombobox, "App One");
-  await selectEvent.select(screen.getAllByRole("combobox")[1], "2.0.0");
+  await selectOption(appCombobox, "App One");
+  await selectOption(screen.getAllByRole("combobox")[1], "2.0.0");
+
+  // release containers query fires on selection
+  resolveReleaseContainersQuery(relayEnvironment, []);
 
   const deployButton = screen.getByRole("button", { name: "Deploy" });
   expect(deployButton).toBeEnabled();
@@ -147,6 +180,7 @@ it("enables deploy after selecting an application and a release, then deploys", 
           result: {
             id: "deployment-1",
             state: "STARTED",
+            containerDeployments: { edges: [] },
           },
           errors: [],
         },
@@ -167,7 +201,7 @@ it("does not allow deploying while the device is offline", async () => {
   await screen.findByText("Install Application");
 
   const [appCombobox] = screen.getAllByRole("combobox");
-  await selectEvent.select(appCombobox, "App One");
+  await selectOption(appCombobox, "App One");
 
   expect(setErrorFeedback).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "Deploy" })).toBeDisabled();

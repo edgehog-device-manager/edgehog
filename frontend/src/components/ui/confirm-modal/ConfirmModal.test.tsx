@@ -50,7 +50,19 @@ it("correctly confirms with the confirm button", async () => {
   expect(props.onConfirm).toHaveBeenCalledTimes(1);
 });
 
-it("correctly confirms by typing Enter", async () => {
+it("correctly confirms by typing Ctrl+Enter", async () => {
+  const props = {
+    title: "Modal Title",
+    confirmLabel: "OK",
+    onConfirm: vi.fn(),
+  };
+  renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
+  const title = screen.getByText(props.title);
+  await userEvent.type(title, "{Control>}{Enter}{/Control}");
+  expect(props.onConfirm).toHaveBeenCalledTimes(1);
+});
+
+it("does not confirm by typing Enter without Ctrl", async () => {
   const props = {
     title: "Modal Title",
     confirmLabel: "OK",
@@ -59,7 +71,7 @@ it("correctly confirms by typing Enter", async () => {
   renderWithProviders(<ConfirmModal {...props}>Prompt message.</ConfirmModal>);
   const title = screen.getByText(props.title);
   await userEvent.type(title, "{Enter}");
-  expect(props.onConfirm).toHaveBeenCalledTimes(1);
+  expect(props.onConfirm).not.toHaveBeenCalled();
 });
 
 it("correctly dismisses with the cancel button", async () => {

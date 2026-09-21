@@ -59,6 +59,8 @@ it("cannot confirm without entering the confirm text", async () => {
 
   await userEvent.click(screen.getByText("Delete"));
   expect(props.onConfirm).toHaveBeenCalledTimes(1);
+  await userEvent.type(title, "{Control>}{Enter}{/Control}");
+  expect(props.onConfirm).toHaveBeenCalledTimes(2);
   await userEvent.type(title, "{Enter}");
   expect(props.onConfirm).toHaveBeenCalledTimes(2);
 });
