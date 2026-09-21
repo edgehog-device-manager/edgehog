@@ -311,6 +311,9 @@
   "components.apps.deployments.deployment-details.DeploymentDetails.deviceRequests": {
     "defaultMessage": "Device Requests"
   },
+  "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds": {
+    "defaultMessage": "File Binds"
+  },
   "components.apps.deployments.deployment-details.DeploymentDetails.incompatibleVersion": {
     "defaultMessage": "{version} (Incompatible system model)"
   },
