@@ -56,3 +56,4 @@ jobs:
       - uses: openfga/action-openfga-test@e89aa8259796cd5ee5c1b1ae7d72c401029cb947 # v0.1.2
         with:
           test_path: fga/openfga/tests
+          fga_cli_version: "v0.7.20"
