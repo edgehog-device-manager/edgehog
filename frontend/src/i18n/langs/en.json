@@ -346,6 +346,69 @@
     "defaultMessage": "Image",
     "description": "Title for the Image column of the containers table"
   },
+  "components.apps.containers.file-mount-input.FileMountInput.defaultFileBadge": {
+    "defaultMessage": "Default: {name}"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.deviceMode": {
+    "defaultMessage": "Device File"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.emptyTextError": {
+    "defaultMessage": "Please enter file content."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.filePickerSubTab": {
+    "defaultMessage": "File Picker"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.languageHintLabel": {
+    "defaultMessage": "Language Format:"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.loadingRepositories": {
+    "defaultMessage": "Loading repositories..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.optionalBadge": {
+    "defaultMessage": "Optional"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.processing": {
+    "defaultMessage": "Processing..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.repositoryMode": {
+    "defaultMessage": "Repository File"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.requiredBadge": {
+    "defaultMessage": "Required"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.requiredError": {
+    "defaultMessage": "This file mount is required."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectDeviceFileLabel": {
+    "defaultMessage": "Select file from device"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectFileError": {
+    "defaultMessage": "Please select a file to upload."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectFilePlaceholder": {
+    "defaultMessage": "Choose a file..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepository": {
+    "defaultMessage": "Select Repository"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepositoryFile": {
+    "defaultMessage": "Select File from Repository"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepositoryFileError": {
+    "defaultMessage": "Please select a repository file."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepositoryPlaceholder": {
+    "defaultMessage": "Choose a repository..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.textEditorSubTab": {
+    "defaultMessage": "Text Editor"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.unboundOption": {
+    "defaultMessage": "None (Unbound)"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.uploadMode": {
+    "defaultMessage": "Upload"
+  },
   "components.apps.containers.image-credentials-table.ImageCredentialsTable.labelTitle": {
     "defaultMessage": "Label"
   },
@@ -729,6 +792,9 @@
   "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel": {
+    "defaultMessage": "Container: {containerName}"
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.deployButton": {
     "defaultMessage": "Deploy"
   },
@@ -738,11 +804,32 @@
   "components.apps.releases.install-application-modal.InstallApplicationModal.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel": {
+    "defaultMessage": "Environment"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envStrategyMerge": {
+    "defaultMessage": "Merge"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envStrategyOverride": {
+    "defaultMessage": "Override"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.fileBindsTitle": {
+    "defaultMessage": "File Mounts Configuration"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.invalidJsonError": {
+    "defaultMessage": "Invalid JSON. Expected a JSON object mapping keys to string values."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.missingRequiredBindsFeedback": {
+    "defaultMessage": "Please configure a file source for all required file mounts."
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable": {
     "defaultMessage": "No applications available"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching": {
     "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noFilesAvailableWarning": {
+    "defaultMessage": "This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable": {
     "defaultMessage": "No releases available for this application"
@@ -757,13 +844,16 @@
     "defaultMessage": "Select a release"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication": {
-    "defaultMessage": "Select Application"
+    "defaultMessage": "Application"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst": {
     "defaultMessage": "Please select an application first"
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectEnvStrategy": {
+    "defaultMessage": "Env Strategy"
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease": {
-    "defaultMessage": "Select Release"
+    "defaultMessage": "Release"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.title": {
     "defaultMessage": "Install Application"

@@ -34,6 +34,15 @@ const DEPLOY_RELEASE_MUTATION_NAME =
   "InstallApplicationModal_DeployRelease_Mutation";
 
 const applicationsData = {
+  device: {
+    id: "device-1",
+    deviceFiles: {
+      edges: [],
+    },
+    fileDownloadRequests: {
+      edges: [],
+    },
+  },
   applications: {
     edges: [
       {
@@ -47,6 +56,9 @@ const applicationsData = {
                   id: "rel-1",
                   version: "1.0.0",
                   systemModels: [{ name: "Test System Model" }],
+                  containers: {
+                    edges: [],
+                  },
                 },
               },
               {
@@ -54,6 +66,9 @@ const applicationsData = {
                   id: "rel-2",
                   version: "2.0.0",
                   systemModels: [],
+                  containers: {
+                    edges: [],
+                  },
                 },
               },
             ],
@@ -110,8 +125,10 @@ it("renders the selects and disables the deploy button until a release is select
   resolveApplicationsQuery(relayEnvironment);
 
   expect(await screen.findByText("Install Application")).toBeVisible();
-  expect(screen.getByText("Select Application")).toBeVisible();
-  expect(screen.getByText("Select Release")).toBeVisible();
+  expect(screen.getByText("Application")).toBeVisible();
+  expect(screen.getByText("Release")).toBeVisible();
+  expect(screen.getByText("Env Strategy")).toBeVisible();
+  expect(screen.getByText("Environment")).toBeVisible();
   expect(screen.getByRole("button", { name: "Deploy" })).toBeDisabled();
 });
 
@@ -122,8 +139,12 @@ it("enables deploy after selecting an application and a release, then deploys", 
   await screen.findByText("Install Application");
 
   const [appCombobox] = screen.getAllByRole("combobox");
-  await selectEvent.select(appCombobox, "App One");
-  await selectEvent.select(screen.getAllByRole("combobox")[1], "2.0.0");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "2.0.0", {
+    container: document.body,
+  });
 
   const deployButton = screen.getByRole("button", { name: "Deploy" });
   expect(deployButton).toBeEnabled();
@@ -167,7 +188,9 @@ it("does not allow deploying while the device is offline", async () => {
   await screen.findByText("Install Application");
 
   const [appCombobox] = screen.getAllByRole("combobox");
-  await selectEvent.select(appCombobox, "App One");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
 
   expect(setErrorFeedback).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "Deploy" })).toBeDisabled();

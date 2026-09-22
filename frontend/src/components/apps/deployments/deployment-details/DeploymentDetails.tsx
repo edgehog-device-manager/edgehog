@@ -111,6 +111,7 @@ const DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT = graphql`
     id
     fileBinds {
       id
+      fileName
       fileMount {
         id
         mountpoint
@@ -421,6 +422,7 @@ const ContainerDeploymentItem = ({
       (fb) => {
         const file =
           fb.fileDownloadRequest?.fileName ??
+          fb.fileName ??
           fb.deviceFile?.pathOnDevice ??
           unnamed;
         const mountpoint = fb.fileMount?.mountpoint ?? unnamed;
