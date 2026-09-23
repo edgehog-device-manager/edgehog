@@ -37,7 +37,16 @@ const applicationsData = {
   device: {
     id: "device-1",
     deviceFiles: {
-      edges: [],
+      edges: [
+        {
+          node: {
+            id: "device-file-1",
+            pathOnDevice: "/data/.env",
+            deleted: false,
+            fileDownloadRequest: null,
+          },
+        },
+      ],
     },
     fileDownloadRequests: {
       edges: [],
@@ -68,6 +77,26 @@ const applicationsData = {
                   systemModels: [],
                   containers: {
                     edges: [],
+                  },
+                },
+              },
+              {
+                node: {
+                  id: "rel-3",
+                  version: "3.0.0",
+                  systemModels: [],
+                  containers: {
+                    edges: [
+                      {
+                        node: {
+                          id: "container-1",
+                          name: "app",
+                          fileMounts: {
+                            edges: [],
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
               },
@@ -194,4 +223,69 @@ it("does not allow deploying while the device is offline", async () => {
 
   expect(setErrorFeedback).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "Deploy" })).toBeDisabled();
+});
+
+it("deploys with an env file instead of env vars in env file mode", async () => {
+  const { relayEnvironment, onToggleModal } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const [appCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+    container: document.body,
+  });
+
+  // Switch from the default env override mode to env file mode
+  await userEvent.click(screen.getByRole("radio", { name: "Env file" }));
+
+  // The env JSON editor is hidden and the per-container env file section shows
+  expect(screen.queryByText("Environment")).not.toBeInTheDocument();
+  expect(
+    await screen.findByTestId("container-env-files-container-1"),
+  ).toBeVisible();
+
+  // Pick the device file as the container env file source
+  const envFileCombobox = screen.getAllByRole("combobox")[2];
+  await selectEvent.select(envFileCombobox, "Device File: /data/.env", {
+    container: document.body,
+  });
+
+  await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+  const mutationOperation = relayEnvironment.mock.findOperation(
+    (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+  );
+  expect(mutationOperation.request.variables).toEqual({
+    input: {
+      deviceId: "device-1",
+      releaseId: "rel-3",
+      configs: [
+        {
+          containerId: "container-1",
+          envStrategy: "merge",
+          envFiles: [{ deviceFileId: "device-file-1" }],
+        },
+      ],
+    },
+  });
+
+  act(() => {
+    relayEnvironment.mock.resolve(mutationOperation, {
+      data: {
+        deployRelease: {
+          result: {
+            id: "deployment-1",
+            state: "STARTED",
+          },
+          errors: [],
+        },
+      },
+    });
+  });
+
+  await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
 });

@@ -27,15 +27,20 @@ import type { InstallApplicationModal_GetApplicationsWithReleases_Query } from "
 import type {
   ContainerEnvVarInput,
   DeploymentConfigSpecInput,
+  EnvFileSpecInput,
   FileBindSpecInput,
   InstallApplicationModal_DeployRelease_Mutation,
 } from "@/api/__generated__/InstallApplicationModal_DeployRelease_Mutation.graphql";
 import type { InstallApplicationModal_markFileBindAsUploaded_Mutation } from "@/api/__generated__/InstallApplicationModal_markFileBindAsUploaded_Mutation.graphql";
 import { useNavigate, Route } from "@/Navigation";
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import Select from "@/components/ui/select/Select";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 import Alert from "@/components/ui/alert/Alert";
+import EnvFileInput, {
+  EnvFileInputRef,
+} from "@/components/apps/containers/env-file-input/EnvFileInput";
 import FileMountInput, {
   FileBindResult,
   FileMountInputRef,
@@ -186,6 +191,8 @@ type SelectOption = {
   disabled: boolean;
 };
 
+type EnvMode = "override" | "file";
+
 const InstallApplicationModal = ({
   open,
   onToggleModal,
@@ -199,6 +206,7 @@ const InstallApplicationModal = ({
 
   const [selectedApp, setSelectedApp] = useState<string | null>(null);
   const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
+  const [envMode, setEnvMode] = useState<EnvMode>("override");
   const [envStrategy, setEnvStrategy] = useState<string>("merge");
   const [envJson, setEnvJson] = useState<string>("{}");
   const [mountValidity, setMountValidity] = useState<Record<string, boolean>>(
@@ -206,6 +214,7 @@ const InstallApplicationModal = ({
   );
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const mountInputRefs = useRef<Record<string, FileMountInputRef | null>>({});
+  const envFileInputRefs = useRef<Record<string, EnvFileInputRef | null>>({});
 
   const data =
     useLazyLoadQuery<InstallApplicationModal_GetApplicationsWithReleases_Query>(
@@ -497,6 +506,7 @@ const InstallApplicationModal = ({
     setSelectedApp(option?.value || null);
     setSelectedRelease(null);
     setMountValidity({});
+    setEnvMode("override");
     setEnvStrategy("merge");
     setEnvJson("{}");
   };
@@ -504,6 +514,7 @@ const InstallApplicationModal = ({
   const handleReleaseChange = (option: SingleValue<SelectOption>) => {
     setSelectedRelease(option?.value || null);
     setMountValidity({});
+    setEnvMode("override");
     setEnvStrategy("merge");
     setEnvJson("{}");
   };
@@ -512,6 +523,7 @@ const InstallApplicationModal = ({
     setSelectedApp(null);
     setSelectedRelease(null);
     setMountValidity({});
+    setEnvMode("override");
     setEnvStrategy("merge");
     setEnvJson("{}");
   }, []);
@@ -540,6 +552,7 @@ const InstallApplicationModal = ({
     try {
       const pendingUploads: PendingUploadData[] = [];
       const mountSpecs: Record<string, FileBindSpecInput> = {};
+      const envFileSpecs: Record<string, EnvFileSpecInput> = {};
 
       for (const container of containersWithMounts) {
         for (const mount of container.mounts) {
@@ -569,6 +582,18 @@ const InstallApplicationModal = ({
         }
       }
 
+      if (envMode === "file") {
+        for (const container of releaseContainers) {
+          const ref = envFileInputRefs.current[container.id];
+          if (ref) {
+            const res = await ref.getEnvFileSpec();
+            if (res?.spec) {
+              envFileSpecs[container.id] = res.spec;
+            }
+          }
+        }
+      }
+
       const deployConfigs: DeploymentConfigSpecInput[] = releaseContainers
         .map((container) => {
           const binds = container.mounts
@@ -576,9 +601,15 @@ const InstallApplicationModal = ({
             .filter((b): b is FileBindSpecInput => !!b);
 
           const hasBinds = binds.length > 0;
-          const hasEnv = !!parsedEnv && parsedEnv.length > 0;
+          const hasEnv =
+            envMode === "override" && !!parsedEnv && parsedEnv.length > 0;
+          // Single optional env file per container. Upload-sourced specs are
+          // target-less here; their presigned PUT + markEnvFileAsUploaded
+          // follow-up is handled separately (see EnvFileInput.pendingUpload).
+          const envFileSpec =
+            envMode === "file" ? envFileSpecs[container.id] : undefined;
 
-          if (!hasBinds && !hasEnv && envStrategy === "merge") {
+          if (!hasBinds && !hasEnv && !envFileSpec && envStrategy === "merge") {
             return null;
           }
 
@@ -587,6 +618,7 @@ const InstallApplicationModal = ({
             envStrategy,
             ...(hasEnv ? { env: parsedEnv } : {}),
             ...(hasBinds ? { fileBinds: binds } : {}),
+            ...(envFileSpec ? { envFiles: [envFileSpec] } : {}),
           };
         })
         .filter((c): c is NonNullable<typeof c> => !!c);
@@ -711,6 +743,7 @@ const InstallApplicationModal = ({
     allRequiredMountsConfigured,
     containersWithMounts,
     releaseContainers,
+    envMode,
     parsedEnv,
     envStrategy,
     deployRelease,
@@ -745,7 +778,7 @@ const InstallApplicationModal = ({
         !isOnline ||
         !selectedRelease ||
         !allRequiredMountsConfigured ||
-        !isEnvJsonValid ||
+        (envMode === "override" && !isEnvJsonValid) ||
         isSubmitting ||
         isDeploying
       }
@@ -840,45 +873,127 @@ const InstallApplicationModal = ({
           />
         </FormRow>
 
-        <FormRow
-          id="select-env-strategy"
-          label={intl.formatMessage({
-            id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectEnvStrategy",
-            defaultMessage: "Env Strategy",
-          })}
-        >
-          <Select
-            value={selectedEnvStrategyOption}
-            onChange={(option) => setEnvStrategy(option?.value || "merge")}
-            options={envStrategyOptions}
-            menuPlacement="auto"
-            isDisabled={!selectedRelease}
-          />
-        </FormRow>
+        <div className="mt-2 pt-2 border-top">
+          <h6 className="mb-2 fw-semibold">
+            <FormattedMessage
+              id="components.apps.releases.install-application-modal.InstallApplicationModal.environmentConfigurationTitle"
+              defaultMessage="Environment configuration"
+            />
+          </h6>
 
-        <FormRow
-          id="env-json"
-          label={intl.formatMessage({
-            id: "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel",
-            defaultMessage: "Environment",
-          })}
-        >
-          <MonacoJsonEditor
-            value={envJson}
-            onChange={(val) => setEnvJson(val ?? "")}
-            defaultValue="{}"
-            error={
-              !isEnvJsonValid
-                ? intl.formatMessage({
-                    id: "components.apps.releases.install-application-modal.InstallApplicationModal.invalidJsonError",
-                    defaultMessage:
-                      "Invalid JSON. Expected a JSON object mapping keys to string values.",
-                  })
-                : undefined
-            }
-            readonly={!selectedRelease}
-          />
-        </FormRow>
+          <ToggleButtonGroup
+            type="radio"
+            name="env-mode"
+            value={envMode}
+            onChange={(value) => setEnvMode(value)}
+            size="sm"
+            className="mb-2"
+          >
+            <ToggleButton
+              id="env-mode-override"
+              value="override"
+              variant="outline-primary"
+              disabled={!selectedRelease}
+            >
+              <FormattedMessage
+                id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeOverride"
+                defaultMessage="Env override"
+              />
+            </ToggleButton>
+
+            <ToggleButton
+              id="env-mode-file"
+              value="file"
+              variant="outline-primary"
+              disabled={!selectedRelease}
+            >
+              <FormattedMessage
+                id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeFile"
+                defaultMessage="Env file"
+              />
+            </ToggleButton>
+          </ToggleButtonGroup>
+
+          {envMode === "override" && (
+            <>
+              <FormRow
+                id="select-env-strategy"
+                label={intl.formatMessage({
+                  id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectEnvStrategy",
+                  defaultMessage: "Env Strategy",
+                })}
+              >
+                <Select
+                  value={selectedEnvStrategyOption}
+                  onChange={(option) =>
+                    setEnvStrategy(option?.value || "merge")
+                  }
+                  options={envStrategyOptions}
+                  menuPlacement="auto"
+                  isDisabled={!selectedRelease}
+                />
+              </FormRow>
+
+              <FormRow
+                id="env-json"
+                label={intl.formatMessage({
+                  id: "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel",
+                  defaultMessage: "Environment",
+                })}
+              >
+                <MonacoJsonEditor
+                  value={envJson}
+                  onChange={(val) => setEnvJson(val ?? "")}
+                  defaultValue="{}"
+                  error={
+                    !isEnvJsonValid
+                      ? intl.formatMessage({
+                          id: "components.apps.releases.install-application-modal.InstallApplicationModal.invalidJsonError",
+                          defaultMessage:
+                            "Invalid JSON. Expected a JSON object mapping keys to string values.",
+                        })
+                      : undefined
+                  }
+                  readonly={!selectedRelease}
+                />
+              </FormRow>
+            </>
+          )}
+
+          {envMode === "file" && selectedRelease && (
+            <div
+              className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
+              style={{ maxHeight: "55vh" }}
+            >
+              {releaseContainers.map((container) => (
+                <div
+                  key={container.id}
+                  className="border rounded p-3 bg-light"
+                  data-testid={`container-env-files-${container.id}`}
+                >
+                  <div className="fw-bold mb-2 small text-secondary">
+                    <FormattedMessage
+                      id="components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel"
+                      defaultMessage="Container: {containerName}"
+                      values={{ containerName: container.name }}
+                    />
+                  </div>
+
+                  <EnvFileInput
+                    key={container.id}
+                    ref={(el) => {
+                      envFileInputRefs.current[container.id] = el;
+                    }}
+                    containerId={container.id}
+                    deviceId={deviceId}
+                    deviceFiles={deviceFiles}
+                    fileDownloadRequests={fileDownloadRequests}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
 
         {containersWithMounts.length > 0 && (
           <div className="mt-2 pt-2 border-top">

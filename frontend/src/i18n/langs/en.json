@@ -346,6 +346,54 @@
     "defaultMessage": "Image",
     "description": "Title for the Image column of the containers table"
   },
+  "components.apps.containers.env-file-input.EnvFileInput.deviceMode": {
+    "defaultMessage": "Device File"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.filePickerSubTab": {
+    "defaultMessage": "File Picker"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.languageHintLabel": {
+    "defaultMessage": "Language Format:"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.loadingRepositories": {
+    "defaultMessage": "Loading repositories..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.optionalBadge": {
+    "defaultMessage": "Optional"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.processing": {
+    "defaultMessage": "Processing..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.repositoryMode": {
+    "defaultMessage": "Repository File"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectDeviceFileLabel": {
+    "defaultMessage": "Select file from device"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectFilePlaceholder": {
+    "defaultMessage": "Choose a file..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectRepository": {
+    "defaultMessage": "Select Repository"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectRepositoryFile": {
+    "defaultMessage": "Select File from Repository"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectRepositoryPlaceholder": {
+    "defaultMessage": "Choose a repository..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.textEditorSubTab": {
+    "defaultMessage": "Text Editor"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.title": {
+    "defaultMessage": "Env file"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.unboundOption": {
+    "defaultMessage": "None (no env file)"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.uploadMode": {
+    "defaultMessage": "Upload"
+  },
   "components.apps.containers.file-mount-input.FileMountInput.defaultFileBadge": {
     "defaultMessage": "Default: {name}"
   },
@@ -807,11 +855,20 @@
   "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel": {
     "defaultMessage": "Environment"
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envModeFile": {
+    "defaultMessage": "Env file"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envModeOverride": {
+    "defaultMessage": "Env override"
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.envStrategyMerge": {
     "defaultMessage": "Merge"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.envStrategyOverride": {
     "defaultMessage": "Override"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.environmentConfigurationTitle": {
+    "defaultMessage": "Environment configuration"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.fileBindsTitle": {
     "defaultMessage": "File Mounts Configuration"
