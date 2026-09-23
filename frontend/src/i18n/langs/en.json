@@ -542,15 +542,6 @@
   "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.apps.deployments.deployment-details.DeploymentDetails.confirmLabel": {
-    "defaultMessage": "Confirm"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.description": {
-    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.title": {
-    "defaultMessage": "Upgrade Deployment"
-  },
   "components.apps.deployments.deployment-details.DeploymentDetails.containerWithIndex": {
     "defaultMessage": "Container {index}"
   },
@@ -572,29 +563,17 @@
   "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds": {
     "defaultMessage": "File Binds"
   },
-  "components.apps.deployments.deployment-details.DeploymentDetails.incompatibleVersion": {
-    "defaultMessage": "{version} (Incompatible system model)"
-  },
   "components.apps.deployments.deployment-details.DeploymentDetails.networks": {
     "defaultMessage": "Networks"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.noContainers": {
     "defaultMessage": "No containers"
   },
-  "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesAvailable": {
-    "defaultMessage": "No Release Versions Available"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesFoundMatching": {
-    "defaultMessage": "No release versions found matching \"{inputValue}\""
-  },
   "components.apps.deployments.deployment-details.DeploymentDetails.none": {
     "defaultMessage": "None"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.releaseVersion": {
     "defaultMessage": "v.{version}"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.selectOption": {
-    "defaultMessage": "Select a Release Version"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.unnamed": {
     "defaultMessage": "Unnamed"
@@ -753,6 +732,72 @@
   },
   "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.title": {
     "defaultMessage": "Edit Deployment Campaign"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.confirmLabel": {
+    "defaultMessage": "Upgrade"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel": {
+    "defaultMessage": "Container: {containerName}"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.description": {
+    "defaultMessage": "Upgrade deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envJsonLabel": {
+    "defaultMessage": "Environment"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeFile": {
+    "defaultMessage": "Env file"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeNone": {
+    "defaultMessage": "No config"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeOverride": {
+    "defaultMessage": "Env override"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envStrategyMerge": {
+    "defaultMessage": "Merge"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envStrategyOverride": {
+    "defaultMessage": "Override"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.environmentConfigurationTitle": {
+    "defaultMessage": "Environment configuration"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.fileBindsTitle": {
+    "defaultMessage": "File Mounts Configuration"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.incompatibleVersion": {
+    "defaultMessage": "{version} (Incompatible system model)"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.invalidJsonError": {
+    "defaultMessage": "Invalid JSON. Expected a JSON object mapping keys to string values."
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.missingRequiredBindsFeedback": {
+    "defaultMessage": "Please configure a file source for all required file mounts."
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noFilesAvailableWarning": {
+    "defaultMessage": "This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesAvailable": {
+    "defaultMessage": "No Release Versions Available"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesFoundMatching": {
+    "defaultMessage": "No release versions found matching \"{inputValue}\""
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectEnvStrategy": {
+    "defaultMessage": "Env Strategy"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectOption": {
+    "defaultMessage": "Select a Release Version"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectRelease": {
+    "defaultMessage": "Target Release"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.title": {
+    "defaultMessage": "Upgrade Deployment"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.upgradeErrorFeedback": {
+    "defaultMessage": "Could not upgrade the deployment, please try again."
   },
   "components.apps.releases.application-devices-table.ApplicationDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
@@ -4666,12 +4711,6 @@
   },
   "pages.Deployment.stopErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
-  },
-  "pages.Deployment.upgradeErrorFeedback": {
-    "defaultMessage": "Could not upgrade the deployment, please try again."
-  },
-  "pages.Deployment.upgradeErrorOffline": {
-    "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
   "pages.DeploymentCampaign.deploymentCampaignNotFound.message": {
     "defaultMessage": "Return to the Deployment Campaign list."

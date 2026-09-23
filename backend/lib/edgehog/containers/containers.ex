@@ -234,7 +234,21 @@ defmodule Edgehog.Containers do
       update Deployment, :send_deployment, :send_deployment
 
       update Deployment, :upgrade_deployment, :upgrade_release do
-        relay_id_translations input: [target: :release]
+        relay_id_translations input: [
+                                target: :release,
+                                configs: [
+                                  container_id: :container,
+                                  file_binds: [
+                                    device_file_id: :device_file,
+                                    file_download_request_id: :file_download_request,
+                                    file_mount_id: :container_file_mount
+                                  ],
+                                  env_files: [
+                                    device_file_id: :device_file,
+                                    file_download_request_id: :file_download_request
+                                  ]
+                                ]
+                              ]
       end
 
       update Edgehog.Containers.FileBind, :mark_file_bind_as_uploaded, :mark_as_uploaded do

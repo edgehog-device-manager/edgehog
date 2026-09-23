@@ -156,7 +156,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
         assert data.id == file_bind.id
         assert data.deploymentId == deployment.id
         assert data.targetId == file_request.id
-        assert data.targetType == "request"
+        assert data.targetType == "storage"
         assert data.mountpoint == "/etc/app.conf"
 
         :ok
@@ -201,7 +201,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
       expect(CreateBind, :send_bind, fn _client, _device_id, data ->
         assert data.id == file_bind.id
         assert data.deploymentId == deployment.id
-        assert data.targetType == "request"
+        assert data.targetType == "storage"
         assert data.mountpoint == "/etc/app.conf"
 
         :ok

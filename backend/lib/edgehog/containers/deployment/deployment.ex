@@ -229,6 +229,16 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
+      argument :configs, {:array, Types.DeploymentConfig} do
+        description """
+        Per-container configuration overrides to apply to the new deployment.
+        The same as for :deploy action.
+        """
+
+        allow_nil? false
+        default []
+      end
+
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_upgrade}
 

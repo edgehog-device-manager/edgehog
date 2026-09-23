@@ -200,7 +200,7 @@ defmodule Edgehog.Containers.Container.Deployment.OrchestratorTest do
         assert data.id == file_bind.id
         assert data.deploymentId == deployment.id
         assert data.targetId == file_request.id
-        assert data.targetType == "request"
+        assert data.targetType == "storage"
         assert data.mountpoint == "/etc/app.conf"
 
         # Simulate the device reporting the bind through AvailableFileBinds

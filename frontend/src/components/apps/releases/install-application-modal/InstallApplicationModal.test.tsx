@@ -427,7 +427,7 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
         }),
       ),
     );
-    expect(fetchMock.mock.calls[0][1].body).toBeInstanceOf(File);
+    expect((fetchMock.mock.calls[0] as any)?.[1]?.body).toBeInstanceOf(File);
 
     const markUploadedOperation = relayEnvironment.mock.findOperation(
       (op) =>
