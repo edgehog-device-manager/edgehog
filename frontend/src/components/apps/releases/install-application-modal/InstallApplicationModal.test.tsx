@@ -32,6 +32,8 @@ const APPLICATIONS_QUERY_NAME =
   "InstallApplicationModal_GetApplicationsWithReleases_Query";
 const DEPLOY_RELEASE_MUTATION_NAME =
   "InstallApplicationModal_DeployRelease_Mutation";
+const MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME =
+  "InstallApplicationModal_markEnvFileAsUploaded_Mutation";
 
 const applicationsData = {
   device: {
@@ -288,4 +290,132 @@ it("deploys with an env file instead of env vars in env file mode", async () => 
   });
 
   await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
+});
+
+it("uploads an env file via presigned URL and marks it as uploaded", async () => {
+  const fetchMock = vi.fn(async () => ({ ok: true, statusText: "OK" }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  try {
+    const { relayEnvironment, onToggleModal } = renderModal();
+    resolveApplicationsQuery(relayEnvironment);
+
+    await screen.findByText("Install Application");
+
+    const [appCombobox] = screen.getAllByRole("combobox");
+    await selectEvent.select(appCombobox, "App One", {
+      container: document.body,
+    });
+    await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+      container: document.body,
+    });
+
+    await userEvent.click(screen.getByRole("radio", { name: "Env file" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Upload" }));
+    await userEvent.click(screen.getByText("File Picker"));
+
+    const envCard = await screen.findByTestId(
+      "container-env-files-container-1",
+    );
+    // The dropzone's hidden file input has no accessible name, so it cannot
+    // be queried via Testing Library roles.
+    // eslint-disable-next-line testing-library/no-node-access
+    const fileInput = envCard.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    expect(fileInput).not.toBeNull();
+    const file = new File(["FOO=bar"], ".env", { type: "text/plain" });
+    await userEvent.upload(fileInput, file);
+
+    await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+    const mutationOperation = relayEnvironment.mock.findOperation(
+      (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+    );
+    expect(mutationOperation.request.variables).toEqual({
+      input: {
+        deviceId: "device-1",
+        releaseId: "rel-3",
+        configs: [
+          {
+            containerId: "container-1",
+            envStrategy: "merge",
+            envFiles: [{}],
+          },
+        ],
+      },
+    });
+
+    act(() => {
+      relayEnvironment.mock.resolve(mutationOperation, {
+        data: {
+          deployRelease: {
+            result: {
+              id: "deployment-1",
+              state: "STARTED",
+              containerDeployments: {
+                edges: [
+                  {
+                    node: {
+                      id: "container-deployment-1",
+                      container: { id: "container-1" },
+                      fileBinds: [],
+                      envFiles: [
+                        {
+                          id: "env-file-1",
+                          uploaded: false,
+                          uploadUrl: "https://s3.example/upload",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            errors: [],
+          },
+        },
+      });
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://s3.example/upload",
+        expect.objectContaining({
+          method: "PUT",
+          headers: { "Content-Type": "text/plain" },
+        }),
+      ),
+    );
+    expect(fetchMock.mock.calls[0][1].body).toBeInstanceOf(File);
+
+    const markUploadedOperation = relayEnvironment.mock.findOperation(
+      (op) =>
+        op.request.node.params.name === MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME,
+    );
+    expect(markUploadedOperation.request.variables).toEqual({
+      id: "env-file-1",
+      input: {
+        fileName: ".env",
+        uncompressedFileSizeBytes: 7,
+        digest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+        encoding: "",
+      },
+    });
+
+    act(() => {
+      relayEnvironment.mock.resolve(markUploadedOperation, {
+        data: {
+          markEnvFileAsUploaded: {
+            result: { id: "env-file-1", uploaded: true, state: "CREATED" },
+            errors: [],
+          },
+        },
+      });
+    });
+
+    await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });

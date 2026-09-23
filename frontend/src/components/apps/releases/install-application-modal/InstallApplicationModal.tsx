@@ -32,6 +32,7 @@ import type {
   InstallApplicationModal_DeployRelease_Mutation,
 } from "@/api/__generated__/InstallApplicationModal_DeployRelease_Mutation.graphql";
 import type { InstallApplicationModal_markFileBindAsUploaded_Mutation } from "@/api/__generated__/InstallApplicationModal_markFileBindAsUploaded_Mutation.graphql";
+import type { InstallApplicationModal_markEnvFileAsUploaded_Mutation } from "@/api/__generated__/InstallApplicationModal_markEnvFileAsUploaded_Mutation.graphql";
 import { useNavigate, Route } from "@/Navigation";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import Select from "@/components/ui/select/Select";
@@ -40,6 +41,7 @@ import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 import Alert from "@/components/ui/alert/Alert";
 import EnvFileInput, {
   EnvFileInputRef,
+  EnvFilePendingUpload,
 } from "@/components/apps/containers/env-file-input/EnvFileInput";
 import FileMountInput, {
   FileBindResult,
@@ -138,12 +140,20 @@ const DEPLOY_RELEASE_MUTATION = graphql`
           edges {
             node {
               id
+              container {
+                id
+              }
               fileBinds {
                 id
                 fileMountId
                 fileMount {
                   id
                 }
+                uploaded
+                uploadUrl
+              }
+              envFiles {
+                id
                 uploaded
                 uploadUrl
               }
@@ -164,6 +174,24 @@ const MARK_FILE_BIND_AS_UPLOADED_MUTATION = graphql`
     $input: MarkFileBindAsUploadedInput!
   ) {
     markFileBindAsUploaded(id: $id, input: $input) {
+      result {
+        id
+        uploaded
+        state
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
+const MARK_ENV_FILE_AS_UPLOADED_MUTATION = graphql`
+  mutation InstallApplicationModal_markEnvFileAsUploaded_Mutation(
+    $id: ID!
+    $input: MarkEnvFileAsUploadedInput!
+  ) {
+    markEnvFileAsUploaded(id: $id, input: $input) {
       result {
         id
         uploaded
@@ -469,6 +497,11 @@ const InstallApplicationModal = ({
       MARK_FILE_BIND_AS_UPLOADED_MUTATION,
     );
 
+  const [markEnvFileAsUploaded] =
+    useMutation<InstallApplicationModal_markEnvFileAsUploaded_Mutation>(
+      MARK_ENV_FILE_AS_UPLOADED_MUTATION,
+    );
+
   const commitMarkFileBindAsUploaded = useCallback(
     (
       variables: InstallApplicationModal_markFileBindAsUploaded_Mutation["variables"],
@@ -490,6 +523,29 @@ const InstallApplicationModal = ({
         });
       }),
     [markFileBindAsUploaded],
+  );
+
+  const commitMarkEnvFileAsUploaded = useCallback(
+    (
+      variables: InstallApplicationModal_markEnvFileAsUploaded_Mutation["variables"],
+    ) =>
+      new Promise<void>((resolve, reject) => {
+        markEnvFileAsUploaded({
+          variables,
+          onCompleted: (data, errors) => {
+            if (errors?.length) {
+              return reject(new Error(errors.map((e) => e.message).join(", ")));
+            }
+            if (data?.markEnvFileAsUploaded?.result) {
+              resolve();
+            } else {
+              reject(new Error("Failed to mark env file as uploaded."));
+            }
+          },
+          onError: reject,
+        });
+      }),
+    [markEnvFileAsUploaded],
   );
 
   const handleAppChange = (option: SingleValue<SelectOption>) => {
@@ -551,6 +607,7 @@ const InstallApplicationModal = ({
 
     try {
       const pendingUploads: PendingUploadData[] = [];
+      const pendingEnvUploads: EnvFilePendingUpload[] = [];
       const mountSpecs: Record<string, FileBindSpecInput> = {};
       const envFileSpecs: Record<string, EnvFileSpecInput> = {};
 
@@ -589,6 +646,9 @@ const InstallApplicationModal = ({
             const res = await ref.getEnvFileSpec();
             if (res?.spec) {
               envFileSpecs[container.id] = res.spec;
+              if (res.pendingUpload) {
+                pendingEnvUploads.push(res.pendingUpload);
+              }
             }
           }
         }
@@ -604,8 +664,8 @@ const InstallApplicationModal = ({
           const hasEnv =
             envMode === "override" && !!parsedEnv && parsedEnv.length > 0;
           // Single optional env file per container. Upload-sourced specs are
-          // target-less here; their presigned PUT + markEnvFileAsUploaded
-          // follow-up is handled separately (see EnvFileInput.pendingUpload).
+          // target-less; their file content is PUT to the presigned upload
+          // URL returned by the deploy below, then marked as uploaded.
           const envFileSpec =
             envMode === "file" ? envFileSpecs[container.id] : undefined;
 
@@ -653,7 +713,7 @@ const InstallApplicationModal = ({
               );
             }
 
-            if (pendingUploads.length > 0) {
+            if (pendingUploads.length > 0 || pendingEnvUploads.length > 0) {
               try {
                 const containerDeployments =
                   deploymentResult.containerDeployments?.edges
@@ -694,6 +754,49 @@ const InstallApplicationModal = ({
 
                   await commitMarkFileBindAsUploaded({
                     id: matchingBind.id,
+                    input: {
+                      fileName: pending.fileName,
+                      uncompressedFileSizeBytes:
+                        pending.uncompressedFileSizeBytes,
+                      digest: pending.digest,
+                      encoding: pending.encoding,
+                    },
+                  });
+                }
+
+                for (const pending of pendingEnvUploads) {
+                  // pending.containerId and cd.container.id are both GraphQL
+                  // global IDs of the container, so they compare directly.
+                  const matchingDeployment = containerDeployments.find(
+                    (cd) => cd.container?.id === pending.containerId,
+                  );
+                  const matchingEnvFile = matchingDeployment?.envFiles?.find(
+                    (envFile) => envFile.uploadUrl,
+                  );
+
+                  if (!matchingEnvFile || !matchingEnvFile.uploadUrl) {
+                    throw new Error(
+                      `No presigned upload URL returned for env file of container ${pending.containerId}.`,
+                    );
+                  }
+
+                  const uploadRes = await fetch(matchingEnvFile.uploadUrl, {
+                    method: "PUT",
+                    body: pending.file,
+                    headers: {
+                      "Content-Type":
+                        pending.file.type || "application/octet-stream",
+                    },
+                  });
+
+                  if (!uploadRes.ok) {
+                    throw new Error(
+                      `Failed to upload ${pending.fileName} to S3 (${uploadRes.statusText}).`,
+                    );
+                  }
+
+                  await commitMarkEnvFileAsUploaded({
+                    id: matchingEnvFile.id,
                     input: {
                       fileName: pending.fileName,
                       uncompressedFileSizeBytes:
@@ -749,6 +852,7 @@ const InstallApplicationModal = ({
     deployRelease,
     deviceId,
     commitMarkFileBindAsUploaded,
+    commitMarkEnvFileAsUploaded,
     intl,
     resetSelections,
     setErrorFeedback,

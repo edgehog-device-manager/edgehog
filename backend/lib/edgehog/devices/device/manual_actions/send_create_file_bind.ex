@@ -58,7 +58,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateFileBind do
   defp fetch_bind_target_id(%{id: id}),
     do: {:error, "file bind #{id} has no target: the uploaded file was not provisioned"}
 
-  defp fetch_bind_target_type(%{device_file_id: nil}), do: {:ok, "request"}
-
+  # NOTE: for the time being the type is always storage. The ID is
+  # correctly resolved when using file download requests on the device
+  # side.
   defp fetch_bind_target_type(_file_bind), do: {:ok, "storage"}
 end

@@ -107,7 +107,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
          %{file_download_request_id: nil, device_file_id: nil} = file_bind,
          tenant
        ) do
-    loads = [:container_deployment, file_mount: [:default_file]]
+    loads = [:uploaded, container_deployment: [], file_mount: [:default_file]]
 
     with {:ok, file_bind} <- Ash.load(file_bind, loads, tenant: tenant),
          :needs_target <- check_still_needs_target(file_bind),
