@@ -858,6 +858,9 @@
   "components.apps.releases.install-application-modal.InstallApplicationModal.envModeFile": {
     "defaultMessage": "Env file"
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envModeNone": {
+    "defaultMessage": "No config"
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.envModeOverride": {
     "defaultMessage": "Env override"
   },
