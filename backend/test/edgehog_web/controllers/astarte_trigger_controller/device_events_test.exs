@@ -48,9 +48,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
       stub(Reconciler, :register_device, fn _device, _tenant -> :ok end)
       stub(Reconciler, :stop_device, fn _device, _tenant -> :ok end)
-      stub(Starter, :cook, fn _device -> {:ok, :mock_pid} end)
-      stub(Starter, :cook, fn _device, _opts -> {:ok, :mock_pid} end)
       stub(Reconciler, :start_link, fn _opts -> :ok end)
+      stub(Starter, :cook, fn _device -> {:ok, :mock_pid} end)
+
+      stub(Starter, :cook, fn device, opts ->
+        tenant = Keyword.fetch!(opts, :tenant)
+        assert %Edgehog.Tenants.Tenant{} = tenant
+        assert %Device{} = device
+        {:ok, :mock_pid}
+      end)
 
       {:ok, conn: conn, cluster: cluster, realm: realm, device: device, path: path}
     end
