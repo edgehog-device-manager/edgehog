@@ -185,6 +185,9 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
             mountpoint
             required
             defaultFileId
+            fileMode
+            userId
+            groupId
             defaultFile {
               id
               name
@@ -508,6 +511,9 @@ const ReuseContainerModal = ({
                       required: boolean;
                       defaultFileId?:
                         string | { id: string; value: string; label: string };
+                      fileMode?: number;
+                      userId?: number;
+                      groupId?: number;
                     }[]
                   >((fileMounts, edge) => {
                     const node = edge?.node;
@@ -531,6 +537,18 @@ const ReuseContainerModal = ({
                             ? { id: fileId, value: fileId, label: fileLabel }
                             : fileId
                           : undefined,
+                        fileMode:
+                          node.fileMode !== undefined && node.fileMode !== null
+                            ? node.fileMode
+                            : undefined,
+                        userId:
+                          node.userId !== undefined && node.userId !== null
+                            ? node.userId
+                            : undefined,
+                        groupId:
+                          node.groupId !== undefined && node.groupId !== null
+                            ? node.groupId
+                            : undefined,
                       });
                     }
 

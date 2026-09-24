@@ -1133,7 +1133,10 @@ input EnvFileSpecInput {
 }
 
 input FileBindSpecInput {
+  userId: Int
+  groupId: Int
   fileMountId: ID
+  fileMode: Int
   fileId: ID
   fileDownloadRequestId: ID
   deviceFileId: ID
@@ -1153,7 +1156,10 @@ type EnvFileSpec {
 }
 
 type FileBindSpec {
+  userId: Int
+  groupId: Int
   fileMountId: ID
+  fileMode: Int
   fileId: ID
   fileDownloadRequestId: ID
   deviceFileId: ID
@@ -1182,8 +1188,11 @@ input DeviceMappingDescInput {
 }
 
 input FileMountDescInput {
+  userId: Int
   required: Boolean
   mountpoint: String!
+  groupId: Int
+  fileMode: Int
   defaultFileId: ID
 }
 
@@ -2039,6 +2048,9 @@ enum FileBindSortField {
   UPLOADED
   STATE
   LAST_MESSAGE
+  FILE_MODE
+  USER_ID
+  GROUP_ID
   FILE_MOUNT_ID
   FILE_DOWNLOAD_REQUEST_ID
   DEVICE_FILE_ID
@@ -2095,6 +2107,45 @@ input FileBindFilterFileMountId {
   greaterThanOrEqual: ID
   isDistinctFrom: ID
   isNotDistinctFrom: ID
+}
+
+input FileBindFilterGroupId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input FileBindFilterUserId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input FileBindFilterFileMode {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
 }
 
 input FileBindFilterLastMessage {
@@ -2250,6 +2301,15 @@ input FileBindFilterInput {
 
   lastMessage: FileBindFilterLastMessage
 
+  "Optional POSIX file mode override for this deployment bind."
+  fileMode: FileBindFilterFileMode
+
+  "Optional POSIX user ID (UID) override for this deployment bind."
+  userId: FileBindFilterUserId
+
+  "Optional POSIX group ID (GID) override for this deployment bind."
+  groupId: FileBindFilterGroupId
+
   fileMountId: FileBindFilterFileMountId
 
   fileDownloadRequestId: FileBindFilterFileDownloadRequestId
@@ -2292,6 +2352,15 @@ type FileBind implements Node {
   state: String!
 
   lastMessage: String
+
+  "Optional POSIX file mode override for this deployment bind."
+  fileMode: Int
+
+  "Optional POSIX user ID (UID) override for this deployment bind."
+  userId: Int
+
+  "Optional POSIX group ID (GID) override for this deployment bind."
+  groupId: Int
 
   fileMountId: ID!
 
@@ -4781,6 +4850,9 @@ enum ContainerFileMountSortField {
   ID
   MOUNTPOINT
   REQUIRED
+  FILE_MODE
+  USER_ID
+  GROUP_ID
   CONTAINER_ID
   DEFAULT_FILE_ID
 }
@@ -4832,6 +4904,45 @@ input ContainerFileMountFilterContainerId {
   isNotDistinctFrom: ID
 }
 
+input ContainerFileMountFilterGroupId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFileMountFilterUserId {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerFileMountFilterFileMode {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
 input ContainerFileMountFilterRequired {
   isNil: Boolean
   eq: Boolean
@@ -4878,14 +4989,32 @@ input ContainerFileMountFilterId {
 
 input ContainerFileMountFilterInput {
   and: [ContainerFileMountFilterInput!]
+
   or: [ContainerFileMountFilterInput!]
+
   not: [ContainerFileMountFilterInput!]
+
   id: ContainerFileMountFilterId
+
   mountpoint: ContainerFileMountFilterMountpoint
+
   required: ContainerFileMountFilterRequired
+
+  "Optional POSIX file mode (decimal representation of octal mode, e.g. 511 for 0777)."
+  fileMode: ContainerFileMountFilterFileMode
+
+  "Optional POSIX user ID (UID) of the file owner."
+  userId: ContainerFileMountFilterUserId
+
+  "Optional POSIX group ID (GID) of the file group."
+  groupId: ContainerFileMountFilterGroupId
+
   containerId: ContainerFileMountFilterContainerId
+
   defaultFileId: ContainerFileMountFilterDefaultFileId
+
   container: ContainerFilterInput
+
   defaultFile: FileFilterInput
 }
 
@@ -4896,11 +5025,26 @@ input ContainerFileMountSortInput {
 
 type ContainerFileMount {
   id: ID!
+
   mountpoint: String!
+
   required: Boolean!
+
+  "Optional POSIX file mode (decimal representation of octal mode, e.g. 511 for 0777)."
+  fileMode: Int
+
+  "Optional POSIX user ID (UID) of the file owner."
+  userId: Int
+
+  "Optional POSIX group ID (GID) of the file group."
+  groupId: Int
+
   containerId: ID!
+
   defaultFileId: ID
+
   container: Container!
+
   defaultFile: File
 }
 

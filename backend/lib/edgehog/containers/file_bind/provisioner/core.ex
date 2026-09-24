@@ -147,15 +147,19 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
     file_path = FileBindStorage.file_path(tenant_id, file_bind.id, file_bind.file_name)
 
     with {:ok, %{get_url: url}} <- FileBindStorage.read_presigned_url(file_path) do
-      params = %{
-        url: url,
-        file_name: file_bind.file_name,
-        uncompressed_file_size_bytes: file_bind.uncompressed_file_size_bytes,
-        digest: file_bind.digest,
-        encoding: file_bind.encoding || "",
-        destination_type: :storage,
-        device_id: container_deployment.device_id
-      }
+      params =
+        %{
+          url: url,
+          file_name: file_bind.file_name,
+          uncompressed_file_size_bytes: file_bind.uncompressed_file_size_bytes,
+          digest: file_bind.digest,
+          encoding: file_bind.encoding || "",
+          destination_type: :storage,
+          device_id: container_deployment.device_id
+        }
+        |> maybe_put_permission(file_bind, :file_mode)
+        |> maybe_put_permission(file_bind, :user_id)
+        |> maybe_put_permission(file_bind, :group_id)
 
       Files.create_file_bind_file_download_request(params, tenant: tenant)
     end
@@ -164,13 +168,32 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   defp create_managed_from_default(file, file_bind, tenant) do
     %{container_deployment: container_deployment} = file_bind
 
+    params =
+      %{
+        destination_type: :storage,
+        file_id: file.id,
+        device_id: container_deployment.device_id
+      }
+      |> maybe_put_permission(file_bind, :file_mode)
+      |> maybe_put_permission(file_bind, :user_id)
+      |> maybe_put_permission(file_bind, :group_id)
+
     FileDownloadRequest
-    |> Ash.Changeset.for_create(
-      :managed,
-      %{destination_type: :storage, file_id: file.id, device_id: container_deployment.device_id},
-      tenant: tenant
-    )
+    |> Ash.Changeset.for_create(:managed, params, tenant: tenant)
     |> Ash.create(tenant: tenant)
+  end
+
+  defp maybe_put_permission(params, file_bind, key) do
+    val =
+      with :error <- Map.fetch(file_bind, key),
+           {:ok, mount} <- Map.fetch(file_bind, :file_mount) do
+        Map.fetch(mount, key)
+      end
+
+    case val do
+      :error -> params
+      {:ok, val} -> Map.put(params, key, val)
+    end
   end
 
   defp link_file_bind(file_bind, file_download_request, tenant) do

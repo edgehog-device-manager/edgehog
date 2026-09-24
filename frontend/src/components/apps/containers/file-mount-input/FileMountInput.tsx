@@ -29,8 +29,17 @@ import React, {
 } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
-import { Card, Nav, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Nav,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-bootstrap";
 import { SingleValue } from "react-select";
+
+import FilePermissionsInput from "@/components/ui/file-permissions/FilePermissionsInput";
+import { modeToOctal } from "@/lib/permissions";
 
 import type { FileBindSpecInput } from "@/api/__generated__/InstallApplicationModal_DeployRelease_Mutation.graphql";
 import type {
@@ -164,6 +173,9 @@ export type FileMountInputProps = {
   deviceId: string;
   defaultFileId?: string | null;
   defaultFileName?: string | null;
+  defaultFileMode?: number | null;
+  defaultUserId?: number | null;
+  defaultGroupId?: number | null;
   deviceFiles?: DeviceFileItem[];
   fileDownloadRequests?: DownloadRequestItem[];
   onChange?: (result: FileBindResult | null, isValid: boolean) => void;
@@ -316,6 +328,9 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
       deviceId,
       defaultFileId,
       defaultFileName,
+      defaultFileMode,
+      defaultUserId,
+      defaultGroupId,
       deviceFiles = [],
       fileDownloadRequests = [],
       onChange,
@@ -347,6 +362,58 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
     const [uploadFiles, setUploadFiles] = useState<File[]>([]);
 
     const customFileName = "";
+
+    const [prevDefaults, setPrevDefaults] = useState({
+      defaultFileMode,
+      defaultUserId,
+      defaultGroupId,
+    });
+
+    const [overrideFileMode, setOverrideFileMode] = useState<
+      number | undefined
+    >(
+      defaultFileMode !== undefined && defaultFileMode !== null
+        ? defaultFileMode
+        : undefined,
+    );
+    const [overrideUserId, setOverrideUserId] = useState<number | undefined>(
+      defaultUserId !== undefined && defaultUserId !== null
+        ? defaultUserId
+        : undefined,
+    );
+    const [overrideGroupId, setOverrideGroupId] = useState<number | undefined>(
+      defaultGroupId !== undefined && defaultGroupId !== null
+        ? defaultGroupId
+        : undefined,
+    );
+    const [isPermissionsOpen, setIsPermissionsOpen] = useState<boolean>(false);
+
+    if (
+      defaultFileMode !== prevDefaults.defaultFileMode ||
+      defaultUserId !== prevDefaults.defaultUserId ||
+      defaultGroupId !== prevDefaults.defaultGroupId
+    ) {
+      setPrevDefaults({
+        defaultFileMode,
+        defaultUserId,
+        defaultGroupId,
+      });
+      setOverrideFileMode(
+        defaultFileMode !== undefined && defaultFileMode !== null
+          ? defaultFileMode
+          : undefined,
+      );
+      setOverrideUserId(
+        defaultUserId !== undefined && defaultUserId !== null
+          ? defaultUserId
+          : undefined,
+      );
+      setOverrideGroupId(
+        defaultGroupId !== undefined && defaultGroupId !== null
+          ? defaultGroupId
+          : undefined,
+      );
+    }
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -574,6 +641,9 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
                 deviceId,
                 fileId,
                 destinationType: "STORAGE",
+                fileMode: overrideFileMode,
+                userId: overrideUserId,
+                groupId: overrideGroupId,
               },
             },
             onCompleted: (data, errors) => {
@@ -611,6 +681,12 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
 
         const hasDefault = !!defaultFileId || !!defaultFileName;
 
+        const permissions = {
+          fileMode: overrideFileMode,
+          userId: overrideUserId,
+          groupId: overrideGroupId,
+        };
+
         if (mode === "device") {
           if (!selectedDeviceFile || selectedDeviceFile === "none") {
             if (required && !hasDefault) {
@@ -620,6 +696,15 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
                   defaultMessage: "This file mount is required.",
                 }),
               );
+              return null;
+            }
+
+            if (hasDefault) {
+              return {
+                spec: {
+                  fileMountId,
+                },
+              };
             }
 
             return null;
@@ -658,6 +743,16 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
                   defaultMessage: "Please select a repository file.",
                 }),
               );
+              return null;
+            }
+
+            if (hasDefault) {
+              return {
+                spec: {
+                  fileMountId,
+                  ...permissions,
+                },
+              };
             }
 
             return null;
@@ -680,6 +775,7 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
               spec: {
                 fileMountId,
                 fileDownloadRequestId: result.id,
+                ...permissions,
               },
             };
           } catch (error: any) {
@@ -758,6 +854,7 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
             return {
               spec: {
                 fileMountId,
+                ...permissions,
               },
               pendingUpload: {
                 fileMountId,
@@ -788,6 +885,9 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
         languageHint,
         mode,
         mountpoint,
+        overrideFileMode,
+        overrideGroupId,
+        overrideUserId,
         required,
         selectedDeviceFile,
         selectedRepositoryFileId,
@@ -1168,6 +1268,67 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
                 </Stack>
               )}
             </>
+          )}
+
+          {(mode === "repository" || mode === "upload") && (
+            <div className="mt-3 pt-3 border-top">
+              <div className="d-flex align-items-center justify-content-between">
+                <div className="d-flex align-items-center gap-2">
+                  <span className="fw-semibold small">
+                    <FormattedMessage
+                      id="components.apps.containers.file-mount-input.FileMountInput.permissionsHeader"
+                      defaultMessage="Permissions & Ownership"
+                    />
+                  </span>
+                  {overrideFileMode !== undefined ? (
+                    <span className="badge bg-light text-dark border font-monospace">
+                      {modeToOctal(overrideFileMode)}
+                    </span>
+                  ) : (
+                    <span className="text-muted small fst-italic">
+                      <FormattedMessage
+                        id="components.apps.containers.file-mount-input.FileMountInput.defaultPermissions"
+                        defaultMessage="(Default)"
+                      />
+                    </span>
+                  )}
+                </div>
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="p-0 text-decoration-none"
+                  onClick={() => setIsPermissionsOpen((prev) => !prev)}
+                  disabled={disabled || isLoading}
+                >
+                  {isPermissionsOpen ? (
+                    <FormattedMessage
+                      id="components.apps.containers.file-mount-input.FileMountInput.hidePermissions"
+                      defaultMessage="Hide"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="components.apps.containers.file-mount-input.FileMountInput.customizePermissions"
+                      defaultMessage="Customize"
+                    />
+                  )}
+                </Button>
+              </div>
+
+              {isPermissionsOpen && (
+                <div className="mt-3 p-3 bg-light border rounded">
+                  <FilePermissionsInput
+                    idPrefix={`deploy-mount-${fileMountId}`}
+                    fileMode={overrideFileMode}
+                    userId={overrideUserId}
+                    groupId={overrideGroupId}
+                    onFileModeChange={setOverrideFileMode}
+                    onUserIdChange={setOverrideUserId}
+                    onGroupIdChange={setOverrideGroupId}
+                    disabled={disabled || isLoading}
+                  />
+                </div>
+              )}
+            </div>
           )}
         </Card.Body>
       </Card>

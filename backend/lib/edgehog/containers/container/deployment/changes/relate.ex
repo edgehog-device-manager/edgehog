@@ -165,11 +165,25 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
   defp relate_file_binds(file_binds, device, container, _tenant) do
     file_binds = file_binds || []
-    explicit = Enum.map(file_binds, &Map.put(&1, :device_id, device.id))
+
+    mounts_by_id =
+      container.file_mounts
+      |> List.wrap()
+      |> Map.new(&{&1.id, &1})
+
+    explicit =
+      Enum.map(file_binds, fn bind ->
+        mount_id = get_value(bind, :file_mount_id)
+        mount = Map.get(mounts_by_id, mount_id)
+
+        bind
+        |> Map.put(:device_id, device.id)
+        |> resolve_bind_permissions(mount)
+      end)
 
     explicit_ids =
       explicit
-      |> Enum.map(& &1.file_mount_id)
+      |> Enum.map(&get_value(&1, :file_mount_id))
       |> Enum.reject(&is_nil/1)
       |> MapSet.new()
 
@@ -182,12 +196,35 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
     explicit ++ default_binds
   end
 
+  defp resolve_bind_permissions(bind, nil), do: bind
+
+  defp resolve_bind_permissions(bind, mount) do
+    file_mode = get_value(bind, :file_mode) || mount.file_mode
+    user_id = get_value(bind, :user_id) || mount.user_id
+    group_id = get_value(bind, :group_id) || mount.group_id
+
+    bind
+    |> maybe_put(:file_mode, file_mode)
+    |> maybe_put(:user_id, user_id)
+    |> maybe_put(:group_id, group_id)
+  end
+
   defp default_file_bind(file_mount, device) do
     %{
       file_mount_id: file_mount.id,
       device_id: device.id
     }
+    |> maybe_put(:file_mode, file_mount.file_mode)
+    |> maybe_put(:user_id, file_mount.user_id)
+    |> maybe_put(:group_id, file_mount.group_id)
   end
+
+  defp get_value(map, key) when is_map(map) do
+    Map.get(map, key, Map.get(map, to_string(key)))
+  end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, val), do: Map.put(map, key, val)
 
   defp resolve_env(changeset, container) do
     deploy_env = Ash.Changeset.get_argument(changeset, :env) || []

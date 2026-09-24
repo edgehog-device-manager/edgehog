@@ -46,6 +46,18 @@ defmodule Edgehog.Containers.Types.FileMount do
         default_file_id: [
           type: :uuid,
           allow_nil?: true
+        ],
+        file_mode: [
+          type: :integer,
+          allow_nil?: true
+        ],
+        user_id: [
+          type: :integer,
+          allow_nil?: true
+        ],
+        group_id: [
+          type: :integer,
+          allow_nil?: true
         ]
       ]
     ]

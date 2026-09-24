@@ -30,7 +30,19 @@ defmodule Edgehog.Containers.Container.FileMount do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:mountpoint, :required, :container_id, :default_file_id]]
+    defaults [
+      :read,
+      :destroy,
+      create: [
+        :mountpoint,
+        :required,
+        :container_id,
+        :default_file_id,
+        :file_mode,
+        :user_id,
+        :group_id
+      ]
+    ]
   end
 
   validations do
@@ -55,6 +67,24 @@ defmodule Edgehog.Containers.Container.FileMount do
       default true
       allow_nil? false
       public? true
+    end
+
+    attribute :file_mode, :integer do
+      description "Optional POSIX file mode (decimal representation of octal mode, e.g. 511 for 0777)."
+      public? true
+      allow_nil? true
+    end
+
+    attribute :user_id, :integer do
+      description "Optional POSIX user ID (UID) of the file owner."
+      public? true
+      allow_nil? true
+    end
+
+    attribute :group_id, :integer do
+      description "Optional POSIX group ID (GID) of the file group."
+      public? true
+      allow_nil? true
     end
 
     timestamps()

@@ -214,6 +214,62 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
       assert updated.file_download_request_id != nil
     end
 
+    test "send_to_device/2 forwards permissions to the created download request",
+         context do
+      %{tenant: tenant, device: device, deployment: deployment, container: container} = context
+
+      %{file_mounts: [file_mount]} = container
+
+      {:ok, container_deployment} =
+        Deployment
+        |> Ash.Changeset.for_create(
+          :deploy,
+          [
+            container: container,
+            device: device,
+            deployment: deployment,
+            file_binds: [
+              %{
+                file_mount_id: file_mount.id,
+                file_mode: 493,
+                user_id: 1000,
+                group_id: 1000
+              }
+            ]
+          ],
+          tenant: tenant
+        )
+        |> Ash.create()
+
+      [file_bind] =
+        Ash.load!(container_deployment, :file_binds, tenant: tenant).file_binds
+
+      {:ok, file_bind} =
+        file_bind
+        |> Ash.Changeset.for_update(:mark_as_uploaded, %{
+          file_name: "app.conf",
+          uncompressed_file_size_bytes: 128,
+          digest: "sha256:abcd",
+          encoding: ""
+        })
+        |> Ash.update(tenant: tenant)
+
+      expect(CreateBind, :send_bind, fn _client, _device_id, _data -> :ok end)
+
+      assert :ok == Core.send_to_device(file_bind, tenant: tenant, deployment: deployment)
+
+      updated = Ash.get!(Edgehog.Containers.FileBind, file_bind.id, tenant: tenant)
+
+      request =
+        Ash.get!(Edgehog.Files.FileDownloadRequest, updated.file_download_request_id,
+          tenant: tenant
+        )
+
+      assert request.file_mode == 493
+      assert request.user_id == 1000
+      assert request.group_id == 1000
+    end
+
     test "send_to_device/2 returns an error when the file was not uploaded", context do
       %{tenant: tenant, device: device, deployment: deployment, container: container} = context
 

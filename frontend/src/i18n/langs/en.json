@@ -62,6 +62,9 @@
   "components.apps.containers.container-details.ContainerDetails.cpusetCpusLabel": {
     "defaultMessage": "Cpu Sets"
   },
+  "components.apps.containers.container-details.ContainerDetails.defaultPerms": {
+    "defaultMessage": "Default mode"
+  },
   "components.apps.containers.container-details.ContainerDetails.deviceCgroupRulesLabel": {
     "defaultMessage": "Device Cgroup Rules"
   },
@@ -112,6 +115,9 @@
   },
   "components.apps.containers.container-details.ContainerDetails.fileMountMountpointLabel": {
     "defaultMessage": "Mountpoint"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountPermissionsLabel": {
+    "defaultMessage": "Permissions"
   },
   "components.apps.containers.container-details.ContainerDetails.fileMountRequiredLabel": {
     "defaultMessage": "Required"
@@ -394,8 +400,14 @@
   "components.apps.containers.env-file-input.EnvFileInput.uploadMode": {
     "defaultMessage": "Upload"
   },
+  "components.apps.containers.file-mount-input.FileMountInput.customizePermissions": {
+    "defaultMessage": "Customize"
+  },
   "components.apps.containers.file-mount-input.FileMountInput.defaultFileBadge": {
     "defaultMessage": "Default: {name}"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.defaultPermissions": {
+    "defaultMessage": "(Default)"
   },
   "components.apps.containers.file-mount-input.FileMountInput.deviceMode": {
     "defaultMessage": "Device File"
@@ -406,6 +418,9 @@
   "components.apps.containers.file-mount-input.FileMountInput.filePickerSubTab": {
     "defaultMessage": "File Picker"
   },
+  "components.apps.containers.file-mount-input.FileMountInput.hidePermissions": {
+    "defaultMessage": "Hide"
+  },
   "components.apps.containers.file-mount-input.FileMountInput.languageHintLabel": {
     "defaultMessage": "Language Format:"
   },
@@ -414,6 +429,9 @@
   },
   "components.apps.containers.file-mount-input.FileMountInput.optionalBadge": {
     "defaultMessage": "Optional"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.permissionsHeader": {
+    "defaultMessage": "Permissions & Ownership"
   },
   "components.apps.containers.file-mount-input.FileMountInput.processing": {
     "defaultMessage": "Processing..."
@@ -2248,6 +2266,57 @@
   "components.ui.field-help.FieldHelp.exampleTitle": {
     "defaultMessage": "Example:"
   },
+  "components.ui.file-permissions.FileModeSelector.clear": {
+    "defaultMessage": "Clear"
+  },
+  "components.ui.file-permissions.FileModeSelector.executeAction": {
+    "defaultMessage": "Execute (x)"
+  },
+  "components.ui.file-permissions.FileModeSelector.groupTarget": {
+    "defaultMessage": "Group"
+  },
+  "components.ui.file-permissions.FileModeSelector.invalidOctal": {
+    "defaultMessage": "Valid: 000-777"
+  },
+  "components.ui.file-permissions.FileModeSelector.octalNotation": {
+    "defaultMessage": "Octal Notation"
+  },
+  "components.ui.file-permissions.FileModeSelector.othersTarget": {
+    "defaultMessage": "Others (Global)"
+  },
+  "components.ui.file-permissions.FileModeSelector.presets": {
+    "defaultMessage": "Presets:"
+  },
+  "components.ui.file-permissions.FileModeSelector.readAction": {
+    "defaultMessage": "Read (r)"
+  },
+  "components.ui.file-permissions.FileModeSelector.scope": {
+    "defaultMessage": "Scope"
+  },
+  "components.ui.file-permissions.FileModeSelector.symbolic": {
+    "defaultMessage": "Symbolic"
+  },
+  "components.ui.file-permissions.FileModeSelector.userTarget": {
+    "defaultMessage": "User (Owner)"
+  },
+  "components.ui.file-permissions.FileModeSelector.writeAction": {
+    "defaultMessage": "Write (w)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.fileMode": {
+    "defaultMessage": "File Mode (Permissions)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.groupId": {
+    "defaultMessage": "Group ID (GID)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.groupIdHelp": {
+    "defaultMessage": "Leave empty for device runtime default"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.userId": {
+    "defaultMessage": "Owner User ID (UID)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.userIdHelp": {
+    "defaultMessage": "Leave empty for device runtime default"
+  },
   "components.ui.infinite-table.InfiniteTable.noRecords": {
     "defaultMessage": "No records to display."
   },
@@ -2397,6 +2466,18 @@
   },
   "forms.CreateContainer.fileMountMountpointLabel": {
     "defaultMessage": "Mountpoint"
+  },
+  "forms.CreateContainer.fileMountPermissionsNoFileTooltip": {
+    "defaultMessage": "Select a default file to configure permissions"
+  },
+  "forms.CreateContainer.fileMountPermissionsTooltip": {
+    "defaultMessage": "Configure File Permissions (mode, UID, GID)"
+  },
+  "forms.CreateContainer.fileMountPermsDefault": {
+    "defaultMessage": "Permissions"
+  },
+  "forms.CreateContainer.fileMountPermsSet": {
+    "defaultMessage": "Perms: {mode}"
   },
   "forms.CreateContainer.fileMountRequiredLabel": {
     "defaultMessage": "Required"

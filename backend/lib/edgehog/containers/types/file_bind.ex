@@ -40,6 +40,18 @@ defmodule Edgehog.Containers.Types.FileBind do
         ],
         file_mount_id: [
           type: :uuid
+        ],
+        file_mode: [
+          type: :integer,
+          allow_nil?: true
+        ],
+        user_id: [
+          type: :integer,
+          allow_nil?: true
+        ],
+        group_id: [
+          type: :integer,
+          allow_nil?: true
         ]
       ]
     ]

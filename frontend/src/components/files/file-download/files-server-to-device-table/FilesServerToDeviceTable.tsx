@@ -25,6 +25,7 @@ import type { FilesServerToDeviceTab_fileDownloadRequests$data } from "@/api/__g
 import RequestStatus from "@/components/files/request-status/request-status/RequestStatus";
 import Table, { createColumnHelper } from "@/components/ui/table/Table";
 import { formatFileSize } from "@/lib/files";
+import { modeToOctal, modeToSymbolic } from "@/lib/permissions";
 import { Link, Route } from "@/Navigation";
 
 type FileDownloadRequestNode = NonNullable<
@@ -260,7 +261,7 @@ const columns = [
     cell: ({ getValue }) => {
       const fileMode = getValue();
 
-      if (fileMode === 0) {
+      if (fileMode === 0 || fileMode === null || fileMode === undefined) {
         return (
           <span className="text-muted">
             <FormattedMessage
@@ -271,7 +272,11 @@ const columns = [
         );
       }
 
-      return fileMode;
+      return (
+        <span className="font-monospace">
+          {modeToOctal(fileMode)} ({modeToSymbolic(fileMode)})
+        </span>
+      );
     },
   }),
   columnHelper.accessor("responseMessage", {

@@ -223,6 +223,111 @@ defmodule Edgehog.Containers.Container.Deployment.FileMountAndEnvTest do
       container_deployment = Ash.load!(container_deployment, :file_binds, tenant: tenant)
       assert container_deployment.file_binds == []
     end
+
+    test "inherits permissions from file mount to file bind and passes to file download request",
+         context do
+      %{tenant: tenant, device: device, default_file: file, deployment: deployment} = context
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [
+            %{
+              mountpoint: "/etc/app.conf",
+              required: true,
+              default_file_id: file.id,
+              file_mode: 493,
+              user_id: 1000,
+              group_id: 1000
+            }
+          ]
+        )
+
+      {:ok, container_deployment} =
+        Deployment
+        |> Ash.Changeset.for_create(
+          :deploy,
+          deploy_params(container, device, deployment, []),
+          tenant: tenant
+        )
+        |> Ash.create()
+
+      container_deployment =
+        Ash.load!(container_deployment, [file_binds: [file_mount: :mountpoint]], tenant: tenant)
+
+      [file_bind] = container_deployment.file_binds
+      assert file_bind.file_mode == 493
+      assert file_bind.user_id == 1000
+      assert file_bind.group_id == 1000
+
+      Mimic.stub(CreateBind, :send_bind, fn _, _, _ -> :ok end)
+
+      :ok =
+        Core.send_to_device(file_bind,
+          tenant: tenant,
+          deployment: deployment
+        )
+
+      file_bind = Ash.get!(FileBind, file_bind.id, tenant: tenant)
+
+      request =
+        Ash.get!(StoredFileDownloadRequest, file_bind.file_download_request_id, tenant: tenant)
+
+      assert request.file_mode == 493
+      assert request.user_id == 1000
+      assert request.group_id == 1000
+    end
+
+    test "overrides file mount permissions with deploy-time file bind permissions", context do
+      %{tenant: tenant, device: device, default_file: file, deployment: deployment} = context
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [
+            %{
+              mountpoint: "/etc/app.conf",
+              required: true,
+              default_file_id: file.id,
+              file_mode: 493,
+              user_id: 1000,
+              group_id: 1000
+            }
+          ]
+        )
+
+      [mount] = container.file_mounts
+
+      {:ok, container_deployment} =
+        Deployment
+        |> Ash.Changeset.for_create(
+          :deploy,
+          deploy_params(
+            container,
+            device,
+            deployment,
+            file_binds: [
+              %{
+                file_mount_id: mount.id,
+                file_id: file.id,
+                file_mode: 511,
+                user_id: 0,
+                group_id: 0
+              }
+            ]
+          ),
+          tenant: tenant
+        )
+        |> Ash.create()
+
+      container_deployment =
+        Ash.load!(container_deployment, [:file_binds], tenant: tenant)
+
+      [file_bind] = container_deployment.file_binds
+      assert file_bind.file_mode == 511
+      assert file_bind.user_id == 0
+      assert file_bind.group_id == 0
+    end
   end
 
   describe "deploy with environment" do

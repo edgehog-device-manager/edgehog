@@ -25,6 +25,8 @@ import {
 } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
+import { modeToOctal, modeToSymbolic } from "@/lib/permissions";
+
 import type {
   ContainerDetailsFragment$data,
   ContainerDetailsFragment$key,
@@ -624,6 +626,9 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
           id
           mountpoint
           required
+          fileMode
+          userId
+          groupId
           defaultFile {
             id
             name
@@ -1605,6 +1610,12 @@ const FileMountDetails = ({
           <Col>
             <FormattedMessage {...messages.fileMountDefaultFileLabel} />
           </Col>
+          <Col xs="auto" style={{ minWidth: 220 }}>
+            <FormattedMessage
+              id="components.apps.containers.container-details.ContainerDetails.fileMountPermissionsLabel"
+              defaultMessage="Permissions"
+            />
+          </Col>
           <Col xs="auto" style={{ visibility: "hidden" }} aria-hidden="true">
             <div
               className="d-flex align-items-center"
@@ -1637,6 +1648,37 @@ const FileMountDetails = ({
 
               <Col>
                 <Form.Control readOnly value={defaultFileLabel} />
+              </Col>
+
+              <Col xs="auto" style={{ minWidth: 220 }}>
+                <div
+                  className="d-flex align-items-center gap-1 font-monospace small"
+                  style={{ minHeight: "38px" }}
+                >
+                  {!mount.defaultFile ? (
+                    <span className="text-muted">-</span>
+                  ) : mount.fileMode !== undefined &&
+                    mount.fileMode !== null ? (
+                    <span className="badge bg-light text-dark border">
+                      {modeToOctal(mount.fileMode)} (
+                      {modeToSymbolic(mount.fileMode)})
+                    </span>
+                  ) : (
+                    <span className="text-muted fst-italic">
+                      <FormattedMessage
+                        id="components.apps.containers.container-details.ContainerDetails.defaultPerms"
+                        defaultMessage="Default mode"
+                      />
+                    </span>
+                  )}
+                  {mount.defaultFile &&
+                  ((mount.userId !== undefined && mount.userId !== null) ||
+                    (mount.groupId !== undefined && mount.groupId !== null)) ? (
+                    <span className="text-muted ms-1">
+                      (UID: {mount.userId ?? "-"} / GID: {mount.groupId ?? "-"})
+                    </span>
+                  ) : null}
+                </div>
               </Col>
 
               <Col xs="auto">

@@ -114,6 +114,9 @@ const GET_UPGRADE_DATA_QUERY = graphql`
                         mountpoint
                         required
                         defaultFileId
+                        fileMode
+                        userId
+                        groupId
                         defaultFile {
                           id
                           name
@@ -1197,6 +1200,9 @@ const UpgradeDeploymentModal = ({
                             deviceId={deviceId}
                             defaultFileId={mount.defaultFileId}
                             defaultFileName={mount.defaultFile?.name}
+                            defaultFileMode={mount.fileMode}
+                            defaultUserId={mount.userId}
+                            defaultGroupId={mount.groupId}
                             deviceFiles={deviceFiles}
                             fileDownloadRequests={fileDownloadRequests}
                             onChange={(result, isValid) =>

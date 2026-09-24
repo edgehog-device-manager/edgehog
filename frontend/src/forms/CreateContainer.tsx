@@ -25,8 +25,11 @@ import {
   useWatch,
   type UseFormReturn,
 } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 import { Card, Col, Container, Row } from "react-bootstrap";
+
+import FilePermissionsInput from "@/components/ui/file-permissions/FilePermissionsInput";
+import { modeToOctal } from "@/lib/permissions";
 
 import type {
   ContainerEnvVarInput,
@@ -185,6 +188,18 @@ const mapCreateContainerToInput = (
             ? ((mount.defaultFileId as { id?: string; value?: string }).value ??
               (mount.defaultFileId as { id?: string; value?: string }).id)
             : mount.defaultFileId) || undefined,
+        fileMode:
+          mount.fileMode !== undefined && mount.fileMode !== null
+            ? mount.fileMode
+            : undefined,
+        userId:
+          mount.userId !== undefined && mount.userId !== null
+            ? mount.userId
+            : undefined,
+        groupId:
+          mount.groupId !== undefined && mount.groupId !== null
+            ? mount.groupId
+            : undefined,
       }))
     : undefined;
 
@@ -2966,6 +2981,166 @@ const LoggingSection = ({ form, open, onToggle }: BaseSectionProps) => {
   );
 };
 
+const FileMountRow = ({
+  index,
+  error,
+  control,
+  register,
+  fileOptions,
+  setValue,
+  onRemove,
+}: {
+  index: number;
+  error?: any;
+  control: any;
+  register: any;
+  fileOptions: any;
+  setValue: any;
+  onRemove: () => void;
+}) => {
+  const intl = useIntl();
+  const [isPermsOpen, setIsPermsOpen] = useState(false);
+  const defaultFileId = useWatch({
+    control,
+    name: `fileMounts.${index}.defaultFileId`,
+  });
+  const fileMode = useWatch({ control, name: `fileMounts.${index}.fileMode` });
+  const userId = useWatch({ control, name: `fileMounts.${index}.userId` });
+  const groupId = useWatch({ control, name: `fileMounts.${index}.groupId` });
+
+  const hasDefaultFile = !!defaultFileId;
+  const hasCustomPerms =
+    (fileMode !== undefined && fileMode !== null) ||
+    (userId !== undefined && userId !== null) ||
+    (groupId !== undefined && groupId !== null);
+
+  const modeBadge =
+    fileMode !== undefined && fileMode !== null ? modeToOctal(fileMode) : null;
+
+  return (
+    <div className="mb-3 border-bottom pb-3">
+      <Row className="align-items-start">
+        <Col>
+          <Form.Control
+            {...register(`fileMounts.${index}.mountpoint`)}
+            isInvalid={!!error?.mountpoint}
+            placeholder="e.g., /mnt/data"
+          />
+          <FormFeedback feedback={error?.mountpoint?.message} />
+        </Col>
+
+        <Col>
+          <SelectFormField
+            control={control}
+            options={fileOptions}
+            name={`fileMounts.${index}.defaultFileId`}
+            isClearable
+          />
+        </Col>
+
+        <Col xs="auto">
+          <div
+            className="d-flex align-items-center"
+            style={{ minHeight: "38px" }}
+          >
+            <Form.Check
+              type="checkbox"
+              className="text-nowrap"
+              id={`fileMount-required-${index}`}
+              label={
+                <FormattedMessage
+                  id="forms.CreateContainer.fileMountRequiredLabel"
+                  defaultMessage="Required"
+                />
+              }
+              {...register(`fileMounts.${index}.required`)}
+            />
+          </div>
+        </Col>
+
+        <Col xs="auto">
+          <Button
+            variant={
+              hasCustomPerms && hasDefaultFile ? "primary" : "outline-secondary"
+            }
+            size="sm"
+            type="button"
+            className="d-flex align-items-center"
+            style={{ minHeight: "38px" }}
+            onClick={() => setIsPermsOpen((prev) => !prev)}
+            disabled={!hasDefaultFile}
+            title={
+              !hasDefaultFile
+                ? intl.formatMessage({
+                    id: "forms.CreateContainer.fileMountPermissionsNoFileTooltip",
+                    defaultMessage:
+                      "Select a default file to configure permissions",
+                  })
+                : intl.formatMessage({
+                    id: "forms.CreateContainer.fileMountPermissionsTooltip",
+                    defaultMessage:
+                      "Configure File Permissions (mode, UID, GID)",
+                  })
+            }
+          >
+            {hasCustomPerms && hasDefaultFile ? (
+              <FormattedMessage
+                id="forms.CreateContainer.fileMountPermsSet"
+                defaultMessage="Perms: {mode}"
+                values={{ mode: modeBadge ?? "Custom" }}
+              />
+            ) : (
+              <FormattedMessage
+                id="forms.CreateContainer.fileMountPermsDefault"
+                defaultMessage="Permissions"
+              />
+            )}
+            <Icon
+              icon={isPermsOpen ? "caretUp" : "caretDown"}
+              className="ms-1"
+            />
+          </Button>
+        </Col>
+
+        <Col xs="auto">
+          <Button variant="shadow-danger" type="button" onClick={onRemove}>
+            <Icon className="text-danger" icon="delete" />
+          </Button>
+        </Col>
+      </Row>
+
+      {hasDefaultFile && isPermsOpen && (
+        <div className="mt-2 p-3 bg-light border rounded">
+          <FilePermissionsInput
+            idPrefix={`fileMount-${index}`}
+            fileMode={fileMode}
+            userId={userId}
+            groupId={groupId}
+            onFileModeChange={(val) =>
+              setValue(`fileMounts.${index}.fileMode`, val, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            onUserIdChange={(val) =>
+              setValue(`fileMounts.${index}.userId`, val, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            onGroupIdChange={(val) =>
+              setValue(`fileMounts.${index}.groupId`, val, {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+          />
+        </div>
+      )}
+    </div>
+  );
+};
+
 const FileMountsSection = ({
   form,
   queryRef,
@@ -2975,6 +3150,7 @@ const FileMountsSection = ({
   const {
     control,
     register,
+    setValue,
     formState: { errors },
   } = form;
 
@@ -3040,6 +3216,18 @@ const FileMountsSection = ({
                     style={{ visibility: "hidden" }}
                     aria-hidden="true"
                   >
+                    <Button size="sm" variant="outline-secondary" type="button">
+                      <FormattedMessage
+                        id="forms.CreateContainer.fileMountPermsDefault"
+                        defaultMessage="Permissions"
+                      />
+                    </Button>
+                  </Col>
+                  <Col
+                    xs="auto"
+                    style={{ visibility: "hidden" }}
+                    aria-hidden="true"
+                  >
                     <Button variant="shadow-danger" type="button">
                       <Icon className="text-danger" icon="delete" />
                     </Button>
@@ -3047,61 +3235,18 @@ const FileMountsSection = ({
                 </Row>
               )}
 
-              {fileMounts.fields.map((field, i) => {
-                const error = errors.fileMounts?.[i];
-
-                return (
-                  <Row className="mb-3 align-items-start" key={field.key}>
-                    <Col>
-                      <Form.Control
-                        {...register(`fileMounts.${i}.mountpoint`)}
-                        isInvalid={!!error?.mountpoint}
-                        placeholder="e.g., /mnt/data"
-                      />
-                      <FormFeedback feedback={error?.mountpoint?.message} />
-                    </Col>
-
-                    <Col>
-                      <SelectFormField
-                        control={control}
-                        options={fileOptions}
-                        name={`fileMounts.${i}.defaultFileId`}
-                        isClearable
-                      />
-                    </Col>
-
-                    <Col xs="auto">
-                      <div
-                        className="d-flex align-items-center"
-                        style={{ minHeight: "38px" }}
-                      >
-                        <Form.Check
-                          type="checkbox"
-                          className="text-nowrap"
-                          id={`fileMount-required-${i}`}
-                          label={
-                            <FormattedMessage
-                              id="forms.CreateContainer.fileMountRequiredLabel"
-                              defaultMessage="Required"
-                            />
-                          }
-                          {...register(`fileMounts.${i}.required`)}
-                        />
-                      </div>
-                    </Col>
-
-                    <Col xs="auto">
-                      <Button
-                        variant="shadow-danger"
-                        type="button"
-                        onClick={() => fileMounts.remove(i)}
-                      >
-                        <Icon className="text-danger" icon="delete" />
-                      </Button>
-                    </Col>
-                  </Row>
-                );
-              })}
+              {fileMounts.fields.map((field, i) => (
+                <FileMountRow
+                  key={field.key}
+                  index={i}
+                  error={errors.fileMounts?.[i]}
+                  control={control}
+                  register={register}
+                  fileOptions={fileOptions}
+                  setValue={setValue}
+                  onRemove={() => fileMounts.remove(i)}
+                />
+              ))}
             </Container>
 
             <Button
@@ -3112,6 +3257,9 @@ const FileMountsSection = ({
                   mountpoint: "",
                   required: true,
                   defaultFileId: undefined,
+                  fileMode: undefined,
+                  userId: undefined,
+                  groupId: undefined,
                 })
               }
             >

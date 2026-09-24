@@ -37,7 +37,16 @@ defmodule Edgehog.Containers.FileBind do
 
     create :create do
       primary? true
-      accept [:container_deployment_id, :device_id, :file_mount_id, :file_name]
+
+      accept [
+        :container_deployment_id,
+        :device_id,
+        :file_mount_id,
+        :file_name,
+        :file_mode,
+        :user_id,
+        :group_id
+      ]
 
       argument :file_download_request_id, :uuid
       argument :device_file_id, :uuid
@@ -55,6 +64,9 @@ defmodule Edgehog.Containers.FileBind do
         :file_download_request_id,
         :device_file_id,
         :file_name,
+        :file_mode,
+        :user_id,
+        :group_id,
         :uncompressed_file_size_bytes,
         :digest,
         :encoding,
@@ -174,6 +186,24 @@ defmodule Edgehog.Containers.FileBind do
 
     attribute :last_message, :string do
       public? true
+    end
+
+    attribute :file_mode, :integer do
+      description "Optional POSIX file mode override for this deployment bind."
+      public? true
+      allow_nil? true
+    end
+
+    attribute :user_id, :integer do
+      description "Optional POSIX user ID (UID) override for this deployment bind."
+      public? true
+      allow_nil? true
+    end
+
+    attribute :group_id, :integer do
+      description "Optional POSIX group ID (GID) override for this deployment bind."
+      public? true
+      allow_nil? true
     end
 
     timestamps()

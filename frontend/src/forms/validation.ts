@@ -617,9 +617,9 @@ const fileDownloadRequestFormSchema = z
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
     progress: z.boolean(),
-    fileMode: z.number(messages.number.id).int().positive().optional(),
-    userId: z.number(messages.number.id).int().positive().optional(),
-    groupId: z.number(messages.number.id).int().positive().optional(),
+    fileMode: z.number(messages.number.id).int().min(0).max(0o777).optional(),
+    userId: z.number(messages.number.id).int().min(0).optional(),
+    groupId: z.number(messages.number.id).int().min(0).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.destinationType === "FILESYSTEM" && data.destination === null) {
@@ -681,9 +681,9 @@ const manualFileDownloadRequestFromRepositorySchema = z
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
     progressTracked: z.boolean(),
-    fileMode: z.number(messages.number.id).int().positive().optional(),
-    userId: z.number(messages.number.id).int().positive().optional(),
-    groupId: z.number(messages.number.id).int().positive().optional(),
+    fileMode: z.number(messages.number.id).int().min(0).max(0o777).optional(),
+    userId: z.number(messages.number.id).int().min(0).optional(),
+    groupId: z.number(messages.number.id).int().min(0).optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.repository?.id) {
@@ -839,9 +839,9 @@ const fileDownloadCampaignBaseSchema = z.object({
   destinationType: fileDestinationTypeSchema,
   destination: nullableDestinationSchema,
   ttlSeconds: requiredNumber.int().min(0),
-  fileMode: z.number(messages.number.id).int().positive().optional(),
-  userId: z.number(messages.number.id).int().positive().optional(),
-  groupId: z.number(messages.number.id).int().positive().optional(),
+  fileMode: z.number(messages.number.id).int().min(0).max(0o777).optional(),
+  userId: z.number(messages.number.id).int().min(0).optional(),
+  groupId: z.number(messages.number.id).int().min(0).optional(),
 });
 
 const fileDownloadCampaignSchema = fileDownloadCampaignBaseSchema
@@ -1184,6 +1184,15 @@ const fileMountSchema = z.object({
     ])
     .nullable()
     .optional(),
+  fileMode: z
+    .number(messages.number.id)
+    .int()
+    .min(0)
+    .max(0o777)
+    .nullable()
+    .optional(),
+  userId: z.number(messages.number.id).int().min(0).nullable().optional(),
+  groupId: z.number(messages.number.id).int().min(0).nullable().optional(),
 });
 
 const fileMountsSchema = z

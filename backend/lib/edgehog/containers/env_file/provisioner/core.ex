@@ -100,21 +100,12 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
          %{file_download_request_id: nil, device_file_id: nil} = env_file,
          tenant
        ) do
-    with {:ok, env_file} <-
-           Ash.load(
-             env_file,
-             [:container_deployment, :file_download_request_id, :device_file_id],
-             tenant: tenant
-           ),
+    loads = [:uploaded, :file_download_request_id, :device_file_id, container_deployment: []]
+
+    with {:ok, env_file} <- Ash.load(env_file, loads, tenant: tenant),
          :needs_target <- check_still_needs_target(env_file),
          {:ok, file_download_request} <- create_file_download_request(env_file, tenant) do
       link_env_file(env_file, file_download_request, tenant)
-    else
-      :already_has_target ->
-        {:ok, Ash.load!(env_file, [:file_download_request_id, :device_file_id], tenant: tenant)}
-
-      error ->
-        error
     end
   end
 
@@ -131,17 +122,7 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
   end
 
   defp create_file_download_request(env_file, tenant) do
-    env_file =
-      case Map.get(env_file, :container_deployment) do
-        nil ->
-          {:ok, loaded} = Ash.load(env_file, [:container_deployment], tenant: tenant)
-          loaded
-
-        _ ->
-          env_file
-      end
-
-    %{container_deployment: container_deployment} = env_file
+    container_deployment = Map.fetch!(env_file, :container_deployment)
     tenant_id = tenant_id(tenant)
 
     file_path = EnvFileStorage.file_path(tenant_id, env_file.id, env_file.file_name)
@@ -162,29 +143,11 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
   end
 
   defp link_env_file(env_file, file_download_request, tenant) do
-    with {:ok, fresh} <-
-           Ash.load(env_file, [:file_download_request_id, :device_file_id], tenant: tenant) do
-      case fresh do
-        %{file_download_request_id: id} when id == file_download_request.id ->
-          {:ok, fresh}
+    action_opts = %{file_download_request_id: file_download_request.id}
 
-        %{file_download_request_id: file_id} when is_binary(file_id) ->
-          # Another provisioner already linked a different request; clean up the new one
-          _ = Ash.destroy(file_download_request, tenant: tenant)
-          {:ok, fresh}
-
-        %{device_file_id: device_file_id} when is_binary(device_file_id) ->
-          _ = Ash.destroy(file_download_request, tenant: tenant)
-          {:ok, fresh}
-
-        _ ->
-          action_opts = %{file_download_request_id: file_download_request.id}
-
-          fresh
-          |> Ash.Changeset.for_update(:link_file_download_request, action_opts)
-          |> Ash.update(tenant: tenant)
-      end
-    end
+    env_file
+    |> Ash.Changeset.for_update(:link_file_download_request, action_opts)
+    |> Ash.update(tenant: tenant)
   end
 
   defp tenant_id(%{tenant_id: tenant_id}), do: tenant_id
