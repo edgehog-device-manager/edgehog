@@ -33,8 +33,11 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableEnvFiles do
     device = Devices.fetch_device_by_identity!(device_id, realm_id, tenant: tenant)
 
     case String.split(event.path, "/") do
-      ["", env_file_id, _field] -> handle_env_file_event(env_file_id, event.value, device, tenant)
-      _ -> {:error, :invalid_event_path}
+      ["", env_file_id, _field] ->
+        handle_env_file_event(env_file_id, event.value, device, tenant)
+
+      _ ->
+        {:error, :invalid_event_path}
     end
   end
 

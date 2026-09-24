@@ -276,8 +276,7 @@ defmodule Edgehog.Containers.Deployment do
 
       change {Edgehog.Changes.Log, message: "Deployment successfully stopped."} do
         where [
-          data_one_of(:context, [:stop_message_sent]),
-          {Validations.Event, type: "Info"}
+          data_one_of(:context, [:stop_message_sent])
         ]
       end
 

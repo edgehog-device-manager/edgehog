@@ -25,6 +25,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
 
+  alias Edgehog.Astarte.Device.DeploymentCommand
   alias Edgehog.Containers
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Deployment
@@ -323,6 +324,56 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
 
       deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
       assert deployment.state == :stopped
+    end
+
+    test "AvailableDeployments Stopped trigger updates a deployment with a pending stop command",
+         context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release = release_fixture(containers: 1, tenant: tenant)
+
+      deployment =
+        deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          release_id: release.id,
+          state: :started
+        )
+
+      deployment = make_deployment_ready!(deployment, tenant)
+
+      # Simulate a stop command sent to the device, which sets the
+      # deployment context to :stop_message_sent
+      expect(DeploymentCommand, :send_deployment_command, 1, fn _, _, _ -> :ok end)
+
+      {:ok, deployment} =
+        deployment
+        |> Ash.Changeset.for_update(:stop, %{})
+        |> Ash.update(tenant: tenant)
+
+      assert deployment.context == :stop_message_sent
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableDeployments",
+          path: "/" <> deployment.id <> "/status",
+          value: "Stopped"
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant)
+      assert deployment.state == :stopped
+      assert deployment.context == nil
     end
 
     test "unset AvailableDeployments deletes an existing deployment", context do

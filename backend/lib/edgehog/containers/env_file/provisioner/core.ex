@@ -124,7 +124,7 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
   defp check_still_needs_target(%{file_download_request_id: nil, device_file_id: nil}),
     do: :needs_target
 
-  defp check_still_needs_target(_), do: :already_has_target
+  defp check_still_needs_target(env_file), do: {:ok, env_file}
 
   defp create_file_download_request(%{uploaded: false}, _tenant) do
     {:error, :file_not_uploaded}

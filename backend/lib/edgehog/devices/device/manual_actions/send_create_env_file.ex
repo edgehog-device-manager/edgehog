@@ -54,7 +54,11 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateEnvFile do
   defp fetch_env_file_target_id(%{id: id}),
     do: {:error, "env file #{id} has no target: the uploaded file was not provisioned"}
 
-  defp fetch_env_file_target_type(%{device_file_id: nil}), do: {:ok, "request"}
+  # NOTE: Same as file binds: for the moment the device does not
+  # support the `request` type, instead, by using `storage` and
+  # setting the id the same as the file download request id the
+  # binding works.
+  defp fetch_env_file_target_type(%{device_file_id: nil}), do: {:ok, "storage"}
 
   defp fetch_env_file_target_type(_env_file), do: {:ok, "storage"}
 end
