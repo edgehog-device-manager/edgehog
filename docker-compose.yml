@@ -209,6 +209,10 @@ services:
       - "traefik.http.routers.edgehog-rustfs-console.entrypoints=web"
       - "traefik.http.routers.edgehog-rustfs-console.service=edgehog-rustfs-console"
       - "traefik.http.services.edgehog-rustfs-console.loadbalancer.server.port=9001"
+      - "traefik.http.routers.edgehog-rustfs-storage.middlewares=rustfs-cors"
+      - "traefik.http.middlewares.rustfs-cors.headers.accesscontrolallowmethods=GET,PUT,OPTIONS,POST,HEAD"
+      - "traefik.http.middlewares.rustfs-cors.headers.accesscontrolalloworiginlist=*"
+      - "traefik.http.middlewares.rustfs-cors.headers.accesscontrolallowheaders=*"
 
   rustfs-init:
     image: amazon/aws-cli:latest
