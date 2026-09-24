@@ -560,6 +560,9 @@
   "components.apps.deployments.deployment-details.DeploymentDetails.deviceRequests": {
     "defaultMessage": "Device Requests"
   },
+  "components.apps.deployments.deployment-details.DeploymentDetails.envFiles": {
+    "defaultMessage": "Env Files"
+  },
   "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds": {
     "defaultMessage": "File Binds"
   },
