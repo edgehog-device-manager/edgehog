@@ -218,6 +218,8 @@ const RepositoryFilesSelector = ({
       <Select
         options={fileOptions}
         value={selectedFileOption}
+        menuPlacement="auto"
+        menuPosition="fixed"
         onChange={(option: SingleValue<SelectOption>) => {
           onFileChange(option?.value || "");
         }}
@@ -281,6 +283,8 @@ const RepositorySelector = ({
         <Select
           options={repositoryOptions}
           value={selectedRepositoryOption}
+          menuPlacement="auto"
+          menuPosition="fixed"
           onChange={(option: SingleValue<SelectOption>) => {
             onRepositoryChange(option?.value || "");
             onFileChange("");
@@ -1027,6 +1031,7 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
                     value={selectedDeviceOption}
                     isDisabled={disabled}
                     menuPlacement="auto"
+                    menuPosition="fixed"
                     onChange={(option: SingleValue<FileBindOption>) => {
                       setUserSelectedDeviceFile(option?.value || "none");
                       setErrorMessage(null);
@@ -1110,6 +1115,8 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
                           <Select
                             options={languageOptions}
                             value={selectedLanguageOption}
+                            menuPlacement="auto"
+                            menuPosition="fixed"
                             onChange={(option: SingleValue<SelectOption>) => {
                               if (option) {
                                 setLanguageHint(option.value as TextLanguage);
