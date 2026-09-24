@@ -42,7 +42,7 @@ import DeploymentActionButtons from "@/components/apps/deployments/deployment-ac
 import DeploymentEventsCard from "@/components/apps/deployments/deployment-events-card/DeploymentEventsCard";
 import { parseDeploymentState } from "@/components/apps/deployments/deployment-state/DeploymentState";
 import Icon from "@/components/ui/icon/Icon";
-import ResourceStateIcon from "@/components/apps/resource-state-icon/ResourceStateIcon";
+import ResourceState from "@/components/apps/resource-state/ResourceState";
 import { Link, Route } from "@/Navigation";
 import FullHeightCard from "@/components/ui/full-height-card/FullHeightCard";
 import UpgradeDeploymentModal from "@/components/apps/deployments/upgrade-deployment-modal/UpgradeDeploymentModal";
@@ -111,6 +111,8 @@ const DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT = graphql`
     fileBinds {
       id
       fileName
+      state
+      isReady
       fileMount {
         id
         mountpoint
@@ -118,7 +120,6 @@ const DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT = graphql`
       fileDownloadRequest {
         id
         fileName
-        status
       }
       deviceFile {
         id
@@ -139,7 +140,6 @@ const DEPLOYMENT_DETAILS_ENV_FILES_FRAGMENT = graphql`
       fileDownloadRequest {
         id
         fileName
-        status
       }
       deviceFile {
         id
@@ -241,6 +241,7 @@ export type Event = NonNullable<
 type TreeNode = {
   id: string;
   name: string;
+  detail?: string | null;
   type?: "node" | "leaf";
   state?: string | null;
   isReady?: boolean | null;
@@ -253,12 +254,14 @@ const buildSubTree = (
   nodes: readonly any[],
   labelExtractor: (node: any) => string,
   intlLabels: { title: string; empty: string; unnamed: string },
+  detailExtractor?: (node: any) => string | null,
 ): TreeNode => {
   const children: TreeNode[] =
     nodes.length > 0
       ? nodes.map((n) => ({
           id: `${prefix}-${category}-${n.id}`,
           name: labelExtractor(n) || intlLabels.unnamed,
+          detail: detailExtractor ? detailExtractor(n) : null,
           type: "leaf",
           state: n.state,
           isReady: n.isReady,
@@ -434,21 +437,11 @@ const ContainerDeploymentItem = ({
       prefix,
       "file-bind",
       fileBindsData?.fileBinds ?? [],
-      (fb) => {
-        const file =
-          fb.fileDownloadRequest?.fileName ??
-          fb.fileName ??
-          fb.deviceFile?.pathOnDevice ??
-          unnamed;
-        const mountpoint = fb.fileMount?.mountpoint ?? unnamed;
-        const status =
-          fb.fileDownloadRequest?.status ??
-          (fb.deviceFile ? "COMPLETED" : null);
-
-        return status
-          ? `${file} - ${mountpoint} - ${status}`
-          : `${file} - ${mountpoint}`;
-      },
+      (fb) =>
+        fb.fileDownloadRequest?.fileName ??
+        fb.deviceFile?.pathOnDevice ??
+        fb.fileName ??
+        unnamed,
       {
         title: intl.formatMessage({
           id: "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds",
@@ -457,6 +450,7 @@ const ContainerDeploymentItem = ({
         empty,
         unnamed,
       },
+      (fb) => fb.fileMount?.mountpoint ?? null,
     );
 
     const envFilesSubTree = buildSubTree(
@@ -464,16 +458,12 @@ const ContainerDeploymentItem = ({
       "env-file",
       envFilesData?.envFiles ?? [],
       (ef) => {
-        const file =
+        return (
           ef.fileDownloadRequest?.fileName ??
           ef.deviceFile?.pathOnDevice ??
           ef.fileName ??
-          unnamed;
-        const status =
-          ef.fileDownloadRequest?.status ??
-          (ef.deviceFile ? "COMPLETED" : null);
-
-        return status ? `${file} - ${status}` : `${file}`;
+          unnamed
+        );
       },
       {
         title: intl.formatMessage({
@@ -529,6 +519,7 @@ const ContainerDeploymentItem = ({
     networkData,
     volumeData,
     deviceMappingData,
+    deviceRequestData,
     imageDeployment,
     containerState,
     isReady,
@@ -564,12 +555,12 @@ const ContainerDeploymentItem = ({
       {...required}
       {...handlers}
       renderNode={({ node, onToggle }) => {
-        const { state, isReady, name, type } = node.data ?? {};
+        const { state, isReady, name, detail, type } = node.data ?? {};
         const isNode = type === "node";
 
         return (
           <div
-            className="d-flex align-items-center gap-2 py-1 px-1"
+            className="d-flex align-items-center gap-2 py-1 px-1 w-100"
             style={{ cursor: isNode ? "pointer" : "default" }}
             onClick={(e) => isNode && onToggle(e)}
           >
@@ -586,11 +577,20 @@ const ContainerDeploymentItem = ({
                 <Icon icon="caretDown" />
               </span>
             )}
-            <span className={`node-name ${isNode ? "fw-bold" : ""}`}>
-              {name}
+            <span
+              className={`flex-grow-1 text-truncate ${isNode ? "fw-bold" : ""}`}
+              style={{ minWidth: 0 }}
+              title={detail ? `${name}\n${detail}` : name}
+            >
+              <span className="d-block text-truncate">{name}</span>
+              {detail && (
+                <span className="d-block text-truncate small text-body-secondary">
+                  {detail}
+                </span>
+              )}
             </span>
 
-            <ResourceStateIcon state={state} isReady={isReady} />
+            <ResourceState state={state} isReady={isReady} />
           </div>
         );
       }}
