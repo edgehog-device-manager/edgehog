@@ -175,23 +175,26 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - `{:error, reason}` for any other errors.
   """
   def do_operation(mechanism, target) do
-    upgrade(target, mechanism.release, mechanism.target_release)
+    resolved_configs =
+      Helpers.resolve_file_binds(target, mechanism.configs)
+
+    upgrade(target, mechanism.release, mechanism.target_release, resolved_configs)
   end
 
-  defp upgrade(target, release, target_release) do
+  defp upgrade(target, release, target_release, configs) do
     cond do
       Helpers.application_deployed?(target, target_release) ->
         {:ok, :already_in_desired_state}
 
       Helpers.application_deployed?(target, release) ->
-        do_upgrade(target, release, target_release)
+        do_upgrade(target, release, target_release, configs)
 
       true ->
         {:error, :deployment_not_found}
     end
   end
 
-  defp do_upgrade(target, release, target_release) do
+  defp do_upgrade(target, release, target_release, configs) do
     target = Campaigns.update_target_latest_attempt!(target, DateTime.utc_now())
 
     device =
@@ -207,7 +210,9 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     else
       upgrade_result =
         current_deployment
-        |> Ash.Changeset.for_update(:upgrade_release, %{target: target_release.id},
+        |> Ash.Changeset.for_update(
+          :upgrade_release,
+          %{target: target_release.id, configs: configs},
           tenant: target.tenant_id
         )
         |> Ash.update()

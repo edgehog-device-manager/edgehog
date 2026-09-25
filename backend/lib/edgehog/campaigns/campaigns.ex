@@ -100,7 +100,14 @@ defmodule Edgehog.Campaigns do
                                   deployment_delete: [release_id: :release],
                                   deployment_upgrade: [
                                     release_id: :release,
-                                    target_release_id: :release
+                                    target_release_id: :release,
+                                    configs: [
+                                      container_id: :container,
+                                      file_binds: [
+                                        file_id: :file,
+                                        file_mount_id: :container_file_mount
+                                      ]
+                                    ]
                                   ],
                                   firmware_upgrade: [base_image_id: :base_image],
                                   file_download: [file_id: :file]
