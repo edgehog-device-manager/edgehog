@@ -14,3 +14,4 @@ COPY --from=builder /app/build/ /usr/share/nginx/html/
 ADD nginx.conf /etc/nginx/conf.d/default.conf
 ADD set-backend-url.sh /docker-entrypoint.d/set-backend-url.sh
 ADD hide-navigation-elements.sh /docker-entrypoint.d/hide-navigation-elements.sh
+ADD forwarder-version.sh /docker-entrypoint.d/forwarder-version.sh
