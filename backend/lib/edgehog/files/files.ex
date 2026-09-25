@@ -24,7 +24,7 @@ defmodule Edgehog.Files do
   """
 
   use Ash.Domain,
-    extensions: [AshGraphql.Domain, Ash.Authorizer]
+    extensions: [AshGraphql.Domain, Ash.Policy.Authorizer]
 
   alias Edgehog.Files.DeviceFile
   alias Edgehog.Files.File
