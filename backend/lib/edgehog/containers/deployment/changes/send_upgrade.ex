@@ -41,13 +41,14 @@ defmodule Edgehog.Containers.Deployment.Changes.SendUpgrade do
     device_id = deployment.device_id
     # SAFETY: we have validated the parameter in the validations, so it must exist.
     target_id = Ash.Changeset.get_argument(changeset, :target)
+    configs = Ash.Changeset.get_argument(changeset, :configs) || []
 
     with {:ok, action} <-
            DeploymentReadyAction
            |> Ash.Changeset.for_create(
              :create_deployment,
              %{
-               deployment: %{device_id: device_id, release_id: target_id},
+               deployment: %{device_id: device_id, release_id: target_id, configs: configs},
                action_type: :upgrade_deployment,
                action_arguments: %{upgrade_target_id: deployment.id}
              }

@@ -26,12 +26,13 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.SendFileDownloadRequest do
 
   use Ash.Resource.Change
 
-  alias Edgehog.Files
+  alias Edgehog.Files.FileDownloadRequest.Provisioner
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    Ash.Changeset.after_action(changeset, fn _changeset, file_download_request ->
-      with :ok <- Files.send_file_download_request(file_download_request) do
+  def change(changeset, _opts, %{tenant: tenant}) do
+    Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
+      with {:ok, file_download_request} <- result,
+           {:ok, _pid} <- Provisioner.provision(file_download_request, tenant) do
         {:ok, file_download_request}
       end
     end)

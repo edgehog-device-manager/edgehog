@@ -23,13 +23,24 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
   use Ash.Resource.Change
 
+  alias Edgehog.Containers.Container.Env
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
          {:ok, device} <- Ash.Changeset.fetch_argument(changeset, :device),
          {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
          {:ok, container} <-
-           Ash.load(container, [:image, :volumes, :networks, :device_mappings, :device_requests],
+           Ash.load(
+             container,
+             [
+               :image,
+               :volumes,
+               :networks,
+               :device_mappings,
+               :device_requests,
+               :file_mounts
+             ],
              tenant: tenant
            ) do
       image = container.image
@@ -90,7 +101,21 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
           }
         end)
 
+      {env, env_strategy} = resolve_env(changeset, container)
+
+      file_binds_input =
+        changeset
+        |> Ash.Changeset.get_argument(:file_binds)
+        |> relate_file_binds(device, container, tenant)
+
+      env_files_input =
+        changeset
+        |> Ash.Changeset.get_argument(:env_files)
+        |> relate_env_files(device)
+
       changeset
+      |> Ash.Changeset.change_attribute(:env, env)
+      |> Ash.Changeset.change_attribute(:env_strategy, env_strategy)
       |> Ash.Changeset.manage_relationship(:image_deployment, image_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
@@ -106,16 +131,105 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         on_lookup: :relate,
         use_identities: [:volume_instance]
       )
-      |> Ash.Changeset.manage_relationship(:device_mapping_deployments, device_mappings_input,
+      |> Ash.Changeset.manage_relationship(
+        :device_mapping_deployments,
+        device_mappings_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_mapping_instance]
       )
-      |> Ash.Changeset.manage_relationship(:device_request_deployments, device_requests_input,
+      |> Ash.Changeset.manage_relationship(
+        :device_request_deployments,
+        device_requests_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_request_instance]
       )
+      |> Ash.Changeset.manage_relationship(:file_binds, file_binds_input,
+        on_no_match: :create,
+        on_match: :ignore,
+        on_lookup: :ignore
+      )
+      |> Ash.Changeset.manage_relationship(:env_files, env_files_input,
+        on_no_match: :create,
+        on_match: :ignore,
+        on_lookup: :ignore
+      )
     end
+  end
+
+  defp relate_env_files(env_files, device) do
+    env_files = env_files || []
+    Enum.map(env_files, &Map.put(&1, :device_id, device.id))
+  end
+
+  defp relate_file_binds(file_binds, device, container, _tenant) do
+    file_binds = file_binds || []
+
+    mounts_by_id =
+      container.file_mounts
+      |> List.wrap()
+      |> Map.new(&{&1.id, &1})
+
+    explicit =
+      Enum.map(file_binds, fn bind ->
+        mount_id = get_value(bind, :file_mount_id)
+        mount = Map.get(mounts_by_id, mount_id)
+
+        bind
+        |> Map.put(:device_id, device.id)
+        |> resolve_bind_permissions(mount)
+      end)
+
+    explicit_ids =
+      explicit
+      |> Enum.map(&get_value(&1, :file_mount_id))
+      |> Enum.reject(&is_nil/1)
+      |> MapSet.new()
+
+    default_binds =
+      container.file_mounts
+      |> Enum.filter(&(not MapSet.member?(explicit_ids, &1.id) and &1.default_file_id))
+      |> Enum.map(&default_file_bind(&1, device))
+      |> Enum.reject(&is_nil/1)
+
+    explicit ++ default_binds
+  end
+
+  defp resolve_bind_permissions(bind, nil), do: bind
+
+  defp resolve_bind_permissions(bind, mount) do
+    file_mode = get_value(bind, :file_mode) || mount.file_mode
+    user_id = get_value(bind, :user_id) || mount.user_id
+    group_id = get_value(bind, :group_id) || mount.group_id
+
+    bind
+    |> maybe_put(:file_mode, file_mode)
+    |> maybe_put(:user_id, user_id)
+    |> maybe_put(:group_id, group_id)
+  end
+
+  defp default_file_bind(file_mount, device) do
+    %{
+      file_mount_id: file_mount.id,
+      device_id: device.id
+    }
+    |> maybe_put(:file_mode, file_mount.file_mode)
+    |> maybe_put(:user_id, file_mount.user_id)
+    |> maybe_put(:group_id, file_mount.group_id)
+  end
+
+  defp get_value(map, key) when is_map(map) do
+    Map.get(map, key, Map.get(map, to_string(key)))
+  end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, val), do: Map.put(map, key, val)
+
+  defp resolve_env(changeset, container) do
+    deploy_env = Ash.Changeset.get_argument(changeset, :env) || []
+    env_strategy = Ash.Changeset.get_argument(changeset, :env_strategy) || :merge
+    resolved = Env.resolve(container.env || [], deploy_env, env_strategy)
+    {resolved, env_strategy}
   end
 end

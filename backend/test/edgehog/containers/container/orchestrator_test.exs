@@ -31,11 +31,15 @@ defmodule Edgehog.Containers.Container.Deployment.OrchestratorTest do
   use Edgehog.DataCase, async: false
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
+  import Edgehog.FilesFixtures
   import Edgehog.TenantsFixtures
 
   alias Ecto.Adapters.SQL.Sandbox
+  alias Edgehog.Astarte.Device.CreateBind
   alias Edgehog.Containers.Container.Deployment.Orchestrator
   alias Edgehog.Containers.Container.Deployment.Provisioner
+  alias Edgehog.Containers.FileBind.Provisioner, as: FileBindProvisioner
   alias Edgehog.Containers.Image.Deployment.Provisioner, as: ImageProvisioner
 
   describe "Container deployment orchestrator" do
@@ -96,6 +100,130 @@ defmodule Edgehog.Containers.Container.Deployment.OrchestratorTest do
       # they report readiness and let the orchestrator proceed
       image_provisioner =
         container_deployment.image_deployment
+        |> ImageProvisioner.Core.name()
+        |> via_pid!()
+
+      Sandbox.allow(Edgehog.Repo, self(), image_provisioner)
+      ImageProvisioner.run(image_provisioner)
+
+      container_provisioner =
+        container_deployment
+        |> Provisioner.Core.name()
+        |> via_pid!()
+
+      Sandbox.allow(Edgehog.Repo, self(), container_provisioner)
+      Provisioner.run(container_provisioner)
+
+      # When all the provisioners are satisfied, the container orchestrator
+      # broadcasts the readiness of the container deployment
+      assert_receive %Phoenix.Socket.Broadcast{event: :ready, payload: new_container_deployment},
+                     5000
+
+      assert new_container_deployment.id == container_deployment.id
+
+      Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
+    end
+
+    test "provisions file binds like any other resource", context do
+      %{tenant: tenant} = context
+
+      device = device_fixture(tenant: tenant)
+
+      container =
+        [tenant: tenant, file_mounts: [%{mountpoint: "/etc/app.conf", required: false}]]
+        |> container_fixture()
+        |> Ash.load!(:file_mounts)
+
+      %{file_mounts: [file_mount]} = container
+
+      release = release_fixture(tenant: tenant, container_ids: [container.id])
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      file_request = manual_file_download_request_fixture(tenant: tenant, device_id: device.id)
+
+      [container_deployment] =
+        deployment
+        |> Ash.load!([container_deployments: [:container]], tenant: tenant)
+        |> Map.get(:container_deployments, [])
+
+      file_bind =
+        file_bind_fixture(
+          tenant: tenant,
+          container_deployment_id: container_deployment.id,
+          file_mount_id: file_mount.id,
+          file_download_request_id: file_request.id
+        )
+
+      deployment = make_deployment_ready!(deployment, tenant)
+      mark_device_online!(deployment, tenant)
+
+      # Reload the container deployment, as readiness was changed above
+      container_deployment =
+        Ash.get!(Edgehog.Containers.Container.Deployment, container_deployment.id, tenant: tenant)
+
+      topic = Orchestrator.topic(container_deployment)
+
+      # Subscribe to the container deployment readiness
+      Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+
+      # Start the container orchestrator in manual mode, so that we can allow
+      # the whole tree to the sandbox before any provisioning step reads from
+      # the database
+      {:ok, orchestrator} =
+        Orchestrator.conduct(container_deployment, deployment, tenant, mode: :manual)
+
+      Sandbox.allow(Edgehog.Repo, self(), orchestrator)
+
+      # Kick off the provisioning. The orchestrator loads the resources and
+      # starts the leaf provisioners, which are left in manual mode
+      Orchestrator.start(orchestrator)
+
+      # Wait for processes to start and register on each registry
+      Process.sleep(500)
+
+      # Drive the file bind provisioner: it sends the CreateFileBindRequest
+      # to the device, and completes once the device reports the bind
+      file_bind_provisioner =
+        file_bind
+        |> FileBindProvisioner.Core.name()
+        |> via_pid!()
+
+      Sandbox.allow(Edgehog.Repo, self(), file_bind_provisioner)
+
+      test_process = self()
+
+      CreateBind
+      |> allow(test_process, file_bind_provisioner)
+      |> expect(:send_bind, fn _client, _device_id, data ->
+        assert data.id == file_bind.id
+        assert data.deploymentId == deployment.id
+        assert data.targetId == file_request.id
+        assert data.targetType == "storage"
+        assert data.mountpoint == "/etc/app.conf"
+
+        # Simulate the device reporting the bind through AvailableFileBinds
+        file_bind
+        |> Ash.Changeset.for_update(:mark_as_available)
+        |> Ash.update!(tenant: tenant)
+
+        :ok
+      end)
+
+      ref = Process.monitor(file_bind_provisioner)
+
+      FileBindProvisioner.run(file_bind_provisioner)
+
+      assert_receive {:DOWN, ^ref, :process, ^file_bind_provisioner, :normal}, 5000
+
+      # Drive the remaining provisioners: they all find their resource
+      # already ready, so they report readiness and let the orchestrator
+      # proceed
+      image_provisioner =
+        container_deployment
+        |> Ash.load!(:image_deployment, tenant: tenant)
+        |> Map.get(:image_deployment)
         |> ImageProvisioner.Core.name()
         |> via_pid!()
 

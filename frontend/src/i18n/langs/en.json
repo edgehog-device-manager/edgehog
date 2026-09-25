@@ -62,6 +62,9 @@
   "components.apps.containers.container-details.ContainerDetails.cpusetCpusLabel": {
     "defaultMessage": "Cpu Sets"
   },
+  "components.apps.containers.container-details.ContainerDetails.defaultPerms": {
+    "defaultMessage": "Default mode"
+  },
   "components.apps.containers.container-details.ContainerDetails.deviceCgroupRulesLabel": {
     "defaultMessage": "Device Cgroup Rules"
   },
@@ -106,6 +109,21 @@
   },
   "components.apps.containers.container-details.ContainerDetails.extraHostsLabel": {
     "defaultMessage": "Extra Hosts"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountDefaultFileLabel": {
+    "defaultMessage": "Default File"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountMountpointLabel": {
+    "defaultMessage": "Mountpoint"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountPermissionsLabel": {
+    "defaultMessage": "Permissions"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountRequiredLabel": {
+    "defaultMessage": "Required"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountsLabel": {
+    "defaultMessage": "File Mounts"
   },
   "components.apps.containers.container-details.ContainerDetails.groupAddLabel": {
     "defaultMessage": "Group Add"
@@ -208,6 +226,9 @@
   },
   "components.apps.containers.container-details.ContainerDetails.noDeviceRequests": {
     "defaultMessage": "No device requests assigned."
+  },
+  "components.apps.containers.container-details.ContainerDetails.noFileMounts": {
+    "defaultMessage": "No file mounts configured."
   },
   "components.apps.containers.container-details.ContainerDetails.noNetworks": {
     "defaultMessage": "No networks assigned."
@@ -331,6 +352,129 @@
     "defaultMessage": "Image",
     "description": "Title for the Image column of the containers table"
   },
+  "components.apps.containers.env-file-input.EnvFileInput.deviceMode": {
+    "defaultMessage": "Device File"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.filePickerSubTab": {
+    "defaultMessage": "File Picker"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.languageHintLabel": {
+    "defaultMessage": "Language Format:"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.loadingRepositories": {
+    "defaultMessage": "Loading repositories..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.optionalBadge": {
+    "defaultMessage": "Optional"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.processing": {
+    "defaultMessage": "Processing..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.repositoryMode": {
+    "defaultMessage": "Repository File"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectDeviceFileLabel": {
+    "defaultMessage": "Select file from device"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectFilePlaceholder": {
+    "defaultMessage": "Choose a file..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectRepository": {
+    "defaultMessage": "Select Repository"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectRepositoryFile": {
+    "defaultMessage": "Select File from Repository"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.selectRepositoryPlaceholder": {
+    "defaultMessage": "Choose a repository..."
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.textEditorSubTab": {
+    "defaultMessage": "Text Editor"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.title": {
+    "defaultMessage": "Env file"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.unboundOption": {
+    "defaultMessage": "None (no env file)"
+  },
+  "components.apps.containers.env-file-input.EnvFileInput.uploadMode": {
+    "defaultMessage": "Upload"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.customizePermissions": {
+    "defaultMessage": "Customize"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.defaultFileBadge": {
+    "defaultMessage": "Default: {name}"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.defaultPermissions": {
+    "defaultMessage": "(Default)"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.deviceMode": {
+    "defaultMessage": "Device File"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.emptyTextError": {
+    "defaultMessage": "Please enter file content."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.filePickerSubTab": {
+    "defaultMessage": "File Picker"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.hidePermissions": {
+    "defaultMessage": "Hide"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.languageHintLabel": {
+    "defaultMessage": "Language Format:"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.loadingRepositories": {
+    "defaultMessage": "Loading repositories..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.optionalBadge": {
+    "defaultMessage": "Optional"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.permissionsHeader": {
+    "defaultMessage": "Permissions & Ownership"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.processing": {
+    "defaultMessage": "Processing..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.repositoryMode": {
+    "defaultMessage": "Repository File"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.requiredBadge": {
+    "defaultMessage": "Required"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.requiredError": {
+    "defaultMessage": "This file mount is required."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectDeviceFileLabel": {
+    "defaultMessage": "Select file from device"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectFileError": {
+    "defaultMessage": "Please select a file to upload."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectFilePlaceholder": {
+    "defaultMessage": "Choose a file..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepository": {
+    "defaultMessage": "Select Repository"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepositoryFile": {
+    "defaultMessage": "Select File from Repository"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepositoryFileError": {
+    "defaultMessage": "Please select a repository file."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.selectRepositoryPlaceholder": {
+    "defaultMessage": "Choose a repository..."
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.textEditorSubTab": {
+    "defaultMessage": "Text Editor"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.unboundOption": {
+    "defaultMessage": "None (Unbound)"
+  },
+  "components.apps.containers.file-mount-input.FileMountInput.uploadMode": {
+    "defaultMessage": "Upload"
+  },
   "components.apps.containers.image-credentials-table.ImageCredentialsTable.labelTitle": {
     "defaultMessage": "Label"
   },
@@ -416,15 +560,6 @@
   "components.apps.deployments.deployment-campaigns-table.DeploymentCampaignsTable.statusTitle": {
     "defaultMessage": "Status"
   },
-  "components.apps.deployments.deployment-details.DeploymentDetails.confirmLabel": {
-    "defaultMessage": "Confirm"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.description": {
-    "defaultMessage": "Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.title": {
-    "defaultMessage": "Upgrade Deployment"
-  },
   "components.apps.deployments.deployment-details.DeploymentDetails.containerWithIndex": {
     "defaultMessage": "Container {index}"
   },
@@ -443,8 +578,11 @@
   "components.apps.deployments.deployment-details.DeploymentDetails.deviceRequests": {
     "defaultMessage": "Device Requests"
   },
-  "components.apps.deployments.deployment-details.DeploymentDetails.incompatibleVersion": {
-    "defaultMessage": "{version} (Incompatible system model)"
+  "components.apps.deployments.deployment-details.DeploymentDetails.envFiles": {
+    "defaultMessage": "Env Files"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds": {
+    "defaultMessage": "File Binds"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.networks": {
     "defaultMessage": "Networks"
@@ -452,20 +590,11 @@
   "components.apps.deployments.deployment-details.DeploymentDetails.noContainers": {
     "defaultMessage": "No containers"
   },
-  "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesAvailable": {
-    "defaultMessage": "No Release Versions Available"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesFoundMatching": {
-    "defaultMessage": "No release versions found matching \"{inputValue}\""
-  },
   "components.apps.deployments.deployment-details.DeploymentDetails.none": {
     "defaultMessage": "None"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.releaseVersion": {
     "defaultMessage": "v.{version}"
-  },
-  "components.apps.deployments.deployment-details.DeploymentDetails.selectOption": {
-    "defaultMessage": "Select a Release Version"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.unnamed": {
     "defaultMessage": "Unnamed"
@@ -625,6 +754,72 @@
   "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.title": {
     "defaultMessage": "Edit Deployment Campaign"
   },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.confirmLabel": {
+    "defaultMessage": "Upgrade"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel": {
+    "defaultMessage": "Container: {containerName}"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.description": {
+    "defaultMessage": "Upgrade deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envJsonLabel": {
+    "defaultMessage": "Environment"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeFile": {
+    "defaultMessage": "Env file"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeNone": {
+    "defaultMessage": "No config"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeOverride": {
+    "defaultMessage": "Env override"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envStrategyMerge": {
+    "defaultMessage": "Merge"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envStrategyOverride": {
+    "defaultMessage": "Override"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.environmentConfigurationTitle": {
+    "defaultMessage": "Environment configuration"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.fileBindsTitle": {
+    "defaultMessage": "File Mounts Configuration"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.incompatibleVersion": {
+    "defaultMessage": "{version} (Incompatible system model)"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.invalidJsonError": {
+    "defaultMessage": "Invalid JSON. Expected a JSON object mapping keys to string values."
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.missingRequiredBindsFeedback": {
+    "defaultMessage": "Please configure a file source for all required file mounts."
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noFilesAvailableWarning": {
+    "defaultMessage": "This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesAvailable": {
+    "defaultMessage": "No Release Versions Available"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesFoundMatching": {
+    "defaultMessage": "No release versions found matching \"{inputValue}\""
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectEnvStrategy": {
+    "defaultMessage": "Env Strategy"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectOption": {
+    "defaultMessage": "Select a Release Version"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectRelease": {
+    "defaultMessage": "Target Release"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.title": {
+    "defaultMessage": "Upgrade Deployment"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.upgradeErrorFeedback": {
+    "defaultMessage": "Could not upgrade the deployment, please try again."
+  },
   "components.apps.releases.application-devices-table.ApplicationDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the application devices table"
@@ -711,6 +906,9 @@
   "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel": {
+    "defaultMessage": "Container: {containerName}"
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.deployButton": {
     "defaultMessage": "Deploy"
   },
@@ -720,11 +918,44 @@
   "components.apps.releases.install-application-modal.InstallApplicationModal.deviceOfflineError": {
     "defaultMessage": "The device is disconnected. You cannot deploy an application while it is offline."
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel": {
+    "defaultMessage": "Environment"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envModeFile": {
+    "defaultMessage": "Env file"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envModeNone": {
+    "defaultMessage": "No config"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envModeOverride": {
+    "defaultMessage": "Env override"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envStrategyMerge": {
+    "defaultMessage": "Merge"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.envStrategyOverride": {
+    "defaultMessage": "Override"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.environmentConfigurationTitle": {
+    "defaultMessage": "Environment configuration"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.fileBindsTitle": {
+    "defaultMessage": "File Mounts Configuration"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.invalidJsonError": {
+    "defaultMessage": "Invalid JSON. Expected a JSON object mapping keys to string values."
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.missingRequiredBindsFeedback": {
+    "defaultMessage": "Please configure a file source for all required file mounts."
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable": {
     "defaultMessage": "No applications available"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching": {
     "defaultMessage": "No applications found matching \"{inputValue}\""
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.noFilesAvailableWarning": {
+    "defaultMessage": "This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable": {
     "defaultMessage": "No releases available for this application"
@@ -739,13 +970,16 @@
     "defaultMessage": "Select a release"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication": {
-    "defaultMessage": "Select Application"
+    "defaultMessage": "Application"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst": {
     "defaultMessage": "Please select an application first"
   },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.selectEnvStrategy": {
+    "defaultMessage": "Env Strategy"
+  },
   "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease": {
-    "defaultMessage": "Select Release"
+    "defaultMessage": "Release"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.title": {
     "defaultMessage": "Install Application"
@@ -2032,6 +2266,57 @@
   "components.ui.field-help.FieldHelp.exampleTitle": {
     "defaultMessage": "Example:"
   },
+  "components.ui.file-permissions.FileModeSelector.clear": {
+    "defaultMessage": "Clear"
+  },
+  "components.ui.file-permissions.FileModeSelector.executeAction": {
+    "defaultMessage": "Execute (x)"
+  },
+  "components.ui.file-permissions.FileModeSelector.groupTarget": {
+    "defaultMessage": "Group"
+  },
+  "components.ui.file-permissions.FileModeSelector.invalidOctal": {
+    "defaultMessage": "Valid: 000-777"
+  },
+  "components.ui.file-permissions.FileModeSelector.octalNotation": {
+    "defaultMessage": "Octal Notation"
+  },
+  "components.ui.file-permissions.FileModeSelector.othersTarget": {
+    "defaultMessage": "Others (Global)"
+  },
+  "components.ui.file-permissions.FileModeSelector.presets": {
+    "defaultMessage": "Presets:"
+  },
+  "components.ui.file-permissions.FileModeSelector.readAction": {
+    "defaultMessage": "Read (r)"
+  },
+  "components.ui.file-permissions.FileModeSelector.scope": {
+    "defaultMessage": "Scope"
+  },
+  "components.ui.file-permissions.FileModeSelector.symbolic": {
+    "defaultMessage": "Symbolic"
+  },
+  "components.ui.file-permissions.FileModeSelector.userTarget": {
+    "defaultMessage": "User (Owner)"
+  },
+  "components.ui.file-permissions.FileModeSelector.writeAction": {
+    "defaultMessage": "Write (w)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.fileMode": {
+    "defaultMessage": "File Mode (Permissions)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.groupId": {
+    "defaultMessage": "Group ID (GID)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.groupIdHelp": {
+    "defaultMessage": "Leave empty for device runtime default"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.userId": {
+    "defaultMessage": "Owner User ID (UID)"
+  },
+  "components.ui.file-permissions.FilePermissionsInput.userIdHelp": {
+    "defaultMessage": "Leave empty for device runtime default"
+  },
   "components.ui.infinite-table.InfiniteTable.noRecords": {
     "defaultMessage": "No records to display."
   },
@@ -2128,6 +2413,9 @@
   "forms.CreateContainer.ReferenceLabel": {
     "defaultMessage": "Image Reference"
   },
+  "forms.CreateContainer.addFileMountButton": {
+    "defaultMessage": "Add File Mount"
+  },
   "forms.CreateContainer.blkioAddRateLimitButton": {
     "defaultMessage": "Add Rate Limit"
   },
@@ -2172,6 +2460,30 @@
   },
   "forms.CreateContainer.driverOptionsLabel": {
     "defaultMessage": "Driver Options (JSON String)"
+  },
+  "forms.CreateContainer.fileMountDefaultFileLabel": {
+    "defaultMessage": "Default File"
+  },
+  "forms.CreateContainer.fileMountMountpointLabel": {
+    "defaultMessage": "Mountpoint"
+  },
+  "forms.CreateContainer.fileMountPermissionsNoFileTooltip": {
+    "defaultMessage": "Select a default file to configure permissions"
+  },
+  "forms.CreateContainer.fileMountPermissionsTooltip": {
+    "defaultMessage": "Configure File Permissions (mode, UID, GID)"
+  },
+  "forms.CreateContainer.fileMountPermsDefault": {
+    "defaultMessage": "Permissions"
+  },
+  "forms.CreateContainer.fileMountPermsSet": {
+    "defaultMessage": "Perms: {mode}"
+  },
+  "forms.CreateContainer.fileMountRequiredLabel": {
+    "defaultMessage": "Required"
+  },
+  "forms.CreateContainer.fileMountsLabel": {
+    "defaultMessage": "File Mounts"
   },
   "forms.CreateContainer.healthcheckIntervalLabel": {
     "defaultMessage": "Healthcheck Interval (ns)"
@@ -3608,6 +3920,15 @@
   "forms.fieldExplanation.extraHosts.title": {
     "defaultMessage": "Extra Hosts"
   },
+  "forms.fieldExplanation.fileMounts.description": {
+    "defaultMessage": "Mount files into the container. Specify the container mountpoint path, whether the mount is required, and optionally select a default file from repository files."
+  },
+  "forms.fieldExplanation.fileMounts.example": {
+    "defaultMessage": "/etc/config/app.json"
+  },
+  "forms.fieldExplanation.fileMounts.title": {
+    "defaultMessage": "File Mounts"
+  },
   "forms.fieldExplanation.groupAdd.description": {
     "defaultMessage": "Additional groups the container process should belong to."
   },
@@ -4043,6 +4364,12 @@
   "forms.validation.memorySwapInvalid": {
     "defaultMessage": "Memory Swap must be greater than/equal to Memory."
   },
+  "forms.validation.mountpoint.duplicate": {
+    "defaultMessage": "Duplicate mountpoint value."
+  },
+  "forms.validation.mountpoint.format": {
+    "defaultMessage": "Mountpoint must start with '/'."
+  },
   "forms.validation.number": {
     "defaultMessage": "Must be a number."
   },
@@ -4468,12 +4795,6 @@
   },
   "pages.Deployment.stopErrorOffline": {
     "defaultMessage": "The device is disconnected. You cannot stop an application while it is offline."
-  },
-  "pages.Deployment.upgradeErrorFeedback": {
-    "defaultMessage": "Could not upgrade the deployment, please try again."
-  },
-  "pages.Deployment.upgradeErrorOffline": {
-    "defaultMessage": "The device is disconnected. You cannot upgrade an application while it is offline."
   },
   "pages.DeploymentCampaign.deploymentCampaignNotFound.message": {
     "defaultMessage": "Return to the Deployment Campaign list."

@@ -33,11 +33,19 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
   alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Campaigns
   alias Edgehog.Files
+  alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
   alias Edgehog.Storage
 
   setup do
     stub(Edgehog.Astarte.Device.DeviceStatus, :get, fn _client, _device_id ->
       {:error, :not_found}
+    end)
+
+    # Don't start a real download request provisioner: these tests only cover
+    # campaign target behavior, and async tests cannot share the SQL sandbox
+    # connection with spawned provisioner processes.
+    stub(FileDownloadRequestProvisioner, :provision, fn _request, _tenant ->
+      {:ok, self()}
     end)
 
     stub(Storage, :read_presigned_url, fn path ->

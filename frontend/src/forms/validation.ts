@@ -162,6 +162,14 @@ const messages = defineMessages({
     id: "forms.validation.oomScoreAdj",
     defaultMessage: "Must be between -1000 and 1000.",
   },
+  mountpointFormat: {
+    id: "forms.validation.mountpoint.format",
+    defaultMessage: "Mountpoint must start with '/'.",
+  },
+  mountpointDuplicate: {
+    id: "forms.validation.mountpoint.duplicate",
+    defaultMessage: "Duplicate mountpoint value.",
+  },
 });
 
 /* ----------------------------- Constants ----------------------------- */
@@ -609,9 +617,9 @@ const fileDownloadRequestFormSchema = z
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
     progress: z.boolean(),
-    fileMode: z.number(messages.number.id).int().positive().optional(),
-    userId: z.number(messages.number.id).int().positive().optional(),
-    groupId: z.number(messages.number.id).int().positive().optional(),
+    fileMode: z.number(messages.number.id).int().min(0).max(0o777).optional(),
+    userId: z.number(messages.number.id).int().min(0).optional(),
+    groupId: z.number(messages.number.id).int().min(0).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.destinationType === "FILESYSTEM" && data.destination === null) {
@@ -673,9 +681,9 @@ const manualFileDownloadRequestFromRepositorySchema = z
     destination: nullableDestinationSchema,
     ttlSeconds: z.number(messages.number.id).int().min(0),
     progressTracked: z.boolean(),
-    fileMode: z.number(messages.number.id).int().positive().optional(),
-    userId: z.number(messages.number.id).int().positive().optional(),
-    groupId: z.number(messages.number.id).int().positive().optional(),
+    fileMode: z.number(messages.number.id).int().min(0).max(0o777).optional(),
+    userId: z.number(messages.number.id).int().min(0).optional(),
+    groupId: z.number(messages.number.id).int().min(0).optional(),
   })
   .superRefine((data, ctx) => {
     if (!data.repository?.id) {
@@ -831,9 +839,9 @@ const fileDownloadCampaignBaseSchema = z.object({
   destinationType: fileDestinationTypeSchema,
   destination: nullableDestinationSchema,
   ttlSeconds: requiredNumber.int().min(0),
-  fileMode: z.number(messages.number.id).int().positive().optional(),
-  userId: z.number(messages.number.id).int().positive().optional(),
-  groupId: z.number(messages.number.id).int().positive().optional(),
+  fileMode: z.number(messages.number.id).int().min(0).max(0o777).optional(),
+  userId: z.number(messages.number.id).int().min(0).optional(),
+  groupId: z.number(messages.number.id).int().min(0).optional(),
 });
 
 const fileDownloadCampaignSchema = fileDownloadCampaignBaseSchema
@@ -1156,6 +1164,60 @@ const deviceRequestSchema = z
     },
   );
 
+const fileMountSchema = z.object({
+  mountpoint: z
+    .string()
+    .trim()
+    .min(1)
+    .refine((val) => val.startsWith("/"), {
+      message: messages.mountpointFormat.id,
+    }),
+  required: z.boolean(),
+  defaultFileId: z
+    .union([
+      z.string(),
+      z.object({
+        id: z.string().optional(),
+        value: z.string().optional(),
+        label: z.string().optional(),
+      }),
+    ])
+    .nullable()
+    .optional(),
+  fileMode: z
+    .number(messages.number.id)
+    .int()
+    .min(0)
+    .max(0o777)
+    .nullable()
+    .optional(),
+  userId: z.number(messages.number.id).int().min(0).nullable().optional(),
+  groupId: z.number(messages.number.id).int().min(0).nullable().optional(),
+});
+
+const fileMountsSchema = z
+  .array(fileMountSchema)
+  .superRefine((fileMounts, ctx) => {
+    if (!fileMounts) return;
+
+    const seen = new Set<string>();
+
+    fileMounts.forEach((entry, index) => {
+      const mp = entry.mountpoint?.trim();
+      if (!mp) return;
+
+      if (seen.has(mp)) {
+        ctx.addIssue({
+          path: [index, "mountpoint"],
+          code: "custom",
+          message: messages.mountpointDuplicate.id,
+        });
+      } else {
+        seen.add(mp);
+      }
+    });
+  });
+
 const containerSchema = z
   .object({
     name: z.string().min(1),
@@ -1235,6 +1297,7 @@ const containerSchema = z
     volumes: volumesSchema.optional(),
     deviceMappings: deviceMappingsSchema.optional(),
     deviceRequests: z.array(deviceRequestSchema).optional(),
+    fileMounts: fileMountsSchema.optional(),
   })
   .superRefine((container, ctx) => {
     const cpuPeriod = container.cpuPeriod;

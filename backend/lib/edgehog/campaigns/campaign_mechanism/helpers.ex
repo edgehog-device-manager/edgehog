@@ -27,6 +27,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers do
   """
 
   alias Edgehog.Campaigns
+  alias Edgehog.Campaigns.CampaignMechanism.Helpers
   alias Edgehog.Containers
 
   @doc """
@@ -103,5 +104,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers do
     with {:ok, _deployment} <- deployment_result do
       :ok
     end
+  end
+
+  def resolve_file_binds(target, configs) do
+    Helpers.FileBindsResolver.resolve(configs, target.device_id, target.tenant_id)
   end
 end

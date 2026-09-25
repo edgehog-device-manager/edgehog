@@ -1,0 +1,45 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+
+defmodule Edgehog.Containers.Types.EnvFile do
+  @moduledoc """
+  Input type to represent an env file.
+  """
+
+  use AshGraphql.Type
+
+  use Ash.Type.NewType,
+    subtype_of: :map,
+    constraints: [
+      fields: [
+        device_file_id: [
+          type: :uuid
+        ],
+        file_download_request_id: [
+          type: :uuid
+        ]
+      ]
+    ]
+
+  @impl AshGraphql.Type
+  def graphql_input_type(_), do: :env_file_spec_input
+
+  @impl AshGraphql.Type
+  def graphql_type(_), do: :env_file_spec
+end

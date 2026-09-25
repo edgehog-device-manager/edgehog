@@ -37,6 +37,7 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
   alias Edgehog.Campaigns.CampaignMechanism.FileDownload
   alias Edgehog.Campaigns.CampaignMechanism.FileDownload.Executor
   alias Edgehog.Files
+  alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
   alias Edgehog.Storage
 
   setup do
@@ -59,6 +60,16 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
 
     stub(Storage, :read_presigned_url, fn path ->
       {:ok, %{get_url: "http://example.test/#{path}"}}
+    end)
+
+    # Don't start a real download request provisioner: async tests cannot
+    # share the SQL sandbox connection with spawned provisioner processes.
+    # Synchronously emulate the send instead, preserving the previous
+    # synchronous behavior these tests were written against.
+    stub(FileDownloadRequestProvisioner, :provision, fn request, tenant ->
+      with :ok <- Edgehog.Files.send_file_download_request(request, tenant: tenant) do
+        {:ok, self()}
+      end
     end)
 
     %{tenant: tenant_fixture()}
@@ -645,6 +656,7 @@ defmodule Edgehog.Campaigns.Executors.FileDownloadExecutorTest do
     DeviceStatus,
     FileTransferCapabilities,
     FileDownloadRequest,
+    FileDownloadRequestProvisioner,
     Storage
   ]
 

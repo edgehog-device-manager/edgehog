@@ -17,7 +17,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 defmodule EdgehogWeb.Schema.Mutation.UpdateCampaignTest do
-  use EdgehogWeb.GraphqlCase, async: true
+  use EdgehogWeb.GraphqlCase, async: false
 
   import Edgehog.CampaignsFixtures
   import Edgehog.ContainersFixtures
@@ -81,6 +81,45 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateCampaignTest do
         [
           id: id,
           releaseId: release_id,
+          tenant: tenant
+        ]
+        |> update_campaign_mutation()
+        |> extract_result!()
+
+      assert updated_campaign["campaignMechanism"]["release"]["id"] == release_id
+    end
+
+    test "updates a deployment_deploy campaign configs", %{
+      deployment_deploy_campaign: campaign,
+      tenant: tenant
+    } do
+      id = AshGraphql.Resource.encode_relay_id(campaign)
+
+      %{container: container, file_mount: file_mount, file: file, release: release} =
+        deployment_deploy_file_bind_config_fixture(tenant: tenant)
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      container_id = AshGraphql.Resource.encode_relay_id(container)
+      file_id = AshGraphql.Resource.encode_relay_id(file)
+      file_mount_id = AshGraphql.Resource.encode_relay_id(file_mount)
+
+      updated_campaign =
+        [
+          id: id,
+          releaseId: release_id,
+          configs: [
+            %{
+              "containerId" => container_id,
+              "env" => [],
+              "envStrategy" => "MERGE",
+              "fileBinds" => [
+                %{
+                  "fileId" => file_id,
+                  "fileMountId" => file_mount_id
+                }
+              ]
+            }
+          ],
           tenant: tenant
         ]
         |> update_campaign_mutation()
@@ -247,7 +286,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateCampaignTest do
         "requestTimeoutSeconds" => Keyword.get(opts, :request_timeout_seconds),
         "fileId" => Keyword.get(opts, :file_id),
         "baseImageId" => Keyword.get(opts, :base_image_id),
-        "targetReleaseId" => Keyword.get(opts, :target_release_id)
+        "targetReleaseId" => Keyword.get(opts, :target_release_id),
+        "configs" => Keyword.get(opts, :configs)
       }
       |> Enum.filter(fn {_k, v} -> v != nil end)
       |> Map.new()
