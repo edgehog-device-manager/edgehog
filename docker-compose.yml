@@ -44,6 +44,10 @@ services:
       - "traefik.http.routers.edgehog-pgadmin.rule=Host(`pgadmin.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-pgadmin.entrypoints=web"
       - "traefik.http.routers.edgehog-pgadmin.service=pgadmin"
+      - "traefik.http.routers.https-edgehog-pgadmin.rule=Host(`pgadmin.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-pgadmin.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-pgadmin.tls=true"
+      - "traefik.http.routers.https-edgehog-pgadmin.service=pgadmin"
       - "traefik.http.services.pgadmin.loadbalancer.server.port=80"
 
   openfga:
@@ -65,11 +69,19 @@ services:
       - "traefik.http.routers.openfga-http.rule=Host(`api.openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.openfga-http.entrypoints=web"
       - "traefik.http.routers.openfga-http.service=openfga-http"
+      - "traefik.http.routers.https-openfga-http.rule=Host(`api.openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-openfga-http.entrypoints=websecure"
+      - "traefik.http.routers.https-openfga-http.tls=true"
+      - "traefik.http.routers.https-openfga-http.service=openfga-http"
       - "traefik.http.services.openfga-http.loadbalancer.server.port=8080"
       # --- gRPC (port 8081) — requires a TCP/HTTP2 entrypoint in Traefik ---
       - "traefik.http.routers.openfga-grpc.rule=Host(`grpc.openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.openfga-grpc.entrypoints=web"
       - "traefik.http.routers.openfga-grpc.service=openfga-grpc"
+      - "traefik.http.routers.https-openfga-grpc.rule=Host(`grpc.openfga.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-openfga-grpc.entrypoints=websecure"
+      - "traefik.http.routers.https-openfga-grpc.tls=true"
+      - "traefik.http.routers.https-openfga-grpc.service=openfga-grpc"
       - "traefik.http.services.openfga-grpc.loadbalancer.server.port=8081"
       - "traefik.http.services.openfga-grpc.loadbalancer.server.scheme=h2c"
       # --- Playground (port 3000) ---
@@ -100,7 +112,7 @@ services:
           cat /fga-env/.env
 
   edgehog-backend:
-    image: edgehogdevicemanager/edgehog-backend:0.13.1
+    image: docker.io/edgehogdevicemanager/edgehog-backend:0.13.1
     build:
       context: backend
     env_file: .env
@@ -148,10 +160,14 @@ services:
       - "traefik.http.routers.edgehog-backend.rule=Host(`api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-backend.entrypoints=web"
       - "traefik.http.routers.edgehog-backend.service=edgehog-backend"
+      - "traefik.http.routers.https-edgehog-backend.rule=Host(`api.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-backend.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-backend.tls=true"
+      - "traefik.http.routers.https-edgehog-backend.service=edgehog-backend"
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: edgehogdevicemanager/edgehog-frontend:0.13.1
+    image: docker.io/edgehogdevicemanager/edgehog-frontend:0.13.1
     build:
       context: frontend
     environment:
@@ -163,6 +179,10 @@ services:
       - "traefik.http.routers.edgehog-frontend.rule=Host(`${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-frontend.entrypoints=web"
       - "traefik.http.routers.edgehog-frontend.service=edgehog-frontend"
+      - "traefik.http.routers.https-edgehog-frontend.rule=Host(`${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-frontend.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-frontend.tls=true"
+      - "traefik.http.routers.https-edgehog-frontend.service=edgehog-frontend"
       - "traefik.http.services.edgehog-frontend.loadbalancer.server.port=80"
 
   edgehog-device-forwarder:
@@ -178,6 +198,10 @@ services:
       - "traefik.http.routers.edgehog-device-forwarder.rule=Host(`device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-device-forwarder.entrypoints=web"
       - "traefik.http.routers.edgehog-device-forwarder.service=edgehog-device-forwarder"
+      - "traefik.http.routers.https-edgehog-device-forwarder.rule=Host(`device-forwarder.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-device-forwarder.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-device-forwarder.tls=true"
+      - "traefik.http.routers.https-edgehog-device-forwarder.service=edgehog-device-forwarder"
       - "traefik.http.services.edgehog-device-forwarder.loadbalancer.server.port=4001"
 
   rustfs:
@@ -204,10 +228,18 @@ services:
       - "traefik.http.routers.edgehog-rustfs-storage.rule=Host(`rustfs-storage.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-rustfs-storage.entrypoints=web"
       - "traefik.http.routers.edgehog-rustfs-storage.service=edgehog-rustfs-storage"
+      - "traefik.http.routers.https-edgehog-rustfs-storage.rule=Host(`rustfs-storage.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-rustfs-storage.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-rustfs-storage.tls=true"
+      - "traefik.http.routers.https-edgehog-rustfs-storage.service=edgehog-rustfs-storage"
       - "traefik.http.services.edgehog-rustfs-storage.loadbalancer.server.port=9000"
       - "traefik.http.routers.edgehog-rustfs-console.rule=Host(`rustfs.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-rustfs-console.entrypoints=web"
       - "traefik.http.routers.edgehog-rustfs-console.service=edgehog-rustfs-console"
+      - "traefik.http.routers.https-edgehog-rustfs-console.rule=Host(`rustfs.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-rustfs-console.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-rustfs-console.tls=true"
+      - "traefik.http.routers.https-edgehog-rustfs-console.service=edgehog-rustfs-console"
       - "traefik.http.services.edgehog-rustfs-console.loadbalancer.server.port=9001"
 
   rustfs-init:
@@ -248,6 +280,10 @@ services:
       - "traefik.http.routers.edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
       - "traefik.http.routers.edgehog-registry.entrypoints=web"
       - "traefik.http.routers.edgehog-registry.service=edgehog-registry"
+      - "traefik.http.routers.https-edgehog-registry.rule=Host(`registry.${DOCKER_COMPOSE_EDGEHOG_BASE_DOMAIN}`)"
+      - "traefik.http.routers.https-edgehog-registry.entrypoints=websecure"
+      - "traefik.http.routers.https-edgehog-registry.tls=true"
+      - "traefik.http.routers.https-edgehog-registry.service=edgehog-registry"
       - "traefik.http.services.edgehog-registry.loadbalancer.server.port=5000"
 
   registry-auth:
