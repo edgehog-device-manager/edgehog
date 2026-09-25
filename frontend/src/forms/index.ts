@@ -994,6 +994,19 @@ const fieldExplanations = defineMessages({
     id: "forms.fieldExplanation.logConfig.example",
     defaultMessage: "max-size=10m",
   },
+  fileMountsTitle: {
+    id: "forms.fieldExplanation.fileMounts.title",
+    defaultMessage: "File Mounts",
+  },
+  fileMountsDescription: {
+    id: "forms.fieldExplanation.fileMounts.description",
+    defaultMessage:
+      "Mount files into the container. Specify the container mountpoint path, whether the mount is required, and optionally select a default file from repository files.",
+  },
+  fileMountsExample: {
+    id: "forms.fieldExplanation.fileMounts.example",
+    defaultMessage: "/etc/config/app.json",
+  },
 });
 
 export { fieldExplanations };

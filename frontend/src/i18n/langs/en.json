@@ -107,6 +107,18 @@
   "components.apps.containers.container-details.ContainerDetails.extraHostsLabel": {
     "defaultMessage": "Extra Hosts"
   },
+  "components.apps.containers.container-details.ContainerDetails.fileMountDefaultFileLabel": {
+    "defaultMessage": "Default File"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountMountpointLabel": {
+    "defaultMessage": "Mountpoint"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountRequiredLabel": {
+    "defaultMessage": "Required"
+  },
+  "components.apps.containers.container-details.ContainerDetails.fileMountsLabel": {
+    "defaultMessage": "File Mounts"
+  },
   "components.apps.containers.container-details.ContainerDetails.groupAddLabel": {
     "defaultMessage": "Group Add"
   },
@@ -208,6 +220,9 @@
   },
   "components.apps.containers.container-details.ContainerDetails.noDeviceRequests": {
     "defaultMessage": "No device requests assigned."
+  },
+  "components.apps.containers.container-details.ContainerDetails.noFileMounts": {
+    "defaultMessage": "No file mounts configured."
   },
   "components.apps.containers.container-details.ContainerDetails.noNetworks": {
     "defaultMessage": "No networks assigned."
@@ -442,6 +457,9 @@
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.deviceRequests": {
     "defaultMessage": "Device Requests"
+  },
+  "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds": {
+    "defaultMessage": "File Binds"
   },
   "components.apps.deployments.deployment-details.DeploymentDetails.incompatibleVersion": {
     "defaultMessage": "{version} (Incompatible system model)"
@@ -2128,6 +2146,9 @@
   "forms.CreateContainer.ReferenceLabel": {
     "defaultMessage": "Image Reference"
   },
+  "forms.CreateContainer.addFileMountButton": {
+    "defaultMessage": "Add File Mount"
+  },
   "forms.CreateContainer.blkioAddRateLimitButton": {
     "defaultMessage": "Add Rate Limit"
   },
@@ -2172,6 +2193,18 @@
   },
   "forms.CreateContainer.driverOptionsLabel": {
     "defaultMessage": "Driver Options (JSON String)"
+  },
+  "forms.CreateContainer.fileMountDefaultFileLabel": {
+    "defaultMessage": "Default File"
+  },
+  "forms.CreateContainer.fileMountMountpointLabel": {
+    "defaultMessage": "Mountpoint"
+  },
+  "forms.CreateContainer.fileMountRequiredLabel": {
+    "defaultMessage": "Required"
+  },
+  "forms.CreateContainer.fileMountsLabel": {
+    "defaultMessage": "File Mounts"
   },
   "forms.CreateContainer.healthcheckIntervalLabel": {
     "defaultMessage": "Healthcheck Interval (ns)"
@@ -3608,6 +3641,15 @@
   "forms.fieldExplanation.extraHosts.title": {
     "defaultMessage": "Extra Hosts"
   },
+  "forms.fieldExplanation.fileMounts.description": {
+    "defaultMessage": "Mount files into the container. Specify the container mountpoint path, whether the mount is required, and optionally select a default file from repository files."
+  },
+  "forms.fieldExplanation.fileMounts.example": {
+    "defaultMessage": "/etc/config/app.json"
+  },
+  "forms.fieldExplanation.fileMounts.title": {
+    "defaultMessage": "File Mounts"
+  },
   "forms.fieldExplanation.groupAdd.description": {
     "defaultMessage": "Additional groups the container process should belong to."
   },
@@ -4042,6 +4084,12 @@
   },
   "forms.validation.memorySwapInvalid": {
     "defaultMessage": "Memory Swap must be greater than/equal to Memory."
+  },
+  "forms.validation.mountpoint.duplicate": {
+    "defaultMessage": "Duplicate mountpoint value."
+  },
+  "forms.validation.mountpoint.format": {
+    "defaultMessage": "Mountpoint must start with '/'."
   },
   "forms.validation.number": {
     "defaultMessage": "Must be a number."

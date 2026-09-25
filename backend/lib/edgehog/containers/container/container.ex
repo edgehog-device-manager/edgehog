@@ -28,6 +28,7 @@ defmodule Edgehog.Containers.Container do
 
   alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Container.EnvEncoding
+  alias Edgehog.Containers.Container.FileMount
   alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Container.Validations.BindsFormat
   alias Edgehog.Containers.Container.Validations.CpuPeriodQuotaConsistency
@@ -35,7 +36,7 @@ defmodule Edgehog.Containers.Container do
   alias Edgehog.Containers.Container.Validations.VolumeTargetUniqueness
   alias Edgehog.Containers.ContainerVolume
   alias Edgehog.Containers.Image
-  alias Edgehog.Containers.Types.RestartPolicy
+  alias Edgehog.Containers.Types
 
   graphql do
     type :container
@@ -52,6 +53,7 @@ defmodule Edgehog.Containers.Container do
                                devices: :relay,
                                releases: :relay,
                                container_volumes: :relay,
+                               file_mounts: :relay,
                                device_mappings: :relay,
                                device_requests: :relay
   end
@@ -228,15 +230,20 @@ defmodule Edgehog.Containers.Container do
         :readonly_paths
       ]
 
-      argument :image, :map
-      argument :networks, {:array, :map}
-      argument :volumes, {:array, :map}
-      argument :device_mappings, {:array, :map}
-      argument :device_requests, {:array, :map}
+      argument :image, Types.Image
+      argument :networks, {:array, Types.Network}
+      argument :volumes, {:array, Types.Volume}
+      argument :file_mounts, {:array, Types.FileMount}
+      argument :device_mappings, {:array, Types.DeviceMapping}
+      argument :device_requests, {:array, Types.DeviceRequest}
 
       change manage_relationship(:volumes,
                on_no_match: :error,
                on_lookup: {:relate_and_update, :create, :read, [:target]}
+             )
+
+      change manage_relationship(:file_mounts,
+               type: :create
              )
 
       change manage_relationship(:image,
@@ -346,6 +353,7 @@ defmodule Edgehog.Containers.Container do
       ]
 
       argument :volumes, {:array, :map}
+      argument :file_mounts, {:array, :map}
       argument :networks, {:array, :uuid}
       argument :device_mappings, {:array, :uuid}
       argument :device_requests, {:array, :uuid}
@@ -354,6 +362,8 @@ defmodule Edgehog.Containers.Container do
                on_no_match: {:create, :create, :create, [:target]},
                on_lookup: {:relate, :create}
              )
+
+      change manage_relationship(:file_mounts, type: :create)
 
       change manage_relationship(:networks, type: :append)
       change manage_relationship(:device_mappings, type: :append)
@@ -478,7 +488,7 @@ defmodule Edgehog.Containers.Container do
       public? true
     end
 
-    attribute :restart_policy, RestartPolicy do
+    attribute :restart_policy, Types.RestartPolicy do
       public? true
     end
 
@@ -787,6 +797,10 @@ defmodule Edgehog.Containers.Container do
     end
 
     has_many :container_volumes, ContainerVolume do
+      public? true
+    end
+
+    has_many :file_mounts, FileMount do
       public? true
     end
 

@@ -159,6 +159,8 @@ defmodule Edgehog.Campaigns.Campaign do
       argument :destination_type, FileDestination
       argument :destination, :string
 
+      argument :configs, {:array, Edgehog.Containers.Types.DeploymentConfig}
+
       require_atomic? false
 
       validate one_of(:status, [:scheduled]),

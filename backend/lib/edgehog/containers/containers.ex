@@ -106,6 +106,14 @@ defmodule Edgehog.Containers do
       get Container, :container, :read do
         description "Returns the desired container"
       end
+
+      get Edgehog.Containers.FileBind, :file_bind, :read do
+        description "Returns the desired file bind, including the presigned upload URL for target-less binds."
+      end
+
+      get Edgehog.Containers.EnvFile, :env_file, :read do
+        description "Returns the desired env file, including the presigned upload URL for target-less env files."
+      end
     end
 
     mutations do
@@ -138,7 +146,13 @@ defmodule Edgehog.Containers do
         relay_id_translations input: [
                                 application_id: :application,
                                 containers: [
-                                  id: :container
+                                  id: :container,
+                                  volumes: [
+                                    id: :volume
+                                  ],
+                                  networks: [
+                                    id: :network
+                                  ]
                                 ],
                                 container_dependencies: [
                                   container_id: :container,
@@ -160,6 +174,9 @@ defmodule Edgehog.Containers do
                                 ],
                                 volumes: [
                                   id: :volume
+                                ],
+                                file_mounts: [
+                                  default_file_id: :file
                                 ]
                               ]
       end
@@ -192,7 +209,23 @@ defmodule Edgehog.Containers do
 
       create Deployment, :deploy_release, :deploy do
         description "Deploy the application on a device"
-        relay_id_translations input: [release_id: :release, device_id: :device]
+
+        relay_id_translations input: [
+                                release_id: :release,
+                                device_id: :device,
+                                configs: [
+                                  container_id: :container,
+                                  file_binds: [
+                                    device_file_id: :device_file,
+                                    file_download_request_id: :file_download_request,
+                                    file_mount_id: :container_file_mount
+                                  ],
+                                  env_files: [
+                                    device_file_id: :device_file,
+                                    file_download_request_id: :file_download_request
+                                  ]
+                                ]
+                              ]
       end
 
       update Deployment, :start_deployment, :start
@@ -202,6 +235,14 @@ defmodule Edgehog.Containers do
 
       update Deployment, :upgrade_deployment, :upgrade_release do
         relay_id_translations input: [target: :release]
+      end
+
+      update Edgehog.Containers.FileBind, :mark_file_bind_as_uploaded, :mark_as_uploaded do
+        description "Marks the file uploaded through the presigned upload URL as uploaded."
+      end
+
+      update Edgehog.Containers.EnvFile, :mark_env_file_as_uploaded, :mark_as_uploaded do
+        description "Marks the file uploaded through the presigned upload URL as uploaded."
       end
 
       destroy Release, :delete_release, :destroy do
@@ -217,6 +258,8 @@ defmodule Edgehog.Containers do
       define :fetch_container, action: :read, get_by: [:id]
       define :containers_with_image, action: :filter_by_image, args: [:image_id]
     end
+
+    resource Edgehog.Containers.Container.FileMount
 
     resource Edgehog.Containers.Container.Deployment do
       define :deploy_container, action: :deploy, args: [:container, :device]
@@ -376,5 +419,25 @@ defmodule Edgehog.Containers do
     resource Upgrade
     resource DeploymentContainerDeployment
     resource Edgehog.Containers.ReleaseContainerDependencies
+
+    resource Edgehog.Containers.FileBind do
+      define :fetch_file_bind, action: :read, get_by: [:id]
+      define :mark_file_bind_as_uploaded, action: :mark_as_uploaded
+      define :mark_file_bind_as_sent, action: :mark_as_sent
+      define :mark_file_bind_as_available, action: :mark_as_available
+      define :mark_file_bind_as_unavailable, action: :mark_as_unavailable
+      define :mark_file_bind_as_errored, action: :mark_as_errored, args: [:message]
+      define :destroy_file_bind, action: :destroy
+    end
+
+    resource Edgehog.Containers.EnvFile do
+      define :fetch_env_file, action: :read, get_by: [:id]
+      define :mark_env_file_as_uploaded, action: :mark_as_uploaded
+      define :mark_env_file_as_sent, action: :mark_as_sent
+      define :mark_env_file_as_available, action: :mark_as_available
+      define :mark_env_file_as_unavailable, action: :mark_as_unavailable
+      define :mark_env_file_as_errored, action: :mark_as_errored, args: [:message]
+      define :destroy_env_file, action: :destroy
+    end
   end
 end

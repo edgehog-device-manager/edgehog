@@ -171,6 +171,10 @@ defmodule Edgehog.StorageTest do
       file = temporary_file_fixture()
       device_id = [tenant: tenant] |> Edgehog.DevicesFixtures.device_fixture() |> Map.fetch!(:id)
 
+      Mimic.stub(Edgehog.Files.FileDownloadRequest.Provisioner, :provision, fn _, _ ->
+        {:ok, self()}
+      end)
+
       Mimic.stub(FileTransferCapabilities, :get, fn _client, _device_id ->
         {:ok,
          %FileTransferCapabilities{

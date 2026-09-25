@@ -24,16 +24,20 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
 
   alias Edgehog.Astarte.Device.CreateContainerRequest
   alias Edgehog.Astarte.Device.CreateContainerRequest.RequestData
+  alias Edgehog.Containers.Container.Env
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do
     device = changeset.data
 
     with {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
-         {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
+         {:ok, container_deployment} <-
+           Ash.Changeset.fetch_argument(changeset, :container_deployment),
+         {:ok, container_deployment} <-
+           Ash.load(container_deployment, [:container, :file_binds, :env_files]),
+         {:ok, container} <- Map.fetch(container_deployment, :container),
          {:ok, container} <-
            Ash.load(container, [
-             :env_encoding,
              :image,
              :networks,
              :device_mappings,
@@ -41,7 +45,6 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
              container_volumes: [:binding]
            ]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
-      env_encoding = container.env_encoding
       restart_policy = to_correct_string(container.restart_policy)
 
       volume_ids = Enum.map(container.container_volumes, & &1.volume_id)
@@ -77,7 +80,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         stopTimeout: container.stop_timeout,
         restartPolicy: restart_policy,
         restartPolicyMaximumRetryCount: container.restart_policy_maximum_retry_count,
-        env: env_encoding,
+        env: Env.encode(container_deployment.env),
         binds: binds,
         networkMode: container.network_mode,
         portBindings: container.port_bindings,
@@ -87,6 +90,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateContainer do
         capDrop: container.cap_drop,
         cpuShares: container.cpu_shares,
         cpusetCpus: container.cpuset_cpus,
+        fileBindIds: Enum.map(container_deployment.file_binds, & &1.id),
+        envFileIds: Enum.map(container_deployment.env_files, & &1.id),
         cpuPeriod: normalize(container.cpu_period),
         cpuQuota: normalize(container.cpu_quota),
         cpuRealtimePeriod: normalize(container.cpu_realtime_period),

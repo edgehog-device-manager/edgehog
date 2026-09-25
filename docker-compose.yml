@@ -228,8 +228,12 @@ services:
           echo "Setting bucket policy (public read)..."
           aws --endpoint-url http://rustfs:9000 s3api put-bucket-policy --bucket edgehog --policy '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":"*","Action":["s3:GetObject"],"Resource":["arn:aws:s3:::edgehog/*"]}]}'
           echo "Policy exit code: $?"
+          echo "Setting bucket CORS (allow PUT from frontend)..."
+          aws --endpoint-url http://rustfs:9000 s3api put-bucket-cors --bucket edgehog --cors-configuration '{"CORSRules":[{"AllowedOrigins":["*"],"AllowedMethods":["GET","PUT","POST","DELETE","HEAD"],"AllowedHeaders":["*"],"ExposeHeaders":["ETag"],"MaxAgeSeconds":3000}]}'
+          echo "CORS exit code: $?"
           echo "Verifying..."
           aws --endpoint-url http://rustfs:9000 s3api get-bucket-policy --bucket edgehog
+          aws --endpoint-url http://rustfs:9000 s3api get-bucket-cors --bucket edgehog || true
           echo "Done."
 
   registry:

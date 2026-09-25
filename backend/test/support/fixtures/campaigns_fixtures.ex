@@ -374,6 +374,68 @@ defmodule Edgehog.CampaignsFixtures do
     terminated_target_fixture(opts, :failure)
   end
 
+  @doc """
+  Generate a release whose container exposes a (possibly required) file mount,
+  plus a file and a matching deployment config referencing it.
+
+  Useful to build `deployment_deploy` campaigns with file binds.
+
+  ## Options
+
+    * `:tenant` - Required. The tenant for the resources.
+    * `:mountpoint` - The mountpoint of the file mount. Defaults to a unique path.
+    * `:required` - Whether the file mount is required. Defaults to `true`.
+    * `:system_models` - The number of system models tied to the release. Defaults to `1`.
+    * `:file_binds` - Overrides the `file_binds` of the generated config.
+
+  Returns a map with `:container`, `:file_mount`, `:file`, `:release` and
+  `:config` (the per-container deployment config referencing the file).
+  """
+  def deployment_deploy_file_bind_config_fixture(opts \\ []) do
+    {tenant, opts} = Keyword.pop!(opts, :tenant)
+
+    {mountpoint, opts} =
+      Keyword.pop_lazy(opts, :mountpoint, fn ->
+        "/etc/fixture_#{System.unique_integer([:positive])}.conf"
+      end)
+
+    {required, opts} = Keyword.pop(opts, :required, true)
+    {system_models, opts} = Keyword.pop(opts, :system_models, 1)
+    {file_binds, opts} = Keyword.pop(opts, :file_binds)
+
+    container =
+      ContainersFixtures.container_fixture(
+        tenant: tenant,
+        file_mounts: [%{mountpoint: mountpoint, required: required}]
+      )
+
+    [file_mount] = Ash.load!(container, :file_mounts, tenant: tenant).file_mounts
+
+    file = opts[:file] || FilesFixtures.file_fixture(tenant: tenant)
+
+    release =
+      ContainersFixtures.release_fixture(
+        tenant: tenant,
+        container_ids: [container.id],
+        system_models: system_models
+      )
+
+    config = %{
+      container_id: container.id,
+      env: [],
+      env_strategy: :merge,
+      file_binds: file_binds || [%{file_id: file.id, file_mount_id: file_mount.id}]
+    }
+
+    %{
+      container: container,
+      file_mount: file_mount,
+      file: file,
+      release: release,
+      config: config
+    }
+  end
+
   # Campaign Mechanism Helpers
 
   defp build_campaign_mechanism(mechanism_type, tenant, opts, mechanism_opts)
@@ -671,7 +733,7 @@ defmodule Edgehog.CampaignsFixtures do
     release = get_release_for_target(target, mechanism_type, tenant)
 
     {:ok, updated_target} =
-      Campaigns.link_deployment(target, release, tenant: tenant, load: :deployment)
+      Campaigns.link_deployment(target, release, [], tenant: tenant, load: :deployment)
 
     # Send the deployment request
     updated_target

@@ -23,13 +23,24 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
 
   use Ash.Resource.Change
 
+  alias Edgehog.Containers.Container.Env
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     with {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
          {:ok, device} <- Ash.Changeset.fetch_argument(changeset, :device),
          {:ok, deployment} <- Ash.Changeset.fetch_argument(changeset, :deployment),
          {:ok, container} <-
-           Ash.load(container, [:image, :volumes, :networks, :device_mappings, :device_requests],
+           Ash.load(
+             container,
+             [
+               :image,
+               :volumes,
+               :networks,
+               :device_mappings,
+               :device_requests,
+               :file_mounts
+             ],
              tenant: tenant
            ) do
       image = container.image
@@ -90,7 +101,21 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
           }
         end)
 
+      {env, env_strategy} = resolve_env(changeset, container)
+
+      file_binds_input =
+        changeset
+        |> Ash.Changeset.get_argument(:file_binds)
+        |> relate_file_binds(device, container, tenant)
+
+      env_files_input =
+        changeset
+        |> Ash.Changeset.get_argument(:env_files)
+        |> relate_env_files(device)
+
       changeset
+      |> Ash.Changeset.change_attribute(:env, env)
+      |> Ash.Changeset.change_attribute(:env_strategy, env_strategy)
       |> Ash.Changeset.manage_relationship(:image_deployment, image_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
@@ -106,16 +131,68 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.Relate do
         on_lookup: :relate,
         use_identities: [:volume_instance]
       )
-      |> Ash.Changeset.manage_relationship(:device_mapping_deployments, device_mappings_input,
+      |> Ash.Changeset.manage_relationship(
+        :device_mapping_deployments,
+        device_mappings_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_mapping_instance]
       )
-      |> Ash.Changeset.manage_relationship(:device_request_deployments, device_requests_input,
+      |> Ash.Changeset.manage_relationship(
+        :device_request_deployments,
+        device_requests_input,
         on_no_match: {:create, :deploy},
         on_lookup: :relate,
         use_identities: [:device_request_instance]
       )
+      |> Ash.Changeset.manage_relationship(:file_binds, file_binds_input,
+        on_no_match: :create,
+        on_match: :ignore,
+        on_lookup: :ignore
+      )
+      |> Ash.Changeset.manage_relationship(:env_files, env_files_input,
+        on_no_match: :create,
+        on_match: :ignore,
+        on_lookup: :ignore
+      )
     end
+  end
+
+  defp relate_env_files(env_files, device) do
+    env_files = env_files || []
+    Enum.map(env_files, &Map.put(&1, :device_id, device.id))
+  end
+
+  defp relate_file_binds(file_binds, device, container, _tenant) do
+    file_binds = file_binds || []
+    explicit = Enum.map(file_binds, &Map.put(&1, :device_id, device.id))
+
+    explicit_ids =
+      explicit
+      |> Enum.map(& &1.file_mount_id)
+      |> Enum.reject(&is_nil/1)
+      |> MapSet.new()
+
+    default_binds =
+      container.file_mounts
+      |> Enum.filter(&(not MapSet.member?(explicit_ids, &1.id) and &1.default_file_id))
+      |> Enum.map(&default_file_bind(&1, device))
+      |> Enum.reject(&is_nil/1)
+
+    explicit ++ default_binds
+  end
+
+  defp default_file_bind(file_mount, device) do
+    %{
+      file_mount_id: file_mount.id,
+      device_id: device.id
+    }
+  end
+
+  defp resolve_env(changeset, container) do
+    deploy_env = Ash.Changeset.get_argument(changeset, :env) || []
+    env_strategy = Ash.Changeset.get_argument(changeset, :env_strategy) || :merge
+    resolved = Env.resolve(container.env || [], deploy_env, env_strategy)
+    {resolved, env_strategy}
   end
 end

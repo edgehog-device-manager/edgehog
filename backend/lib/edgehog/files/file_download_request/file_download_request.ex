@@ -142,6 +142,86 @@ defmodule Edgehog.Files.FileDownloadRequest do
       change Changes.SendFileDownloadRequest
     end
 
+    create :from_file_bind do
+      description """
+      Creates a file download request for the file uploaded on a
+      target-less container file bind. The bucket object is owned by the
+      file bind (prefix `file_binds/`) and is kept after the request
+      completes so redeploys can reuse it.
+      """
+
+      accept [
+        :url,
+        :file_name,
+        :uncompressed_file_size_bytes,
+        :digest,
+        :encoding,
+        :ttl_seconds,
+        :file_mode,
+        :user_id,
+        :group_id,
+        :destination_type,
+        :destination,
+        :progress_tracked
+      ]
+
+      argument :device_id, :id do
+        description "The ID identifying the Device the File Download Request will be sent to"
+        allow_nil? false
+      end
+
+      # Manually generate the ID since it may be needed before we hit the DB
+      change set_attribute(:id, &Ash.UUIDv7.generate/0)
+
+      validate Validations.CheckEncoding
+
+      change manage_relationship(:device_id, :device, type: :append),
+        only_when_valid?: true
+
+      change set_attribute(:manual?, true)
+      change Changes.SendFileDownloadRequest
+    end
+
+    create :from_env_file do
+      description """
+      Creates a file download request for the file uploaded on a
+      target-less container env file. The bucket object is owned by the
+      env file (prefix `env_files/`) and is kept after the request
+      completes so redeploys can reuse it.
+      """
+
+      accept [
+        :url,
+        :file_name,
+        :uncompressed_file_size_bytes,
+        :digest,
+        :encoding,
+        :ttl_seconds,
+        :file_mode,
+        :user_id,
+        :group_id,
+        :destination_type,
+        :destination,
+        :progress_tracked
+      ]
+
+      argument :device_id, :id do
+        description "The ID identifying the Device the File Download Request will be sent to"
+        allow_nil? false
+      end
+
+      # Manually generate the ID since it may be needed before we hit the DB
+      change set_attribute(:id, &Ash.UUIDv7.generate/0)
+
+      validate Validations.CheckEncoding
+
+      change manage_relationship(:device_id, :device, type: :append),
+        only_when_valid?: true
+
+      change set_attribute(:manual?, true)
+      change Changes.SendFileDownloadRequest
+    end
+
     create :create_fixture do
       accept [
         :url,
@@ -354,7 +434,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
     publish :managed, [[:id, "*"]]
     publish :manual, [[:id, "*"]]
 
-    publish :set_response, [[:id, "*"]]
+    publish :set_response, [[:status, nil], [:id, "*"]]
   end
 
   postgres do

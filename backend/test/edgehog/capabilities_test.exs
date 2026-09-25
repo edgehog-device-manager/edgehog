@@ -133,6 +133,14 @@ defmodule Edgehog.CapabilitiesTest do
         "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest" => %InterfaceVersion{
           major: 0,
           minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableFileBinds" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateFileBindRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
         }
       }
 
