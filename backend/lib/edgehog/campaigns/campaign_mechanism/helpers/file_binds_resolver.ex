@@ -23,6 +23,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers.FileBindsResolver do
   Resolves file references in deployment configs to download-request IDs for a device.
   """
 
+  alias Edgehog.Containers.Container.FileMount
   alias Edgehog.Files.FileDownloadRequest
 
   def resolve([] = configs, _device_id, _tenant_id), do: configs
@@ -43,11 +44,17 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers.FileBindsResolver do
   end
 
   defp do_resolve_file_bind(%{file_id: file_id} = file_bind, device_id, tenant_id) do
-    opts = %{
-      file_id: file_id,
-      device_id: device_id,
-      destination_type: "storage"
-    }
+    permissions = resolve_permissions(file_bind, tenant_id)
+
+    opts =
+      %{
+        file_id: file_id,
+        device_id: device_id,
+        destination_type: "storage"
+      }
+      |> maybe_put(:file_mode, permissions.file_mode)
+      |> maybe_put(:user_id, permissions.user_id)
+      |> maybe_put(:group_id, permissions.group_id)
 
     file_download_request =
       FileDownloadRequest
@@ -57,5 +64,49 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers.FileBindsResolver do
     file_bind
     |> Map.put(:file_id, nil)
     |> Map.put(:file_download_request_id, file_download_request.id)
+    |> maybe_put(:file_mode, permissions.file_mode)
+    |> maybe_put(:user_id, permissions.user_id)
+    |> maybe_put(:group_id, permissions.group_id)
   end
+
+  defp resolve_permissions(file_bind, tenant_id) do
+    file_mode = get_value(file_bind, :file_mode)
+    user_id = get_value(file_bind, :user_id)
+    group_id = get_value(file_bind, :group_id)
+
+    mount =
+      case Map.get(file_bind, :file_mount) do
+        %FileMount{} = mount ->
+          mount
+
+        _ ->
+          mount_id = get_value(file_bind, :file_mount_id)
+
+          fetch_file_mount(mount_id, tenant_id)
+      end
+
+    %{
+      file_mode: fallback(file_mode, mount && mount.file_mode),
+      user_id: fallback(user_id, mount && mount.user_id),
+      group_id: fallback(group_id, mount && mount.group_id)
+    }
+  end
+
+  defp fetch_file_mount(mount_id, tenant_id) do
+    case Ash.get(FileMount, mount_id, tenant: tenant_id) do
+      {:ok, mount} -> mount
+      _ -> nil
+    end
+  end
+
+  defp fallback(val, default) do
+    if is_nil(val), do: default, else: val
+  end
+
+  defp get_value(map, key) when is_map(map) do
+    Map.get(map, key, Map.get(map, to_string(key)))
+  end
+
+  defp maybe_put(map, _key, nil), do: map
+  defp maybe_put(map, key, val), do: Map.put(map, key, val)
 end

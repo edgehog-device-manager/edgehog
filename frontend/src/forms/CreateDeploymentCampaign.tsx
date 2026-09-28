@@ -92,6 +92,9 @@ const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
                               id
                               name
                             }
+                            fileMode
+                            userId
+                            groupId
                           }
                         }
                       }
@@ -494,7 +497,12 @@ const CreateDeploymentCampaignForm = ({
           return next;
         }
 
-        if (existing?.fileId === result.spec.fileId) {
+        if (
+          existing?.fileId === result.spec.fileId &&
+          existing?.fileMode === result.spec.fileMode &&
+          existing?.userId === result.spec.userId &&
+          existing?.groupId === result.spec.groupId
+        ) {
           return prev;
         }
 

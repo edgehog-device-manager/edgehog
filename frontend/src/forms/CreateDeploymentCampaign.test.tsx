@@ -51,14 +51,20 @@ vi.mock("@/components/apps/releases/release-select/ReleaseSelect", () => ({
       <select
         aria-label={isTarget ? "Target release" : "Release"}
         value={controllerProps.value?.id ?? ""}
-        onChange={(event) =>
+        onChange={(event) => {
+          const val = event.target.value;
           controllerProps.onChange(
-            event.target.value ? { id: "rel-1", version: "1.0.0" } : null,
-          )
-        }
+            val === "rel-2"
+              ? { id: "rel-2", version: "2.0.0" }
+              : val
+                ? { id: "rel-1", version: "1.0.0" }
+                : null,
+          );
+        }}
       >
         <option value="">Select...</option>
         <option value="rel-1">1.0.0</option>
+        <option value="rel-2">2.0.0</option>
       </select>
     ) : null,
 }));
@@ -268,6 +274,41 @@ const optionsData = {
                   },
                 },
               },
+              {
+                node: {
+                  __typename: "Release",
+                  id: "rel-2",
+                  version: "2.0.0",
+                  containers: {
+                    edges: [
+                      {
+                        node: {
+                          __typename: "Container",
+                          id: "container-2",
+                          name: "worker",
+                          fileMounts: {
+                            edges: [
+                              {
+                                node: {
+                                  __typename: "FileMount",
+                                  id: "mount-2",
+                                  mountpoint: "/etc/worker.conf",
+                                  required: true,
+                                  defaultFileId: null,
+                                  defaultFile: null,
+                                  fileMode: 420,
+                                  userId: 1000,
+                                  groupId: 1001,
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
             ],
           },
         },
@@ -370,7 +411,7 @@ const repositoryFilesData = {
   },
 };
 
-const selectApplicationAndRelease = async () => {
+const selectApplicationAndRelease = async (releaseId = "rel-1") => {
   // combobox 0 is the operation type, 1 the application; the release picker is
   // a native select stubbed above.
   await waitFor(() => expect(screen.getAllByRole("combobox")).toHaveLength(3));
@@ -379,7 +420,7 @@ const selectApplicationAndRelease = async () => {
     container: document.body,
   });
 
-  await userEvent.selectOptions(screen.getByLabelText("Release"), "rel-1");
+  await userEvent.selectOptions(screen.getByLabelText("Release"), releaseId);
 };
 
 describe("CreateDeploymentCampaignForm file mounts", () => {
@@ -656,5 +697,84 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
         screen.queryByTestId("deployment-campaign-file-mounts"),
       ).not.toBeInTheDocument(),
     );
+  });
+
+  it("preserves default file mount permissions in campaign configs", async () => {
+    const { relayEnvironment, onSubmit } = await renderForm();
+
+    await selectApplicationAndRelease("rel-2");
+    await screen.findByTestId("deployment-campaign-file-mounts");
+    await completeRequiredFields();
+
+    await pickRepositoryFile(relayEnvironment);
+
+    const submitButton = screen.getByRole("button", {
+      name: /Create deploy campaign/i,
+    });
+    await waitFor(() => expect(submitButton).toBeEnabled());
+
+    await userEvent.click(submitButton);
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+
+    const payload = onSubmit.mock.calls[0][0];
+
+    expect(payload.campaignMechanism.deploymentDeploy.configs).toEqual([
+      {
+        containerId: "container-2",
+        fileBinds: [
+          {
+            fileMountId: "mount-2",
+            fileId: "file-1",
+            fileMode: 420,
+            userId: 1000,
+            groupId: 1001,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("updates file bind permissions when customized", async () => {
+    const { relayEnvironment, onSubmit } = await renderForm();
+
+    await selectApplicationAndRelease("rel-1");
+    await screen.findByTestId("deployment-campaign-file-mounts");
+    await completeRequiredFields();
+
+    await pickRepositoryFile(relayEnvironment);
+
+    const customizeButton = screen.getByRole("button", { name: "Customize" });
+    await userEvent.click(customizeButton);
+
+    const uidInput = screen.getByLabelText(/Owner User ID/i);
+    await userEvent.clear(uidInput);
+    await userEvent.type(uidInput, "1234");
+
+    const submitButton = screen.getByRole("button", {
+      name: /Create deploy campaign/i,
+    });
+    await waitFor(() => expect(submitButton).toBeEnabled());
+
+    await userEvent.click(submitButton);
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+
+    const payload = onSubmit.mock.calls[0][0];
+
+    expect(payload.campaignMechanism.deploymentDeploy.configs).toEqual([
+      {
+        containerId: "container-1",
+        fileBinds: [
+          {
+            fileMountId: "mount-1",
+            fileId: "file-1",
+            fileMode: 493,
+            userId: 1234,
+            groupId: 0,
+          },
+        ],
+      },
+    ]);
   });
 });

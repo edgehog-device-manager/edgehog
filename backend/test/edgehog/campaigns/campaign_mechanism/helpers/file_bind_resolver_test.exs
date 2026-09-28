@@ -23,6 +23,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers.FileBindsResolverTest do
   use Edgehog.DataCase, async: true
 
   import Edgehog.CampaignsFixtures
+  import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
   import Edgehog.FilesFixtures
   import Edgehog.TenantsFixtures
@@ -85,6 +86,90 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers.FileBindsResolverTest do
 
       assert request.device_id == device.id
       assert request.file_name == file.name
+    end
+
+    test "preserves custom file_mode, user_id, and group_id on FileDownloadRequest and resolved bind",
+         %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+
+      %{config: config, file_mount: file_mount} =
+        deployment_deploy_file_bind_config_fixture(tenant: tenant)
+
+      [file_bind] = config.file_binds
+
+      config = %{
+        config
+        | file_binds: [
+            Map.merge(file_bind, %{file_mode: 0o644, user_id: 1000, group_id: 1001})
+          ]
+      }
+
+      [resolved_config] = FileBindsResolver.resolve([config], device.id, tenant.tenant_id)
+
+      assert [resolved_bind] = resolved_config.file_binds
+      assert resolved_bind.file_mount_id == file_mount.id
+      assert resolved_bind.file_id == nil
+      assert resolved_bind.file_mode == 0o644
+      assert resolved_bind.user_id == 1000
+      assert resolved_bind.group_id == 1001
+      refute is_nil(resolved_bind.file_download_request_id)
+
+      request =
+        Ash.get!(FileDownloadRequest, resolved_bind.file_download_request_id,
+          tenant: tenant.tenant_id
+        )
+
+      assert request.file_mode == 0o644
+      assert request.user_id == 1000
+      assert request.group_id == 1001
+    end
+
+    test "falls back to file_mount permissions when not specified in file_bind", %{
+      tenant: tenant
+    } do
+      device = device_fixture(tenant: tenant)
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [
+            %{
+              mountpoint: "/etc/fixture_#{System.unique_integer([:positive])}.conf",
+              required: true,
+              file_mode: 0o755,
+              user_id: 2000,
+              group_id: 2001
+            }
+          ]
+        )
+
+      [file_mount] = Ash.load!(container, :file_mounts, tenant: tenant).file_mounts
+      file = file_fixture(tenant: tenant)
+
+      config = %{
+        container_id: container.id,
+        env: [],
+        env_strategy: :merge,
+        file_binds: [%{file_id: file.id, file_mount_id: file_mount.id}]
+      }
+
+      [resolved_config] = FileBindsResolver.resolve([config], device.id, tenant.tenant_id)
+
+      assert [resolved_bind] = resolved_config.file_binds
+      assert resolved_bind.file_mount_id == file_mount.id
+      assert resolved_bind.file_mode == 0o755
+      assert resolved_bind.user_id == 2000
+      assert resolved_bind.group_id == 2001
+      refute is_nil(resolved_bind.file_download_request_id)
+
+      request =
+        Ash.get!(FileDownloadRequest, resolved_bind.file_download_request_id,
+          tenant: tenant.tenant_id
+        )
+
+      assert request.file_mode == 0o755
+      assert request.user_id == 2000
+      assert request.group_id == 2001
     end
 
     test "resolves file binds for each config independently", %{tenant: tenant} do
