@@ -170,7 +170,7 @@ export type FileMountInputProps = {
   fileMountId: string;
   mountpoint: string;
   required?: boolean;
-  deviceId: string;
+  deviceId?: string;
   defaultFileId?: string | null;
   defaultFileName?: string | null;
   defaultFileMode?: number | null;
@@ -341,11 +341,17 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
   ) => {
     const intl = useIntl();
 
+    // A missing device means the bind is not tied to a single device (e.g. a
+    // campaign targeting many of them). In that case only repository files are
+    // available and the spec carries a `fileId` for the backend to resolve per
+    // device, instead of a concrete `fileDownloadRequestId`.
+    const isDeviceScoped = !!deviceId;
+
     // ---------------------------------------------------------------------------
     // State
     // ---------------------------------------------------------------------------
 
-    const [mode, setMode] = useState<MountMode>("device");
+    const [selectedMode, setSelectedMode] = useState<MountMode>("device");
     const [uploadSubTab, setUploadSubTab] = useState<UploadSubTab>("text");
 
     const [userSelectedDeviceFile, setUserSelectedDeviceFile] = useState<
@@ -423,6 +429,8 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
     useEffect(() => {
       onChangeRef.current = onChange;
     }, [onChange]);
+
+    const mode: MountMode = isDeviceScoped ? selectedMode : "repository";
 
     // ---------------------------------------------------------------------------
     // Mutation
@@ -635,6 +643,11 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
             FileMountInput_createManagedFileDownloadRequest_Mutation$data["createManagedFileDownloadRequest"]
           >["result"]
         >((resolve, reject) => {
+          if (!deviceId) {
+            reject(new Error("No device to send the repository file to."));
+            return;
+          }
+
           createManagedDownloadRequest({
             variables: {
               input: {
@@ -675,17 +688,20 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
     // File bind
     // ---------------------------------------------------------------------------
 
+    const permissions = useMemo(
+      () => ({
+        fileMode: overrideFileMode,
+        userId: overrideUserId,
+        groupId: overrideGroupId,
+      }),
+      [overrideFileMode, overrideGroupId, overrideUserId],
+    );
+
     const getFileBindSpec =
       useCallback(async (): Promise<FileBindResult | null> => {
         setErrorMessage(null);
 
         const hasDefault = !!defaultFileId || !!defaultFileName;
-
-        const permissions = {
-          fileMode: overrideFileMode,
-          userId: overrideUserId,
-          groupId: overrideGroupId,
-        };
 
         if (mode === "device") {
           if (!selectedDeviceFile || selectedDeviceFile === "none") {
@@ -756,6 +772,19 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
             }
 
             return null;
+          }
+
+          // Without a device there is no request to create yet: hand back the
+          // repository file and let the backend resolve a download request per
+          // target.
+          if (!isDeviceScoped) {
+            return {
+              spec: {
+                fileMountId,
+                fileId: selectedRepositoryFileId,
+                ...permissions,
+              },
+            };
           }
 
           setIsLoading(true);
@@ -882,12 +911,11 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
         defaultFileName,
         fileMountId,
         intl,
+        isDeviceScoped,
         languageHint,
         mode,
         mountpoint,
-        overrideFileMode,
-        overrideGroupId,
-        overrideUserId,
+        permissions,
         required,
         selectedDeviceFile,
         selectedRepositoryFileId,
@@ -964,9 +992,16 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
         if (selectedRepositoryFileId) {
           handleChange(
             {
-              spec: {
-                fileMountId,
-              },
+              spec: isDeviceScoped
+                ? {
+                    fileMountId,
+                    ...permissions,
+                  }
+                : {
+                    fileMountId,
+                    fileId: selectedRepositoryFileId,
+                    ...permissions,
+                  },
             },
             valid,
           );
@@ -997,8 +1032,10 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
       handleChange(null, valid);
     }, [
       fileMountId,
+      isDeviceScoped,
       isValid,
       mode,
+      permissions,
       selectedDeviceFile,
       selectedRepositoryFileId,
     ]);
@@ -1058,22 +1095,24 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
             name={`mount-mode-${fileMountId}`}
             value={mode}
             onChange={(value) => {
-              setMode(value);
+              setSelectedMode(value);
               setErrorMessage(null);
             }}
             size="sm"
           >
-            <ToggleButton
-              id={`mode-device-${fileMountId}`}
-              value="device"
-              variant="outline-primary"
-              disabled={disabled || isLoading}
-            >
-              <FormattedMessage
-                id="components.apps.containers.file-mount-input.FileMountInput.deviceMode"
-                defaultMessage="Device File"
-              />
-            </ToggleButton>
+            {isDeviceScoped && (
+              <ToggleButton
+                id={`mode-device-${fileMountId}`}
+                value="device"
+                variant="outline-primary"
+                disabled={disabled || isLoading}
+              >
+                <FormattedMessage
+                  id="components.apps.containers.file-mount-input.FileMountInput.deviceMode"
+                  defaultMessage="Device File"
+                />
+              </ToggleButton>
+            )}
 
             <ToggleButton
               id={`mode-repository-${fileMountId}`}
@@ -1087,17 +1126,19 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
               />
             </ToggleButton>
 
-            <ToggleButton
-              id={`mode-upload-${fileMountId}`}
-              value="upload"
-              variant="outline-primary"
-              disabled={disabled || isLoading}
-            >
-              <FormattedMessage
-                id="components.apps.containers.file-mount-input.FileMountInput.uploadMode"
-                defaultMessage="Upload"
-              />
-            </ToggleButton>
+            {isDeviceScoped && (
+              <ToggleButton
+                id={`mode-upload-${fileMountId}`}
+                value="upload"
+                variant="outline-primary"
+                disabled={disabled || isLoading}
+              >
+                <FormattedMessage
+                  id="components.apps.containers.file-mount-input.FileMountInput.uploadMode"
+                  defaultMessage="Upload"
+                />
+              </ToggleButton>
+            )}
           </ToggleButtonGroup>
         </Card.Header>
 
