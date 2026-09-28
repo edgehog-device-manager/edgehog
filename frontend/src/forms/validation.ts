@@ -939,7 +939,8 @@ const maskedPathsSchema = z.array(z.string().min(1));
 const readonlyPathsSchema = z.array(z.string().min(1));
 const cgroupsModeSchema = z
   .string()
-  .refine((v) => v === "host" || v === "private", {
+  .nullable()
+  .refine((v) => v === null || v === "" || v === "host" || v === "private", {
     message: messages.cgroupsMode.id,
   });
 const pidModeSchema = z.string().refine(
@@ -1277,7 +1278,7 @@ const containerSchema = z
     storageOpts: z.array(keyValuePairSchema).optional(),
     readOnlyRootfs: z.boolean().optional(),
     tmpfs: z.array(tmpfsPairSchema).optional(),
-    cgroupsMode: cgroupsModeSchema.optional(),
+    cgroupsMode: cgroupsModeSchema.nullable().optional(),
     dns: dnsSchema.optional(),
     dnsOptions: dnsSchema.optional(),
     dnsSearch: dnsSchema.optional(),

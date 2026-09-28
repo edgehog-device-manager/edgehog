@@ -250,6 +250,7 @@ const mapCreateContainerToInput = (
 
   return {
     ...rest,
+    cgroupsMode: rest.cgroupsMode ?? undefined,
     command: command ? splitBySpace(command) : undefined,
     entrypoint: entrypoint ? splitBySpace(entrypoint) : undefined,
     healthcheckTest: healthcheckTest
