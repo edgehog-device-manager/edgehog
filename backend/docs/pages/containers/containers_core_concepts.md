@@ -143,6 +143,20 @@ Docker provides two main ways to persist data: volumes and bind mounts, and it's
 With a **bind mount**, a file or directory from the host machine is mounted directly into the container.
 With a **volume**, Docker creates a new directory inside its own managed storage area on the host and takes full responsibility for managing its contents.
 
+## Files in containers
+
+Edgehog delivers single files to containers with three related concepts. Keep their names apart:
+
+- **File mount**: a creation-time declaration on a container. It says _where_ a file must appear inside the container (`mountpoint`), whether the container can start without it (`required`), and optionally which file to use when nobody overrides it (`default file`). File mounts are defined when the container is created in a release.
+- **File bind**: a deployment-time choice of _which_ file content fills a file mount on a specific device. If no custom bind is given, the mount uses its default file. If the mount is required and has neither a default file nor a bind, the container cannot start.
+- **Env file**: a deployment-time file handed to the container as an env file, independent of any mountpoint. Use it for per-device configuration (for example, a `.env` file) that should not be baked into the release.
+
+In short: mounts describe _where_ and _whether needed_, binds and env files describe _which content for this deployment_.
+
+File mounts can also carry optional permission overrides (file mode, user and group IDs). They default to the device-side defaults unless you set them explicitly in the UI.
+
+For the click-by-click flows, see [Container creation](./applications_management.md#container-creation) for file mounts and [Deploying with files](./applications_management.md#deploying-with-files) for file binds and env files.
+
 ## Networks
 
 In Edgehog, networks correspond directly to Docker networks. They are [managed through Edgehog](./network_management.md), allowing users to create reusable network specifications that can be referenced by multiple containers during the deployment process.
