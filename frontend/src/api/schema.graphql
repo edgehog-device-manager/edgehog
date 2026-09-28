@@ -238,6 +238,15 @@ type FirmwareUpgrade {
 
 input CampaignCampaignMechanismDeploymentUpgradeInput {
   """
+  Per-container configuration overrides to apply at deployment time.
+    Each override is keyed by the container id and may include:
+      - env: a list of key/value pairs
+      - env_strategy: either :merge or :override
+      - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+  """
+  configs: [DeploymentConfigSpecInput!]
+
+  """
   The maximum percentage of failures allowed over the number of total targets.
   If the failures exceed this threshold, the Campaign terminates with
   a failure.
@@ -299,6 +308,15 @@ type DeploymentUpgrade {
   Deployment lost (and possibly retry). It must be at least 30 seconds.
   """
   requestTimeoutSeconds: Int!
+
+  """
+  Per-container configuration overrides to apply at deployment time.
+    Each override is keyed by the container id and may include:
+      - env: a list of key/value pairs
+      - env_strategy: either :merge or :override
+      - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+  """
+  configs: [DeploymentConfigSpec!]!
 
   releaseId: ID
 

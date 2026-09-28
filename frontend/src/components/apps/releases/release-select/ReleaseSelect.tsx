@@ -40,7 +40,6 @@ import Button from "@/components/ui/button/Button";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
-import { ApplicationRecord } from "@/forms/CreateDeploymentCampaign";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import Select from "@/components/ui/select/Select";
 
@@ -77,6 +76,10 @@ export type ReleaseRecord = NonNullable<
   NonNullable<ReleaseSelect_ReleasesFragment$data["releases"]>["edges"]
 >[number]["node"];
 
+export type ApplicationRef = {
+  id: string;
+};
+
 const getReleaseLabel = (release: ReleaseRecord) => release.version;
 const getReleaseValue = (release: ReleaseRecord) => release.id;
 const noReleaseOptionsMessage = (
@@ -98,7 +101,7 @@ const noReleaseOptionsMessage = (
 
 type ReleaseSelectProps = {
   isTarget: boolean;
-  selectedApp: ApplicationRecord;
+  selectedApp: ApplicationRef;
   selectedRelease?: ReleaseRecord;
   deploymentCampaignReleaseOptionsRef: ReleaseSelect_ReleasesFragment$key | null;
   controllerProps: ControllerProps;
@@ -187,7 +190,7 @@ const ReleaseSelect = ({
 
 type ReleaseSelectContentProps = {
   isTarget: boolean;
-  selectedApp: ApplicationRecord;
+  selectedApp: ApplicationRef;
   selectedRelease?: ReleaseRecord;
   applicationQuery: PreloadedQuery<ReleaseSelect_getApplication_Query>;
   controllerProps: ControllerProps;
@@ -241,7 +244,7 @@ type ControllerProps = {
 
 type ReleaseSelectWrapperProps = {
   isTarget?: boolean;
-  selectedApp: ApplicationRecord;
+  selectedApp: ApplicationRef;
   selectedRelease?: ReleaseRecord;
   controllerProps: ControllerProps;
 };

@@ -2797,11 +2797,23 @@
   "forms.CreateDeploymentCampaign.channelOption": {
     "defaultMessage": "Search or select a channel..."
   },
+  "forms.CreateDeploymentCampaign.containerLabel": {
+    "defaultMessage": "Container: {containerName}"
+  },
+  "forms.CreateDeploymentCampaign.fileBindsDescription": {
+    "defaultMessage": "Select the repository file to mount at each mountpoint. The file is sent to every device targeted by the channel."
+  },
+  "forms.CreateDeploymentCampaign.fileBindsTitle": {
+    "defaultMessage": "File Mounts Configuration"
+  },
   "forms.CreateDeploymentCampaign.maxFailurePercentageLabel": {
     "defaultMessage": "Max Failures <muted>(%)</muted>"
   },
   "forms.CreateDeploymentCampaign.maxInProgressOperationsLabel": {
     "defaultMessage": "Max Pending Operations"
+  },
+  "forms.CreateDeploymentCampaign.missingRequiredBindsFeedback": {
+    "defaultMessage": "Please configure a file source for all required file mounts."
   },
   "forms.CreateDeploymentCampaign.nameLabel": {
     "defaultMessage": "Name"
