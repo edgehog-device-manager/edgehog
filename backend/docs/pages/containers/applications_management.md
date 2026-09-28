@@ -83,6 +83,7 @@ Define how the container connects to networks.
 Configure volumes and bind mounts.
 
 - **Bind Mounts**: Map host directories into the container. Lets both host and container see and modify the same files.
+- **File Mounts**: Declare single-file mountpoints inside the container (path, whether required, optional default file). The actual file content is chosen at deployment time with a file bind. See [Files in containers](./containers_core_concepts.md#files-in-containers).
 - **Volumes**: Docker-managed storage that persists data independently of the container lifecycle. For more detailed information on creating and managing volumes, refer to the [Volumes management](./volume_management.md) page.
 - **Volume Driver**: Driver that container uses to mount volumes
 - **Storage Options**: allows for specifying storage driver options when creating a container. The specific options available depend on the storage driver being used.
@@ -90,6 +91,18 @@ Configure volumes and bind mounts.
 - **Read-only Mode**: makes the container’s root FS read-only; the container can only write to:
   - tmpfs mounts
   - volumes / bind mounts you explicitly attach
+
+##### File mounts at creation time
+
+To declare that a container expects single files at specific paths:
+
+1. In the **Create Release** page, click **Add Container** and open the **Storage Configuration** section
+2. Click **Add File Mount** and fill in the mountpoint (an absolute path, for example `/app/config.yaml`), whether it is required, and optionally a default file from your repositories
+3. Optionally open the permissions row to override file mode, user or group IDs. If left unset, device-side defaults apply
+
+![File mount](assets/container_create_file_mounts_section.png)
+
+![File mount with permissions](assets/container_create_file_mount_perms.png)
 
 #### **Resource Limits**
 
@@ -227,5 +240,24 @@ Expose specific host devices to the container.
 
 - **Device Mappings** – Map host devices into the container (e.g., `/dev/ttyUSB0`).
   Useful for hardware-dependent workloads.
+
+## Deploying with files
+
+When you deploy a release to a single device, you can customize which file content each container receives, without changing the release itself:
+
+1. Open the device and start the deploy flow for the application release
+2. For each container that declares file mounts, the **File Binds** list shows one row per mountpoint. Keep the default file or pick a custom file (upload a new file or select a file already on the device) for that mountpoint
+3. Optionally add an **Env File** for a container: upload a file (for example, a `.env` file) that is delivered alongside the deployment
+4. Confirm the deployment. Files are uploaded first, then the deployment is sent to the device
+
+Rules of thumb:
+
+- A file bind only overrides content for that deployment. The release and its default files stay unchanged
+- If a mount is marked required and has neither a default file nor a custom bind, the container cannot start
+- Permission overrides set on the mount still apply to a custom bind unless you change them at deployment time
+
+![Deployment file binds](assets/deployment_file_binds.png)
+
+![Deployment env file](assets/deployment_env_file.png)
 
 > **Note:** On the right side of every field there is ![Field Help](assets/help_icon.png) icon. Hovering over it displays a short tooltip explaining the purpose of that field.

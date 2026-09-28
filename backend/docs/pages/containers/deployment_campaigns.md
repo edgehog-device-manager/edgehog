@@ -36,6 +36,7 @@ When creating a Deployment Campaign, the following information must be provided:
 - **Channel**: The target Channel for the Deployment Campaign. All devices in this channel will be targeted.
 - **Scheduled Time** (optional): The time at which the campaign should start executing. If not provided, the campaign will start immediately upon creation.
 - **[Deployment Mechanism](#deployment-mechanism)** properties.
+- **Per-container file configuration** (for `deploy` and `upgrade` operations, see [below](#per-container-file-configuration)): custom file binds and env files applied to every targeted device.
 
 The Deployment Campaign information can be provided using the form, and pressing the "Create" button saves the Deployment Campaign.
 
@@ -67,6 +68,17 @@ The properties of this Deployment Mechanism are:
 - **Max In-Progress Deployments**: the maximum number of concurrent operations. The Deployment Campaign will have at most this number of operations that are started but not yet finished (either successfully or not).
 - **Create Request Retries**: the number of times an operation must be retried on a specific Device before considering it a failure. Note that the operation is retried only if the request doesn't get acknowledged from the device.
 - **Request Timeout**: the timeout (in seconds) to wait before considering a request lost (and possibly retry).
+
+### Per-container file configuration
+
+For `deploy` and `upgrade` campaigns, the Create Campaign page lets you specify the same per-container file options available in a [single-device deployment](./applications_management.md#deploying-with-files):
+
+1. After selecting the application and release, expand the per-container section
+2. For each container that declares file mounts, keep the default file or choose a custom file bind for that mountpoint. The same bind is applied to every device targeted by the campaign
+
+The same rules apply as for single-device deployments: binds only override content for the campaign targets, and a required mount with no default file and no custom bind prevents the container from starting.
+
+![Deployment Campaign file binds screenshot](assets/deployment_campaign_file_binds.png)
 
 ## Deployment Campaign
 
