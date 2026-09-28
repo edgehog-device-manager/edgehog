@@ -57,6 +57,19 @@ config :edgehog, Edgehog.Repo,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
 
+forwarder_hostname = System.get_env("EDGEHOG_FORWARDER_HOSTNAME", "localhost")
+forwarder_port = System.get_env("EDGEHOG_FORWARDER_PORT", "4001")
+
+forwarder_secure_sessions? =
+  System.get_env("EDGEHOG_FORWARDER_SECURE_SESSIONS", "false") == "true"
+
+config :edgehog, :edgehog_forwarder, %{
+  hostname: forwarder_hostname,
+  port: String.to_integer(forwarder_port),
+  secure_sessions?: forwarder_secure_sessions?,
+  enabled?: forwarder_hostname != nil
+}
+
 # Mimic production environment variables, default to phoenix defaults.
 
 # For development, we disable any cache and enable

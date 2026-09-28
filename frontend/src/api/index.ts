@@ -89,6 +89,9 @@ const backendUrl =
 const hideNavigationElements =
   applicationMetatag?.dataset?.hideNavigationElements === "true";
 
+const forwarderVersion =
+  applicationMetatag?.dataset?.forwarderVersion || "0.1.0";
+
 try {
   new URL(backendUrl);
 } catch {
@@ -329,4 +332,9 @@ const relayEnvironment = (session: Session) => {
 };
 
 export type { FetchGraphQL };
-export { fetchGraphQL, relayEnvironment, hideNavigationElements };
+export {
+  fetchGraphQL,
+  relayEnvironment,
+  hideNavigationElements,
+  forwarderVersion,
+};
