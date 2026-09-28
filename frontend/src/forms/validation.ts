@@ -959,7 +959,11 @@ const oomScoreAdjSchema = z
   .int()
   .min(-1000)
   .max(1000);
-const blkioWeightSchema = z.number(messages.number.id).int().min(0).max(1000);
+const blkioWeightSchema = z
+  .number(messages.number.id)
+  .int()
+  .min(0, messages.blkioWeight.id)
+  .max(1000, messages.blkioWeight.id);
 
 const keyValuePairSchema = z.object({
   key: z.string().trim().min(1),
@@ -977,7 +981,11 @@ const ulimitSchema = z.object({
 });
 const blkioWeightDeviceSchema = z.object({
   path: z.string().trim().min(1),
-  weight: z.number(messages.number.id).int().min(0).max(1000),
+  weight: z
+    .number(messages.number.id)
+    .int()
+    .min(0, messages.blkioWeight.id)
+    .max(1000, messages.blkioWeight.id),
 });
 const blkioLimitSchema = z.object({
   path: z.string().trim().min(1),
