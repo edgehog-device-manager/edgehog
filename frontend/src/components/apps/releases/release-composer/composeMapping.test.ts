@@ -210,7 +210,20 @@ services:
     not_a_compose_key: true
 `);
 
-    expect(unknownServiceKey.ok).toBe(false);
+    // Unknown service keys are kept as extras with a warning so user
+    // settings survive round trips instead of failing validation.
+    expect(unknownServiceKey.ok).toBe(true);
+
+    if (!unknownServiceKey.ok) return;
+
+    expect(
+      unknownServiceKey.warnings.some((w) =>
+        w.includes("'not_a_compose_key'"),
+      ),
+    ).toBe(true);
+    expect(
+      unknownServiceKey.data.services[0].extras?.keys,
+    ).toHaveProperty("not_a_compose_key", true);
   });
 
   it("keeps x- extensions as warnings without failing validation", () => {
