@@ -40,12 +40,16 @@ import {
   healthcheckTestToString,
   isBindSource,
   labelToId,
+  listOrDictToPairs,
+  parseBlkioEntries,
   parseDurationToNs,
   parseIntValue,
+  parseUlimits,
   portBindingFromEntry,
   restartPolicyToEdgehog,
   splitVolumeShortSyntax,
   SUPPORTED_SERVICE_KEYS,
+  toInt,
 } from "./composeUtils";
 
 /* ------------------------- YAML -> form data ------------------------- */
@@ -160,6 +164,8 @@ export const composeToFormData = (
           : undefined,
       command: commandToString(service.command),
       entrypoint: commandToString(service.entrypoint),
+      labels: listOrDictToPairs(service.labels),
+      sysctls: listOrDictToPairs(service.sysctls),
       networks: [],
       deviceMappings: [],
       deviceRequests: [],
@@ -267,6 +273,110 @@ export const composeToFormData = (
     } else if (service.healthcheck != null) {
       warnings.push(
         `${ctx}: unsupported healthcheck definition is not supported and will be ignored`,
+      );
+    }
+
+    // ulimits
+    if (service.ulimits != null) {
+      container.ulimits = parseUlimits(service.ulimits, ctx, warnings);
+    }
+
+    // logging
+    if (
+      service.logging != null &&
+      typeof service.logging === "object" &&
+      !Array.isArray(service.logging)
+    ) {
+      const logging = asRecord(service.logging);
+
+      if (typeof logging.driver === "string") {
+        container.logType = logging.driver;
+      }
+
+      if (logging.options != null) {
+        container.logConfig = Object.entries(asRecord(logging.options)).map(
+          ([key, val]) => ({
+            key,
+            value: val == null ? "" : String(val),
+          }),
+        );
+      }
+    } else if (service.logging != null) {
+      warnings.push(
+        `${ctx}: unsupported logging definition is not supported and will be ignored`,
+      );
+    }
+
+    // blkio_config
+    if (
+      service.blkio_config != null &&
+      typeof service.blkio_config === "object" &&
+      !Array.isArray(service.blkio_config)
+    ) {
+      const blkio = asRecord(service.blkio_config);
+      const unsupportedBlkioOptions = Object.keys(blkio).filter(
+        (key) =>
+          ![
+            "weight",
+            "weight_device",
+            "device_read_bps",
+            "device_write_bps",
+            "device_read_iops",
+            "device_write_iops",
+          ].includes(key),
+      );
+
+      if (unsupportedBlkioOptions.length > 0) {
+        warnings.push(
+          `${ctx}: blkio_config option(s) ${unsupportedBlkioOptions.join(", ")} are not supported and will be ignored`,
+        );
+      }
+
+      if (blkio.weight != null) {
+        const weight = toInt(blkio.weight);
+
+        if (weight === undefined) {
+          warnings.push(
+            `${ctx}: unsupported blkio weight '${String(blkio.weight)}' is not supported and will be ignored`,
+          );
+        } else {
+          container.blkioWeight = weight;
+        }
+      }
+
+      container.blkioWeightDevice = parseBlkioEntries(
+        blkio.weight_device,
+        "weight",
+        ctx,
+        warnings,
+      ).map(({ path, value }) => ({ path, weight: value }));
+      container.blkioDeviceReadBps = parseBlkioEntries(
+        blkio.device_read_bps,
+        "rate",
+        ctx,
+        warnings,
+      ).map(({ path, value }) => ({ path, rate: value }));
+      container.blkioDeviceWriteBps = parseBlkioEntries(
+        blkio.device_write_bps,
+        "rate",
+        ctx,
+        warnings,
+      ).map(({ path, value }) => ({ path, rate: value }));
+      container.blkioDeviceReadIops = parseBlkioEntries(
+        blkio.device_read_iops,
+        "rate",
+        ctx,
+        warnings,
+      ).map(({ path, value }) => ({ path, rate: value }));
+      container.blkioDeviceWriteIops = parseBlkioEntries(
+        blkio.device_write_iops,
+        "rate",
+        ctx,
+        warnings,
+      ).map(({ path, value }) => ({ path, rate: value }));
+    } else if (service.blkio_config != null) {
+      warnings.push(
+        `${ctx}: unsupported blkio_config definition is not supported and will be ignored`,
       );
     }
 
