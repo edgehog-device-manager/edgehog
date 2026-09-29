@@ -164,6 +164,10 @@ export const useComposerState = ({ mappingContext }: UseComposerStateArgs) => {
               // keep what the user configured in the panes
               deviceRequests: existing.deviceRequests ?? [],
               fileMounts: existing.fileMounts ?? [],
+              networkDisabled: existing.networkDisabled,
+              autoRemove: existing.autoRemove,
+              maskedPaths: existing.maskedPaths ?? [],
+              readonlyPaths: existing.readonlyPaths ?? [],
             }
           : service.container;
 
