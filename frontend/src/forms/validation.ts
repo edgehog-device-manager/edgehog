@@ -938,11 +938,8 @@ const securityoptSchema = z.array(z.string().min(1));
 const maskedPathsSchema = z.array(z.string().min(1));
 const readonlyPathsSchema = z.array(z.string().min(1));
 const cgroupsModeSchema = z
-  .string()
-  .nullable()
-  .refine((v) => v === null || v === "" || v === "host" || v === "private", {
-    message: messages.cgroupsMode.id,
-  });
+  .union([z.enum(["host", "private"]), z.literal("")])
+  .nullable();
 const pidModeSchema = z.string().refine(
   (v) => {
     const pattern = /^(host|container:.+)$/;
