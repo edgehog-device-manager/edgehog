@@ -31,6 +31,7 @@ import {
   formatNsToDuration,
   healthcheckTestToCompose,
   idToLabel,
+  pairsToMap,
   restartPolicyToCompose,
   sameStrings,
 } from "./composeUtils";
@@ -152,6 +153,70 @@ export const formDataToCompose = (
 
     if (container.capAdd?.length) output.cap_add = [...container.capAdd];
     if (container.capDrop?.length) output.cap_drop = [...container.capDrop];
+
+    if (container.labels?.length) {
+      output.labels = pairsToMap(container.labels);
+    }
+
+    if (container.sysctls?.length) {
+      output.sysctls = pairsToMap(container.sysctls);
+    }
+
+    if (container.ulimits?.length) {
+      output.ulimits = Object.fromEntries(
+        container.ulimits.map((ulimit) =>
+          ulimit.soft === ulimit.hard
+            ? [ulimit.name, ulimit.soft]
+            : [ulimit.name, { soft: ulimit.soft, hard: ulimit.hard }],
+        ),
+      );
+    }
+
+    if (container.logType || container.logConfig?.length) {
+      const logging: Record<string, unknown> = {};
+
+      if (container.logType) logging.driver = container.logType;
+      if (container.logConfig?.length)
+        logging.options = pairsToMap(container.logConfig);
+
+      output.logging = logging;
+    }
+
+    if (
+      container.blkioWeight != null ||
+      container.blkioWeightDevice?.length ||
+      container.blkioDeviceReadBps?.length ||
+      container.blkioDeviceWriteBps?.length ||
+      container.blkioDeviceReadIops?.length ||
+      container.blkioDeviceWriteIops?.length
+    ) {
+      const blkioConfig: Record<string, unknown> = {};
+
+      if (container.blkioWeight != null)
+        blkioConfig.weight = container.blkioWeight;
+      if (container.blkioWeightDevice?.length)
+        blkioConfig.weight_device = container.blkioWeightDevice.map(
+          ({ path, weight }) => ({ path, weight }),
+        );
+      if (container.blkioDeviceReadBps?.length)
+        blkioConfig.device_read_bps = container.blkioDeviceReadBps.map(
+          ({ path, rate }) => ({ path, rate }),
+        );
+      if (container.blkioDeviceWriteBps?.length)
+        blkioConfig.device_write_bps = container.blkioDeviceWriteBps.map(
+          ({ path, rate }) => ({ path, rate }),
+        );
+      if (container.blkioDeviceReadIops?.length)
+        blkioConfig.device_read_iops = container.blkioDeviceReadIops.map(
+          ({ path, rate }) => ({ path, rate }),
+        );
+      if (container.blkioDeviceWriteIops?.length)
+        blkioConfig.device_write_iops = container.blkioDeviceWriteIops.map(
+          ({ path, rate }) => ({ path, rate }),
+        );
+
+      output.blkio_config = blkioConfig;
+    }
 
     if (
       container.healthcheckTest != null ||

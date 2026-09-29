@@ -31,11 +31,13 @@ import type { ReleaseCreate_getOptions_Query$data } from "@/api/__generated__/Re
 import Icon from "@/components/ui/icon/Icon";
 import MultiSelect from "@/components/ui/multi-select/MultiSelect";
 import {
+  BlkioSection,
   DeviceMappingsSection,
   DeviceRequestsSection,
   FileMountsSection,
   HealthcheckSection,
   ImageSection,
+  LoggingSection,
   NameSection,
   NetworkSection,
   ProcessSection,
@@ -261,6 +263,16 @@ const ServicePane = ({
                 form={form}
                 open={isSectionOpen("healthcheck")}
                 onToggle={() => toggleSection("healthcheck")}
+              />
+              <BlkioSection
+                form={form}
+                open={isSectionOpen("blkio")}
+                onToggle={() => toggleSection("blkio")}
+              />
+              <LoggingSection
+                form={form}
+                open={isSectionOpen("logging")}
+                onToggle={() => toggleSection("logging")}
               />
               <DeviceRequestsSection
                 form={form}
