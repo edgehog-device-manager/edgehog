@@ -2800,6 +2800,36 @@
   "forms.CreateDeploymentCampaign.containerLabel": {
     "defaultMessage": "Container: {containerName}"
   },
+  "forms.CreateDeploymentCampaign.environment.file": {
+    "defaultMessage": "Env file"
+  },
+  "forms.CreateDeploymentCampaign.environment.fileNotAvailable": {
+    "defaultMessage": "Environment file configuration is not available yet for deployment campaigns."
+  },
+  "forms.CreateDeploymentCampaign.environment.invalidJson": {
+    "defaultMessage": "Invalid JSON"
+  },
+  "forms.CreateDeploymentCampaign.environment.mergeOption": {
+    "defaultMessage": "Merge"
+  },
+  "forms.CreateDeploymentCampaign.environment.none": {
+    "defaultMessage": "No config"
+  },
+  "forms.CreateDeploymentCampaign.environment.override": {
+    "defaultMessage": "Env override"
+  },
+  "forms.CreateDeploymentCampaign.environment.overrideOption": {
+    "defaultMessage": "Override"
+  },
+  "forms.CreateDeploymentCampaign.environment.strategy": {
+    "defaultMessage": "Environment strategy"
+  },
+  "forms.CreateDeploymentCampaign.environment.variables": {
+    "defaultMessage": "Environment variables"
+  },
+  "forms.CreateDeploymentCampaign.environmentConfigurationTitle": {
+    "defaultMessage": "Environment Configuration"
+  },
   "forms.CreateDeploymentCampaign.fileBindsDescription": {
     "defaultMessage": "Select the repository file to mount at each mountpoint. The file is sent to every device targeted by the channel."
   },

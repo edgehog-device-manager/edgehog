@@ -30,6 +30,7 @@ import { Card, Col, Container, Row } from "react-bootstrap";
 
 import FilePermissionsInput from "@/components/ui/file-permissions/FilePermissionsInput";
 import { modeToOctal } from "@/lib/permissions";
+import { envToString } from "@/lib/environment";
 
 import type {
   ContainerEnvVarInput,
@@ -101,15 +102,6 @@ const mapEnv = (
       value: item.value,
     }));
 };
-
-const reduceEnv = (env: ContainerEnvVarInput[]) =>
-  env.reduce((acc: Record<string, string>, envVar) => {
-    acc[envVar.key] = envVar.value;
-    return acc;
-  }, {});
-
-const envToString = (env: ContainerEnvVarInput[]) =>
-  JSON.stringify(reduceEnv(env), null, 2);
 
 const mapKeyValuePairs = (pairs?: { key: string; value: string }[] | null) => {
   if (!pairs?.length) return { keys: undefined, values: undefined };

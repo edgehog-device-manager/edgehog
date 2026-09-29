@@ -25,7 +25,6 @@ import { SingleValue } from "react-select";
 
 import type { InstallApplicationModal_GetApplicationsWithReleases_Query } from "@/api/__generated__/InstallApplicationModal_GetApplicationsWithReleases_Query.graphql";
 import type {
-  ContainerEnvVarInput,
   DeploymentConfigSpecInput,
   EnvFileSpecInput,
   FileBindSpecInput,
@@ -33,6 +32,12 @@ import type {
 } from "@/api/__generated__/InstallApplicationModal_DeployRelease_Mutation.graphql";
 import type { InstallApplicationModal_markFileBindAsUploaded_Mutation } from "@/api/__generated__/InstallApplicationModal_markFileBindAsUploaded_Mutation.graphql";
 import type { InstallApplicationModal_markEnvFileAsUploaded_Mutation } from "@/api/__generated__/InstallApplicationModal_markEnvFileAsUploaded_Mutation.graphql";
+import {
+  type EnvMode,
+  areAllEnvJsonsValid,
+  getContainerEnvVars,
+  isEnvJsonValid,
+} from "@/lib/environment";
 import { useNavigate, Route } from "@/Navigation";
 import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 import Select from "@/components/ui/select/Select";
@@ -223,8 +228,6 @@ type SelectOption = {
   disabled: boolean;
 };
 
-type EnvMode = "none" | "override" | "file";
-
 const InstallApplicationModal = ({
   open,
   onToggleModal,
@@ -377,43 +380,6 @@ const InstallApplicationModal = ({
     [envStrategyOptions, envStrategies],
   );
 
-  const parseEnvJson = useCallback(
-    (envJson: string): ContainerEnvVarInput[] | undefined => {
-      if (!envJson || !envJson.trim()) return undefined;
-      try {
-        const parsed = JSON.parse(envJson);
-        if (
-          typeof parsed === "object" &&
-          parsed !== null &&
-          !Array.isArray(parsed)
-        ) {
-          const entries = Object.entries(parsed);
-          if (entries.length === 0) return undefined;
-          return entries.map(([key, value]) => ({
-            key,
-            value: typeof value === "string" ? value : JSON.stringify(value),
-          }));
-        }
-      } catch {
-        return undefined;
-      }
-      return undefined;
-    },
-    [],
-  );
-
-  const isEnvJsonValid = useCallback((envJson: string) => {
-    if (!envJson || !envJson.trim()) return true;
-    try {
-      const parsed = JSON.parse(envJson);
-      return (
-        typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)
-      );
-    } catch {
-      return false;
-    }
-  }, []);
-
   const releaseContainers = useMemo(() => {
     if (!selectedReleaseNode?.containers?.edges) return [];
     return selectedReleaseNode.containers.edges.map(({ node: container }) => ({
@@ -432,12 +398,8 @@ const InstallApplicationModal = ({
 
   // Deploy is blocked when any override-mode container holds invalid JSON.
   const allEnvJsonValid = useMemo(() => {
-    return releaseContainers.every(
-      (container) =>
-        envModes[container.id] !== "override" ||
-        isEnvJsonValid(envJsons[container.id] || "{}"),
-    );
-  }, [releaseContainers, envModes, envJsons, isEnvJsonValid]);
+    return areAllEnvJsonsValid(releaseContainers, envModes, envJsons);
+  }, [releaseContainers, envModes, envJsons]);
 
   const deviceFiles = useMemo(() => {
     return (
@@ -697,10 +659,10 @@ const InstallApplicationModal = ({
             .filter((b): b is FileBindSpecInput => !!b);
 
           const hasBinds = binds.length > 0;
-          const containerEnv =
-            envModes[container.id] === "override"
-              ? parseEnvJson(envJsons[container.id] || "{}")
-              : undefined;
+          const containerEnv = getContainerEnvVars(
+            envModes[container.id],
+            envJsons[container.id],
+          );
           const hasEnv = !!containerEnv && containerEnv.length > 0;
           const containerStrategy = envStrategies[container.id] || "merge";
           // Single optional env file per container. Upload-sourced specs are
@@ -896,7 +858,6 @@ const InstallApplicationModal = ({
     envModes,
     envStrategies,
     envJsons,
-    parseEnvJson,
     deployRelease,
     deviceId,
     commitMarkFileBindAsUploaded,

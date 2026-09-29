@@ -23,6 +23,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
 
 import type {
   CreateDeploymentCampaign_ApplicationOptionsFragment$data,
@@ -39,10 +40,13 @@ import type {
   DeploymentConfigSpecInput,
   FileBindSpecInput,
 } from "@/api/__generated__/DeploymentCampaignCreate_CreateCampaign_Mutation.graphql";
+import { type EnvMode } from "@/lib/environment";
 
 import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
+import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
 import Form from "@/components/ui/form/Form";
+import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { FormRow } from "@/components/ui/form-row/FormRow";
@@ -55,6 +59,7 @@ import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
   deploymentCampaignSchema,
   DeploymentCampaignFormData,
+  envJsonSchema,
 } from "@/forms/validation";
 import DatePicker from "@/components/ui/date-picker/DatePicker";
 import SelectFormField from "@/forms/SelectFormFIeld";
@@ -92,9 +97,6 @@ const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
                               id
                               name
                             }
-                            fileMode
-                            userId
-                            groupId
                           }
                         }
                       }
@@ -152,6 +154,13 @@ type ReleaseRecord = ConnectionNode<ApplicationRecord["releases"]>;
 type ContainerRecord = ConnectionNode<ReleaseRecord["containers"]>;
 
 type ContainerFileMountRecord = ConnectionNode<ContainerRecord["fileMounts"]>;
+
+const getContainerMounts = (
+  container: ContainerRecord,
+): ContainerFileMountRecord[] =>
+  container.fileMounts?.edges
+    ?.map((edge) => edge?.node)
+    .filter((node): node is ContainerFileMountRecord => node != null) ?? [];
 
 type ChannelRecord = NonNullable<
   NonNullable<
@@ -324,8 +333,18 @@ const CreateDeploymentCampaignForm = ({
     Record<string, FileBindSpecInput>
   >({});
 
+  const [envModes, setEnvModes] = useState<Record<string, EnvMode>>({});
+  const [envStrategies, setEnvStrategies] = useState<Record<string, string>>(
+    {},
+  );
+  const [envJsons, setEnvJsons] = useState<Record<string, string>>({});
+
   const [showMissingBindsFeedback, setShowMissingBindsFeedback] =
     useState(false);
+
+  const [environmentSectionOpen, setEnvironmentSectionOpen] =
+    useState<boolean>(false);
+  const [mountsSectionOpen, setMountsSectionOpen] = useState<boolean>(false);
 
   const selectedApp = useWatch({ control, name: "application" });
   const selectedRelease = useWatch({ control, name: "release" });
@@ -334,6 +353,8 @@ const CreateDeploymentCampaignForm = ({
   const supportsFileMounts =
     selectedOperationType != null &&
     OPERATION_TYPES_WITH_CONFIGS.includes(selectedOperationType);
+
+  const supportsEnvironmentConfiguration = supportsFileMounts;
 
   const {
     data: applicationPaginationData,
@@ -451,14 +472,22 @@ const CreateDeploymentCampaignForm = ({
       .map((container) => ({
         id: container.id,
         name: container.name,
-        mounts:
-          container.fileMounts?.edges
-            ?.map((edge) => edge?.node)
-            .filter((node): node is ContainerFileMountRecord => node != null) ??
-          [],
+        mounts: getContainerMounts(container),
       }))
       .filter((container) => container.mounts.length > 0);
   }, [releaseContainers, supportsFileMounts]);
+
+  const allEnvJsonValid = useMemo(() => {
+    if (!supportsEnvironmentConfiguration) {
+      return true;
+    }
+
+    return releaseContainers.every(
+      (container) =>
+        envModes[container.id] !== "override" ||
+        envJsonSchema.safeParse(envJsons[container.id] || "{}").success,
+    );
+  }, [releaseContainers, envModes, envJsons, supportsEnvironmentConfiguration]);
 
   // A default file already satisfies a required mount, exactly like it does
   // server-side, so it never counts as missing.
@@ -514,33 +543,60 @@ const CreateDeploymentCampaignForm = ({
 
   const resetMountBindings = useCallback(() => {
     setMountBindings({});
+    setShowMissingBindsFeedback(false);
+    setMountsSectionOpen(false);
+  }, []);
+
+  const resetEnvironmentConfiguration = useCallback(() => {
+    setEnvModes({});
+    setEnvStrategies({});
+    setEnvJsons({});
+    setEnvironmentSectionOpen(false);
   }, []);
 
   const onFormSubmit = (data: DeploymentCampaignFormData) => {
-    // The submit button is disabled while required mounts are unconfigured, but
-    // a disabled button does not stop react-hook-form from submitting on Enter.
-    // Guard here as well so the form can never be submitted incomplete.
+    // The submit button is disabled while required mounts are unconfigured,
+    // but a disabled button does not stop react-hook-form from submitting
+    // on Enter. Guard here as well.
     if (missingRequiredMounts.length > 0) {
       setShowMissingBindsFeedback(true);
+      setMountsSectionOpen(true);
       return;
     }
 
-    const configs: DeploymentConfigSpecInput[] = containersWithMounts
+    if (!allEnvJsonValid) {
+      return;
+    }
+
+    const configs: DeploymentConfigSpecInput[] = releaseContainers
       .map<DeploymentConfigSpecInput | null>((container) => {
-        const fileBinds = container.mounts
+        const fileBinds = getContainerMounts(container)
           .map((mount) => mountBindings[mount.id])
           .filter((bind): bind is FileBindSpecInput => !!bind?.fileId);
 
-        if (fileBinds.length === 0) {
+        const parsedEnv =
+          envModes[container.id] === "override"
+            ? envJsonSchema.safeParse(envJsons[container.id] || "{}")
+            : undefined;
+        const containerEnv =
+          parsedEnv && parsedEnv.success ? parsedEnv.data : undefined;
+
+        const hasEnv = !!containerEnv && containerEnv.length > 0;
+        const hasFileBinds = fileBinds.length > 0;
+        const envStrategy = envStrategies[container.id] || "merge";
+
+        if (!hasEnv && !hasFileBinds) {
           return null;
         }
 
         return {
           containerId: container.id,
-          fileBinds,
+          envStrategy,
+          ...(hasEnv ? { env: containerEnv } : {}),
+          ...(hasFileBinds ? { fileBinds } : {}),
         };
       })
-      .filter((config): config is DeploymentConfigSpecInput => !!config);
+      .filter((config): config is DeploymentConfigSpecInput => config !== null);
 
     onSubmit(transformOutputData(data, configs));
   };
@@ -621,6 +677,7 @@ const CreateDeploymentCampaignForm = ({
             onChange={() => {
               resetField("release");
               resetMountBindings();
+              resetEnvironmentConfiguration();
             }}
           />
           <FormFeedback feedback={errors.application?.id?.message} />
@@ -647,10 +704,11 @@ const CreateDeploymentCampaignForm = ({
                   <ReleaseSelectWrapper
                     selectedApp={selectedApp}
                     controllerProps={{
-                      value: value,
-                      invalid: invalid,
+                      value,
+                      invalid,
                       onChange: (release) => {
                         resetMountBindings();
+                        resetEnvironmentConfiguration();
                         onChange(release);
                       },
                     }}
@@ -693,9 +751,9 @@ const CreateDeploymentCampaignForm = ({
                       selectedApp={selectedApp}
                       selectedRelease={selectedRelease}
                       controllerProps={{
-                        value: value,
-                        invalid: invalid,
-                        onChange: onChange,
+                        value,
+                        invalid,
+                        onChange,
                       }}
                     />
                   )}
@@ -713,88 +771,255 @@ const CreateDeploymentCampaignForm = ({
           </FormRow>
         )}
 
-        {supportsFileMounts && containersWithMounts.length > 0 && (
-          <div
-            className="mt-2 pt-2 border-top"
-            data-testid="deployment-campaign-file-mounts"
-          >
-            <h6 className="mb-2 fw-semibold">
-              <FormattedMessage
-                id="forms.CreateDeploymentCampaign.fileBindsTitle"
-                defaultMessage="File Mounts Configuration"
-              />
-            </h6>
-
-            <p className="mb-2 small text-muted">
-              <FormattedMessage
-                id="forms.CreateDeploymentCampaign.fileBindsDescription"
-                defaultMessage="Select the repository file to mount at each mountpoint. The file is sent to every device targeted by the channel."
-              />
-            </p>
-
-            <Alert
-              show={
-                showMissingBindsFeedback && missingRequiredMounts.length > 0
+        {supportsEnvironmentConfiguration && releaseContainers.length > 0 && (
+          <div className="ps-3">
+            <CollapseItem
+              open={environmentSectionOpen}
+              onToggle={() => setEnvironmentSectionOpen((current) => !current)}
+              caretPosition="right"
+              headerClassName="fw-medium ps-0 border-0"
+              contentClassName="pt-2 ps-2"
+              title={
+                <FormattedMessage
+                  id="forms.CreateDeploymentCampaign.environmentConfigurationTitle"
+                  defaultMessage="Environment Configuration"
+                />
               }
-              variant="danger"
-              data-testid="missing-required-binds-feedback"
             >
-              <FormattedMessage
-                id="forms.CreateDeploymentCampaign.missingRequiredBindsFeedback"
-                defaultMessage="Please configure a file source for all required file mounts."
-              />
-              <ul className="mb-0 mt-1">
-                {missingRequiredMounts.map((mount) => (
-                  <li key={mount.id}>
-                    {intl.formatMessage(
-                      {
-                        id: "forms.CreateDeploymentCampaign.containerLabel",
-                        defaultMessage: "Container: {containerName}",
-                      },
-                      { containerName: mount.containerName },
-                    )}{" "}
-                    — {mount.mountpoint}
-                  </li>
-                ))}
-              </ul>
-            </Alert>
+              <div className="d-flex flex-column gap-3">
+                {releaseContainers.map((container) => {
+                  const envMode = envModes[container.id] || "none";
+                  const envStrategy = envStrategies[container.id] || "merge";
 
-            <div className="d-flex flex-column gap-3 pe-1 pb-2">
-              {containersWithMounts.map((container) => (
-                <div
-                  key={container.id}
-                  className="border rounded p-3 bg-light"
-                  data-testid={`container-mounts-${container.id}`}
-                >
-                  <div className="fw-bold mb-2 small text-secondary">
-                    <FormattedMessage
-                      id="forms.CreateDeploymentCampaign.containerLabel"
-                      defaultMessage="Container: {containerName}"
-                      values={{ containerName: container.name }}
-                    />
-                  </div>
+                  return (
+                    <div
+                      key={container.id}
+                      className="border rounded p-3 bg-light"
+                      data-testid={`container-environment-${container.id}`}
+                    >
+                      <div className="fw-bold mb-2 small text-secondary">
+                        <FormattedMessage
+                          id="forms.CreateDeploymentCampaign.containerLabel"
+                          defaultMessage="Container: {containerName}"
+                          values={{ containerName: container.name }}
+                        />
+                      </div>
 
-                  <div className="d-flex flex-column gap-2">
-                    {container.mounts.map((mount) => (
-                      <FileMountInput
-                        key={mount.id}
-                        fileMountId={mount.id}
-                        mountpoint={mount.mountpoint}
-                        required={mount.required}
-                        defaultFileId={mount.defaultFileId}
-                        defaultFileName={mount.defaultFile?.name}
-                        defaultFileMode={mount.fileMode}
-                        defaultUserId={mount.userId}
-                        defaultGroupId={mount.groupId}
-                        onChange={(result) =>
-                          handleFileBindChange(mount.id, result)
-                        }
+                      <ToggleButtonGroup
+                        type="radio"
+                        name={`env-mode-${container.id}`}
+                        value={envMode}
+                        onChange={(value: EnvMode) => {
+                          setEnvModes((current) => ({
+                            ...current,
+                            [container.id]: value,
+                          }));
+                        }}
+                        size="sm"
+                      >
+                        <ToggleButton
+                          id={`env-none-${container.id}`}
+                          value="none"
+                          variant="outline-primary"
+                        >
+                          <FormattedMessage
+                            id="forms.CreateDeploymentCampaign.environment.none"
+                            defaultMessage="No config"
+                          />
+                        </ToggleButton>
+
+                        <ToggleButton
+                          id={`env-override-${container.id}`}
+                          value="override"
+                          variant="outline-primary"
+                        >
+                          <FormattedMessage
+                            id="forms.CreateDeploymentCampaign.environment.override"
+                            defaultMessage="Env override"
+                          />
+                        </ToggleButton>
+
+                        <ToggleButton
+                          id={`env-file-${container.id}`}
+                          value="file"
+                          variant="outline-primary"
+                        >
+                          <FormattedMessage
+                            id="forms.CreateDeploymentCampaign.environment.file"
+                            defaultMessage="Env file"
+                          />
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+
+                      {envMode === "override" && (
+                        <div className="mt-3">
+                          <Form.Label>
+                            <FormattedMessage
+                              id="forms.CreateDeploymentCampaign.environment.strategy"
+                              defaultMessage="Environment strategy"
+                            />
+                          </Form.Label>
+
+                          <Form.Select
+                            value={envStrategy}
+                            onChange={(event) => {
+                              setEnvStrategies((current) => ({
+                                ...current,
+                                [container.id]: event.target.value,
+                              }));
+                            }}
+                          >
+                            <option value="merge">
+                              <FormattedMessage
+                                id="forms.CreateDeploymentCampaign.environment.mergeOption"
+                                defaultMessage="Merge"
+                              />
+                            </option>
+                            <option value="override">
+                              <FormattedMessage
+                                id="forms.CreateDeploymentCampaign.environment.overrideOption"
+                                defaultMessage="Override"
+                              />
+                            </option>
+                          </Form.Select>
+
+                          <div className="mt-3">
+                            <Form.Label>
+                              <FormattedMessage
+                                id="forms.CreateDeploymentCampaign.environment.variables"
+                                defaultMessage="Environment variables"
+                              />
+                            </Form.Label>
+
+                            <MonacoJsonEditor
+                              value={envJsons[container.id] || "{}"}
+                              onChange={(value) => {
+                                setEnvJsons((current) => ({
+                                  ...current,
+                                  [container.id]: value ?? "",
+                                }));
+                              }}
+                            />
+
+                            {!envJsonSchema.safeParse(
+                              envJsons[container.id] || "{}",
+                            ).success && (
+                              <div className="text-danger small mt-1">
+                                <FormattedMessage
+                                  id="forms.CreateDeploymentCampaign.environment.invalidJson"
+                                  defaultMessage="Invalid JSON"
+                                />
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {envMode === "file" && (
+                        <div className="mt-3">
+                          <div className="small text-muted">
+                            <FormattedMessage
+                              id="forms.CreateDeploymentCampaign.environment.fileNotAvailable"
+                              defaultMessage="Environment file configuration is not available yet for deployment campaigns."
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CollapseItem>
+          </div>
+        )}
+
+        {supportsFileMounts && containersWithMounts.length > 0 && (
+          <div className=" ps-3" data-testid="deployment-campaign-file-mounts">
+            <CollapseItem
+              open={mountsSectionOpen}
+              onToggle={() => setMountsSectionOpen((current) => !current)}
+              caretPosition="right"
+              headerClassName="fw-medium ps-0 border-0"
+              contentClassName="pt-2 ps-2"
+              title={
+                <FormattedMessage
+                  id="forms.CreateDeploymentCampaign.fileBindsTitle"
+                  defaultMessage="File Mounts Configuration"
+                />
+              }
+            >
+              <p className="mb-2 small text-muted">
+                <FormattedMessage
+                  id="forms.CreateDeploymentCampaign.fileBindsDescription"
+                  defaultMessage="Select the repository file to mount at each mountpoint. The file is sent to every device targeted by the channel."
+                />
+              </p>
+
+              <Alert
+                show={
+                  showMissingBindsFeedback && missingRequiredMounts.length > 0
+                }
+                variant="danger"
+                data-testid="missing-required-binds-feedback"
+              >
+                <FormattedMessage
+                  id="forms.CreateDeploymentCampaign.missingRequiredBindsFeedback"
+                  defaultMessage="Please configure a file source for all required file mounts."
+                />
+
+                <ul className="mb-0 mt-1">
+                  {missingRequiredMounts.map((mount) => (
+                    <li key={mount.id}>
+                      {intl.formatMessage(
+                        {
+                          id: "forms.CreateDeploymentCampaign.containerLabel",
+                          defaultMessage: "Container: {containerName}",
+                        },
+                        { containerName: mount.containerName },
+                      )}{" "}
+                      — {mount.mountpoint}
+                    </li>
+                  ))}
+                </ul>
+              </Alert>
+
+              <div className="d-flex flex-column gap-3 pe-1 pb-2">
+                {containersWithMounts.map((container) => (
+                  <div
+                    key={container.id}
+                    className="border rounded p-3 bg-light"
+                    data-testid={`container-mounts-${container.id}`}
+                  >
+                    <div className="fw-bold mb-2 small text-secondary">
+                      <FormattedMessage
+                        id="forms.CreateDeploymentCampaign.containerLabel"
+                        defaultMessage="Container: {containerName}"
+                        values={{ containerName: container.name }}
                       />
-                    ))}
+                    </div>
+
+                    <div className="d-flex flex-column gap-2">
+                      {container.mounts.map((mount) => (
+                        <FileMountInput
+                          key={mount.id}
+                          fileMountId={mount.id}
+                          mountpoint={mount.mountpoint}
+                          required={mount.required}
+                          defaultFileId={mount.defaultFileId}
+                          defaultFileName={mount.defaultFile?.name}
+                          defaultFileMode={mount.fileMode}
+                          defaultUserId={mount.userId}
+                          defaultGroupId={mount.groupId}
+                          onChange={(result) =>
+                            handleFileBindChange(mount.id, result)
+                          }
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </CollapseItem>
           </div>
         )}
 
@@ -948,13 +1173,20 @@ const CreateDeploymentCampaignForm = ({
         </FormRow>
 
         <div className="d-flex justify-content-end align-items-center">
-          <Button variant="primary" type="submit" disabled={isLoading}>
+          <Button
+            variant="primary"
+            type="submit"
+            disabled={isLoading || !allEnvJsonValid}
+          >
             {isLoading && <Spinner size="sm" className="me-2" />}
+
             {selectedOperationType ? (
               <FormattedMessage
                 id="forms.CreateDeploymentCampaign.submitWithType"
                 defaultMessage="Create {type} campaign"
-                values={{ type: selectedOperationType.toLowerCase() }}
+                values={{
+                  type: selectedOperationType.toLowerCase(),
+                }}
               />
             ) : (
               <FormattedMessage

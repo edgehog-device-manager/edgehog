@@ -461,13 +461,29 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
   // The repository picker is lazy: resolve its repositories first.
   const pickRepositoryFile = async (relayEnvironment: MockEnvironment) => {
+    const mountsToggle = screen.queryByRole("button", {
+      name: "File Mounts Configuration",
+    });
+    if (
+      mountsToggle &&
+      mountsToggle.getAttribute("aria-expanded") === "false"
+    ) {
+      await userEvent.click(mountsToggle);
+    }
+
     await resolveOperation(
       relayEnvironment,
       "FileMountInput_GetRepositories_Query",
       repositoriesData,
     );
-    const pickers = await screen.findAllByText("Choose a repository...");
-    await selectEvent.select(pickers[0], "Configs", {
+
+    const mountsSection = await screen.findByTestId(
+      "deployment-campaign-file-mounts",
+    );
+
+    const repoCombobox = await within(mountsSection).findByRole("combobox");
+
+    await selectEvent.select(repoCombobox, "Configs", {
       container: document.body,
     });
 
@@ -476,12 +492,17 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
       "FileMountInput_GetRepositoryFiles_Query",
       repositoryFilesData,
     );
-    const filePickers = await screen.findAllByText("Choose a file...");
-    await selectEvent.select(filePickers[0], "config.yaml", {
+
+    await waitFor(() => {
+      expect(within(mountsSection).getAllByRole("combobox")).toHaveLength(2);
+    });
+
+    const fileCombobox = within(mountsSection).getAllByRole("combobox")[1];
+
+    await selectEvent.select(fileCombobox, "config.yaml", {
       container: document.body,
     });
   };
-
   it("renders one repository-only input per file mount without looping", async () => {
     await renderForm();
     await selectApplicationAndRelease();
@@ -502,6 +523,41 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     expect(
       screen.queryByRole("radio", { name: "Upload" }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows collapsed environment and file mounts sections after selecting a release", async () => {
+    await renderForm();
+    await selectApplicationAndRelease();
+
+    const envToggle = await screen.findByRole("button", {
+      name: "Environment Configuration",
+    });
+    expect(envToggle).toBeVisible();
+    expect(envToggle).toHaveAttribute("aria-expanded", "false");
+
+    const mountsToggle = await screen.findByRole("button", {
+      name: "File Mounts Configuration",
+    });
+    expect(mountsToggle).toBeVisible();
+    expect(mountsToggle).toHaveAttribute("aria-expanded", "false");
+
+    await userEvent.click(mountsToggle);
+    expect(mountsToggle).toHaveAttribute("aria-expanded", "true");
+  });
+
+  it("shows environment configuration section and allows selecting override mode", async () => {
+    await renderForm();
+    await selectApplicationAndRelease();
+
+    const envToggle = await screen.findByRole("button", {
+      name: "Environment Configuration",
+    });
+    await userEvent.click(envToggle);
+    expect(envToggle).toHaveAttribute("aria-expanded", "true");
+
+    await userEvent.click(screen.getByRole("radio", { name: "Env override" }));
+    expect(screen.getByText("Environment strategy")).toBeInTheDocument();
+    expect(screen.getByText("Environment variables")).toBeInTheDocument();
   });
 
   it("raises the missing binds feedback on submit attempt and clears it once configured", async () => {
@@ -557,7 +613,6 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     expect(screen.getByText("0755")).toBeInTheDocument();
 
     await userEvent.click(screen.getByRole("button", { name: /customize/i }));
-
     expect(screen.getByLabelText(/owner user id/i)).toHaveValue(0);
     expect(screen.getByLabelText(/group id/i)).toHaveValue(0);
   });
@@ -585,6 +640,7 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     expect(payload.campaignMechanism.deploymentDeploy.configs).toEqual([
       {
         containerId: "container-1",
+        envStrategy: "merge",
         fileBinds: [
           {
             fileMountId: "mount-1",
@@ -615,17 +671,19 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     await selectOperationType("Upgrade");
     await selectApplicationAndRelease();
-    await screen.findByTestId("deployment-campaign-file-mounts");
     await userEvent.selectOptions(
       screen.getByLabelText("Target release"),
-      "rel-1",
+      "rel-2",
     );
+    await screen.findByTestId("deployment-campaign-file-mounts");
     await completeRequiredFields();
     await pickRepositoryFile(relayEnvironment);
 
-    await userEvent.click(
-      screen.getByRole("button", { name: /Create upgrade campaign/i }),
-    );
+    const submitButton = screen.getByRole("button", {
+      name: /Create upgrade campaign/i,
+    });
+    await waitFor(() => expect(submitButton).toBeEnabled());
+    await userEvent.click(submitButton);
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
 
@@ -634,6 +692,7 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
         configs: [
           {
             containerId: "container-1",
+            envStrategy: "merge",
             fileBinds: [
               {
                 fileMountId: "mount-1",
@@ -722,6 +781,7 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     expect(payload.campaignMechanism.deploymentDeploy.configs).toEqual([
       {
         containerId: "container-2",
+        envStrategy: "merge",
         fileBinds: [
           {
             fileMountId: "mount-2",
@@ -765,6 +825,7 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     expect(payload.campaignMechanism.deploymentDeploy.configs).toEqual([
       {
         containerId: "container-1",
+        envStrategy: "merge",
         fileBinds: [
           {
             fileMountId: "mount-1",

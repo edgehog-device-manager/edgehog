@@ -1139,6 +1139,43 @@ const envSchema = z
     }
   });
 
+const envJsonSchema = z
+  .string()
+  .nullish()
+  .transform((val, ctx) => {
+    if (!val || !val.trim()) return undefined;
+    try {
+      const parsed = JSON.parse(val);
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        Array.isArray(parsed)
+      ) {
+        ctx.addIssue({
+          code: "custom",
+          message: messages.expectedObject.id,
+        });
+        return z.NEVER;
+      }
+      return parsed;
+    } catch {
+      ctx.addIssue({
+        code: "custom",
+        message: messages.invalidJson.id,
+      });
+      return z.NEVER;
+    }
+  })
+  .transform((parsed) => {
+    if (!parsed) return undefined;
+    const entries = Object.entries(parsed);
+    if (entries.length === 0) return undefined;
+    return entries.map(([key, value]) => ({
+      key,
+      value: typeof value === "string" ? value : JSON.stringify(value),
+    }));
+  });
+
 const deviceMappingsSchema = z.array(
   z.object({
     pathInContainer: z.string().trim().min(1),
@@ -1504,6 +1541,7 @@ export {
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   editDeploymentCampaignSchema,
+  envJsonSchema,
   updateCampaignSchema,
   editUpdateCampaignSchema,
   fileDownloadCampaignSchema,
