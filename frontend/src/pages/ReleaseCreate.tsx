@@ -55,6 +55,7 @@ const CREATE_RELEASE_PAGE_QUERY = graphql`
     ...hooks_NetworksOptionsFragment
     ...hooks_VolumesOptionsFragment
     ...hooks_ImageCredentialsOptionsFragment
+    ...hooks_FilesOptionsFragment
   }
 `;
 
