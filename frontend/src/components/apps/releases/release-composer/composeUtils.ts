@@ -68,10 +68,14 @@ export const parseIntValue = (value: unknown): number | undefined =>
 
 export const restartPolicyToEdgehog = (
   value: unknown,
-): { policy?: string; warning?: string } => {
+): { policy?: string; count?: number; warning?: string } => {
   if (typeof value !== "string") return { warning: `unsupported value` };
 
-  const [rawPolicy, arg] = value.split(":");
+  const separator = value.indexOf(":");
+  const rawPolicy = (separator === -1 ? value : value.slice(0, separator))
+    .trim()
+    .toLowerCase();
+  const arg = separator === -1 ? undefined : value.slice(separator + 1).trim();
 
   const mapping: Record<string, string> = {
     no: "no",
@@ -81,20 +85,32 @@ export const restartPolicyToEdgehog = (
     "unless-stopped": "unless_stopped",
   };
 
-  const policy = mapping[rawPolicy.trim().toLowerCase()];
+  const policy = mapping[rawPolicy];
 
   if (!policy)
     return { policy: undefined, warning: `unsupported value '${value}'` };
-  if (arg)
-    return {
-      policy,
-      warning: `restart argument '${arg}' is not supported and will be ignored`,
-    };
+  if (arg !== undefined && arg !== "") {
+    // only on-failure supports a retry count; anything else keeps the
+    // previous warn-and-ignore behavior
+    const count = Number(arg);
+
+    if (policy !== "on_failure" || !Number.isInteger(count) || count < 0) {
+      return {
+        policy,
+        warning: `restart argument '${arg}' is not supported and will be ignored`,
+      };
+    }
+
+    return { policy, count };
+  }
 
   return { policy };
 };
 
-export const restartPolicyToCompose = (policy?: string): string | undefined => {
+export const restartPolicyToCompose = (
+  policy?: string,
+  count?: number,
+): string | undefined => {
   if (!policy) return undefined;
 
   const mapping: Record<string, string> = {
@@ -104,7 +120,12 @@ export const restartPolicyToCompose = (policy?: string): string | undefined => {
     unless_stopped: "unless-stopped",
   };
 
-  return mapping[policy];
+  const base = mapping[policy];
+
+  if (!base) return undefined;
+  if (base === "on-failure" && count != null) return `${base}:${count}`;
+
+  return base;
 };
 
 export const envToKeyValuePairs = (
@@ -301,6 +322,11 @@ export const SUPPORTED_SERVICE_KEYS = new Set([
   "devices",
   "depends_on",
   "deploy",
+  "user",
+  "working_dir",
+  "command",
+  "entrypoint",
+  "healthcheck",
 ]);
 
 export const formatSchemaIssues = (error: ZodError): string => {
@@ -315,4 +341,112 @@ export const formatSchemaIssues = (error: ZodError): string => {
   }
 
   return parts.join("; ");
+};
+
+/**
+ * Compose accepts a plain string or a list of words for command/entrypoint.
+ * The Edgehog form stores a single string, so lists are joined. This is
+ * stable after the first pass: serializing always emits the string form.
+ */
+export const commandToString = (value: unknown): string | undefined => {
+  if (typeof value === "string") return value === "" ? undefined : value;
+  if (typeof value === "number") return String(value);
+  if (!Array.isArray(value)) return undefined;
+
+  const parts = value.flatMap((item) =>
+    typeof item === "string" || typeof item === "number" ? [String(item)] : [],
+  );
+
+  return parts.length > 0 ? parts.join(" ") : undefined;
+};
+
+const durationMultipliers: Record<string, number> = {
+  ns: 1,
+  us: 1_000,
+  ms: 1_000_000,
+  s: 1_000_000_000,
+  m: 60 * 1_000_000_000,
+  h: 60 * 60 * 1_000_000_000,
+};
+
+/**
+ * Parses compose duration strings ("30s", "1m30s", "500ms") into nanoseconds.
+ * Plain numbers pass through as-is. Returns undefined when unparseable.
+ */
+export const parseDurationToNs = (value: unknown): number | undefined => {
+  if (typeof value === "number")
+    return Number.isInteger(value) && value >= 0 ? value : undefined;
+  if (typeof value !== "string") return undefined;
+
+  const text = value.trim().toLowerCase();
+
+  if (text === "") return undefined;
+
+  const matches = [...text.matchAll(/(\d+(?:\.\d+)?)\s*(ns|us|ms|s|m|h)/g)];
+
+  if (matches.length === 0) return undefined;
+
+  const consumed = matches.map((match) => match[0]).join("");
+
+  if (consumed.replace(/\s+/g, "") !== text.replace(/\s+/g, ""))
+    return undefined;
+
+  return Math.round(
+    matches.reduce(
+      (total, match) =>
+        total + parseFloat(match[1]) * durationMultipliers[match[2]],
+      0,
+    ),
+  );
+};
+
+/**
+ * Formats nanoseconds back to a compose duration, preferring the largest
+ * unit that divides evenly so output stays readable ("30s", not "30000000000ns").
+ */
+export const formatNsToDuration = (ns: number): string => {
+  const units: [string, number][] = [
+    ["h", durationMultipliers.h],
+    ["m", durationMultipliers.m],
+    ["s", durationMultipliers.s],
+    ["ms", durationMultipliers.ms],
+    ["us", durationMultipliers.us],
+    ["ns", 1],
+  ];
+
+  for (const [unit, size] of units) {
+    if (ns >= size && ns % size === 0) return `${ns / size}${unit}`;
+  }
+
+  return `${ns}ns`;
+};
+
+/**
+ * Normalizes a compose healthcheck test (NONE, CMD-SHELL, CMD arrays or a
+ * plain string) to the single string the Edgehog form stores. CMD exec
+ * arrays are joined; callers should warn that the shell form is emitted.
+ */
+export const healthcheckTestToString = (value: unknown): string | undefined => {
+  if (typeof value === "string") return value === "" ? undefined : value;
+  if (!Array.isArray(value) || value.length === 0) return undefined;
+
+  const [first, ...rest] = value;
+
+  if (first === "NONE") return "NONE";
+  if (first === "CMD-SHELL" || first === "CMD" || first === "SHELL")
+    return rest.map((item) => String(item)).join(" ");
+
+  return value.map((item) => String(item)).join(" ");
+};
+
+/**
+ * Emits the string form back as a CMD-SHELL test so re-imports are stable.
+ */
+export const healthcheckTestToCompose = (
+  value: string | undefined,
+): unknown => {
+  if (!value) return undefined;
+  if (value === "NONE") return ["NONE"];
+
+  return ["CMD-SHELL", value];
 };
