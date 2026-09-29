@@ -3471,4 +3471,6 @@ export {
   ResourceLimitsSection,
   SecuritySection,
   FileMountsSection,
+  ProcessSection,
+  HealthcheckSection,
 };
