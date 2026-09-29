@@ -140,6 +140,64 @@ defmodule Edgehog.Containers.Deployment.UpgradeTest do
 
       assert new_deployment.release_id == target_release.id
     end
+
+    test "applies configs to the new deployment", %{tenant: tenant} do
+      deployment = ready_deployment_fixture(tenant: tenant)
+
+      container =
+        [
+          tenant: tenant,
+          file_mounts: [%{mountpoint: "/etc/app.conf", required: true}]
+        ]
+        |> container_fixture()
+        |> Ash.load!(:file_mounts)
+
+      %{file_mounts: [file_mount]} = container
+
+      target_release =
+        release_fixture(
+          tenant: tenant,
+          application_id: deployment.release.application_id,
+          version: "0.0.2",
+          container_ids: [container.id]
+        )
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _, _ -> :ok end)
+
+      assert {:ok, new_deployment} =
+               deployment
+               |> Ash.Changeset.for_update(
+                 :upgrade_release,
+                 %{
+                   target: target_release.id,
+                   configs: [
+                     %{
+                       container_id: container.id,
+                       env_strategy: :merge,
+                       env: [%{key: "FOO", value: "bar"}],
+                       file_binds: [%{file_mount_id: file_mount.id}]
+                     }
+                   ]
+                 },
+                 tenant: tenant
+               )
+               |> Ash.update(tenant: tenant)
+
+      assert new_deployment.release_id == target_release.id
+
+      new_deployment =
+        Ash.load!(new_deployment, [container_deployments: [:file_binds]], tenant: tenant)
+
+      assert length(new_deployment.container_deployments) == 1
+
+      [container_deployment] = new_deployment.container_deployments
+      assert container_deployment.env == [%{key: "FOO", value: "bar"}]
+
+      assert length(container_deployment.file_binds) == 1
+
+      [file_bind] = container_deployment.file_binds
+      assert file_bind.file_mount_id == file_mount.id
+    end
   end
 
   defp ready_deployment_fixture(tenant: tenant) do

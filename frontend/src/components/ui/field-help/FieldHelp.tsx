@@ -85,6 +85,7 @@ type FieldKey =
   | "capabilities"
   | "driverOptions"
   | "deviceRequests"
+  | "fileMounts"
   | "user"
   | "workingDirectory"
   | "command"

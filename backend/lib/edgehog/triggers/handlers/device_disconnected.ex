@@ -34,7 +34,7 @@ defmodule Edgehog.Triggers.Handlers.DeviceDisconnected do
     params = %{realm_id: realm_id, device_id: device_id, timestamp: timestamp}
 
     Device
-    |> Ash.Changeset.for_create(:from_device_disconnected_event, params)
-    |> Ash.create(tenant: tenant)
+    |> Ash.Changeset.for_create(:from_device_disconnected_event, params, tenant: tenant)
+    |> Ash.create()
   end
 end

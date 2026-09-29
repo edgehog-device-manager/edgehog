@@ -36,6 +36,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Campaigns.CampaignTarget.Changes
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Types.DeploymentConfig
   alias Edgehog.Files.File
 
   resource do
@@ -238,6 +239,11 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       argument :release, :struct do
         constraints instance_of: Release
         allow_nil? false
+      end
+
+      argument :configs, {:array, DeploymentConfig} do
+        allow_nil? false
+        default []
       end
 
       require_atomic? false

@@ -42,7 +42,6 @@ import type { Deployment_deployment_updated_Subscription } from "@/api/__generat
 import type { Deployment_sendDeployment_Mutation } from "@/api/__generated__/Deployment_sendDeployment_Mutation.graphql";
 import type { Deployment_startDeployment_Mutation } from "@/api/__generated__/Deployment_startDeployment_Mutation.graphql";
 import type { Deployment_stopDeployment_Mutation } from "@/api/__generated__/Deployment_stopDeployment_Mutation.graphql";
-import type { Deployment_upgradeDeployment_Mutation } from "@/api/__generated__/Deployment_upgradeDeployment_Mutation.graphql";
 import type { Deployment_deleteDeployment_Mutation } from "@/api/__generated__/Deployment_deleteDeployment_Mutation.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
@@ -84,6 +83,7 @@ const GET_DEPLOYMENT_QUERY = graphql`
       state
       isReady
       device {
+        id
         name
         online
         systemModel {
@@ -206,19 +206,6 @@ const DELETE_DEPLOYMENT_MUTATION = graphql`
   }
 `;
 
-const UPGRADE_DEPLOYMENT_MUTATION = graphql`
-  mutation Deployment_upgradeDeployment_Mutation(
-    $id: ID!
-    $input: UpgradeDeploymentInput!
-  ) {
-    upgradeDeployment(id: $id, input: $input) {
-      result {
-        id
-      }
-    }
-  }
-`;
-
 interface DeploymentContentProps {
   deployment: NonNullable<Deployment_getDeployment_Query$data["deployment"]>;
   isOnline: boolean;
@@ -246,11 +233,6 @@ const DeploymentContent = ({
   const [deleteDeployment, isDeletingDeployment] =
     useMutation<Deployment_deleteDeployment_Mutation>(
       DELETE_DEPLOYMENT_MUTATION,
-    );
-
-  const [upgradeDeployment] =
-    useMutation<Deployment_upgradeDeployment_Mutation>(
-      UPGRADE_DEPLOYMENT_MUTATION,
     );
 
   const handleSendDeployedApplication = useCallback(
@@ -392,89 +374,6 @@ const DeploymentContent = ({
     [deleteDeployment, setErrorFeedback, navigate, deviceId, isOnline],
   );
 
-  const handleUpgradeDeployedRelease = useCallback(
-    (deploymentId: string, upgradeTargetReleaseId: string) => {
-      if (!isOnline) {
-        return setErrorFeedback(
-          <FormattedMessage
-            id="pages.Deployment.upgradeErrorOffline"
-            defaultMessage="The device is disconnected. You cannot upgrade an application while it is offline."
-          />,
-        );
-      }
-
-      upgradeDeployment({
-        variables: {
-          id: deploymentId,
-          input: { target: upgradeTargetReleaseId },
-        },
-
-        updater: (store, response) => {
-          const upgradedDeployment = response?.upgradeDeployment?.result;
-
-          if (!upgradedDeployment) {
-            return;
-          }
-
-          const newDeploymentId = upgradedDeployment.id;
-
-          const newDeploymentRecord = store.get(newDeploymentId);
-
-          if (!newDeploymentRecord) {
-            return;
-          }
-
-          const deviceRecord = deviceId ? store.get(deviceId) : null;
-
-          if (!deviceRecord) {
-            return;
-          }
-
-          const connection = ConnectionHandler.getConnection(
-            deviceRecord,
-            "DeployedApplicationsTable_applicationDeployments",
-          );
-
-          if (!connection) {
-            return;
-          }
-
-          const edge = ConnectionHandler.createEdge(
-            store,
-            connection,
-            newDeploymentRecord,
-            "DeploymentEdge",
-          );
-
-          ConnectionHandler.insertEdgeBefore(connection, edge);
-        },
-
-        onCompleted: (data, errors) => {
-          handleMutationCompletion(errors, setErrorFeedback, () => {
-            if (deviceId && data?.upgradeDeployment?.result?.id) {
-              navigate({
-                route: Route.deploymentEdit,
-                params: {
-                  deviceId,
-                  deploymentId: data.upgradeDeployment.result.id,
-                },
-              });
-            }
-          });
-        },
-        onError() {
-          setErrorFeedback(
-            <FormattedMessage
-              id="pages.Deployment.upgradeErrorFeedback"
-              defaultMessage="Could not upgrade the deployment, please try again."
-            />,
-          );
-        },
-      });
-    },
-    [upgradeDeployment, setErrorFeedback, isOnline, deviceId, navigate],
-  );
-
   return (
     <Page className="h-100 d-flex flex-column overflow-hidden">
       <Page.Header
@@ -503,7 +402,6 @@ const DeploymentContent = ({
           onStop={handleStopDeployedApplication}
           onRedeploy={handleSendDeployedApplication}
           onDelete={handleDeleteDeployedApplication}
-          onUpgrade={handleUpgradeDeployedRelease}
         />
       </Page.Main>
     </Page>

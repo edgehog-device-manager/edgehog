@@ -300,7 +300,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
     test "fails and rolls back when one of the volumes is invalid", %{tenant: tenant} do
       image = image_fixture(tenant: tenant)
       bad_uuid = Ecto.UUID.generate()
-      bad_id = Base.encode64("Volume:#{bad_uuid}")
+      bad_id = Base.encode64("volume:#{bad_uuid}")
 
       input = %{
         "name" => "failing-rollback-test",

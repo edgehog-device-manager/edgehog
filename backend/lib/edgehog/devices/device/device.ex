@@ -344,10 +344,12 @@ defmodule Edgehog.Devices.Device do
     update :send_create_container_request do
       description "Sends a create container request to the device."
 
-      argument :container, :struct,
-        constraints: [instance_of: Edgehog.Containers.Container],
-        description: "The Container the device has to initiate.",
-        allow_nil?: false
+      argument :container_deployment, :struct do
+        constraints instance_of: Edgehog.Containers.Container.Deployment
+
+        description "The container deployment the device has to initiate"
+        allow_nil? false
+      end
 
       argument :deployment, :struct do
         constraints instance_of: Deployment
@@ -409,6 +411,42 @@ defmodule Edgehog.Devices.Device do
       end
 
       manual ManualActions.SendCreateDeviceRequest
+    end
+
+    update :send_create_file_bind_request do
+      description "Send a create file bind request to the device."
+
+      argument :file_bind, :struct do
+        constraints instance_of: Edgehog.Containers.FileBind
+        description "The new file bind for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this file bind is used."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateFileBind
+    end
+
+    update :send_create_env_file_request do
+      description "Send a create env file request to the device."
+
+      argument :env_file, :struct do
+        constraints instance_of: Edgehog.Containers.EnvFile
+        description "The new env file for the device."
+        allow_nil? false
+      end
+
+      argument :deployment, :struct do
+        constraints instance_of: Deployment
+        description "The deployment in which this env file is used."
+        allow_nil? false
+      end
+
+      manual ManualActions.SendCreateEnvFile
     end
 
     update :send_release_command do
@@ -631,6 +669,16 @@ defmodule Edgehog.Devices.Device do
     calculate :available_device_requests, {:array, Types.DeviceRequestStatus} do
       public? true
       calculation {Calculations.AstarteInterfaceValue, value_id: :available_device_requests}
+    end
+
+    calculate :available_file_binds, {:array, Types.FileBindStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_file_binds}
+    end
+
+    calculate :available_env_files, {:array, Types.EnvFileStatus} do
+      public? true
+      calculation {Calculations.AstarteInterfaceValue, value_id: :available_env_files}
     end
 
     calculate :battery_status, {:array, BatterySlot} do

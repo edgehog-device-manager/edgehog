@@ -39,19 +39,9 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
     device = Ash.get!(Device, device_id, tenant: tenant)
 
     containers = release.containers
+    configs = Ash.Changeset.get_argument(changeset, :configs)
 
-    inputs =
-      Enum.map(
-        containers,
-        &%{
-          container: &1,
-          device: device,
-          deployment: deployment,
-          # Needed for container_instance identity
-          container_id: &1.id,
-          device_id: device.id
-        }
-      )
+    inputs = Enum.map(containers, &container_deployment_input(&1, device, deployment, configs))
 
     Ash.Changeset.manage_relationship(
       changeset,
@@ -63,4 +53,32 @@ defmodule Edgehog.Containers.Deployment.Changes.Relate do
       use_identities: [:container_instance]
     )
   end
+
+  defp container_deployment_input(container, device, deployment, configs) do
+    container_id = to_string(container.id)
+
+    config =
+      Enum.find(configs, %{}, fn entry ->
+        to_string(config_value(entry, :container_id)) == container_id
+      end)
+
+    %{
+      container: container,
+      device: device,
+      deployment: deployment,
+      # Needed for container_instance identity
+      container_id: container.id,
+      device_id: device.id,
+      env: config_value(config, :env),
+      env_strategy: config_value(config, :env_strategy),
+      file_binds: config_value(config, :file_binds) || [],
+      env_files: config_value(config, :env_files) || []
+    }
+  end
+
+  defp config_value(config, key) when is_map(config) and is_atom(key) do
+    Map.get(config, key, Map.get(config, Atom.to_string(key)))
+  end
+
+  defp config_value(_config, _key), do: nil
 end

@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { Controller, useForm, useWatch } from "react-hook-form";
@@ -34,14 +34,22 @@ import type {
   CreateDeploymentCampaign_ChannelOptionsFragment$key,
 } from "@/api/__generated__/CreateDeploymentCampaign_ChannelOptionsFragment.graphql";
 import type { CreateDeploymentCampaign_ChannelPaginationQuery } from "@/api/__generated__/CreateDeploymentCampaign_ChannelPaginationQuery.graphql";
-import type { CampaignMechanismInput } from "@/api/__generated__/DeploymentCampaignCreate_CreateCampaign_Mutation.graphql";
+import type {
+  CampaignMechanismInput,
+  DeploymentConfigSpecInput,
+  FileBindSpecInput,
+} from "@/api/__generated__/DeploymentCampaignCreate_CreateCampaign_Mutation.graphql";
 
+import Alert from "@/components/ui/alert/Alert";
 import Button from "@/components/ui/button/Button";
 import Form from "@/components/ui/form/Form";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import ReleaseSelectWrapper from "@/components/apps/releases/release-select/ReleaseSelect";
+import FileMountInput, {
+  FileBindResult,
+} from "@/components/apps/containers/file-mount-input/FileMountInput";
 import FormFeedback from "@/forms/FormFeedback";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import {
@@ -61,6 +69,41 @@ const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
         node {
           id
           name
+          releases(first: 10000) {
+            edges {
+              node {
+                id
+                containers(first: 250) {
+                  edges {
+                    node {
+                      id
+                      name
+                      fileMounts(first: 250) {
+                        edges {
+                          node {
+                            id
+                            mountpoint
+                            required
+                            defaultFileId
+                            fileMode
+                            userId
+                            groupId
+                            defaultFile {
+                              id
+                              name
+                            }
+                            fileMode
+                            userId
+                            groupId
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -98,6 +141,18 @@ type ApplicationRecord = NonNullable<
   >["edges"]
 >[number]["node"];
 
+type ConnectionNode<T> = T extends {
+  readonly edges: ReadonlyArray<{ node: infer N }> | null;
+}
+  ? N
+  : never;
+
+type ReleaseRecord = ConnectionNode<ApplicationRecord["releases"]>;
+
+type ContainerRecord = ConnectionNode<ReleaseRecord["containers"]>;
+
+type ContainerFileMountRecord = ConnectionNode<ContainerRecord["fileMounts"]>;
+
 type ChannelRecord = NonNullable<
   NonNullable<
     CreateDeploymentCampaign_ChannelOptionsFragment$data["channels"]
@@ -118,6 +173,7 @@ type DeploymentConfig = {
   maxInProgressOperations: number;
   requestRetries: number;
   requestTimeoutSeconds: number;
+  configs?: DeploymentConfigSpecInput[];
 };
 
 type SelectOption = {
@@ -133,6 +189,12 @@ const OPERATION_TO_MECHANISM: Record<OperationType, DeploymentAction> = {
   Delete: "deploymentDelete",
 };
 
+const OPERATION_TYPES_WITH_CONFIGS: OperationType[] = ["Deploy", "Upgrade"];
+
+const MECHANISMS_WITH_CONFIGS = OPERATION_TYPES_WITH_CONFIGS.map(
+  (operationType) => OPERATION_TO_MECHANISM[operationType],
+);
+
 const initialData: DeploymentCampaignFormData = {
   name: "",
   scheduledAtTimestamp: "",
@@ -146,8 +208,9 @@ const initialData: DeploymentCampaignFormData = {
   requestTimeoutSeconds: 300,
 };
 
-const transformOutputData = (
+export const transformOutputData = (
   data: DeploymentCampaignFormData,
+  configs: DeploymentConfigSpecInput[] = [],
 ): DeploymentCampaignData => {
   const {
     name,
@@ -171,6 +234,8 @@ const transformOutputData = (
     requestRetries,
     requestTimeoutSeconds,
     ...(targetRelease && { targetReleaseId: targetRelease.id }),
+    ...(MECHANISMS_WITH_CONFIGS.includes(mechanismKey) &&
+      configs.length > 0 && { configs }),
   };
 
   return {
@@ -255,13 +320,20 @@ const CreateDeploymentCampaignForm = ({
     resolver: zodResolver(deploymentCampaignSchema),
   });
 
-  const onFormSubmit = (data: DeploymentCampaignFormData) => {
-    onSubmit(transformOutputData(data));
-  };
+  const [mountBindings, setMountBindings] = useState<
+    Record<string, FileBindSpecInput>
+  >({});
+
+  const [showMissingBindsFeedback, setShowMissingBindsFeedback] =
+    useState(false);
 
   const selectedApp = useWatch({ control, name: "application" });
   const selectedRelease = useWatch({ control, name: "release" });
   const selectedOperationType = useWatch({ control, name: "operationType" });
+
+  const supportsFileMounts =
+    selectedOperationType != null &&
+    OPERATION_TYPES_WITH_CONFIGS.includes(selectedOperationType);
 
   const {
     data: applicationPaginationData,
@@ -350,8 +422,134 @@ const CreateDeploymentCampaignForm = ({
     );
   }, [channelPaginationData]);
 
+  const releaseContainers = useMemo<ContainerRecord[]>(() => {
+    if (!selectedApp?.id || !selectedRelease?.id) {
+      return [];
+    }
+
+    const application = applicationOptions.find(
+      (candidate) => candidate.id === selectedApp.id,
+    );
+
+    const release = application?.releases?.edges
+      ?.map((edge) => edge?.node)
+      .find((node) => node?.id === selectedRelease.id);
+
+    return (
+      release?.containers?.edges
+        ?.map((edge) => edge?.node)
+        .filter((node): node is ContainerRecord => node != null) ?? []
+    );
+  }, [applicationOptions, selectedApp, selectedRelease]);
+
+  const containersWithMounts = useMemo(() => {
+    if (!supportsFileMounts) {
+      return [];
+    }
+
+    return releaseContainers
+      .map((container) => ({
+        id: container.id,
+        name: container.name,
+        mounts:
+          container.fileMounts?.edges
+            ?.map((edge) => edge?.node)
+            .filter((node): node is ContainerFileMountRecord => node != null) ??
+          [],
+      }))
+      .filter((container) => container.mounts.length > 0);
+  }, [releaseContainers, supportsFileMounts]);
+
+  // A default file already satisfies a required mount, exactly like it does
+  // server-side, so it never counts as missing.
+  const isRequiredMountMissing = useCallback(
+    (mount: ContainerFileMountRecord) =>
+      mount.required &&
+      !mount.defaultFileId &&
+      !mount.defaultFile?.name &&
+      mountBindings[mount.id]?.fileId == null,
+    [mountBindings],
+  );
+
+  const missingRequiredMounts = useMemo(() => {
+    return containersWithMounts.flatMap((container) =>
+      container.mounts.filter(isRequiredMountMissing).map((mount) => ({
+        id: mount.id,
+        mountpoint: mount.mountpoint,
+        containerName: container.name,
+      })),
+    );
+  }, [containersWithMounts, isRequiredMountMissing]);
+
+  const handleFileBindChange = useCallback(
+    (mountId: string, result: FileBindResult | null) => {
+      setMountBindings((prev) => {
+        const existing = prev[mountId];
+
+        if (result?.spec?.fileId == null) {
+          if (!(mountId in prev)) {
+            return prev;
+          }
+
+          const next = { ...prev };
+          delete next[mountId];
+
+          return next;
+        }
+
+        if (
+          existing?.fileId === result.spec.fileId &&
+          existing?.fileMode === result.spec.fileMode &&
+          existing?.userId === result.spec.userId &&
+          existing?.groupId === result.spec.groupId
+        ) {
+          return prev;
+        }
+
+        return { ...prev, [mountId]: result.spec };
+      });
+    },
+    [],
+  );
+
+  const resetMountBindings = useCallback(() => {
+    setMountBindings({});
+  }, []);
+
+  const onFormSubmit = (data: DeploymentCampaignFormData) => {
+    // The submit button is disabled while required mounts are unconfigured, but
+    // a disabled button does not stop react-hook-form from submitting on Enter.
+    // Guard here as well so the form can never be submitted incomplete.
+    if (missingRequiredMounts.length > 0) {
+      setShowMissingBindsFeedback(true);
+      return;
+    }
+
+    const configs: DeploymentConfigSpecInput[] = containersWithMounts
+      .map<DeploymentConfigSpecInput | null>((container) => {
+        const fileBinds = container.mounts
+          .map((mount) => mountBindings[mount.id])
+          .filter((bind): bind is FileBindSpecInput => !!bind?.fileId);
+
+        if (fileBinds.length === 0) {
+          return null;
+        }
+
+        return {
+          containerId: container.id,
+          fileBinds,
+        };
+      })
+      .filter((config): config is DeploymentConfigSpecInput => !!config);
+
+    onSubmit(transformOutputData(data, configs));
+  };
+
   return (
-    <form onSubmit={handleSubmit(onFormSubmit)}>
+    <form
+      onSubmit={handleSubmit(onFormSubmit)}
+      data-testid="create-deployment-campaign-form"
+    >
       <Stack gap={3}>
         <FormRow
           id="create-deployment-campaign-form-operation-type"
@@ -420,7 +618,10 @@ const CreateDeploymentCampaignForm = ({
             noOptionsMessage={({ inputValue }) =>
               noApplicationOptionsMessage(intl, inputValue)
             }
-            onChange={() => resetField("release")}
+            onChange={() => {
+              resetField("release");
+              resetMountBindings();
+            }}
           />
           <FormFeedback feedback={errors.application?.id?.message} />
         </FormRow>
@@ -448,7 +649,10 @@ const CreateDeploymentCampaignForm = ({
                     controllerProps={{
                       value: value,
                       invalid: invalid,
-                      onChange: onChange,
+                      onChange: (release) => {
+                        resetMountBindings();
+                        onChange(release);
+                      },
                     }}
                   />
                 )}
@@ -507,6 +711,91 @@ const CreateDeploymentCampaignForm = ({
               </div>
             )}
           </FormRow>
+        )}
+
+        {supportsFileMounts && containersWithMounts.length > 0 && (
+          <div
+            className="mt-2 pt-2 border-top"
+            data-testid="deployment-campaign-file-mounts"
+          >
+            <h6 className="mb-2 fw-semibold">
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.fileBindsTitle"
+                defaultMessage="File Mounts Configuration"
+              />
+            </h6>
+
+            <p className="mb-2 small text-muted">
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.fileBindsDescription"
+                defaultMessage="Select the repository file to mount at each mountpoint. The file is sent to every device targeted by the channel."
+              />
+            </p>
+
+            <Alert
+              show={
+                showMissingBindsFeedback && missingRequiredMounts.length > 0
+              }
+              variant="danger"
+              data-testid="missing-required-binds-feedback"
+            >
+              <FormattedMessage
+                id="forms.CreateDeploymentCampaign.missingRequiredBindsFeedback"
+                defaultMessage="Please configure a file source for all required file mounts."
+              />
+              <ul className="mb-0 mt-1">
+                {missingRequiredMounts.map((mount) => (
+                  <li key={mount.id}>
+                    {intl.formatMessage(
+                      {
+                        id: "forms.CreateDeploymentCampaign.containerLabel",
+                        defaultMessage: "Container: {containerName}",
+                      },
+                      { containerName: mount.containerName },
+                    )}{" "}
+                    — {mount.mountpoint}
+                  </li>
+                ))}
+              </ul>
+            </Alert>
+
+            <div className="d-flex flex-column gap-3 pe-1 pb-2">
+              {containersWithMounts.map((container) => (
+                <div
+                  key={container.id}
+                  className="border rounded p-3 bg-light"
+                  data-testid={`container-mounts-${container.id}`}
+                >
+                  <div className="fw-bold mb-2 small text-secondary">
+                    <FormattedMessage
+                      id="forms.CreateDeploymentCampaign.containerLabel"
+                      defaultMessage="Container: {containerName}"
+                      values={{ containerName: container.name }}
+                    />
+                  </div>
+
+                  <div className="d-flex flex-column gap-2">
+                    {container.mounts.map((mount) => (
+                      <FileMountInput
+                        key={mount.id}
+                        fileMountId={mount.id}
+                        mountpoint={mount.mountpoint}
+                        required={mount.required}
+                        defaultFileId={mount.defaultFileId}
+                        defaultFileName={mount.defaultFile?.name}
+                        defaultFileMode={mount.fileMode}
+                        defaultUserId={mount.userId}
+                        defaultGroupId={mount.groupId}
+                        onChange={(result) =>
+                          handleFileBindChange(mount.id, result)
+                        }
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
 
         <FormRow

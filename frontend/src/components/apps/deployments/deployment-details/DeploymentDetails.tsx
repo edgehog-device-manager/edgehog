@@ -16,13 +16,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, usePaginationFragment } from "react-relay";
-import { SingleValue } from "react-select";
-import semver from "semver";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
@@ -33,20 +31,21 @@ import type {
   DeploymentDetails_events$data,
   DeploymentDetails_events$key,
 } from "@/api/__generated__/DeploymentDetails_events.graphql";
+import type { DeploymentDetails_fileBinds$key } from "@/api/__generated__/DeploymentDetails_fileBinds.graphql";
+import type { DeploymentDetails_envFiles$key } from "@/api/__generated__/DeploymentDetails_envFiles.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
 import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
-import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import DeploymentActionButtons from "@/components/apps/deployments/deployment-action-buttons/DeploymentActionButtons";
 import DeploymentEventsCard from "@/components/apps/deployments/deployment-events-card/DeploymentEventsCard";
 import { parseDeploymentState } from "@/components/apps/deployments/deployment-state/DeploymentState";
 import Icon from "@/components/ui/icon/Icon";
-import ResourceStateIcon from "@/components/apps/resource-state-icon/ResourceStateIcon";
+import ResourceState from "@/components/apps/resource-state/ResourceState";
 import { Link, Route } from "@/Navigation";
 import FullHeightCard from "@/components/ui/full-height-card/FullHeightCard";
-import Select from "@/components/ui/select/Select";
+import UpgradeDeploymentModal from "@/components/apps/deployments/upgrade-deployment-modal/UpgradeDeploymentModal";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
@@ -98,7 +97,53 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
           ...DeploymentDetails_deviceMappingDeployments
           ...DeploymentDetails_networkDeployments
           ...DeploymentDetails_volumeDeployments
+          ...DeploymentDetails_fileBinds
+          ...DeploymentDetails_envFiles
         }
+      }
+    }
+  }
+`;
+
+const DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT = graphql`
+  fragment DeploymentDetails_fileBinds on ContainerDeployment {
+    id
+    fileBinds {
+      id
+      fileName
+      state
+      isReady
+      fileMount {
+        id
+        mountpoint
+      }
+      fileDownloadRequest {
+        id
+        fileName
+      }
+      deviceFile {
+        id
+        pathOnDevice
+      }
+    }
+  }
+`;
+
+const DEPLOYMENT_DETAILS_ENV_FILES_FRAGMENT = graphql`
+  fragment DeploymentDetails_envFiles on ContainerDeployment {
+    id
+    envFiles {
+      id
+      fileName
+      state
+      isReady
+      fileDownloadRequest {
+        id
+        fileName
+      }
+      deviceFile {
+        id
+        pathOnDevice
       }
     }
   }
@@ -187,17 +232,6 @@ const DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
-type UpgradeTargetRelease = {
-  id: string;
-  version: string;
-};
-
-type SelectOption = {
-  value: string;
-  label: string;
-  disabled: boolean;
-};
-
 type Deployment = Deployment_getDeployment_Query$data["deployment"];
 
 export type Event = NonNullable<
@@ -207,6 +241,7 @@ export type Event = NonNullable<
 type TreeNode = {
   id: string;
   name: string;
+  detail?: string | null;
   type?: "node" | "leaf";
   state?: string | null;
   isReady?: boolean | null;
@@ -216,15 +251,17 @@ type TreeNode = {
 const buildSubTree = (
   prefix: string,
   category: string,
-  nodes: any[],
+  nodes: readonly any[],
   labelExtractor: (node: any) => string,
   intlLabels: { title: string; empty: string; unnamed: string },
+  detailExtractor?: (node: any) => string | null,
 ): TreeNode => {
   const children: TreeNode[] =
     nodes.length > 0
       ? nodes.map((n) => ({
           id: `${prefix}-${category}-${n.id}`,
           name: labelExtractor(n) || intlLabels.unnamed,
+          detail: detailExtractor ? detailExtractor(n) : null,
           type: "leaf",
           state: n.state,
           isReady: n.isReady,
@@ -253,7 +290,9 @@ interface ContainerDeploymentItemProps {
   containerFragmentKey: DeploymentDetails_networkDeployments$key &
     DeploymentDetails_volumeDeployments$key &
     DeploymentDetails_deviceMappingDeployments$key &
-    DeploymentDetails_deviceRequestDeployments$key;
+    DeploymentDetails_deviceRequestDeployments$key &
+    DeploymentDetails_fileBinds$key &
+    DeploymentDetails_envFiles$key;
   imageDeployment: any;
   containerState: string;
   isReady: boolean | null;
@@ -268,6 +307,16 @@ const ContainerDeploymentItem = ({
 }: ContainerDeploymentItemProps) => {
   const intl = useIntl();
   const prefix = `container-${index}`;
+
+  const fileBindsData = useFragment<DeploymentDetails_fileBinds$key>(
+    DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT,
+    containerFragmentKey,
+  );
+
+  const envFilesData = useFragment<DeploymentDetails_envFiles$key>(
+    DEPLOYMENT_DETAILS_ENV_FILES_FRAGMENT,
+    containerFragmentKey,
+  );
 
   const networkData = useFragment<DeploymentDetails_networkDeployments$key>(
     DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT,
@@ -384,6 +433,48 @@ const ContainerDeploymentItem = ({
       },
     );
 
+    const fileBindsSubTree = buildSubTree(
+      prefix,
+      "file-bind",
+      fileBindsData?.fileBinds ?? [],
+      (fb) =>
+        fb.fileDownloadRequest?.fileName ??
+        fb.deviceFile?.pathOnDevice ??
+        fb.fileName ??
+        unnamed,
+      {
+        title: intl.formatMessage({
+          id: "components.apps.deployments.deployment-details.DeploymentDetails.fileBinds",
+          defaultMessage: "File Binds",
+        }),
+        empty,
+        unnamed,
+      },
+      (fb) => fb.fileMount?.mountpoint ?? null,
+    );
+
+    const envFilesSubTree = buildSubTree(
+      prefix,
+      "env-file",
+      envFilesData?.envFiles ?? [],
+      (ef) => {
+        return (
+          ef.fileDownloadRequest?.fileName ??
+          ef.deviceFile?.pathOnDevice ??
+          ef.fileName ??
+          unnamed
+        );
+      },
+      {
+        title: intl.formatMessage({
+          id: "components.apps.deployments.deployment-details.DeploymentDetails.envFiles",
+          defaultMessage: "Env Files",
+        }),
+        empty,
+        unnamed,
+      },
+    );
+
     const imageTreeNode: TreeNode = {
       id: `${prefix}-image-${imageDeployment?.image?.id}`,
       name:
@@ -417,13 +508,18 @@ const ContainerDeploymentItem = ({
           deviceMappingsSubTree,
           volumeSubTree,
           networkSubTree,
+          fileBindsSubTree,
+          envFilesSubTree,
         ],
       },
     ];
   }, [
+    fileBindsData,
+    envFilesData,
     networkData,
     volumeData,
     deviceMappingData,
+    deviceRequestData,
     imageDeployment,
     containerState,
     isReady,
@@ -459,12 +555,12 @@ const ContainerDeploymentItem = ({
       {...required}
       {...handlers}
       renderNode={({ node, onToggle }) => {
-        const { state, isReady, name, type } = node.data ?? {};
+        const { state, isReady, name, detail, type } = node.data ?? {};
         const isNode = type === "node";
 
         return (
           <div
-            className="d-flex align-items-center gap-2 py-1 px-1"
+            className="d-flex align-items-center gap-2 py-1 px-1 w-100"
             style={{ cursor: isNode ? "pointer" : "default" }}
             onClick={(e) => isNode && onToggle(e)}
           >
@@ -481,11 +577,20 @@ const ContainerDeploymentItem = ({
                 <Icon icon="caretDown" />
               </span>
             )}
-            <span className={`node-name ${isNode ? "fw-bold" : ""}`}>
-              {name}
+            <span
+              className={`flex-grow-1 text-truncate ${isNode ? "fw-bold" : ""}`}
+              style={{ minWidth: 0 }}
+              title={detail ? `${name}\n${detail}` : name}
+            >
+              <span className="d-block text-truncate">{name}</span>
+              {detail && (
+                <span className="d-block text-truncate small text-body-secondary">
+                  {detail}
+                </span>
+              )}
             </span>
 
-            <ResourceStateIcon state={state} isReady={isReady} />
+            <ResourceState state={state} isReady={isReady} />
           </div>
         );
       }}
@@ -501,17 +606,16 @@ type DeploymentDetailsProps = {
   onStop: (id: string) => void;
   onRedeploy: (id: string) => void;
   onDelete: (id: string) => void;
-  onUpgrade: (id: string, targetId: string) => void;
 };
 
 const DeploymentDetails = ({
   deploymentRef,
   isDeletingDeployment,
+  setErrorFeedback,
   onStart,
   onStop,
   onRedeploy,
   onDelete,
-  onUpgrade,
 }: DeploymentDetailsProps) => {
   const { data: eventsData } = usePaginationFragment<
     DeploymentEventsPaginationQuery,
@@ -545,91 +649,8 @@ const DeploymentDetails = ({
 
   const deploymentState = parseDeploymentState(state ?? undefined);
 
-  const intl = useIntl();
-
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-
-  const [upgradeTargetRelease, setUpgradeTargetRelease] =
-    useState<UpgradeTargetRelease | null>(null);
-
-  const handleUpgradeReleaseChange = useCallback(
-    (option: SingleValue<SelectOption>) => {
-      if (option) {
-        setUpgradeTargetRelease({
-          id: option.value,
-          version: option.label,
-        });
-      } else {
-        setUpgradeTargetRelease(null);
-      }
-    },
-    [],
-  );
-
-  const upgradeReleaseOptions: SelectOption[] = useMemo(() => {
-    const releaseEdges = deploymentRef?.release?.application?.releases?.edges;
-    const currentVersion = deploymentRef?.release?.version;
-    const systemModelName = deploymentRef?.device?.systemModel?.name;
-
-    if (!releaseEdges || !currentVersion) {
-      return [];
-    }
-
-    return releaseEdges.reduce<SelectOption[]>((options, edge) => {
-      const release = edge?.node;
-
-      if (!release || release.version === currentVersion) {
-        return options;
-      }
-
-      const parsedCurrentVersion = semver.valid(currentVersion);
-      const parsedTargetVersion = semver.valid(release.version);
-
-      if (parsedCurrentVersion && parsedTargetVersion) {
-        if (!semver.gt(parsedTargetVersion, parsedCurrentVersion)) {
-          return options;
-        }
-      }
-
-      const systemModelNames = release.systemModels?.map((sm) => sm.name) ?? [];
-      const appliesToAll = systemModelNames.length === 0;
-      const matchesSystemModel =
-        appliesToAll ||
-        (systemModelName && systemModelNames.includes(systemModelName));
-
-      const label = !matchesSystemModel
-        ? intl.formatMessage(
-            {
-              id: "components.apps.deployments.deployment-details.DeploymentDetails.incompatibleVersion",
-              defaultMessage: "{version} (Incompatible system model)",
-            },
-            { version: release.version },
-          )
-        : release.version;
-
-      options.push({
-        value: release.id,
-        label: label,
-        disabled: !(appliesToAll || matchesSystemModel),
-      });
-
-      return options;
-    }, []);
-  }, [
-    deploymentRef?.release?.application?.releases?.edges,
-    deploymentRef?.release?.version,
-    deploymentRef?.device?.systemModel?.name,
-    intl,
-  ]);
-
-  const selectedUpgradeReleaseOption = useMemo(() => {
-    return (
-      upgradeReleaseOptions.find(
-        (option) => option.value === upgradeTargetRelease?.id,
-      ) || null
-    );
-  }, [upgradeReleaseOptions, upgradeTargetRelease?.id]);
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
@@ -673,7 +694,6 @@ const DeploymentDetails = ({
                 onStop={() => deploymentId && onStop(deploymentId)}
                 onRedeploy={() => deploymentId && onRedeploy(deploymentId)}
                 onUpgrade={() => {
-                  setUpgradeTargetRelease(null);
                   handleShowUpgradeModal();
                 }}
                 onDelete={() => {
@@ -716,83 +736,21 @@ const DeploymentDetails = ({
           </p>
         </DeleteModal>
       )}
-      {showUpgradeModal && (
-        <ConfirmModal
-          confirmLabel={
-            <FormattedMessage
-              id="components.apps.deployments.deployment-details.DeploymentDetails.confirmLabel"
-              defaultMessage="Confirm"
-            />
-          }
-          disabled={!deploymentRef || !upgradeTargetRelease}
-          onCancel={() => {
-            setShowUpgradeModal(false);
-            setUpgradeTargetRelease(null);
-          }}
-          onConfirm={() => {
-            if (deploymentRef && upgradeTargetRelease) {
-              onUpgrade(deploymentRef.id, upgradeTargetRelease.id);
-            }
-            setShowUpgradeModal(false);
-            setUpgradeTargetRelease(null);
-          }}
-          title={
-            <FormattedMessage
-              id="components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.title"
-              defaultMessage="Upgrade Deployment"
-            />
-          }
-        >
-          <p>
-            <FormattedMessage
-              id="components.apps.deployments.deployment-details.DeploymentDetails.confirmModal.description"
-              defaultMessage="Are you sure you want to upgrade the deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
-              values={{
-                application: applicationName,
-                currentVersion: releaseVersion,
-                bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
-              }}
-            />
-          </p>
-
-          <Select
-            value={selectedUpgradeReleaseOption}
-            onChange={handleUpgradeReleaseChange}
-            options={upgradeReleaseOptions}
-            isOptionDisabled={(option) => option.disabled}
-            isClearable
-            placeholder={intl.formatMessage({
-              id: "components.apps.deployments.deployment-details.DeploymentDetails.selectOption",
-              defaultMessage: "Select a Release Version",
-            })}
-            noOptionsMessage={({ inputValue }) =>
-              inputValue
-                ? intl.formatMessage(
-                    {
-                      id: "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesFoundMatching",
-                      defaultMessage:
-                        'No release versions found matching "{inputValue}"',
-                    },
-                    { inputValue },
-                  )
-                : upgradeReleaseOptions.length === 0
-                  ? intl.formatMessage({
-                      id: "components.apps.deployments.deployment-details.DeploymentDetails.noReleasesAvailable",
-                      defaultMessage: "No Release Versions Available",
-                    })
-                  : intl.formatMessage({
-                      id: "components.apps.deployments.deployment-details.DeploymentDetails.selectOption",
-                      defaultMessage: "Select a Release Version",
-                    })
-            }
-            filterOption={(option, inputValue) => {
-              // Search by release version label only.
-              return option.label
-                .toLowerCase()
-                .includes(inputValue.toLowerCase());
-            }}
+      {showUpgradeModal && deploymentRef && deploymentRef.id && (
+        <Suspense fallback={null}>
+          <UpgradeDeploymentModal
+            open={showUpgradeModal}
+            onToggleModal={setShowUpgradeModal}
+            deploymentId={deploymentRef.id}
+            deviceId={deploymentRef.device?.id ?? ""}
+            applicationId={applicationId}
+            applicationName={applicationName}
+            currentVersion={releaseVersion ?? ""}
+            systemModelName={deploymentRef.device?.systemModel?.name}
+            isOnline={deploymentRef.device?.online ?? false}
+            setErrorFeedback={setErrorFeedback}
           />
-        </ConfirmModal>
+        </Suspense>
       )}
       <div
         className="flex-md-fill"

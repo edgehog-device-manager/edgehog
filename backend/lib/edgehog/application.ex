@@ -70,6 +70,7 @@ defmodule Edgehog.Application do
       {Registry, keys: :unique, name: Edgehog.Containers.Reconciler.Registry},
       # Container Handlers registries
       Edgehog.Containers.Supervisor,
+      Edgehog.Files.Supervisor,
       # Start the Endpoint (http/https)
       Endpoint,
       # Fetch Astarte devices

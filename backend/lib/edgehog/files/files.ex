@@ -94,6 +94,8 @@ defmodule Edgehog.Files do
       define :set_file_download_response, action: :set_response
       define :set_file_download_progress, action: :set_progress
       define :set_file_download_status, action: :set_status
+      define :create_file_bind_file_download_request, action: :from_file_bind
+      define :create_env_file_file_download_request, action: :from_env_file
     end
 
     resource FileUploadRequest do

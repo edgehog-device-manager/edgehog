@@ -51,6 +51,8 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   alias Edgehog.Containers.Container.Deployment.Orchestrator.Registry, as: ContainerRegistry
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
+  alias Edgehog.Containers.EnvFile
+  alias Edgehog.Containers.FileBind
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Telemetry
@@ -259,6 +261,20 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
   @impl GenServer
   def handle_info({:ready, %DeviceRequest.Deployment{id: id}}, state) do
     new_state = Core.device_request_ready(id, state)
+
+    {:noreply, new_state, {:continue, :maybe_ready}}
+  end
+
+  @impl GenServer
+  def handle_info({:ready, %FileBind{id: id}}, state) do
+    new_state = Core.file_bind_ready(id, state)
+
+    {:noreply, new_state, {:continue, :maybe_ready}}
+  end
+
+  @impl GenServer
+  def handle_info({:ready, %EnvFile{id: id}}, state) do
+    new_state = Core.env_file_ready(id, state)
 
     {:noreply, new_state, {:continue, :maybe_ready}}
   end

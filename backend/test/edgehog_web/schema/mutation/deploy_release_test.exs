@@ -61,6 +61,96 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     |> extract_result!()
   end
 
+  test "deployRelease creates file binds for a required mount from configs", %{
+    tenant: tenant
+  } do
+    container =
+      [
+        tenant: tenant,
+        file_mounts: [%{mountpoint: "/etc/app.conf", required: true}]
+      ]
+      |> container_fixture()
+      |> Ash.load!(:file_mounts)
+
+    %{file_mounts: [file_mount]} = container
+
+    device = device_fixture(tenant: tenant)
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        container_ids: [container.id]
+      )
+
+    expect(Deployment.Orchestrator, :conduct, fn _, _ -> :ok end)
+
+    result =
+      [
+        tenant: tenant,
+        release_id: AshGraphql.Resource.encode_relay_id(release),
+        device_id: AshGraphql.Resource.encode_relay_id(device),
+        configs: [
+          %{
+            "containerId" => AshGraphql.Resource.encode_relay_id(container),
+            "fileBinds" => [
+              %{"fileMountId" => AshGraphql.Resource.encode_relay_id(file_mount)}
+            ]
+          }
+        ]
+      ]
+      |> deploy_release_mutation()
+      |> extract_result!()
+
+    assert %{"id" => deployment_id} = result
+
+    {:ok, %{id: decoded_id}} =
+      AshGraphql.Resource.decode_relay_id(deployment_id)
+
+    deployment =
+      Edgehog.Containers.Deployment
+      |> Ash.get!(decoded_id, tenant: tenant)
+      |> Ash.load!([container_deployments: [:file_binds]], tenant: tenant)
+
+    assert length(deployment.container_deployments) == 1
+
+    [container_deployment] = deployment.container_deployments
+    assert length(container_deployment.file_binds) == 1
+
+    [file_bind] = container_deployment.file_binds
+    assert file_bind.file_mount_id == file_mount.id
+  end
+
+  test "deployRelease returns an error when a required mount has no bind", %{
+    tenant: tenant
+  } do
+    container =
+      container_fixture(
+        tenant: tenant,
+        file_mounts: [%{mountpoint: "/etc/app.conf", required: true}]
+      )
+
+    device = device_fixture(tenant: tenant)
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        container_ids: [container.id]
+      )
+
+    error =
+      [
+        tenant: tenant,
+        release_id: AshGraphql.Resource.encode_relay_id(release),
+        device_id: AshGraphql.Resource.encode_relay_id(device),
+        configs: []
+      ]
+      |> deploy_release_mutation()
+      |> extract_error!()
+
+    assert error.message == "Some required mountpoints are not being set."
+    assert error.fields == [:file_binds]
+  end
+
   test "deployRelease sends containers in order depending on their dependencies", %{
     tenant: tenant
   } do
@@ -207,10 +297,15 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
         |> AshGraphql.Resource.encode_relay_id()
       end)
 
-    input = %{
-      "deviceId" => device_id,
-      "releaseId" => release_id
-    }
+    {configs, _opts} = Keyword.pop(opts, :configs)
+
+    input =
+      %{
+        "deviceId" => device_id,
+        "releaseId" => release_id
+      }
+
+    input = maybe_put_input(input, "configs", configs)
 
     variables = %{"input" => input}
 
@@ -241,6 +336,9 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
     error
   end
+
+  defp maybe_put_input(input, _key, nil), do: input
+  defp maybe_put_input(input, key, value), do: Map.put(input, key, value)
 
   # NOTE: coped from `send_create_deployment`, builds the dependency graph from
   # dependencies spec

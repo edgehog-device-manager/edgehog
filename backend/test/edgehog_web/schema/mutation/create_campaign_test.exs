@@ -19,7 +19,7 @@
 #
 
 defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
-  use EdgehogWeb.GraphqlCase, async: true
+  use EdgehogWeb.GraphqlCase, async: false
 
   use Oban.Testing, repo: Edgehog.Repo
 
@@ -27,6 +27,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
   import Edgehog.CampaignsFixtures
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
+  import Edgehog.FilesFixtures
   import Edgehog.GroupsFixtures
 
   alias Edgehog.Campaigns.Campaign
@@ -113,6 +114,61 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
       assert campaign_data["channel"]["id"] == channel_id
       assert [target_data] = extract_nodes!(campaign_data["campaignTargets"]["edges"])
       assert target_data["status"] == "IDLE"
+      assert target_data["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
+
+      # Check that the executor got started
+      assert_campaign_executor_started(tenant, campaign_data, :deployment_deploy)
+    end
+
+    test "creates deployment_deploy campaign with configs and file binds", %{tenant: tenant} do
+      %{container: container, file_mount: file_mount, file: file, release: release} =
+        deployment_deploy_file_bind_config_fixture(tenant: tenant)
+
+      target_group = device_group_fixture(selector: ~s<"deploy" in tags>, tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+
+      device =
+        [release_id: release.id, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["deploy"])
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
+      container_id = AshGraphql.Resource.encode_relay_id(container)
+      file_id = AshGraphql.Resource.encode_relay_id(file)
+      file_mount_id = AshGraphql.Resource.encode_relay_id(file_mount)
+
+      campaign_mechanism =
+        build_deployment_mechanism(:deployment_deploy, release_id,
+          configs: [
+            %{
+              "containerId" => container_id,
+              "env" => [],
+              "envStrategy" => "MERGE",
+              "fileBinds" => [
+                %{
+                  "fileId" => file_id,
+                  "fileMountId" => file_mount_id
+                }
+              ]
+            }
+          ]
+        )
+
+      campaign_data =
+        [
+          name: "My Deployment Deploy Campaign With File Binds",
+          campaign_mechanism: campaign_mechanism,
+          channel_id: channel_id,
+          tenant: tenant
+        ]
+        |> create_campaign_mutation()
+        |> extract_result!()
+
+      assert campaign_data["name"] == "My Deployment Deploy Campaign With File Binds"
+      assert campaign_data["status"] == "IDLE"
+      assert campaign_data["campaignMechanism"]["release"]["id"] == release_id
+      assert [target_data] = extract_nodes!(campaign_data["campaignTargets"]["edges"])
       assert target_data["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
 
       # Check that the executor got started
@@ -278,6 +334,90 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
       assert campaign_data["status"] == "IDLE"
       assert campaign_data["campaignMechanism"]["release"]["id"] == release_id
       assert campaign_data["campaignMechanism"]["targetRelease"]["id"] == target_release_id
+
+      # Check that the executor got started
+      assert_campaign_executor_started(tenant, campaign_data, :deployment_upgrade)
+    end
+
+    test "creates deployment_upgrade campaign with configs and file binds", %{tenant: tenant} do
+      # 1. Base release for the application
+      release = release_fixture(tenant: tenant, version: "1.0.0", system_models: 1)
+      application_id = Ash.load!(release, :application, tenant: tenant).application.id
+      release = Ash.load!(release, :system_models, tenant: tenant)
+      system_model = hd(release.system_models)
+
+      # 2. Target release (version 1.0.1) with a container having a file mount
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [%{mountpoint: "/etc/app.conf", required: true}]
+        )
+
+      [file_mount] = Ash.load!(container, :file_mounts, tenant: tenant).file_mounts
+      file = file_fixture(tenant: tenant)
+
+      target_release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application_id,
+          version: "1.0.1",
+          container_ids: [container.id],
+          system_models: [system_model]
+        )
+
+      target_group = device_group_fixture(selector: ~s<"upgrade" in tags>, tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+
+      device =
+        [release_id: release.id, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["upgrade"])
+
+      # Create an initial deployment that can be upgraded
+      _deployment =
+        deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      target_release_id = AshGraphql.Resource.encode_relay_id(target_release)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
+      container_id = AshGraphql.Resource.encode_relay_id(container)
+      file_id = AshGraphql.Resource.encode_relay_id(file)
+      file_mount_id = AshGraphql.Resource.encode_relay_id(file_mount)
+
+      campaign_mechanism =
+        build_deployment_mechanism(:deployment_upgrade, release_id,
+          target_release_id: target_release_id,
+          configs: [
+            %{
+              "containerId" => container_id,
+              "env" => [],
+              "envStrategy" => "MERGE",
+              "fileBinds" => [
+                %{
+                  "fileId" => file_id,
+                  "fileMountId" => file_mount_id
+                }
+              ]
+            }
+          ]
+        )
+
+      result =
+        create_campaign_mutation(
+          name: "My Deployment Upgrade Campaign With File Binds",
+          campaign_mechanism: campaign_mechanism,
+          channel_id: channel_id,
+          tenant: tenant
+        )
+
+      campaign_data = extract_result!(result)
+
+      assert campaign_data["name"] == "My Deployment Upgrade Campaign With File Binds"
+      assert campaign_data["status"] == "IDLE"
+      assert campaign_data["campaignMechanism"]["release"]["id"] == release_id
+      assert campaign_data["campaignMechanism"]["targetRelease"]["id"] == target_release_id
+      assert [target_data] = extract_nodes!(campaign_data["campaignTargets"]["edges"])
+      assert target_data["device"]["id"] == AshGraphql.Resource.encode_relay_id(device)
 
       # Check that the executor got started
       assert_campaign_executor_started(tenant, campaign_data, :deployment_upgrade)
@@ -723,6 +863,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
 
   defp build_deployment_mechanism(type, release_id, opts \\ []) do
     target_release_id = Keyword.get(opts, :target_release_id)
+    configs = Keyword.get(opts, :configs)
 
     mechanism = %{
       "releaseId" => release_id,
@@ -733,6 +874,13 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
     mechanism =
       if target_release_id do
         Map.put(mechanism, "targetReleaseId", target_release_id)
+      else
+        mechanism
+      end
+
+    mechanism =
+      if configs do
+        Map.put(mechanism, "configs", configs)
       else
         mechanism
       end

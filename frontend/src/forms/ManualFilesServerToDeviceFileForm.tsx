@@ -20,8 +20,10 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMemo, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
+
+import FileModeSelector from "@/components/ui/file-permissions/FileModeSelector";
 
 import Button from "@/components/ui/button/Button";
 import Col from "@/components/ui/col/Col";
@@ -561,12 +563,16 @@ const ManualFilesServerToDeviceFileForm = ({
                 />
               }
             >
-              <Form.Control
-                type="text"
-                {...register("fileMode", {
-                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                })}
-                isInvalid={!!errors.fileMode}
+              <Controller
+                control={control}
+                name="fileMode"
+                render={({ field }) => (
+                  <FileModeSelector
+                    idPrefix="manual-file-mode"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <FormFeedback feedback={errors.fileMode?.message} />
             </FormRow>

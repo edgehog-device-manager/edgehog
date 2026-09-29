@@ -267,7 +267,18 @@ const getDefaultArchiveName = () => {
   return `archive-${dateStr}`;
 };
 
+const calculateFileDigest = async (file: Blob | File): Promise<string> => {
+  const buffer = await file.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+  return `sha256:${hashHex}`;
+};
+
 export {
+  calculateFileDigest,
   createTarArchive,
   formatFileSize,
   getArchiveExtension,

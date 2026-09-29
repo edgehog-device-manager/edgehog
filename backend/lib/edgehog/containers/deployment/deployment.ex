@@ -33,6 +33,7 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.Deployment.Validations
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Types
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
 
@@ -83,6 +84,19 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
+      argument :configs, {:array, Types.DeploymentConfig} do
+        description """
+        Per-container configuration overrides to apply at deployment time.
+        Each override is keyed by the container id and may include:
+          - env: a list of key/value pairs
+          - env_strategy: either :merge or :override
+          - file_binds: a list of mountpoints, each with a file to bind at that mountpoint
+        """
+
+        allow_nil? false
+        default []
+      end
+
       validate Validations.DeviceIsCompatible
 
       change manage_relationship(:device_id, :device, type: :append)
@@ -102,6 +116,16 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
+      argument :configs, {:array, Types.DeploymentConfig} do
+        description """
+        Per-container configuration overrides to apply at deployment time.
+        The same as for :deploy action.
+        """
+
+        allow_nil? false
+        default []
+      end
+
       validate Validations.DeviceIsCompatible
 
       change manage_relationship(:device_id, :device, type: :append)
@@ -119,6 +143,11 @@ defmodule Edgehog.Containers.Deployment do
 
         argument :device_id, :id do
           allow_nil? false
+        end
+
+        argument :configs, {:array, Types.DeploymentConfig} do
+          allow_nil? false
+          default []
         end
 
         change manage_relationship(:device_id, :device, type: :append)
@@ -200,6 +229,16 @@ defmodule Edgehog.Containers.Deployment do
         allow_nil? false
       end
 
+      argument :configs, {:array, Types.DeploymentConfig} do
+        description """
+        Per-container configuration overrides to apply to the new deployment.
+        The same as for :deploy action.
+        """
+
+        allow_nil? false
+        default []
+      end
+
       validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_upgrade}
 
@@ -237,8 +276,7 @@ defmodule Edgehog.Containers.Deployment do
 
       change {Edgehog.Changes.Log, message: "Deployment successfully stopped."} do
         where [
-          data_one_of(:context, [:stop_message_sent]),
-          {Validations.Event, type: "Info"}
+          data_one_of(:context, [:stop_message_sent])
         ]
       end
 

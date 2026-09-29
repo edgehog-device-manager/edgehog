@@ -69,12 +69,13 @@ defmodule Edgehog.MixProject do
 
   defp dialyzer_opts(:test) do
     [
+      plt_core_path: "priv/plts",
       plt_file: {:no_warn, "priv/plts/dialyzer.plt"},
       plt_add_apps: [:ex_unit, :mix]
     ]
   end
 
-  defp dialyzer_opts(_env), do: [plt_add_apps: [:mix]]
+  defp dialyzer_opts(_env), do: [plt_core_path: "priv/plts", plt_add_apps: [:mix]]
 
   # Specifies your project dependencies.
   #
@@ -269,7 +270,19 @@ defmodule Edgehog.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       # Workaround for https://github.com/ash-project/spark/issues/78
-      format: ["compile", "format"]
+      format: ["compile", "format"],
+      lint: [
+        "compile --warnings-as-errors",
+        "format --check-formatted",
+        "credo --only warning",
+        "cmd mkdir -p priv/plts",
+        "dialyzer"
+      ],
+      "lint:quick": [
+        "compile --warnings-as-errors",
+        "format --check-formatted",
+        "credo --only warning"
+      ]
     ]
   end
 end

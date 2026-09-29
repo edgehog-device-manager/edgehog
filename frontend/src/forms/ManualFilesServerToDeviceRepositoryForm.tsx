@@ -35,6 +35,7 @@ import Col from "@/components/ui/col/Col";
 import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
+import FileModeSelector from "@/components/ui/file-permissions/FileModeSelector";
 import type { DestinationTypeOption } from "@/components/fleet/devices/tabs/files-server-to-device-tab/FilesServerToDeviceTab";
 import FileSelect from "@/components/files/file-download/file-select/FileSelect";
 import Form from "@/components/ui/form/Form";
@@ -423,12 +424,16 @@ const ManualFilesServerToDeviceRepositoryForm = ({
                 />
               }
             >
-              <Form.Control
-                type="text"
-                {...register("fileMode", {
-                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                })}
-                isInvalid={!!errors.fileMode}
+              <Controller
+                control={control}
+                name="fileMode"
+                render={({ field }) => (
+                  <FileModeSelector
+                    idPrefix="repo-file-mode"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <FormFeedback feedback={errors.fileMode?.message} />
             </FormRow>

@@ -27,6 +27,7 @@ defmodule Edgehog.Containers.Deployment.Starter.CoreTest do
   import Edgehog.TenantsFixtures
   import Edgehog.DevicesFixtures
 
+  alias Edgehog.Containers.Deployment.Orchestrator
   alias Edgehog.Containers.Deployment.Starter.Core
 
   setup do
@@ -46,7 +47,7 @@ defmodule Edgehog.Containers.Deployment.Starter.CoreTest do
       deployment_fixture(state: :started, device_id: device.id, tenant: tenant)
       deployment_fixture(state: :stopped, device_id: device.id, tenant: tenant)
 
-      {:ok, deployments} = Core.load(device, tenant)
+      deployments = Core.load(device)
 
       expected_deployments =
         [d1, d2]
@@ -64,19 +65,25 @@ defmodule Edgehog.Containers.Deployment.Starter.CoreTest do
 
   describe "start/1" do
     test "starts pending deployments", %{tenant: tenant, device: device} do
-      d1 = deployment_fixture(state: :pending, device_id: device.id, tenant: tenant)
-      d2 = deployment_fixture(state: :pending, device_id: device.id, tenant: tenant)
-      deployments = [d1, d2]
+      deployment_fixture(state: :pending, device_id: device.id, tenant: tenant)
+      deployment_fixture(state: :pending, device_id: device.id, tenant: tenant)
 
-      Edgehog.Containers.Deployment.Orchestrator
-      |> expect(:conduct, fn ^d1, ^tenant ->
+      deployments = Core.load(device)
+
+      assert length(deployments) == 2
+
+      deployment_ids =
+        deployments
+        |> Enum.map(& &1.id)
+        |> Enum.sort()
+
+      expect(Orchestrator, :conduct, 2, fn deployment, _tenant ->
+        assert deployment.id in deployment_ids
+        assert deployment.tenant.tenant_id == tenant.tenant_id
         {:ok, :mock_pid}
       end)
-      |> expect(:conduct, fn ^d2, ^tenant ->
-        {:ok, :mock_pid}
-      end)
 
-      Core.start(deployments, tenant)
+      assert [] = Core.start(deployments)
     end
   end
 end

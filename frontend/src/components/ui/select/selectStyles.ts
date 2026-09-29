@@ -23,6 +23,14 @@ import { StylesConfig } from "react-select";
 export const createSelectStyles = <Option>(
   invalid: boolean,
 ): StylesConfig<Option, boolean> => ({
+  menu: (base) => ({
+    ...base,
+    zIndex: 9999,
+  }),
+  menuPortal: (base) => ({
+    ...base,
+    zIndex: 9999,
+  }),
   control: (base, state) => ({
     ...base,
 

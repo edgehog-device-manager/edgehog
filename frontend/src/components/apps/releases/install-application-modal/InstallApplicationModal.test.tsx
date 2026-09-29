@@ -32,8 +32,28 @@ const APPLICATIONS_QUERY_NAME =
   "InstallApplicationModal_GetApplicationsWithReleases_Query";
 const DEPLOY_RELEASE_MUTATION_NAME =
   "InstallApplicationModal_DeployRelease_Mutation";
+const MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME =
+  "InstallApplicationModal_markEnvFileAsUploaded_Mutation";
 
 const applicationsData = {
+  device: {
+    id: "device-1",
+    deviceFiles: {
+      edges: [
+        {
+          node: {
+            id: "device-file-1",
+            pathOnDevice: "/data/.env",
+            deleted: false,
+            fileDownloadRequest: null,
+          },
+        },
+      ],
+    },
+    fileDownloadRequests: {
+      edges: [],
+    },
+  },
   applications: {
     edges: [
       {
@@ -47,6 +67,9 @@ const applicationsData = {
                   id: "rel-1",
                   version: "1.0.0",
                   systemModels: [{ name: "Test System Model" }],
+                  containers: {
+                    edges: [],
+                  },
                 },
               },
               {
@@ -54,6 +77,29 @@ const applicationsData = {
                   id: "rel-2",
                   version: "2.0.0",
                   systemModels: [],
+                  containers: {
+                    edges: [],
+                  },
+                },
+              },
+              {
+                node: {
+                  id: "rel-3",
+                  version: "3.0.0",
+                  systemModels: [],
+                  containers: {
+                    edges: [
+                      {
+                        node: {
+                          id: "container-1",
+                          name: "app",
+                          fileMounts: {
+                            edges: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
                 },
               },
             ],
@@ -110,9 +156,43 @@ it("renders the selects and disables the deploy button until a release is select
   resolveApplicationsQuery(relayEnvironment);
 
   expect(await screen.findByText("Install Application")).toBeVisible();
-  expect(screen.getByText("Select Application")).toBeVisible();
-  expect(screen.getByText("Select Release")).toBeVisible();
+  expect(screen.getByText("Application")).toBeVisible();
+  expect(screen.getByText("Release")).toBeVisible();
+  // The environment section only appears once a release is selected
+  expect(
+    screen.queryByText("Environment configuration"),
+  ).not.toBeInTheDocument();
   expect(screen.getByRole("button", { name: "Deploy" })).toBeDisabled();
+});
+
+it("shows the collapsed environment section after selecting a release", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const [appCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+    container: document.body,
+  });
+
+  // The section header is visible but its content starts collapsed
+  const sectionToggle = await screen.findByRole("button", {
+    name: "Environment configuration",
+  });
+  expect(sectionToggle).toBeVisible();
+  expect(sectionToggle).toHaveAttribute("aria-expanded", "false");
+
+  await userEvent.click(sectionToggle);
+  expect(sectionToggle).toHaveAttribute("aria-expanded", "true");
+
+  // Per-container env mode defaults to "No config"
+  await screen.findByText("No config");
+  await screen.findByTestId("container-env-files-container-1");
+  expect(screen.queryByText("Environment")).not.toBeInTheDocument();
 });
 
 it("enables deploy after selecting an application and a release, then deploys", async () => {
@@ -122,8 +202,12 @@ it("enables deploy after selecting an application and a release, then deploys", 
   await screen.findByText("Install Application");
 
   const [appCombobox] = screen.getAllByRole("combobox");
-  await selectEvent.select(appCombobox, "App One");
-  await selectEvent.select(screen.getAllByRole("combobox")[1], "2.0.0");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "2.0.0", {
+    container: document.body,
+  });
 
   const deployButton = screen.getByRole("button", { name: "Deploy" });
   expect(deployButton).toBeEnabled();
@@ -167,8 +251,293 @@ it("does not allow deploying while the device is offline", async () => {
   await screen.findByText("Install Application");
 
   const [appCombobox] = screen.getAllByRole("combobox");
-  await selectEvent.select(appCombobox, "App One");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
 
   expect(setErrorFeedback).toHaveBeenCalledTimes(1);
   expect(screen.getByRole("button", { name: "Deploy" })).toBeDisabled();
+});
+
+it("deploys with an env file instead of env vars in env file mode", async () => {
+  const { relayEnvironment, onToggleModal } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const [appCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+    container: document.body,
+  });
+
+  // Expand the environment section and switch the container to env file mode
+  await userEvent.click(
+    await screen.findByRole("button", {
+      name: "Environment configuration",
+    }),
+  );
+  await userEvent.click(screen.getByRole("radio", { name: "Env file" }));
+
+  // The env JSON editor is hidden and the per-container env file section shows
+  expect(screen.queryByText("Environment")).not.toBeInTheDocument();
+  await screen.findByTestId("container-env-files-container-1");
+
+  // Pick the device file as the container env file source
+  const envFileCombobox = screen.getAllByRole("combobox")[2];
+  await selectEvent.select(envFileCombobox, "Device File: /data/.env", {
+    container: document.body,
+  });
+
+  await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+  const mutationOperation = relayEnvironment.mock.findOperation(
+    (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+  );
+  expect(mutationOperation.request.variables).toEqual({
+    input: {
+      deviceId: "device-1",
+      releaseId: "rel-3",
+      configs: [
+        {
+          containerId: "container-1",
+          envStrategy: "merge",
+          envFiles: [{ deviceFileId: "device-file-1" }],
+        },
+      ],
+    },
+  });
+
+  act(() => {
+    relayEnvironment.mock.resolve(mutationOperation, {
+      data: {
+        deployRelease: {
+          result: {
+            id: "deployment-1",
+            state: "STARTED",
+          },
+          errors: [],
+        },
+      },
+    });
+  });
+
+  await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
+});
+
+it("uploads an env file via presigned URL and marks it as uploaded", async () => {
+  const fetchMock = vi.fn(async () => ({ ok: true, statusText: "OK" }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  try {
+    const { relayEnvironment, onToggleModal } = renderModal();
+    resolveApplicationsQuery(relayEnvironment);
+
+    await screen.findByText("Install Application");
+
+    const [appCombobox] = screen.getAllByRole("combobox");
+    await selectEvent.select(appCombobox, "App One", {
+      container: document.body,
+    });
+    await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+      container: document.body,
+    });
+
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "Environment configuration",
+      }),
+    );
+    await userEvent.click(screen.getByRole("radio", { name: "Env file" }));
+    await userEvent.click(screen.getByRole("radio", { name: "Upload" }));
+    await userEvent.click(screen.getByText("File Picker"));
+
+    const envCard = await screen.findByTestId(
+      "container-env-files-container-1",
+    );
+    // The dropzone's hidden file input has no accessible name, so it cannot
+    // be queried via Testing Library roles.
+    // eslint-disable-next-line testing-library/no-node-access
+    const fileInput = envCard.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    expect(fileInput).not.toBeNull();
+    const file = new File(["FOO=bar"], ".env", { type: "text/plain" });
+    await userEvent.upload(fileInput, file);
+
+    await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+    const mutationOperation = relayEnvironment.mock.findOperation(
+      (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+    );
+    expect(mutationOperation.request.variables).toEqual({
+      input: {
+        deviceId: "device-1",
+        releaseId: "rel-3",
+        configs: [
+          {
+            containerId: "container-1",
+            envStrategy: "merge",
+            envFiles: [{}],
+          },
+        ],
+      },
+    });
+
+    act(() => {
+      relayEnvironment.mock.resolve(mutationOperation, {
+        data: {
+          deployRelease: {
+            result: {
+              id: "deployment-1",
+              state: "STARTED",
+              containerDeployments: {
+                edges: [
+                  {
+                    node: {
+                      id: "container-deployment-1",
+                      container: { id: "container-1" },
+                      fileBinds: [],
+                      envFiles: [
+                        {
+                          id: "env-file-1",
+                          uploaded: false,
+                          uploadUrl: "https://s3.example/upload",
+                        },
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            errors: [],
+          },
+        },
+      });
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://s3.example/upload",
+        expect.objectContaining({
+          method: "PUT",
+          headers: { "Content-Type": "text/plain" },
+        }),
+      ),
+    );
+    expect((fetchMock.mock.calls[0] as any)?.[1]?.body).toBeInstanceOf(File);
+
+    const markUploadedOperation = relayEnvironment.mock.findOperation(
+      (op) =>
+        op.request.node.params.name === MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME,
+    );
+    expect(markUploadedOperation.request.variables).toEqual({
+      id: "env-file-1",
+      input: {
+        fileName: ".env",
+        uncompressedFileSizeBytes: 7,
+        digest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+        encoding: "",
+      },
+    });
+
+    act(() => {
+      relayEnvironment.mock.resolve(markUploadedOperation, {
+        data: {
+          markEnvFileAsUploaded: {
+            result: { id: "env-file-1", uploaded: true, state: "CREATED" },
+            errors: [],
+          },
+        },
+      });
+    });
+
+    await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it("deploys without env config by default", async () => {
+  const { relayEnvironment, onToggleModal } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const [appCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+    container: document.body,
+  });
+
+  // No env mode selected: the deploy carries no env or envFiles configs
+  await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+  const mutationOperation = relayEnvironment.mock.findOperation(
+    (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+  );
+  expect(mutationOperation.request.variables).toEqual({
+    input: {
+      deviceId: "device-1",
+      releaseId: "rel-3",
+    },
+  });
+
+  act(() => {
+    relayEnvironment.mock.resolve(mutationOperation, {
+      data: {
+        deployRelease: {
+          result: {
+            id: "deployment-1",
+            state: "STARTED",
+          },
+          errors: [],
+        },
+      },
+    });
+  });
+
+  await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
+});
+
+it("shows per-container strategy and editor in env override mode", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const [appCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "3.0.0", {
+    container: document.body,
+  });
+
+  await userEvent.click(
+    await screen.findByRole("button", {
+      name: "Environment configuration",
+    }),
+  );
+  await userEvent.click(screen.getByRole("radio", { name: "Env override" }));
+
+  // Strategy select and JSON editor render inside the container card
+  expect(screen.getByText("Env Strategy")).toBeVisible();
+  expect(screen.getByText("Environment")).toBeVisible();
+  // The default empty object carries no vars, so deploy stays config-free
+  await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+  const mutationOperation = relayEnvironment.mock.findOperation(
+    (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+  );
+  expect(mutationOperation.request.variables).toEqual({
+    input: {
+      deviceId: "device-1",
+      releaseId: "rel-3",
+    },
+  });
 });

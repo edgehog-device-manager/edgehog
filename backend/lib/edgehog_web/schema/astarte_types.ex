@@ -235,4 +235,31 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "Whether the device referenced in the request is present or not."
     field :present, :boolean
   end
+
+  @desc "Describe the available file binds on the device."
+  object :file_bind_status do
+    @desc "The file bind id."
+    field :id, :string
+
+    @desc "The target file id."
+    field :target_id, :string
+
+    @desc "The id of the deployment the file bind belongs to."
+    field :deployment_id, :string
+
+    @desc "The target file type."
+    field :target_type, :string
+
+    @desc "Where the file is mounted onto the container."
+    field :mountpoint, :string
+
+    @desc "The binding options."
+    field :options, :string
+  end
+
+  @desc "Describe the available env files on the device."
+  object :env_file_status do
+    @desc "The env file id."
+    field :id, :string
+  end
 end

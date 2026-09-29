@@ -29,8 +29,9 @@ defmodule Edgehog.Campaigns.CampaignTarget.Changes.LinkDeployment do
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
     {:ok, release} = Ash.Changeset.fetch_argument(changeset, :release)
+    configs = Ash.Changeset.get_argument(changeset, :configs)
     device_id = Ash.Changeset.get_attribute(changeset, :device_id)
-    deployment = %{device_id: device_id, release_id: release.id}
+    deployment = %{device_id: device_id, release_id: release.id, configs: configs}
 
     Ash.Changeset.manage_relationship(changeset, :deployment, deployment,
       on_no_match: {:create, :just_create}

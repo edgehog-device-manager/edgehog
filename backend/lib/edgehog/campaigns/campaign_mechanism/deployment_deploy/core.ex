@@ -166,17 +166,25 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - `{:error, reason}` if the deployment operation fails.
   """
   def do_operation(mechanism, target) do
-    deploy(target, mechanism.release)
+    # TODO: we actually want to be done at provisioning time by the provisioner,
+    # which would also allow us to remove this helper, like FileBinds deal with
+    # using a default file if none is passed. but to do so we need to persist
+    # the DeploymentConfig somewhere (deployment itself?),
+    # since right now it's only an action argument.
+    resolved_configs =
+      Helpers.resolve_file_binds(target, mechanism.configs)
+
+    deploy(target, mechanism.release, resolved_configs)
   end
 
-  defp deploy(target, release) do
+  defp deploy(target, release, configs) do
     # TODO: this crashes if called multiple times. The first time creates all
     # the necessary resources, the next time, if not completely deployed, retries
     # to send all the information but fails as the resources are already present.
     if Helpers.application_deployed?(target, release) do
       {:ok, :already_in_desired_state}
     else
-      {:ok, target} = do_deploy(target, release)
+      target = do_deploy(target, release, configs)
 
       deployment_result =
         target
@@ -191,10 +199,10 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     end
   end
 
-  defp do_deploy(target, release) do
+  defp do_deploy(target, release, configs) do
     target
     |> Campaigns.update_target_latest_attempt!(DateTime.utc_now())
-    |> Campaigns.link_deployment(release)
+    |> Campaigns.link_deployment!(release, configs)
   end
 
   @doc """

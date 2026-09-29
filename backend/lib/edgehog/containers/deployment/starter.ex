@@ -31,7 +31,6 @@ defmodule Edgehog.Containers.Deployment.Starter do
   alias __MODULE__, as: Data
   alias Edgehog.Containers.Deployment.Starter.Core
   alias Edgehog.Devices.Device
-  alias Edgehog.Tenants.Tenant
 
   # the state struct, we can reference it with the %Data{} struct
   defstruct [
@@ -53,17 +52,12 @@ defmodule Edgehog.Containers.Deployment.Starter do
   The process will registry to the appropriate registry according to the
   `name/1` function. See `start_link/1` docs for more.
   """
-  def cook(device, tenant, opts \\ []) do
-    args =
-      opts
-      |> Keyword.put(:device, device)
-      |> Keyword.put(:tenant, tenant)
+  def cook(device, opts \\ []) do
+    args = Keyword.put(opts, :device, device)
 
-    %{slug: slug} = tenant
     %{device_id: device_id} = device
-    id = "#{slug}:#{device_id}"
 
-    child_spec = Supervisor.child_spec({__MODULE__, args}, id: id)
+    child_spec = Supervisor.child_spec({__MODULE__, args}, id: device_id)
 
     with {:error, {:already_started, pid}} <- DynamicSupervisor.start_child(@sup, child_spec) do
       {:ok, pid}
@@ -79,15 +73,12 @@ defmodule Edgehog.Containers.Deployment.Starter do
   """
   def start_link(args) do
     device = Keyword.fetch!(args, :device)
-    tenant = Keyword.fetch!(args, :tenant)
 
-    GenServer.start_link(__MODULE__, args, name: name(device, tenant))
+    GenServer.start_link(__MODULE__, args, name: name(device))
   end
 
-  def name(%Device{device_id: device_id}, %Tenant{slug: slug}) do
-    id = "#{slug}:#{device_id}"
-
-    {:via, Registry, {Edgehog.Containers.Deployment.Starter.Registry, id}}
+  def name(%Device{device_id: device_id}) do
+    {:via, Registry, {Edgehog.Containers.Deployment.Starter.Registry, "#{device_id}"}}
   end
 
   # Test additional API
@@ -107,13 +98,11 @@ defmodule Edgehog.Containers.Deployment.Starter do
   @impl GenServer
   def init(args) do
     device = Keyword.fetch!(args, :device)
-    tenant = Keyword.fetch!(args, :tenant)
 
     mode = Keyword.get(args, :mode, :auto)
 
     state = %Data{
       device: device,
-      tenant: tenant,
       mode: mode
     }
 
@@ -131,21 +120,21 @@ defmodule Edgehog.Containers.Deployment.Starter do
   end
 
   @impl GenServer
-  def handle_continue(:load, %{device: device, tenant: tenant} = state) do
-    case Core.load(device, tenant) do
-      {:ok, deployments} ->
+  def handle_continue(:load, %{device: device} = state) do
+    case Core.load(device) do
+      {:error, error} ->
+        {:stop, {:shutdown, error}, state}
+
+      deployments ->
         state
         |> Map.put(:deployments, deployments)
         |> then(&{:noreply, &1, {:continue, :start_deployments}})
-
-      {:error, error} ->
-        {:stop, state, {:shutdown, error}}
     end
   end
 
   @impl GenServer
-  def handle_continue(:start_deployments, %{deployments: deployments, tenant: tenant} = state) do
-    case Core.start(deployments, tenant) do
+  def handle_continue(:start_deployments, %{deployments: deployments} = state) do
+    case Core.start(deployments) do
       [] -> {:stop, :normal, state}
       errors -> {:stop, {:shutdown, {:start_errors, errors}}, state}
     end

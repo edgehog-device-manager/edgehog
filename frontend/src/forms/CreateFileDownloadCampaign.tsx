@@ -42,6 +42,7 @@ import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
 import DatePicker from "@/components/ui/date-picker/DatePicker";
+import FileModeSelector from "@/components/ui/file-permissions/FileModeSelector";
 import FileSelect from "@/components/files/file-download/file-select/FileSelect";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
@@ -700,12 +701,16 @@ const CreateFileDownloadCampaignForm = ({
                 />
               }
             >
-              <Form.Control
-                type="text"
-                {...register("fileMode", {
-                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                })}
-                isInvalid={!!errors.fileMode}
+              <Controller
+                control={control}
+                name="fileMode"
+                render={({ field }) => (
+                  <FileModeSelector
+                    idPrefix="campaign-file-mode"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <FormFeedback feedback={errors.fileMode?.message} />
             </FormRow>

@@ -24,19 +24,33 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
 
   import Edgehog.CampaignsFixtures
   import Edgehog.ContainersFixtures
+  import Edgehog.FilesFixtures
   import Edgehog.TenantsFixtures
 
   alias Ash.Error.Invalid
   alias Astarte.Client.APIError
+  alias Edgehog.Astarte.Device.CreateBind
+  alias Edgehog.Astarte.Device.CreateContainerRequest
+  alias Edgehog.Astarte.Device.CreateDeploymentRequest
   alias Edgehog.Astarte.Device.DeploymentCommand
+  alias Edgehog.Astarte.Device.DeploymentUpdate
+  alias Edgehog.Astarte.Device.FileDownloadRequest, as: AstarteFileDownloadRequest
+  alias Edgehog.Astarte.Device.FileTransferCapabilities
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Containers
+  alias Edgehog.Containers.Container.Deployment.Provisioner.Core, as: ContainerProvisionerCore
   alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Deployment.Provisioner.Core, as: DeploymentProvisionerCore
+  alias Edgehog.Containers.FileBind.Provisioner.Core, as: FileBindProvisionerCore
+  alias Edgehog.Files.FileDownloadRequest
+  alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
   alias Phoenix.Socket.Broadcast
+
+  require Ash.Query
 
   setup do
     %{tenant: tenant_fixture()}
@@ -180,6 +194,322 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
 
       assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
       assert updated_target.id == target.id
+    end
+
+    test "upgrades the deployment with configs and creates download requests for file binds", %{
+      tenant: tenant
+    } do
+      stub(FileTransferCapabilities, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           unix_permissions: false,
+           server_to_device: %{storage: ["tar.gz"], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
+         }}
+      end)
+
+      stub(AstarteFileDownloadRequest, :request_download, fn _client, _device_id, _request_data ->
+        :ok
+      end)
+
+      stub(FileDownloadRequestProvisioner, :provision, fn _request, _tenant ->
+        {:ok, self()}
+      end)
+
+      # 1. Base release for the application
+      release = release_fixture(tenant: tenant, version: "1.0.0", system_models: 1)
+      application_id = Ash.load!(release, :application, tenant: tenant).application.id
+      release = Ash.load!(release, :system_models, tenant: tenant)
+      system_model = hd(release.system_models)
+
+      # 2. Target release (version 1.0.1) with a container having a file mount
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [%{mountpoint: "/etc/app.conf", required: true}]
+        )
+
+      [file_mount] = Ash.load!(container, :file_mounts, tenant: tenant).file_mounts
+      file = file_fixture(tenant: tenant)
+
+      target_release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application_id,
+          version: "1.0.1",
+          container_ids: [container.id],
+          system_models: [system_model]
+        )
+
+      config = %{
+        container_id: container.id,
+        env: [],
+        env_strategy: :merge,
+        file_binds: [%{file_id: file.id, file_mount_id: file_mount.id}]
+      }
+
+      target =
+        target_fixture(
+          tenant: tenant,
+          mechanism_type: :deployment_upgrade,
+          release_id: release.id,
+          target_release_id: target_release.id,
+          campaign_mechanism: [configs: [config]]
+        )
+
+      target = Ash.load!(target, [:device], tenant: tenant.tenant_id)
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.get(:campaign)
+        |> Ash.load!(
+          [
+            campaign_mechanism: [
+              deployment_upgrade: [
+                :release,
+                :target_release
+              ]
+            ]
+          ],
+          tenant: tenant.tenant_id
+        )
+
+      mechanism = campaign.campaign_mechanism.value
+
+      {:ok, deployment} =
+        Containers.deployment_by_identity(
+          target.device.id,
+          mechanism.release.id,
+          tenant: tenant.tenant_id
+        )
+
+      {:ok, _deployment} =
+        Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
+      assert updated_target.id == target.id
+
+      # Verify FileDownloadRequest was created
+      requests = Ash.read!(FileDownloadRequest, tenant: tenant.tenant_id)
+      assert [request] = Enum.filter(requests, &(&1.device_id == target.device_id))
+      assert request.file_name == file.name
+
+      # Verify the updated deployment has file binds referencing the download request
+      updated_target = Ash.load!(updated_target, [:deployment], tenant: tenant.tenant_id)
+      deployment = updated_target.deployment
+      deployment = Ash.load!(deployment, :container_deployments, tenant: tenant.tenant_id)
+
+      [container_deployment] = deployment.container_deployments
+
+      file_binds =
+        Ash.load!(container_deployment, :file_binds, tenant: tenant.tenant_id).file_binds
+
+      assert [file_bind] = file_binds
+      assert file_bind.file_mount_id == file_mount.id
+      assert file_bind.file_download_request_id == request.id
+    end
+
+    test "propagates configs down to Astarte provisioners and sends upgrade with ids only", %{
+      tenant: tenant
+    } do
+      stub(FileTransferCapabilities, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           unix_permissions: false,
+           server_to_device: %{storage: ["tar.gz"], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
+         }}
+      end)
+
+      stub(AstarteFileDownloadRequest, :request_download, fn _client, _device_id, _request_data ->
+        :ok
+      end)
+
+      stub(FileDownloadRequestProvisioner, :provision, fn _request, _tenant ->
+        {:ok, self()}
+      end)
+
+      # 1. Base release for the application
+      release = release_fixture(tenant: tenant, version: "1.0.0", system_models: 1)
+      application_id = Ash.load!(release, :application, tenant: tenant).application.id
+      release = Ash.load!(release, :system_models, tenant: tenant)
+      system_model = hd(release.system_models)
+
+      # 2. Target release (version 1.0.1) with a container having a file mount
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [%{mountpoint: "/etc/app.conf", required: true}]
+        )
+
+      [file_mount] = Ash.load!(container, :file_mounts, tenant: tenant).file_mounts
+      file = file_fixture(tenant: tenant)
+
+      target_release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application_id,
+          version: "1.0.1",
+          container_ids: [container.id],
+          system_models: [system_model]
+        )
+
+      config = %{
+        container_id: container.id,
+        env: [%{key: "FOO", value: "bar"}],
+        env_strategy: :merge,
+        file_binds: [%{file_id: file.id, file_mount_id: file_mount.id}]
+      }
+
+      target =
+        target_fixture(
+          tenant: tenant,
+          mechanism_type: :deployment_upgrade,
+          release_id: release.id,
+          target_release_id: target_release.id,
+          campaign_mechanism: [configs: [config]]
+        )
+
+      target = Ash.load!(target, [:device], tenant: tenant.tenant_id)
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.get(:campaign)
+        |> Ash.load!(
+          [
+            campaign_mechanism: [
+              deployment_upgrade: [
+                :release,
+                :target_release
+              ]
+            ]
+          ],
+          tenant: tenant.tenant_id
+        )
+
+      mechanism = campaign.campaign_mechanism.value
+
+      {:ok, old_deployment} =
+        Containers.deployment_by_identity(
+          target.device.id,
+          mechanism.release.id,
+          tenant: tenant.tenant_id
+        )
+
+      {:ok, _deployment} =
+        Containers.mark_deployment_as_started(old_deployment, tenant: tenant.tenant_id)
+
+      # Do not start a real orchestrator tree: we drive the Astarte-level
+      # provisioner cores manually below.
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
+
+      updated_target = Ash.load!(updated_target, [:deployment], tenant: tenant.tenant_id)
+      new_deployment = updated_target.deployment
+
+      assert new_deployment.release_id == target_release.id
+      assert new_deployment.id != old_deployment.id
+
+      requests = Ash.read!(FileDownloadRequest, tenant: tenant.tenant_id)
+      assert [request] = Enum.filter(requests, &(&1.device_id == target.device_id))
+
+      new_deployment =
+        Ash.load!(new_deployment, [container_deployments: [:file_binds]],
+          tenant: tenant.tenant_id
+        )
+
+      assert [container_deployment] = new_deployment.container_deployments
+      assert container_deployment.env == [%{key: "FOO", value: "bar"}]
+      assert [file_bind] = container_deployment.file_binds
+      assert file_bind.file_mount_id == file_mount.id
+      assert file_bind.file_download_request_id == request.id
+
+      # 3. Configs reach the device through the provisioners (Astarte level).
+
+      # File bind provisioner sends CreateBind with the resolved download request
+      # as target — not the original file_id.
+      expect(CreateBind, :send_bind, fn _client, _device_id, data ->
+        assert data.id == file_bind.id
+        assert data.deploymentId == new_deployment.id
+        assert data.targetId == request.id
+        assert data.targetType == "storage"
+        assert data.mountpoint == "/etc/app.conf"
+
+        :ok
+      end)
+
+      assert :ok =
+               FileBindProvisionerCore.send_to_device(file_bind,
+                 tenant: tenant.tenant_id,
+                 deployment: new_deployment
+               )
+
+      # Container provisioner sends fileBindIds + encoded env for the new deployment.
+      expect(CreateContainerRequest, :send_create_container_request, fn _, _, data ->
+        assert data.deploymentId == new_deployment.id
+        assert file_bind.id in data.fileBindIds
+        assert "FOO=bar" in data.env
+
+        :ok
+      end)
+
+      assert :ok =
+               ContainerProvisionerCore.send_to_device(container_deployment,
+                 tenant: tenant.tenant_id,
+                 deployment: new_deployment
+               )
+
+      # Deployment provisioner sends the new deployment id to the device.
+      expect(CreateDeploymentRequest, :send_create_deployment_request, fn _, _, data ->
+        assert data.id == new_deployment.id
+
+        :ok
+      end)
+
+      assert :ok =
+               DeploymentProvisionerCore.send_to_device(new_deployment,
+                 tenant: tenant.tenant_id
+               )
+
+      # 4. The upgrade command itself carries only ids: the runtime is just
+      # told that the new deployment upgrades the old one.
+      ready_action =
+        Edgehog.Containers.DeploymentReadyAction
+        |> Ash.Query.filter(action_type == :upgrade_deployment)
+        |> Ash.Query.filter(deployment_id == ^new_deployment.id)
+        |> Ash.read_one!(tenant: tenant.tenant_id)
+
+      upgrade_target_id =
+        ready_action
+        |> Ash.load!(:upgrade_deployment, tenant: tenant.tenant_id)
+        |> Map.fetch!(:upgrade_deployment)
+        |> Map.fetch!(:upgrade_target_id)
+
+      assert upgrade_target_id == old_deployment.id
+
+      expect(DeploymentUpdate, :update, fn _client, _device_id, data ->
+        assert data.from == old_deployment.id
+        assert data.to == new_deployment.id
+
+        :ok
+      end)
+
+      assert {:ok, _} =
+               Edgehog.Devices.update_application(
+                 target.device,
+                 old_deployment,
+                 new_deployment,
+                 tenant: tenant.tenant_id
+               )
     end
   end
 

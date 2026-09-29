@@ -39,6 +39,7 @@ import CollapseItem, {
   useCollapseToggle,
 } from "@/components/ui/collapse-item/CollapseItem";
 import EditModal from "@/components/ui/edit-modal/EditModal";
+import FileModeSelector from "@/components/ui/file-permissions/FileModeSelector";
 import FileSelect from "@/components/files/file-download/file-select/FileSelect";
 import Form from "@/components/ui/form/Form";
 import { FormRow } from "@/components/ui/form-row/FormRow";
@@ -626,12 +627,16 @@ const EditFileDownloadCampaignModal = <C extends Campaign>({
                 />
               }
             >
-              <Form.Control
-                type="text"
-                {...register("fileMode", {
-                  setValueAs: (v) => (v === "" ? undefined : Number(v)),
-                })}
-                isInvalid={!!errors.fileMode}
+              <Controller
+                control={control}
+                name="fileMode"
+                render={({ field }) => (
+                  <FileModeSelector
+                    idPrefix="edit-campaign-file-mode"
+                    value={field.value}
+                    onChange={field.onChange}
+                  />
+                )}
               />
               <FormFeedback feedback={errors.fileMode?.message as string} />
             </FormRow>

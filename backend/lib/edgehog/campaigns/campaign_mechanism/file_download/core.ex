@@ -86,10 +86,14 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - Raises an error on failure.
   """
   def subscribe_to_operation_updates!(_mechanism, operation_id) do
-    with {:error, reason} <-
-           Phoenix.PubSub.subscribe(Edgehog.PubSub, "file_download_requests:#{operation_id}") do
-      raise reason
-    end
+    operation_id
+    |> topics()
+    |> Enum.each(&sub_to!/1)
+  end
+
+  defp sub_to!(topic) do
+    with {:error, reason} <- Phoenix.PubSub.subscribe(Edgehog.PubSub, topic),
+         do: raise(reason)
   end
 
   @doc """
@@ -103,7 +107,16 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     - `:ok`
   """
   def unsubscribe_to_operation_updates!(_mechanism, operation_id) do
-    Phoenix.PubSub.unsubscribe(Edgehog.PubSub, "file_download_requests:#{operation_id}")
+    operation_id
+    |> topics()
+    |> Enum.each(&Phoenix.PubSub.unsubscribe(Edgehog.PubSub, &1))
+  end
+
+  defp topics(operation_id) do
+    [
+      "file_download_requests:completed:#{operation_id}",
+      "file_download_requests:failed:#{operation_id}"
+    ]
   end
 
   # Target Management

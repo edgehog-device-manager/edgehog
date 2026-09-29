@@ -22,6 +22,7 @@ import type { hooks_ImageCredentialsOptionsFragment$key } from "@/api/__generate
 import type { hooks_NetworksOptionsFragment$key } from "@/api/__generated__/hooks_NetworksOptionsFragment.graphql";
 import type { hooks_VolumesOptionsFragment$key } from "@/api/__generated__/hooks_VolumesOptionsFragment.graphql";
 import { hooks_ContainersOptionsFragment$key } from "@/api/__generated__/hooks_ContainersOptionsFragment.graphql";
+import type { hooks_FilesOptionsFragment$key } from "@/api/__generated__/hooks_FilesOptionsFragment.graphql";
 import { hooks_SystemModelsOptionsFragment$key } from "@/api/__generated__/hooks_SystemModelsOptionsFragment.graphql";
 
 type Option = {
@@ -90,6 +91,27 @@ export const CONTAINERS_OPTIONS_FRAGMENT = graphql`
         node {
           id
           name
+        }
+      }
+    }
+  }
+`;
+
+export const FILES_OPTIONS_FRAGMENT = graphql`
+  fragment hooks_FilesOptionsFragment on RootQueryType {
+    repositories {
+      edges {
+        node {
+          id
+          name
+          files {
+            edges {
+              node {
+                id
+                name
+              }
+            }
+          }
         }
       }
     }
@@ -195,6 +217,35 @@ export const useContainerOptions = (
           label: edge.node.name,
         },
       ];
+    }) ?? []
+  );
+};
+
+export const useFilesOptions = (
+  queryRef: hooks_FilesOptionsFragment$key,
+): Option[] => {
+  const data = useFragment(FILES_OPTIONS_FRAGMENT, queryRef);
+
+  return (
+    data.repositories?.edges?.flatMap((repoEdge) => {
+      const repoName = repoEdge?.node?.name;
+
+      return (
+        repoEdge?.node?.files?.edges?.flatMap((fileEdge) => {
+          if (!fileEdge?.node) {
+            return [];
+          }
+
+          return [
+            {
+              value: fileEdge.node.id,
+              label: repoName
+                ? `${repoName} / ${fileEdge.node.name}`
+                : fileEdge.node.name,
+            },
+          ];
+        }) ?? []
+      );
     }) ?? []
   );
 };

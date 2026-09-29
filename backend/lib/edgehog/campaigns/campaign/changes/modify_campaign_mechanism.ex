@@ -51,7 +51,9 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ModifyCampaignMechanism do
     end
   end
 
-  defp keys_for_type(:deployment_upgrade), do: [:release_id, :target_release_id] ++ @common_keys
+  defp keys_for_type(:deployment_upgrade),
+    do: [:release_id, :target_release_id, :configs] ++ @common_keys
+
   defp keys_for_type(:firmware_upgrade), do: [:base_image_id, :force_downgrade] ++ @common_keys
 
   defp keys_for_type(:file_download) do
@@ -66,9 +68,10 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ModifyCampaignMechanism do
     ] ++ @common_keys
   end
 
+  defp keys_for_type(:deployment_deploy), do: [:release_id, :configs] ++ @common_keys
+
   defp keys_for_type(type)
        when type in [
-              :deployment_deploy,
               :deployment_start,
               :deployment_stop,
               :deployment_delete

@@ -179,6 +179,25 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
           }
         }
       }
+      fileMounts {
+        edges {
+          node {
+            mountpoint
+            required
+            defaultFileId
+            fileMode
+            userId
+            groupId
+            defaultFile {
+              id
+              name
+              repository {
+                name
+              }
+            }
+          }
+        }
+      }
     }
   }
 `;
@@ -483,6 +502,57 @@ const ReuseContainerModal = ({
                     }
 
                     return deviceRequests;
+                  }, [])
+                : undefined,
+              fileMounts: c.fileMounts?.edges
+                ? c.fileMounts.edges.reduce<
+                    {
+                      mountpoint: string;
+                      required: boolean;
+                      defaultFileId?:
+                        string | { id: string; value: string; label: string };
+                      fileMode?: number;
+                      userId?: number;
+                      groupId?: number;
+                    }[]
+                  >((fileMounts, edge) => {
+                    const node = edge?.node;
+
+                    if (node) {
+                      const fileId =
+                        node.defaultFileId ?? node.defaultFile?.id ?? undefined;
+
+                      const repoName = node.defaultFile?.repository?.name;
+                      const fileName = node.defaultFile?.name;
+                      const fileLabel =
+                        repoName && fileName
+                          ? `${repoName} / ${fileName}`
+                          : (fileName ?? undefined);
+
+                      fileMounts.push({
+                        mountpoint: node.mountpoint,
+                        required: node.required,
+                        defaultFileId: fileId
+                          ? fileLabel
+                            ? { id: fileId, value: fileId, label: fileLabel }
+                            : fileId
+                          : undefined,
+                        fileMode:
+                          node.fileMode !== undefined && node.fileMode !== null
+                            ? node.fileMode
+                            : undefined,
+                        userId:
+                          node.userId !== undefined && node.userId !== null
+                            ? node.userId
+                            : undefined,
+                        groupId:
+                          node.groupId !== undefined && node.groupId !== null
+                            ? node.groupId
+                            : undefined,
+                      });
+                    }
+
+                    return fileMounts;
                   }, [])
                 : undefined,
             };
