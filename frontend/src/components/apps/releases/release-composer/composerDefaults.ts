@@ -42,6 +42,8 @@ export const emptyContainer = (): ContainerInputData => ({
   deviceMappings: [],
   deviceRequests: [],
   fileMounts: [],
+  maskedPaths: [],
+  readonlyPaths: [],
 });
 
 export const initialComposerState = (): ComposerState => ({
