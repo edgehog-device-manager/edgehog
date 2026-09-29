@@ -37,6 +37,7 @@ import type {
   ReleaseCreateContainersInput,
 } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
 import type { hooks_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/hooks_ImageCredentialsOptionsFragment.graphql";
+import type { hooks_FilesOptionsFragment$key } from "@/api/__generated__/hooks_FilesOptionsFragment.graphql";
 import type { hooks_NetworksOptionsFragment$key } from "@/api/__generated__/hooks_NetworksOptionsFragment.graphql";
 import type { hooks_VolumesOptionsFragment$key } from "@/api/__generated__/hooks_VolumesOptionsFragment.graphql";
 
@@ -140,7 +141,7 @@ const omit = <T extends Record<string, unknown>, K extends keyof T>(
 
 const mapCreateContainerToInput = (
   data: ContainerInputData,
-): CreateContainerInput => {
+): ReleaseCreateContainersInput => {
   const { keys: labelKeys, values: labelValues } = mapKeyValuePairs(
     data.labels,
   );
@@ -295,6 +296,10 @@ type SectionWithQueryProps = BaseSectionProps & {
   queryRef: hooks_ImageCredentialsOptionsFragment$key &
     hooks_NetworksOptionsFragment$key &
     hooks_VolumesOptionsFragment$key;
+};
+
+type FileMountsSectionProps = BaseSectionProps & {
+  queryRef: hooks_FilesOptionsFragment$key;
 };
 
 const NameSection = ({ form }: { form: UseFormReturn<ContainerInputData> }) => {
@@ -3141,7 +3146,7 @@ const FileMountsSection = ({
   queryRef,
   open,
   onToggle,
-}: SectionWithQueryProps) => {
+}: FileMountsSectionProps) => {
   const {
     control,
     register,
@@ -3273,7 +3278,8 @@ const FileMountsSection = ({
 type CreateContainerProps = {
   queryRef: hooks_ImageCredentialsOptionsFragment$key &
     hooks_NetworksOptionsFragment$key &
-    hooks_VolumesOptionsFragment$key;
+    hooks_VolumesOptionsFragment$key &
+    hooks_FilesOptionsFragment$key;
   isLoading?: boolean;
   onSubmit: (data: ReleaseCreateContainersInput) => void;
   initialData: Partial<ContainerInputData>;
@@ -3411,6 +3417,7 @@ export {
   mapEnv,
   type BaseSectionProps,
   type SectionWithQueryProps,
+  type FileMountsSectionProps,
   NameSection,
   ImageSection,
   NetworkSection,
@@ -3420,4 +3427,5 @@ export {
   DeviceMappingsSection,
   ResourceLimitsSection,
   SecuritySection,
+  FileMountsSection,
 };

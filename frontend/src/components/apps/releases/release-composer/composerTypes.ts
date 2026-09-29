@@ -18,19 +18,17 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-// Barrel keeping existing imports stable after the split into
-// composeTypes / composeUtils / composeParse / composeSerialize.
+import type { ContainerInputData } from "@/forms/validation";
+import type { ComposeServiceExtras } from "./composeMapping";
 
-export type {
-  ComposeMappingResult,
-  ComposeServiceData,
-  ComposeServiceExtras,
-  DeviceMappingData,
-  LabelOption,
-  MappingContext,
-  ReleaseComposeData,
-  SerializeOptions,
-  SerializeResult,
-} from "./composeTypes";
-export { composeToFormData } from "./composeParse";
-export { formDataToCompose } from "./composeSerialize";
+export type ServiceEntry = {
+  key: string;
+};
+
+export type ComposerState = {
+  services: ServiceEntry[];
+  serviceData: Record<string, ContainerInputData>;
+  dependsOnByKey: Record<string, string[]>;
+  extrasByKey: Record<string, ComposeServiceExtras>;
+  topLevelExtras: Record<string, unknown>;
+};
