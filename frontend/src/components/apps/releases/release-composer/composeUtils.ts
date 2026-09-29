@@ -332,6 +332,25 @@ export const SUPPORTED_SERVICE_KEYS = new Set([
   "ulimits",
   "logging",
   "blkio_config",
+  "domainname",
+  "dns",
+  "dns_search",
+  "dns_opt",
+  "expose",
+  "cpu_shares",
+  "cpuset",
+  "shm_size",
+  "oom_score_adj",
+  "cgroup",
+  "ipc",
+  "userns_mode",
+  "pid",
+  "security_opt",
+  "group_add",
+  "device_cgroup_rules",
+  "runtime",
+  "stop_signal",
+  "stop_grace_period",
 ]);
 
 export const formatSchemaIssues = (error: ZodError): string => {
@@ -376,7 +395,7 @@ const durationMultipliers: Record<string, number> = {
 
 /**
  * Parses compose duration strings ("30s", "1m30s", "500ms") into nanoseconds.
- * Plain numbers pass through as-is. Returns undefined when unparseable.
+ * Plain numbers pass through as-is. Returns undefined when unparsable.
  */
 export const parseDurationToNs = (value: unknown): number | undefined => {
   if (typeof value === "number")
@@ -457,6 +476,38 @@ export const healthcheckTestToCompose = (
 };
 
 /**
+ * Coerces compose string-or-list fields (dns, expose, group_add, …) to
+ * string arrays. Numbers become strings; anything else is dropped.
+ */
+export const stringOrStringList = (value: unknown): string[] => {
+  if (typeof value === "string") return [value];
+  if (typeof value === "number") return [String(value)];
+  if (!Array.isArray(value)) return [];
+
+  return value.flatMap((item) =>
+    typeof item === "string" || typeof item === "number" ? [String(item)] : [],
+  );
+};
+
+/**
+ * Parses compose durations into whole seconds (stop_grace_period).
+ * Returns undefined when unparsable or fractional.
+ */
+export const parseDurationToSec = (value: unknown): number | undefined => {
+  const ns = parseDurationToNs(value);
+
+  if (ns === undefined || ns % 1_000_000_000 !== 0) return undefined;
+
+  return ns / 1_000_000_000;
+};
+
+/**
+ * Formats whole seconds back to a compose duration.
+ */
+export const formatSecToDuration = (sec: number): string =>
+  formatNsToDuration(sec * 1_000_000_000);
+
+/**
  * Coerces compose numbers-or-numeric-strings to integers.
  * Returns undefined when the value is not a valid integer.
  */
@@ -535,7 +586,7 @@ export const parseUlimits = (
 
 /**
  * Parses blkio_config object lists ([{path, weight|rate}]) with
- * string-numeric coercion. Unparseable entries are warned and skipped.
+ * string-numeric coercion. Unparsable entries are warned and skipped.
  * Returns normalized {path, value} pairs; callers map value to weight/rate.
  */
 export const parseBlkioEntries = (
