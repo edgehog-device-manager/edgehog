@@ -31,7 +31,7 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import FormFeedback from "@/forms/FormFeedback";
 
 import { fileDeleteRequestFormSchema } from "./validation";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 type StorageSourceOption = {
   value: string;

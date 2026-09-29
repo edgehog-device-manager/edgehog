@@ -69,7 +69,7 @@ import Stack from "@/components/ui/stack/Stack";
 import StringArrayFormInput from "@/components/apps/containers/string-array-form-input/StringArrayFormInput";
 import FormFeedback from "@/forms/FormFeedback";
 import MultiSelectFormField from "@/forms/MultiSelectFormField";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 import {
   CapAddList,
   CapDropList,

@@ -48,7 +48,7 @@ import {
   manualFileDownloadRequestFromRepositorySchema,
 } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const REPOSITORIES_FRAGMENT = graphql`
   fragment ManualFilesServerToDeviceRepositoryForm_repositories_Fragment on RootQueryType

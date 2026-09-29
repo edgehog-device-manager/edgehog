@@ -54,7 +54,7 @@ import {
   FileDownloadCampaignFormData,
   fileDownloadCampaignSchema,
 } from "@/forms/validation";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const CAMPAIGN_REPOSITORY_OPTIONS_FRAGMENT = graphql`
   fragment CreateFileDownloadCampaign_RepositoryOptionsFragment on RootQueryType

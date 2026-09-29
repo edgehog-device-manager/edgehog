@@ -40,7 +40,7 @@ import {
   baseImageCollectionSchema,
 } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const CREATE_BASE_IMAGE_COLLECTION_FRAGMENT = graphql`
   fragment CreateBaseImageCollection_OptionsFragment on RootQueryType

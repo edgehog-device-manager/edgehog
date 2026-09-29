@@ -62,7 +62,7 @@ import {
   envJsonSchema,
 } from "@/forms/validation";
 import DatePicker from "@/components/ui/date-picker/DatePicker";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const CAMPAIGN_APPLICATION_OPTIONS_FRAGMENT = graphql`
   fragment CreateDeploymentCampaign_ApplicationOptionsFragment on RootQueryType

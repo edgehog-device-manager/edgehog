@@ -21,7 +21,7 @@
 import { Tooltip } from "react-tooltip";
 import { FormattedMessage } from "react-intl";
 
-import { fieldExplanations } from "@/forms/index";
+import { fieldExplanations } from "./fieldExplanations";
 import Icon from "@/components/ui/icon/Icon";
 
 type FieldKey =
