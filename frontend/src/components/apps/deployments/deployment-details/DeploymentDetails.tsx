@@ -17,7 +17,9 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
+import Col from "@/components/ui/col/Col";
+import Row from "@/components/ui/row/Row";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, usePaginationFragment } from "react-relay";

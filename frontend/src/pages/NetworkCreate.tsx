@@ -29,7 +29,7 @@ import Page from "@/components/ui/page/Page";
 import { Route, useNavigate } from "@/Navigation";
 import CreateNetworkForm from "@/forms/CreateNetwork";
 import { NetworkFormData } from "@/forms/validation";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 const CREATE_NETWORK_MUTATION = graphql`
   mutation NetworkCreate_networkCreate_Mutation($input: CreateNetworkInput!) {

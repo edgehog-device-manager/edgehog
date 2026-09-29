@@ -19,5 +19,7 @@
 */
 
 import Row from "react-bootstrap/Row";
+import type { RowProps } from "react-bootstrap/Row";
 
+export type { RowProps };
 export default Row;

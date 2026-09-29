@@ -28,7 +28,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { ImageCredentials_getImageCredentials_Query } from "@/api/__generated__/ImageCredentials_getImageCredentials_Query.graphql";
 import { ImageCredentials_ImageCredentialsFragment$key } from "@/api/__generated__/ImageCredentials_ImageCredentialsFragment.graphql";

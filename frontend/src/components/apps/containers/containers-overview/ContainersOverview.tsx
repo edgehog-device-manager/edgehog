@@ -29,7 +29,7 @@ import type {
 import Button from "@/components/ui/button/Button";
 import ContainerDetails from "@/components/apps/containers/container-details/ContainerDetails";
 import "@/components/apps/containers/containers-overview/ContainersOverview.scss";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 const CONTAINERS_TABLE_FRAGMENT = graphql`
   fragment ContainersOverview_ContainerEdgeFragment on ContainerConnection {

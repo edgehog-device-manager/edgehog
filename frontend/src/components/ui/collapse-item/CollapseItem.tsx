@@ -20,7 +20,8 @@
 
 import { useCallback, useRef, useState } from "react";
 import { useIntl } from "react-intl";
-import { Button, Collapse } from "react-bootstrap";
+import Button from "@/components/ui/button/Button";
+import Collapse from "@/components/ui/collapse/Collapse";
 
 import Icon from "@/components/ui/icon/Icon";
 

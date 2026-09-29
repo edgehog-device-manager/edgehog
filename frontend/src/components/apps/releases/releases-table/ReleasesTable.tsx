@@ -20,7 +20,7 @@
 
 import compact from "lodash/compact";
 import { useMemo } from "react";
-import { Button } from "react-bootstrap";
+import Button from "@/components/ui/button/Button";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 

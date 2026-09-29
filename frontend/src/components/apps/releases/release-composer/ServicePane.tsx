@@ -22,9 +22,9 @@ import { useEffect, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import Button from "react-bootstrap/Button";
-import Collapse from "react-bootstrap/Collapse";
-import Stack from "react-bootstrap/Stack";
+import Button from "@/components/ui/button/Button";
+import Collapse from "@/components/ui/collapse/Collapse";
+import Stack from "@/components/ui/stack/Stack";
 
 import type { ReleaseCreate_getOptions_Query$data } from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
 
