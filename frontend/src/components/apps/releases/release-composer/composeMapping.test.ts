@@ -141,8 +141,7 @@ services:
   web:
     image: nginx
     build: ./web
-    healthcheck:
-      test: echo ok
+    container_name: my-web
     networks:
       - missing-network
     volumes:
@@ -161,7 +160,7 @@ services:
     expect(warnings.some((w) => w.includes("not supported by Edgehog"))).toBe(
       true,
     );
-    expect(warnings.some((w) => w.includes("'healthcheck'"))).toBe(true);
+    expect(warnings.some((w) => w.includes("'container_name'"))).toBe(true);
     expect(warnings.some((w) => w.includes("top-level key 'version'"))).toBe(
       true,
     );
@@ -182,7 +181,10 @@ services:
     expect(result.data.services[0].extras?.keys).toMatchObject({
       build: "./web",
     });
-    expect(result.data.services[0].extras?.keys).toHaveProperty("healthcheck");
+    expect(result.data.services[0].extras?.keys).toHaveProperty(
+      "container_name",
+      "my-web",
+    );
   });
 
   it("rejects documents violating the Compose Specification", () => {
@@ -217,13 +219,12 @@ services:
     if (!unknownServiceKey.ok) return;
 
     expect(
-      unknownServiceKey.warnings.some((w) =>
-        w.includes("'not_a_compose_key'"),
-      ),
+      unknownServiceKey.warnings.some((w) => w.includes("'not_a_compose_key'")),
     ).toBe(true);
-    expect(
-      unknownServiceKey.data.services[0].extras?.keys,
-    ).toHaveProperty("not_a_compose_key", true);
+    expect(unknownServiceKey.data.services[0].extras?.keys).toHaveProperty(
+      "not_a_compose_key",
+      true,
+    );
   });
 
   it("keeps x- extensions as warnings without failing validation", () => {
@@ -467,8 +468,7 @@ services:
   web:
     image: nginx
     build: ./web
-    healthcheck:
-      test: echo ok
+    container_name: my-web
 `;
 
     const parsed = composeToFormData(yaml, context);
@@ -488,7 +488,7 @@ services:
 
     expect(doc.version).toBe("3.9");
     expect(doc.services.web.build).toBe("./web");
-    expect(doc.services.web.healthcheck).toEqual({ test: "echo ok" });
+    expect(doc.services.web.container_name).toBe("my-web");
     expect(doc.services.web.image).toBe("nginx:1.27");
   });
 
@@ -653,5 +653,166 @@ services:
 
     expect(second.data).toEqual(first.data);
     expect(second.topLevelExtras).toEqual(first.topLevelExtras);
+  });
+});
+
+describe("process and healthcheck mapping", () => {
+  it("parses user, working_dir, command and entrypoint", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    user: "1000:1000"
+    working_dir: /srv/app
+    command: bundle exec rails s
+    entrypoint:
+      - /bin/sh
+      - -c
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    const app = result.data.services[0];
+
+    expect(app.container.user).toBe("1000:1000");
+    expect(app.container.workingDirectory).toBe("/srv/app");
+    expect(app.container.command).toBe("bundle exec rails s");
+    expect(app.container.entrypoint).toBe("/bin/sh -c");
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("parses healthcheck with durations, retries and shell test", () => {
+    const yaml = `
+services:
+  web:
+    image: nginx:1.27
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 1m
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    const web = result.data.services[0];
+
+    expect(web.container.healthcheckTest).toBe("curl -f http://localhost");
+    expect(web.container.healthcheckInterval).toBe(30_000_000_000);
+    expect(web.container.healthcheckTimeout).toBe(5_000_000_000);
+    expect(web.container.healthcheckRetries).toBe(3);
+    expect(web.container.healthcheckStartPeriod).toBe(60_000_000_000);
+  });
+
+  it("parses restart retry counts and warns on invalid arguments", () => {
+    const counted = composeToFormData(`
+services:
+  worker:
+    image: worker:1.0
+    restart: "on-failure:5"
+`);
+
+    expect(counted.ok).toBe(true);
+
+    if (!counted.ok) return;
+
+    expect(counted.data.services[0].container.restartPolicy).toBe("on_failure");
+    expect(
+      counted.data.services[0].container.restartPolicyMaximumRetryCount,
+    ).toBe(5);
+
+    const invalid = composeToFormData(`
+services:
+  worker:
+    image: worker:1.0
+    restart: "always:5"
+`);
+
+    expect(invalid.ok).toBe(true);
+
+    if (!invalid.ok) return;
+
+    expect(invalid.warnings.some((w) => w.includes("restart argument"))).toBe(
+      true,
+    );
+  });
+
+  it("warns on healthcheck disable and invalid durations", () => {
+    const result = composeToFormData(`
+services:
+  web:
+    image: nginx
+    healthcheck:
+      test: ["NONE"]
+      disable: true
+      interval: soon
+`);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.data.services[0].container.healthcheckTest).toBe("NONE");
+    expect(result.warnings.some((w) => w.includes("healthcheck disable"))).toBe(
+      true,
+    );
+    expect(
+      result.warnings.some((w) => w.includes("healthcheck duration")),
+    ).toBe(true);
+  });
+
+  it("round-trips process and healthcheck fields stably", () => {
+    const yaml = `
+services:
+  web:
+    image: nginx:1.27
+    user: www-data
+    working_dir: /usr/share/nginx
+    command: nginx -g 'daemon off;'
+    restart: "on-failure:3"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl -f http://localhost
+      interval: 30s
+      timeout: 5s
+      retries: 3
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    const { text, warnings } = formDataToCompose(parsed.data, context);
+
+    expect(warnings).toEqual([]);
+
+    const reparsed = composeToFormData(text, context);
+
+    expect(reparsed.ok).toBe(true);
+
+    if (!reparsed.ok) return;
+
+    expect(reparsed.data).toEqual(parsed.data);
+
+    const doc = parse(text) as TestDoc;
+
+    expect(doc.services.web.restart).toBe("on-failure:3");
+    expect(doc.services.web.healthcheck).toMatchObject({
+      interval: "30s",
+      timeout: "5s",
+      retries: 3,
+    });
   });
 });
