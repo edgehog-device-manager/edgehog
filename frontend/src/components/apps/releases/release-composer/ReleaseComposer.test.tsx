@@ -58,6 +58,7 @@ const GET_OPTIONS_QUERY = graphql`
     ...hooks_NetworksOptionsFragment
     ...hooks_VolumesOptionsFragment
     ...hooks_ImageCredentialsOptionsFragment
+    ...hooks_FilesOptionsFragment
   }
 `;
 
@@ -88,6 +89,7 @@ const renderComposer = () => {
       networks: { edges: [] },
       volumes: { edges: [] },
       listImageCredentials: { edges: [] },
+      repositories: { edges: [] },
     },
   }));
 
