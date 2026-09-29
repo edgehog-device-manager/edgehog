@@ -327,6 +327,11 @@ export const SUPPORTED_SERVICE_KEYS = new Set([
   "command",
   "entrypoint",
   "healthcheck",
+  "labels",
+  "sysctls",
+  "ulimits",
+  "logging",
+  "blkio_config",
 ]);
 
 export const formatSchemaIssues = (error: ZodError): string => {
@@ -449,4 +454,115 @@ export const healthcheckTestToCompose = (
   if (value === "NONE") return ["NONE"];
 
   return ["CMD-SHELL", value];
+};
+
+/**
+ * Coerces compose numbers-or-numeric-strings to integers.
+ * Returns undefined when the value is not a valid integer.
+ */
+export const toInt = (value: unknown): number | undefined => {
+  if (typeof value === "number")
+    return Number.isInteger(value) ? value : undefined;
+  if (typeof value === "string" && value.trim() !== "") {
+    const parsed = Number(value);
+
+    return Number.isInteger(parsed) ? parsed : undefined;
+  }
+
+  return undefined;
+};
+
+/**
+ * Converts a compose list-or-dict (labels, sysctls) to key/value pairs.
+ * Map scalars are stringified; list entries split on the first "=".
+ */
+export const listOrDictToPairs = (
+  value: unknown,
+): { key: string; value: string }[] => envToKeyValuePairs(value);
+
+export const pairsToMap = (
+  pairs: { key: string; value: string }[] | undefined,
+): Record<string, string> =>
+  Object.fromEntries((pairs ?? []).map((p) => [p.key, p.value]));
+
+/**
+ * Parses a compose ulimits map ({name: int | {soft, hard}}) into the
+ * [{name, soft, hard}] rows the form stores. A single value expands to
+ * soft == hard so re-serialization stays stable.
+ */
+export const parseUlimits = (
+  value: unknown,
+  context: string,
+  warnings: string[],
+): { name: string; soft: number; hard: number }[] => {
+  const record = asRecord(value);
+  const result: { name: string; soft: number; hard: number }[] = [];
+
+  for (const [name, raw] of Object.entries(record)) {
+    if (typeof raw === "object" && raw !== null && !Array.isArray(raw)) {
+      const limits = asRecord(raw);
+      const soft = toInt(limits.soft);
+      const hard = toInt(limits.hard);
+
+      if (soft === undefined || hard === undefined) {
+        warnings.push(
+          `${context}: unsupported ulimit '${name}' is not supported and will be ignored`,
+        );
+
+        continue;
+      }
+
+      result.push({ name, soft, hard });
+
+      continue;
+    }
+
+    const single = toInt(raw);
+
+    if (single === undefined) {
+      warnings.push(
+        `${context}: unsupported ulimit '${name}' is not supported and will be ignored`,
+      );
+
+      continue;
+    }
+
+    result.push({ name, soft: single, hard: single });
+  }
+
+  return result;
+};
+
+/**
+ * Parses blkio_config object lists ([{path, weight|rate}]) with
+ * string-numeric coercion. Unparseable entries are warned and skipped.
+ * Returns normalized {path, value} pairs; callers map value to weight/rate.
+ */
+export const parseBlkioEntries = (
+  value: unknown,
+  valueKey: string,
+  context: string,
+  warnings: string[],
+): { path: string; value: number }[] => {
+  if (!Array.isArray(value)) return [];
+
+  const result: { path: string; value: number }[] = [];
+
+  for (const entry of value) {
+    const record = asRecord(entry);
+    const path = typeof record.path === "string" ? record.path : "";
+    const parsed = toInt(record[valueKey]);
+
+    if (path === "" || parsed === undefined) {
+      warnings.push(
+        `${context}: unsupported blkio entry is not supported and will be ignored`,
+      );
+
+      continue;
+    }
+
+    result.push({ path, value: parsed });
+  }
+
+  return result;
 };
