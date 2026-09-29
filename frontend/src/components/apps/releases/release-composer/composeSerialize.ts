@@ -28,6 +28,8 @@ import type {
 } from "./composeTypes";
 import {
   clone,
+  formatNsToDuration,
+  healthcheckTestToCompose,
   idToLabel,
   restartPolicyToCompose,
   sameStrings,
@@ -56,8 +58,16 @@ export const formDataToCompose = (
 
     if (container.hostname) output.hostname = container.hostname;
     if (container.networkMode) output.network_mode = container.networkMode;
+    if (container.user) output.user = container.user;
+    if (container.workingDirectory)
+      output.working_dir = container.workingDirectory;
+    if (container.command) output.command = container.command;
+    if (container.entrypoint) output.entrypoint = container.entrypoint;
 
-    const restart = restartPolicyToCompose(container.restartPolicy);
+    const restart = restartPolicyToCompose(
+      container.restartPolicy,
+      container.restartPolicyMaximumRetryCount,
+    );
 
     if (restart) output.restart = restart;
 
@@ -142,6 +152,38 @@ export const formDataToCompose = (
 
     if (container.capAdd?.length) output.cap_add = [...container.capAdd];
     if (container.capDrop?.length) output.cap_drop = [...container.capDrop];
+
+    if (
+      container.healthcheckTest != null ||
+      container.healthcheckInterval != null ||
+      container.healthcheckTimeout != null ||
+      container.healthcheckRetries != null ||
+      container.healthcheckStartPeriod != null ||
+      container.healthcheckStartInterval != null
+    ) {
+      const healthcheck: Record<string, unknown> = {};
+      const test = healthcheckTestToCompose(container.healthcheckTest);
+
+      if (test !== undefined) healthcheck.test = test;
+      if (container.healthcheckInterval != null)
+        healthcheck.interval = formatNsToDuration(
+          container.healthcheckInterval,
+        );
+      if (container.healthcheckTimeout != null)
+        healthcheck.timeout = formatNsToDuration(container.healthcheckTimeout);
+      if (container.healthcheckRetries != null)
+        healthcheck.retries = container.healthcheckRetries;
+      if (container.healthcheckStartPeriod != null)
+        healthcheck.start_period = formatNsToDuration(
+          container.healthcheckStartPeriod,
+        );
+      if (container.healthcheckStartInterval != null)
+        healthcheck.start_interval = formatNsToDuration(
+          container.healthcheckStartInterval,
+        );
+
+      output.healthcheck = healthcheck;
+    }
 
     const env: unknown = container.env;
 
