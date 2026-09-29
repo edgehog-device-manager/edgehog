@@ -27,7 +27,7 @@ import {
   useRelayEnvironment,
 } from "react-relay/hooks";
 import type { PayloadError } from "relay-runtime";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 import { FormattedMessage } from "react-intl";
 
 import { forwarderVersion } from "@/api";

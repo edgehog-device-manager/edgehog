@@ -43,7 +43,7 @@ import Result from "@/components/ui/result/Result";
 import Button from "@/components/ui/button/Button";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
 import CreateChannelForm from "@/forms/CreateChannel";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 const GET_CREATE_CHANNEL_OPTIONS_QUERY = graphql`
   query ChannelCreate_getDeviceGroups_Query(

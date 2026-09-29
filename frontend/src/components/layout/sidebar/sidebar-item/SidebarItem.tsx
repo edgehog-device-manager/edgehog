@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import NavLink from "react-bootstrap/NavLink";
+import { NavLink } from "@/components/ui/nav/Nav";
 import { useLocation } from "react-router-dom";
 
 import { Link, ParametricRoute } from "@/Navigation";

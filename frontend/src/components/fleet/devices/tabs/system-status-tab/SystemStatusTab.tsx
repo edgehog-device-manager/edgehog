@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { graphql, useFragment } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
 import dayjs from "dayjs";

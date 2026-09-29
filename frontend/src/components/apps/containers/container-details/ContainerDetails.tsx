@@ -17,7 +17,11 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React, { useMemo, useState } from "react";
-import { Button, Col, Container, Row, Stack } from "react-bootstrap";
+import Button from "@/components/ui/button/Button";
+import Col from "@/components/ui/col/Col";
+import Container from "@/components/ui/container/Container";
+import Row from "@/components/ui/row/Row";
+import Stack from "@/components/ui/stack/Stack";
 import {
   FormattedMessage,
   MessageDescriptor,

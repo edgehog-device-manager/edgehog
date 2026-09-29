@@ -31,7 +31,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { Files_PaginationQuery } from "@/api/__generated__/Files_PaginationQuery.graphql";
 import { Repository_FilesFragment$key } from "@/api/__generated__/Repository_FilesFragment.graphql";

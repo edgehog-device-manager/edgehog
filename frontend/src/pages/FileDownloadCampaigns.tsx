@@ -30,7 +30,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { FileDownloadCampaigns_FileDownloadCampaignsFragment$key } from "@/api/__generated__/FileDownloadCampaigns_FileDownloadCampaignsFragment.graphql";
 import type { FileDownloadCampaigns_getCampaigns_Query } from "@/api/__generated__/FileDownloadCampaigns_getCampaigns_Query.graphql";

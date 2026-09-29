@@ -28,7 +28,9 @@ import {
 } from "react-relay/hooks";
 import { SingleValue } from "react-select";
 import semver from "semver";
-import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import ToggleButton, {
+  ToggleButtonGroup,
+} from "@/components/ui/toggle-button/ToggleButton";
 
 import type { UpgradeDeploymentModal_GetUpgradeData_Query } from "@/api/__generated__/UpgradeDeploymentModal_GetUpgradeData_Query.graphql";
 import type {

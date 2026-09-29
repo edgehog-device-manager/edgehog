@@ -16,7 +16,9 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Col, Container, Row } from "react-bootstrap";
+import Col from "@/components/ui/col/Col";
+import Container from "@/components/ui/container/Container";
+import Row from "@/components/ui/row/Row";
 import {
   FieldErrors,
   UseFieldArrayReturn,

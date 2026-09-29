@@ -21,7 +21,7 @@
 import { useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { DeviceGroupCreate_createDeviceGroup_Mutation } from "@/api/__generated__/DeviceGroupCreate_createDeviceGroup_Mutation.graphql";
 import Alert from "@/components/ui/alert/Alert";

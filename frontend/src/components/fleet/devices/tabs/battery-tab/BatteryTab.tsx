@@ -18,7 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { BatteryTab_batteryStatus$key } from "@/api/__generated__/BatteryTab_batteryStatus.graphql";
 

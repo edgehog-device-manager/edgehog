@@ -19,10 +19,10 @@
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
-import Col from "react-bootstrap/Col";
-import Nav from "react-bootstrap/Nav";
-import Row from "react-bootstrap/Row";
-import Tab from "react-bootstrap/Tab";
+import Col from "@/components/ui/col/Col";
+import Nav from "@/components/ui/nav/Nav";
+import Row from "@/components/ui/row/Row";
+import Tab from "@/components/ui/tab/Tab";
 
 import Form from "@/components/ui/form/Form";
 import Result from "@/components/ui/result/Result";

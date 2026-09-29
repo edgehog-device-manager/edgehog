@@ -18,7 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Dropdown, Form } from "react-bootstrap";
+import Dropdown from "@/components/ui/dropdown/Dropdown";
+import Form from "@/components/ui/form/Form";
 import type { Column, RowData } from "@tanstack/react-table";
 import Icon from "@/components/ui/icon/Icon";
 

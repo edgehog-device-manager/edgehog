@@ -43,7 +43,7 @@ import Spinner from "@/components/ui/spinner/Spinner";
 import CreateBaseImageForm from "@/forms/CreateBaseImage";
 import type { BaseImageOutputData } from "@/forms/CreateBaseImage";
 import { Link, Route, useNavigate } from "@/Navigation";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 const GET_BASE_IMAGE_COLLECTION_QUERY = graphql`
   query BaseImageCreate_getOptions_Query($baseImageCollectionId: ID!) {

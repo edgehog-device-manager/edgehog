@@ -18,7 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { HardwareInfoTab_hardwareInfo$key } from "@/api/__generated__/HardwareInfoTab_hardwareInfo.graphql";
 

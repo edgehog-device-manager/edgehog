@@ -39,7 +39,9 @@ import {
   isEnvJsonValid,
 } from "@/lib/environment";
 import { useNavigate, Route } from "@/Navigation";
-import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import ToggleButton, {
+  ToggleButtonGroup,
+} from "@/components/ui/toggle-button/ToggleButton";
 import Select from "@/components/ui/select/Select";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";

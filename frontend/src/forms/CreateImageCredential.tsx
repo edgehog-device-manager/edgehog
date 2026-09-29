@@ -19,7 +19,7 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InputGroup } from "react-bootstrap";
+import InputGroup from "@/components/ui/input-group/InputGroup";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";

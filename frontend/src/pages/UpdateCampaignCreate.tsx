@@ -29,7 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import type { PreloadedQuery } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type {
   UpdateCampaignCreate_getOptions_Query,

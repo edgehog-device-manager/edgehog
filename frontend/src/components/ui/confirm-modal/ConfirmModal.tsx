@@ -21,8 +21,8 @@
 import React, { useCallback } from "react";
 import { FormattedMessage } from "react-intl";
 
-import { Modal } from "react-bootstrap";
-import type { ModalProps } from "react-bootstrap";
+import Modal from "@/components/ui/modal/Modal";
+import type { ModalProps } from "@/components/ui/modal/Modal";
 
 import Button from "@/components/ui/button/Button";
 import Spinner from "@/components/ui/spinner/Spinner";

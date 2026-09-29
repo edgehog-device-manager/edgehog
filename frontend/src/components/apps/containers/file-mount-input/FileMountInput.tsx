@@ -29,13 +29,12 @@ import React, {
 } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
-import {
-  Button,
-  Card,
-  Nav,
-  ToggleButton,
+import Button from "@/components/ui/button/Button";
+import Card from "@/components/ui/card/Card";
+import Nav from "@/components/ui/nav/Nav";
+import ToggleButton, {
   ToggleButtonGroup,
-} from "react-bootstrap";
+} from "@/components/ui/toggle-button/ToggleButton";
 import { SingleValue } from "react-select";
 
 import FilePermissionsInput from "@/components/ui/file-permissions/FilePermissionsInput";

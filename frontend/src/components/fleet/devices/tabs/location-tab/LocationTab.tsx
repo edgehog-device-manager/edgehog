@@ -18,7 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { FormattedDate, FormattedMessage, useIntl } from "react-intl";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { LocationTab_location$key } from "@/api/__generated__/LocationTab_location.graphql";
 

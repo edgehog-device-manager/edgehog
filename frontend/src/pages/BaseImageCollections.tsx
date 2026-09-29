@@ -26,7 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { BaseImageCollections_BaseImageCollectionsFragment$key } from "@/api/__generated__/BaseImageCollections_BaseImageCollectionsFragment.graphql";
 import type { BaseImageCollections_getBaseImageCollections_Query } from "@/api/__generated__/BaseImageCollections_getBaseImageCollections_Query.graphql";

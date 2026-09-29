@@ -30,7 +30,7 @@ import {
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 import { PayloadError } from "relay-runtime";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { FileCreate_createFile_Mutation } from "@/api/__generated__/FileCreate_createFile_Mutation.graphql";
 import type {

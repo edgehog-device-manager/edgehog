@@ -22,8 +22,8 @@ import pick from "lodash/pick";
 import { useCallback, useEffect, useState } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { useLocation, useNavigate } from "react-router-dom";
-import Alert from "react-bootstrap/Alert";
-import Form from "react-bootstrap/Form";
+import Alert from "@/components/ui/alert/Alert";
+import Form from "@/components/ui/form/Form";
 
 import AuthPage from "@/components/auth/auth-page/AuthPage";
 import Button from "@/components/ui/button/Button";

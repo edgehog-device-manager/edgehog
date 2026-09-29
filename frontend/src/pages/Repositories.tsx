@@ -26,7 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { Repositories_getRepositories_Query } from "@/api/__generated__/Repositories_getRepositories_Query.graphql";
 import { Repositories_PaginationQuery } from "@/api/__generated__/Repositories_PaginationQuery.graphql";

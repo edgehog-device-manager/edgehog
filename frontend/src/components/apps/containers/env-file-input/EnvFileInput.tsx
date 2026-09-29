@@ -27,7 +27,11 @@ import React, {
 } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useLazyLoadQuery, useMutation } from "react-relay/hooks";
-import { Card, Nav, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
+import Nav from "@/components/ui/nav/Nav";
+import ToggleButton, {
+  ToggleButtonGroup,
+} from "@/components/ui/toggle-button/ToggleButton";
 import { SingleValue } from "react-select";
 
 import type { EnvFileSpecInput } from "@/api/__generated__/InstallApplicationModal_DeployRelease_Mutation.graphql";

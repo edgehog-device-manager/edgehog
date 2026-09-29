@@ -26,7 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { Volumes_getVolumes_Query } from "@/api/__generated__/Volumes_getVolumes_Query.graphql";
 import { Volumes_PaginationQuery } from "@/api/__generated__/Volumes_PaginationQuery.graphql";

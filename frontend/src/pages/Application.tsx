@@ -19,7 +19,10 @@
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Card, Col, Form, Row } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
+import Col from "@/components/ui/col/Col";
+import Form from "@/components/ui/form/Form";
+import Row from "@/components/ui/row/Row";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";

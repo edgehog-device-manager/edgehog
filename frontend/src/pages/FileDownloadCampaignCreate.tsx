@@ -29,7 +29,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { FileDownloadCampaignCreate_createCampaign_Mutation } from "@/api/__generated__/FileDownloadCampaignCreate_createCampaign_Mutation.graphql";
 import type {

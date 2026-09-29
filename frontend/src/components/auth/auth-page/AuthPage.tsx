@@ -18,9 +18,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Card from "react-bootstrap/Card";
-import Col from "react-bootstrap/Col";
-import Row from "react-bootstrap/Row";
+import Card from "@/components/ui/card/Card";
+import Col from "@/components/ui/col/Col";
+import Row from "@/components/ui/row/Row";
 
 import assets from "@/assets";
 import "./AuthPage.scss";
