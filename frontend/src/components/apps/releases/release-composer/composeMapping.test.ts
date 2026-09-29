@@ -816,3 +816,165 @@ services:
     });
   });
 });
+
+describe("blkio, logging and key/value mapping", () => {
+  it("parses labels and sysctls in map and list form", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    labels:
+      com.example.team: backend
+      com.example.port: 8080
+    sysctls:
+      - net.core.somaxconn=1024
+      - net.ipv4.ip_forward=1
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    const app = result.data.services[0];
+
+    expect(app.container.labels).toEqual([
+      { key: "com.example.team", value: "backend" },
+      { key: "com.example.port", value: "8080" },
+    ]);
+    expect(app.container.sysctls).toEqual([
+      { key: "net.core.somaxconn", value: "1024" },
+      { key: "net.ipv4.ip_forward", value: "1" },
+    ]);
+  });
+
+  it("parses ulimits in single-value and object form", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    ulimits:
+      nofile: 1024
+      nproc:
+        soft: 100
+        hard: 200
+      bogus: not-a-number
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.data.services[0].container.ulimits).toEqual([
+      { name: "nofile", soft: 1024, hard: 1024 },
+      { name: "nproc", soft: 100, hard: 200 },
+    ]);
+    expect(result.warnings.some((w) => w.includes("ulimit 'bogus'"))).toBe(
+      true,
+    );
+  });
+
+  it("parses logging driver and options", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.data.services[0].container.logType).toBe("json-file");
+    expect(result.data.services[0].container.logConfig).toEqual([
+      { key: "max-size", value: "10m" },
+      { key: "max-file", value: "3" },
+    ]);
+  });
+
+  it("parses blkio_config with string numerics", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    blkio_config:
+      weight: "500"
+      weight_device:
+        - path: /dev/sda
+          weight: 400
+      device_read_bps:
+        - path: /dev/sda
+          rate: 1048576
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    const app = result.data.services[0];
+
+    expect(app.container.blkioWeight).toBe(500);
+    expect(app.container.blkioWeightDevice).toEqual([
+      { path: "/dev/sda", weight: 400 },
+    ]);
+    expect(app.container.blkioDeviceReadBps).toEqual([
+      { path: "/dev/sda", rate: 1048576 },
+    ]);
+  });
+
+  it("round-trips blkio, logging and key/value fields stably", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    labels:
+      com.example.team: backend
+    sysctls:
+      net.core.somaxconn: "1024"
+    ulimits:
+      nofile: 1024
+      nproc:
+        soft: 100
+        hard: 200
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+    blkio_config:
+      weight: 500
+      device_read_bps:
+        - path: /dev/sda
+          rate: 1048576
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    const { text, warnings } = formDataToCompose(parsed.data, context);
+
+    expect(warnings).toEqual([]);
+
+    const reparsed = composeToFormData(text, context);
+
+    expect(reparsed.ok).toBe(true);
+
+    if (!reparsed.ok) return;
+
+    expect(reparsed.data).toEqual(parsed.data);
+  });
+});
