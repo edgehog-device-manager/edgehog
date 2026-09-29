@@ -17,8 +17,8 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import React from "react";
-import { Card, Col } from "react-bootstrap";
-import type { ColProps } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
+import Col, { type ColProps } from "@/components/ui/col/Col";
 
 const FullHeightCard = (props: ColProps): React.ReactElement => {
   const { children, className, ...remainingProps } = props;

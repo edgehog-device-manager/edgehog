@@ -20,12 +20,12 @@
 
 import { useMemo } from "react";
 import { FormattedMessage, useIntl } from "react-intl";
-import Alert from "react-bootstrap/Alert";
-import Button from "react-bootstrap/Button";
-import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
-import Row from "react-bootstrap/Row";
-import Stack from "react-bootstrap/Stack";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import Col from "@/components/ui/col/Col";
+import Form from "@/components/ui/form/Form";
+import Row from "@/components/ui/row/Row";
+import Stack from "@/components/ui/stack/Stack";
 
 import type { ReleaseCreate_getOptions_Query$data } from "@/api/__generated__/ReleaseCreate_getOptions_Query.graphql";
 import type { CreateReleaseInput } from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";

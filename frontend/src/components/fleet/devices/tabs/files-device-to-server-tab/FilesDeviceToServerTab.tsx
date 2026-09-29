@@ -19,7 +19,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from "react";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
   ConnectionHandler,

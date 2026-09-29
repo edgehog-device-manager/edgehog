@@ -26,7 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { HardwareTypes_getHardwareTypes_Query } from "@/api/__generated__/HardwareTypes_getHardwareTypes_Query.graphql";
 import { HardwareTypes_HardwareTypesFragment$key } from "@/api/__generated__/HardwareTypes_HardwareTypesFragment.graphql";

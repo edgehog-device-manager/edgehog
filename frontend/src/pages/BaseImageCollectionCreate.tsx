@@ -46,7 +46,7 @@ import CreateBaseImageCollectionForm, {
   BaseImageCollectionOutputData,
 } from "@/forms/CreateBaseImageCollection";
 import { Link, Route, useNavigate } from "@/Navigation";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 const CREATE_BASE_IMAGE_COLLECTION_PAGE_QUERY = graphql`
   query BaseImageCollectionCreate_getOptions_Query(

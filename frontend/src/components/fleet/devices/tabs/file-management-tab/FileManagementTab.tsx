@@ -27,7 +27,7 @@ import {
   useFragment,
   useSubscription,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { FileManagementTab_fileManagement$key } from "@/api/__generated__/FileManagementTab_fileManagement.graphql";
 import type { FileManagementTab_DeviceFilesSubscription } from "@/api/__generated__/FileManagementTab_DeviceFilesSubscription.graphql";

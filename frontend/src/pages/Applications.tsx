@@ -30,7 +30,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { Applications_ApplicationsFragment$key } from "@/api/__generated__/Applications_ApplicationsFragment.graphql";
 import type { Applications_ApplicationSubscription } from "@/api/__generated__/Applications_ApplicationSubscription.graphql";

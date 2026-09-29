@@ -19,8 +19,8 @@
  */
 
 import React, { useState } from "react";
-import Accordion from "react-bootstrap/Accordion";
-import Dropdown from "react-bootstrap/Dropdown";
+import Accordion from "@/components/ui/accordion/Accordion";
+import Dropdown from "@/components/ui/dropdown/Dropdown";
 import { useLocation } from "react-router-dom";
 
 import Icon from "@/components/ui/icon/Icon";

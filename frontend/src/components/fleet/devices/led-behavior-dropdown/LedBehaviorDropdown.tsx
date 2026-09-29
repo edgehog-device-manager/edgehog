@@ -23,10 +23,10 @@ import { graphql, useMutation } from "react-relay/hooks";
 import { defineMessages, FormattedMessage, useIntl } from "react-intl";
 import type { MessageDescriptor } from "react-intl";
 
-import ButtonGroup from "react-bootstrap/ButtonGroup";
-import Dropdown from "react-bootstrap/Dropdown";
-import OverlayTrigger from "react-bootstrap/OverlayTrigger";
-import Tooltip from "react-bootstrap/Tooltip";
+import ButtonGroup from "@/components/ui/button-group/ButtonGroup";
+import Dropdown from "@/components/ui/dropdown/Dropdown";
+import OverlayTrigger from "@/components/ui/overlay-trigger/OverlayTrigger";
+import Tooltip from "@/components/ui/tooltip/Tooltip";
 
 import Button from "@/components/ui/button/Button";
 import Icon from "@/components/ui/icon/Icon";

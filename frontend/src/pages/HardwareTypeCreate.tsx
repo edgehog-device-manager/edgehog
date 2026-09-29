@@ -28,7 +28,7 @@ import Page from "@/components/ui/page/Page";
 import CreateHardwareTypeForm from "@/forms/CreateHardwareType";
 import type { HardwareTypeOutputData } from "@/forms/CreateHardwareType";
 import { Route, useNavigate } from "@/Navigation";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 const CREATE_HARDWARE_TYPE_MUTATION = graphql`
   mutation HardwareTypeCreate_createHardwareType_Mutation(

@@ -29,7 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { ReleaseContainers_PaginationQuery } from "@/api/__generated__/ReleaseContainers_PaginationQuery.graphql";
 import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";

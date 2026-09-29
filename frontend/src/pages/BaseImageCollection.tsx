@@ -29,7 +29,7 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { BaseImageCollection_BaseImagesFragment$key } from "@/api/__generated__/BaseImageCollection_BaseImagesFragment.graphql";
 import type { BaseImageCollection_deleteBaseImageCollection_Mutation } from "@/api/__generated__/BaseImageCollection_deleteBaseImageCollection_Mutation.graphql";

@@ -21,7 +21,7 @@
 import { ReactNode, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { graphql, useMutation } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { VolumeCreate_volumeCreate_Mutation } from "@/api/__generated__/VolumeCreate_volumeCreate_Mutation.graphql";
 

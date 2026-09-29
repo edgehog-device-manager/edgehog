@@ -22,7 +22,7 @@ import { Suspense, useCallback, useState } from "react";
 import { FormattedMessage } from "react-intl";
 import { ConnectionHandler, graphql, useMutation } from "react-relay/hooks";
 import { ErrorBoundary } from "react-error-boundary";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { ApplicationCreate_createApplication_Mutation } from "@/api/__generated__/ApplicationCreate_createApplication_Mutation.graphql";
 

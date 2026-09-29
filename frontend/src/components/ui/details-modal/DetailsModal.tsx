@@ -17,7 +17,7 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-import { Modal } from "react-bootstrap";
+import Modal from "@/components/ui/modal/Modal";
 import { flexRender } from "@tanstack/react-table";
 import type { Column, Row, RowData } from "@tanstack/react-table";
 import { FormattedMessage } from "react-intl";
