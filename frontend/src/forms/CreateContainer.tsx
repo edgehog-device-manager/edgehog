@@ -3430,4 +3430,6 @@ export {
   FileMountsSection,
   ProcessSection,
   HealthcheckSection,
+  BlkioSection,
+  LoggingSection,
 };
