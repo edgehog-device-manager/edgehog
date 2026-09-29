@@ -33,6 +33,7 @@ import MultiSelect from "@/components/ui/multi-select/MultiSelect";
 import {
   DeviceMappingsSection,
   DeviceRequestsSection,
+  FileMountsSection,
   ImageSection,
   NameSection,
   NetworkSection,
@@ -73,7 +74,7 @@ const ServicePane = ({
   const intl = useIntl();
   const [open, setOpen] = useState(true);
   const form = useForm<ContainerInputData>({
-    resolver: zodResolver(containerSchema),
+    resolver: zodResolver(containerSchema) as never,
     // detach from the parent-owned object: react-hook-form mutates nested
     // values in place
     defaultValues: structuredClone(container),
@@ -182,25 +183,28 @@ const ServicePane = ({
             <Stack gap={2}>
               <NameSection form={form} />
 
-        <div className="bg-white border rounded-3 p-3">
-          <FormRow
-            id="release-composer-depends-on"
-            label={
-              <FormattedMessage
-                id="components.apps.releases.release-composer.ServicePane.dependsOnLabel"
-                defaultMessage="Depends on"
-              />
-            }
-          >
-            <MultiSelect
-              value={dependsOn.map((name) => ({ value: name, label: name }))}
-              options={dependsOnOptions}
-              onChange={(options) =>
-                onDependsOnChange(options.map((option) => option.value))
-              }
-            />
-          </FormRow>
-        </div>
+              <div className="bg-white border rounded-3 p-3">
+                <FormRow
+                  id="release-composer-depends-on"
+                  label={
+                    <FormattedMessage
+                      id="components.apps.releases.release-composer.ServicePane.dependsOnLabel"
+                      defaultMessage="Depends on"
+                    />
+                  }
+                >
+                  <MultiSelect
+                    value={dependsOn.map((name) => ({
+                      value: name,
+                      label: name,
+                    }))}
+                    options={dependsOnOptions}
+                    onChange={(options) =>
+                      onDependsOnChange(options.map((option) => option.value))
+                    }
+                  />
+                </FormRow>
+              </div>
 
               <ImageSection
                 form={form}
@@ -234,6 +238,12 @@ const ServicePane = ({
                 form={form}
                 open={isSectionOpen("runtimeEnvironment")}
                 onToggle={() => toggleSection("runtimeEnvironment")}
+              />
+              <FileMountsSection
+                form={form}
+                queryRef={queryRef}
+                open={isSectionOpen("fileMounts")}
+                onToggle={() => toggleSection("fileMounts")}
               />
               <DeviceMappingsSection
                 form={form}
