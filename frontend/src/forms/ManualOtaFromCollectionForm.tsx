@@ -42,7 +42,7 @@ import {
   ManualOtaFromCollectionData,
   manualOtaFromCollectionSchema,
 } from "@/forms/validation";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const BASE_IMAGE_COLLECTIONS_FRAGMENT = graphql`
   fragment ManualOtaFromCollectionForm_baseImageCollections_Fragment on RootQueryType

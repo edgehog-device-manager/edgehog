@@ -35,7 +35,7 @@ import {
   type FileSourceType,
   type ManualFileUploadRequestData,
 } from "@/forms/validation";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 type SourceTypeOption = {
   value: FileSourceType;
