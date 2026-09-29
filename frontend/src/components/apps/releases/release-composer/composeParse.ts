@@ -43,11 +43,14 @@ import {
   listOrDictToPairs,
   parseBlkioEntries,
   parseDurationToNs,
+  parseDurationToSec,
   parseIntValue,
+  parseMemory,
   parseUlimits,
   portBindingFromEntry,
   restartPolicyToEdgehog,
   splitVolumeShortSyntax,
+  stringOrStringList,
   SUPPORTED_SERVICE_KEYS,
   toInt,
 } from "./composeUtils";
@@ -166,6 +169,51 @@ export const composeToFormData = (
       entrypoint: commandToString(service.entrypoint),
       labels: listOrDictToPairs(service.labels),
       sysctls: listOrDictToPairs(service.sysctls),
+      domainname:
+        typeof service.domainname === "string" &&
+        service.domainname.trim() !== ""
+          ? service.domainname
+          : undefined,
+      dns: stringOrStringList(service.dns),
+      dnsSearch: stringOrStringList(service.dns_search),
+      dnsOptions: asStringArray(service.dns_opt),
+      exposedPorts: stringOrStringList(service.expose),
+      cpuShares: toInt(service.cpu_shares),
+      cpusetCpus:
+        typeof service.cpuset === "string" && service.cpuset.trim() !== ""
+          ? service.cpuset
+          : undefined,
+      shmSize: parseMemory(service.shm_size),
+      oomScoreAdjustment: toInt(service.oom_score_adj),
+      cgroupsMode:
+        service.cgroup === "host" || service.cgroup === "private"
+          ? service.cgroup
+          : undefined,
+      ipcMode:
+        typeof service.ipc === "string" && service.ipc.trim() !== ""
+          ? service.ipc
+          : undefined,
+      usernsMode:
+        typeof service.userns_mode === "string" &&
+        service.userns_mode.trim() !== ""
+          ? service.userns_mode
+          : undefined,
+      pidMode:
+        typeof service.pid === "string" && service.pid.trim() !== ""
+          ? service.pid
+          : undefined,
+      securityopt: asStringArray(service.security_opt),
+      groupAdd: stringOrStringList(service.group_add),
+      deviceCgroupRules: asStringArray(service.device_cgroup_rules),
+      runtime:
+        typeof service.runtime === "string" && service.runtime.trim() !== ""
+          ? service.runtime
+          : undefined,
+      stopSignal:
+        typeof service.stop_signal === "string" &&
+        service.stop_signal.trim() !== ""
+          ? service.stop_signal
+          : undefined,
       networks: [],
       deviceMappings: [],
       deviceRequests: [],
@@ -378,6 +426,19 @@ export const composeToFormData = (
       warnings.push(
         `${ctx}: unsupported blkio_config definition is not supported and will be ignored`,
       );
+    }
+
+    // stop timeout (compose duration -> whole seconds)
+    if (service.stop_grace_period != null) {
+      const stopTimeout = parseDurationToSec(service.stop_grace_period);
+
+      if (stopTimeout === undefined) {
+        warnings.push(
+          `${ctx}: unsupported stop_grace_period '${String(service.stop_grace_period)}' is not supported and will be ignored`,
+        );
+      } else {
+        container.stopTimeout = stopTimeout;
+      }
     }
 
     // resource limits
