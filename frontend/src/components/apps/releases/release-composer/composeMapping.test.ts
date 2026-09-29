@@ -978,3 +978,129 @@ services:
     expect(reparsed.data).toEqual(parsed.data);
   });
 });
+
+describe("renamed scalar fields", () => {
+  it("parses network, limits, security and runtime orphans", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    domainname: example.com
+    dns:
+      - 8.8.8.8
+    dns_search: example.com
+    dns_opt:
+      - ndots:2
+    expose:
+      - 3000
+      - 8000
+    cpu_shares: 512
+    cpuset: "0-1"
+    shm_size: 64m
+    oom_score_adj: -500
+    cgroup: private
+    ipc: host
+    userns_mode: keep-id
+    pid: host
+    security_opt:
+      - no-new-privileges:true
+    group_add:
+      - "1001"
+    device_cgroup_rules:
+      - c 10:200 rwm
+    runtime: runc
+    stop_signal: SIGTERM
+    stop_grace_period: 30s
+`;
+
+    const result = composeToFormData(yaml, context);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    const app = result.data.services[0];
+
+    expect(app.container.domainname).toBe("example.com");
+    expect(app.container.dns).toEqual(["8.8.8.8"]);
+    expect(app.container.dnsSearch).toEqual(["example.com"]);
+    expect(app.container.dnsOptions).toEqual(["ndots:2"]);
+    expect(app.container.exposedPorts).toEqual(["3000", "8000"]);
+    expect(app.container.cpuShares).toBe(512);
+    expect(app.container.cpusetCpus).toBe("0-1");
+    expect(app.container.shmSize).toBe(64 * 1024 ** 2);
+    expect(app.container.oomScoreAdjustment).toBe(-500);
+    expect(app.container.cgroupsMode).toBe("private");
+    expect(app.container.ipcMode).toBe("host");
+    expect(app.container.usernsMode).toBe("keep-id");
+    expect(app.container.pidMode).toBe("host");
+    expect(app.container.securityopt).toEqual(["no-new-privileges:true"]);
+    expect(app.container.groupAdd).toEqual(["1001"]);
+    expect(app.container.deviceCgroupRules).toEqual(["c 10:200 rwm"]);
+    expect(app.container.runtime).toBe("runc");
+    expect(app.container.stopSignal).toBe("SIGTERM");
+    expect(app.container.stopTimeout).toBe(30);
+    expect(result.warnings).toEqual([]);
+  });
+
+  it("warns on invalid stop_grace_period", () => {
+    const result = composeToFormData(`
+services:
+  app:
+    image: app:1.0
+    stop_grace_period: soon
+`);
+
+    expect(result.ok).toBe(true);
+
+    if (!result.ok) return;
+
+    expect(result.data.services[0].container.stopTimeout).toBeUndefined();
+    expect(result.warnings.some((w) => w.includes("stop_grace_period"))).toBe(
+      true,
+    );
+  });
+
+  it("round-trips renamed fields stably", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    domainname: example.com
+    dns:
+      - 8.8.8.8
+    expose:
+      - "3000"
+    cpu_shares: 512
+    shm_size: 67108864
+    stop_signal: SIGTERM
+    stop_grace_period: 1m30s
+    runtime: runc
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    const { text, warnings } = formDataToCompose(parsed.data, context);
+
+    expect(warnings).toEqual([]);
+
+    const reparsed = composeToFormData(text, context);
+
+    expect(reparsed.ok).toBe(true);
+
+    if (!reparsed.ok) return;
+
+    expect(reparsed.data).toEqual(parsed.data);
+
+    const doc = parse(text) as TestDoc;
+
+    // durations normalize to whole seconds: "1m30s" becomes "90s",
+    // but the parsed data stays identical
+    expect(doc.services.app.stop_grace_period).toBe("90s");
+    expect(doc.services.app.shm_size).toBe(67108864);
+  });
+});
