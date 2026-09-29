@@ -11220,16 +11220,10 @@ type RootQueryType {
   ): VolumeConnection
 
   "Returns the desired file bind, including the presigned upload URL for target-less binds."
-  fileBind(
-    "The id of the record"
-    id: ID!
-  ): FileBind
+  fileBind("The id of the record" id: ID!): FileBind
 
   "Returns the desired env file, including the presigned upload URL for target-less env files."
-  envFile(
-    "The id of the record"
-    id: ID!
-  ): EnvFile
+  envFile("The id of the record" id: ID!): EnvFile
 
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
@@ -11456,10 +11450,16 @@ type RootMutationType {
   deleteVolume(id: ID!): DeleteVolumeResult
 
   "Marks the file uploaded through the presigned upload URL as uploaded."
-  markFileBindAsUploaded(id: ID!, input: MarkFileBindAsUploadedInput): MarkFileBindAsUploadedResult
+  markFileBindAsUploaded(
+    id: ID!
+    input: MarkFileBindAsUploadedInput
+  ): MarkFileBindAsUploadedResult
 
   "Marks the file uploaded through the presigned upload URL as uploaded."
-  markEnvFileAsUploaded(id: ID!, input: MarkEnvFileAsUploadedInput): MarkEnvFileAsUploadedResult
+  markEnvFileAsUploaded(
+    id: ID!
+    input: MarkEnvFileAsUploadedInput
+  ): MarkEnvFileAsUploadedResult
 
   "Create a new base image in a base image collection."
   createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
