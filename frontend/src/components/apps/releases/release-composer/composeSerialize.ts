@@ -336,9 +336,31 @@ export const formDataToCompose = (
       );
     }
 
-    if (container.deviceRequests?.length) {
+    if (container.networkDisabled) {
       warnings.push(
-        `${ctx}: device requests are configured from the form only and are not part of the compose file`,
+        `${ctx}: network disabling is configured from the form only and is not part of the compose file`,
+      );
+    }
+
+    if (container.autoRemove) {
+      warnings.push(
+        `${ctx}: auto remove is configured from the form only and is not part of the compose file`,
+      );
+    }
+
+    if (container.maskedPaths?.length || container.readonlyPaths?.length) {
+      warnings.push(
+        `${ctx}: masked/readonly paths are configured from the form only and are not part of the compose file`,
+      );
+    }
+
+    if (
+      container.deviceRequests?.some(
+        (request) => request.options != null && request.options !== "",
+      )
+    ) {
+      warnings.push(
+        `${ctx}: device request options are configured from the form only and are not part of the compose file`,
       );
     }
 

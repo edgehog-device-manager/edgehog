@@ -556,7 +556,7 @@ services:
   });
 
   it("warns about form-only settings that cannot be serialized", () => {
-    const { warnings } = formDataToCompose({
+    const { text, warnings } = formDataToCompose({
       services: [
         {
           name: "app",
@@ -579,7 +579,20 @@ services:
     });
 
     expect(warnings.some((w) => w.includes("image credentials"))).toBe(true);
-    expect(warnings.some((w) => w.includes("device requests"))).toBe(true);
+    // device requests serialize to deploy.resources.reservations.devices,
+    // only their driver options stay form-only
+    expect(warnings.some((w) => w.includes("device request options"))).toBe(
+      true,
+    );
+
+    const doc = parse(text) as TestDoc;
+    const devices = (
+      doc.services.app.deploy as {
+        resources: { reservations: { devices: unknown[] } };
+      }
+    ).resources.reservations.devices;
+
+    expect(devices).toHaveLength(1);
   });
 });
 
@@ -1102,5 +1115,103 @@ services:
     // but the parsed data stays identical
     expect(doc.services.app.stop_grace_period).toBe("90s");
     expect(doc.services.app.shm_size).toBe(67108864);
+  });
+});
+
+describe("form-only settings", () => {
+  it("round-trips deploy device requests without form-only warnings", () => {
+    const yaml = `
+services:
+  app:
+    image: app:1.0
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities:
+                - - gpu
+`;
+
+    const parsed = composeToFormData(yaml, context);
+
+    expect(parsed.ok).toBe(true);
+
+    if (!parsed.ok) return;
+
+    expect(parsed.data.services[0].container.deviceRequests).toEqual([
+      {
+        driver: "nvidia",
+        count: 1,
+        deviceIds: [],
+        capabilities: ["gpu"],
+      },
+    ]);
+
+    const { text, warnings } = formDataToCompose(parsed.data, context);
+
+    expect(warnings).toEqual([]);
+
+    const reparsed = composeToFormData(text, context);
+
+    expect(reparsed.ok).toBe(true);
+
+    if (!reparsed.ok) return;
+
+    expect(reparsed.data).toEqual(parsed.data);
+  });
+
+  it("warns about device request options that cannot be serialized", () => {
+    const { warnings } = formDataToCompose({
+      services: [
+        {
+          name: "app",
+          dependsOn: [],
+          container: {
+            name: "app",
+            image: { reference: "app" },
+            deviceRequests: [
+              {
+                driver: "nvidia",
+                count: 1,
+                deviceIds: [],
+                capabilities: ["gpu"],
+                options: '{"version": "2"}',
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(warnings.some((w) => w.includes("device request options"))).toBe(
+      true,
+    );
+  });
+
+  it("warns about networkDisabled, autoRemove and masked/readonly paths", () => {
+    const { warnings } = formDataToCompose({
+      services: [
+        {
+          name: "app",
+          dependsOn: [],
+          container: {
+            name: "app",
+            image: { reference: "app" },
+            networkDisabled: true,
+            autoRemove: true,
+            maskedPaths: ["/proc/keys"],
+            readonlyPaths: ["/sys"],
+          },
+        },
+      ],
+    });
+
+    expect(warnings.some((w) => w.includes("network disabling"))).toBe(true);
+    expect(warnings.some((w) => w.includes("auto remove"))).toBe(true);
+    expect(warnings.some((w) => w.includes("masked/readonly paths"))).toBe(
+      true,
+    );
   });
 });
