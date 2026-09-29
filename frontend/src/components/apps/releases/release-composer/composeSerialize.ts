@@ -29,6 +29,7 @@ import type {
 import {
   clone,
   formatNsToDuration,
+  formatSecToDuration,
   healthcheckTestToCompose,
   idToLabel,
   pairsToMap,
@@ -58,12 +59,17 @@ export const formDataToCompose = (
     }
 
     if (container.hostname) output.hostname = container.hostname;
+    if (container.domainname) output.domainname = container.domainname;
     if (container.networkMode) output.network_mode = container.networkMode;
     if (container.user) output.user = container.user;
     if (container.workingDirectory)
       output.working_dir = container.workingDirectory;
     if (container.command) output.command = container.command;
     if (container.entrypoint) output.entrypoint = container.entrypoint;
+    if (container.stopSignal) output.stop_signal = container.stopSignal;
+    if (container.stopTimeout != null)
+      output.stop_grace_period = formatSecToDuration(container.stopTimeout);
+    if (container.runtime) output.runtime = container.runtime;
 
     const restart = restartPolicyToCompose(
       container.restartPolicy,
@@ -81,6 +87,22 @@ export const formDataToCompose = (
 
     if (container.extraHosts?.length) {
       output.extra_hosts = [...container.extraHosts];
+    }
+
+    if (container.dns?.length) {
+      output.dns = [...container.dns];
+    }
+
+    if (container.dnsSearch?.length) {
+      output.dns_search = [...container.dnsSearch];
+    }
+
+    if (container.dnsOptions?.length) {
+      output.dns_opt = [...container.dnsOptions];
+    }
+
+    if (container.exposedPorts?.length) {
+      output.expose = [...container.exposedPorts];
     }
 
     const networkLabels: string[] = [];
@@ -146,6 +168,11 @@ export const formDataToCompose = (
       output.mem_swappiness = container.memorySwappiness;
     if (container.cpuPeriod != null) output.cpu_period = container.cpuPeriod;
     if (container.cpuQuota != null) output.cpu_quota = container.cpuQuota;
+    if (container.cpuShares != null) output.cpu_shares = container.cpuShares;
+    if (container.cpusetCpus) output.cpuset = container.cpusetCpus;
+    if (container.shmSize != null) output.shm_size = container.shmSize;
+    if (container.oomScoreAdjustment != null)
+      output.oom_score_adj = container.oomScoreAdjustment;
     if (container.cpuRealtimePeriod != null)
       output.cpu_rt_period = container.cpuRealtimePeriod;
     if (container.cpuRealtimeRuntime != null)
@@ -153,6 +180,15 @@ export const formDataToCompose = (
 
     if (container.capAdd?.length) output.cap_add = [...container.capAdd];
     if (container.capDrop?.length) output.cap_drop = [...container.capDrop];
+    if (container.cgroupsMode) output.cgroup = container.cgroupsMode;
+    if (container.ipcMode) output.ipc = container.ipcMode;
+    if (container.usernsMode) output.userns_mode = container.usernsMode;
+    if (container.pidMode) output.pid = container.pidMode;
+    if (container.securityopt?.length)
+      output.security_opt = [...container.securityopt];
+    if (container.groupAdd?.length) output.group_add = [...container.groupAdd];
+    if (container.deviceCgroupRules?.length)
+      output.device_cgroup_rules = [...container.deviceCgroupRules];
 
     if (container.labels?.length) {
       output.labels = pairsToMap(container.labels);
