@@ -34,9 +34,11 @@ import {
   DeviceMappingsSection,
   DeviceRequestsSection,
   FileMountsSection,
+  HealthcheckSection,
   ImageSection,
   NameSection,
   NetworkSection,
+  ProcessSection,
   ResourceLimitsSection,
   RuntimeSection,
   SecuritySection,
@@ -249,6 +251,16 @@ const ServicePane = ({
                 form={form}
                 open={isSectionOpen("deviceMappings")}
                 onToggle={() => toggleSection("deviceMappings")}
+              />
+              <ProcessSection
+                form={form}
+                open={isSectionOpen("process")}
+                onToggle={() => toggleSection("process")}
+              />
+              <HealthcheckSection
+                form={form}
+                open={isSectionOpen("healthcheck")}
+                onToggle={() => toggleSection("healthcheck")}
               />
               <DeviceRequestsSection
                 form={form}

@@ -32,12 +32,15 @@ import {
   asRecord,
   asStringArray,
   clone,
+  commandToString,
   deviceMappingFromEntry,
   envToKeyValuePairs,
   extraHostsFromValue,
   formatSchemaIssues,
+  healthcheckTestToString,
   isBindSource,
   labelToId,
+  parseDurationToNs,
   parseIntValue,
   portBindingFromEntry,
   restartPolicyToEdgehog,
@@ -146,6 +149,17 @@ export const composeToFormData = (
       ),
       env: envToKeyValuePairs(service.environment),
       restartPolicy: undefined,
+      user:
+        typeof service.user === "string" && service.user.trim() !== ""
+          ? service.user
+          : undefined,
+      workingDirectory:
+        typeof service.working_dir === "string" &&
+        service.working_dir.trim() !== ""
+          ? service.working_dir
+          : undefined,
+      command: commandToString(service.command),
+      entrypoint: commandToString(service.entrypoint),
       networks: [],
       deviceMappings: [],
       deviceRequests: [],
@@ -165,11 +179,95 @@ export const composeToFormData = (
 
     // restart policy
     if (service.restart != null) {
-      const { policy, warning } = restartPolicyToEdgehog(service.restart);
+      const { policy, count, warning } = restartPolicyToEdgehog(
+        service.restart,
+      );
 
       container.restartPolicy = policy;
+      container.restartPolicyMaximumRetryCount = count;
 
       if (warning) warnings.push(`${ctx}: restart ${warning}`);
+    }
+
+    // healthcheck
+    if (
+      service.healthcheck != null &&
+      typeof service.healthcheck === "object" &&
+      !Array.isArray(service.healthcheck)
+    ) {
+      const healthcheck = asRecord(service.healthcheck);
+
+      if (healthcheck.test !== undefined) {
+        if (Array.isArray(healthcheck.test) && healthcheck.test[0] === "CMD") {
+          warnings.push(
+            `${ctx}: healthcheck exec form is normalized to shell form`,
+          );
+        }
+
+        container.healthcheckTest = healthcheckTestToString(healthcheck.test);
+      }
+
+      if (healthcheck.disable === true) {
+        warnings.push(
+          `${ctx}: healthcheck disable is not supported and will be ignored`,
+        );
+      }
+
+      const durations: {
+        field:
+          | "healthcheckInterval"
+          | "healthcheckTimeout"
+          | "healthcheckStartPeriod"
+          | "healthcheckStartInterval";
+        raw: unknown;
+      }[] = [
+        { field: "healthcheckInterval", raw: healthcheck.interval },
+        { field: "healthcheckTimeout", raw: healthcheck.timeout },
+        { field: "healthcheckStartPeriod", raw: healthcheck.start_period },
+        { field: "healthcheckStartInterval", raw: healthcheck.start_interval },
+      ];
+
+      for (const { field, raw } of durations) {
+        if (raw == null) continue;
+
+        const parsed = parseDurationToNs(raw);
+
+        if (parsed === undefined) {
+          warnings.push(
+            `${ctx}: unsupported healthcheck duration '${String(raw)}' is not supported and will be ignored`,
+          );
+
+          continue;
+        }
+
+        container[field] = parsed;
+      }
+
+      if (healthcheck.retries != null) {
+        const retries =
+          typeof healthcheck.retries === "number"
+            ? healthcheck.retries
+            : typeof healthcheck.retries === "string" &&
+                healthcheck.retries.trim() !== ""
+              ? Number(healthcheck.retries)
+              : undefined;
+
+        if (
+          retries === undefined ||
+          !Number.isInteger(retries) ||
+          retries < 0
+        ) {
+          warnings.push(
+            `${ctx}: unsupported healthcheck retries '${String(healthcheck.retries)}' is not supported and will be ignored`,
+          );
+        } else {
+          container.healthcheckRetries = retries;
+        }
+      }
+    } else if (service.healthcheck != null) {
+      warnings.push(
+        `${ctx}: unsupported healthcheck definition is not supported and will be ignored`,
+      );
     }
 
     // resource limits

@@ -454,7 +454,7 @@ describe("ReleaseComposer collapsible panes", () => {
     fireEvent.change(getYamlEditor(), {
       target: {
         value:
-          'services:\n  nginx:\n    image: nginx:latest\n    healthcheck:\n      test: ["CMD", "curl", "-f", "http://localhost"]\n',
+          "services:\n  nginx:\n    image: nginx:latest\n    container_name: my-nginx\n",
       },
     });
 
