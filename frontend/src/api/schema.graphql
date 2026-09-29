@@ -11770,16 +11770,10 @@ type RootQueryType {
   ): VolumeConnection
 
   "Returns the desired file bind, including the presigned upload URL for target-less binds."
-  fileBind(
-    "The id of the record"
-    id: ID!
-  ): FileBind
+  fileBind("The id of the record" id: ID!): FileBind
 
   "Returns the desired env file, including the presigned upload URL for target-less env files."
-  envFile(
-    "The id of the record"
-    id: ID!
-  ): EnvFile
+  envFile("The id of the record" id: ID!): EnvFile
 
   "Returns the desired allowed registry."
   allowedRegistry("The id of the record" id: ID!): AllowedRegistry
@@ -12058,10 +12052,16 @@ type RootMutationType {
   ): SendVolumeCommandResult
 
   "Marks the file uploaded through the presigned upload URL as uploaded."
-  markFileBindAsUploaded(id: ID!, input: MarkFileBindAsUploadedInput): MarkFileBindAsUploadedResult
+  markFileBindAsUploaded(
+    id: ID!
+    input: MarkFileBindAsUploadedInput
+  ): MarkFileBindAsUploadedResult
 
   "Marks the file uploaded through the presigned upload URL as uploaded."
-  markEnvFileAsUploaded(id: ID!, input: MarkEnvFileAsUploadedInput): MarkEnvFileAsUploadedResult
+  markEnvFileAsUploaded(
+    id: ID!
+    input: MarkEnvFileAsUploadedInput
+  ): MarkEnvFileAsUploadedResult
 
   "Creates a new allowed registry."
   createAllowedRegistry(
