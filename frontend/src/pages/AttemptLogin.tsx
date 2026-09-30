@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Spinner } from "react-bootstrap";
 import { useLocation, useNavigate } from "react-router-dom";
 import { commitLocalUpdate, useRelayEnvironment } from "react-relay/hooks";
@@ -37,7 +37,18 @@ const AttemptLogin = () => {
   const navigate = useNavigate();
   const relayEnvironment = useRelayEnvironment();
 
+  const hasAttemptedLogin = useRef(false);
+
+  // Logging in is a side effect of reaching this page, so it must happen
+  // exactly once per mount. The ref guard is what keeps StrictMode's
+  // double-invoked effect from issuing two login calls in development, while
+  // still letting the effect declare the values it actually reads.
   useEffect(() => {
+    if (hasAttemptedLogin.current) {
+      return;
+    }
+    hasAttemptedLogin.current = true;
+
     if (!tenantSlug || !authToken) {
       // Without new credentials, just go to `redirectTo` or default
       // authenticated route
@@ -65,7 +76,15 @@ const AttemptLogin = () => {
         logout();
         navigate(Route.login, { replace: true });
       });
-  }, []);
+  }, [
+    authToken,
+    login,
+    logout,
+    navigate,
+    redirectTo,
+    relayEnvironment,
+    tenantSlug,
+  ]);
 
   return (
     <div data-testid="app" className="d-flex vh-100 flex-column">
