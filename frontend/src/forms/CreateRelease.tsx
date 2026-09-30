@@ -56,6 +56,10 @@ const initialData: ReleaseFormData = {
   containerDependencies: [],
 };
 
+// Stable fallback so memos keyed on watched values keep a constant identity
+// while nothing is selected yet.
+const EMPTY_CONTAINERS: NonNullable<ReleaseFormData["containers"]> = [];
+
 const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
   const containers = data.containers.map((container) => ({
     id: container.id,
@@ -117,7 +121,7 @@ const CreateRelease = ({
     useWatch({
       control,
       name: "containers",
-    }) ?? [];
+    }) ?? EMPTY_CONTAINERS;
 
   const dependencyFieldArray = useFieldArray({
     control,

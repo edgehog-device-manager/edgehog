@@ -862,7 +862,6 @@ const InstallApplicationModal = ({
     deviceId,
     commitMarkFileBindAsUploaded,
     commitMarkEnvFileAsUploaded,
-    intl,
     resetSelections,
     setErrorFeedback,
     onToggleModal,
