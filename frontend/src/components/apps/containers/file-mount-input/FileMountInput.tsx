@@ -681,7 +681,13 @@ const FileMountInput = forwardRef<FileMountInputRef, FileMountInputProps>(
             onError: reject,
           });
         }),
-      [createManagedDownloadRequest, deviceId],
+      [
+        createManagedDownloadRequest,
+        deviceId,
+        overrideFileMode,
+        overrideGroupId,
+        overrideUserId,
+      ],
     );
 
     // ---------------------------------------------------------------------------
