@@ -293,6 +293,16 @@ it("deploys with an env file instead of env vars in env file mode", async () => 
 
   await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
 
+  await waitFor(() =>
+    expect(
+      relayEnvironment.mock
+        .getAllOperations()
+        .some(
+          (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+        ),
+    ).toBe(true),
+  );
+
   const mutationOperation = relayEnvironment.mock.findOperation(
     (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
   );
@@ -368,6 +378,17 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
     await userEvent.upload(fileInput, file);
 
     await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+    await waitFor(() =>
+      expect(
+        relayEnvironment.mock
+          .getAllOperations()
+          .some(
+            (op) =>
+              op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+          ),
+      ).toBe(true),
+    );
 
     const mutationOperation = relayEnvironment.mock.findOperation(
       (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
@@ -477,6 +498,16 @@ it("deploys without env config by default", async () => {
   // No env mode selected: the deploy carries no env or envFiles configs
   await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
 
+  await waitFor(() =>
+    expect(
+      relayEnvironment.mock
+        .getAllOperations()
+        .some(
+          (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+        ),
+    ).toBe(true),
+  );
+
   const mutationOperation = relayEnvironment.mock.findOperation(
     (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
   );
@@ -530,6 +561,16 @@ it("shows per-container strategy and editor in env override mode", async () => {
   expect(screen.getByText("Environment")).toBeVisible();
   // The default empty object carries no vars, so deploy stays config-free
   await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+  await waitFor(() =>
+    expect(
+      relayEnvironment.mock
+        .getAllOperations()
+        .some(
+          (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+        ),
+    ).toBe(true),
+  );
 
   const mutationOperation = relayEnvironment.mock.findOperation(
     (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,

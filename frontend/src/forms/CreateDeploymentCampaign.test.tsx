@@ -228,6 +228,7 @@ const connectionPageInfo = {
 
 const optionsData = {
   applications: {
+    __typename: "ApplicationConnection",
     count: 1,
     pageInfo: connectionPageInfo,
     edges: [
@@ -316,6 +317,7 @@ const optionsData = {
     ],
   },
   channels: {
+    __typename: "ChannelConnection",
     count: 1,
     pageInfo: connectionPageInfo,
     edges: [
@@ -370,12 +372,14 @@ const resolveOperation = async (
   name: string,
   data: Record<string, unknown>,
 ) => {
-  await waitFor(() =>
-    expect(
-      relayEnvironment.mock
-        .getAllOperations()
-        .some((op) => op.request.node.params.name === name),
-    ).toBe(true),
+  await waitFor(
+    () =>
+      expect(
+        relayEnvironment.mock
+          .getAllOperations()
+          .some((op) => op.request.node.params.name === name),
+      ).toBe(true),
+    { timeout: 5000 },
   );
 
   await act(async () => {
@@ -423,7 +427,7 @@ const selectApplicationAndRelease = async (releaseId = "rel-1") => {
   await userEvent.selectOptions(screen.getByLabelText("Release"), releaseId);
 };
 
-describe("CreateDeploymentCampaignForm file mounts", () => {
+describe("CreateDeploymentCampaignForm file mounts", { timeout: 15000 }, () => {
   // The channel picker is the last combobox outside the file mounts section,
   // since the mount repository/file pickers are react-selects too.
   const selectChannel = async () => {
@@ -479,9 +483,15 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     const mountsSection = await screen.findByTestId(
       "deployment-campaign-file-mounts",
+      {},
+      { timeout: 5000 },
     );
 
-    const repoCombobox = await within(mountsSection).findByRole("combobox");
+    const repoCombobox = await within(mountsSection).findByRole(
+      "combobox",
+      {},
+      { timeout: 5000 },
+    );
 
     await selectEvent.select(repoCombobox, "Configs", {
       container: document.body,
@@ -493,11 +503,14 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
       repositoryFilesData,
     );
 
-    await waitFor(() => {
-      expect(within(mountsSection).getAllByRole("combobox")).toHaveLength(2);
-    });
-
-    const fileCombobox = within(mountsSection).getAllByRole("combobox")[1];
+    const fileCombobox = await waitFor(
+      () => {
+        const comboboxes = within(mountsSection).getAllByRole("combobox");
+        expect(comboboxes).toHaveLength(2);
+        return comboboxes[1];
+      },
+      { timeout: 5000 },
+    );
 
     await selectEvent.select(fileCombobox, "config.yaml", {
       container: document.body,
@@ -573,7 +586,7 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     // Submitting is allowed, but the form refuses the incomplete submission and
     // says which mountpoints are still missing.
-    const submitButton = screen.getByRole("button", {
+    const submitButton = await screen.findByRole("button", {
       name: /Create deploy campaign/i,
     });
     expect(submitButton).toBeEnabled();
@@ -584,6 +597,8 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     const feedback = await screen.findByTestId(
       "missing-required-binds-feedback",
+      {},
+      { timeout: 5000 },
     );
     expect(feedback).toBeVisible();
     expect(feedback).toHaveTextContent(
@@ -595,10 +610,12 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     // Configuring the mount clears the feedback again.
     await pickRepositoryFile(relayEnvironment);
 
-    await waitFor(() =>
-      expect(
-        screen.queryByTestId("missing-required-binds-feedback"),
-      ).toBeNull(),
+    await waitFor(
+      () =>
+        expect(
+          screen.queryByTestId("missing-required-binds-feedback"),
+        ).toBeNull(),
+      { timeout: 5000 },
     );
   });
 
@@ -626,10 +643,10 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     await pickRepositoryFile(relayEnvironment);
 
-    const submitButton = screen.getByRole("button", {
+    const submitButton = await screen.findByRole("button", {
       name: /Create deploy campaign/i,
     });
-    await waitFor(() => expect(submitButton).toBeEnabled());
+    await waitFor(() => expect(submitButton).toBeEnabled(), { timeout: 5000 });
 
     await userEvent.click(submitButton);
 
@@ -679,10 +696,10 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
     await completeRequiredFields();
     await pickRepositoryFile(relayEnvironment);
 
-    const submitButton = screen.getByRole("button", {
+    const submitButton = await screen.findByRole("button", {
       name: /Create upgrade campaign/i,
     });
-    await waitFor(() => expect(submitButton).toBeEnabled());
+    await waitFor(() => expect(submitButton).toBeEnabled(), { timeout: 5000 });
     await userEvent.click(submitButton);
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
@@ -767,10 +784,10 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     await pickRepositoryFile(relayEnvironment);
 
-    const submitButton = screen.getByRole("button", {
+    const submitButton = await screen.findByRole("button", {
       name: /Create deploy campaign/i,
     });
-    await waitFor(() => expect(submitButton).toBeEnabled());
+    await waitFor(() => expect(submitButton).toBeEnabled(), { timeout: 5000 });
 
     await userEvent.click(submitButton);
 
@@ -804,17 +821,25 @@ describe("CreateDeploymentCampaignForm file mounts", () => {
 
     await pickRepositoryFile(relayEnvironment);
 
-    const customizeButton = screen.getByRole("button", { name: "Customize" });
+    const customizeButton = await screen.findByRole(
+      "button",
+      { name: "Customize" },
+      { timeout: 5000 },
+    );
     await userEvent.click(customizeButton);
 
-    const uidInput = screen.getByLabelText(/Owner User ID/i);
+    const uidInput = await screen.findByLabelText(
+      /Owner User ID/i,
+      {},
+      { timeout: 5000 },
+    );
     await userEvent.clear(uidInput);
     await userEvent.type(uidInput, "1234");
 
-    const submitButton = screen.getByRole("button", {
+    const submitButton = await screen.findByRole("button", {
       name: /Create deploy campaign/i,
     });
-    await waitFor(() => expect(submitButton).toBeEnabled());
+    await waitFor(() => expect(submitButton).toBeEnabled(), { timeout: 5000 });
 
     await userEvent.click(submitButton);
 

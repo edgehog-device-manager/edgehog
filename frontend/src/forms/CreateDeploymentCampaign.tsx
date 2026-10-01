@@ -670,7 +670,11 @@ const CreateDeploymentCampaignForm = ({
             })}
             isLoading={isLoadingNextApplication}
             onMenuScrollToBottom={onLoadMoreApplicationOptions}
-            onInputChange={setSearchApplicationText}
+            onInputChange={(text, { action }) => {
+              if (action === "input-change") {
+                setSearchApplicationText(text);
+              }
+            }}
             noOptionsMessage={({ inputValue }) =>
               noApplicationOptionsMessage(intl, inputValue)
             }
@@ -1042,7 +1046,11 @@ const CreateDeploymentCampaignForm = ({
             }))}
             isLoading={isLoadingNextChannel}
             onMenuScrollToBottom={onLoadMoreChannelOptions}
-            onInputChange={setSearchChannelText}
+            onInputChange={(text, { action }) => {
+              if (action === "input-change") {
+                setSearchChannelText(text);
+              }
+            }}
             placeholder={intl.formatMessage({
               id: "forms.CreateDeploymentCampaign.channelOption",
               defaultMessage: "Search or select a channel...",
