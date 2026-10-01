@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,16 +19,36 @@
 #
 
 defmodule Edgehog.Astarte.Device.StorageUsage.StorageUnit do
-  @moduledoc false
+  @moduledoc """
+  Device storage units. They represent a storage available on a device and
+  provide insightful data on it:
+
+  - label       :: is the storage identification label. Unique per storage unit.
+  - mounts      :: is a list of paths mounted on the device.
+  - name        :: an optional name for the storage
+  - fstype      :: the filesystem type of the storage unit
+  - kind        :: the storage unit kind
+  - total_bytes :: the storage unit total bytes
+  - free_bytes  :: the storage unit free bytes
+  """
   @enforce_keys [:label]
+
   defstruct [
     :label,
+    :mounts,
+    :name,
+    :fstype,
+    :kind,
     :total_bytes,
     :free_bytes
   ]
 
   @type t() :: %__MODULE__{
           label: String.t(),
+          mounts: list(String.t()) | nil,
+          name: String.t() | nil,
+          fstype: String.t() | nil,
+          kind: String.t() | nil,
           total_bytes: integer() | nil,
           free_bytes: integer() | nil
         }

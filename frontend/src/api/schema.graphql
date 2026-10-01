@@ -11601,6 +11601,18 @@ type StorageUnit {
   "The label of the storage unit."
   label: String!
 
+  "Optional path mounted on the device"
+  mounts: [String]
+
+  "Optional name of the storage"
+  name: String
+
+  "Optional filesystem of the storage"
+  fstype: String
+
+  "Optional kind of storage"
+  kind: String
+
   "The total number of bytes of the storage unit."
   totalBytes: Int
 

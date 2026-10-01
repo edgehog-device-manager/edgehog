@@ -38,6 +38,10 @@ const STORAGE_TABLE_FRAGMENT = graphql`
       label
       totalBytes
       freeBytes
+      mounts
+      name
+      fstype
+      kind
     }
   }
 `;
@@ -52,9 +56,69 @@ const columns = [
     header: () => (
       <FormattedMessage
         id="components.fleet.devices.storage-table.StorageTable.labelTitle"
-        defaultMessage="Storage Unit"
+        defaultMessage="Unit label"
       />
     ),
+  }),
+  columnHelper.accessor("name", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.devices.storage-table.StorageTable.nameTitle"
+        defaultMessage="Name"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value === null ? "" : <span className="text-nowrap">{value}</span>;
+    },
+  }),
+  columnHelper.accessor("mounts", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.devices.storage-table.StorageTable.mountsTitle"
+        defaultMessage="Mountpoints"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const value = getValue();
+      if (value == null) return "";
+      return (
+        <span className="d-flex flex-wrap gap-1">
+          {value.map((mount) => (
+            <span
+              key={mount}
+              className="badge text-bg-light font-monospace text-nowrap fw-normal border"
+            >
+              {mount}
+            </span>
+          ))}
+        </span>
+      );
+    },
+  }),
+  columnHelper.accessor("fstype", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.devices.storage-table.StorageTable.fstypeTitle"
+        defaultMessage="File system"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value === null ? "" : <span className="text-nowrap">{value}</span>;
+    },
+  }),
+  columnHelper.accessor("kind", {
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.devices.storage-table.StorageTable.kindTitle"
+        defaultMessage="Storage type"
+      />
+    ),
+    cell: ({ getValue }) => {
+      const value = getValue();
+      return value === null ? "" : <span className="text-nowrap">{value}</span>;
+    },
   }),
   columnHelper.accessor("totalBytes", {
     header: () => (

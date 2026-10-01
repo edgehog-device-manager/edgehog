@@ -452,6 +452,17 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
   const upgradeButton = screen.getByRole("button", { name: "Upgrade" });
   await userEvent.click(upgradeButton);
 
+  await waitFor(() =>
+    expect(
+      relayEnvironment.mock
+        .getAllOperations()
+        .some(
+          (op) =>
+            op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+        ),
+    ).toBe(true),
+  );
+
   const upgradeOperation = relayEnvironment.mock.findOperation(
     (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );

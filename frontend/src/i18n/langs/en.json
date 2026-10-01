@@ -1733,8 +1733,20 @@
   "components.fleet.devices.storage-table.StorageTable.freeSpaceTitle": {
     "defaultMessage": "Free Space"
   },
+  "components.fleet.devices.storage-table.StorageTable.fstypeTitle": {
+    "defaultMessage": "File system"
+  },
+  "components.fleet.devices.storage-table.StorageTable.kindTitle": {
+    "defaultMessage": "Storage type"
+  },
   "components.fleet.devices.storage-table.StorageTable.labelTitle": {
-    "defaultMessage": "Storage Unit"
+    "defaultMessage": "Unit label"
+  },
+  "components.fleet.devices.storage-table.StorageTable.mountsTitle": {
+    "defaultMessage": "Mountpoints"
+  },
+  "components.fleet.devices.storage-table.StorageTable.nameTitle": {
+    "defaultMessage": "Name"
   },
   "components.fleet.devices.storage-table.StorageTable.noStorage.message": {
     "defaultMessage": "The device has not detected any storage unit yet."

@@ -51,6 +51,18 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
     @desc "The label of the storage unit."
     field :label, non_null(:string)
 
+    @desc "Optional path mounted on the device"
+    field :mounts, list_of(:string)
+
+    @desc "Optional name of the storage"
+    field :name, :string
+
+    @desc "Optional filesystem of the storage"
+    field :fstype, :string
+
+    @desc "Optional kind of storage"
+    field :kind, :string
+
     @desc "The total number of bytes of the storage unit."
     field :total_bytes, :integer
 

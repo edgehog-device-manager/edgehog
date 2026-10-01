@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 SECO Mind Srl
+# Copyright 2021-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -46,22 +46,26 @@ defmodule Edgehog.Astarte.Device.StorageUsage do
     end
   end
 
-  defp parse_storage_unit(unit_label, storage_unit) when is_binary(unit_label) do
+  defp parse_storage_unit(nil, storage_unit), do: parse_storage_unit("unknown", storage_unit)
+
+  defp parse_storage_unit(unit_label, storage_unit) do
     %StorageUnit{
       label: unit_label,
       total_bytes: parse_longinteger(storage_unit["totalBytes"]),
-      free_bytes: parse_longinteger(storage_unit["freeBytes"])
+      free_bytes: parse_longinteger(storage_unit["freeBytes"]),
+      name: storage_unit["name"],
+      mounts: storage_unit["mounts"],
+      fstype: storage_unit["fstype"],
+      kind: storage_unit["kind"]
     }
   end
 
-  defp parse_longinteger(string) when is_binary(string) do
+  defp parse_longinteger(nil), do: nil
+
+  defp parse_longinteger(string) do
     case Integer.parse(string) do
       {integer, _remainder} -> integer
       _ -> nil
     end
-  end
-
-  defp parse_longinteger(_term) do
-    nil
   end
 end

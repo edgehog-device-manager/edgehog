@@ -324,6 +324,13 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
+    storage: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.StorageUsage",
+        major: 1,
+        minor: 0
+      }
+    ],
     system_info: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.SystemInfo",
