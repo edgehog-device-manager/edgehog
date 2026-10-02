@@ -20,7 +20,13 @@
 
 import { Suspense, type ReactNode } from "react";
 import { it, expect, vi } from "vitest";
-import { act, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import selectEvent from "react-select-event";
 import { createMockEnvironment } from "relay-test-utils";
@@ -176,6 +182,25 @@ const resolveUpgradeDataQuery = (
   });
 };
 
+const waitForOperation = async (
+  relayEnvironment: ReturnType<typeof createMockEnvironment>,
+  name: string,
+) => {
+  await waitFor(
+    () =>
+      expect(
+        relayEnvironment.mock
+          .getAllOperations()
+          .some((op) => op.request.node.params.name === name),
+      ).toBe(true),
+    { timeout: 5000 },
+  );
+
+  return relayEnvironment.mock.findOperation(
+    (op) => op.request.node.params.name === name,
+  );
+};
+
 it("renders the modal and disables upgrade until target release is selected", async () => {
   const { relayEnvironment } = renderModal();
   resolveUpgradeDataQuery(relayEnvironment);
@@ -248,8 +273,9 @@ it("upgrades without container configs by default", async () => {
 
   await userEvent.click(upgradeButton);
 
-  const upgradeOperation = relayEnvironment.mock.findOperation(
-    (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );
 
   expect(upgradeOperation.request.variables).toEqual({
@@ -303,8 +329,9 @@ it("shows per-container strategy and editor in env override mode", async () => {
 
   await userEvent.click(screen.getByRole("button", { name: "Upgrade" }));
 
-  const upgradeOperation = relayEnvironment.mock.findOperation(
-    (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );
 
   expect(upgradeOperation.request.variables).toEqual({
@@ -346,8 +373,9 @@ it("upgrades with an env file in env file mode", async () => {
 
   await userEvent.click(upgradeButton);
 
-  const upgradeOperation = relayEnvironment.mock.findOperation(
-    (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );
 
   expect(upgradeOperation.request.variables).toEqual({
@@ -391,8 +419,9 @@ it("upgrades with file mounts configured", async () => {
 
   await userEvent.click(upgradeButton);
 
-  const upgradeOperation = relayEnvironment.mock.findOperation(
-    (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );
 
   expect(upgradeOperation.request.variables).toEqual({
@@ -452,19 +481,9 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
   const upgradeButton = screen.getByRole("button", { name: "Upgrade" });
   await userEvent.click(upgradeButton);
 
-  await waitFor(() =>
-    expect(
-      relayEnvironment.mock
-        .getAllOperations()
-        .some(
-          (op) =>
-            op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
-        ),
-    ).toBe(true),
-  );
-
-  const upgradeOperation = relayEnvironment.mock.findOperation(
-    (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );
 
   expect(upgradeOperation.request.variables.input.configs).toEqual([
@@ -518,9 +537,9 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
   );
   expect((fetchMock.mock.calls[0] as any)?.[1]?.body).toBeInstanceOf(File);
 
-  const markUploadedOperation = relayEnvironment.mock.findOperation(
-    (op) =>
-      op.request.node.params.name === MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME,
+  const markUploadedOperation = await waitForOperation(
+    relayEnvironment,
+    MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME,
   );
 
   expect(markUploadedOperation.request.variables).toEqual({
@@ -589,8 +608,9 @@ it("uploads a file mount via presigned URL and marks it as uploaded", async () =
   const upgradeButton = screen.getByRole("button", { name: "Upgrade" });
   await userEvent.click(upgradeButton);
 
-  const upgradeOperation = relayEnvironment.mock.findOperation(
-    (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
   );
 
   expect(upgradeOperation.request.variables.input.configs).toEqual([
@@ -649,9 +669,9 @@ it("uploads a file mount via presigned URL and marks it as uploaded", async () =
   );
   expect((fetchMock.mock.calls[0] as any)?.[1]?.body).toBeInstanceOf(File);
 
-  const markUploadedOperation = relayEnvironment.mock.findOperation(
-    (op) =>
-      op.request.node.params.name === MARK_FILE_BIND_AS_UPLOADED_MUTATION_NAME,
+  const markUploadedOperation = await waitForOperation(
+    relayEnvironment,
+    MARK_FILE_BIND_AS_UPLOADED_MUTATION_NAME,
   );
 
   expect(markUploadedOperation.request.variables).toEqual({
@@ -682,4 +702,66 @@ it("uploads a file mount via presigned URL and marks it as uploaded", async () =
   await waitFor(() => {
     expect(onToggleModal).toHaveBeenCalledWith(false);
   });
+});
+
+it("renders inside a form element with a submit Upgrade button", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveUpgradeDataQuery(relayEnvironment);
+
+  await screen.findByText("Upgrade Deployment");
+
+  const upgradeButton = screen.getByRole("button", { name: "Upgrade" });
+  expect(upgradeButton).toHaveAttribute("type", "submit");
+  expect(screen.getByTestId("upgrade-deployment-form")).toBeInTheDocument();
+  expect(screen.getByTestId("modal-cancel-button")).toBeInTheDocument();
+});
+
+it("renders file mounts configuration with number inputs for userId and groupId", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveUpgradeDataQuery(relayEnvironment);
+
+  await screen.findByText("Upgrade Deployment");
+
+  const [releaseCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(releaseCombobox, "3.0.0", {
+    container: document.body,
+  });
+
+  const mountsToggle = await screen.findByRole("button", {
+    name: "File Mounts Configuration",
+  });
+  await userEvent.click(mountsToggle);
+
+  await userEvent.click(screen.getByRole("radio", { name: "Upload" }));
+  await userEvent.click(screen.getByRole("button", { name: "Customize" }));
+
+  const userIdInput = screen.getByLabelText("Owner User ID (UID)");
+  const groupIdInput = screen.getByLabelText("Group ID (GID)");
+
+  expect(userIdInput).toHaveAttribute("type", "number");
+  expect(groupIdInput).toHaveAttribute("type", "number");
+
+  await userEvent.type(userIdInput, "1000");
+  expect(userIdInput).toHaveValue(1000);
+
+  await userEvent.type(groupIdInput, "1001");
+  expect(groupIdInput).toHaveValue(1001);
+});
+
+it("prevents form submission when required fields are missing", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveUpgradeDataQuery(relayEnvironment);
+
+  await screen.findByText("Upgrade Deployment");
+
+  const form = screen.getByTestId("upgrade-deployment-form");
+  fireEvent.submit(form);
+
+  // Upgrade mutation should not be called because useForm validation prevents submission
+  const upgradeOps = relayEnvironment.mock
+    .getAllOperations()
+    .filter(
+      (op) => op.request.node.params.name === UPGRADE_DEPLOYMENT_MUTATION_NAME,
+    );
+  expect(upgradeOps.length).toBe(0);
 });

@@ -20,7 +20,7 @@
 
 import { Suspense, type ReactNode } from "react";
 import { it, expect, vi } from "vitest";
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, fireEvent, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import selectEvent from "react-select-event";
 import { createMockEnvironment } from "relay-test-utils";
@@ -95,6 +95,39 @@ const applicationsData = {
                           name: "app",
                           fileMounts: {
                             edges: [],
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              {
+                node: {
+                  id: "rel-4",
+                  version: "4.0.0",
+                  systemModels: [],
+                  containers: {
+                    edges: [
+                      {
+                        node: {
+                          id: "container-2",
+                          name: "app-with-mount",
+                          fileMounts: {
+                            edges: [
+                              {
+                                node: {
+                                  id: "mount-1",
+                                  mountpoint: "/etc/app.conf",
+                                  required: false,
+                                  defaultFileId: null,
+                                  defaultFile: null,
+                                  fileMode: null,
+                                  userId: null,
+                                  groupId: null,
+                                },
+                              },
+                            ],
                           },
                         },
                       },
@@ -581,4 +614,70 @@ it("shows per-container strategy and editor in env override mode", async () => {
       releaseId: "rel-3",
     },
   });
+});
+
+it("renders inside a form element with a submit Deploy button", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const deployButton = screen.getByRole("button", { name: "Deploy" });
+  expect(deployButton).toHaveAttribute("type", "submit");
+  expect(screen.getByTestId("install-application-form")).toBeInTheDocument();
+  expect(screen.getByTestId("modal-cancel-button")).toBeInTheDocument();
+});
+
+it("renders file mounts configuration with number inputs for userId and groupId", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const [appCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(appCombobox, "App One", {
+    container: document.body,
+  });
+  await selectEvent.select(screen.getAllByRole("combobox")[1], "4.0.0", {
+    container: document.body,
+  });
+
+  await userEvent.click(
+    await screen.findByRole("button", {
+      name: "File Mounts Configuration",
+    }),
+  );
+
+  await userEvent.click(screen.getByRole("radio", { name: "Upload" }));
+  await userEvent.click(screen.getByRole("button", { name: "Customize" }));
+
+  const userIdInput = screen.getByLabelText("Owner User ID (UID)");
+  const groupIdInput = screen.getByLabelText("Group ID (GID)");
+
+  expect(userIdInput).toHaveAttribute("type", "number");
+  expect(groupIdInput).toHaveAttribute("type", "number");
+
+  await userEvent.type(userIdInput, "1000");
+  expect(userIdInput).toHaveValue(1000);
+
+  await userEvent.type(groupIdInput, "1001");
+  expect(groupIdInput).toHaveValue(1001);
+});
+
+it("prevents form submission when required fields are missing", async () => {
+  const { relayEnvironment } = renderModal();
+  resolveApplicationsQuery(relayEnvironment);
+
+  await screen.findByText("Install Application");
+
+  const form = screen.getByTestId("install-application-form");
+  fireEvent.submit(form);
+
+  // Deploy mutation should not be called because useForm validation prevents submission
+  const deployOps = relayEnvironment.mock
+    .getAllOperations()
+    .filter(
+      (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+    );
+  expect(deployOps.length).toBe(0);
 });
