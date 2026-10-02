@@ -20,7 +20,13 @@
 
 import { Suspense } from "react";
 import { describe, it, expect, vi } from "vitest";
-import { act, screen, waitFor, within } from "@testing-library/react";
+import {
+  act,
+  fireEvent,
+  screen,
+  waitFor,
+  within,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import selectEvent from "react-select-event";
 import { createMockEnvironment, type MockEnvironment } from "relay-test-utils";
@@ -67,6 +73,24 @@ vi.mock("@/components/apps/releases/release-select/ReleaseSelect", () => ({
         <option value="rel-2">2.0.0</option>
       </select>
     ) : null,
+}));
+
+// Monaco cannot load in jsdom, so the JSON editor is stubbed with a textarea:
+// the form only cares about the value flowing through onChange.
+vi.mock("@/components/ui/monaco-json-editor/MonacoJsonEditor", () => ({
+  default: ({
+    value,
+    onChange,
+  }: {
+    value?: string;
+    onChange?: (value: string | undefined) => void;
+  }) => (
+    <textarea
+      aria-label="Environment variables JSON"
+      value={value}
+      onChange={(event) => onChange?.(event.target.value)}
+    />
+  ),
 }));
 
 const TEST_OPTIONS_QUERY = graphql`
@@ -678,12 +702,23 @@ describe("CreateDeploymentCampaignForm file mounts", { timeout: 15000 }, () => {
     await selectOperationType("Upgrade");
     await selectApplicationAndRelease();
 
+    // The mounts to configure belong to the target release, so nothing is offered
+    // until a target release is picked.
+    expect(
+      screen.queryByTestId("deployment-campaign-file-mounts"),
+    ).not.toBeInTheDocument();
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("Target release"),
+      "rel-2",
+    );
+
     expect(
       await screen.findByTestId("deployment-campaign-file-mounts"),
     ).toBeInTheDocument();
   });
 
-  it("sends the repository file id for upgrade campaigns", async () => {
+  it("sends the target release file bind for upgrade campaigns", async () => {
     const { relayEnvironment, onSubmit } = await renderForm();
 
     await selectOperationType("Upgrade");
@@ -693,6 +728,9 @@ describe("CreateDeploymentCampaignForm file mounts", { timeout: 15000 }, () => {
       "rel-2",
     );
     await screen.findByTestId("deployment-campaign-file-mounts");
+    expect(screen.getByTestId("container-mounts-container-2")).toBeVisible();
+    expect(screen.queryByTestId("container-mounts-container-1")).toBeNull();
+
     await completeRequiredFields();
     await pickRepositoryFile(relayEnvironment);
 
@@ -704,25 +742,165 @@ describe("CreateDeploymentCampaignForm file mounts", { timeout: 15000 }, () => {
 
     await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
 
+    // An upgrade configures the release it upgrades *to*, so the bind must
+    // describe the target release's container and mount, never the source one.
     expect(onSubmit.mock.calls[0][0].campaignMechanism).toEqual({
       deploymentUpgrade: expect.objectContaining({
+        releaseId: "rel-1",
+        targetReleaseId: "rel-2",
         configs: [
           {
-            containerId: "container-1",
+            containerId: "container-2",
             envStrategy: "merge",
             fileBinds: [
               {
-                fileMountId: "mount-1",
+                fileMountId: "mount-2",
                 fileId: "file-1",
-                fileMode: 493,
-                userId: 0,
-                groupId: 0,
+                fileMode: 420,
+                userId: 1000,
+                groupId: 1001,
               },
             ],
           },
         ],
       }),
     });
+  });
+
+  it("sends the target release environment configuration for upgrade campaigns", async () => {
+    const { relayEnvironment, onSubmit } = await renderForm();
+
+    await selectOperationType("Upgrade");
+    await selectApplicationAndRelease();
+    await userEvent.selectOptions(
+      screen.getByLabelText("Target release"),
+      "rel-2",
+    );
+
+    const envToggle = await screen.findByRole("button", {
+      name: "Environment Configuration",
+    });
+    await userEvent.click(envToggle);
+
+    const envPanel = await screen.findByTestId(
+      "container-environment-container-2",
+    );
+    expect(
+      screen.queryByTestId("container-environment-container-1"),
+    ).toBeNull();
+
+    await userEvent.click(
+      within(envPanel).getByRole("radio", { name: "Env override" }),
+    );
+    fireEvent.change(
+      within(envPanel).getByLabelText("Environment variables JSON"),
+      { target: { value: '{"LOG_LEVEL":"debug"}' } },
+    );
+
+    await completeRequiredFields();
+    await pickRepositoryFile(relayEnvironment);
+
+    const submitButton = await screen.findByRole("button", {
+      name: /Create upgrade campaign/i,
+    });
+    await waitFor(() => expect(submitButton).toBeEnabled(), { timeout: 5000 });
+    await userEvent.click(submitButton);
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+
+    expect(
+      onSubmit.mock.calls[0][0].campaignMechanism.deploymentUpgrade.configs,
+    ).toEqual([
+      {
+        containerId: "container-2",
+        envStrategy: "merge",
+        env: [{ key: "LOG_LEVEL", value: "debug" }],
+        fileBinds: [
+          {
+            fileMountId: "mount-2",
+            fileId: "file-1",
+            fileMode: 420,
+            userId: 1000,
+            groupId: 1001,
+          },
+        ],
+      },
+    ]);
+  });
+
+  it("discards the target release configuration when the target release changes", async () => {
+    const { relayEnvironment } = await renderForm();
+
+    await selectOperationType("Upgrade");
+    await selectApplicationAndRelease();
+    await userEvent.selectOptions(
+      screen.getByLabelText("Target release"),
+      "rel-2",
+    );
+
+    await userEvent.click(
+      await screen.findByRole("button", { name: "Environment Configuration" }),
+    );
+    const envPanel = await screen.findByTestId(
+      "container-environment-container-2",
+    );
+    await userEvent.click(
+      within(envPanel).getByRole("radio", { name: "Env override" }),
+    );
+    fireEvent.change(
+      within(envPanel).getByLabelText("Environment variables JSON"),
+      { target: { value: '{"LOG_LEVEL":"debug"}' } },
+    );
+    await pickRepositoryFile(relayEnvironment);
+
+    const mountsToggle = await screen.findByRole("button", {
+      name: "File Mounts Configuration",
+    });
+    expect(mountsToggle).toHaveAttribute("aria-expanded", "true");
+
+    await userEvent.selectOptions(
+      screen.getByLabelText("Target release"),
+      "rel-1",
+    );
+    await userEvent.selectOptions(
+      screen.getByLabelText("Target release"),
+      "rel-2",
+    );
+
+    const resetEnvPanel = await screen.findByTestId(
+      "container-environment-container-2",
+    );
+    expect(
+      within(resetEnvPanel).getByRole("radio", { name: "No config" }),
+    ).toBeChecked();
+    expect(
+      within(resetEnvPanel).queryByLabelText("Environment variables JSON"),
+    ).toBeNull();
+
+    const resetMountsToggle = await screen.findByRole("button", {
+      name: "File Mounts Configuration",
+    });
+    expect(resetMountsToggle).toHaveAttribute("aria-expanded", "false");
+  });
+
+  // A target release picked for one source release cannot be carried over to
+  // another one.
+  it("clears the target release when the source release changes", async () => {
+    await renderForm();
+
+    await selectOperationType("Upgrade");
+    await selectApplicationAndRelease();
+
+    const targetReleaseSelect = screen.getByLabelText("Target release");
+    await userEvent.selectOptions(targetReleaseSelect, "rel-2");
+    expect(targetReleaseSelect).toHaveValue("rel-2");
+
+    await userEvent.selectOptions(screen.getByLabelText("Release"), "rel-2");
+
+    expect(screen.getByLabelText("Target release")).toHaveValue("");
+    expect(
+      screen.queryByTestId("deployment-campaign-file-mounts"),
+    ).not.toBeInTheDocument();
   });
 
   // Operations without configs have nothing to configure on the device, so an

@@ -348,6 +348,7 @@ const CreateDeploymentCampaignForm = ({
 
   const selectedApp = useWatch({ control, name: "application" });
   const selectedRelease = useWatch({ control, name: "release" });
+  const selectedTargetRelease = useWatch({ control, name: "targetRelease" });
   const selectedOperationType = useWatch({ control, name: "operationType" });
 
   const supportsFileMounts =
@@ -355,6 +356,14 @@ const CreateDeploymentCampaignForm = ({
     OPERATION_TYPES_WITH_CONFIGS.includes(selectedOperationType);
 
   const supportsEnvironmentConfiguration = supportsFileMounts;
+
+  // An upgrade configures the release being upgraded to, so file mounts and
+  // environment settings must describe the target release's containers. Every
+  // other configurable operation deploys the selected release itself.
+  const configurableRelease =
+    selectedOperationType === "Upgrade"
+      ? selectedTargetRelease
+      : selectedRelease;
 
   const {
     data: applicationPaginationData,
@@ -444,7 +453,7 @@ const CreateDeploymentCampaignForm = ({
   }, [channelPaginationData]);
 
   const releaseContainers = useMemo<ContainerRecord[]>(() => {
-    if (!selectedApp?.id || !selectedRelease?.id) {
+    if (!selectedApp?.id || !configurableRelease?.id) {
       return [];
     }
 
@@ -454,14 +463,14 @@ const CreateDeploymentCampaignForm = ({
 
     const release = application?.releases?.edges
       ?.map((edge) => edge?.node)
-      .find((node) => node?.id === selectedRelease.id);
+      .find((node) => node?.id === configurableRelease.id);
 
     return (
       release?.containers?.edges
         ?.map((edge) => edge?.node)
         .filter((node): node is ContainerRecord => node != null) ?? []
     );
-  }, [applicationOptions, selectedApp, selectedRelease]);
+  }, [applicationOptions, selectedApp, configurableRelease]);
 
   const containersWithMounts = useMemo(() => {
     if (!supportsFileMounts) {
@@ -680,6 +689,7 @@ const CreateDeploymentCampaignForm = ({
             }
             onChange={() => {
               resetField("release");
+              resetField("targetRelease");
               resetMountBindings();
               resetEnvironmentConfiguration();
             }}
@@ -711,6 +721,7 @@ const CreateDeploymentCampaignForm = ({
                       value,
                       invalid,
                       onChange: (release) => {
+                        resetField("targetRelease");
                         resetMountBindings();
                         resetEnvironmentConfiguration();
                         onChange(release);
@@ -757,7 +768,11 @@ const CreateDeploymentCampaignForm = ({
                       controllerProps={{
                         value,
                         invalid,
-                        onChange,
+                        onChange: (release) => {
+                          resetMountBindings();
+                          resetEnvironmentConfiguration();
+                          onChange(release);
+                        },
                       }}
                     />
                   )}
