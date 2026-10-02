@@ -21,7 +21,7 @@ defmodule Edgehog.Containers do
   use Ash.Domain,
     extensions: [
       AshGraphql.Domain,
-      Ash.Authorizer
+      Ash.Policy.Authorizer
     ]
 
   alias Edgehog.Containers.Application
