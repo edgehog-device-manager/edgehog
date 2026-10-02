@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Controller,
   useFieldArray,
@@ -26,7 +26,10 @@ import {
   type UseFormReturn,
 } from "react-hook-form";
 import { FormattedMessage, useIntl } from "react-intl";
-import { Card, Col, Container, Row } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
+import Col from "@/components/ui/col/Col";
+import Container from "@/components/ui/container/Container";
+import Row from "@/components/ui/row/Row";
 
 import FilePermissionsInput from "@/components/ui/file-permissions/FilePermissionsInput";
 import { modeToOctal } from "@/lib/permissions";
@@ -34,9 +37,12 @@ import { envToString } from "@/lib/environment";
 
 import type {
   ContainerEnvVarInput,
-  CreateContainerInput,
-} from "@/api/__generated__/ContainerCreate_createContainer_Mutation.graphql";
-import type { ContainerCreate_getOptions_Query$data } from "@/api/__generated__/ContainerCreate_getOptions_Query.graphql";
+  ReleaseCreateContainersInput,
+} from "@/api/__generated__/ReleaseCreate_createRelease_Mutation.graphql";
+import type { hooks_ImageCredentialsOptionsFragment$key } from "@/api/__generated__/hooks_ImageCredentialsOptionsFragment.graphql";
+import type { hooks_FilesOptionsFragment$key } from "@/api/__generated__/hooks_FilesOptionsFragment.graphql";
+import type { hooks_NetworksOptionsFragment$key } from "@/api/__generated__/hooks_NetworksOptionsFragment.graphql";
+import type { hooks_VolumesOptionsFragment$key } from "@/api/__generated__/hooks_VolumesOptionsFragment.graphql";
 
 import Button from "@/components/ui/button/Button";
 import { useCollapsibleSections } from "@/components/ui/collapse-item/CollapseItem";
@@ -66,7 +72,7 @@ import Stack from "@/components/ui/stack/Stack";
 import StringArrayFormInput from "@/components/apps/containers/string-array-form-input/StringArrayFormInput";
 import FormFeedback from "@/forms/FormFeedback";
 import MultiSelectFormField from "@/forms/MultiSelectFormField";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 import {
   CapAddList,
   CapDropList,
@@ -75,7 +81,7 @@ import {
   type ContainerInputData,
 } from "@/forms/validation";
 
-export const restartPolicyOptions = [
+const restartPolicyOptions = [
   { value: "no", label: "No" },
   { value: "always", label: "Always" },
   { value: "on_failure", label: "On Failure" },
@@ -138,7 +144,7 @@ const omit = <T extends Record<string, unknown>, K extends keyof T>(
 
 const mapCreateContainerToInput = (
   data: ContainerInputData,
-): CreateContainerInput => {
+): ReleaseCreateContainersInput => {
   const { keys: labelKeys, values: labelValues } = mapKeyValuePairs(
     data.labels,
   );
@@ -290,7 +296,13 @@ type BaseSectionProps = {
 };
 
 type SectionWithQueryProps = BaseSectionProps & {
-  queryRef: ContainerCreate_getOptions_Query$data;
+  queryRef: hooks_ImageCredentialsOptionsFragment$key &
+    hooks_NetworksOptionsFragment$key &
+    hooks_VolumesOptionsFragment$key;
+};
+
+type FileMountsSectionProps = BaseSectionProps & {
+  queryRef: hooks_FilesOptionsFragment$key;
 };
 
 const NameSection = ({ form }: { form: UseFormReturn<ContainerInputData> }) => {
@@ -936,6 +948,24 @@ const StorageSection = ({
         <FieldHelp id="volumes" itemsAlignment="center">
           <div className="p-3 border rounded">
             <Stack gap={3}>
+              {volumes.fields.length > 0 && (
+                <Row className="mb-1 text-muted fw-semibold small g-2">
+                  <Col sm={6}>
+                    <FormattedMessage
+                      id="forms.CreateContainer.storageVolumeSelectLabel"
+                      defaultMessage="Volume"
+                    />
+                  </Col>
+                  <Col sm className="flex-grow-1">
+                    <FormattedMessage
+                      id="forms.CreateContainer.storageVolumeTargetLabel"
+                      defaultMessage="Target"
+                    />
+                  </Col>
+                  <Col xs="auto" style={{ width: "38px" }} />
+                </Row>
+              )}
+
               {volumes.fields.map((volume, i) => {
                 const error = (
                   errors.volumes as unknown as
@@ -955,54 +985,34 @@ const StorageSection = ({
                 );
 
                 return (
-                  <Stack
-                    key={volume.key}
-                    direction="horizontal"
-                    gap={3}
-                    className="align-items-start"
-                  >
-                    <FormRow
-                      id={`volume-${i}`}
-                      label={
-                        <FormattedMessage
-                          id="forms.CreateContainer.storageVolumeSelectLabel"
-                          defaultMessage="Volume"
-                        />
-                      }
-                    >
-                      <div style={{ width: "250px", margin: "0 auto" }}>
-                        <SelectFormField
-                          control={control}
-                          options={availableVolumeOptions}
-                          name={`volumes.${i}.id`}
-                        />
-                      </div>
+                  <Row key={volume.key} className="align-items-start g-2">
+                    <Col sm={6}>
+                      <SelectFormField
+                        control={control}
+                        options={availableVolumeOptions}
+                        name={`volumes.${i}.id`}
+                      />
                       <FormFeedback feedback={error?.id?.message} />
-                    </FormRow>
+                    </Col>
 
-                    <FormRow
-                      id={`volume-target-${i}`}
-                      label={
-                        <FormattedMessage
-                          id="forms.CreateContainer.storageVolumeTargetLabel"
-                          defaultMessage="Target"
-                        />
-                      }
-                    >
+                    <Col sm className="flex-grow-1">
                       <Form.Control
                         {...register(`volumes.${i}.target`)}
+                        placeholder="/path/in/container"
                         isInvalid={!!error?.target}
                       />
                       <FormFeedback feedback={error?.target?.message} />
-                    </FormRow>
+                    </Col>
 
-                    <Button
-                      variant="shadow-danger"
-                      onClick={() => volumes.remove(i)}
-                    >
-                      <Icon className="text-danger" icon="delete" />
-                    </Button>
-                  </Stack>
+                    <Col xs="auto">
+                      <Button
+                        variant="shadow-danger"
+                        onClick={() => volumes.remove(i)}
+                      >
+                        <Icon className="text-danger" icon="delete" />
+                      </Button>
+                    </Col>
+                  </Row>
                 );
               })}
 
@@ -2206,10 +2216,10 @@ const DeviceRequestsSection = ({ form, open, onToggle }: BaseSectionProps) => {
                   onClick={() => {
                     deviceRequests.append({
                       driver: "",
-                      count: -1,
+                      count: undefined,
                       deviceIds: [],
                       capabilities: [],
-                      options: "{}",
+                      options: undefined,
                     });
 
                     setSelectedRequest(0);
@@ -3139,7 +3149,7 @@ const FileMountsSection = ({
   queryRef,
   open,
   onToggle,
-}: SectionWithQueryProps) => {
+}: FileMountsSectionProps) => {
   const {
     control,
     register,
@@ -3269,9 +3279,12 @@ const FileMountsSection = ({
 };
 
 type CreateContainerProps = {
-  queryRef: ContainerCreate_getOptions_Query$data;
+  queryRef: hooks_ImageCredentialsOptionsFragment$key &
+    hooks_NetworksOptionsFragment$key &
+    hooks_VolumesOptionsFragment$key &
+    hooks_FilesOptionsFragment$key;
   isLoading?: boolean;
-  onSubmit: (data: CreateContainerInput) => void;
+  onSubmit: (data: ReleaseCreateContainersInput) => void;
   initialData: Partial<ContainerInputData>;
 };
 
@@ -3283,13 +3296,18 @@ const CreateContainer = ({
 }: CreateContainerProps) => {
   const form = useForm<ContainerInputData>({
     mode: "onTouched",
-    resolver: zodResolver(containerSchema) as never,
+    defaultValues: initialData,
+    resolver: zodResolver(containerSchema),
   });
 
   const { handleSubmit, reset } = form;
 
+  const initialDataRef = useRef(initialData);
   useEffect(() => {
-    reset(initialData);
+    if (initialData && initialData !== initialDataRef.current) {
+      initialDataRef.current = initialData;
+      reset(initialData);
+    }
   }, [initialData, reset]);
 
   const { toggleSection, isSectionOpen } =
@@ -3400,3 +3418,26 @@ const CreateContainer = ({
 };
 
 export default CreateContainer;
+
+export {
+  mapCreateContainerToInput,
+  restartPolicyOptions,
+  mapEnv,
+  type BaseSectionProps,
+  type SectionWithQueryProps,
+  type FileMountsSectionProps,
+  NameSection,
+  ImageSection,
+  NetworkSection,
+  StorageSection,
+  DeviceRequestsSection,
+  RuntimeSection,
+  DeviceMappingsSection,
+  ResourceLimitsSection,
+  SecuritySection,
+  FileMountsSection,
+  ProcessSection,
+  HealthcheckSection,
+  BlkioSection,
+  LoggingSection,
+};

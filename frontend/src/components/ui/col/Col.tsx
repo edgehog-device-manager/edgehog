@@ -19,5 +19,7 @@
 */
 
 import Col from "react-bootstrap/Col";
+import type { ColProps } from "react-bootstrap/Col";
 
+export type { ColProps };
 export default Col;

@@ -22,7 +22,8 @@ import { FormattedMessage, MessageDescriptor, useIntl } from "react-intl";
 import { graphql, usePaginationFragment } from "react-relay/hooks";
 import { useMemo, useState, MouseEvent } from "react";
 import semver from "semver";
-import { Badge, Table } from "react-bootstrap";
+import Badge from "@/components/ui/badge/Badge";
+import Table from "@/components/ui/table/PlainTable";
 
 import type { DeployedApplicationsTable_PaginationQuery } from "@/api/__generated__/DeployedApplicationsTable_PaginationQuery.graphql";
 import type {

@@ -19,7 +19,9 @@
 */
 
 import { ReactNode } from "react";
-import { Row, Col, Form } from "react-bootstrap";
+import Col from "@/components/ui/col/Col";
+import Form from "@/components/ui/form/Form";
+import Row from "@/components/ui/row/Row";
 
 import "@/components/ui/form-row/FormRow.scss";
 

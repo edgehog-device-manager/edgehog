@@ -938,11 +938,8 @@ const securityoptSchema = z.array(z.string().min(1));
 const maskedPathsSchema = z.array(z.string().min(1));
 const readonlyPathsSchema = z.array(z.string().min(1));
 const cgroupsModeSchema = z
-  .string()
-  .nullable()
-  .refine((v) => v === null || v === "" || v === "host" || v === "private", {
-    message: messages.cgroupsMode.id,
-  });
+  .union([z.enum(["host", "private"]), z.literal("")])
+  .nullable();
 const pidModeSchema = z.string().refine(
   (v) => {
     const pattern = /^(host|container:.+)$/;
@@ -1387,96 +1384,6 @@ const containerSchema = z
 
 type ContainerInputData = z.infer<typeof containerSchema>;
 
-const requiredSystemModelsSchema = z.array(z.object({ id: z.string().min(1) }));
-
-const releaseSchema = z
-  .object({
-    version: z.string().min(1),
-    requiredSystemModels: requiredSystemModelsSchema.optional(),
-    containers: z.array(z.object({ id: z.string().min(1) })),
-
-    containerDependencies: z
-      .array(
-        z.object({
-          containerId: z.string().min(1),
-          dependencies: z
-            .array(z.string().min(1))
-            .nonempty(messages.required.id),
-        }),
-      )
-      .optional(),
-  })
-  .superRefine((data, ctx) => {
-    const items = data.containerDependencies ?? [];
-
-    const seen = new Set<string>();
-
-    items.forEach((item, index) => {
-      if (!item.containerId) return;
-
-      if (seen.has(item.containerId)) {
-        ctx.addIssue({
-          path: ["containerDependencies", index, "containerId"],
-          code: "custom",
-          message: messages.duplicateContainer.id,
-        });
-      } else {
-        seen.add(item.containerId);
-      }
-
-      if (item.dependencies?.includes(item.containerId)) {
-        ctx.addIssue({
-          path: ["containerDependencies", index, "dependencies"],
-          code: "custom",
-          message: messages.selfDependency.id,
-        });
-      }
-    });
-
-    const graph: Record<string, string[]> = {};
-
-    for (const item of items) {
-      if (!item.containerId) continue;
-      graph[item.containerId] = item.dependencies ?? [];
-    }
-
-    const visiting = new Set<string>();
-    const visited = new Set<string>();
-
-    function hasCycle(node: string): boolean {
-      if (visiting.has(node)) return true;
-      if (visited.has(node)) return false;
-
-      visiting.add(node);
-
-      for (const neighbor of graph[node] ?? []) {
-        if (hasCycle(neighbor)) return true;
-      }
-
-      visiting.delete(node);
-      visited.add(node);
-
-      return false;
-    }
-
-    items.forEach((item, index) => {
-      if (!item.containerId) return;
-
-      visiting.clear();
-      visited.clear();
-
-      if (hasCycle(item.containerId)) {
-        ctx.addIssue({
-          path: ["containerDependencies", index, "dependencies"],
-          code: "custom",
-          message: messages.circularDependency.id,
-        });
-      }
-    });
-  });
-
-type ReleaseFormData = z.infer<typeof releaseSchema>;
-
 /* ----------------------------- Exports ----------------------------- */
 
 export type {
@@ -1503,7 +1410,6 @@ export type {
   EditUpdateCampaignFormData,
   FileDownloadCampaignFormData,
   UpdateFileDownloadCampaignFormData,
-  ReleaseFormData,
   ContainerInputData,
   TargetGroup,
   TargetGroupExtended,
@@ -1545,7 +1451,6 @@ export {
   updateCampaignSchema,
   editUpdateCampaignSchema,
   fileDownloadCampaignSchema,
-  releaseSchema,
   containerSchema,
   CapAddList,
   CapDropList,

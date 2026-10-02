@@ -19,7 +19,8 @@
  */
 
 import React from "react";
-import { Modal, ModalProps } from "react-bootstrap";
+import Modal from "@/components/ui/modal/Modal";
+import type { ModalProps } from "@/components/ui/modal/Modal";
 import { FormattedMessage } from "react-intl";
 
 import Button from "@/components/ui/button/Button";

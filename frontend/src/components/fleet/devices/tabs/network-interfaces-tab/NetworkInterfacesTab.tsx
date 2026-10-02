@@ -18,7 +18,7 @@
 
 import { graphql, useFragment } from "react-relay/hooks";
 import { useIntl } from "react-intl";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { NetworkInterfacesTab_networkInterfaces$key } from "@/api/__generated__/NetworkInterfacesTab_networkInterfaces.graphql";
 

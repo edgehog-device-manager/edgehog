@@ -28,7 +28,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { DeviceGroups_DeviceGroupsFragment$key } from "@/api/__generated__/DeviceGroups_DeviceGroupsFragment.graphql";
 import type { DeviceGroups_getDeviceGroups_Query } from "@/api/__generated__/DeviceGroups_getDeviceGroups_Query.graphql";

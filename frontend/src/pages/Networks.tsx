@@ -26,7 +26,7 @@ import {
   usePreloadedQuery,
   useQueryLoader,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type { Networks_getNetworks_Query } from "@/api/__generated__/Networks_getNetworks_Query.graphql";
 import { Networks_NetworksFragment$key } from "@/api/__generated__/Networks_NetworksFragment.graphql";

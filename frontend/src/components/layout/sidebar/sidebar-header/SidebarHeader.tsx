@@ -18,8 +18,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import Button from "react-bootstrap/Button";
-import Image from "react-bootstrap/Image";
+import Button from "@/components/ui/button/Button";
+import Image from "@/components/ui/image/Image";
 
 import Icon from "@/components/ui/icon/Icon";
 import assets from "@/assets";

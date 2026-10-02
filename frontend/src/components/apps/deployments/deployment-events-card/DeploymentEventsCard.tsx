@@ -16,7 +16,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Badge, Card } from "react-bootstrap";
+import Badge from "@/components/ui/badge/Badge";
+import Card from "@/components/ui/card/Card";
 import { defineMessages, FormattedMessage } from "react-intl";
 
 import { DeploymentEventType } from "@/api/__generated__/Releases_PaginationQuery.graphql";
