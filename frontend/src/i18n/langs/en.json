@@ -754,6 +754,10 @@
   "components.apps.deployments.edit-deployment-campaign-modal.EditDeploymentCampaignModal.title": {
     "defaultMessage": "Edit Deployment Campaign"
   },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.cancelButton": {
+    "defaultMessage": "Cancel",
+    "description": "Title for the button to cancel and dismiss a confirmation modal"
+  },
   "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.confirmLabel": {
     "defaultMessage": "Upgrade"
   },
@@ -905,6 +909,10 @@
   },
   "components.apps.releases.deployed-applications-table.DeployedApplicationsTable.noDeployedApplications": {
     "defaultMessage": "No deployed applications"
+  },
+  "components.apps.releases.install-application-modal.InstallApplicationModal.cancelButton": {
+    "defaultMessage": "Cancel",
+    "description": "Title for the button to cancel and dismiss a confirmation modal"
   },
   "components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel": {
     "defaultMessage": "Container: {containerName}"

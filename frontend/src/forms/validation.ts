@@ -790,6 +790,28 @@ type EditDeploymentCampaignFormData = z.infer<
   typeof editDeploymentCampaignSchema
 >;
 
+const installApplicationSchema = z.object({
+  application: z.object({
+    id: z.string().min(1),
+    name: z.string().min(1),
+  }),
+  release: z.object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+  }),
+});
+
+type InstallApplicationFormData = z.infer<typeof installApplicationSchema>;
+
+const upgradeDeploymentSchema = z.object({
+  release: z.object({
+    id: z.string().min(1),
+    version: z.string().min(1),
+  }),
+});
+
+type UpgradeDeploymentFormData = z.infer<typeof upgradeDeploymentSchema>;
+
 const updateCampaignBaseSchema = z.object({
   name: z.string().min(1),
   scheduledAtTimestamp: z.string().optional(),
@@ -1499,6 +1521,8 @@ export type {
   ImageCredentialUpdateFormData,
   DeploymentCampaignFormData,
   EditDeploymentCampaignFormData,
+  InstallApplicationFormData,
+  UpgradeDeploymentFormData,
   UpdateCampaignFormData,
   EditUpdateCampaignFormData,
   FileDownloadCampaignFormData,
@@ -1541,6 +1565,8 @@ export {
   imageCredentialUpdateSchema,
   deploymentCampaignSchema,
   editDeploymentCampaignSchema,
+  installApplicationSchema,
+  upgradeDeploymentSchema,
   envJsonSchema,
   updateCampaignSchema,
   editUpdateCampaignSchema,
