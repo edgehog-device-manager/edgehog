@@ -156,7 +156,19 @@ if config_env() in [:prod, :test] do
       uri = URI.parse(normalized_asset_host)
       port = uri.port || if(s3.scheme == "https://", do: 443, else: 80)
 
-      %{scheme: s3.scheme, host: uri.host || "localhost", port: port}
+      asset_host_path = if uri.path not in [nil, "", "/"], do: uri.path
+
+      public_path_prefix =
+        System.get_env("S3_PUBLIC_PATH_PREFIX") ||
+          System.get_env("S3_PATH_PREFIX") ||
+          asset_host_path
+
+      %{
+        scheme: s3.scheme,
+        host: uri.host || "localhost",
+        port: port,
+        public_path_prefix: public_path_prefix
+      }
     end
 
   config :azurex, Azurex.Blob.Config,

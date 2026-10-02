@@ -80,8 +80,35 @@ defmodule Edgehog.Storage.S3 do
            ExAws.S3.presigned_url(config, verb, bucket, file_path,
              expires_in: @presign_expiration_seconds
            ) do
-      {key, url}
+      prefix =
+        config
+        |> Map.get(:public_path_prefix)
+        |> then(&(&1 || ""))
+        |> String.trim()
+        |> String.trim("/")
+
+      {key, prepend_public_path_prefix(url, prefix)}
     end
+  end
+
+  defp prepend_public_path_prefix(url, ""), do: url
+
+  defp prepend_public_path_prefix(url, prefix) do
+    prefix = "/" <> prefix
+
+    url
+    |> URI.parse()
+    |> compose_url(prefix)
+  end
+
+  defp compose_url(%{path: nil} = uri, prefix) do
+    URI.to_string(%{uri | path: prefix})
+  end
+
+  defp compose_url(%{path: path} = uri, prefix) do
+    if String.starts_with?(path, prefix <> "/") or path == prefix,
+      do: uri,
+      else: URI.to_string(%{uri | path: prefix <> path})
   end
 
   defp extract_errors(errors) do
