@@ -43,7 +43,13 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
     file_download_request =
       Ash.load!(
         input.arguments.file_download_request,
-        [:url, device: [:device_id, :appengine_client]],
+        [
+          :url,
+          :file_name,
+          :destination,
+          :destination_type,
+          device: [:device_id, :appengine_client]
+        ],
         reuse_values?: true
       )
 
@@ -72,7 +78,7 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
       userId: file_download_request.user_id || -1,
       groupId: file_download_request.group_id || -1,
       destinationType: file_download_request.destination_type,
-      destination: file_download_request.destination || ""
+      destination: dest(file_download_request)
     }
 
     case @file_download_request_module.request_download(
@@ -100,4 +106,15 @@ defmodule Edgehog.Files.FileDownloadRequest.ManualActions.SendFileDownloadReques
         result
     end
   end
+
+  # For storage the device expects the file name; any user-supplied destination is ignored.
+  defp dest(%{destination_type: :storage, file_name: name}) do
+    name
+  end
+
+  defp dest(%{destination: destination}) do
+    destination || ""
+  end
+
+  defp dest(_), do: ""
 end

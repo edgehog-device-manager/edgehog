@@ -97,6 +97,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
              )
 
       validate Validations.FileExists
+      validate Validations.ValidateDestination
 
       change Changes.ExtractFileData, only_when_valid?: true
       change Changes.SendFileDownloadRequest
@@ -133,6 +134,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
       change set_attribute(:id, &Ash.UUIDv7.generate/0)
 
       validate Validations.CheckEncoding
+      validate Validations.ValidateDestination
 
       change manage_relationship(:device_id, :device, type: :append),
         only_when_valid?: true
@@ -174,6 +176,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
       change set_attribute(:id, &Ash.UUIDv7.generate/0)
 
       validate Validations.CheckEncoding
+      validate Validations.ValidateDestination
 
       change manage_relationship(:device_id, :device, type: :append),
         only_when_valid?: true
@@ -214,6 +217,7 @@ defmodule Edgehog.Files.FileDownloadRequest do
       change set_attribute(:id, &Ash.UUIDv7.generate/0)
 
       validate Validations.CheckEncoding
+      validate Validations.ValidateDestination
 
       change manage_relationship(:device_id, :device, type: :append),
         only_when_valid?: true
