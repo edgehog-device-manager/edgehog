@@ -25,6 +25,13 @@ config :ash, :disable_async?, true
 config :ash, :missed_notifications, :ignore
 config :ash, warn_on_transaction_hooks?: false
 
+# Tenant reconcilers are started at application boot, before test_helper.exs puts
+# the Ecto sandbox in :manual mode. With a non-zero timeout they run in :auto
+# mode and query the DB outside the test process, causing DBConnection.OwnershipError
+# noise. Setting the timeout to 0 puts them in :manual mode, where they never
+# reconcile on their own.
+config :edgehog, tenant_reconciler_timeout: 0
+
 # In test we don't send emails.
 config :edgehog, Edgehog.Mailer, adapter: Swoosh.Adapters.Test
 
