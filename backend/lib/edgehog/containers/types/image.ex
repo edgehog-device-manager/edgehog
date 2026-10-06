@@ -21,6 +21,13 @@
 defmodule Edgehog.Containers.Types.Image do
   @moduledoc """
   Input type representing an image.
+
+  When `image_credentials_id` is not provided, it defaults to `nil`
+  (rather than being omitted). The `Container` `:create_and_relate` action
+  looks images up through the `:reference_credentials` identity, and Ash
+  only attempts that lookup when every identity key is present in the
+  input — an absent key silently creates a duplicate image instead of
+  relating the existing credential-less one.
   """
 
   use AshGraphql.Type
@@ -39,6 +46,21 @@ defmodule Edgehog.Containers.Types.Image do
         ]
       ]
     ]
+
+  @impl Ash.Type
+  def apply_constraints(%{} = value, constraints) do
+    value =
+      if Map.has_key?(value, :image_credentials_id),
+        do: value,
+        else: Map.put(value, :image_credentials_id, nil)
+
+    super(value, constraints)
+  end
+
+  @impl Ash.Type
+  def apply_constraints(value, constraints) do
+    super(value, constraints)
+  end
 
   @impl AshGraphql.Type
   def graphql_input_type(_), do: :image_desc_input
