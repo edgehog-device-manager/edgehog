@@ -231,7 +231,7 @@ defmodule Edgehog.Containers.Reconciler.CoreTest do
 
       deployment =
         deployment_fixture(
-          release_opts: [containers: 1, container_params: [networks: [network.id]]],
+          release_opts: [containers: 1, container_params: [networks: [network]]],
           tenant: tenant
         )
 
@@ -327,7 +327,7 @@ defmodule Edgehog.Containers.Reconciler.CoreTest do
 
       deployment =
         deployment_fixture(
-          release_opts: [containers: 1, container_params: [device_mappings: [device_mapping.id]]],
+          release_opts: [containers: 1, container_params: [device_mappings: [device_mapping]]],
           tenant: tenant
         )
 

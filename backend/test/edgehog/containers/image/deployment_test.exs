@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,10 +36,10 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
   describe "Image deployment" do
     test "links up to container deployments", %{tenant: tenant, image: image} do
       release1 =
-        release_fixture(tenant: tenant, containers: 1, container_params: [image_id: image.id])
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
 
       release2 =
-        release_fixture(tenant: tenant, containers: 1, container_params: [image_id: image.id])
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
 
       device = device_fixture(tenant: tenant)
 

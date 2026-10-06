@@ -26,20 +26,16 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
-    # one volume per container
-    volumes_per_container = 1
-    volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
 
     network = network_fixture(tenant: tenant)
     device_mapping = device_mapping_fixture(tenant: tenant)
     device_request = device_request_fixture(tenant: tenant)
 
     container_params = [
-      volumes: volumes_per_container,
-      volume_target: volume_target,
-      networks: [network.id],
-      device_mappings: [device_mapping.id],
-      device_requests: [device_request.id]
+      volumes: 1,
+      networks: [network],
+      device_mappings: [device_mapping],
+      device_requests: [device_request]
     ]
 
     device = device_fixture(tenant: tenant)

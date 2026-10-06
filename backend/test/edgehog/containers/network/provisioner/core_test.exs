@@ -41,7 +41,7 @@ defmodule Edgehog.Containers.Network.Deployment.Provisioner.CoreTest do
       deployment =
         deployment_fixture(
           tenant: tenant,
-          release_opts: [containers: 1, container_params: [networks: [network.id]]]
+          release_opts: [containers: 1, container_params: [networks: [network]]]
         )
 
       [network_deployment] =

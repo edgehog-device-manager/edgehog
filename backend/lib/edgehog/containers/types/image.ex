@@ -26,8 +26,8 @@ defmodule Edgehog.Containers.Types.Image do
   (rather than being omitted). The `Container` `:create_and_relate` action
   looks images up through the `:reference_credentials` identity, and Ash
   only attempts that lookup when every identity key is present in the
-  input — an absent key silently creates a duplicate image instead of
-  relating the existing credential-less one.
+  input. Absent keys silently create a duplicate image instead of
+  relating the existing one.
   """
 
   use AshGraphql.Type
