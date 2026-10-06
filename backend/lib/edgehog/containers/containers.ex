@@ -164,20 +164,14 @@ defmodule Edgehog.Containers do
                               ]
       end
 
-      create Container, :create_container, :create_with_nested do
+      create Container, :create_container, :create_and_relate do
         description "Create a new container"
 
         relay_id_translations input: [
                                 image: [image_credentials_id: :image_credentials],
-                                networks: [
-                                  id: :network
-                                ],
-                                volumes: [
-                                  id: :volume
-                                ],
-                                file_mounts: [
-                                  default_file_id: :file
-                                ]
+                                networks: [id: :network],
+                                volumes: [id: :volume],
+                                file_mounts: [default_file_id: :file]
                               ]
       end
 
