@@ -119,7 +119,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor do
   defp handle_ready(_deployment, _data) do
     # When an upgrade is triggered, the new release deployment must be both deployed and started.
     # We avoid triggering the :deployment_success event while the deployment is only in the
-    # :stopped (deployed) state — it should trigger only once the deployment transitions to :started.
+    # :stopped (deployed) state - it should trigger only once the deployment transitions to :started.
     :keep_state_and_data
   end
 

@@ -89,7 +89,12 @@ defmodule Edgehog.Containers.Image do
   end
 
   identities do
-    identity :reference_credentials, [:reference, :image_credentials_id]
+    identity :reference_credentials, [:reference, :image_credentials_id] do
+      # `image_credentials_id` is nullable: without this, credential-less
+      # images (NULL credentials) are always considered distinct, so the
+      # identity can neither match them on lookup nor prevent duplicates.
+      nils_distinct? false
+    end
   end
 
   postgres do

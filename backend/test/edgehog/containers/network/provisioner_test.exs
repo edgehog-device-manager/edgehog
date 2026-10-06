@@ -43,7 +43,7 @@ defmodule Edgehog.Containers.Network.Deployment.ProvisionerTest do
       deployment =
         deployment_fixture(
           tenant: tenant,
-          release_opts: [containers: 1, container_params: [networks: [network.id]]]
+          release_opts: [containers: 1, container_params: [networks: [network]]]
         )
 
       timestamp = now()

@@ -41,7 +41,7 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner.CoreTest do
       deployment =
         deployment_fixture(
           tenant: tenant,
-          release_opts: [containers: 1, container_params: [device_requests: [device_request.id]]]
+          release_opts: [containers: 1, container_params: [device_requests: [device_request]]]
         )
 
       [device_request_deployment] =

@@ -222,50 +222,52 @@ defmodule Edgehog.ContainersFixtures do
     Ash.create!(Volume, params, tenant: tenant)
   end
 
+  @doc """
+  Generate a %Container{}.
+
+  ## Options
+
+    * `:tenant` (required) - the tenant to create the container in.
+    * `:image` - `%Image{}` struct, image id, or `%{reference: ...}` map.
+      Defaults to a fresh `image_fixture/1`.
+    * `:volumes` - list of volume bindings, defaults to `[]` (no volumes).
+      Each entry can be:
+        * `%{id: volume_id, target: target}`
+        * `{volume_or_id, target}`
+        * `%{volume: volume_or_id, target: target}`
+    * `:networks` - list of `%Network{}` structs, network ids, or `%{id: ...}`
+      maps. Defaults to `[]` (no networks).
+    * `:device_mappings` - list of `%DeviceMapping{}` structs or inline
+      `%{path_on_host, path_in_container, cgroup_permissions}` maps.
+      Defaults to `[]` (no device mappings).
+    * `:device_requests` - list of `%DeviceRequest{}` structs or inline
+      `%{driver, count, device_ids, capabilities, options}` maps.
+      Defaults to `[]` (no device requests).
+    * `:file_mounts` - list of inline file mount maps, defaults to `[]`.
+
+  Any remaining options (e.g. `:name`, `:env`) are passed through as
+  container attributes.
+  """
   def container_fixture(opts \\ []) do
     {tenant, opts} = Keyword.pop!(opts, :tenant)
-
-    {image_id, opts} =
-      Keyword.pop_lazy(opts, :image_id, fn -> image_fixture(tenant: tenant).id end)
-
-    # number of volumes to associate with the container
-    {volumes, opts} = Keyword.pop(opts, :volumes, 0)
-
-    {volume_target, opts} = Keyword.pop(opts, :volume_target, nil)
-    {volume_label, opts} = Keyword.pop(opts, :volume_label, nil)
-
-    volume_params = fn i ->
-      %{
-        target:
-          volume_target ||
-            "/fixture/target-#{System.unique_integer([:positive])}-#{i}",
-        label:
-          volume_label ||
-            "label#{System.unique_integer([:positive])}-#{i}"
-      }
-    end
-
-    volumes =
-      if volumes > 0 do
-        Enum.map(1..volumes, fn i -> volume_params.(i) end)
-      else
-        []
-      end
-
-    {networks, opts} = Keyword.pop(opts, :networks, [])
-    {device_mappings, opts} = Keyword.pop(opts, :device_mappings, [])
-    {device_requests, opts} = Keyword.pop(opts, :device_requests, [])
+    {image_opt, opts} = Keyword.pop(opts, :image)
+    {volumes_opt, opts} = Keyword.pop(opts, :volumes, [])
+    {networks_opt, opts} = Keyword.pop(opts, :networks, [])
+    {device_mappings_opt, opts} = Keyword.pop(opts, :device_mappings, [])
+    {device_requests_opt, opts} = Keyword.pop(opts, :device_requests, [])
     {file_mounts, opts} = Keyword.pop(opts, :file_mounts, [])
+    {name, opts} = Keyword.pop_lazy(opts, :name, &unique_container_name/0)
 
-    {name, opts} =
-      Keyword.pop_lazy(opts, :name, fn ->
-        "container#{System.unique_integer()}"
-      end)
+    image = resolve_container_image(image_opt, tenant)
+    volumes = normalize_container_volumes(volumes_opt, tenant)
+    networks = normalize_container_networks(networks_opt)
+    device_mappings = normalize_container_device_mappings(device_mappings_opt)
+    device_requests = normalize_container_device_requests(device_requests_opt)
 
     params =
       Enum.into(opts, %{
         name: name,
-        image_id: image_id,
+        image: image,
         volumes: volumes,
         networks: networks,
         device_mappings: device_mappings,
@@ -274,8 +276,119 @@ defmodule Edgehog.ContainersFixtures do
       })
 
     Container
-    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
+    |> Ash.Changeset.for_create(:create_and_relate, params, tenant: tenant)
     |> Ash.create!()
+  end
+
+  defp resolve_container_image(nil, tenant) do
+    [tenant: tenant]
+    |> image_fixture()
+    |> container_image_reference()
+  end
+
+  defp resolve_container_image(%Image{} = image, _tenant) do
+    container_image_reference(image)
+  end
+
+  defp resolve_container_image(%{reference: _reference} = image, _tenant) do
+    Map.take(image, [:reference, :image_credentials_id])
+  end
+
+  defp resolve_container_image(image_id, tenant) when is_binary(image_id) do
+    Image
+    |> Ash.get!(image_id, tenant: tenant)
+    |> container_image_reference()
+  end
+
+  defp container_image_reference(%Image{} = image) do
+    maybe_put_image_credentials(%{reference: image.reference}, image)
+  end
+
+  defp maybe_put_image_credentials(params, %{image_credentials_id: nil}), do: params
+
+  defp maybe_put_image_credentials(params, %{image_credentials_id: credentials_id}) do
+    Map.put(params, :image_credentials_id, credentials_id)
+  end
+
+  defp normalize_container_volumes(n, tenant) when is_integer(n) do
+    fn ->
+      volume = volume_fixture(tenant: tenant)
+      target = unique_volume_target()
+
+      %{id: volume.id, target: target}
+    end
+    |> Stream.repeatedly()
+    |> Enum.take(n)
+  end
+
+  defp normalize_container_volumes(volumes, _) when is_list(volumes) do
+    Enum.map(volumes, &normalize_container_volume/1)
+  end
+
+  defp normalize_container_volume(%{id: _id, target: _target} = binding) do
+    Map.take(binding, [:id, :target])
+  end
+
+  defp normalize_container_volume({volume_or_id, target}) do
+    %{id: container_volume_id(volume_or_id), target: target}
+  end
+
+  defp normalize_container_volume(%{volume: volume_or_id, target: target}) do
+    %{id: container_volume_id(volume_or_id), target: target}
+  end
+
+  defp container_volume_id(%Volume{id: id}), do: id
+  defp container_volume_id(id) when is_binary(id), do: id
+
+  defp normalize_container_networks(networks) when is_list(networks) do
+    Enum.map(networks, &normalize_container_network/1)
+  end
+
+  defp normalize_container_network(%Network{id: id}), do: %{id: id}
+  defp normalize_container_network(%{id: _id} = network), do: Map.take(network, [:id])
+  defp normalize_container_network(id) when is_binary(id), do: %{id: id}
+
+  defp normalize_container_device_mappings(mappings) when is_list(mappings) do
+    Enum.map(mappings, &normalize_container_device_mapping/1)
+  end
+
+  defp normalize_container_device_mapping(%Edgehog.Containers.DeviceMapping{} = mapping) do
+    Map.take(mapping, [:path_on_host, :path_in_container, :cgroup_permissions])
+  end
+
+  defp normalize_container_device_mapping(
+         %{path_on_host: _, path_in_container: _, cgroup_permissions: _} = mapping
+       ) do
+    Map.take(mapping, [:path_on_host, :path_in_container, :cgroup_permissions])
+  end
+
+  defp normalize_container_device_requests(requests) when is_list(requests) do
+    Enum.map(requests, &normalize_container_device_request/1)
+  end
+
+  defp normalize_container_device_request(%Edgehog.Containers.DeviceRequest{} = request) do
+    %{driver: request.driver, count: request.count, device_ids: request.device_ids}
+    |> maybe_put_device_request_capabilities(request)
+    |> maybe_put_device_request_options(request)
+  end
+
+  defp normalize_container_device_request(%{} = request) do
+    Map.take(request, [:driver, :count, :device_ids, :capabilities, :options])
+  end
+
+  defp maybe_put_device_request_capabilities(params, %{capabilities: nil}), do: params
+
+  defp maybe_put_device_request_capabilities(params, %{capabilities: capabilities})
+       when is_list(capabilities) do
+    Map.put(params, :capabilities, capabilities)
+  end
+
+  defp maybe_put_device_request_capabilities(params, _request), do: params
+
+  defp maybe_put_device_request_options(params, %{options: nil}), do: params
+
+  defp maybe_put_device_request_options(params, %{options: options}) do
+    Map.put(params, :options, options)
   end
 
   @doc """

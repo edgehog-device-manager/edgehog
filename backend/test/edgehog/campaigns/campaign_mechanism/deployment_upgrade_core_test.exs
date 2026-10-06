@@ -436,7 +436,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       # 3. Configs reach the device through the provisioners (Astarte level).
 
       # File bind provisioner sends CreateBind with the resolved download request
-      # as target — not the original file_id.
+      # as target, not the original file_id.
       expect(CreateBind, :send_bind, fn _client, _device_id, data ->
         assert data.id == file_bind.id
         assert data.deploymentId == new_deployment.id

@@ -28,14 +28,12 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
   setup %{tenant: tenant} do
     app = application_fixture(tenant: tenant)
     network = network_fixture(tenant: tenant)
-    volume_target = "/var/local/fixture#{System.unique_integer([:positive])}"
     device_mapping = device_mapping_fixture(tenant: tenant)
 
     container_params = [
       volumes: 1,
-      volume_target: volume_target,
-      networks: [network.id],
-      device_mappings: [device_mapping.id]
+      networks: [network],
+      device_mappings: [device_mapping]
     ]
 
     release =
