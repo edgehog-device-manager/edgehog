@@ -143,7 +143,8 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
     mode = Keyword.get(args, :mode, :auto)
 
-    started_at = Telemetry.container_deployment_started(container_deployment, deployment)
+    started_at =
+      Telemetry.container_deployment_started(container_deployment, deployment, tenant: tenant)
 
     state = %{
       container_deployment: container_deployment,
@@ -207,6 +208,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
       Telemetry.container_deployment_completed(
         state.container_deployment,
         state.deployment,
+        [tenant: state.tenant],
         state.started_at
       )
 
@@ -299,6 +301,7 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
     %{
       container_deployment: container_deployment,
       deployment: deployment,
+      tenant: tenant,
       started_at: started_at
     } = state
 
@@ -306,7 +309,12 @@ defmodule Edgehog.Containers.Container.Deployment.Orchestrator do
 
     Core.log_provisioning_failed(id)
 
-    Telemetry.container_deployment_failed(container_deployment, deployment, started_at)
+    Telemetry.container_deployment_failed(
+      container_deployment,
+      deployment,
+      [tenant: tenant],
+      started_at
+    )
 
     topic = topic(container_deployment)
 

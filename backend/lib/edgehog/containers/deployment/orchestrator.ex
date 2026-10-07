@@ -138,7 +138,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     mode = Keyword.get(args, :mode, :auto)
 
-    started_at = Telemetry.deployment_started(deployment)
+    started_at = Telemetry.deployment_started(deployment, tenant: tenant)
 
     state = %{
       deployment: deployment,
@@ -260,7 +260,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     Core.log_orchestrator_completed(id)
 
-    Telemetry.deployment_completed(deployment, started_at)
+    Telemetry.deployment_completed(deployment, [tenant: tenant], started_at)
 
     readiness_topic = topic(deployment)
 
@@ -313,7 +313,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
 
     Core.log_provisioning_failed(id)
 
-    Telemetry.deployment_failed(deployment, started_at)
+    Telemetry.deployment_failed(deployment, [tenant: tenant], started_at)
 
     # Mark the deployment as timed out. This also publishes on the
     # deployments:timeout:id topic through the Ash notifier.

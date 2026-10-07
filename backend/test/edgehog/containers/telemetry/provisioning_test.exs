@@ -64,6 +64,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       Provisioner.run(provisioner)
 
@@ -82,6 +83,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
     end
 
     test "emits a failed stop event when the device is offline at startup" do
@@ -111,6 +113,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       # The device is offline at startup, so the provisioner gives up immediately
       # and the stop event is emitted
@@ -127,6 +130,19 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
+    end
+
+    test "raises KeyError when :tenant is missing or invalid in context" do
+      %{deployment: deployment} = deployment_context(ready: true)
+
+      assert_raise KeyError, fn ->
+        Telemetry.provisioning_started(deployment, [])
+      end
+
+      assert_raise KeyError, fn ->
+        Telemetry.provisioning_started(deployment, tenant: %{})
+      end
     end
   end
 

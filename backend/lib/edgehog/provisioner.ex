@@ -170,7 +170,7 @@ defmodule Edgehog.Provisioner do
 
         # The remaining options are resource specific context that the Core
         # might need (e.g. the application deployment a resource belongs to).
-        context = Keyword.drop(args, [:resource, :tenant, :mode])
+        context = Keyword.drop(args, [:resource, :mode])
 
         %{id: id, device: %{id: device_id, online: device_online?}} = resource
 

@@ -26,27 +26,27 @@ defmodule Edgehog.Containers.Telemetry do
 
   - `[:edgehog, :containers, :provisioning, :start]` when a provisioner
     starts provisioning a resource. Metadata contains `resource_type`,
-    `resource_id`, `deployment_id` and `device_id`.
+    `resource_id`, `deployment_id`, `device_id` and `tenant_slug`.
   - `[:edgehog, :containers, :provisioning, :stop]` when a provisioner
     terminates, either successfully or with a failure. Metadata contains
-    `resource_type`, `resource_id`, `deployment_id`, `device_id`, `result`
-    (either `:ok` or `:error`) and `reason` (either the provisioning outcome,
+    `resource_type`, `resource_id`, `deployment_id`, `device_id`, `tenant_slug`,
+    `result` (either `:ok` or `:error`) and `reason` (either the provisioning outcome,
     e.g. `:ready` or `:already_ready`, or the failure reason). Measurements
     contain `duration` (native time) and `retries`.
   - `[:edgehog, :containers, :deployment, :start]` when a deployment
     orchestrator starts conducting a deployment. Metadata contains
-    `deployment_id` and `device_id`.
+    `deployment_id`, `device_id` and `tenant_slug`.
   - `[:edgehog, :containers, :deployment, :stop]` when a deployment
     orchestrator terminates, either successfully or with a failure. Metadata
-    contains `deployment_id`, `device_id` and `result`. Measurements contain
+    contains `deployment_id`, `device_id`, `tenant_slug` and `result`. Measurements contain
     `duration` (native time).
   - `[:edgehog, :containers, :container_deployment, :start]` when a container
     deployment orchestrator starts conducting a container deployment. Metadata
-    contains `container_deployment_id`, `deployment_id` and `device_id`.
+    contains `container_deployment_id`, `deployment_id`, `device_id` and `tenant_slug`.
   - `[:edgehog, :containers, :container_deployment, :stop]` when a container
     deployment orchestrator terminates, either successfully or with a failure.
-    Metadata contains `container_deployment_id`, `deployment_id`, `device_id`
-    and `result`. Measurements contain `duration` (native time).
+    Metadata contains `container_deployment_id`, `deployment_id`, `device_id`,
+    `tenant_slug` and `result`. Measurements contain `duration` (native time).
   """
 
   alias Edgehog.Config
@@ -143,12 +143,12 @@ defmodule Edgehog.Containers.Telemetry do
 
   Returns the start time, computed with `System.monotonic_time/0`
   """
-  def deployment_started(deployment) do
+  def deployment_started(deployment, context) do
     start = System.monotonic_time()
 
     metadata =
       [started_at: start]
-      |> Keyword.merge(deployment_metadata(deployment))
+      |> Keyword.merge(deployment_metadata(deployment, context))
       |> Map.new()
 
     :telemetry.execute(@deployment_start, %{count: 1}, metadata)
@@ -159,12 +159,12 @@ defmodule Edgehog.Containers.Telemetry do
   @doc """
   Emits a successful deployment orchestration stop event.
   """
-  def deployment_completed(deployment, started_at) do
+  def deployment_completed(deployment, context, started_at) do
     duration = System.monotonic_time() - started_at
 
     metadata =
       [result: :ok, duration: duration, duration_unit: :native]
-      |> Keyword.merge(deployment_metadata(deployment))
+      |> Keyword.merge(deployment_metadata(deployment, context))
       |> Map.new()
 
     :telemetry.execute(@deployment_stop, %{count: 1, duration: duration}, metadata)
@@ -173,12 +173,12 @@ defmodule Edgehog.Containers.Telemetry do
   @doc """
   Emits a failed deployment orchestration stop event.
   """
-  def deployment_failed(deployment, started_at) do
+  def deployment_failed(deployment, context, started_at) do
     duration = System.monotonic_time() - started_at
 
     metadata =
       [result: :error, duration: duration, duration_unit: :native]
-      |> Keyword.merge(deployment_metadata(deployment))
+      |> Keyword.merge(deployment_metadata(deployment, context))
       |> Map.new()
 
     :telemetry.execute(@deployment_stop, %{count: 1, duration: duration}, metadata)
@@ -191,12 +191,12 @@ defmodule Edgehog.Containers.Telemetry do
 
   Returns the start time, computed with `System.monotonic_time/0`
   """
-  def container_deployment_started(container_deployment, deployment) do
+  def container_deployment_started(container_deployment, deployment, context) do
     start = System.monotonic_time()
 
     metadata =
       [started_at: start]
-      |> Keyword.merge(container_deployment_metadata(container_deployment, deployment))
+      |> Keyword.merge(container_deployment_metadata(container_deployment, deployment, context))
       |> Map.new()
 
     :telemetry.execute(@container_deployment_start, %{count: 1}, metadata)
@@ -207,12 +207,12 @@ defmodule Edgehog.Containers.Telemetry do
   @doc """
   Emits a successful container deployment orchestration stop event.
   """
-  def container_deployment_completed(container_deployment, deployment, started_at) do
+  def container_deployment_completed(container_deployment, deployment, context, started_at) do
     duration = System.monotonic_time() - started_at
 
     metadata =
       [result: :ok, duration: duration, duration_unit: :native]
-      |> Keyword.merge(container_deployment_metadata(container_deployment, deployment))
+      |> Keyword.merge(container_deployment_metadata(container_deployment, deployment, context))
       |> Map.new()
 
     :telemetry.execute(@container_deployment_stop, %{count: 1, duration: duration}, metadata)
@@ -221,12 +221,12 @@ defmodule Edgehog.Containers.Telemetry do
   @doc """
   Emits a failed container deployment orchestration stop event.
   """
-  def container_deployment_failed(container_deployment, deployment, started_at) do
+  def container_deployment_failed(container_deployment, deployment, context, started_at) do
     duration = System.monotonic_time() - started_at
 
     metadata =
       [result: :error, duration: duration, duration_unit: :native]
-      |> Keyword.merge(container_deployment_metadata(container_deployment, deployment))
+      |> Keyword.merge(container_deployment_metadata(container_deployment, deployment, context))
       |> Map.new()
 
     :telemetry.execute(@container_deployment_stop, %{count: 1, duration: duration}, metadata)
@@ -242,10 +242,12 @@ defmodule Edgehog.Containers.Telemetry do
   def include_identifiers?, do: Config.containers_telemetry_include_identifiers!()
 
   defp base_metadata(resource, context) do
-    resource_metadata(resource) ++ deployment_id_metadata(resource, context)
+    resource_metadata(resource) ++
+      deployment_id_metadata(resource, context) ++
+      tenant_metadata(context)
   end
 
-  defp deployment_metadata(deployment) do
+  defp deployment_metadata(deployment, context) do
     identifiers =
       if include_identifiers?() do
         [
@@ -256,10 +258,10 @@ defmodule Edgehog.Containers.Telemetry do
         []
       end
 
-    identifiers
+    identifiers ++ tenant_metadata(context)
   end
 
-  defp container_deployment_metadata(container_deployment, deployment) do
+  defp container_deployment_metadata(container_deployment, deployment, context) do
     identifier =
       if include_identifiers?() do
         [container_deployment_id: Map.get(container_deployment, :id)]
@@ -267,7 +269,7 @@ defmodule Edgehog.Containers.Telemetry do
         []
       end
 
-    identifier ++ deployment_metadata(deployment)
+    identifier ++ deployment_metadata(deployment, context)
   end
 
   defp resource_metadata(resource) do
@@ -293,5 +295,11 @@ defmodule Edgehog.Containers.Telemetry do
       %{id: deployment_id} -> [deployment_id: deployment_id]
       _ -> [deployment_id: nil]
     end
+  end
+
+  defp tenant_metadata(context) do
+    context
+    |> Keyword.fetch!(:tenant)
+    |> then(&[tenant: &1.slug])
   end
 end

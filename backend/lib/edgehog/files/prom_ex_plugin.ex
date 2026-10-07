@@ -60,7 +60,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_download_start_event(),
           measurement: :count,
           description: "Number of file download requests started on a device.",
-          tags: [:destination_type, :request_id, :device_id, :file_id],
+          tags: [:destination_type, :request_id, :device_id, :file_id, :tenant_slug],
           tag_values: &download_tag_values/1
         ),
         counter(
@@ -68,7 +68,15 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_download_stop_event(),
           measurement: :count,
           description: "Number of file download requests completed on a device.",
-          tags: [:destination_type, :request_id, :device_id, :file_id, :result, :reason],
+          tags: [
+            :destination_type,
+            :request_id,
+            :device_id,
+            :file_id,
+            :result,
+            :reason,
+            :tenant_slug
+          ],
           tag_values: &download_tag_values/1
         ),
         distribution(
@@ -76,7 +84,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_download_stop_event(),
           measurement: :duration,
           description: "The time it took for a file download request to complete.",
-          tags: [:destination_type, :device_id, :result, :reason],
+          tags: [:destination_type, :device_id, :result, :reason, :tenant_slug],
           tag_values: &download_tag_values/1,
           reporter_options: [buckets: [100, 250, 500, 1000, 2500, 5000, 10_000, 60_000]],
           unit: {:native, :second}
@@ -86,7 +94,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_download_stop_event(),
           measurement: :retries,
           description: "The number of retries it took for a file download request to complete.",
-          tags: [:destination_type, :device_id, :result],
+          tags: [:destination_type, :device_id, :result, :tenant_slug],
           tag_values: &download_tag_values/1
         )
       ]
@@ -104,7 +112,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_upload_start_event(),
           measurement: :count,
           description: "Number of file upload requests started on a device.",
-          tags: [:source_type, :request_id, :device_id],
+          tags: [:source_type, :request_id, :device_id, :tenant_slug],
           tag_values: &upload_tag_values/1
         ),
         counter(
@@ -112,7 +120,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_upload_stop_event(),
           measurement: :count,
           description: "Number of file upload requests completed on a device.",
-          tags: [:source_type, :request_id, :device_id, :result, :reason],
+          tags: [:source_type, :request_id, :device_id, :result, :reason, :tenant_slug],
           tag_values: &upload_tag_values/1
         ),
         distribution(
@@ -120,7 +128,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_upload_stop_event(),
           measurement: :duration,
           description: "The time it took for a file upload request to complete.",
-          tags: [:source_type, :device_id, :result, :reason],
+          tags: [:source_type, :device_id, :result, :reason, :tenant_slug],
           tag_values: &upload_tag_values/1,
           reporter_options: [buckets: [100, 250, 500, 1000, 2500, 5000, 10_000, 60_000]],
           unit: {:native, :second}
@@ -130,7 +138,7 @@ defmodule Edgehog.Files.PromExPlugin do
           event_name: Telemetry.file_upload_stop_event(),
           measurement: :retries,
           description: "The number of retries it took for a file upload request to complete.",
-          tags: [:source_type, :device_id, :result],
+          tags: [:source_type, :device_id, :result, :tenant_slug],
           tag_values: &upload_tag_values/1
         )
       ]
@@ -144,7 +152,8 @@ defmodule Edgehog.Files.PromExPlugin do
       :device_id,
       :file_id,
       :result,
-      :reason
+      :reason,
+      :tenant_slug
     ])
   end
 
@@ -154,7 +163,8 @@ defmodule Edgehog.Files.PromExPlugin do
       :request_id,
       :device_id,
       :result,
-      :reason
+      :reason,
+      :tenant_slug
     ])
   end
 end
