@@ -26,7 +26,7 @@ defmodule Edgehog.Files.Telemetry do
 
   - `[:edgehog, :files, :file_download_request, :start]` when a file download
     request provisioning starts. Metadata contains `transfer_type`, `destination_type`,
-    `progress_tracked`, `needs_encoding`, and optionally `request_id`, `device_id`,
+    `progress_tracked`, `needs_encoding`, `tenant_slug`, and optionally `request_id`, `device_id`,
     and `file_id`.
   - `[:edgehog, :files, :file_download_request, :stop]` when a file download
     request terminates, either successfully or with a failure. Metadata contains
@@ -36,7 +36,7 @@ defmodule Edgehog.Files.Telemetry do
     `count`, `duration` (native time), and `retries`.
   - `[:edgehog, :files, :file_upload_request, :start]` when a file upload
     request starts. Metadata contains `transfer_type`, `source_type`,
-    `progress_tracked`, `needs_encoding`, and optionally `request_id` and `device_id`.
+    `progress_tracked`, `needs_encoding`, `tenant_slug`, and optionally `request_id` and `device_id`.
   - `[:edgehog, :files, :file_upload_request, :stop]` when a file upload
     request terminates, either successfully or with a failure. Metadata contains
     the start metadata plus `result` (either `:ok` or `:error`), `reason`,
@@ -62,7 +62,7 @@ defmodule Edgehog.Files.Telemetry do
 
   Returns the start time, computed with `System.monotonic_time/0`.
   """
-  def file_download_request_started(resource, context \\ []) do
+  def file_download_request_started(resource, context) do
     start = System.monotonic_time()
 
     metadata =
@@ -84,7 +84,7 @@ defmodule Edgehog.Files.Telemetry do
   """
   def file_download_request_completed(
         resource,
-        context \\ [],
+        context,
         started_at,
         retries \\ 0,
         reason \\ :ready
@@ -111,7 +111,7 @@ defmodule Edgehog.Files.Telemetry do
   @doc """
   Emits a failed file download request stop event.
   """
-  def file_download_request_failed(resource, context \\ [], started_at, retries \\ 0, reason) do
+  def file_download_request_failed(resource, context, started_at, retries \\ 0, reason) do
     duration = duration_since(started_at)
 
     metadata =
@@ -137,7 +137,7 @@ defmodule Edgehog.Files.Telemetry do
 
   Returns the start time, computed with `System.monotonic_time/0`.
   """
-  def file_upload_request_started(resource, context \\ []) do
+  def file_upload_request_started(resource, context) do
     start = System.monotonic_time()
 
     metadata =
@@ -159,7 +159,7 @@ defmodule Edgehog.Files.Telemetry do
   """
   def file_upload_request_completed(
         resource,
-        context \\ [],
+        context,
         started_at,
         retries \\ 0,
         reason \\ :ok
@@ -186,7 +186,7 @@ defmodule Edgehog.Files.Telemetry do
   @doc """
   Emits a failed file upload request stop event.
   """
-  def file_upload_request_failed(resource, context \\ [], started_at, retries \\ 0, reason) do
+  def file_upload_request_failed(resource, context, started_at, retries \\ 0, reason) do
     duration = duration_since(started_at)
 
     metadata =
@@ -221,7 +221,9 @@ defmodule Edgehog.Files.Telemetry do
       destination_type: destination_type,
       progress_tracked: progress_tracked,
       needs_encoding: needs_encoding
-    ] ++ download_identifiers_metadata(resource, context)
+    ] ++
+      download_identifiers_metadata(resource, context) ++
+      tenant_metadata(context)
   end
 
   defp base_upload_metadata(resource, context) do
@@ -234,7 +236,15 @@ defmodule Edgehog.Files.Telemetry do
       source_type: source_type,
       progress_tracked: progress_tracked,
       needs_encoding: needs_encoding
-    ] ++ upload_identifiers_metadata(resource, context)
+    ] ++
+      upload_identifiers_metadata(resource, context) ++
+      tenant_metadata(context)
+  end
+
+  defp tenant_metadata(context) do
+    context
+    |> Keyword.fetch!(:tenant)
+    |> then(&[tenant: &1.slug])
   end
 
   defp download_identifiers_metadata(resource, context) do

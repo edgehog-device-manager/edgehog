@@ -84,7 +84,8 @@ defmodule Edgehog.Files.TelemetryTest do
     test "emits start event with measurements and metadata", ctx do
       start_capture([Telemetry.file_download_start_event()])
 
-      started_at = Telemetry.file_download_request_started(ctx.file_download_request)
+      started_at =
+        Telemetry.file_download_request_started(ctx.file_download_request, tenant: ctx.tenant)
 
       assert is_integer(started_at)
 
@@ -98,6 +99,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.needs_encoding == true
       assert metadata.request_id == ctx.file_download_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
       assert metadata.started_at == started_at
     end
 
@@ -108,7 +110,7 @@ defmodule Edgehog.Files.TelemetryTest do
 
       Telemetry.file_download_request_completed(
         ctx.file_download_request,
-        [],
+        [tenant: ctx.tenant],
         started_at,
         1,
         :ready
@@ -126,6 +128,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.destination_type == :storage
       assert metadata.request_id == ctx.file_download_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
     end
 
     test "emits failed stop event with result :error and reason", ctx do
@@ -135,7 +138,7 @@ defmodule Edgehog.Files.TelemetryTest do
 
       Telemetry.file_download_request_failed(
         ctx.file_download_request,
-        [],
+        [tenant: ctx.tenant],
         started_at,
         3,
         :device_offline
@@ -153,6 +156,17 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.destination_type == :storage
       assert metadata.request_id == ctx.file_download_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
+    end
+
+    test "raises KeyError when :tenant is missing or invalid in context", ctx do
+      assert_raise KeyError, fn ->
+        Telemetry.file_download_request_started(ctx.file_download_request, [])
+      end
+
+      assert_raise KeyError, fn ->
+        Telemetry.file_download_request_started(ctx.file_download_request, tenant: %{})
+      end
     end
   end
 
@@ -176,7 +190,8 @@ defmodule Edgehog.Files.TelemetryTest do
     test "emits start event with measurements and metadata", ctx do
       start_capture([Telemetry.file_upload_start_event()])
 
-      started_at = Telemetry.file_upload_request_started(ctx.file_upload_request)
+      started_at =
+        Telemetry.file_upload_request_started(ctx.file_upload_request, tenant: ctx.tenant)
 
       assert is_integer(started_at)
 
@@ -190,6 +205,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.needs_encoding == true
       assert metadata.request_id == ctx.file_upload_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
       assert metadata.started_at == started_at
     end
 
@@ -200,7 +216,7 @@ defmodule Edgehog.Files.TelemetryTest do
 
       Telemetry.file_upload_request_completed(
         ctx.file_upload_request,
-        [],
+        [tenant: ctx.tenant],
         started_at,
         0,
         :ok
@@ -218,6 +234,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.source_type == :filesystem
       assert metadata.request_id == ctx.file_upload_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
     end
 
     test "emits failed stop event with result :error and reason", ctx do
@@ -227,7 +244,7 @@ defmodule Edgehog.Files.TelemetryTest do
 
       Telemetry.file_upload_request_failed(
         ctx.file_upload_request,
-        [],
+        [tenant: ctx.tenant],
         started_at,
         1,
         :connection_refused
@@ -245,6 +262,17 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.source_type == :filesystem
       assert metadata.request_id == ctx.file_upload_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
+    end
+
+    test "raises KeyError when :tenant is missing or invalid in context", ctx do
+      assert_raise KeyError, fn ->
+        Telemetry.file_upload_request_started(ctx.file_upload_request, [])
+      end
+
+      assert_raise KeyError, fn ->
+        Telemetry.file_upload_request_started(ctx.file_upload_request, tenant: %{})
+      end
     end
   end
 
@@ -272,7 +300,7 @@ defmodule Edgehog.Files.TelemetryTest do
 
       start_capture([Telemetry.file_download_start_event()])
 
-      Telemetry.file_download_request_started(ctx.file_download_request)
+      Telemetry.file_download_request_started(ctx.file_download_request, tenant: ctx.tenant)
 
       {_measurements, metadata} = assert_receive_event(Telemetry.file_download_start_event())
 
@@ -280,6 +308,7 @@ defmodule Edgehog.Files.TelemetryTest do
       refute Map.has_key?(metadata, :device_id)
       refute Map.has_key?(metadata, :file_id)
       assert metadata.transfer_type == :download
+      assert metadata.tenant == ctx.tenant.slug
     end
   end
 
@@ -326,6 +355,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.transfer_type == :download
       assert metadata.request_id == file_download_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
 
       FileDownloadRequestProvisioner.run(provisioner)
 
@@ -342,6 +372,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.transfer_type == :download
       assert metadata.request_id == file_download_request.id
       assert metadata.device_id == ctx.device.id
+      assert metadata.tenant == ctx.tenant.slug
     end
 
     test "emits start and failed stop events when device is offline", ctx do
@@ -376,6 +407,7 @@ defmodule Edgehog.Files.TelemetryTest do
 
       assert metadata.transfer_type == :download
       assert metadata.request_id == file_download_request.id
+      assert metadata.tenant == ctx.tenant.slug
 
       {measurements, metadata} =
         assert_receive_event(Telemetry.file_download_stop_event())
@@ -387,6 +419,7 @@ defmodule Edgehog.Files.TelemetryTest do
       assert metadata.reason == :device_offline
       assert metadata.transfer_type == :download
       assert metadata.request_id == file_download_request.id
+      assert metadata.tenant == ctx.tenant.slug
     end
   end
 

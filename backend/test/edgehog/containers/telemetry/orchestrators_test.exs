@@ -62,6 +62,7 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert measurements.count == 1
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       # The provisioners are already satisfied (the deployment is ready), so the
       # orchestrator terminates normally as soon as they all report readiness
@@ -74,6 +75,7 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert metadata.result == :ok
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
     end
 
     test "emits a failed deployment event when a container reports a failure" do
@@ -96,6 +98,7 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert measurements.count == 1
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       test_process = self()
 
@@ -147,8 +150,21 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert metadata.result == :error
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
+    end
+
+    test "raises KeyError when :tenant is missing or invalid in context" do
+      %{deployment: deployment} = deployment_ready_fixture()
+
+      assert_raise KeyError, fn ->
+        Telemetry.deployment_started(deployment, [])
+      end
+
+      assert_raise KeyError, fn ->
+        Telemetry.deployment_started(deployment, tenant: %{})
+      end
     end
   end
 
@@ -182,6 +198,7 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert metadata.container_deployment_id == container_deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       Sandbox.allow(Edgehog.Repo, self(), orchestrator)
 
@@ -223,6 +240,7 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert metadata.container_deployment_id == container_deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
     end
@@ -253,6 +271,7 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert metadata.container_deployment_id == container_deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       Sandbox.allow(Edgehog.Repo, self(), container_orchestrator)
 
@@ -286,8 +305,22 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
       assert metadata.container_deployment_id == container_deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
+      assert metadata.tenant == tenant.slug
 
       Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)
+    end
+
+    test "raises KeyError when :tenant is missing or invalid in context for container deployment" do
+      %{deployment: deployment, container_deployment: container_deployment} =
+        container_deployment_ready_fixture()
+
+      assert_raise KeyError, fn ->
+        Telemetry.container_deployment_started(container_deployment, deployment, [])
+      end
+
+      assert_raise KeyError, fn ->
+        Telemetry.container_deployment_started(container_deployment, deployment, tenant: %{})
+      end
     end
   end
 
