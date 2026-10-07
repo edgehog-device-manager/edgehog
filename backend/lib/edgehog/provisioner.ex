@@ -18,16 +18,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Provisioner do
+defmodule Edgehog.Provisioner do
   @moduledoc """
-  This module provides the default implementation for `Edgehog.Containers.Provisioner.Behaviour`.
+  This module provides the default implementation for `Edgehog.Provisioner.Behaviour`.
   It is sufficient to add a using statement like so:
 
   ```ex
   defmodule ResourceDeployment.Provisioner do
     @sup Edgehog.Containers.Resource.Provisioner.Supervisor
 
-    use Edgehog.Containers.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
+    use Edgehog.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
   end
   ```
 
@@ -37,7 +37,7 @@ defmodule Edgehog.Containers.Provisioner do
   retries and errors.
 
   The resource specific logic is delegated to the `Core` module nested inside
-  the provisioner (see `Edgehog.Containers.Provisioner.Core.Behaviour`): pure
+  the provisioner (see `Edgehog.Provisioner.Core.Behaviour`): pure
   functions that can be tested in isolation (e.g. `ready?/1`, `topic/1`) and
   functions that provide the side effects of the provisioning (e.g.
   `send_to_device/2`, `reconcile/2`).
@@ -76,7 +76,7 @@ defmodule Edgehog.Containers.Provisioner do
       use GenServer, restart: :transient
 
       alias Edgehog.Config
-      alias Edgehog.Containers.Provisioner
+      alias Edgehog.Provisioner
       alias unquote(core_module), as: Core
       alias unquote(resource_module), as: Resource
 
@@ -400,13 +400,13 @@ defmodule Edgehog.Containers.Provisioner do
         sup = Module.get_attribute(env.module, :sup)
 
         if is_nil(sup) do
-          raise "the `@sup` module attribute must be set before `use Edgehog.Containers.Provisioner`, " <>
+          raise "the `@sup` module attribute must be set before `use Edgehog.Provisioner`, " <>
                   "specifying the supervisor under which the provisioner processes are started. " <>
                   "Alternatively, override the `provision/3` callback to start the process as needed."
         end
 
         quote do
-          @impl Edgehog.Containers.Provisioner.Behaviour
+          @impl Edgehog.Provisioner.Behaviour
           def provision(resource, tenant, opts \\ []) do
             args =
               opts

@@ -28,37 +28,37 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
   provisioner broadcasts readiness once the device reports the download as
   completed, and a failure if the provisioning deadline is hit.
 
-  For more information, check the `Edgehog.Containers.Provisioner.Core.Behaviour` docs.
+  For more information, check the `Edgehog.Provisioner.Core.Behaviour` docs.
   """
-  use Edgehog.Containers.Provisioner.Core
+  use Edgehog.Provisioner.Core
 
   alias Edgehog.Files
 
   require Logger
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def ready?(%{status: status}), do: status == :completed
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def topic(%{id: id}), do: "ready:file_download_requests:#{id}"
   def topic(id), do: "ready:file_download_requests:#{id}"
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def subscribe_topic(%{id: id}), do: "file_download_requests:#{id}"
   def subscribe_topic(id), do: "file_download_requests:#{id}"
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def name(%{id: id}),
     do: {:via, Registry, {Edgehog.Files.FileDownloadRequest.Provisioner.Registry, id}}
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
     Files.send_file_download_request(resource, tenant: tenant)
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def reconcile(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
@@ -68,14 +68,14 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
 
   # Logging functions
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_provisioning_started(resource, device) do
     Logger.info("""
     File download request #{resource.id} provisioned on device #{device.device_id}. Waiting events
     """)
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_api_error(resource, error) do
     if temporary_error?(error) do
       Logger.warning(
@@ -88,14 +88,14 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
     end
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_provisioning_failed(resource, reason) do
     Logger.info(
       "Provisioner for file download request #{resource.id} gave up with reason #{inspect(reason)}."
     )
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_provisioning_completed(resource, retries) do
     Logger.info(
       "File download request #{resource.id} successfully provisioned after #{retries} retries."

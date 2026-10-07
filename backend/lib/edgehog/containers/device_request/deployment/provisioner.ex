@@ -22,9 +22,9 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   @moduledoc """
   The provisioner for deploying device requests on a device.
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Containers.DeviceRequest.Deployment,
     core: Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Core
 

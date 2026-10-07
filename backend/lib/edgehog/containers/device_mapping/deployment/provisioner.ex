@@ -22,9 +22,9 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.Provisioner do
   @moduledoc """
   The provisioner for deploying device mappings on a device.
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Containers.DeviceMapping.Deployment,
     core: Edgehog.Containers.DeviceMapping.Deployment.Provisioner.Core
 
