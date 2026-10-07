@@ -48,6 +48,7 @@ defmodule Edgehog.Containers.Provisioner.Core do
   defmacro __using__(_opts) do
     quote do
       alias Edgehog.Containers.Provisioner.Core
+      alias Edgehog.Containers.Telemetry
 
       require Logger
 
@@ -104,13 +105,31 @@ defmodule Edgehog.Containers.Provisioner.Core do
       @impl Core.Behaviour
       def log_provisioning_completed(_resource, _retries), do: :ok
 
+      @impl Core.Behaviour
+      def telemetry_provisioning_started(resource, context) do
+        Telemetry.provisioning_started(resource, context)
+      end
+
+      @impl Core.Behaviour
+      def telemetry_provisioning_completed(resource, context, started_at, retries, result) do
+        Telemetry.provisioning_completed(resource, context, started_at, retries, result)
+      end
+
+      @impl Core.Behaviour
+      def telemetry_provisioning_failed(resource, context, started_at, retries, reason) do
+        Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
+      end
+
       defoverridable log_subscribing_to_events: 1,
                      log_subscribing_to_device_status: 1,
                      log_device_status: 2,
                      log_provisioning_started: 2,
                      log_api_error: 2,
                      log_provisioning_failed: 2,
-                     log_provisioning_completed: 2
+                     log_provisioning_completed: 2,
+                     telemetry_provisioning_started: 2,
+                     telemetry_provisioning_completed: 5,
+                     telemetry_provisioning_failed: 5
     end
   end
 end

@@ -77,7 +77,6 @@ defmodule Edgehog.Containers.Provisioner do
 
       alias Edgehog.Config
       alias Edgehog.Containers.Provisioner
-      alias Edgehog.Containers.Telemetry
       alias unquote(core_module), as: Core
       alias unquote(resource_module), as: Resource
 
@@ -164,7 +163,7 @@ defmodule Edgehog.Containers.Provisioner do
 
         %{id: id, device: %{id: device_id, online: device_online?}} = resource
 
-        started_at = Telemetry.provisioning_started(resource, context)
+        started_at = Core.telemetry_provisioning_started(resource, context)
 
         state = %{
           resource: resource,
@@ -296,7 +295,7 @@ defmodule Edgehog.Containers.Provisioner do
           result: result
         } = state
 
-        Telemetry.provisioning_completed(resource, context, started_at, retries, result)
+        Core.telemetry_provisioning_completed(resource, context, started_at, retries, result)
 
         Core.log_provisioning_completed(resource, retries)
 
@@ -320,7 +319,7 @@ defmodule Edgehog.Containers.Provisioner do
 
         Core.log_provisioning_failed(resource, reason)
 
-        Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
+        Core.telemetry_provisioning_failed(resource, context, started_at, retries, reason)
 
         # Broadcast failure so that the orchestrator can react
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:failure, resource})
@@ -339,7 +338,7 @@ defmodule Edgehog.Containers.Provisioner do
           retries: retries
         } = state
 
-        Telemetry.provisioning_failed(resource, context, started_at, retries, :unexpected)
+        Core.telemetry_provisioning_failed(resource, context, started_at, retries, :unexpected)
 
         Core.log_provisioning_failed(resource, reason)
       end
