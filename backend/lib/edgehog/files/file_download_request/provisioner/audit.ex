@@ -32,6 +32,11 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Audit do
   require Logger
 
   @impl Edgehog.Provisioner.Audit.Behaviour
+  def provisioning_started(resource, context) do
+    Telemetry.file_download_request_started(resource, context)
+  end
+
+  @impl Edgehog.Provisioner.Audit.Behaviour
   def api_error(resource, error) do
     if Core.temporary_error?(error) do
       Logger.warning(
@@ -49,6 +54,8 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Audit do
     Logger.info(
       "File download request #{resource.id} successfully provisioned after #{retries} retries."
     )
+
+    Telemetry.file_download_request_completed(resource, context, started_at, retries, result)
   end
 
   @impl Edgehog.Provisioner.Audit.Behaviour
@@ -56,5 +63,7 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Audit do
     Logger.info(
       "Provisioner for file download request #{resource.id} gave up with reason #{inspect(reason)}."
     )
+
+    Telemetry.file_download_request_failed(resource, context, started_at, retries, reason)
   end
 end
