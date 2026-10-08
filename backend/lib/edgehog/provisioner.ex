@@ -27,7 +27,10 @@ defmodule Edgehog.Provisioner do
   defmodule ResourceDeployment.Provisioner do
     @sup Edgehog.Containers.Resource.Provisioner.Supervisor
 
-    use Edgehog.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
+    use Edgehog.Provisioner,
+      resource: Edgehog.Containers.Resource.Deployment,
+      core: Core,
+      audit: Audit
   end
   ```
 
@@ -41,6 +44,11 @@ defmodule Edgehog.Provisioner do
   functions that can be tested in isolation (e.g. `ready?/1`, `topic/1`) and
   functions that provide the side effects of the provisioning (e.g.
   `send_to_device/2`, `reconcile/2`).
+
+  The observability of the provisioning (logging and telemetry) is delegated
+  to the `Audit` module nested inside the provisioner (see
+  `Edgehog.Provisioner.Audit.Behaviour`): one function per provisioning event,
+  each choosing what to do for it.
 
   The provisioning flow can be described as follows:
 
@@ -70,6 +78,7 @@ defmodule Edgehog.Provisioner do
     resource_module = Keyword.fetch!(opts, :resource)
 
     core_module = Keyword.fetch!(opts, :core)
+    audit_module = Keyword.get(opts, :audit, Edgehog.Provisioner.Audit)
 
     # credo:disable-for-next-line Credo.Check.Refactor.LongQuoteBlocks
     quote do
@@ -79,6 +88,7 @@ defmodule Edgehog.Provisioner do
       alias Edgehog.Provisioner
       alias unquote(core_module), as: Core
       alias unquote(resource_module), as: Resource
+      alias unquote(audit_module), as: Audit
 
       @before_compile unquote(__MODULE__)
 
