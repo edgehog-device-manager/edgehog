@@ -34,8 +34,6 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
 
   alias Edgehog.Files
 
-  require Logger
-
   @impl Edgehog.Provisioner.Core.Behaviour
   def ready?(%{status: status}), do: status == :completed
 
@@ -52,6 +50,10 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
     do: {:via, Registry, {Edgehog.Files.FileDownloadRequest.Provisioner.Registry, id}}
 
   @impl Edgehog.Provisioner.Core.Behaviour
+
+
+
+  @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
@@ -64,41 +66,5 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner.Core do
 
     with {:error, _} <- Files.fetch_file_download_request(resource.id, tenant: tenant),
          do: :not_found
-  end
-
-  # Logging functions
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_started(resource, device) do
-    Logger.info("""
-    File download request #{resource.id} provisioned on device #{device.device_id}. Waiting events
-    """)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_api_error(resource, error) do
-    if temporary_error?(error) do
-      Logger.warning(
-        "Error while sending the file download request #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
-      )
-    else
-      Logger.error(
-        "Unrecoverable error while sending the file download request #{resource.id}: #{inspect(error)}. Terminating."
-      )
-    end
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_failed(resource, reason) do
-    Logger.info(
-      "Provisioner for file download request #{resource.id} gave up with reason #{inspect(reason)}."
-    )
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_completed(resource, retries) do
-    Logger.info(
-      "File download request #{resource.id} successfully provisioned after #{retries} retries."
-    )
   end
 end

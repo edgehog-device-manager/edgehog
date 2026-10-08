@@ -33,13 +33,11 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
   use Edgehog.Provisioner.Core
 
   alias Edgehog.Astarte.Device.AvailableFileBinds.FileBindStatus
+  alias Edgehog.Containers.FileBind.Provisioner.Audit
   alias Edgehog.Containers.FileBind.Storage, as: FileBindStorage
-  alias Edgehog.Containers.Telemetry
   alias Edgehog.Devices
   alias Edgehog.Files
   alias Edgehog.Files.FileDownloadRequest
-
-  require Logger
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def ready?(%{state: state}), do: state in [:available, :unavailable]
@@ -57,9 +55,8 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
     do: {:via, Registry, {Edgehog.Containers.FileBind.Provisioner.Registry, id}}
 
   @impl Edgehog.Provisioner.Core.Behaviour
-  def temporary_error?(:file_not_uploaded), do: true
-  def temporary_error?({:error, :file_not_uploaded}), do: true
-  def temporary_error?(error), do: super(error)
+
+
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
@@ -71,7 +68,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
            Ash.load(file_bind, [:device, :file_mount], tenant: tenant),
          {:ok, device} <-
            Devices.send_create_file_bind_request(device, file_bind, deployment, tenant: tenant) do
-      log_provisioning_started(file_bind, device)
+      Audit.sent_to_device(file_bind, device)
     end
   end
 
@@ -207,53 +204,4 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
 
   defp tenant_id(%{tenant_id: tenant_id}), do: tenant_id
   defp tenant_id(tenant_id), do: tenant_id
-
-  # Logging functions
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_started(resource, device) do
-    Logger.info("""
-    FileBind #{resource.id} provisioned on device #{device.device_id}. Waiting events
-    """)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_api_error(resource, error) do
-    if temporary_error?(error) do
-      Logger.warning(
-        "Error while sending the file bind #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
-      )
-    else
-      Logger.error(
-        "Unrecoverable error while sending the file bind #{resource.id}: #{inspect(error)}. Terminating."
-      )
-    end
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_failed(resource, reason) do
-    Logger.info(
-      "Provisioner for file bind #{resource.id} gave up with reason #{inspect(reason)}."
-    )
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_completed(resource, retries) do
-    Logger.info("FileBind #{resource.id} successfully provisioned after #{retries} retries.")
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_started(resource, context) do
-    Telemetry.provisioning_started(resource, context)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_completed(resource, context, started_at, retries, result) do
-    Telemetry.provisioning_completed(resource, context, started_at, retries, result)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_failed(resource, context, started_at, retries, reason) do
-    Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
-  end
 end

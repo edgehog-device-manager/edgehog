@@ -87,6 +87,7 @@ defmodule Edgehog.Provisioner do
       alias Edgehog.Config
       alias Edgehog.Provisioner
       alias unquote(core_module), as: Core
+      alias unquote(audit_module), as: Audit
       alias unquote(resource_module), as: Resource
       alias unquote(audit_module), as: Audit
 
@@ -173,7 +174,7 @@ defmodule Edgehog.Provisioner do
 
         %{id: id, device: %{id: device_id, online: device_online?}} = resource
 
-        started_at = Core.telemetry_provisioning_started(resource, context)
+        started_at = Audit.provisioning_started(resource, context)
 
         state = %{
           resource: resource,
@@ -187,14 +188,14 @@ defmodule Edgehog.Provisioner do
         }
 
         topic = Core.subscribe_topic(resource)
+        device_offline_topic = "devices:offline:#{device_id}"
 
-        Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+        for topic <- [topic, device_offline_topic] do
+          Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+          Audit.subscribing_to_events(topic)
+        end
 
-        Phoenix.PubSub.subscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
-
-        Core.log_subscribing_to_events(topic)
-        Core.log_subscribing_to_device_status(device_id)
-        Core.log_device_status(device_id, device_online?)
+        Audit.device_status(device_id, device_online?)
 
         # If the provisioning does not complete within the deadline, the
         # provisioner gives up and broadcasts a failure that the orchestrator reacts
@@ -261,8 +262,6 @@ defmodule Edgehog.Provisioner do
       # failure so that the orchestrator can react
       @impl GenServer
       def handle_info(:give_up, state) do
-        Core.log_provisioning_failed(state.resource, :timeout_hit)
-
         {:stop, {:shutdown, :timeout_hit}, state}
       end
 
@@ -305,9 +304,7 @@ defmodule Edgehog.Provisioner do
           result: result
         } = state
 
-        Core.telemetry_provisioning_completed(resource, context, started_at, retries, result)
-
-        Core.log_provisioning_completed(resource, retries)
+        Audit.provisioning_completed(resource, context, started_at, retries, result)
 
         # Broadcast readiness so that the orchestrator can proceed
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:ready, resource})
@@ -327,9 +324,7 @@ defmodule Edgehog.Provisioner do
           retries: retries
         } = state
 
-        Core.log_provisioning_failed(resource, reason)
-
-        Core.telemetry_provisioning_failed(resource, context, started_at, retries, reason)
+        Audit.provisioning_failed(resource, context, started_at, retries, reason)
 
         # Broadcast failure so that the orchestrator can react
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:failure, resource})
@@ -348,9 +343,7 @@ defmodule Edgehog.Provisioner do
           retries: retries
         } = state
 
-        Core.telemetry_provisioning_failed(resource, context, started_at, retries, :unexpected)
-
-        Core.log_provisioning_failed(resource, reason)
+        Audit.provisioning_failed(resource, context, started_at, retries, reason)
       end
 
       defp maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
@@ -386,7 +379,7 @@ defmodule Edgehog.Provisioner do
             {:noreply, new_state, timeout}
 
           error ->
-            Core.log_api_error(resource, error)
+            Audit.api_error(resource, error)
             timeout = timeout(state)
 
             if Core.temporary_error?(error),

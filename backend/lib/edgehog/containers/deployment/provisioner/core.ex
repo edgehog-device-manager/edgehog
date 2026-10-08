@@ -27,10 +27,8 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
   use Edgehog.Provisioner.Core
 
   alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Containers.Telemetry
+  alias Edgehog.Containers.Deployment.Provisioner.Audit
   alias Edgehog.Devices
-
-  require Logger
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def ready?(%{state: state}), do: state in [:started, :stopped]
@@ -48,6 +46,10 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
     do: {:via, Registry, {Edgehog.Containers.Deployment.Provisioner.Registry, id}}
 
   @impl Edgehog.Provisioner.Core.Behaviour
+
+
+
+  @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(deployment, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
@@ -59,7 +61,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
       |> Ash.Changeset.for_update(:mark_as_sent, %{}, tenant: tenant)
       |> Ash.update!()
 
-      log_provisioning_started(deployment, device)
+      Audit.sent_to_device(deployment, device)
     end
   end
 
@@ -93,53 +95,4 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
   end
 
   def maybe_update(other, _deployment, _tenant), do: other
-
-  # Logging functions
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_started(resource, device) do
-    Logger.info("""
-    Deployment #{resource.id} provisioned on device #{device.device_id}. Waiting events
-    """)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_api_error(deployment, error) do
-    if temporary_error?(error) do
-      Logger.warning(
-        "Error while sending the deployment #{deployment.id}: #{inspect(error)}. The operation will be retried shortly."
-      )
-    else
-      Logger.error(
-        "Unrecoverable error while sending the deployment #{deployment.id}: #{inspect(error)}. Terminating."
-      )
-    end
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_failed(deployment, reason) do
-    Logger.info(
-      "Provisioner for deployment #{deployment.id} gave up with reason #{inspect(reason)}."
-    )
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_completed(deployment, retries) do
-    Logger.info("Deployment #{deployment.id} successfully provisioned after #{retries} retries.")
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_started(resource, context) do
-    Telemetry.provisioning_started(resource, context)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_completed(resource, context, started_at, retries, result) do
-    Telemetry.provisioning_completed(resource, context, started_at, retries, result)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_failed(resource, context, started_at, retries, reason) do
-    Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
-  end
 end

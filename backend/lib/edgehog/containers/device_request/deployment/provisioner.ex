@@ -26,7 +26,8 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner do
   """
   use Edgehog.Provisioner,
     resource: Edgehog.Containers.DeviceRequest.Deployment,
-    core: Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Core
+    core: Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Core,
+    audit: Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Audit
 
   @sup Edgehog.Containers.DeviceRequest.Provisioner.Supervisor
 end

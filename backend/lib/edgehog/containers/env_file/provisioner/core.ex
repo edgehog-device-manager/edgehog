@@ -32,12 +32,10 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
   use Edgehog.Provisioner.Core
 
   alias Edgehog.Astarte.Device.AvailableEnvFiles.EnvFileStatus
+  alias Edgehog.Containers.EnvFile.Provisioner.Audit
   alias Edgehog.Containers.EnvFile.Storage, as: EnvFileStorage
-  alias Edgehog.Containers.Telemetry
   alias Edgehog.Devices
   alias Edgehog.Files
-
-  require Logger
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def ready?(%{state: state}), do: state in [:available, :unavailable]
@@ -55,9 +53,8 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
     do: {:via, Registry, {Edgehog.Containers.EnvFile.Provisioner.Registry, id}}
 
   @impl Edgehog.Provisioner.Core.Behaviour
-  def temporary_error?(:file_not_uploaded), do: true
-  def temporary_error?({:error, :file_not_uploaded}), do: true
-  def temporary_error?(error), do: super(error)
+
+
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
@@ -69,7 +66,7 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
            Ash.load(env_file, [:device], tenant: tenant),
          {:ok, device} <-
            Devices.send_create_env_file_request(device, env_file, deployment, tenant: tenant) do
-      log_provisioning_started(env_file, device)
+      Audit.sent_to_device(env_file, device)
     end
   end
 
@@ -153,51 +150,4 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
 
   defp tenant_id(%{tenant_id: tenant_id}), do: tenant_id
   defp tenant_id(tenant_id), do: tenant_id
-
-  # Logging functions
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_started(resource, device) do
-    Logger.info("""
-    EnvFile #{resource.id} provisioned on device #{device.device_id}. Waiting events
-    """)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_api_error(resource, error) do
-    if temporary_error?(error) do
-      Logger.warning(
-        "Error while sending the env file #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
-      )
-    else
-      Logger.error(
-        "Unrecoverable error while sending the env file #{resource.id}: #{inspect(error)}. Terminating."
-      )
-    end
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_failed(resource, reason) do
-    Logger.info("Provisioner for env file #{resource.id} gave up with reason #{inspect(reason)}.")
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def log_provisioning_completed(resource, retries) do
-    Logger.info("EnvFile #{resource.id} successfully provisioned after #{retries} retries.")
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_started(resource, context) do
-    Telemetry.provisioning_started(resource, context)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_completed(resource, context, started_at, retries, result) do
-    Telemetry.provisioning_completed(resource, context, started_at, retries, result)
-  end
-
-  @impl Edgehog.Provisioner.Core.Behaviour
-  def telemetry_provisioning_failed(resource, context, started_at, retries, reason) do
-    Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
-  end
 end
