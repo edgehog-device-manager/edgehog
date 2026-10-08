@@ -52,11 +52,11 @@ defmodule Edgehog.Devices.DeviceTest do
       container =
         container_fixture(
           tenant: tenant,
-          image_id: image.id,
+          image: image,
           volumes: 1,
-          networks: [network.id],
-          device_mappings: [device_mapping.id],
-          device_requests: [device_request.id]
+          networks: [network],
+          device_mappings: [device_mapping],
+          device_requests: [device_request]
         )
 
       %{
