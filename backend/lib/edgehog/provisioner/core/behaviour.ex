@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
+defmodule Edgehog.Provisioner.Core.Behaviour do
   @moduledoc """
   Behaviour describing the API of the Core functions for a Provisioner.
 
@@ -29,11 +29,11 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   resource state with what astarte reports).
 
   This module shouldn't be used directly. Rather, it's best to
-  use `Edgehog.Containers.Provisioner.Core`, i.e.:
+  use `Edgehog.Provisioner.Core`, i.e.:
 
   ```ex
   defmodule ResourceProvisioner.Core do
-    use Edgehog.Containers.Provisioner.Core
+    use Edgehog.Provisioner.Core
   end
   ```
 
@@ -42,7 +42,7 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   default implementations.
   """
 
-  alias Edgehog.Containers.Provisioner
+  alias Edgehog.Provisioner
   alias Edgehog.Tenants.Tenant
 
   @doc """
@@ -119,6 +119,36 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
   @callback log_provisioning_completed(resource(), non_neg_integer()) :: :ok
 
   @doc """
+  Emits a telemetry event when provisioning starts.
+
+  Returns any state or metadata (e.g. start timestamp) needed for subsequent
+  provisioning completed or failed events.
+  """
+  @callback telemetry_provisioning_started(resource(), keyword()) :: term()
+
+  @doc """
+  Emits a telemetry event when provisioning completes successfully.
+  """
+  @callback telemetry_provisioning_completed(
+              resource(),
+              keyword(),
+              start_metadata :: term(),
+              retries :: non_neg_integer(),
+              result :: term()
+            ) :: :ok
+
+  @doc """
+  Emits a telemetry event when provisioning fails.
+  """
+  @callback telemetry_provisioning_failed(
+              resource(),
+              keyword(),
+              start_metadata :: term(),
+              retries :: non_neg_integer(),
+              reason :: term()
+            ) :: :ok
+
+  @doc """
   Returns the via tuple used as the name for the provisioner on its registry.
   """
   @callback name(resource()) :: {:via, Registry, {provisioner_registry(), id()}}
@@ -148,7 +178,7 @@ defmodule Edgehog.Containers.Provisioner.Core.Behaviour do
           | {:error, term()}
 
   @typedoc """
-  See `Edgehog.Containers.Provisioner.Behaviour.resource()`.
+  See `Edgehog.Provisioner.Behaviour.resource()`.
   """
   @type resource() :: Provisioner.Behaviour.resource()
 

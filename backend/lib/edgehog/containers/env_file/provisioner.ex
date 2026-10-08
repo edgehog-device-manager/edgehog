@@ -25,9 +25,9 @@ defmodule Edgehog.Containers.EnvFile.Provisioner do
   the device (creating a file download request for uploaded files when
   needed) and then sending a `CreateEnvFileRequest` to the device.
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Containers.EnvFile,
     core: Edgehog.Containers.EnvFile.Provisioner.Core
 

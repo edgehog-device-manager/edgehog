@@ -50,9 +50,9 @@ defmodule Edgehog.Containers.Deployment.Provisioner do
   - A :timeout hits the server, it retries to send the deployment information to the
     device
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Containers.Deployment,
     core: Edgehog.Containers.Deployment.Provisioner.Core
 

@@ -18,9 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Provisioner.Core do
+defmodule Edgehog.Provisioner.Core do
   @moduledoc """
-  Convenience module for `Edgehog.Containers.Provisioner.Core.Behaviour`.
+  Convenience module for `Edgehog.Provisioner.Core.Behaviour`.
 
   The resource specific functions required by the provisioner (both the pure
   functions, e.g. `ready?/1` and `topic/1`, and the functions providing the
@@ -33,21 +33,21 @@ defmodule Edgehog.Containers.Provisioner.Core do
 
   ```ex
   defmodule ResourceDeploymentProvisioner do
-    use Edgehog.Containers.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
+    use Edgehog.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
 
     defmodule Core do
-      use Edgehog.Containers.Provisioner.Core
+      use Edgehog.Provisioner.Core
     end
   end
   ```
 
   which will declare that the module implements
-  `Edgehog.Containers.Provisioner.Core.Behaviour`.
+  `Edgehog.Provisioner.Core.Behaviour`.
   """
 
   defmacro __using__(_opts) do
     quote do
-      alias Edgehog.Containers.Provisioner.Core
+      alias Edgehog.Provisioner.Core
 
       require Logger
 
@@ -104,13 +104,27 @@ defmodule Edgehog.Containers.Provisioner.Core do
       @impl Core.Behaviour
       def log_provisioning_completed(_resource, _retries), do: :ok
 
+      @impl Core.Behaviour
+      def telemetry_provisioning_started(_resource, _context), do: nil
+
+      @impl Core.Behaviour
+      def telemetry_provisioning_completed(_resource, _context, _started_at, _retries, _result),
+        do: :ok
+
+      @impl Core.Behaviour
+      def telemetry_provisioning_failed(_resource, _context, _started_at, _retries, _reason),
+        do: :ok
+
       defoverridable log_subscribing_to_events: 1,
                      log_subscribing_to_device_status: 1,
                      log_device_status: 2,
                      log_provisioning_started: 2,
                      log_api_error: 2,
                      log_provisioning_failed: 2,
-                     log_provisioning_completed: 2
+                     log_provisioning_completed: 2,
+                     telemetry_provisioning_started: 2,
+                     telemetry_provisioning_completed: 5,
+                     telemetry_provisioning_failed: 5
     end
   end
 end

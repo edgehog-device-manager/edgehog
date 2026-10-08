@@ -22,31 +22,32 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
   @moduledoc """
   The module describing the Core functions required by the image deployment provisioner.
 
-  For more information, check the `Edgehog.Containers.Provisioner.Core.Behaviour` docs.
+  For more information, check the `Edgehog.Provisioner.Core.Behaviour` docs.
   """
-  use Edgehog.Containers.Provisioner.Core
+  use Edgehog.Provisioner.Core
 
   alias Edgehog.Astarte.Device.AvailableImages.ImageStatus
+  alias Edgehog.Containers.Telemetry
   alias Edgehog.Devices
 
   require Logger
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def ready?(%{state: state}), do: state in [:pulled, :unpulled]
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def topic(%{id: id}), do: "ready:image_deployments:#{id}"
   def topic(id), do: "ready:image_deployments:#{id}"
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def subscribe_topic(%{id: id}), do: "image_deployments:#{id}"
   def subscribe_topic(id), do: "image_deployments:#{id}"
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def name(%{id: id}),
     do: {:via, Registry, {Edgehog.Containers.Image.Deployment.Provisioner.Registry, id}}
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
     deployment = Keyword.fetch!(opts, :deployment)
@@ -60,7 +61,7 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
     end
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def reconcile(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
 
@@ -92,14 +93,14 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
 
   # Logging functions
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_provisioning_started(resource, device) do
     Logger.info("""
     Image #{resource.id} provisioned on device #{device.device_id}. Waiting events
     """)
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_api_error(resource, error) do
     if temporary_error?(error) do
       Logger.warning(
@@ -112,13 +113,28 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
     end
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_provisioning_failed(resource, reason) do
     Logger.info("Provisioner for image #{resource.id} gave up with reason #{inspect(reason)}.")
   end
 
-  @impl Edgehog.Containers.Provisioner.Core.Behaviour
+  @impl Edgehog.Provisioner.Core.Behaviour
   def log_provisioning_completed(resource, retries) do
     Logger.info("Image #{resource.id} successfully provisioned after #{retries} retries.")
+  end
+
+  @impl Edgehog.Provisioner.Core.Behaviour
+  def telemetry_provisioning_started(resource, context) do
+    Telemetry.provisioning_started(resource, context)
+  end
+
+  @impl Edgehog.Provisioner.Core.Behaviour
+  def telemetry_provisioning_completed(resource, context, started_at, retries, result) do
+    Telemetry.provisioning_completed(resource, context, started_at, retries, result)
+  end
+
+  @impl Edgehog.Provisioner.Core.Behaviour
+  def telemetry_provisioning_failed(resource, context, started_at, retries, reason) do
+    Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
   end
 end
