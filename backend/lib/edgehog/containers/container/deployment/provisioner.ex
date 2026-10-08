@@ -55,7 +55,8 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner do
   """
   use Edgehog.Provisioner,
     resource: Edgehog.Containers.Container.Deployment,
-    core: Edgehog.Containers.Container.Deployment.Provisioner.Core
+    core: Edgehog.Containers.Container.Deployment.Provisioner.Core,
+    audit: Edgehog.Containers.Container.Deployment.Provisioner.Audit
 
   @sup Edgehog.Containers.Container.Provisioner.Supervisor
 end

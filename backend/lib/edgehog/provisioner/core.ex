@@ -74,57 +74,6 @@ defmodule Edgehog.Provisioner.Core do
       def temporary_error?(_error), do: false
 
       defoverridable temporary_error?: 1
-
-      @impl Core.Behaviour
-      def log_subscribing_to_events(topic) do
-        Logger.debug("Subscribing to events on #{topic}")
-      end
-
-      @impl Core.Behaviour
-      def log_subscribing_to_device_status(device_id) do
-        Logger.debug("Subscribing to status events of device #{device_id}")
-      end
-
-      @impl Core.Behaviour
-      def log_device_status(device_id, device_online?) do
-        Logger.debug(
-          "Device #{device_id} is currently #{if device_online?, do: "online", else: "offline"}"
-        )
-      end
-
-      @impl Core.Behaviour
-      def log_provisioning_started(_actual_resource, _device), do: :ok
-
-      @impl Core.Behaviour
-      def log_api_error(_resource, _error), do: :ok
-
-      @impl Core.Behaviour
-      def log_provisioning_failed(_resource, _reason), do: :ok
-
-      @impl Core.Behaviour
-      def log_provisioning_completed(_resource, _retries), do: :ok
-
-      @impl Core.Behaviour
-      def telemetry_provisioning_started(_resource, _context), do: nil
-
-      @impl Core.Behaviour
-      def telemetry_provisioning_completed(_resource, _context, _started_at, _retries, _result),
-        do: :ok
-
-      @impl Core.Behaviour
-      def telemetry_provisioning_failed(_resource, _context, _started_at, _retries, _reason),
-        do: :ok
-
-      defoverridable log_subscribing_to_events: 1,
-                     log_subscribing_to_device_status: 1,
-                     log_device_status: 2,
-                     log_provisioning_started: 2,
-                     log_api_error: 2,
-                     log_provisioning_failed: 2,
-                     log_provisioning_completed: 2,
-                     telemetry_provisioning_started: 2,
-                     telemetry_provisioning_completed: 5,
-                     telemetry_provisioning_failed: 5
     end
   end
 end

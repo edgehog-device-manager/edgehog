@@ -29,7 +29,8 @@ defmodule Edgehog.Containers.EnvFile.Provisioner do
   """
   use Edgehog.Provisioner,
     resource: Edgehog.Containers.EnvFile,
-    core: Edgehog.Containers.EnvFile.Provisioner.Core
+    core: Edgehog.Containers.EnvFile.Provisioner.Core,
+    audit: Edgehog.Containers.EnvFile.Provisioner.Audit
 
   @sup Edgehog.Containers.EnvFile.Provisioner.Supervisor
 end

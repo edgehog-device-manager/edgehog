@@ -30,7 +30,8 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner do
   """
   use Edgehog.Provisioner,
     resource: Edgehog.Files.FileDownloadRequest,
-    core: Edgehog.Files.FileDownloadRequest.Provisioner.Core
+    core: Edgehog.Files.FileDownloadRequest.Provisioner.Core,
+    audit: Edgehog.Files.FileDownloadRequest.Provisioner.Audit
 
   @sup Edgehog.Containers.File.Provisioner.Supervisor
 end

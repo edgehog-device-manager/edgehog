@@ -30,7 +30,8 @@ defmodule Edgehog.Containers.FileBind.Provisioner do
   """
   use Edgehog.Provisioner,
     resource: Edgehog.Containers.FileBind,
-    core: Edgehog.Containers.FileBind.Provisioner.Core
+    core: Edgehog.Containers.FileBind.Provisioner.Core,
+    audit: Edgehog.Containers.FileBind.Provisioner.Audit
 
   @sup Edgehog.Containers.FileBind.Provisioner.Supervisor
 end
