@@ -39,10 +39,17 @@ import {
   isEnvJsonValid,
 } from "@/lib/environment";
 import { useNavigate, Route } from "@/Navigation";
-import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Modal, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  type InstallApplicationFormData,
+  installApplicationSchema,
+} from "@/forms/validation";
+import Button from "@/components/ui/button/Button";
+import Spinner from "@/components/ui/spinner/Spinner";
 import Select from "@/components/ui/select/Select";
 import { FormRow } from "@/components/ui/form-row/FormRow";
-import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 import Alert from "@/components/ui/alert/Alert";
 import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
 import EnvFileInput, {
@@ -239,8 +246,17 @@ const InstallApplicationModal = ({
   const intl = useIntl();
   const navigate = useNavigate();
 
-  const [selectedApp, setSelectedApp] = useState<string | null>(null);
-  const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
+  const { control, handleSubmit, reset, resetField } =
+    useForm<InstallApplicationFormData>({
+      mode: "onTouched",
+      resolver: zodResolver(installApplicationSchema),
+    });
+
+  const selectedAppObject = useWatch({ control, name: "application" });
+  const selectedReleaseObject = useWatch({ control, name: "release" });
+
+  const selectedApp = selectedAppObject?.id || null;
+  const selectedRelease = selectedReleaseObject?.id || null;
   // Per-container environment configuration. Missing entries mean "none".
   const [envModes, setEnvModes] = useState<Record<string, EnvMode>>({});
   const [envStrategies, setEnvStrategies] = useState<Record<string, string>>(
@@ -253,8 +269,6 @@ const InstallApplicationModal = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const mountInputRefs = useRef<Record<string, FileMountInputRef | null>>({});
   const envFileInputRefs = useRef<Record<string, EnvFileInputRef | null>>({});
-  // Both configuration sections start collapsed; selection changes collapse
-  // them again.
   const [envSectionOpen, setEnvSectionOpen] = useState<boolean>(false);
   const [mountsSectionOpen, setMountsSectionOpen] = useState<boolean>(false);
 
@@ -537,7 +551,7 @@ const InstallApplicationModal = ({
     [markEnvFileAsUploaded],
   );
 
-  const handleAppChange = (option: SingleValue<SelectOption>) => {
+  const handleAppChange = (_option: SingleValue<SelectOption>) => {
     if (!isOnline) {
       setErrorFeedback(
         <FormattedMessage
@@ -545,11 +559,11 @@ const InstallApplicationModal = ({
           defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
         />,
       );
+      resetField("application");
       return;
     }
 
-    setSelectedApp(option?.value || null);
-    setSelectedRelease(null);
+    resetField("release");
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
@@ -559,25 +573,38 @@ const InstallApplicationModal = ({
   };
 
   const handleReleaseChange = (option: SingleValue<SelectOption>) => {
-    setSelectedRelease(option?.value || null);
+    const releaseId = option?.value;
+
+    const release = applicationEdges
+      .find((app) => app.node.id === selectedApp)
+      ?.node.releases.edges?.find(({ node }) => node.id === releaseId)?.node;
+
+    const hasRequiredMountsWithoutDefault =
+      release?.containers?.edges?.some(({ node: container }) =>
+        container.fileMounts?.edges?.some(
+          ({ node: mount }) =>
+            mount.required && !mount.defaultFileId && !mount.defaultFile?.name,
+        ),
+      ) ?? false;
+
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
     setEnvJsons({});
+
+    setMountsSectionOpen(hasRequiredMountsWithoutDefault);
     setEnvSectionOpen(false);
-    setMountsSectionOpen(false);
   };
 
   const resetSelections = useCallback(() => {
-    setSelectedApp(null);
-    setSelectedRelease(null);
+    reset();
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
     setEnvJsons({});
     setEnvSectionOpen(false);
     setMountsSectionOpen(false);
-  }, []);
+  }, [reset]);
 
   const handleCancel = useCallback(() => {
     resetSelections();
@@ -588,12 +615,18 @@ const InstallApplicationModal = ({
     if (!selectedRelease) return;
 
     if (!allRequiredMountsConfigured) {
+      setMountsSectionOpen(true);
       setErrorFeedback(
         <FormattedMessage
           id="components.apps.releases.install-application-modal.InstallApplicationModal.missingRequiredBindsFeedback"
           defaultMessage="Please configure a file source for all required file mounts."
         />,
       );
+      return;
+    }
+
+    if (!allEnvJsonValid) {
+      setEnvSectionOpen(true);
       return;
     }
 
@@ -853,6 +886,7 @@ const InstallApplicationModal = ({
   }, [
     selectedRelease,
     allRequiredMountsConfigured,
+    allEnvJsonValid,
     containersWithMounts,
     releaseContainers,
     envModes,
@@ -869,355 +903,423 @@ const InstallApplicationModal = ({
   ]);
 
   return (
-    <ConfirmModal
-      size="lg"
-      title={
-        <FormattedMessage
-          id="components.apps.releases.install-application-modal.InstallApplicationModal.title"
-          defaultMessage="Install Application"
-        />
-      }
-      confirmLabel={
-        <FormattedMessage
-          id="components.apps.releases.install-application-modal.InstallApplicationModal.deployButton"
-          defaultMessage="Deploy"
-        />
-      }
-      show={open}
-      onCancel={handleCancel}
-      onConfirm={handleDeploy}
-      disabled={
-        !isOnline ||
-        !selectedRelease ||
-        !allRequiredMountsConfigured ||
-        !allEnvJsonValid ||
-        isSubmitting ||
-        isDeploying
-      }
-      isConfirming={isDeploying || isSubmitting}
-    >
-      <div className="d-flex flex-column gap-2">
-        <FormRow
-          id="select-application"
-          label={intl.formatMessage({
-            id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication",
-            defaultMessage: "Application",
-          })}
-        >
-          <Select
-            value={selectedApplicationOption}
-            onChange={handleAppChange}
-            options={applicationOptions}
-            isClearable
-            menuPlacement="auto"
-            placeholder={intl.formatMessage({
-              id: "components.apps.releases.install-application-modal.InstallApplicationModal.searchPlaceholder",
-              defaultMessage: "Search or select an application...",
-            })}
-            noOptionsMessage={({ inputValue }) =>
-              inputValue
-                ? intl.formatMessage(
-                    {
-                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching",
-                      defaultMessage:
-                        'No applications found matching "{inputValue}"',
-                    },
-                    { inputValue },
-                  )
-                : intl.formatMessage({
-                    id: "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable",
-                    defaultMessage: "No applications available",
-                  })
-            }
-            filterOption={(option, inputValue) => {
-              return option.label
-                .toLowerCase()
-                .includes(inputValue.toLowerCase());
-            }}
-          />
-        </FormRow>
-
-        <FormRow
-          id="select-release"
-          label={intl.formatMessage({
-            id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease",
-            defaultMessage: "Release",
-          })}
-        >
-          <Select
-            value={selectedReleaseOption}
-            onChange={handleReleaseChange}
-            options={releaseOptions}
-            isClearable
-            menuPlacement="auto"
-            placeholder={intl.formatMessage({
-              id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectARelease",
-              defaultMessage: "Select a release",
-            })}
-            noOptionsMessage={({ inputValue }) =>
-              inputValue
-                ? intl.formatMessage(
-                    {
-                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesFoundMatching",
-                      defaultMessage:
-                        'No releases found matching "{inputValue}"',
-                    },
-                    { inputValue },
-                  )
-                : selectedApp
-                  ? intl.formatMessage({
-                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable",
-                      defaultMessage:
-                        "No releases available for this application",
-                    })
-                  : intl.formatMessage({
-                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst",
-                      defaultMessage: "Please select an application first",
-                    })
-            }
-            filterOption={(option, inputValue) => {
-              return option.label
-                .toLowerCase()
-                .includes(inputValue.toLowerCase());
-            }}
-            isDisabled={!selectedApp}
-            isOptionDisabled={(option) => option.disabled}
-          />
-        </FormRow>
-
-        {selectedRelease && (
-          <div className="mt-2 pt-2 border-top">
-            <CollapseItem
-              title={
-                <FormattedMessage
-                  id="components.apps.releases.install-application-modal.InstallApplicationModal.environmentConfigurationTitle"
-                  defaultMessage="Environment configuration"
-                />
-              }
-              open={envSectionOpen}
-              onToggle={() => setEnvSectionOpen((prev) => !prev)}
-              caretPosition="right"
-              headerClassName="fw-semibold ps-0 border-0"
-              contentClassName="pt-2"
+    <Modal show={open} onHide={handleCancel} centered size="lg">
+      <form
+        onSubmit={(e) => {
+          handleSubmit(handleDeploy)(e);
+        }}
+        data-testid="install-application-form"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <FormattedMessage
+              id="components.apps.releases.install-application-modal.InstallApplicationModal.title"
+              defaultMessage="Install Application"
+            />
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex flex-column gap-2">
+            <FormRow
+              id="select-application"
+              label={intl.formatMessage({
+                id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplication",
+                defaultMessage: "Application",
+              })}
             >
-              <div
-                className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
-                style={{ maxHeight: "55vh" }}
-              >
-                {releaseContainers.map((container) => {
-                  const containerEnvMode = envModes[container.id] || "none";
-                  const containerEnvJson = envJsons[container.id] || "{}";
-                  const containerEnvJsonValid =
-                    isEnvJsonValid(containerEnvJson);
-                  return (
-                    <div
-                      key={container.id}
-                      className="border rounded p-3 bg-light"
-                      data-testid={`container-env-files-${container.id}`}
-                    >
-                      <div className="fw-bold mb-2 small text-secondary">
-                        <FormattedMessage
-                          id="components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel"
-                          defaultMessage="Container: {containerName}"
-                          values={{ containerName: container.name }}
-                        />
-                      </div>
-
-                      <ToggleButtonGroup
-                        type="radio"
-                        name={`env-mode-${container.id}`}
-                        value={containerEnvMode}
-                        onChange={(value: EnvMode) =>
-                          setEnvModes((prev) => ({
-                            ...prev,
-                            [container.id]: value,
-                          }))
-                        }
-                        size="sm"
-                        className="mb-2"
-                      >
-                        <ToggleButton
-                          id={`env-mode-none-${container.id}`}
-                          value="none"
-                          variant="outline-primary"
-                        >
+              <Controller
+                name="application"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={selectedApplicationOption}
+                    onChange={(option) => {
+                      if (!isOnline) {
+                        setErrorFeedback(
                           <FormattedMessage
-                            id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeNone"
-                            defaultMessage="No config"
-                          />
-                        </ToggleButton>
-
-                        <ToggleButton
-                          id={`env-mode-override-${container.id}`}
-                          value="override"
-                          variant="outline-primary"
-                        >
-                          <FormattedMessage
-                            id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeOverride"
-                            defaultMessage="Env override"
-                          />
-                        </ToggleButton>
-
-                        <ToggleButton
-                          id={`env-mode-file-${container.id}`}
-                          value="file"
-                          variant="outline-primary"
-                        >
-                          <FormattedMessage
-                            id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeFile"
-                            defaultMessage="Env file"
-                          />
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-
-                      {containerEnvMode === "override" && (
-                        <>
-                          <FormRow
-                            id={`select-env-strategy-${container.id}`}
-                            label={intl.formatMessage({
-                              id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectEnvStrategy",
-                              defaultMessage: "Env Strategy",
-                            })}
-                          >
-                            <Select
-                              value={selectedEnvStrategyOption(container.id)}
-                              onChange={(option) =>
-                                setEnvStrategies((prev) => ({
-                                  ...prev,
-                                  [container.id]: option?.value || "merge",
-                                }))
-                              }
-                              options={envStrategyOptions}
-                              menuPlacement="auto"
-                            />
-                          </FormRow>
-
-                          <FormRow
-                            id={`env-json-${container.id}`}
-                            label={intl.formatMessage({
-                              id: "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel",
-                              defaultMessage: "Environment",
-                            })}
-                          >
-                            <MonacoJsonEditor
-                              value={containerEnvJson}
-                              onChange={(val) =>
-                                setEnvJsons((prev) => ({
-                                  ...prev,
-                                  [container.id]: val ?? "",
-                                }))
-                              }
-                              defaultValue="{}"
-                              error={
-                                !containerEnvJsonValid
-                                  ? intl.formatMessage({
-                                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.invalidJsonError",
-                                      defaultMessage:
-                                        "Invalid JSON. Expected a JSON object mapping keys to string values.",
-                                    })
-                                  : undefined
-                              }
-                            />
-                          </FormRow>
-                        </>
-                      )}
-
-                      {containerEnvMode === "file" && (
-                        <EnvFileInput
-                          key={container.id}
-                          ref={(el) => {
-                            envFileInputRefs.current[container.id] = el;
-                          }}
-                          containerId={container.id}
-                          deviceId={deviceId}
-                          deviceFiles={deviceFiles}
-                          fileDownloadRequests={fileDownloadRequests}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </CollapseItem>
-          </div>
-        )}
-
-        {containersWithMounts.length > 0 && (
-          <div className="mt-2 pt-2 border-top">
-            <CollapseItem
-              title={
-                <FormattedMessage
-                  id="components.apps.releases.install-application-modal.InstallApplicationModal.fileBindsTitle"
-                  defaultMessage="File Mounts Configuration"
-                />
-              }
-              open={mountsSectionOpen}
-              onToggle={() => setMountsSectionOpen((prev) => !prev)}
-              caretPosition="right"
-              headerClassName="fw-semibold ps-0 border-0"
-              contentClassName="pt-2"
-            >
-              {hasRequiredMounts && hasNoFilesOnDevice && (
-                <Alert variant="warning" className="py-2 px-3 mb-2 small">
-                  <FormattedMessage
-                    id="components.apps.releases.install-application-modal.InstallApplicationModal.noFilesAvailableWarning"
-                    defaultMessage="This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
-                  />
-                </Alert>
-              )}
-
-              <div
-                className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
-                style={{ maxHeight: "55vh" }}
-              >
-                {containersWithMounts.map((container) => (
-                  <div
-                    key={container.id}
-                    className="border rounded p-3 bg-light"
-                    data-testid={`container-mounts-${container.id}`}
-                  >
-                    <div className="fw-bold mb-2 small text-secondary">
-                      <FormattedMessage
-                        id="components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel"
-                        defaultMessage="Container: {containerName}"
-                        values={{ containerName: container.name }}
-                      />
-                    </div>
-
-                    <div className="d-flex flex-column gap-2">
-                      {container.mounts.map((mount) => {
-                        return (
-                          <FileMountInput
-                            key={mount.id}
-                            ref={(el) => {
-                              mountInputRefs.current[mount.id] = el;
-                            }}
-                            fileMountId={mount.id}
-                            mountpoint={mount.mountpoint}
-                            required={mount.required}
-                            deviceId={deviceId}
-                            defaultFileId={mount.defaultFileId}
-                            defaultFileName={mount.defaultFile?.name}
-                            defaultFileMode={mount.fileMode}
-                            defaultUserId={mount.userId}
-                            defaultGroupId={mount.groupId}
-                            deviceFiles={deviceFiles}
-                            fileDownloadRequests={fileDownloadRequests}
-                            onChange={(result, isValid) =>
-                              handleFileBindChange(mount.id, result, isValid)
-                            }
-                          />
+                            id="components.apps.releases.install-application-modal.InstallApplicationModal.deviceOfflineError"
+                            defaultMessage="The device is disconnected. You cannot deploy an application while it is offline."
+                          />,
                         );
-                      })}
-                    </div>
+                        return;
+                      }
+                      field.onChange(
+                        option
+                          ? { id: option.value, name: option.label }
+                          : null,
+                      );
+                      handleAppChange(option);
+                    }}
+                    options={applicationOptions}
+                    isClearable
+                    menuPlacement="auto"
+                    placeholder={intl.formatMessage({
+                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.searchPlaceholder",
+                      defaultMessage: "Search or select an application...",
+                    })}
+                    noOptionsMessage={({ inputValue }) =>
+                      inputValue
+                        ? intl.formatMessage(
+                            {
+                              id: "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsFoundMatching",
+                              defaultMessage:
+                                'No applications found matching "{inputValue}"',
+                            },
+                            { inputValue },
+                          )
+                        : intl.formatMessage({
+                            id: "components.apps.releases.install-application-modal.InstallApplicationModal.noApplicationsAvailable",
+                            defaultMessage: "No applications available",
+                          })
+                    }
+                    filterOption={(option, inputValue) => {
+                      return option.label
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase());
+                    }}
+                  />
+                )}
+              />
+            </FormRow>
+
+            <FormRow
+              id="select-release"
+              label={intl.formatMessage({
+                id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectRelease",
+                defaultMessage: "Release",
+              })}
+            >
+              <Controller
+                name="release"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={selectedReleaseOption}
+                    onChange={(option) => {
+                      field.onChange(
+                        option
+                          ? { id: option.value, version: option.label }
+                          : null,
+                      );
+                      handleReleaseChange(option);
+                    }}
+                    options={releaseOptions}
+                    isClearable
+                    menuPlacement="auto"
+                    placeholder={intl.formatMessage({
+                      id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectARelease",
+                      defaultMessage: "Select a release",
+                    })}
+                    noOptionsMessage={({ inputValue }) =>
+                      inputValue
+                        ? intl.formatMessage(
+                            {
+                              id: "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesFoundMatching",
+                              defaultMessage:
+                                'No releases found matching "{inputValue}"',
+                            },
+                            { inputValue },
+                          )
+                        : selectedApp
+                          ? intl.formatMessage({
+                              id: "components.apps.releases.install-application-modal.InstallApplicationModal.noReleasesAvailable",
+                              defaultMessage:
+                                "No releases available for this application",
+                            })
+                          : intl.formatMessage({
+                              id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectApplicationFirst",
+                              defaultMessage:
+                                "Please select an application first",
+                            })
+                    }
+                    filterOption={(option, inputValue) => {
+                      return option.label
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase());
+                    }}
+                    isDisabled={!selectedApp}
+                    isOptionDisabled={(option) => option.disabled}
+                  />
+                )}
+              />
+            </FormRow>
+
+            {selectedRelease && (
+              <div className="mt-2 pt-2 border-top">
+                <CollapseItem
+                  title={
+                    <FormattedMessage
+                      id="components.apps.releases.install-application-modal.InstallApplicationModal.environmentConfigurationTitle"
+                      defaultMessage="Environment configuration"
+                    />
+                  }
+                  open={envSectionOpen}
+                  onToggle={() => setEnvSectionOpen((prev) => !prev)}
+                  caretPosition="right"
+                  headerClassName="fw-semibold ps-0 border-0"
+                  contentClassName="pt-2"
+                >
+                  <div
+                    className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
+                    style={{ maxHeight: "55vh" }}
+                  >
+                    {releaseContainers.map((container) => {
+                      const containerEnvMode = envModes[container.id] || "none";
+                      const containerEnvJson = envJsons[container.id] || "{}";
+                      const containerEnvJsonValid =
+                        isEnvJsonValid(containerEnvJson);
+                      return (
+                        <div
+                          key={container.id}
+                          className="border rounded p-3 bg-light"
+                          data-testid={`container-env-files-${container.id}`}
+                        >
+                          <div className="fw-bold mb-2 small text-secondary">
+                            <FormattedMessage
+                              id="components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel"
+                              defaultMessage="Container: {containerName}"
+                              values={{ containerName: container.name }}
+                            />
+                          </div>
+
+                          <ToggleButtonGroup
+                            type="radio"
+                            name={`env-mode-${container.id}`}
+                            value={containerEnvMode}
+                            onChange={(value: EnvMode) =>
+                              setEnvModes((prev) => ({
+                                ...prev,
+                                [container.id]: value,
+                              }))
+                            }
+                            size="sm"
+                            className="mb-2"
+                          >
+                            <ToggleButton
+                              id={`env-mode-none-${container.id}`}
+                              value="none"
+                              variant="outline-primary"
+                            >
+                              <FormattedMessage
+                                id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeNone"
+                                defaultMessage="No config"
+                              />
+                            </ToggleButton>
+
+                            <ToggleButton
+                              id={`env-mode-override-${container.id}`}
+                              value="override"
+                              variant="outline-primary"
+                            >
+                              <FormattedMessage
+                                id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeOverride"
+                                defaultMessage="Env override"
+                              />
+                            </ToggleButton>
+
+                            <ToggleButton
+                              id={`env-mode-file-${container.id}`}
+                              value="file"
+                              variant="outline-primary"
+                            >
+                              <FormattedMessage
+                                id="components.apps.releases.install-application-modal.InstallApplicationModal.envModeFile"
+                                defaultMessage="Env file"
+                              />
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+
+                          {containerEnvMode === "override" && (
+                            <>
+                              <FormRow
+                                id={`select-env-strategy-${container.id}`}
+                                label={intl.formatMessage({
+                                  id: "components.apps.releases.install-application-modal.InstallApplicationModal.selectEnvStrategy",
+                                  defaultMessage: "Env Strategy",
+                                })}
+                              >
+                                <Select
+                                  value={selectedEnvStrategyOption(
+                                    container.id,
+                                  )}
+                                  onChange={(option) =>
+                                    setEnvStrategies((prev) => ({
+                                      ...prev,
+                                      [container.id]: option?.value || "merge",
+                                    }))
+                                  }
+                                  options={envStrategyOptions}
+                                  menuPlacement="auto"
+                                />
+                              </FormRow>
+
+                              <FormRow
+                                id={`env-json-${container.id}`}
+                                label={intl.formatMessage({
+                                  id: "components.apps.releases.install-application-modal.InstallApplicationModal.envJsonLabel",
+                                  defaultMessage: "Environment",
+                                })}
+                              >
+                                <MonacoJsonEditor
+                                  value={containerEnvJson}
+                                  onChange={(val) =>
+                                    setEnvJsons((prev) => ({
+                                      ...prev,
+                                      [container.id]: val ?? "",
+                                    }))
+                                  }
+                                  defaultValue="{}"
+                                  error={
+                                    !containerEnvJsonValid
+                                      ? intl.formatMessage({
+                                          id: "components.apps.releases.install-application-modal.InstallApplicationModal.invalidJsonError",
+                                          defaultMessage:
+                                            "Invalid JSON. Expected a JSON object mapping keys to string values.",
+                                        })
+                                      : undefined
+                                  }
+                                />
+                              </FormRow>
+                            </>
+                          )}
+
+                          {containerEnvMode === "file" && (
+                            <EnvFileInput
+                              key={container.id}
+                              ref={(el) => {
+                                envFileInputRefs.current[container.id] = el;
+                              }}
+                              containerId={container.id}
+                              deviceId={deviceId}
+                              deviceFiles={deviceFiles}
+                              fileDownloadRequests={fileDownloadRequests}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                </CollapseItem>
               </div>
-            </CollapseItem>
+            )}
+
+            {containersWithMounts.length > 0 && (
+              <div className="mt-2 pt-2 border-top">
+                <CollapseItem
+                  title={
+                    <FormattedMessage
+                      id="components.apps.releases.install-application-modal.InstallApplicationModal.fileBindsTitle"
+                      defaultMessage="File Mounts Configuration"
+                    />
+                  }
+                  open={mountsSectionOpen}
+                  onToggle={() => setMountsSectionOpen((prev) => !prev)}
+                  caretPosition="right"
+                  headerClassName="fw-semibold ps-0 border-0"
+                  contentClassName="pt-2"
+                >
+                  {hasRequiredMounts && hasNoFilesOnDevice && (
+                    <Alert variant="warning" className="py-2 px-3 mb-2 small">
+                      <FormattedMessage
+                        id="components.apps.releases.install-application-modal.InstallApplicationModal.noFilesAvailableWarning"
+                        defaultMessage="This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
+                      />
+                    </Alert>
+                  )}
+
+                  <div
+                    className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
+                    style={{ maxHeight: "55vh" }}
+                  >
+                    {containersWithMounts.map((container) => (
+                      <div
+                        key={container.id}
+                        className="border rounded p-3 bg-light"
+                        data-testid={`container-mounts-${container.id}`}
+                      >
+                        <div className="fw-bold mb-2 small text-secondary">
+                          <FormattedMessage
+                            id="components.apps.releases.install-application-modal.InstallApplicationModal.containerLabel"
+                            defaultMessage="Container: {containerName}"
+                            values={{ containerName: container.name }}
+                          />
+                        </div>
+
+                        <div className="d-flex flex-column gap-2">
+                          {container.mounts.map((mount) => {
+                            return (
+                              <FileMountInput
+                                key={mount.id}
+                                ref={(el) => {
+                                  mountInputRefs.current[mount.id] = el;
+                                }}
+                                fileMountId={mount.id}
+                                mountpoint={mount.mountpoint}
+                                required={mount.required}
+                                deviceId={deviceId}
+                                defaultFileId={mount.defaultFileId}
+                                defaultFileName={mount.defaultFile?.name}
+                                defaultFileMode={mount.fileMode}
+                                defaultUserId={mount.userId}
+                                defaultGroupId={mount.groupId}
+                                deviceFiles={deviceFiles}
+                                fileDownloadRequests={fileDownloadRequests}
+                                onChange={(result, isValid) =>
+                                  handleFileBindChange(
+                                    mount.id,
+                                    result,
+                                    isValid,
+                                  )
+                                }
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapseItem>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </ConfirmModal>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isDeploying || isSubmitting}
+            data-testid="modal-cancel-button"
+          >
+            <FormattedMessage
+              id="components.apps.releases.install-application-modal.InstallApplicationModal.cancelButton"
+              defaultMessage="Cancel"
+              description="Title for the button to cancel and dismiss a confirmation modal"
+            />
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={
+              !isOnline ||
+              !selectedRelease ||
+              !allRequiredMountsConfigured ||
+              !allEnvJsonValid ||
+              isSubmitting ||
+              isDeploying
+            }
+            data-testid="modal-confirm-button"
+          >
+            {(isDeploying || isSubmitting) && (
+              <Spinner className="mr-2" size="sm" />
+            )}
+            <FormattedMessage
+              id="components.apps.releases.install-application-modal.InstallApplicationModal.deployButton"
+              defaultMessage="Deploy"
+            />
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   );
 };
 

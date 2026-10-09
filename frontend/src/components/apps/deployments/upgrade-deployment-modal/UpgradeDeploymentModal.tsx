@@ -28,7 +28,15 @@ import {
 } from "react-relay/hooks";
 import { SingleValue } from "react-select";
 import semver from "semver";
-import { ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import {
+  Button,
+  Modal,
+  Spinner,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "react-bootstrap";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import type { UpgradeDeploymentModal_GetUpgradeData_Query } from "@/api/__generated__/UpgradeDeploymentModal_GetUpgradeData_Query.graphql";
 import type {
@@ -40,6 +48,10 @@ import type {
 import type { UpgradeDeploymentModal_markFileBindAsUploaded_Mutation } from "@/api/__generated__/UpgradeDeploymentModal_markFileBindAsUploaded_Mutation.graphql";
 import type { UpgradeDeploymentModal_markEnvFileAsUploaded_Mutation } from "@/api/__generated__/UpgradeDeploymentModal_markEnvFileAsUploaded_Mutation.graphql";
 import {
+  upgradeDeploymentSchema,
+  type UpgradeDeploymentFormData,
+} from "@/forms/validation";
+import {
   type EnvMode,
   areAllEnvJsonsValid,
   getContainerEnvVars,
@@ -48,7 +60,6 @@ import {
 import { useNavigate, Route } from "@/Navigation";
 import Select from "@/components/ui/select/Select";
 import { FormRow } from "@/components/ui/form-row/FormRow";
-import ConfirmModal from "@/components/ui/confirm-modal/ConfirmModal";
 import Alert from "@/components/ui/alert/Alert";
 import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
 import EnvFileInput, {
@@ -247,8 +258,15 @@ const UpgradeDeploymentModal = ({
 }: UpgradeDeploymentModalProps) => {
   const intl = useIntl();
   const navigate = useNavigate();
+  const { control, handleSubmit, reset } = useForm<UpgradeDeploymentFormData>({
+    resolver: zodResolver(upgradeDeploymentSchema),
+    defaultValues: {
+      release: undefined,
+    },
+  });
 
-  const [selectedRelease, setSelectedRelease] = useState<string | null>(null);
+  const selectedReleaseObject = useWatch({ control, name: "release" });
+  const selectedRelease = selectedReleaseObject?.id || null;
   const [envModes, setEnvModes] = useState<Record<string, EnvMode>>({});
   const [envStrategies, setEnvStrategies] = useState<Record<string, string>>(
     {},
@@ -524,24 +542,37 @@ const UpgradeDeploymentModal = ({
   );
 
   const handleReleaseChange = (option: SingleValue<SelectOption>) => {
-    setSelectedRelease(option?.value || null);
+    const releaseId = option?.value;
+    const release = releaseEdges.find(
+      ({ node }) => node?.id === releaseId,
+    )?.node;
+
+    const hasRequiredMountsWithoutDefault =
+      release?.containers?.edges?.some(({ node: container }) =>
+        container.fileMounts?.edges?.some(
+          ({ node: mount }) =>
+            mount?.required && !mount.defaultFileId && !mount.defaultFile?.name,
+        ),
+      ) ?? false;
+
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
     setEnvJsons({});
+
+    setMountsSectionOpen(hasRequiredMountsWithoutDefault);
     setEnvSectionOpen(false);
-    setMountsSectionOpen(false);
   };
 
   const resetSelections = useCallback(() => {
-    setSelectedRelease(null);
+    reset();
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
     setEnvJsons({});
     setEnvSectionOpen(false);
     setMountsSectionOpen(false);
-  }, []);
+  }, [reset]);
 
   const handleCancel = useCallback(() => {
     resetSelections();
@@ -552,12 +583,18 @@ const UpgradeDeploymentModal = ({
     if (!selectedRelease) return;
 
     if (!allRequiredMountsConfigured) {
+      setMountsSectionOpen(true);
       setErrorFeedback(
         <FormattedMessage
           id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.missingRequiredBindsFeedback"
           defaultMessage="Please configure a file source for all required file mounts."
         />,
       );
+      return;
+    }
+
+    if (!allEnvJsonValid) {
+      setEnvSectionOpen(true);
       return;
     }
 
@@ -845,6 +882,7 @@ const UpgradeDeploymentModal = ({
   }, [
     selectedRelease,
     allRequiredMountsConfigured,
+    allEnvJsonValid,
     containersWithMounts,
     releaseContainers,
     envModes,
@@ -862,325 +900,377 @@ const UpgradeDeploymentModal = ({
   ]);
 
   return (
-    <ConfirmModal
-      size="lg"
-      title={
-        <FormattedMessage
-          id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.title"
-          defaultMessage="Upgrade Deployment"
-        />
-      }
-      confirmLabel={
-        <FormattedMessage
-          id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.confirmLabel"
-          defaultMessage="Upgrade"
-        />
-      }
-      show={open}
-      onCancel={handleCancel}
-      onConfirm={handleUpgrade}
-      disabled={
-        !isOnline ||
-        !selectedRelease ||
-        !allRequiredMountsConfigured ||
-        !allEnvJsonValid ||
-        isSubmitting ||
-        isUpgrading
-      }
-      isConfirming={isUpgrading || isSubmitting}
-    >
-      <div className="d-flex flex-column gap-2">
-        <p>
-          <FormattedMessage
-            id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.description"
-            defaultMessage="Upgrade deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
-            values={{
-              application: applicationName,
-              currentVersion,
-              bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
-            }}
-          />
-        </p>
+    <Modal show={open} onHide={handleCancel} centered size="lg">
+      <form
+        onSubmit={(e) => {
+          handleSubmit(handleUpgrade)(e);
+        }}
+        data-testid="upgrade-deployment-form"
+      >
+        <Modal.Header closeButton>
+          <Modal.Title>
+            <FormattedMessage
+              id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.title"
+              defaultMessage="Upgrade Deployment"
+            />
+          </Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <div className="d-flex flex-column gap-2">
+            <p>
+              <FormattedMessage
+                id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.description"
+                defaultMessage="Upgrade deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"
+                values={{
+                  application: applicationName,
+                  currentVersion,
+                  bold: (chunks: React.ReactNode) => <strong>{chunks}</strong>,
+                }}
+              />
+            </p>
 
-        <FormRow
-          id="select-upgrade-release"
-          label={intl.formatMessage({
-            id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectRelease",
-            defaultMessage: "Target Release",
-          })}
-        >
-          <Select
-            value={selectedReleaseOption}
-            onChange={handleReleaseChange}
-            options={releaseOptions}
-            isClearable
-            menuPlacement="auto"
-            placeholder={intl.formatMessage({
-              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectOption",
-              defaultMessage: "Select a Release Version",
-            })}
-            noOptionsMessage={({ inputValue }) =>
-              inputValue
-                ? intl.formatMessage(
-                    {
-                      id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesFoundMatching",
-                      defaultMessage:
-                        'No release versions found matching "{inputValue}"',
-                    },
-                    { inputValue },
-                  )
-                : releaseOptions.length === 0
-                  ? intl.formatMessage({
-                      id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesAvailable",
-                      defaultMessage: "No Release Versions Available",
-                    })
-                  : intl.formatMessage({
+            <FormRow
+              id="select-upgrade-release"
+              label={intl.formatMessage({
+                id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectRelease",
+                defaultMessage: "Target Release",
+              })}
+            >
+              <Controller
+                name="release"
+                control={control}
+                render={({ field }) => (
+                  <Select
+                    value={selectedReleaseOption}
+                    onChange={(option) => {
+                      const opt = option as SingleValue<SelectOption>;
+                      if (opt) {
+                        const node = releaseEdges.find(
+                          ({ node: r }) => r.id === opt.value,
+                        )?.node;
+                        field.onChange({
+                          id: opt.value,
+                          version: node?.version || opt.label,
+                        });
+                      } else {
+                        field.onChange(undefined);
+                      }
+                      handleReleaseChange(opt);
+                    }}
+                    options={releaseOptions}
+                    isClearable
+                    menuPlacement="auto"
+                    placeholder={intl.formatMessage({
                       id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectOption",
                       defaultMessage: "Select a Release Version",
-                    })
-            }
-            filterOption={(option, inputValue) => {
-              return option.label
-                .toLowerCase()
-                .includes(inputValue.toLowerCase());
-            }}
-            isOptionDisabled={(option) => option.disabled}
-          />
-        </FormRow>
-
-        {selectedRelease && (
-          <div className="mt-2 pt-2 border-top">
-            <CollapseItem
-              title={
-                <FormattedMessage
-                  id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.environmentConfigurationTitle"
-                  defaultMessage="Environment configuration"
-                />
-              }
-              open={envSectionOpen}
-              onToggle={() => setEnvSectionOpen((prev) => !prev)}
-              caretPosition="right"
-              headerClassName="fw-semibold ps-0 border-0"
-              contentClassName="pt-2"
-            >
-              <div
-                className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
-                style={{ maxHeight: "55vh" }}
-              >
-                {releaseContainers.map((container) => {
-                  const containerEnvMode = envModes[container.id] || "none";
-                  const containerEnvJson = envJsons[container.id] || "{}";
-                  const containerEnvJsonValid =
-                    isEnvJsonValid(containerEnvJson);
-                  return (
-                    <div
-                      key={container.id}
-                      className="border rounded p-3 bg-light"
-                      data-testid={`container-env-files-${container.id}`}
-                    >
-                      <div className="fw-bold mb-2 small text-secondary">
-                        <FormattedMessage
-                          id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel"
-                          defaultMessage="Container: {containerName}"
-                          values={{ containerName: container.name }}
-                        />
-                      </div>
-
-                      <ToggleButtonGroup
-                        type="radio"
-                        name={`env-mode-${container.id}`}
-                        value={containerEnvMode}
-                        onChange={(value: EnvMode) =>
-                          setEnvModes((prev) => ({
-                            ...prev,
-                            [container.id]: value,
-                          }))
-                        }
-                        size="sm"
-                        className="mb-2"
-                      >
-                        <ToggleButton
-                          id={`env-mode-none-${container.id}`}
-                          value="none"
-                          variant="outline-primary"
-                        >
-                          <FormattedMessage
-                            id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeNone"
-                            defaultMessage="No config"
-                          />
-                        </ToggleButton>
-
-                        <ToggleButton
-                          id={`env-mode-override-${container.id}`}
-                          value="override"
-                          variant="outline-primary"
-                        >
-                          <FormattedMessage
-                            id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeOverride"
-                            defaultMessage="Env override"
-                          />
-                        </ToggleButton>
-
-                        <ToggleButton
-                          id={`env-mode-file-${container.id}`}
-                          value="file"
-                          variant="outline-primary"
-                        >
-                          <FormattedMessage
-                            id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeFile"
-                            defaultMessage="Env file"
-                          />
-                        </ToggleButton>
-                      </ToggleButtonGroup>
-
-                      {containerEnvMode === "override" && (
-                        <>
-                          <FormRow
-                            id={`select-env-strategy-${container.id}`}
-                            label={intl.formatMessage({
-                              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectEnvStrategy",
-                              defaultMessage: "Env Strategy",
-                            })}
-                          >
-                            <Select
-                              value={selectedEnvStrategyOption(container.id)}
-                              onChange={(option) =>
-                                setEnvStrategies((prev) => ({
-                                  ...prev,
-                                  [container.id]: option?.value || "merge",
-                                }))
-                              }
-                              options={envStrategyOptions}
-                              menuPlacement="auto"
-                            />
-                          </FormRow>
-
-                          <FormRow
-                            id={`env-json-${container.id}`}
-                            label={intl.formatMessage({
-                              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envJsonLabel",
-                              defaultMessage: "Environment",
-                            })}
-                          >
-                            <MonacoJsonEditor
-                              value={containerEnvJson}
-                              onChange={(val) =>
-                                setEnvJsons((prev) => ({
-                                  ...prev,
-                                  [container.id]: val ?? "",
-                                }))
-                              }
-                              defaultValue="{}"
-                              error={
-                                !containerEnvJsonValid
-                                  ? intl.formatMessage({
-                                      id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.invalidJsonError",
-                                      defaultMessage:
-                                        "Invalid JSON. Expected a JSON object mapping keys to string values.",
-                                    })
-                                  : undefined
-                              }
-                            />
-                          </FormRow>
-                        </>
-                      )}
-
-                      {containerEnvMode === "file" && (
-                        <EnvFileInput
-                          key={container.id}
-                          ref={(el) => {
-                            envFileInputRefs.current[container.id] = el;
-                          }}
-                          containerId={container.id}
-                          deviceId={deviceId}
-                          deviceFiles={deviceFiles}
-                          fileDownloadRequests={fileDownloadRequests}
-                        />
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            </CollapseItem>
-          </div>
-        )}
-
-        {containersWithMounts.length > 0 && (
-          <div className="mt-2 pt-2 border-top">
-            <CollapseItem
-              title={
-                <FormattedMessage
-                  id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.fileBindsTitle"
-                  defaultMessage="File Mounts Configuration"
-                />
-              }
-              open={mountsSectionOpen}
-              onToggle={() => setMountsSectionOpen((prev) => !prev)}
-              caretPosition="right"
-              headerClassName="fw-semibold ps-0 border-0"
-              contentClassName="pt-2"
-            >
-              {hasRequiredMounts && hasNoFilesOnDevice && (
-                <Alert variant="warning" className="py-2 px-3 mb-2 small">
-                  <FormattedMessage
-                    id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noFilesAvailableWarning"
-                    defaultMessage="This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
+                    })}
+                    noOptionsMessage={({ inputValue }) =>
+                      inputValue
+                        ? intl.formatMessage(
+                            {
+                              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesFoundMatching",
+                              defaultMessage:
+                                'No release versions found matching "{inputValue}"',
+                            },
+                            { inputValue },
+                          )
+                        : releaseOptions.length === 0
+                          ? intl.formatMessage({
+                              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noReleasesAvailable",
+                              defaultMessage: "No Release Versions Available",
+                            })
+                          : intl.formatMessage({
+                              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectOption",
+                              defaultMessage: "Select a Release Version",
+                            })
+                    }
+                    filterOption={(option, inputValue) => {
+                      return option.label
+                        .toLowerCase()
+                        .includes(inputValue.toLowerCase());
+                    }}
+                    isOptionDisabled={(option) => option.disabled}
                   />
-                </Alert>
-              )}
+                )}
+              />
+            </FormRow>
 
-              <div
-                className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
-                style={{ maxHeight: "55vh" }}
-              >
-                {containersWithMounts.map((container) => (
+            {selectedRelease && (
+              <div className="mt-2 pt-2 border-top">
+                <CollapseItem
+                  title={
+                    <FormattedMessage
+                      id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.environmentConfigurationTitle"
+                      defaultMessage="Environment configuration"
+                    />
+                  }
+                  open={envSectionOpen}
+                  onToggle={() => setEnvSectionOpen((prev) => !prev)}
+                  caretPosition="right"
+                  headerClassName="fw-semibold ps-0 border-0"
+                  contentClassName="pt-2"
+                >
                   <div
-                    key={container.id}
-                    className="border rounded p-3 bg-light"
-                    data-testid={`container-mounts-${container.id}`}
+                    className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
+                    style={{ maxHeight: "55vh" }}
                   >
-                    <div className="fw-bold mb-2 small text-secondary">
-                      <FormattedMessage
-                        id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel"
-                        defaultMessage="Container: {containerName}"
-                        values={{ containerName: container.name }}
-                      />
-                    </div>
+                    {releaseContainers.map((container) => {
+                      const containerEnvMode = envModes[container.id] || "none";
+                      const containerEnvJson = envJsons[container.id] || "{}";
+                      const containerEnvJsonValid =
+                        isEnvJsonValid(containerEnvJson);
+                      return (
+                        <div
+                          key={container.id}
+                          className="border rounded p-3 bg-light"
+                          data-testid={`container-env-files-${container.id}`}
+                        >
+                          <div className="fw-bold mb-2 small text-secondary">
+                            <FormattedMessage
+                              id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel"
+                              defaultMessage="Container: {containerName}"
+                              values={{ containerName: container.name }}
+                            />
+                          </div>
 
-                    <div className="d-flex flex-column gap-2">
-                      {container.mounts.map((mount) => {
-                        return (
-                          <FileMountInput
-                            key={mount.id}
-                            ref={(el) => {
-                              mountInputRefs.current[mount.id] = el;
-                            }}
-                            fileMountId={mount.id}
-                            mountpoint={mount.mountpoint}
-                            required={mount.required}
-                            deviceId={deviceId}
-                            defaultFileId={mount.defaultFileId}
-                            defaultFileName={mount.defaultFile?.name}
-                            defaultFileMode={mount.fileMode}
-                            defaultUserId={mount.userId}
-                            defaultGroupId={mount.groupId}
-                            deviceFiles={deviceFiles}
-                            fileDownloadRequests={fileDownloadRequests}
-                            onChange={(result, isValid) =>
-                              handleFileBindChange(mount.id, result, isValid)
+                          <ToggleButtonGroup
+                            type="radio"
+                            name={`env-mode-${container.id}`}
+                            value={containerEnvMode}
+                            onChange={(value: EnvMode) =>
+                              setEnvModes((prev) => ({
+                                ...prev,
+                                [container.id]: value,
+                              }))
                             }
-                          />
-                        );
-                      })}
-                    </div>
+                            size="sm"
+                            className="mb-2"
+                          >
+                            <ToggleButton
+                              id={`env-mode-none-${container.id}`}
+                              value="none"
+                              variant="outline-primary"
+                            >
+                              <FormattedMessage
+                                id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeNone"
+                                defaultMessage="No config"
+                              />
+                            </ToggleButton>
+
+                            <ToggleButton
+                              id={`env-mode-override-${container.id}`}
+                              value="override"
+                              variant="outline-primary"
+                            >
+                              <FormattedMessage
+                                id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeOverride"
+                                defaultMessage="Env override"
+                              />
+                            </ToggleButton>
+
+                            <ToggleButton
+                              id={`env-mode-file-${container.id}`}
+                              value="file"
+                              variant="outline-primary"
+                            >
+                              <FormattedMessage
+                                id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envModeFile"
+                                defaultMessage="Env file"
+                              />
+                            </ToggleButton>
+                          </ToggleButtonGroup>
+
+                          {containerEnvMode === "override" && (
+                            <>
+                              <FormRow
+                                id={`select-env-strategy-${container.id}`}
+                                label={intl.formatMessage({
+                                  id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.selectEnvStrategy",
+                                  defaultMessage: "Env Strategy",
+                                })}
+                              >
+                                <Select
+                                  value={selectedEnvStrategyOption(
+                                    container.id,
+                                  )}
+                                  onChange={(option) =>
+                                    setEnvStrategies((prev) => ({
+                                      ...prev,
+                                      [container.id]: option?.value || "merge",
+                                    }))
+                                  }
+                                  options={envStrategyOptions}
+                                  menuPlacement="auto"
+                                />
+                              </FormRow>
+
+                              <FormRow
+                                id={`env-json-${container.id}`}
+                                label={intl.formatMessage({
+                                  id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.envJsonLabel",
+                                  defaultMessage: "Environment",
+                                })}
+                              >
+                                <MonacoJsonEditor
+                                  value={containerEnvJson}
+                                  onChange={(val) =>
+                                    setEnvJsons((prev) => ({
+                                      ...prev,
+                                      [container.id]: val ?? "",
+                                    }))
+                                  }
+                                  defaultValue="{}"
+                                  error={
+                                    !containerEnvJsonValid
+                                      ? intl.formatMessage({
+                                          id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.invalidJsonError",
+                                          defaultMessage:
+                                            "Invalid JSON. Expected a JSON object mapping keys to string values.",
+                                        })
+                                      : undefined
+                                  }
+                                />
+                              </FormRow>
+                            </>
+                          )}
+
+                          {containerEnvMode === "file" && (
+                            <EnvFileInput
+                              key={container.id}
+                              ref={(el) => {
+                                envFileInputRefs.current[container.id] = el;
+                              }}
+                              containerId={container.id}
+                              deviceId={deviceId}
+                              deviceFiles={deviceFiles}
+                              fileDownloadRequests={fileDownloadRequests}
+                            />
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
-                ))}
+                </CollapseItem>
               </div>
-            </CollapseItem>
+            )}
+
+            {containersWithMounts.length > 0 && (
+              <div className="mt-2 pt-2 border-top">
+                <CollapseItem
+                  title={
+                    <FormattedMessage
+                      id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.fileBindsTitle"
+                      defaultMessage="File Mounts Configuration"
+                    />
+                  }
+                  open={mountsSectionOpen}
+                  onToggle={() => setMountsSectionOpen((prev) => !prev)}
+                  caretPosition="right"
+                  headerClassName="fw-semibold ps-0 border-0"
+                  contentClassName="pt-2"
+                >
+                  {hasRequiredMounts && hasNoFilesOnDevice && (
+                    <Alert variant="warning" className="py-2 px-3 mb-2 small">
+                      <FormattedMessage
+                        id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.noFilesAvailableWarning"
+                        defaultMessage="This device has no available files or download requests. To deploy this release with required file mounts, please first upload a file or initiate a download request on the device."
+                      />
+                    </Alert>
+                  )}
+
+                  <div
+                    className="d-flex flex-column gap-3 overflow-auto pe-1 pb-5"
+                    style={{ maxHeight: "55vh" }}
+                  >
+                    {containersWithMounts.map((container) => (
+                      <div
+                        key={container.id}
+                        className="border rounded p-3 bg-light"
+                        data-testid={`container-mounts-${container.id}`}
+                      >
+                        <div className="fw-bold mb-2 small text-secondary">
+                          <FormattedMessage
+                            id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel"
+                            defaultMessage="Container: {containerName}"
+                            values={{ containerName: container.name }}
+                          />
+                        </div>
+
+                        <div className="d-flex flex-column gap-2">
+                          {container.mounts.map((mount) => {
+                            return (
+                              <FileMountInput
+                                key={mount.id}
+                                ref={(el) => {
+                                  mountInputRefs.current[mount.id] = el;
+                                }}
+                                fileMountId={mount.id}
+                                mountpoint={mount.mountpoint}
+                                required={mount.required}
+                                deviceId={deviceId}
+                                defaultFileId={mount.defaultFileId}
+                                defaultFileName={mount.defaultFile?.name}
+                                defaultFileMode={mount.fileMode}
+                                defaultUserId={mount.userId}
+                                defaultGroupId={mount.groupId}
+                                deviceFiles={deviceFiles}
+                                fileDownloadRequests={fileDownloadRequests}
+                                onChange={(result, isValid) =>
+                                  handleFileBindChange(
+                                    mount.id,
+                                    result,
+                                    isValid,
+                                  )
+                                }
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CollapseItem>
+              </div>
+            )}
           </div>
-        )}
-      </div>
-    </ConfirmModal>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={isUpgrading || isSubmitting}
+            data-testid="modal-cancel-button"
+          >
+            <FormattedMessage
+              id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.cancelButton"
+              defaultMessage="Cancel"
+              description="Title for the button to cancel and dismiss a confirmation modal"
+            />
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={
+              !isOnline ||
+              !selectedRelease ||
+              !allRequiredMountsConfigured ||
+              !allEnvJsonValid ||
+              isSubmitting ||
+              isUpgrading
+            }
+            data-testid="modal-confirm-button"
+          >
+            {(isUpgrading || isSubmitting) && (
+              <Spinner className="mr-2" size="sm" />
+            )}
+            <FormattedMessage
+              id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.confirmLabel"
+              defaultMessage="Upgrade"
+            />
+          </Button>
+        </Modal.Footer>
+      </form>
+    </Modal>
   );
 };
 
