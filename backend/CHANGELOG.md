@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- NOTICE -->
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
+## [0.14.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.14.0...v0.14.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* use uri scheme for presigned URL generation ([cf3fdf3](https://github.com/edgehog-device-manager/edgehog/commit/cf3fdf336f45c925efb3594f31ae22a6e87e99eb))
+
 ## [0.14.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.1...v0.14.0) (2026-10-02)
 
 
