@@ -18,16 +18,19 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Provisioner do
+defmodule Edgehog.Provisioner do
   @moduledoc """
-  This module provides the default implementation for `Edgehog.Containers.Provisioner.Behaviour`.
+  This module provides the default implementation for `Edgehog.Provisioner.Behaviour`.
   It is sufficient to add a using statement like so:
 
   ```ex
   defmodule ResourceDeployment.Provisioner do
     @sup Edgehog.Containers.Resource.Provisioner.Supervisor
 
-    use Edgehog.Containers.Provisioner, resource: Edgehog.Containers.Resource.Deployment, core: Core
+    use Edgehog.Provisioner,
+      resource: Edgehog.Containers.Resource.Deployment,
+      core: Core,
+      audit: Audit
   end
   ```
 
@@ -37,10 +40,15 @@ defmodule Edgehog.Containers.Provisioner do
   retries and errors.
 
   The resource specific logic is delegated to the `Core` module nested inside
-  the provisioner (see `Edgehog.Containers.Provisioner.Core.Behaviour`): pure
+  the provisioner (see `Edgehog.Provisioner.Core.Behaviour`): pure
   functions that can be tested in isolation (e.g. `ready?/1`, `topic/1`) and
   functions that provide the side effects of the provisioning (e.g.
   `send_to_device/2`, `reconcile/2`).
+
+  The observability of the provisioning (logging and telemetry) is delegated
+  to the `Audit` module nested inside the provisioner (see
+  `Edgehog.Provisioner.Audit.Behaviour`): one function per provisioning event,
+  each choosing what to do for it.
 
   The provisioning flow can be described as follows:
 
@@ -70,16 +78,18 @@ defmodule Edgehog.Containers.Provisioner do
     resource_module = Keyword.fetch!(opts, :resource)
 
     core_module = Keyword.fetch!(opts, :core)
+    audit_module = Keyword.get(opts, :audit, Edgehog.Provisioner.Audit)
 
     # credo:disable-for-next-line Credo.Check.Refactor.LongQuoteBlocks
     quote do
       use GenServer, restart: :transient
 
       alias Edgehog.Config
-      alias Edgehog.Containers.Provisioner
-      alias Edgehog.Containers.Telemetry
+      alias Edgehog.Provisioner
       alias unquote(core_module), as: Core
+      alias unquote(audit_module), as: Audit
       alias unquote(resource_module), as: Resource
+      alias unquote(audit_module), as: Audit
 
       @before_compile unquote(__MODULE__)
 
@@ -160,11 +170,11 @@ defmodule Edgehog.Containers.Provisioner do
 
         # The remaining options are resource specific context that the Core
         # might need (e.g. the application deployment a resource belongs to).
-        context = Keyword.drop(args, [:resource, :tenant, :mode])
+        context = Keyword.drop(args, [:resource, :mode])
 
         %{id: id, device: %{id: device_id, online: device_online?}} = resource
 
-        started_at = Telemetry.provisioning_started(resource, context)
+        started_at = Audit.provisioning_started(resource, context)
 
         state = %{
           resource: resource,
@@ -178,14 +188,14 @@ defmodule Edgehog.Containers.Provisioner do
         }
 
         topic = Core.subscribe_topic(resource)
+        device_offline_topic = "devices:offline:#{device_id}"
 
-        Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+        for topic <- [topic, device_offline_topic] do
+          Phoenix.PubSub.subscribe(Edgehog.PubSub, topic)
+          Audit.subscribing_to_events(topic)
+        end
 
-        Phoenix.PubSub.subscribe(Edgehog.PubSub, "devices:offline:#{device_id}")
-
-        Core.log_subscribing_to_events(topic)
-        Core.log_subscribing_to_device_status(device_id)
-        Core.log_device_status(device_id, device_online?)
+        Audit.device_status(device_id, device_online?)
 
         # If the provisioning does not complete within the deadline, the
         # provisioner gives up and broadcasts a failure that the orchestrator reacts
@@ -252,8 +262,6 @@ defmodule Edgehog.Containers.Provisioner do
       # failure so that the orchestrator can react
       @impl GenServer
       def handle_info(:give_up, state) do
-        Core.log_provisioning_failed(state.resource, :timeout_hit)
-
         {:stop, {:shutdown, :timeout_hit}, state}
       end
 
@@ -296,9 +304,7 @@ defmodule Edgehog.Containers.Provisioner do
           result: result
         } = state
 
-        Telemetry.provisioning_completed(resource, context, started_at, retries, result)
-
-        Core.log_provisioning_completed(resource, retries)
+        Audit.provisioning_completed(resource, context, started_at, retries, result)
 
         # Broadcast readiness so that the orchestrator can proceed
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:ready, resource})
@@ -318,9 +324,7 @@ defmodule Edgehog.Containers.Provisioner do
           retries: retries
         } = state
 
-        Core.log_provisioning_failed(resource, reason)
-
-        Telemetry.provisioning_failed(resource, context, started_at, retries, reason)
+        Audit.provisioning_failed(resource, context, started_at, retries, reason)
 
         # Broadcast failure so that the orchestrator can react
         Phoenix.PubSub.broadcast(Edgehog.PubSub, Core.topic(resource), {:failure, resource})
@@ -339,9 +343,7 @@ defmodule Edgehog.Containers.Provisioner do
           retries: retries
         } = state
 
-        Telemetry.provisioning_failed(resource, context, started_at, retries, :unexpected)
-
-        Core.log_provisioning_failed(resource, reason)
+        Audit.provisioning_failed(resource, context, started_at, retries, reason)
       end
 
       defp maybe_early_terminate(%{device_online?: device_online?} = state, next_step) do
@@ -377,7 +379,7 @@ defmodule Edgehog.Containers.Provisioner do
             {:noreply, new_state, timeout}
 
           error ->
-            Core.log_api_error(resource, error)
+            Audit.api_error(resource, error)
             timeout = timeout(state)
 
             if Core.temporary_error?(error),
@@ -401,13 +403,13 @@ defmodule Edgehog.Containers.Provisioner do
         sup = Module.get_attribute(env.module, :sup)
 
         if is_nil(sup) do
-          raise "the `@sup` module attribute must be set before `use Edgehog.Containers.Provisioner`, " <>
+          raise "the `@sup` module attribute must be set before `use Edgehog.Provisioner`, " <>
                   "specifying the supervisor under which the provisioner processes are started. " <>
                   "Alternatively, override the `provision/3` callback to start the process as needed."
         end
 
         quote do
-          @impl Edgehog.Containers.Provisioner.Behaviour
+          @impl Edgehog.Provisioner.Behaviour
           def provision(resource, tenant, opts \\ []) do
             args =
               opts

@@ -78,7 +78,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.provisioning_start_event(),
           measurement: :count,
           description: "Number of provisioning operations started for a resource on a device.",
-          tags: [:resource_type, :resource_id, :deployment_id, :device_id],
+          tags: [:resource_type, :resource_id, :deployment_id, :device_id, :tenant_slug],
           tag_values: &identifiers_tag_values/1
         ),
         counter(
@@ -86,7 +86,15 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.provisioning_stop_event(),
           measurement: :count,
           description: "Number of provisioning operations completed for a resource on a device.",
-          tags: [:resource_type, :resource_id, :deployment_id, :device_id, :result, :reason],
+          tags: [
+            :resource_type,
+            :resource_id,
+            :deployment_id,
+            :device_id,
+            :result,
+            :reason,
+            :tenant_slug
+          ],
           tag_values: &identifiers_tag_values/1
         ),
         distribution(
@@ -94,7 +102,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.provisioning_stop_event(),
           measurement: :duration,
           description: "The time it took for a provisioning operation to complete.",
-          tags: [:resource_type, :deployment_id, :device_id, :result, :reason],
+          tags: [:resource_type, :deployment_id, :device_id, :result, :reason, :tenant_slug],
           tag_values: &identifiers_tag_values/1,
           reporter_options: [buckets: [100, 250, 500, 1000, 2500, 5000, 10_000, 60_000]],
           unit: {:native, :second}
@@ -104,7 +112,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.provisioning_stop_event(),
           measurement: :retries,
           description: "The number of retries of a provisioning operation.",
-          tags: [:result, :reason],
+          tags: [:result, :reason, :tenant_slug],
           tag_values: &identifiers_tag_values/1,
           reporter_options: [buckets: [0, 1, 2, 3, 4, 5, 10, 25, 50, 100]]
         )
@@ -123,7 +131,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.deployment_start_event(),
           measurement: :count,
           description: "Number of application deployments started.",
-          tags: [:deployment_id, :device_id],
+          tags: [:deployment_id, :device_id, :tenant_slug],
           tag_values: &identifiers_tag_values/1
         ),
         counter(
@@ -131,7 +139,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.deployment_stop_event(),
           measurement: :count,
           description: "Number of application deployments completed, either successfully or not.",
-          tags: [:deployment_id, :device_id, :result],
+          tags: [:deployment_id, :device_id, :result, :tenant_slug],
           tag_values: &identifiers_tag_values/1
         ),
         distribution(
@@ -139,7 +147,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.deployment_stop_event(),
           measurement: :duration,
           description: "The time it took for an application deployment to complete.",
-          tags: [:deployment_id, :device_id, :result],
+          tags: [:deployment_id, :device_id, :result, :tenant_slug],
           tag_values: &identifiers_tag_values/1,
           reporter_options: [buckets: [1000, 2500, 5000, 10_000, 60_000, 300_000, 600_000]],
           unit: {:native, :second}
@@ -159,7 +167,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.container_deployment_start_event(),
           measurement: :count,
           description: "Number of container deployments started.",
-          tags: [:container_deployment_id, :deployment_id, :device_id],
+          tags: [:container_deployment_id, :deployment_id, :device_id, :tenant_slug],
           tag_values: &identifiers_tag_values/1
         ),
         counter(
@@ -167,7 +175,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.container_deployment_stop_event(),
           measurement: :count,
           description: "Number of container deployments completed, either successfully or not.",
-          tags: [:container_deployment_id, :deployment_id, :device_id, :result],
+          tags: [:container_deployment_id, :deployment_id, :device_id, :result, :tenant_slug],
           tag_values: &identifiers_tag_values/1
         ),
         distribution(
@@ -175,7 +183,7 @@ defmodule Edgehog.Containers.PromExPlugin do
           event_name: Telemetry.container_deployment_stop_event(),
           measurement: :duration,
           description: "The time it took for a container deployment to complete.",
-          tags: [:container_deployment_id, :deployment_id, :device_id, :result],
+          tags: [:container_deployment_id, :deployment_id, :device_id, :result, :tenant_slug],
           tag_values: &identifiers_tag_values/1,
           reporter_options: [buckets: [100, 250, 500, 1000, 2500, 5000, 10_000, 60_000]],
           unit: {:native, :second}
@@ -192,7 +200,8 @@ defmodule Edgehog.Containers.PromExPlugin do
       :device_id,
       :container_deployment_id,
       :result,
-      :reason
+      :reason,
+      :tenant_slug
     ])
   end
 end

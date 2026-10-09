@@ -77,6 +77,22 @@ defmodule Edgehog.Config do
           type: :boolean,
           default: true
 
+  @envdoc """
+  Whether file transfer telemetry events should include high-cardinality
+  identifier labels (request_id, file_id, device_id).
+
+  These labels allow filtering the metrics per specific request, file or
+  device (e.g. in Grafana), at the cost of a higher number of Prometheus time
+  series. Disable them if you are not filtering on them and want to keep the
+  cardinality low.
+  """
+  app_env :files_telemetry_include_identifiers,
+          :edgehog,
+          :files_telemetry_include_identifiers,
+          os_env: "FILES_TELEMETRY_INCLUDE_IDENTIFIERS",
+          type: :boolean,
+          default: true
+
   @envdoc "The API key for the ipbase.com geolocation provider."
   app_env :ipbase_api_key, :edgehog, :ipbase_api_key,
     os_env: "IPBASE_API_KEY",

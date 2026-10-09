@@ -18,16 +18,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.DeviceMapping.Deployment.Provisioner do
+defmodule Edgehog.Provisioner.Audit.Default do
   @moduledoc """
-  The provisioner for deploying device mappings on a device.
+  Default no-op implementation of `Edgehog.Provisioner.Audit.Behaviour`.
 
-  For more information, check the `Edgehog.Provisioner` docs.
+  Used by provisioners that don't pass an explicit `:audit` module to
+  `Edgehog.Provisioner`.
   """
-  use Edgehog.Provisioner,
-    resource: Edgehog.Containers.DeviceMapping.Deployment,
-    core: Edgehog.Containers.DeviceMapping.Deployment.Provisioner.Core,
-    audit: Edgehog.Containers.DeviceMapping.Deployment.Provisioner.Audit
-
-  @sup Edgehog.Containers.DeviceMapping.Provisioner.Supervisor
+  use Edgehog.Provisioner.Audit
 end

@@ -22,11 +22,12 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner do
   @moduledoc """
   The provisioner for deploying images on a device.
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Containers.Image.Deployment,
-    core: Edgehog.Containers.Image.Deployment.Provisioner.Core
+    core: Edgehog.Containers.Image.Deployment.Provisioner.Core,
+    audit: Edgehog.Containers.Image.Deployment.Provisioner.Audit
 
   @sup Edgehog.Containers.Image.Provisioner.Supervisor
 end

@@ -26,11 +26,12 @@ defmodule Edgehog.Files.FileDownloadRequest.Provisioner do
   container deployment orchestrator can treat files like any other
   provisioned resource.
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Files.FileDownloadRequest,
-    core: Edgehog.Files.FileDownloadRequest.Provisioner.Core
+    core: Edgehog.Files.FileDownloadRequest.Provisioner.Core,
+    audit: Edgehog.Files.FileDownloadRequest.Provisioner.Audit
 
   @sup Edgehog.Containers.File.Provisioner.Supervisor
 end

@@ -22,11 +22,12 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner do
   @moduledoc """
   The provisioner for deploying volumes on a device.
 
-  For more information, check the `Edgehog.Containers.Provisioner` docs.
+  For more information, check the `Edgehog.Provisioner` docs.
   """
-  use Edgehog.Containers.Provisioner,
+  use Edgehog.Provisioner,
     resource: Edgehog.Containers.Volume.Deployment,
-    core: Edgehog.Containers.Volume.Deployment.Provisioner.Core
+    core: Edgehog.Containers.Volume.Deployment.Provisioner.Core,
+    audit: Edgehog.Containers.Volume.Deployment.Provisioner.Audit
 
   @sup Edgehog.Containers.Volume.Provisioner.Supervisor
 end
