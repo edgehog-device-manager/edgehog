@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Provisioner.Behaviour do
+defmodule Edgehog.Provisioner.Behaviour do
   @moduledoc """
   Behaviour describing the API of a Provisioner for a resource.
 
@@ -28,11 +28,11 @@ defmodule Edgehog.Containers.Provisioner.Behaviour do
   events emitted by the device, and broadcasting readiness (or failure).
 
   This module shouldn't be used directly. Rather, it's best to
-  use `Edgehog.Containers.Provisioner`, i.e.:
+  use `Edgehog.Provisioner`, i.e.:
 
   ```ex
   defmodule ResourceProvisioner do
-    use Edgehog.Containers.Provisioner, resource: ResourceModule
+    use Edgehog.Provisioner, resource: ResourceModule
   end
   ```
 
@@ -49,7 +49,7 @@ defmodule Edgehog.Containers.Provisioner.Behaviour do
 
   This callback is optional: the default implementation starts the provisioner
   under the supervisor specified by the `@sup` module attribute of the module
-  using `Edgehog.Containers.Provisioner`, so the user of the macro decides
+  using `Edgehog.Provisioner`, so the user of the macro decides
   where the process is spawned. When creating the link, the server checks a
   registry to know whether the corresponding process is already up and running.
   Check `Core.name/1` docs for more info.

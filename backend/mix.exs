@@ -253,7 +253,11 @@ defmodule Edgehog.MixProject do
       "docs/pages/architecture/overview.md",
       "docs/pages/integrating/interacting_with_edgehog.md",
       "docs/pages/integrating/astarte_interfaces.md",
-      "docs/pages/admin/deploying_with_kubernetes.md"
+      "docs/pages/admin/deploying_with_kubernetes.md",
+      "docs/pages/admin/observability.md",
+      "docs/pages/admin/observability_containers.md",
+      "docs/pages/admin/observability_files.md",
+      "docs/pages/admin/observability_stack.md"
     ]
   end
 
