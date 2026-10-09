@@ -269,8 +269,6 @@ const InstallApplicationModal = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const mountInputRefs = useRef<Record<string, FileMountInputRef | null>>({});
   const envFileInputRefs = useRef<Record<string, EnvFileInputRef | null>>({});
-  // Both configuration sections start collapsed; selection changes collapse
-  // them again.
   const [envSectionOpen, setEnvSectionOpen] = useState<boolean>(false);
   const [mountsSectionOpen, setMountsSectionOpen] = useState<boolean>(false);
 
@@ -574,13 +572,28 @@ const InstallApplicationModal = ({
     setMountsSectionOpen(false);
   };
 
-  const handleReleaseChange = (_option: SingleValue<SelectOption>) => {
+  const handleReleaseChange = (option: SingleValue<SelectOption>) => {
+    const releaseId = option?.value;
+
+    const release = applicationEdges
+      .find((app) => app.node.id === selectedApp)
+      ?.node.releases.edges?.find(({ node }) => node.id === releaseId)?.node;
+
+    const hasRequiredMountsWithoutDefault =
+      release?.containers?.edges?.some(({ node: container }) =>
+        container.fileMounts?.edges?.some(
+          ({ node: mount }) =>
+            mount.required && !mount.defaultFileId && !mount.defaultFile?.name,
+        ),
+      ) ?? false;
+
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
     setEnvJsons({});
+
+    setMountsSectionOpen(hasRequiredMountsWithoutDefault);
     setEnvSectionOpen(false);
-    setMountsSectionOpen(false);
   };
 
   const resetSelections = useCallback(() => {
@@ -602,12 +615,18 @@ const InstallApplicationModal = ({
     if (!selectedRelease) return;
 
     if (!allRequiredMountsConfigured) {
+      setMountsSectionOpen(true);
       setErrorFeedback(
         <FormattedMessage
           id="components.apps.releases.install-application-modal.InstallApplicationModal.missingRequiredBindsFeedback"
           defaultMessage="Please configure a file source for all required file mounts."
         />,
       );
+      return;
+    }
+
+    if (!allEnvJsonValid) {
+      setEnvSectionOpen(true);
       return;
     }
 
@@ -867,6 +886,7 @@ const InstallApplicationModal = ({
   }, [
     selectedRelease,
     allRequiredMountsConfigured,
+    allEnvJsonValid,
     containersWithMounts,
     releaseContainers,
     envModes,

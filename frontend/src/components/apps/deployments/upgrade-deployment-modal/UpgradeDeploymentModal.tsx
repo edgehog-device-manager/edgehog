@@ -541,13 +541,27 @@ const UpgradeDeploymentModal = ({
     [markEnvFileAsUploaded],
   );
 
-  const handleReleaseChange = (_option: SingleValue<SelectOption>) => {
+  const handleReleaseChange = (option: SingleValue<SelectOption>) => {
+    const releaseId = option?.value;
+    const release = releaseEdges.find(
+      ({ node }) => node?.id === releaseId,
+    )?.node;
+
+    const hasRequiredMountsWithoutDefault =
+      release?.containers?.edges?.some(({ node: container }) =>
+        container.fileMounts?.edges?.some(
+          ({ node: mount }) =>
+            mount?.required && !mount.defaultFileId && !mount.defaultFile?.name,
+        ),
+      ) ?? false;
+
     setMountValidity({});
     setEnvModes({});
     setEnvStrategies({});
     setEnvJsons({});
+
+    setMountsSectionOpen(hasRequiredMountsWithoutDefault);
     setEnvSectionOpen(false);
-    setMountsSectionOpen(false);
   };
 
   const resetSelections = useCallback(() => {
@@ -569,12 +583,18 @@ const UpgradeDeploymentModal = ({
     if (!selectedRelease) return;
 
     if (!allRequiredMountsConfigured) {
+      setMountsSectionOpen(true);
       setErrorFeedback(
         <FormattedMessage
           id="components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.missingRequiredBindsFeedback"
           defaultMessage="Please configure a file source for all required file mounts."
         />,
       );
+      return;
+    }
+
+    if (!allEnvJsonValid) {
+      setEnvSectionOpen(true);
       return;
     }
 
@@ -862,6 +882,7 @@ const UpgradeDeploymentModal = ({
   }, [
     selectedRelease,
     allRequiredMountsConfigured,
+    allEnvJsonValid,
     containersWithMounts,
     releaseContainers,
     envModes,
