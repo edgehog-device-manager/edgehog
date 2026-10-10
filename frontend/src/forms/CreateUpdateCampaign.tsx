@@ -46,7 +46,7 @@ import {
   UpdateCampaignFormData,
   updateCampaignSchema,
 } from "@/forms/validation";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const CAMPAIGN_BASE_IMAGE_COLL_OPTIONS_FRAGMENT = graphql`
   fragment CreateUpdateCampaign_BaseImageCollOptionsFragment on RootQueryType

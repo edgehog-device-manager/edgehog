@@ -19,7 +19,7 @@
  */
 
 import { useEffect, useRef } from "react";
-import { Spinner } from "react-bootstrap";
+import Spinner from "@/components/ui/spinner/Spinner";
 import { useLocation, useNavigate } from "react-router-dom";
 import { commitLocalUpdate, useRelayEnvironment } from "react-relay/hooks";
 

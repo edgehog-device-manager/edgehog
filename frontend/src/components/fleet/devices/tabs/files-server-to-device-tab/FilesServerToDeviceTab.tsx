@@ -25,7 +25,10 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Card, ToggleButton, ToggleButtonGroup } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
+import ToggleButton, {
+  ToggleButtonGroup,
+} from "@/components/ui/toggle-button/ToggleButton";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {

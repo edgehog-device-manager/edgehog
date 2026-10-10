@@ -31,7 +31,7 @@ import {
   useSubscription,
 } from "react-relay/hooks";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import type {
   UpdateCampaign_getCampaign_Query,

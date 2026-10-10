@@ -23,36 +23,35 @@ defmodule Edgehog.Containers.Release.Validations.NoCircularDependencies do
 
   use Ash.Resource.Validation
 
+  alias Edgehog.Containers.Release.Dependencies
+
   @impl Ash.Resource.Validation
-  def validate(changeset, _opts, _context) do
+  def validate(changeset, _opts, %{tenant: tenant}) do
     containers = Ash.Changeset.get_argument(changeset, :containers) || []
+    container_dependencies = Ash.Changeset.get_argument(changeset, :container_dependencies) || []
 
-    container_dependencies =
-      Ash.Changeset.get_argument(changeset, :container_dependencies) || []
+    with {:ok, resolved} <- Dependencies.resolve_containers(containers, tenant) do
+      pairs = Dependencies.dependency_pairs(containers, container_dependencies, resolved)
+      graph = build_graph(resolved, pairs)
 
-    graph = build_graph(containers, container_dependencies)
+      case Graph.topsort(graph) do
+        false ->
+          {:error, field: :container_dependencies, message: "circular dependencies detected"}
 
-    case Graph.topsort(graph) do
-      false ->
-        {:error, field: :container_dependencies, message: "circular dependencies detected"}
-
-      _ids ->
-        :ok
+        _sorted ->
+          :ok
+      end
     end
   end
 
-  defp build_graph(containers, container_dependencies) do
+  defp build_graph(resolved_containers, dependency_pairs) do
     graph =
-      Enum.reduce(containers, Graph.new(), fn container, graph ->
-        Graph.add_vertex(graph, value(container, :id))
+      Enum.reduce(resolved_containers, Graph.new(), fn container, graph ->
+        Graph.add_vertex(graph, container.name)
       end)
 
-    Enum.reduce(container_dependencies, graph, fn dep, graph ->
-      Graph.add_edge(graph, value(dep, :dependency_id), value(dep, :container_id))
+    Enum.reduce(dependency_pairs, graph, fn {container_name, dependency_name}, graph ->
+      Graph.add_edge(graph, dependency_name, container_name)
     end)
-  end
-
-  defp value(map, key) do
-    Map.get(map, key) || Map.get(map, Atom.to_string(key))
   end
 end

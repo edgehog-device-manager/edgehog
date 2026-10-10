@@ -29,9 +29,9 @@ import {
   useQueryLoader,
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
-import { Containers_PaginationQuery } from "@/api/__generated__/Containers_PaginationQuery.graphql";
+import { ReleaseContainers_PaginationQuery } from "@/api/__generated__/ReleaseContainers_PaginationQuery.graphql";
 import { Release_ContainersFragment$key } from "@/api/__generated__/Release_ContainersFragment.graphql";
 import { Release_DeploymentsFragment$key } from "@/api/__generated__/Release_DeploymentsFragment.graphql";
 import type {
@@ -111,7 +111,7 @@ const ContainersLayoutContainer = ({
   releaseRef,
 }: ContainersLayoutContainerProps) => {
   const { data } = usePaginationFragment<
-    Containers_PaginationQuery,
+    ReleaseContainers_PaginationQuery,
     Release_ContainersFragment$key
   >(CONTAINERS_FRAGMENT, releaseRef);
 

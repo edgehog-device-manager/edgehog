@@ -42,7 +42,7 @@ import assets from "@/assets";
 import { SystemModelFormData, systemModelSchema } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 const CREATE_SYSTEM_MODEL_FRAGMENT = graphql`
   fragment CreateSystemModel_OptionsFragment on RootQueryType

@@ -48,7 +48,7 @@ import {
   getFileExtension,
   isArchiveEncoding,
 } from "@/lib/files";
-import SelectFormField from "@/forms/SelectFormFIeld";
+import SelectFormField from "@/forms/SelectFormField";
 
 type EncodingOption = {
   value: string;

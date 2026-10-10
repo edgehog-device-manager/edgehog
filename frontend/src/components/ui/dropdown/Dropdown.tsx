@@ -1,7 +1,7 @@
 /*
   This file is part of Edgehog.
 
-  Copyright 2021 SECO Mind Srl
+  Copyright 2021-2026 SECO Mind Srl
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -20,31 +20,44 @@
 
 import React from "react";
 import BootstrapDropdown from "react-bootstrap/Dropdown";
+import type { DropdownProps as BootstrapDropdownProps } from "react-bootstrap/Dropdown";
 
 import "./Dropdown.scss";
 
-interface Props {
-  align?: "end" | "start";
-  children?: React.ReactNode;
-  className?: string;
-  toggle: React.ReactNode;
-}
+export type DropdownProps = BootstrapDropdownProps & {
+  toggle?: React.ReactNode;
+};
 
 const Dropdown = ({
   align = "start",
   children,
   className = "",
   toggle,
-}: Props) => (
-  <BootstrapDropdown align={align} className={`Dropdown ${className}`}>
-    <BootstrapDropdown.Toggle as="div">{toggle}</BootstrapDropdown.Toggle>
-    <BootstrapDropdown.Menu className="shadow border-end-0 border-bottom-0 border-start-0 border-primary rounded-0">
-      {children}
-    </BootstrapDropdown.Menu>
-  </BootstrapDropdown>
-);
+  ...restProps
+}: DropdownProps) => {
+  if (toggle) {
+    return (
+      <BootstrapDropdown align={align} className={`Dropdown ${className}`} {...restProps}>
+        <BootstrapDropdown.Toggle as="div">{toggle}</BootstrapDropdown.Toggle>
+        <BootstrapDropdown.Menu className="shadow border-end-0 border-bottom-0 border-start-0 border-primary rounded-0">
+          {children}
+        </BootstrapDropdown.Menu>
+      </BootstrapDropdown>
+    );
+  }
 
+  return (
+    <BootstrapDropdown align={align} className={className} {...restProps}>
+      {children}
+    </BootstrapDropdown>
+  );
+};
+
+Dropdown.Toggle = BootstrapDropdown.Toggle;
+Dropdown.Menu = BootstrapDropdown.Menu;
 Dropdown.Divider = BootstrapDropdown.Divider;
 Dropdown.Item = BootstrapDropdown.Item;
+Dropdown.Header = BootstrapDropdown.Header;
+Dropdown.ItemText = BootstrapDropdown.ItemText;
 
 export default Dropdown;

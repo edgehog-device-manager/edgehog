@@ -16,7 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 

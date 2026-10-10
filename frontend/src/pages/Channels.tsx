@@ -28,7 +28,7 @@ import {
   useQueryLoader,
   useSubscription,
 } from "react-relay/hooks";
-import { Card } from "react-bootstrap";
+import Card from "@/components/ui/card/Card";
 
 import { Channels_ChannelsFragment$key } from "@/api/__generated__/Channels_ChannelsFragment.graphql";
 import type { Channels_getChannels_Query } from "@/api/__generated__/Channels_getChannels_Query.graphql";

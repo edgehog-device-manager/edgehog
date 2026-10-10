@@ -19,7 +19,8 @@
  */
 
 import { ReactNode, Suspense, useCallback, useEffect, useState } from "react";
-import { Alert, Card } from "react-bootstrap";
+import Alert from "@/components/ui/alert/Alert";
+import Card from "@/components/ui/card/Card";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import {
