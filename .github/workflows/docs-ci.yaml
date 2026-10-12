@@ -19,24 +19,23 @@
 
 name: Edgehog docs generation
 
-# publish Generate and publish docs on pushes on main (or release branches) only
-# when backend or frontend files are touched.
 on:
-  workflow_call:
-    inputs:
-      release-made:
-        required: true
-        type: boolean
-      release-version:
-        type: string
-      publish:
-        type: boolean
-        default: true
-    secrets:
-      token:
-        required: false
-      EDGEHOG_APP_PRIVATE_KEY:
-        required: false
+  push:
+    branches:
+      - main
+      - "release-*"
+      - "!release-please*"
+  pull_request:
+    paths:
+      - "backend/docs/**"
+      - ".tool-versions"
+      - ".github/workflows/docs-ci.yaml"
+      - ".github/actions/doc-generate/**"
+      - "tools/gen-docs-versions.sh"
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -80,7 +79,7 @@ jobs:
           fetch-depth: 1
       - name: Generate App token for docs push
         id: app-token
-        if: ${{ inputs.publish }}
+        if: ${{ github.event_name == 'push' && github.repository_owner == 'edgehog-device-manager' }}
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ vars.EDGEHOG_APP_APP_ID }}
@@ -90,7 +89,14 @@ jobs:
       - name: Compute docs version
         id: compute-version
         run: |
-          echo "version=${{ inputs.release-made && inputs.release-version || 'snapshot' }}" >> "$GITHUB_OUTPUT"
+          if [[ "${{ github.event_name }}" == "pull_request" || "${{ github.ref_name }}" == "main" ]]; then
+            version="snapshot"
+          else
+            version="${{ github.ref_name }}"
+            version="${version#release-}"
+            version="${version#v}"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - uses: ./edgehog/.github/actions/doc-generate
         with:
           edgehog: edgehog
@@ -99,15 +105,15 @@ jobs:
           version: ${{ steps.compute-version.outputs.version }}
 
       - name: Commit files
-        if: ${{ inputs.publish }}
+        if: ${{ github.event_name == 'push' && github.repository_owner == 'edgehog-device-manager' }}
         working-directory: docs
         run: |
           git config --local user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
           git config --local user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
           git add .
-          git commit -m "Update Documentation"
+          git diff --cached --quiet || git commit -m "Update Documentation"
       - name: Push changes
-        if: ${{ inputs.publish }}
+        if: ${{ github.event_name == 'push' && github.repository_owner == 'edgehog-device-manager' }}
         working-directory: docs
         run: |
           # Clear checkout extraheader/includeIf and staple global url rewrites that would shadow the App token
