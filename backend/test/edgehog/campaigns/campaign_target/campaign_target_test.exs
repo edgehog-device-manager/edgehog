@@ -224,8 +224,14 @@ defmodule Edgehog.Campaigns.CampaignTargetTest do
     } do
       application2 = application_fixture(tenant: tenant)
 
+      release1_system_models = Ash.load!(release1, :system_models, tenant: tenant).system_models
+
       release2 =
-        release_fixture(application_id: application2.id, tenant: tenant, system_models: 1)
+        release_fixture(
+          application_id: application2.id,
+          tenant: tenant,
+          system_models: release1_system_models
+        )
 
       device =
         [release_id: release1.id, online: true, tenant: tenant]

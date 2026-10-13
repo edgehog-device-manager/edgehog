@@ -37,8 +37,6 @@ defmodule Edgehog.Containers.Deployment do
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
 
-  @testing Mix.env() == :test
-
   graphql do
     type :deployment
 
@@ -69,7 +67,7 @@ defmodule Edgehog.Containers.Deployment do
     defaults [
       :read,
       :destroy,
-      create: [:device_id, :release_id, :state]
+      :create
     ]
 
     create :deploy do
@@ -102,57 +100,6 @@ defmodule Edgehog.Containers.Deployment do
       change manage_relationship(:device_id, :device, type: :append)
       change Changes.Relate
       change Changes.SendDeploymentToDevice
-    end
-
-    create :just_create do
-      description """
-      Starts the deployment of a release on a device.
-      It starts an Executor, handling the communication with the device.
-      """
-
-      accept [:release_id]
-
-      argument :device_id, :id do
-        allow_nil? false
-      end
-
-      argument :configs, {:array, Types.DeploymentConfig} do
-        description """
-        Per-container configuration overrides to apply at deployment time.
-        The same as for :deploy action.
-        """
-
-        allow_nil? false
-        default []
-      end
-
-      validate Validations.DeviceIsCompatible
-
-      change manage_relationship(:device_id, :device, type: :append)
-      change Changes.Relate
-    end
-
-    if @testing do
-      create :create_fixture do
-        description """
-        Starts the deployment of a release on a device.
-        It starts an Executor, handling the communication with the device.
-        """
-
-        accept [:release_id, :state]
-
-        argument :device_id, :id do
-          allow_nil? false
-        end
-
-        argument :configs, {:array, Types.DeploymentConfig} do
-          allow_nil? false
-          default []
-        end
-
-        change manage_relationship(:device_id, :device, type: :append)
-        change Changes.Relate
-      end
     end
 
     update :set_state do
@@ -440,7 +387,6 @@ defmodule Edgehog.Containers.Deployment do
     module EdgehogWeb.Endpoint
 
     publish :deploy, [[:id, "*"]]
-    publish :just_create, [[:id, "*"]]
 
     publish :set_state, [[:state, nil], [:id, "*"]]
     publish :mark_as_sent, [[:state, nil], [:id, "*"]]

@@ -24,7 +24,14 @@ defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    Ash.Changeset.after_transaction(changeset, &after_transaction(&1, &2, tenant))
+    run_provisioner =
+      changeset
+      |> Map.get(:context, %{})
+      |> Map.get(:run_provisioner, true)
+
+    if run_provisioner,
+      do: Ash.Changeset.after_transaction(changeset, &after_transaction(&1, &2, tenant)),
+      else: changeset
   end
 
   defp after_transaction(_changeset, {:ok, deployment}, tenant) do

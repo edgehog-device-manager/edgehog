@@ -23,6 +23,7 @@ defmodule Edgehog.Containers.DeploymentReadyAction do
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers
 
+  alias Edgehog.Containers.DeploymentReadyAction.Changes
   alias Edgehog.Containers.ManualActions
 
   actions do
@@ -35,13 +36,7 @@ defmodule Edgehog.Containers.DeploymentReadyAction do
 
       argument :deployment, :map
 
-      change manage_relationship(:deployment,
-               on_lookup: :relate,
-               use_identities: [:_primary_key, :release_instance],
-               on_no_match: {:create, :just_create},
-               on_match: :ignore
-             )
-
+      change Changes.CreateDeployment
       change ManualActions.DeploymentReadyActionAddRelationship
     end
 

@@ -442,11 +442,13 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargetsTest do
           tenant: tenant
         )
 
+      release1_system_models = Ash.load!(release1, :system_models, tenant: tenant).system_models
+
       release2 =
         release_fixture(
           application_id: application.id,
           version: "2.0.0",
-          system_models: 1,
+          system_models: release1_system_models,
           tenant: tenant
         )
 

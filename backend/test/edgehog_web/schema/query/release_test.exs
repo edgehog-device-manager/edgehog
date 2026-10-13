@@ -51,8 +51,8 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
     params = %{container_id: container.id, network_id: network.id}
     Ash.create!(ContainerNetwork, params, tenant: tenant)
 
-    device1 = device_fixture(tenant: tenant)
-    device2 = device_fixture(tenant: tenant)
+    device1 = device_fixture_compatible_with_release(release_id: release.id, tenant: tenant)
+    device2 = device_fixture_compatible_with_release(release_id: release.id, tenant: tenant)
 
     deployment1 =
       deployment_fixture(device_id: device1.id, release_id: release.id, tenant: tenant)

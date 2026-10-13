@@ -561,6 +561,8 @@ defmodule Edgehog.ContainersFixtures do
       end)
 
     opts = Keyword.delete(opts, :release_opts)
+    {state, opts} = Keyword.pop(opts, :state)
+    {run_provisioner, opts} = Keyword.pop(opts, :run_provisioner, false)
 
     params =
       Enum.into(opts, %{
@@ -568,9 +570,26 @@ defmodule Edgehog.ContainersFixtures do
         release_id: release_id
       })
 
-    Deployment
-    |> Ash.Changeset.for_create(:create_fixture, params, tenant: tenant)
-    |> Ash.create!(tenant: tenant)
+    deployment =
+      Deployment
+      |> Ash.Changeset.for_create(:deploy, params,
+        tenant: tenant,
+        context: %{shared: %{run_provisioner: run_provisioner}}
+      )
+      |> Ash.create!(tenant: tenant)
+
+    case state do
+      nil ->
+        deployment
+
+      :pending ->
+        deployment
+
+      state ->
+        deployment
+        |> Ash.Changeset.for_update(:set_state, %{state: state})
+        |> Ash.update!(tenant: tenant)
+    end
   end
 
   @doc """
