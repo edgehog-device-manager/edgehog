@@ -18,14 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.ManualActions.StartSupervisor do
+defmodule Edgehog.Containers.Release.Deployment.ManualActions.StartSupervisor do
   @moduledoc """
   Manual action to start a deployment supervisor without the need for a database transaction.
   """
 
   use Ash.Resource.ManualUpdate
 
-  alias Edgehog.Containers.Deployment.Orchestrator
+  alias Edgehog.Containers.Release.Deployment.Orchestrator
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, %{tenant: tenant}) do

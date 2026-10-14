@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.OrchestratorTest do
+defmodule Edgehog.Containers.Release.Deployment.OrchestratorTest do
   @moduledoc """
   Tests for the deployment provisioning tree.
 
@@ -35,8 +35,8 @@ defmodule Edgehog.Containers.Deployment.OrchestratorTest do
 
   alias Ecto.Adapters.SQL.Sandbox
   alias Edgehog.Containers.Container.Deployment.Orchestrator, as: ContainerOrchestrator
-  alias Edgehog.Containers.Deployment.Orchestrator
-  alias Edgehog.Containers.Deployment.Provisioner, as: DeploymentProvisioner
+  alias Edgehog.Containers.Release.Deployment.Orchestrator
+  alias Edgehog.Containers.Release.Deployment.Provisioner, as: DeploymentProvisioner
 
   describe "Deployment orchestrator" do
     setup do
@@ -67,7 +67,8 @@ defmodule Edgehog.Containers.Deployment.OrchestratorTest do
       # from the global supervisor itself
       Sandbox.allow(Edgehog.Repo, self(), orchestrator)
 
-      global_supervisor = Process.whereis(Edgehog.Containers.Deployment.Orchestrator.Supervisor)
+      global_supervisor =
+        Process.whereis(Edgehog.Containers.Release.Deployment.Orchestrator.Supervisor)
 
       Sandbox.allow(Edgehog.Repo, self(), global_supervisor)
 
@@ -147,7 +148,7 @@ defmodule Edgehog.Containers.Deployment.OrchestratorTest do
       assert failed_deployment.id == deployment.id
 
       # The deployment is marked as timed out
-      deployment = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      deployment = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
       assert deployment.timed_out
 
       Phoenix.PubSub.unsubscribe(Edgehog.PubSub, topic)

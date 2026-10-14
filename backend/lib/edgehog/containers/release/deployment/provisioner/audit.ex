@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Provisioner.Audit do
+defmodule Edgehog.Containers.Release.Deployment.Provisioner.Audit do
   @moduledoc """
   The module describing the Audit functions for the deployment provisioner.
 
@@ -26,7 +26,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Audit do
   """
   use Edgehog.Provisioner.Audit
 
-  alias Edgehog.Containers.Deployment.Provisioner.Core
+  alias Edgehog.Containers.Release.Deployment.Provisioner.Core
   alias Edgehog.Containers.Telemetry
 
   require Logger

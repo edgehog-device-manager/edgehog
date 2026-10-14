@@ -25,7 +25,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentEventsTest d
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   describe "deployment events" do
     setup %{tenant: tenant} do

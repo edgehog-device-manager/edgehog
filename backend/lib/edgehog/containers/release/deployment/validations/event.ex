@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Validations.Event do
+defmodule Edgehog.Containers.Release.Deployment.Validations.Event do
   @moduledoc """
   Checks if the received event matches some fields.
 

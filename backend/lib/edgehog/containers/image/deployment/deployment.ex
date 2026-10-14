@@ -26,9 +26,9 @@ defmodule Edgehog.Containers.Image.Deployment do
     notifiers: [Ash.Notifier.PubSub]
 
   alias Edgehog.Containers.Container.Deployment
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Image.Deployment.Changes
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
 

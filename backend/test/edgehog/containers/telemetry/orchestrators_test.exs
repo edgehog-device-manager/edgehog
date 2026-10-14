@@ -32,9 +32,9 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
   alias Ecto.Adapters.SQL.Sandbox
   alias Edgehog.Containers.Container.Deployment.Orchestrator, as: ContainerOrchestrator
   alias Edgehog.Containers.Container.Deployment.Provisioner, as: ContainerProvisioner
-  alias Edgehog.Containers.Deployment.Orchestrator, as: DeploymentOrchestrator
-  alias Edgehog.Containers.Deployment.Provisioner, as: DeploymentProvisioner
   alias Edgehog.Containers.Image.Deployment.Provisioner, as: ImageProvisioner
+  alias Edgehog.Containers.Release.Deployment.Orchestrator, as: DeploymentOrchestrator
+  alias Edgehog.Containers.Release.Deployment.Provisioner, as: DeploymentProvisioner
   alias Edgehog.Containers.Telemetry
 
   @moduletag :telemetry
@@ -52,7 +52,9 @@ defmodule Edgehog.Containers.Telemetry.OrchestratorsTest do
 
       Sandbox.allow(Edgehog.Repo, self(), orchestrator)
 
-      global_supervisor = Process.whereis(Edgehog.Containers.Deployment.Orchestrator.Supervisor)
+      global_supervisor =
+        Process.whereis(Edgehog.Containers.Release.Deployment.Orchestrator.Supervisor)
+
       Sandbox.allow(Edgehog.Repo, self(), global_supervisor)
 
       ref = Process.monitor(orchestrator)

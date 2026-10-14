@@ -24,8 +24,8 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Validations
 
   graphql do

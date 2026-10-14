@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.Relate do
+defmodule Edgehog.Containers.Release.Deployment.Changes.Relate do
   @moduledoc """
   Relates a deployment to underlying container deployments, by creating them when
   needed.

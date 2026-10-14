@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.EventType do
+defmodule Edgehog.Containers.Release.Deployment.EventType do
   @moduledoc """
   Expresses the type of event a device can communicate to the backend trough the `DeploymentEvent` interface.
   """

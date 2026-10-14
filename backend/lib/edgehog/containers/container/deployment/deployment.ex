@@ -30,7 +30,7 @@ defmodule Edgehog.Containers.Container.Deployment do
   alias Edgehog.Containers.Container.Deployment.Changes
   alias Edgehog.Containers.Container.Deployment.Validations
   alias Edgehog.Containers.Container.Types.EnvVar
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Types
   alias Edgehog.Containers.Validations.Dangling
   alias Edgehog.Devices.Device

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeploymentUpgrade do
 
   use Ash.Resource.ManualUpdate
 
-  alias Edgehog.Containers.DeploymentReadyAction
+  alias Edgehog.Containers.Release.Deployment.ReadyAction
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do
@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.ManualActions.SendDeploymentUpgrade do
     target_id = Ash.Changeset.get_argument(changeset, :target)
 
     with {:ok, action} <-
-           DeploymentReadyAction
+           ReadyAction
            |> Ash.Changeset.for_create(
              :create_deployment,
              %{

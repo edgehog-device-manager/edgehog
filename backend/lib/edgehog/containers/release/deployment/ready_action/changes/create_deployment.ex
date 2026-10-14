@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.DeploymentReadyAction.Changes.CreateDeployment do
+defmodule Edgehog.Containers.Release.Deployment.ReadyAction.Changes.CreateDeployment do
   @moduledoc """
   Ash change for deployment ready action that creates the target deployment.
 

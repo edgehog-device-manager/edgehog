@@ -23,7 +23,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpgradeDeploymentTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   test "upgradeDeployment applies configs to the new deployment", %{tenant: tenant} do
     deployment = ready_deployment_fixture(tenant: tenant)
@@ -68,7 +68,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpgradeDeploymentTest do
     {:ok, %{id: decoded_id}} = AshGraphql.Resource.decode_relay_id(deployment_id)
 
     new_deployment =
-      Edgehog.Containers.Deployment
+      Edgehog.Containers.Release.Deployment
       |> Ash.get!(decoded_id, tenant: tenant)
       |> Ash.load!([container_deployments: [:file_binds]], tenant: tenant)
 

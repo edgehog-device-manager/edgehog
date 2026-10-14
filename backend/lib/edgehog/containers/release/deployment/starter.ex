@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Starter do
+defmodule Edgehog.Containers.Release.Deployment.Starter do
   @moduledoc """
   Deployments starter.
 
@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.Deployment.Starter do
   use GenServer, restart: :transient
 
   alias __MODULE__, as: Data
-  alias Edgehog.Containers.Deployment.Starter.Core
+  alias Edgehog.Containers.Release.Deployment.Starter.Core
   alias Edgehog.Devices.Device
 
   # the state struct, we can reference it with the %Data{} struct
@@ -41,7 +41,7 @@ defmodule Edgehog.Containers.Deployment.Starter do
   ]
 
   @test Mix.env() == :test
-  @sup Edgehog.Containers.Deployment.Starter.Supervisor
+  @sup Edgehog.Containers.Release.Deployment.Starter.Supervisor
 
   @doc """
   Registers a new starter under the appropriate supervisor.
@@ -78,7 +78,7 @@ defmodule Edgehog.Containers.Deployment.Starter do
   end
 
   def name(%Device{device_id: device_id}) do
-    {:via, Registry, {Edgehog.Containers.Deployment.Starter.Registry, "#{device_id}"}}
+    {:via, Registry, {Edgehog.Containers.Release.Deployment.Starter.Registry, "#{device_id}"}}
   end
 
   # Test additional API

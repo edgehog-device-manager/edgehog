@@ -43,9 +43,9 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
   alias Edgehog.Campaigns.CampaignTarget
   alias Edgehog.Containers
   alias Edgehog.Containers.Container.Deployment.Provisioner.Core, as: ContainerProvisionerCore
-  alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Deployment.Provisioner.Core, as: DeploymentProvisionerCore
   alias Edgehog.Containers.FileBind.Provisioner.Core, as: FileBindProvisionerCore
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.Provisioner.Core, as: DeploymentProvisionerCore
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
   alias Phoenix.Socket.Broadcast
@@ -483,7 +483,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       # 4. The upgrade command itself carries only ids: the runtime is just
       # told that the new deployment upgrades the old one.
       ready_action =
-        Edgehog.Containers.DeploymentReadyAction
+        Edgehog.Containers.Release.Deployment.ReadyAction
         |> Ash.Query.filter(action_type == :upgrade_deployment)
         |> Ash.Query.filter(deployment_id == ^new_deployment.id)
         |> Ash.read_one!(tenant: tenant.tenant_id)

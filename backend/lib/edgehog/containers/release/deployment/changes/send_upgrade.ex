@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.SendUpgrade do
+defmodule Edgehog.Containers.Release.Deployment.Changes.SendUpgrade do
   @moduledoc """
   A change to upgrade the deployment of an application to a newer version.
 
@@ -26,8 +26,8 @@ defmodule Edgehog.Containers.Deployment.Changes.SendUpgrade do
   database has been updated with relevant information _and_ in case of success
   """
   use Ash.Resource.Change
-  alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.DeploymentReadyAction
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.ReadyAction
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, _context) do
@@ -44,7 +44,7 @@ defmodule Edgehog.Containers.Deployment.Changes.SendUpgrade do
     configs = Ash.Changeset.get_argument(changeset, :configs) || []
 
     with {:ok, action} <-
-           DeploymentReadyAction
+           ReadyAction
            |> Ash.Changeset.for_create(
              :create_deployment,
              %{

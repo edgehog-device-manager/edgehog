@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Provisioner.Core do
+defmodule Edgehog.Containers.Release.Deployment.Provisioner.Core do
   @moduledoc """
   The module describing the Core functions required by the deployment provisioner.
 
@@ -27,7 +27,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
   use Edgehog.Provisioner.Core
 
   alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
-  alias Edgehog.Containers.Deployment.Provisioner.Audit
+  alias Edgehog.Containers.Release.Deployment.Provisioner.Audit
   alias Edgehog.Devices
 
   @impl Edgehog.Provisioner.Core.Behaviour
@@ -43,7 +43,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.Core do
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def name(%{id: id}),
-    do: {:via, Registry, {Edgehog.Containers.Deployment.Provisioner.Registry, id}}
+    do: {:via, Registry, {Edgehog.Containers.Release.Deployment.Provisioner.Registry, id}}
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(deployment, opts) do

@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Calculations.Ready do
+defmodule Edgehog.Containers.Release.Deployment.Calculations.Ready do
   @moduledoc """
   Computes the readiness of a deployment.
   A deployment is ready when:

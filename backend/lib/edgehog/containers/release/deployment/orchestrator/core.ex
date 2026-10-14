@@ -18,14 +18,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Orchestrator.Core do
+defmodule Edgehog.Containers.Release.Deployment.Orchestrator.Core do
   @moduledoc """
   Deployment orchestrator pure functions.
   """
 
   alias Edgehog.Containers.Container.Deployment.Orchestrator
-  alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Deployment.Provisioner.Core
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.Provisioner.Core
 
   require Logger
 

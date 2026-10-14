@@ -18,21 +18,21 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment do
+defmodule Edgehog.Containers.Release.Deployment do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Deployment.Calculations
-  alias Edgehog.Containers.Deployment.Changes
-  alias Edgehog.Containers.Deployment.Types.DeploymentContext
-  alias Edgehog.Containers.Deployment.Types.DeploymentState
-  alias Edgehog.Containers.Deployment.Validations
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.Calculations
+  alias Edgehog.Containers.Release.Deployment.Changes
+  alias Edgehog.Containers.Release.Deployment.Types.DeploymentContext
+  alias Edgehog.Containers.Release.Deployment.Types.DeploymentState
+  alias Edgehog.Containers.Release.Deployment.Validations
   alias Edgehog.Containers.Types
   alias Edgehog.Containers.Validations.IsUpgrade
   alias Edgehog.Containers.Validations.SameApplication
@@ -335,7 +335,7 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    has_many :ready_actions, Edgehog.Containers.DeploymentReadyAction do
+    has_many :ready_actions, Edgehog.Containers.Release.Deployment.ReadyAction do
       public? true
     end
 
@@ -346,7 +346,7 @@ defmodule Edgehog.Containers.Deployment do
       public? true
     end
 
-    has_many :events, Edgehog.Containers.Deployment.Event do
+    has_many :events, Edgehog.Containers.Release.Deployment.Event do
       public? true
     end
 

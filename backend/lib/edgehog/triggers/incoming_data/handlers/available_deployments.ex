@@ -25,7 +25,7 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableDeployments do
   @behaviour Ash.Astarte.Triggers.HandlerBehavior
 
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   require Logger
 

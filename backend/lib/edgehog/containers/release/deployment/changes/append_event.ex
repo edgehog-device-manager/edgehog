@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.AppendEvent do
+defmodule Edgehog.Containers.Release.Deployment.Changes.AppendEvent do
   @moduledoc """
   Appends an event with the given argument details.
   """

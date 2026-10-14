@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Provisioner do
+defmodule Edgehog.Containers.Release.Deployment.Provisioner do
   @moduledoc """
   A deployment provisioner.
 
@@ -53,9 +53,9 @@ defmodule Edgehog.Containers.Deployment.Provisioner do
   For more information, check the `Edgehog.Provisioner` docs.
   """
   use Edgehog.Provisioner,
-    resource: Edgehog.Containers.Deployment,
-    core: Edgehog.Containers.Deployment.Provisioner.Core,
-    audit: Edgehog.Containers.Deployment.Provisioner.Audit
+    resource: Edgehog.Containers.Release.Deployment,
+    core: Edgehog.Containers.Release.Deployment.Provisioner.Core,
+    audit: Edgehog.Containers.Release.Deployment.Provisioner.Audit
 
-  @sup Edgehog.Containers.Deployment.Provisioner.Supervisor
+  @sup Edgehog.Containers.Release.Deployment.Provisioner.Supervisor
 end
