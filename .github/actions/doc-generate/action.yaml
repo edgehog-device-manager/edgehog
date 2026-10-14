@@ -59,6 +59,7 @@ runs:
     - name: Move doc to docs folder
       shell: bash
       run: |
+        mkdir "${{ inputs.docs }}/${{ inputs.version }}" || true
         cp -r "${{ inputs.edgehog }}/backend/doc/"* "${{ inputs.docs }}/${{ inputs.version }}"
     - name: Move version to docs folder
       shell: bash
