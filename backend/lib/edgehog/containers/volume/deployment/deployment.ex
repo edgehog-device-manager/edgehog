@@ -25,7 +25,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Containers.Volume
   alias Edgehog.Containers.Volume.Deployment.Changes

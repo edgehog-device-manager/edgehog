@@ -18,13 +18,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Event do
+defmodule Edgehog.Containers.Release.Deployment.Event do
   @moduledoc false
   use Edgehog.MultitenantResource,
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
-  alias Edgehog.Containers.Deployment.EventType
+  alias Edgehog.Containers.Release.Deployment.EventType
 
   graphql do
     type :deployment_event
@@ -67,7 +67,7 @@ defmodule Edgehog.Containers.Deployment.Event do
   end
 
   relationships do
-    belongs_to :deployment, Edgehog.Containers.Deployment do
+    belongs_to :deployment, Edgehog.Containers.Release.Deployment do
       attribute_type :uuid
       allow_nil? false
     end

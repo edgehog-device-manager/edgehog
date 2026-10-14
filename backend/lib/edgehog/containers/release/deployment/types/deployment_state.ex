@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Edgehog.Containers.Deployment.Types.DeploymentState do
+defmodule Edgehog.Containers.Release.Deployment.Types.DeploymentState do
   @moduledoc false
 
   use Ash.Type.Enum,

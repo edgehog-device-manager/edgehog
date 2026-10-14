@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Types.DeploymentContext do
+defmodule Edgehog.Containers.Release.Deployment.Types.DeploymentContext do
   @moduledoc """
   Deployment context. An auxiliary type to track requests and pending operations on a deployment.
   """

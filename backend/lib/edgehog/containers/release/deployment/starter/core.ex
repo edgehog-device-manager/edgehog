@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Starter.Core do
+defmodule Edgehog.Containers.Release.Deployment.Starter.Core do
   @moduledoc """
   Deployment starter core functions.
 
@@ -27,7 +27,7 @@ defmodule Edgehog.Containers.Deployment.Starter.Core do
   (e.g., read the database, send signals, subscribe to events, etc.).
   """
 
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   require Ash.Query
   require Logger

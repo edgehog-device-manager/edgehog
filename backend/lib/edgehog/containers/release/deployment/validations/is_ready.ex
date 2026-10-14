@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 # SPDX-License-Identifier: Apache-2.0
-defmodule Edgehog.Containers.Deployment.Validations.IsReady do
+defmodule Edgehog.Containers.Release.Deployment.Validations.IsReady do
   @moduledoc false
   use Ash.Resource.Validation
 

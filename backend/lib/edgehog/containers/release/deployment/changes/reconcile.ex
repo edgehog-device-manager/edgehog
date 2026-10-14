@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.Reconcile do
+defmodule Edgehog.Containers.Release.Deployment.Changes.Reconcile do
   @moduledoc """
   Starts a reconciliation with the device.
 

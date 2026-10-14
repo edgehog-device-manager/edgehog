@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Validations.NoConflictingCampaign do
+defmodule Edgehog.Containers.Release.Deployment.Validations.NoConflictingCampaign do
   @moduledoc """
   Validates that a deployment is not part of an in-progress campaign with a different operation type.
   """

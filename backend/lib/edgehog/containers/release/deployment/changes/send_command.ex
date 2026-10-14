@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Changes.SendCommand do
+defmodule Edgehog.Containers.Release.Deployment.Changes.SendCommand do
   @moduledoc """
   A change to send a command to a deployment _after_ the action has been done.
 

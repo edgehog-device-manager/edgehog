@@ -24,7 +24,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateDeploymentSendTest do
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Containers.Deployment.Orchestrator
+  alias Edgehog.Containers.Release.Deployment.Orchestrator
 
   describe "startDeployment mutation tests" do
     test "start on an existing deployment", %{tenant: tenant} do

@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.StarterTest do
+defmodule Edgehog.Containers.Release.Deployment.StarterTest do
   @moduledoc false
 
   use Edgehog.DataCase, async: true
@@ -27,8 +27,8 @@ defmodule Edgehog.Containers.Deployment.StarterTest do
   import Edgehog.DevicesFixtures
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Containers.Deployment.Starter
-  alias Edgehog.Containers.Deployment.Starter.Core
+  alias Edgehog.Containers.Release.Deployment.Starter
+  alias Edgehog.Containers.Release.Deployment.Starter.Core
 
   setup do
     tenant = tenant_fixture()

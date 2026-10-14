@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,7 +29,7 @@ defmodule Edgehog.Containers.DeploymentContainerDeployment do
   end
 
   relationships do
-    belongs_to :deployment, Edgehog.Containers.Deployment do
+    belongs_to :deployment, Edgehog.Containers.Release.Deployment do
       primary_key? true
       allow_nil? false
       attribute_type :uuid

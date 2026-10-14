@@ -28,12 +28,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
   alias Edgehog.Astarte.Device.DeploymentCommand
   alias Edgehog.Containers
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.FileBind
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Network
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Volume
 
   describe "process_event for deployment updates" do

@@ -16,11 +16,11 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Edgehog.Containers.Deployment.Changes.SendDeploymentToDevice do
+defmodule Edgehog.Containers.Release.Deployment.Changes.SendDeploymentToDevice do
   @moduledoc false
   use Ash.Resource.Change
 
-  alias Edgehog.Containers.Deployment.Orchestrator
+  alias Edgehog.Containers.Release.Deployment.Orchestrator
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do

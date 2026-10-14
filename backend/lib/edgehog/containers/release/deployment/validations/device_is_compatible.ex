@@ -16,7 +16,7 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 
-defmodule Edgehog.Containers.Deployment.Validations.DeviceIsCompatible do
+defmodule Edgehog.Containers.Release.Deployment.Validations.DeviceIsCompatible do
   @moduledoc false
   use Ash.Resource.Validation
 

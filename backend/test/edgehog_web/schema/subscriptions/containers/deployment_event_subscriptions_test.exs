@@ -24,7 +24,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.DeploymentEventSubscription
 
   import Edgehog.ContainersFixtures
 
-  alias Edgehog.Containers.Deployment.Event
+  alias Edgehog.Containers.Release.Deployment.Event
 
   describe "DeploymentEvent subscriptions" do
     test "receive data on deployment event creation", %{socket: socket, tenant: tenant} do

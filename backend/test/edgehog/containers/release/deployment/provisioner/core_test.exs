@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Provisioner.CoreTest do
+defmodule Edgehog.Containers.Release.Deployment.Provisioner.CoreTest do
   @moduledoc """
   Tests for the deployment provisioner Core.
   """
@@ -31,7 +31,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.CoreTest do
   alias Edgehog.Astarte.Device.AvailableDeployments
   alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
   alias Edgehog.Astarte.Device.CreateDeploymentRequest
-  alias Edgehog.Containers.Deployment.Provisioner.Core
+  alias Edgehog.Containers.Release.Deployment.Provisioner.Core
 
   describe "Deployment provisioner Core" do
     setup do
@@ -70,7 +70,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.CoreTest do
     test "name/1 returns the via tuple used to register the provisioner", _context do
       assert Core.name(%{id: "deployment-id"}) ==
                {:via, Registry,
-                {Edgehog.Containers.Deployment.Provisioner.Registry, "deployment-id"}}
+                {Edgehog.Containers.Release.Deployment.Provisioner.Registry, "deployment-id"}}
     end
 
     test "send_to_device/2 sends the create request to the device and marks the deployment as sent",
@@ -90,7 +90,7 @@ defmodule Edgehog.Containers.Deployment.Provisioner.CoreTest do
 
       assert :ok == Core.send_to_device(deployment, tenant: tenant)
 
-      updated = Ash.get!(Edgehog.Containers.Deployment, deployment.id, tenant: tenant)
+      updated = Ash.get!(Edgehog.Containers.Release.Deployment, deployment.id, tenant: tenant)
       assert updated.state == :sent
     end
 

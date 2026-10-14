@@ -18,12 +18,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.UpgradeTest do
+defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
   @moduledoc """
   Tests for upgrading a deployment to a newer release.
 
   These tests exercise the upgrade path (`upgrade_release` action) and
-  specifically the `DeploymentReadyAction.create_deployment` action used to
+  specifically the `ReadyAction.create_deployment` action used to
   create the new deployment. The new deployment must be created without
   starting a deployment supervisor inside the upgrade transaction: the
   supervisor is started by an `after_transaction` hook, so it can only read
@@ -35,8 +35,8 @@ defmodule Edgehog.Containers.Deployment.UpgradeTest do
   import Edgehog.ContainersFixtures
   import Edgehog.TenantsFixtures
 
-  alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.DeploymentReadyAction
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.ReadyAction
 
   require Ash.Query
 
@@ -102,7 +102,7 @@ defmodule Edgehog.Containers.Deployment.UpgradeTest do
       # The upgrade ready action is registered for the new deployment and
       # references the deployment it upgrades
       ready_action =
-        DeploymentReadyAction
+        ReadyAction
         |> Ash.Query.filter(action_type == :upgrade_deployment)
         |> Ash.read_one!(tenant: tenant)
 

@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.ProvisionerTest do
+defmodule Edgehog.Containers.Release.Deployment.ProvisionerTest do
   @moduledoc """
   Tests for the deployment provisioner.
   """
@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Deployment.ProvisionerTest do
   alias Edgehog.Astarte.Device.AvailableDeployments.DeploymentStatus
   alias Edgehog.Astarte.Device.CreateDeploymentRequest
   alias Edgehog.Config
-  alias Edgehog.Containers.Deployment.Provisioner
+  alias Edgehog.Containers.Release.Deployment.Provisioner
 
   describe "Deployment provisioner" do
     setup do

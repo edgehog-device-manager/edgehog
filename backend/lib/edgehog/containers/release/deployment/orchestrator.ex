@@ -18,7 +18,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Deployment.Orchestrator do
+defmodule Edgehog.Containers.Release.Deployment.Orchestrator do
   @moduledoc """
   Orchestrator for all provisioner processes of a deployment.
 
@@ -46,14 +46,17 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   use GenServer, restart: :transient
 
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Deployment
-  alias Edgehog.Containers.Deployment.Orchestrator.Core
-  alias Edgehog.Containers.Deployment.Orchestrator.Registry, as: DeploymentOrchestratorRegistry
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.Orchestrator.Core
+
+  alias Edgehog.Containers.Release.Deployment.Orchestrator.Registry,
+    as: DeploymentOrchestratorRegistry
+
   alias Edgehog.Containers.Telemetry
 
   @test Mix.env() == :test
 
-  @sup Edgehog.Containers.Deployment.Orchestrator.Supervisor
+  @sup Edgehog.Containers.Release.Deployment.Orchestrator.Supervisor
 
   # API
 
@@ -61,7 +64,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   Conducts the provisioning of a deployment.
 
   Starts the orchestrator for the given deployment under the
-  `Edgehog.Containers.Deployment.Orchestrator.Supervisor` dynamic supervisor, which
+  `Edgehog.Containers.Release.Deployment.Orchestrator.Supervisor` dynamic supervisor, which
   owns the whole provisioning tree of the deployment (its containers and their
   provisioners).
 
@@ -99,7 +102,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   @doc """
   Returns the registered name for the orchestrator of a deployment.
 
-  It accepts either an entire `%Edgehog.Containers.Deployment{}` resource, or
+  It accepts either an entire `%Edgehog.Containers.Release.Deployment{}` resource, or
   just an ID.
   """
   def name(%Deployment{id: id}), do: {:via, Registry, {DeploymentOrchestratorRegistry, id}}
@@ -109,7 +112,7 @@ defmodule Edgehog.Containers.Deployment.Orchestrator do
   Returns the readiness topic the orchestrator will publish onto when the
   deployment and its children are ready.
 
-  It accepts either an entire %Edgehog.Containers.Deployment{} resource, or just
+  It accepts either an entire %Edgehog.Containers.Release.Deployment{} resource, or just
   an ID.
   """
   def topic(%Deployment{id: id}), do: "deployments:ready:#{id}"

@@ -22,7 +22,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
   import Edgehog.ContainersFixtures
   import Edgehog.DevicesFixtures
 
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   test "deployRelease creates the deployment on the device", %{tenant: tenant} do
     containers = 3
@@ -103,7 +103,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
       AshGraphql.Resource.decode_relay_id(deployment_id)
 
     deployment =
-      Edgehog.Containers.Deployment
+      Edgehog.Containers.Release.Deployment
       |> Ash.get!(decoded_id, tenant: tenant)
       |> Ash.load!([container_deployments: [:file_binds]], tenant: tenant)
 
