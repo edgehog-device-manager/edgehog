@@ -112,7 +112,7 @@ services:
           cat /fga-env/.env
 
   edgehog-backend:
-    image: docker.io/edgehogdevicemanager/edgehog-backend:0.13.1
+    image: docker.io/edgehogdevicemanager/edgehog-backend:0.14.1
     build:
       context: backend
     env_file: .env
@@ -167,7 +167,7 @@ services:
       - "traefik.http.services.edgehog-backend.loadbalancer.server.port=4000"
 
   edgehog-frontend:
-    image: docker.io/edgehogdevicemanager/edgehog-frontend:0.13.1
+    image: docker.io/edgehogdevicemanager/edgehog-frontend:0.14.1
     build:
       context: frontend
     environment:
