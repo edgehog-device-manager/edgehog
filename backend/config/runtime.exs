@@ -164,7 +164,7 @@ if config_env() in [:prod, :test] do
           asset_host_path
 
       %{
-        scheme: s3.scheme,
+        scheme: uri.scheme || s3.scheme,
         host: uri.host || "localhost",
         port: port,
         public_path_prefix: public_path_prefix

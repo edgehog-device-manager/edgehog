@@ -19,24 +19,30 @@
 
 name: Edgehog docs generation
 
-# publish Generate and publish docs on pushes on main (or release branches) only
-# when backend or frontend files are touched.
 on:
-  workflow_call:
+  push:
+    branches:
+      - main
+      - "release-*"
+      - "!release-please*"
+  pull_request:
+    paths:
+      - "backend/docs/**"
+      - ".tool-versions"
+      - ".github/workflows/docs-ci.yaml"
+      - ".github/actions/doc-generate/**"
+      - "tools/gen-docs-versions.sh"
+  workflow_dispatch:
     inputs:
-      release-made:
-        required: true
-        type: boolean
-      release-version:
+      ref:
+        description: "Branch or tag to build docs from (e.g. main, release-0.14, v0.14.0). Defaults to `main`"
+        required: false
+        default: "main"
         type: string
-      publish:
-        type: boolean
-        default: true
-    secrets:
-      token:
-        required: false
-      EDGEHOG_APP_PRIVATE_KEY:
-        required: false
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 defaults:
   run:
@@ -58,12 +64,36 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
+      - name: Determine docs version and publish
+        id: docs-target
+        run: |
+          ref="${{ inputs.ref || github.ref_name }}"
+          if [[ "${{ github.event_name }}" == "pull_request" || "$ref" == "main" ]]; then
+            version="snapshot"
+          else
+            version="$ref"
+            version="${version#release-}"
+            version="${version#v}"
+            if [[ "$version" =~ ^([0-9]+\.[0-9]+) ]]; then
+              version="${BASH_REMATCH[1]}"
+            fi
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          publish="false"
+          if [[ "${{ github.repository_owner }}" == "edgehog-device-manager"
+            && "${{ github.event_name }}" =~ ^(push|workflow_dispatch)$
+            && "$version" =~ ^(snapshot|[0-9]+\.[0-9]+)$ ]]; then
+            publish="true"
+          fi
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
       - name: Checkout the source
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           path: edgehog
           show-progress: false
           fetch-tags: true
+          ref: ${{ inputs.ref || github.ref }}
       - name: Checkout the docs repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -80,34 +110,30 @@ jobs:
           fetch-depth: 1
       - name: Generate App token for docs push
         id: app-token
-        if: ${{ inputs.publish }}
+        if: ${{ steps.docs-target.outputs.publish == 'true' }}
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ vars.EDGEHOG_APP_APP_ID }}
           private-key: ${{ secrets.EDGEHOG_APP_PRIVATE_KEY }}
           owner: edgehog-device-manager
           repositories: docs
-      - name: Compute docs version
-        id: compute-version
-        run: |
-          echo "version=${{ inputs.release-made && inputs.release-version || 'snapshot' }}" >> "$GITHUB_OUTPUT"
       - uses: ./edgehog/.github/actions/doc-generate
         with:
           edgehog: edgehog
           docs: docs
           astarte-interfaces: edgehog-astarte-interfaces
-          version: ${{ steps.compute-version.outputs.version }}
+          version: ${{ steps.docs-target.outputs.version }}
 
       - name: Commit files
-        if: ${{ inputs.publish }}
+        if: ${{ steps.docs-target.outputs.publish == 'true' }}
         working-directory: docs
         run: |
           git config --local user.email "${{ steps.app-token.outputs.app-slug }}[bot]@users.noreply.github.com"
           git config --local user.name "${{ steps.app-token.outputs.app-slug }}[bot]"
           git add .
-          git commit -m "Update Documentation"
+          git diff --cached --quiet || git commit -m "Update Documentation"
       - name: Push changes
-        if: ${{ inputs.publish }}
+        if: ${{ steps.docs-target.outputs.publish == 'true' }}
         working-directory: docs
         run: |
           # Clear checkout extraheader/includeIf and staple global url rewrites that would shadow the App token
