@@ -143,7 +143,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
     with {:ok, %{get_url: url}} <- FileBindStorage.read_presigned_url(file_path) do
       params =
         %{
-          url: url,
+          url: URI.to_string(url),
           file_name: file_bind.file_name,
           uncompressed_file_size_bytes: file_bind.uncompressed_file_size_bytes,
           digest: file_bind.digest,
