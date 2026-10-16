@@ -35,7 +35,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
   alias Edgehog.Campaigns.CampaignTarget
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
   alias Phoenix.Socket.Broadcast

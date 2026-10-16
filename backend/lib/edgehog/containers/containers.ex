@@ -26,13 +26,13 @@ defmodule Edgehog.Containers do
 
   alias Edgehog.Containers.Application
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeploymentContainerDeployment
-  alias Edgehog.Containers.DeploymentReadyAction
-  alias Edgehog.Containers.DeploymentReadyAction.Upgrade
   alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
+  alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Release.Deployment.ReadyAction
+  alias Edgehog.Containers.Release.Deployment.ReadyAction.Upgrade
   alias Edgehog.Containers.Volume
 
   authorization do
@@ -299,7 +299,7 @@ defmodule Edgehog.Containers do
       define :mark_deployment_as_timed_out, action: :mark_as_timed_out
     end
 
-    resource Edgehog.Containers.Deployment.Event
+    resource Edgehog.Containers.Release.Deployment.Event
 
     resource Edgehog.Containers.Image do
       define :fetch_image, action: :read, get_by: [:id]
@@ -405,7 +405,7 @@ defmodule Edgehog.Containers do
 
     resource DeploymentContainerDeployment
 
-    resource DeploymentReadyAction
+    resource ReadyAction
     resource Upgrade
 
     resource Edgehog.Containers.ContainerNetwork do
@@ -420,7 +420,7 @@ defmodule Edgehog.Containers do
         args: [:volume_id]
     end
 
-    resource DeploymentReadyAction do
+    resource ReadyAction do
       define :run_ready_action, action: :run
     end
 

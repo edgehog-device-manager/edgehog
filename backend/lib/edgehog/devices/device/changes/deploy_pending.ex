@@ -25,7 +25,7 @@ defmodule Edgehog.Devices.Device.Changes.DeployPending do
   """
   use Ash.Resource.Change
 
-  alias Edgehog.Containers.Deployment.Starter
+  alias Edgehog.Containers.Release.Deployment.Starter
 
   @cook_module Application.compile_env(:edgehog, :container_starter, Starter)
 

@@ -369,7 +369,7 @@ defmodule Edgehog.Campaigns.CampaignTarget do
       attribute_public? false
     end
 
-    belongs_to :deployment, Edgehog.Containers.Deployment do
+    belongs_to :deployment, Edgehog.Containers.Release.Deployment do
       public? true
       attribute_public? false
       attribute_type :uuid

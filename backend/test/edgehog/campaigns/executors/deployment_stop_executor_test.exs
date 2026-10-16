@@ -34,7 +34,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentStop
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentStop.Executor
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   setup do
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->

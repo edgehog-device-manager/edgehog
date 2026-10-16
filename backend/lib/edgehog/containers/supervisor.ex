@@ -37,8 +37,8 @@ defmodule Edgehog.Containers.Supervisor do
   def init(_args) do
     children = [
       # Registries
-      {Registry, keys: :unique, name: Containers.Deployment.Orchestrator.Registry},
-      {Registry, keys: :unique, name: Containers.Deployment.Provisioner.Registry},
+      {Registry, keys: :unique, name: Containers.Release.Deployment.Orchestrator.Registry},
+      {Registry, keys: :unique, name: Containers.Release.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Containers.Container.Deployment.Orchestrator.Registry},
       {Registry, keys: :unique, name: Containers.Container.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Containers.Image.Deployment.Provisioner.Registry},
@@ -48,17 +48,17 @@ defmodule Edgehog.Containers.Supervisor do
       {Registry, keys: :unique, name: Containers.DeviceRequest.Deployment.Provisioner.Registry},
       {Registry, keys: :unique, name: Containers.FileBind.Provisioner.Registry},
       {Registry, keys: :unique, name: Containers.EnvFile.Provisioner.Registry},
-      {Registry, keys: :unique, name: Containers.Deployment.Starter.Registry},
+      {Registry, keys: :unique, name: Containers.Release.Deployment.Starter.Registry},
 
       # Supervisors
       {DynamicSupervisor,
-       name: Containers.Deployment.Orchestrator.Supervisor, strategy: :one_for_one},
+       name: Containers.Release.Deployment.Orchestrator.Supervisor, strategy: :one_for_one},
       {DynamicSupervisor,
        name: Containers.Container.Deployment.Orchestrator.Supervisor, strategy: :one_for_one},
 
       # Provisioners supervisors
       {DynamicSupervisor,
-       name: Containers.Deployment.Provisioner.Supervisor, strategy: :one_for_one},
+       name: Containers.Release.Deployment.Provisioner.Supervisor, strategy: :one_for_one},
       {DynamicSupervisor,
        name: Containers.Container.Provisioner.Supervisor, strategy: :one_for_one},
       {DynamicSupervisor, name: Containers.Image.Provisioner.Supervisor, strategy: :one_for_one},
@@ -75,7 +75,8 @@ defmodule Edgehog.Containers.Supervisor do
        name: Containers.EnvFile.Provisioner.Supervisor, strategy: :one_for_one},
 
       # Starter supervisor
-      {DynamicSupervisor, name: Containers.Deployment.Starter.Supervisor, strategy: :one_for_one}
+      {DynamicSupervisor,
+       name: Containers.Release.Deployment.Starter.Supervisor, strategy: :one_for_one}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)

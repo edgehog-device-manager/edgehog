@@ -30,7 +30,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
   import Edgehog.TelemetryCapture
 
   alias Ecto.Adapters.SQL.Sandbox
-  alias Edgehog.Containers.Deployment.Provisioner
+  alias Edgehog.Containers.Release.Deployment.Provisioner
   alias Edgehog.Containers.Telemetry
 
   @moduletag :telemetry
@@ -60,7 +60,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       {measurements, metadata} = assert_receive_event(Telemetry.provisioning_start_event())
 
       assert measurements.count == 1
-      assert metadata.resource_type == "deployment"
+      assert metadata.resource_type == "release_deployment"
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
@@ -79,7 +79,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       assert metadata.duration_unit == :native
       assert metadata.result == :ok
       assert metadata.reason == :already_ready
-      assert metadata.resource_type == "deployment"
+      assert metadata.resource_type == "release_deployment"
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
@@ -109,7 +109,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
 
       {_measurements, metadata} = assert_receive_event(Telemetry.provisioning_start_event())
 
-      assert metadata.resource_type == "deployment"
+      assert metadata.resource_type == "release_deployment"
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id
@@ -126,7 +126,7 @@ defmodule Edgehog.Containers.Telemetry.ProvisioningTest do
       assert metadata.duration_unit == :native
       assert metadata.result == :error
       assert metadata.reason == :device_offline
-      assert metadata.resource_type == "deployment"
+      assert metadata.resource_type == "release_deployment"
       assert metadata.resource_id == deployment.id
       assert metadata.deployment_id == deployment.id
       assert metadata.device_id == deployment.device_id

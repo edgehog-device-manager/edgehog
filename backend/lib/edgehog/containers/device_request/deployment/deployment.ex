@@ -25,9 +25,9 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
-  alias Edgehog.Containers.Deployment
   alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.DeviceRequest.Deployment.Changes
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
 

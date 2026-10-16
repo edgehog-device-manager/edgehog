@@ -50,7 +50,7 @@ defmodule Edgehog.Containers.Telemetry do
   """
 
   alias Edgehog.Config
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   @provisioning_start [:edgehog, :containers, :provisioning, :start]
   @provisioning_stop [:edgehog, :containers, :provisioning, :stop]

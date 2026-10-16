@@ -31,7 +31,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   alias Edgehog.Campaigns.CampaignMechanism.Core.Any
   alias Edgehog.Campaigns.CampaignMechanism.Helpers
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   require Ash.Query
   require Logger

@@ -38,7 +38,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentUpgrade.Executor
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   setup do
     # Stub the deployment request mock (for upgrade/deploy operation)

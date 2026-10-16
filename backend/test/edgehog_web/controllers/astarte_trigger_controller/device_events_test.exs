@@ -25,8 +25,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeviceEventsTest do
   import Edgehog.DevicesFixtures
 
   alias Edgehog.Astarte.Device.DeviceStatus
-  alias Edgehog.Containers.Deployment.Starter
   alias Edgehog.Containers.Reconciler
+  alias Edgehog.Containers.Release.Deployment.Starter
   alias Edgehog.Devices.Device
 
   describe "process_event for device events" do

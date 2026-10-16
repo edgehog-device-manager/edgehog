@@ -35,7 +35,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentDeploy.Executor
   alias Edgehog.Containers
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
 

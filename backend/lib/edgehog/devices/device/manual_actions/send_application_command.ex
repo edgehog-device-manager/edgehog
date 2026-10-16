@@ -24,7 +24,7 @@ defmodule Edgehog.Devices.Device.ManualActions.SendApplicationCommand do
 
   alias Edgehog.Astarte.Device.DeploymentCommand
   alias Edgehog.Astarte.Device.DeploymentCommand.RequestData
-  alias Edgehog.Containers.Deployment
+  alias Edgehog.Containers.Release.Deployment
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, _context) do
