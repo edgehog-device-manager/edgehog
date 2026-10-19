@@ -22,12 +22,12 @@ defmodule Edgehog.Containers.Types.Image do
   @moduledoc """
   Input type representing an image.
 
-  When `image_credentials_id` is not provided, it defaults to `nil`
-  (rather than being omitted). The `Container` `:create_and_relate` action
-  looks images up through the `:reference_credentials` identity, and Ash
-  only attempts that lookup when every identity key is present in the
-  input. Absent keys silently create a duplicate image instead of
-  relating the existing one.
+  When optional segment fields or `image_credentials_id` are not provided, they
+  default to `nil` (rather than being omitted). The `Container`
+  `:create_and_relate` and `:update` actions look images up through the
+  `:reference_credentials` identity, and Ash only attempts that lookup when
+  every identity key is present in the input. Absent keys silently create a
+  duplicate image instead of relating the existing one.
   """
 
   use AshGraphql.Type
@@ -36,10 +36,12 @@ defmodule Edgehog.Containers.Types.Image do
     subtype_of: :map,
     constraints: [
       fields: [
-        reference: [
-          type: :string,
-          allow_nil?: false
-        ],
+        registry_host: [type: :string],
+        registry_port: [type: :integer],
+        repository: [type: :string],
+        image: [type: :string, allow_nil?: false],
+        tag: [type: :string],
+        digest: [type: :string],
         image_credentials_id: [
           type: :uuid,
           allow_nil?: true
@@ -51,12 +53,21 @@ defmodule Edgehog.Containers.Types.Image do
       ]
     ]
 
+  @optional_fields [
+    :registry_host,
+    :registry_port,
+    :repository,
+    :tag,
+    :digest,
+    :image_credentials_id
+  ]
+
   @impl Ash.Type
   def apply_constraints(%{} = value, constraints) do
     value =
-      if Map.has_key?(value, :image_credentials_id),
-        do: value,
-        else: Map.put(value, :image_credentials_id, nil)
+      Enum.reduce(@optional_fields, value, fn field, acc ->
+        Map.put_new(acc, field, nil)
+      end)
 
     super(value, constraints)
   end

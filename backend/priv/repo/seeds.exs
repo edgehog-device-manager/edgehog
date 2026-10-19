@@ -207,9 +207,9 @@ create_device_mapping = fn attrs ->
   Ash.create!(DeviceMapping, attrs, tenant: tenant)
 end
 
-nginx_image = create_image.(%{reference: "nginx:latest"})
-httpd_image = create_image.(%{reference: "httpd:latest"})
-redis_image = create_image.(%{reference: "redis:7"})
+nginx_image = create_image.(%{image: "nginx", tag: "latest"})
+httpd_image = create_image.(%{image: "httpd", tag: "latest"})
+redis_image = create_image.(%{image: "redis", tag: "7"})
 
 app_nginx_container =
   create_container.(%{
@@ -293,7 +293,10 @@ self_hosted_credentials =
 self_hosted_image =
   create_image.(%{
     image_credentials_id: self_hosted_credentials.id,
-    reference: "registry.edgehog.localhost/test/http-echo:latest"
+    registry_host: "registry.edgehog.localhost",
+    repository: "test",
+    image: "http-echo",
+    tag: "latest"
   })
 
 self_hosted_container =
@@ -328,7 +331,8 @@ image_credentials =
 credentials_image =
   create_image.(%{
     image_credentials_id: image_credentials.id,
-    reference: "httpd:latest"
+    image: "httpd",
+    tag: "latest"
   })
 
 credentials_container =

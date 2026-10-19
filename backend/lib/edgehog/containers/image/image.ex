@@ -29,6 +29,12 @@ defmodule Edgehog.Containers.Image do
   alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Validations
 
+  # NOTE: regexes from docker ref
+  # https://pkg.go.dev/github.com/distribution/reference#pkg-overview
+  # The digest regex is scoped to sha256.
+  @digest_regex ~r/^sha256:[0-9a-fA-F]{32,}$/
+  @tag_regex ~r/^[\w][\w.-]{0,127}$/
+
   graphql do
     type :image
 
@@ -48,17 +54,45 @@ defmodule Edgehog.Containers.Image do
 
     create :create do
       primary? true
-      accept [:reference, :image_credentials_id, :pull_policy]
+
+      accept [
+        :registry_host,
+        :registry_port,
+        :repository,
+        :image,
+        :tag,
+        :digest,
+        :pull_policy,
+        :image_credentials_id
+      ]
 
       validate {Validations.UniquePlainResource,
-                keys: [:reference, :image_credentials_id, :pull_policy],
+                keys: [
+                  :image_credentials_id,
+                  :registry_host,
+                  :registry_port,
+                  :repository,
+                  :image,
+                  :tag,
+                  :pull_policy,
+                  :digest
+                ],
                 read_action: :plain_images,
-                field: :reference,
+                field: :image,
                 nils_distinct?: false}
     end
 
     create :copy do
-      accept [:reference, :image_credentials_id, :pull_policy]
+      accept [
+        :registry_host,
+        :registry_port,
+        :repository,
+        :image,
+        :tag,
+        :digest,
+        :pull_policy,
+        :image_credentials_id
+      ]
 
       argument :id, :uuid
 
@@ -83,11 +117,53 @@ defmodule Edgehog.Containers.Image do
     end
   end
 
+  validations do
+    validate present([:tag, :digest], at_most: 1),
+      message: "You can either set a tag or the image digest, not both."
+
+    validate match(:tag, @tag_regex),
+      where: [present(:tag)],
+      message: "Image tag does not match a valid image tag."
+
+    validate match(:digest, @digest_regex),
+      where: [present(:digest)],
+      message: "Image digest does not match a valid image digest."
+
+    validate present(:registry_host),
+      where: [present(:registry_port)],
+      message: "must be present when registry_port is set"
+  end
+
+  preparations do
+    prepare build(load: [:reference])
+  end
+
   attributes do
     uuid_primary_key :id
 
-    attribute :reference, :string do
+    attribute :registry_host, :string do
+      public? true
+    end
+
+    attribute :registry_port, :integer do
+      public? true
+      constraints min: 1, max: 65_535
+    end
+
+    attribute :repository, :string do
+      public? true
+    end
+
+    attribute :image, :string do
       allow_nil? false
+      public? true
+    end
+
+    attribute :tag, :string do
+      public? true
+    end
+
+    attribute :digest, :string do
       public? true
     end
 
@@ -123,15 +199,33 @@ defmodule Edgehog.Containers.Image do
   end
 
   calculations do
+    calculate :reference, :string, Image.Calculations.Reference do
+      allow_nil? false
+      public? true
+    end
+
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   identities do
-    identity :reference_credentials, [:reference, :image_credentials_id] do
+    identity :reference_credentials,
+             [
+               :registry_host,
+               :registry_port,
+               :repository,
+               :image,
+               :tag,
+               :digest,
+               :image_credentials_id
+             ] do
       nils_distinct? false
     end
+  end
+
+  changes do
+    change load([:reference]), on: [:create]
   end
 
   postgres do

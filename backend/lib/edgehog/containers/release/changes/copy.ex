@@ -109,7 +109,15 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
        ) do
     image_input =
       container.image
-      |> Map.from_struct()
+      |> Map.take([
+        :registry_host,
+        :registry_port,
+        :repository,
+        :image,
+        :tag,
+        :digest,
+        :image_credentials_id
+      ])
       |> Map.put(:id, Map.fetch!(image_id_map, container.image.id))
 
     volumes_inputs =
