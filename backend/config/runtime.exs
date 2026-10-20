@@ -163,8 +163,13 @@ if config_env() in [:prod, :test] do
           System.get_env("S3_PATH_PREFIX") ||
           asset_host_path
 
+      scheme =
+        if uri.scheme,
+          do: uri.scheme <> "://",
+          else: s3.scheme
+
       %{
-        scheme: uri.scheme || s3.scheme,
+        scheme: scheme,
         host: uri.host || "localhost",
         port: port,
         public_path_prefix: public_path_prefix
