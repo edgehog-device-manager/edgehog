@@ -813,6 +813,17 @@ defmodule Edgehog.Devices.Device do
 
     publish_all "offline_create", :create, ["offline", :id], filter: &offline_filter/1
     publish "offline_update", :from_device_status, ["offline", :id], filter: &offline_filter/1
+
+    publish "name_update", :update, ["name", :id]
+    publish "connected_event", :from_device_connected_event, ["connection", :id]
+    publish "disconnected_event", :from_device_disconnected_event, ["connection", :id]
+    publish "connection_update", :from_device_status, ["connection", :id]
+    publish "tags_added", :add_tags, ["tags", :id]
+    publish "tags_removed", :remove_tags, ["tags", :id]
+
+    publish :create, ["tenant", :tenant_id]
+    publish :from_device_registered_event, ["tenant", :tenant_id]
+    publish_all :destroy, ["tenant", :tenant_id]
   end
 
   defp online_filter(inp) do
