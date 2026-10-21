@@ -11,12 +11,15 @@
     :ecto,
     :ecto_sql,
     :phoenix,
+    :phoenix_live_view,
+    :ash_phoenix,
+    :cinder,
     :absinthe,
     :skogsra,
     :nimble_parsec
   ],
-  plugins: [Spark.Formatter],
-  inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs}"],
+  plugins: [Spark.Formatter, Phoenix.LiveView.HTMLFormatter],
+  inputs: ["*.{ex,exs}", "priv/*/seeds.exs", "{config,lib,test}/**/*.{ex,exs,heex}"],
   subdirectories: ["priv/*/migrations"],
   locals_without_parens: [
     assert_created: 3,

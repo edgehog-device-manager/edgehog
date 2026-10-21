@@ -46,3 +46,7 @@ edgehog-*.tar
 /priv/googleapis/
 /priv/grpc-gateway/
 /priv/protoc-gen-validate/
+
+# Built frontend assets
+/priv/static/assets/
+/priv/static/cache_manifest.json

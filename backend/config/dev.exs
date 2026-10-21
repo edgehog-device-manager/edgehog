@@ -94,7 +94,12 @@ config :edgehog, EdgehogWeb.Endpoint,
   code_reloader: true,
   debug_errors: true,
   secret_key_base: "uEb3NXr0KodsrjUUUo98VBEExFFAolxlfOW7ZzP/OGgd1R2pDhwMddZXjvUp/3MW",
-  watchers: []
+  watchers: [
+    esbuild: {Esbuild, :install_and_run, [:edgehog, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:edgehog, ~w(--watch)]}
+  ]
+
+config :edgehog, dev_routes: true
 
 # ## SSL Support
 #

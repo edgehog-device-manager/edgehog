@@ -1,0 +1,122 @@
+/* This file is for your main application CSS */
+@import "tailwindcss" source(none);
+@source "../css";
+@source "../js";
+@source "../../lib/edgehog_web";
+@source "../../deps/cinder/lib";
+
+@plugin "../vendor/heroicons";
+@plugin "../vendor/daisyui" {
+  themes: false;
+}
+
+/* Edgehog Default Light Theme (Industrial Precision Slate + Cobalt) */
+@plugin "../vendor/daisyui-theme" {
+  name: "light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(99% 0.003 255);
+  --color-base-200: oklch(95.5% 0.007 255);
+  --color-base-300: oklch(88% 0.014 255);
+  --color-base-content: oklch(19% 0.024 255);
+  --color-primary: oklch(48% 0.165 252);
+  --color-primary-content: oklch(98.5% 0.005 252);
+  --color-secondary: oklch(34% 0.045 255);
+  --color-secondary-content: oklch(98% 0.005 255);
+  --color-accent: oklch(56% 0.145 215);
+  --color-accent-content: oklch(98.5% 0.005 215);
+  --color-neutral: oklch(24% 0.028 255);
+  --color-neutral-content: oklch(97% 0.006 255);
+  --color-info: oklch(55% 0.145 240);
+  --color-info-content: oklch(98% 0.005 240);
+  --color-success: oklch(54% 0.155 152);
+  --color-success-content: oklch(98.5% 0.006 152);
+  --color-warning: oklch(64% 0.155 68);
+  --color-warning-content: oklch(18% 0.03 68);
+  --color-error: oklch(54% 0.185 26);
+  --color-error-content: oklch(98.5% 0.006 26);
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+/* Edgehog Default Dark Theme (High-Contrast Carbon Slate + Luminous Cobalt) */
+@plugin "../vendor/daisyui-theme" {
+  name: "dark";
+  default: false;
+  prefersdark: true;
+  color-scheme: "dark";
+  --color-base-100: oklch(22% 0.022 255);
+  --color-base-200: oklch(13.5% 0.018 255);
+  --color-base-300: oklch(36% 0.032 255);
+  --color-base-content: oklch(96% 0.008 255);
+  --color-primary: oklch(66% 0.17 250);
+  --color-primary-content: oklch(14% 0.024 252);
+  --color-secondary: oklch(34% 0.04 255);
+  --color-secondary-content: oklch(96% 0.008 255);
+  --color-accent: oklch(70% 0.145 210);
+  --color-accent-content: oklch(14% 0.025 210);
+  --color-neutral: oklch(28% 0.026 255);
+  --color-neutral-content: oklch(96% 0.008 255);
+  --color-info: oklch(68% 0.145 240);
+  --color-info-content: oklch(14% 0.025 240);
+  --color-success: oklch(70% 0.16 152);
+  --color-success-content: oklch(14% 0.025 152);
+  --color-warning: oklch(77% 0.155 72);
+  --color-warning-content: oklch(15% 0.03 72);
+  --color-error: oklch(67% 0.185 25);
+  --color-error-content: oklch(14% 0.025 25);
+  --radius-selector: 0.375rem;
+  --radius-field: 0.375rem;
+  --radius-box: 0.5rem;
+  --size-selector: 0.21875rem;
+  --size-field: 0.21875rem;
+  --border: 1px;
+  --depth: 1;
+  --noise: 0;
+}
+
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
+/* Customer white-label palette overrides injected on :root */
+:root[data-theme="light"],
+:root:not([data-theme="dark"]) {
+  --color-primary: var(--eh-brand-primary-light, oklch(48% 0.165 252));
+  --color-primary-content: var(--eh-brand-primary-content-light, oklch(98.5% 0.005 252));
+  --color-accent: var(--eh-brand-accent-light, oklch(56% 0.145 215));
+}
+
+:root[data-theme="dark"] {
+  --color-primary: var(--eh-brand-primary-dark, oklch(66% 0.17 250));
+  --color-primary-content: var(--eh-brand-primary-content-dark, oklch(14% 0.024 252));
+  --color-accent: var(--eh-brand-accent-dark, oklch(70% 0.145 210));
+}
+
+/* Ensure card borders, form fields, and table dividers use crisp base-300 borders */
+.card-border {
+  border-color: var(--color-base-300);
+}
+
+.input,
+.textarea,
+.select {
+  --input-color: var(--color-base-300);
+}
+
+.table :where(thead tr, tbody tr:not(:last-child)) {
+  border-bottom-color: var(--color-base-300);
+}
+
+/* LiveView loading state variants */
+@custom-variant phx-click-loading (.phx-click-loading&, .phx-click-loading &);
+@custom-variant phx-submit-loading (.phx-submit-loading&, .phx-submit-loading &);
+@custom-variant phx-change-loading (.phx-change-loading&, .phx-change-loading &);
+
+/* Make LiveView wrapper divs transparent for layout */
+[data-phx-session], [data-phx-teleported-src] { display: contents }
