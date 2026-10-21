@@ -1,0 +1,57 @@
+<div class="min-h-screen flex flex-col bg-base-200 text-base-content">
+  <% branding = Branding.current() %>
+  <header
+    :if={assigns[:current_tenant]}
+    class="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 backdrop-blur"
+  >
+    <div class="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8 gap-4">
+      <div class="flex items-center gap-6">
+        <a
+          href={"/tenants/#{@current_tenant.slug}/devices"}
+          class="flex items-center gap-2.5 text-sm font-semibold text-base-content"
+        >
+          <img src={branding.logo_url} alt={branding.app_name} class="h-6 w-6 object-contain" />
+          <span>{branding.app_name}</span>
+        </a>
+
+        <nav class="hidden md:flex items-center gap-1" aria-label={gettext("Main navigation")}>
+          <a
+            href={"/tenants/#{@current_tenant.slug}/devices"}
+            class="btn btn-sm btn-soft btn-primary gap-1.5"
+          >
+            <.icon name="hero-cpu-chip" class="size-4" />
+            <span>{gettext("Devices")}</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <.live_component
+          module={EdgehogWeb.ThemeSelectorComponent}
+          id="navbar-theme-selector"
+        />
+
+        <div class="hidden sm:flex badge badge-lg border-base-300 bg-base-200/70 gap-2 text-xs">
+          <span class="status status-success" />
+          <span class="font-medium text-base-content">{@current_tenant.name}</span>
+          <span class="font-mono text-base-content/55">{@current_tenant.slug}</span>
+        </div>
+
+        <form action="/session" method="post" class="inline">
+          <input type="hidden" name="_method" value="delete" />
+          <input type="hidden" name="_csrf_token" value={Phoenix.Controller.get_csrf_token()} />
+          <button type="submit" class="btn btn-sm btn-outline border-base-300 gap-1.5">
+            <.icon name="hero-arrow-right-start-on-rectangle" class="size-3.5" />
+            <span>{gettext("Sign out")}</span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </header>
+
+  <.flash_group flash={@flash} />
+
+  <main class="flex-1">
+    {@inner_content}
+  </main>
+</div>
