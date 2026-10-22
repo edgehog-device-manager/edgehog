@@ -1740,7 +1740,94 @@ input ApplicationCreateInitialReleaseInput {
 }
 
 input ReleaseCreateContainersInput {
+  autoRemove: Boolean
+  binds: [String!]
+  blkioDeviceReadBpsPath: [String!]
+  blkioDeviceReadBpsRate: [Int!]
+  blkioDeviceReadIopsPath: [String!]
+  blkioDeviceReadIopsRate: [Int!]
+  blkioDeviceWriteBpsPath: [String!]
+  blkioDeviceWriteBpsRate: [Int!]
+  blkioDeviceWriteIopsPath: [String!]
+  blkioDeviceWriteIopsRate: [Int!]
+  blkioWeight: Int
+  blkioWeightDevicePath: [String!]
+  blkioWeightDeviceWeight: [Int!]
+  capAdd: [String!]
+  capDrop: [String!]
+  cgroupsMode: String
+  command: [String!]
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  cpuShares: Int
+  cpusetCpus: String
+  dependsOn: [String!]
+  deviceCgroupRules: [String!]
+  deviceMappings: [DeviceMappingDescInput!]
+  deviceRequests: [DeviceRequestDescInput!]
+  dns: [String!]
+  dnsOptions: [String!]
+  dnsSearch: [String!]
+  domainname: String
+  entrypoint: [String!]
+  env: [ContainerEnvVarInput!]
+  exposedPorts: [String!]
+  extraHosts: [String!]
+  fileMounts: [FileMountDescInput!]
+  groupAdd: [String!]
+  healthcheckInterval: Int
+  healthcheckRetries: Int
+  healthcheckStartInterval: Int
+  healthcheckStartPeriod: Int
+  healthcheckTest: [String!]
+  healthcheckTimeout: Int
+  hostname: String
   id: ID
+  image: ImageDescInput
+  ipcMode: String
+  labelKeys: [String!]
+  labelValues: [String!]
+  logConfigKeys: [String!]
+  logConfigValues: [String!]
+  logType: String
+  maskedPaths: [String!]
+  memory: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
+  name: String
+  networkDisabled: Boolean
+  networkMode: String
+  networks: [NetworkDescInput!]
+  oomScoreAdjustment: Int
+  pidMode: String
+  portBindings: [String!]
+  privileged: Boolean
+  readOnlyRootfs: Boolean
+  readonlyPaths: [String!]
+  restartPolicy: String
+  restartPolicyMaximumRetryCount: Int
+  runtime: String
+  securityopt: [String!]
+  shmSize: Int
+  stopSignal: String
+  stopTimeout: Int
+  storageOptKeys: [String!]
+  storageOptValues: [String!]
+  sysctlsKeys: [String!]
+  sysctlsValues: [String!]
+  tmpfsOptions: [String!]
+  tmpfsPaths: [String!]
+  ulimitsHard: [Int!]
+  ulimitsName: [String!]
+  ulimitsSoft: [Int!]
+  user: String
+  usernsMode: String
+  volumeDriver: String
+  volumes: [VolumeDescInput!]
+  workingDirectory: String
 }
 
 input ReleaseCreateContainerDependenciesInput {
@@ -5190,6 +5277,7 @@ input CreateContainerInput {
   fileMounts: [FileMountDescInput!]
   deviceMappings: [DeviceMappingDescInput!]
   deviceRequests: [DeviceRequestDescInput!]
+  dependsOn: [String!]
 }
 
 enum ContainerSortField {

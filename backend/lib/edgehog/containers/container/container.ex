@@ -151,6 +151,7 @@ defmodule Edgehog.Containers.Container do
       argument :file_mounts, {:array, Types.FileMount}
       argument :device_mappings, {:array, Types.DeviceMapping}
       argument :device_requests, {:array, Types.DeviceRequest}
+      argument :depends_on, {:array, :string}
 
       change manage_relationship(:volumes,
                on_no_match: :error,
@@ -631,10 +632,6 @@ defmodule Edgehog.Containers.Container do
 
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
-  end
-
-  identities do
-    identity :name, [:name]
   end
 
   postgres do
