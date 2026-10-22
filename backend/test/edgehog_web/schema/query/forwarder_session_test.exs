@@ -25,8 +25,17 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
 
   alias Edgehog.Astarte.Device.ForwarderSession
   alias Edgehog.Astarte.Device.ForwarderSession
+  alias Edgehog.Forwarder.Guardian
 
   describe "forwarderSession query" do
+    setup do
+      stub(Edgehog.Config, :forwarder_secret_key_base!, fn ->
+        "secret"
+      end)
+
+      :ok
+    end
+
     test "returns the forwarder session", %{tenant: tenant} do
       device = device_fixture(online: true, tenant: tenant)
       device_id = device.device_id
@@ -52,11 +61,13 @@ defmodule EdgehogWeb.Schema.Query.ForwarderSessionTest do
         )
 
       assert %{
-               "token" => "session_token",
+               "token" => jwt,
                "status" => "CONNECTED",
                "forwarderHostname" => "localhost",
                "forwarderPort" => 4001
              } = extract_result!(result)
+
+      assert {:ok, _claims} = Guardian.decode_and_verify(jwt)
     end
 
     test "returns null if the session does not exist", %{tenant: tenant} do

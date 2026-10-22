@@ -28,6 +28,10 @@ if System.get_env("PHX_SERVER") && System.get_env("RELEASE_NAME") do
   config :edgehog, EdgehogWeb.Endpoint, server: true
 end
 
+config :edgehog, Edgehog.Forwarder.Guardian,
+  issuer: "edgehog",
+  secret_key: {Edgehog.Config, :forwarder_secret_key_base!, []}
+
 # We need s3 storage configuration both in production and in integration tests
 if config_env() in [:prod, :test] do
   # TODO: while you can use access key + secret key with S3-compatible storages,

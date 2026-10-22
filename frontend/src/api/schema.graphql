@@ -10885,8 +10885,15 @@ type RootQueryType {
   """
   forwarderConfig: ForwarderConfig
 
-  "Fetches a forwarder session by its token and the device ID."
-  forwarderSession(token: String!, deviceId: ID!): ForwarderSession
+  "Fetches a forwarder session by its token and the device ID. Returns the authorized"
+  forwarderSession(
+    token: String!
+    protocol: String
+    host: String
+    port: Int
+    insecureTlsConfig: Boolean
+    deviceId: ID!
+  ): ForwarderSession
 
   "Returns a single repository."
   repository("The id of the record" id: ID!): Repository

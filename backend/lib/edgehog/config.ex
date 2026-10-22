@@ -202,6 +202,15 @@ defmodule Edgehog.Config do
     type: :non_neg_integer,
     default: to_timeout(minute: 10)
 
+  @envdoc """
+  Edgehog forwarder secret key base. This must be the same secret key base set
+  to the edgehog device forwarder, allowing this backend to sign tokens for the
+  forwarder.
+  """
+  app_env :forwarder_secret_key_base, :edgehog, :forwarder_secret_key_base,
+    os_env: "EDGEHOG_FORWARDER_SECRET_KEY_BASE",
+    type: :binary
+
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
   """

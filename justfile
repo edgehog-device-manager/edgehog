@@ -175,6 +175,7 @@ _edgehog-dev-backend:
     export URL_HOST=${EDGEHOG_IP}
     export URL_PORT=4000
     export URL_SCHEME=http
+    export EDGEHOG_FORWARDER_SECRET_KEY_BASE=fXzwqLnU1V1bhfOwMRdm3tiGHRlfSpqmrw2aONac2QU4T9iwh3vjSIaweH1n0ZWg
     export EDGEHOG_FORWARDER_HOSTNAME=device-forwarder.edgehog.localhost
     export EDGEHOG_FORWARDER_PORT=80
     export EDGEHOG_FORWARDER_SECURE_SESSIONS="false"

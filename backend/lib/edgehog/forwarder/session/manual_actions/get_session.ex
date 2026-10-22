@@ -21,40 +21,54 @@ defmodule Edgehog.Forwarder.Session.ManualActions.GetSession do
   use Ash.Resource.ManualRead
 
   alias Edgehog.Devices.Device
+  alias Edgehog.Forwarder.Guardian, as: ForwarderGuardian
   alias Edgehog.Forwarder.Session
+
+  # NOTE: `session` is handled separately, as it actually maps to the session token
+  @action_args [:protocol, :host, :port, :insecure_tls_config]
 
   def read(ash_query, _ecto_query, _opts, context) do
     %{tenant: tenant} = context
 
-    %Ash.Query{
-      arguments: %{
-        token: session_token,
-        device_id: device_id
-      }
-    } = ash_query
+    %Ash.Query{arguments: arguments} = ash_query
 
-    with {:ok, device} <- Ash.get(Device, device_id, tenant: tenant, load: :forwarder_sessions) do
-      case get_session_by_token(device.forwarder_sessions, session_token) do
+    %{device_id: device_id} = arguments
+
+    with {:ok, device} <- Ash.get(Device, device_id, tenant: tenant, load: :forwarder_sessions),
+         {:ok, session} <- fetch_session_by_token(device.forwarder_sessions, arguments) do
+      case session do
         nil -> {:ok, []}
         session -> {:ok, [session]}
       end
     end
   end
 
-  defp get_session_by_token(sessions, session_token)
-       when is_list(sessions) and is_binary(session_token) do
-    case Enum.find(sessions, &(&1.token == session_token)) do
-      nil ->
-        nil
+  defp fetch_session_by_token(sessions, conn_args) when is_list(sessions) and is_map(conn_args) do
+    %{token: session_token} = conn_args
 
-      session ->
-        %Session{
-          token: session.token,
-          status: session.status,
-          forwarder_hostname: session.forwarder_hostname,
-          forwarder_port: session.forwarder_port,
-          secure: session.secure
-        }
+    sessions
+    |> Enum.find(&(&1.token == session_token))
+    |> maybe_gen_session(conn_args)
+  end
+
+  defp maybe_gen_session(nil, _conn_args), do: {:ok, nil}
+
+  defp maybe_gen_session(session, conn_args) do
+    args =
+      conn_args
+      |> Map.take(@action_args)
+      |> Map.put(:session, session.token)
+
+    with {:ok, jwt, _claims} <- ForwarderGuardian.encode_and_sign(:forwarder_session, args) do
+      session = %Session{
+        token: jwt,
+        status: session.status,
+        forwarder_hostname: session.forwarder_hostname,
+        forwarder_port: session.forwarder_port,
+        secure: session.secure
+      }
+
+      {:ok, session}
     end
   end
 end
