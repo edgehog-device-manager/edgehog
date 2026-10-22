@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- NOTICE -->
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
+## [0.14.2](https://github.com/edgehog-device-manager/edgehog/compare/v0.14.1...v0.14.2) (2026-10-22)
+
+
+### Bug Fixes
+
+* correctly compose storage path prefix ([f22f735](https://github.com/edgehog-device-manager/edgehog/commit/f22f735b83d575b83e839122ba36ebe989258f9f))
+
 ## [0.14.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.14.0...v0.14.1) (2026-10-14)
 
 
