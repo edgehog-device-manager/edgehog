@@ -123,7 +123,7 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
 
     with {:ok, %{get_url: url}} <- EnvFileStorage.read_presigned_url(file_path) do
       params = %{
-        url: url,
+        url: URI.to_string(url),
         file_name: env_file.file_name,
         uncompressed_file_size_bytes: env_file.uncompressed_file_size_bytes,
         digest: env_file.digest,
