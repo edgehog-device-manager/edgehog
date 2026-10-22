@@ -27,7 +27,16 @@ import { graphql, useLazyLoadQuery } from "react-relay/hooks";
 
 import { renderWithProviders } from "@/setupTests";
 import type { DeviceInfoCard_TestQuery } from "@/api/__generated__/DeviceInfoCard_TestQuery.graphql";
+import { openRemoteTerminal } from "@/lib/remoteTerminal";
 import DeviceInfoCard from "./DeviceInfoCard";
+
+vi.mock("@/lib/remoteTerminal", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/lib/remoteTerminal")>();
+  return {
+    ...actual,
+    openRemoteTerminal: vi.fn(),
+  };
+});
 
 beforeAll(() => {
   Element.prototype.scrollTo = vi.fn();
@@ -282,4 +291,116 @@ it("adds a tag to the device by committing the add tags mutation", async () => {
   });
 
   expect(refreshTags).toHaveBeenCalled();
+});
+
+it("opens the remote terminal when the open button is clicked and session is established", async () => {
+  const { relayEnvironment } = renderCard();
+
+  await screen.findByDisplayValue("Test Device");
+
+  const openButton = screen.getByRole("button", { name: "Open" });
+  fireEvent.click(openButton);
+
+  await waitFor(() => {
+    const operation = relayEnvironment.mock
+      .getAllOperations()
+      .find(
+        (op) =>
+          op.request.node.params.name ===
+          "DeviceInfoCard_requestForwarderSession_Mutation",
+      );
+    expect(operation?.request.variables).toEqual({
+      input: { deviceId: "device-1" },
+    });
+  });
+
+  act(() => {
+    const operation = relayEnvironment.mock.findOperation(
+      (op) =>
+        op.request.node.params.name ===
+        "DeviceInfoCard_requestForwarderSession_Mutation",
+    );
+    relayEnvironment.mock.resolve(operation, {
+      data: {
+        requestForwarderSession: "session-token-123",
+      },
+    });
+  });
+
+  await waitFor(() => {
+    const operation = relayEnvironment.mock
+      .getAllOperations()
+      .find(
+        (op) =>
+          op.request.node.params.name ===
+          "DeviceInfoCard_getForwarderSession_Query",
+      );
+    expect(operation?.request.variables).toEqual({
+      deviceId: "device-1",
+      sessionToken: "session-token-123",
+    });
+  });
+
+  act(() => {
+    const operation = relayEnvironment.mock.findOperation(
+      (op) =>
+        op.request.node.params.name ===
+        "DeviceInfoCard_getForwarderSession_Query",
+    );
+    relayEnvironment.mock.resolve(operation, {
+      data: {
+        forwarderSession: {
+          status: "CONNECTED",
+          secure: true,
+          forwarderHostname: "forwarder.example.com",
+          forwarderPort: 4001,
+          token: "signed-jwt-token",
+        },
+      },
+    });
+  });
+
+  await waitFor(() => {
+    expect(openRemoteTerminal).toHaveBeenCalledWith({
+      forwarderVersion: expect.any(String),
+      forwarderHostname: "forwarder.example.com",
+      forwarderPort: 4001,
+      secure: true,
+      sessionToken: "session-token-123",
+      token: "signed-jwt-token",
+    });
+  });
+});
+
+it("shows error feedback if requesting forwarder session fails", async () => {
+  const { relayEnvironment, onError } = renderCard();
+
+  await screen.findByDisplayValue("Test Device");
+
+  const openButton = screen.getByRole("button", { name: "Open" });
+  fireEvent.click(openButton);
+
+  await waitFor(() => {
+    const operation = relayEnvironment.mock
+      .getAllOperations()
+      .find(
+        (op) =>
+          op.request.node.params.name ===
+          "DeviceInfoCard_requestForwarderSession_Mutation",
+      );
+    expect(operation).toBeDefined();
+  });
+
+  act(() => {
+    const operation = relayEnvironment.mock.findOperation(
+      (op) =>
+        op.request.node.params.name ===
+        "DeviceInfoCard_requestForwarderSession_Mutation",
+    );
+    relayEnvironment.mock.reject(operation, new Error("Failed"));
+  });
+
+  await waitFor(() => {
+    expect(onError).toHaveBeenCalled();
+  });
 });

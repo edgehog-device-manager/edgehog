@@ -55,7 +55,7 @@ import Row from "@/components/ui/row/Row";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import assets from "@/assets";
-import semver from "semver";
+import { openRemoteTerminal } from "@/lib/remoteTerminal";
 
 const DEVICE_INFO_CARD_FRAGMENT = graphql`
   fragment DeviceInfoCard_device on Device {
@@ -179,11 +179,10 @@ const GET_FORWARDER_SESSION_QUERY = graphql`
       secure
       forwarderHostname
       forwarderPort
+      token
     }
   }
 `;
-
-const TTYD_PORT = 7681;
 
 const FORM_ROW = { labelCol: 3, valueCol: 9 };
 
@@ -330,26 +329,21 @@ const DeviceInfoCard = ({
         throw new Error("The forwarder session does not exist.");
       }
 
-      const { forwarderHostname, forwarderPort, secure, status } =
+      const { forwarderHostname, forwarderPort, secure, status, token } =
         data.forwarderSession;
 
       if (status !== "CONNECTED") {
         throw new Error("The forwarder session is not connected.");
       }
 
-      const forwarderProtocol = secure ? "https" : "http";
-
-      if (semver.satisfies(forwarderVersion, "0.1.x")) {
-        window.open(
-          `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/${sessionToken}/http/${TTYD_PORT}`,
-          "_blank",
-        );
-      } else if (semver.satisfies(forwarderVersion, "0.2.x")) {
-        window.open(
-          `${forwarderProtocol}://${forwarderHostname}:${forwarderPort}/?session=${sessionToken}&protocol=http&port=${TTYD_PORT}`,
-          "_blank",
-        );
-      }
+      openRemoteTerminal({
+        forwarderVersion,
+        forwarderHostname,
+        forwarderPort,
+        secure,
+        sessionToken,
+        token,
+      });
     },
     [relayEnvironment, deviceId],
   );

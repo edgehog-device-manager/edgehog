@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -42,10 +42,32 @@ defmodule Edgehog.Forwarder.Session do
 
   actions do
     read :get do
-      description "Fetches a forwarder session by its token and the device ID."
+      description """
+      Fetches a forwarder session by its token and the device ID.
+      Returns a signed token for future requests to the edgehog device forwarder.
+      """
+
       get? true
 
       argument :token, :string, allow_nil?: false
+
+      argument :protocol, :atom do
+        constraints one_of: [:http, :https]
+        default :http
+      end
+
+      argument :host, :string do
+        default "localhost"
+      end
+
+      argument :port, :integer do
+        default 7681
+      end
+
+      argument :insecure_tls_config, :boolean do
+        default true
+      end
+
       argument :device_id, :id, allow_nil?: false
 
       manual ManualActions.GetSession
