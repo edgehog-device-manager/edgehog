@@ -43,7 +43,7 @@ defmodule Edgehog.Containers.ImageCredentials do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :image_credentials do
-        action_types [:create, :destroy]
+        action_types [:create, :update, :destroy]
       end
     end
   end
@@ -52,6 +52,11 @@ defmodule Edgehog.Containers.ImageCredentials do
     defaults [:destroy, :read]
 
     create :create do
+      primary? true
+      accept [:label, :username, :password]
+    end
+
+    update :update do
       primary? true
       accept [:label, :username, :password]
     end
