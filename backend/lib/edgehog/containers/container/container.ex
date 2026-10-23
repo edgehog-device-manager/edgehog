@@ -61,6 +61,16 @@ defmodule Edgehog.Containers.Container do
   actions do
     defaults [:read, :create]
 
+    read :plain_containers do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(container_deployments, true))
+    end
+
+    read :deployed_containers do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(container_deployments, true))
+    end
+
     create :create_and_relate do
       accept [
         :name,

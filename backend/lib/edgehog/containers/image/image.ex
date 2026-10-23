@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Image do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
+  alias Edgehog.Containers.Image
   alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Validations
 
@@ -44,6 +45,16 @@ defmodule Edgehog.Containers.Image do
 
   actions do
     defaults [:read, :destroy, create: [:reference, :image_credentials_id]]
+
+    read :plain_images do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(image_deployments, true))
+    end
+
+    read :deployed_images do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(image_deployments, true))
+    end
 
     destroy :destroy_if_dangling do
       description "Destroys the image if it's dangling (not referenced by any container)"
@@ -72,13 +83,17 @@ defmodule Edgehog.Containers.Image do
     end
 
     many_to_many :devices, Edgehog.Devices.Device do
-      through Edgehog.Containers.Image.Deployment
+      through Image.Deployment
       join_relationship :image_deployments
       public? true
     end
 
     has_many :containers, Container do
       public? true
+    end
+
+    has_many :image_deployments, Image.Deployment do
+      public? false
     end
   end
 
