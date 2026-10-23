@@ -251,9 +251,60 @@ defmodule Edgehog.Containers.Container do
 
     update :update do
       description "Updates a container."
+      primary? true
       require_atomic? false
 
-      accept [:name]
+      accept @container_attributes
+
+      argument :image, Types.Image
+      argument :networks, {:array, Types.Network}
+      argument :volumes, {:array, Types.Volume}
+      argument :file_mounts, {:array, Types.FileMount}
+      argument :device_mappings, {:array, Types.DeviceMapping}
+      argument :device_requests, {:array, Types.DeviceRequest}
+
+      change manage_relationship(:volumes,
+               on_no_match: :error,
+               on_lookup: {:relate_and_update, :create, :read, [:target]},
+               on_match: {:update_join, :update, [:target]},
+               on_missing: :unrelate
+             )
+
+      change manage_relationship(:file_mounts,
+               on_lookup: :ignore,
+               on_no_match: :create,
+               on_match: :update,
+               on_missing: :destroy
+             )
+
+      change manage_relationship(:image,
+               on_no_match: :create,
+               on_lookup: {:relate, :create, :plain_images},
+               on_match: :ignore,
+               on_missing: :unrelate,
+               use_identities: [:reference_credentials]
+             )
+
+      change {Changes.MaybeDestroyChildren, children: [:image]}
+
+      change manage_relationship(:networks,
+               on_no_match: :error,
+               on_lookup: :relate,
+               on_match: :ignore,
+               on_missing: :unrelate
+             )
+
+      change manage_relationship(:device_mappings,
+               on_lookup: :ignore,
+               on_no_match: :create,
+               on_missing: :destroy
+             )
+
+      change manage_relationship(:device_requests,
+               on_lookup: :ignore,
+               on_no_match: :create,
+               on_missing: :destroy
+             )
 
       validate {Edgehog.Containers.Validations.UniquePlainResource,
                 keys: [:name], read_action: :plain_containers, field: :name}

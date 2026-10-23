@@ -179,7 +179,17 @@ defmodule Edgehog.Containers do
                               ]
       end
 
-      update Container, :update_container, :update
+      update Container, :update_container, :update do
+        description "Update a container."
+        read_action :plain_containers
+
+        relay_id_translations input: [
+                                image: [image_credentials_id: :image_credentials],
+                                networks: [id: :network],
+                                volumes: [id: :volume],
+                                file_mounts: [default_file_id: :file]
+                              ]
+      end
 
       destroy Container, :delete_container, :destroy
 

@@ -41,6 +41,14 @@ defmodule Edgehog.Containers.Container.FileMount do
         :file_mode,
         :user_id,
         :group_id
+      ],
+      update: [
+        :mountpoint,
+        :required,
+        :default_file_id,
+        :file_mode,
+        :user_id,
+        :group_id
       ]
     ]
   end
