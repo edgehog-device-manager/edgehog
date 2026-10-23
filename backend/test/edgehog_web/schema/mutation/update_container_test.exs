@@ -23,7 +23,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainerTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
+
   alias Edgehog.Containers
+  alias Edgehog.Containers.Image
 
   describe "updateContainer mutation" do
     test "successfully updates the container name", %{tenant: tenant} do
@@ -58,9 +61,39 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainerTest do
       assert db_container.name == new_name
     end
 
-    test "fails to update fields not permitted by the action", %{tenant: tenant} do
-      container = container_fixture(tenant: tenant, name: "persistent-name")
+    test "updates container attributes and relations while preserving same image or GCing replaced image",
+         %{tenant: tenant} do
+      vol1 = volume_fixture(tenant: tenant, label: "vol-1")
+      vol2 = volume_fixture(tenant: tenant, label: "vol-2")
+      vol3 = volume_fixture(tenant: tenant, label: "vol-3")
+
+      net1 = network_fixture(tenant: tenant, label: "net-1")
+      net2 = network_fixture(tenant: tenant, label: "net-2")
+
+      image1 = image_fixture(tenant: tenant, reference: "alpine:3.18")
+      dm1 = device_mapping_fixture(tenant: tenant, path_on_host: "/dev/ttyS0")
+      dr1 = device_request_fixture(tenant: tenant, driver: "nvidia", count: 1)
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          name: "my-container",
+          image: image1,
+          volumes: [{vol1, "/mnt/v1"}, {vol2, "/mnt/v2"}],
+          networks: [net1],
+          file_mounts: [
+            %{mountpoint: "/etc/a.conf", required: true, file_mode: 420},
+            %{mountpoint: "/etc/b.conf", required: false}
+          ],
+          device_mappings: [dm1],
+          device_requests: [dr1]
+        )
+
       container_id = AshGraphql.Resource.encode_relay_id(container)
+      vol1_id = AshGraphql.Resource.encode_relay_id(vol1)
+      vol3_id = AshGraphql.Resource.encode_relay_id(vol3)
+      net2_id = AshGraphql.Resource.encode_relay_id(net2)
+      image1_relay_id = AshGraphql.Resource.encode_relay_id(image1)
 
       document = """
       mutation UpdateContainer($id: ID!, $input: UpdateContainerInput!) {
@@ -68,26 +101,170 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainerTest do
           result {
             id
             name
+            hostname
+            restartPolicy
+            privileged
+            image {
+              id
+              reference
+            }
+            containerVolumes {
+              edges {
+                node {
+                  target
+                  volume {
+                    id
+                    label
+                  }
+                }
+              }
+            }
+            networks {
+              edges {
+                node {
+                  id
+                  label
+                }
+              }
+            }
+            fileMounts {
+              edges {
+                node {
+                  mountpoint
+                  required
+                  fileMode
+                }
+              }
+            }
+            deviceMappings {
+              edges {
+                node {
+                  pathOnHost
+                  pathInContainer
+                  cgroupPermissions
+                }
+              }
+            }
+            deviceRequests {
+              edges {
+                node {
+                  driver
+                  count
+                }
+              }
+            }
           }
         }
       }
       """
 
-      input = %{
-        "name" => "trying-to-change-policy",
-        "restartPolicy" => "ALWAYS"
-      }
-
-      result =
+      res1 =
         Absinthe.run!(document, EdgehogWeb.Schema,
-          variables: %{"id" => container_id, "input" => input},
+          variables: %{
+            "id" => container_id,
+            "input" => %{
+              "name" => "my-container-updated",
+              "hostname" => "updated-host",
+              "restartPolicy" => "ALWAYS",
+              "privileged" => true,
+              "image" => %{"reference" => "alpine:3.18"},
+              "volumes" => [
+                %{"id" => vol1_id, "target" => "/mnt/v1-new"},
+                %{"id" => vol3_id, "target" => "/mnt/v3"}
+              ],
+              "networks" => [
+                %{"id" => net2_id}
+              ],
+              "fileMounts" => [
+                %{"mountpoint" => "/etc/a.conf", "required" => false, "fileMode" => 511},
+                %{"mountpoint" => "/etc/c.conf", "required" => true}
+              ],
+              "deviceMappings" => [
+                %{
+                  "pathOnHost" => "/dev/video0",
+                  "pathInContainer" => "/dev/video0",
+                  "cgroupPermissions" => "rwm"
+                }
+              ],
+              "deviceRequests" => [
+                %{"driver" => "amd", "count" => 2}
+              ]
+            }
+          },
           context: %{tenant: tenant}
         )
 
-      assert %{errors: [%{message: message}]} = result
+      result = extract_result!(res1)
 
-      assert String.contains?(message, "Unknown field") or
-               String.contains?(message, "In field \"restartPolicy\"")
+      assert result["name"] == "my-container-updated"
+      assert result["hostname"] == "updated-host"
+      assert result["restartPolicy"] == "always"
+      assert result["privileged"] == true
+      assert result["image"] == %{"id" => image1_relay_id, "reference" => "alpine:3.18"}
+
+      # Verify image1 was NOT destroyed
+      assert {:ok, _} = Ash.get(Image, image1.id, tenant: tenant)
+
+      cv_targets =
+        result["containerVolumes"]["edges"]
+        |> Enum.map(fn %{"node" => node} -> {node["volume"]["id"], node["target"]} end)
+        |> MapSet.new()
+
+      assert cv_targets == MapSet.new([{vol1_id, "/mnt/v1-new"}, {vol3_id, "/mnt/v3"}])
+
+      fm_map =
+        Map.new(result["fileMounts"]["edges"], fn %{"node" => node} ->
+          {node["mountpoint"], {node["required"], node["fileMode"]}}
+        end)
+
+      assert fm_map == %{
+               "/etc/a.conf" => {false, 511},
+               "/etc/c.conf" => {true, nil}
+             }
+
+      # Updating container image to a new reference garbage-collects the old dangling image
+      res2 =
+        Absinthe.run!(document, EdgehogWeb.Schema,
+          variables: %{
+            "id" => container_id,
+            "input" => %{"image" => %{"reference" => "alpine:3.19"}}
+          },
+          context: %{tenant: tenant}
+        )
+
+      result2 = extract_result!(res2)
+      assert result2["image"]["reference"] == "alpine:3.19"
+      assert {:error, _} = Ash.get(Image, image1.id, tenant: tenant)
+    end
+
+    test "rejects updating a deployed container copy", %{tenant: tenant} do
+      container = container_fixture(tenant: tenant, name: "plain-container")
+      release = release_fixture(tenant: tenant, container_ids: [container.id])
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id]
+        |> deployment_fixture()
+        |> Ash.load!([release: :containers], tenant: tenant)
+
+      [deployed_container] = deployment.release.containers
+      deployed_container_id = AshGraphql.Resource.encode_relay_id(deployed_container)
+
+      document = """
+      mutation UpdateContainer($id: ID!, $input: UpdateContainerInput!) {
+        updateContainer(id: $id, input: $input) {
+          result { id }
+        }
+      }
+      """
+
+      result =
+        Absinthe.run!(document, EdgehogWeb.Schema,
+          variables: %{"id" => deployed_container_id, "input" => %{"name" => "mutated"}},
+          context: %{tenant: tenant}
+        )
+
+      assert %{data: %{"updateContainer" => nil}, errors: [_ | _]} = result
     end
 
     test "returns an error when the container does not exist", %{tenant: tenant} do
