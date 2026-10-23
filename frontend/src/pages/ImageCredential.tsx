@@ -32,6 +32,7 @@ import {
 import { useParams } from "react-router-dom";
 
 import type { ImageCredential_deleteImageCredentialDelete_Mutation } from "@/api/__generated__/ImageCredential_deleteImageCredentialDelete_Mutation.graphql";
+import type { ImageCredential_updateImageCredential_Mutation } from "@/api/__generated__/ImageCredential_updateImageCredential_Mutation.graphql";
 import {
   ImageCredential_imageCredential_Query,
   ImageCredential_imageCredential_Query$data,
@@ -43,6 +44,7 @@ import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
 import UpdateImageCredentialForm from "@/forms/UpdateImageCredential";
+import { ImageCredentialUpdateFormData } from "@/forms/validation";
 import { Link, Route, useNavigate } from "@/Navigation";
 
 const IMAGE_CREDENTIAL_QUERY = graphql`
@@ -51,6 +53,21 @@ const IMAGE_CREDENTIAL_QUERY = graphql`
       id
       label
       ...UpdateImageCredential_imageCredential_Fragment
+    }
+  }
+`;
+
+const UPDATE_IMAGE_CREDENTIAL_MUTATION = graphql`
+  mutation ImageCredential_updateImageCredential_Mutation(
+    $imageCredentialId: ID!
+    $input: UpdateImageCredentialsInput!
+  ) {
+    updateImageCredentials(id: $imageCredentialId, input: $input) {
+      result {
+        id
+        label
+        ...UpdateImageCredential_imageCredential_Fragment
+      }
     }
   }
 `;
@@ -119,6 +136,45 @@ const ImageCredentialContent = ({
     });
   }, [deleteImageCredential, imageCredentialId, navigate]);
 
+  const [updateImageCredential, isUpdatingImageCredential] =
+    useMutation<ImageCredential_updateImageCredential_Mutation>(
+      UPDATE_IMAGE_CREDENTIAL_MUTATION,
+    );
+
+  const handleUpdateImageCredential = useCallback(
+    (data: ImageCredentialUpdateFormData, onSuccess?: () => void) => {
+      const input = {
+        label: data.label.trim(),
+        username: data.username.trim(),
+        ...(data.password ? { password: data.password } : {}),
+      };
+      updateImageCredential({
+        variables: { imageCredentialId, input },
+        onCompleted(_data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+          onSuccess?.();
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.ImageCredential.updateErrorFeedback"
+              defaultMessage="Could not update the Image Credentials, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateImageCredential, imageCredentialId],
+  );
+
   return (
     <Page>
       <Page.Header title={imageCredential.label} />
@@ -134,7 +190,9 @@ const ImageCredentialContent = ({
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4 ">
           <UpdateImageCredentialForm
             imageCredentialRef={imageCredential}
+            onSubmit={handleUpdateImageCredential}
             onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingImageCredential}
           />
         </Card>
         {showDeleteModal && (

@@ -19,13 +19,14 @@
  */
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Card, Col, Form, Row } from "react-bootstrap";
+import { Card } from "react-bootstrap";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
 import {
   ConnectionHandler,
   graphql,
+  useMutation,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
@@ -36,6 +37,7 @@ import { useParams } from "react-router-dom";
 import { ApplicationDeployments_PaginationQuery } from "@/api/__generated__/ApplicationDeployments_PaginationQuery.graphql";
 import { Application_DeploymentsFragment$key } from "@/api/__generated__/Application_DeploymentsFragment.graphql";
 import { Application_ReleasesFragment$key } from "@/api/__generated__/Application_ReleasesFragment.graphql";
+import type { Application_updateApplication_Mutation } from "@/api/__generated__/Application_updateApplication_Mutation.graphql";
 import type {
   Application_getApplication_Query,
   Application_getApplication_Query$data,
@@ -54,6 +56,8 @@ import ReleasesTable from "@/components/apps/releases/releases-table/ReleasesTab
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Tabs, { Tab } from "@/components/ui/tabs/Tabs";
+import CreateApplicationForm from "@/forms/CreateApplication";
+import { ApplicationFormData } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 
 const GET_APPLICATION_QUERY = graphql`
@@ -71,6 +75,21 @@ const GET_APPLICATION_QUERY = graphql`
         @arguments(first: $first, after: $after, filter: $filter)
       ...Application_DeploymentsFragment
         @arguments(first: $first, after: $after)
+    }
+  }
+`;
+
+const UPDATE_APPLICATION_MUTATION = graphql`
+  mutation Application_updateApplication_Mutation(
+    $applicationId: ID!
+    $input: UpdateApplicationInput!
+  ) {
+    updateApplication(id: $applicationId, input: $input) {
+      result {
+        id
+        name
+        description
+      }
     }
   }
 `;
@@ -320,6 +339,51 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
 
   const currentTabKey = activeTab || TAB_KEYS[0];
 
+  const [updateApplication, isUpdatingApplication] =
+    useMutation<Application_updateApplication_Mutation>(
+      UPDATE_APPLICATION_MUTATION,
+    );
+
+  const handleUpdateApplication = useCallback(
+    (applicationData: ApplicationFormData) => {
+      const input = {
+        name: applicationData.name.trim(),
+        description: applicationData.description ?? "",
+      };
+      updateApplication({
+        variables: { applicationId, input },
+        onCompleted(_data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.Application.updateErrorFeedback"
+              defaultMessage="Could not update the application, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateApplication, applicationId],
+  );
+
+  const defaultValues = useMemo<ApplicationFormData>(
+    () => ({
+      name: application.name,
+      description: application.description ?? "",
+    }),
+    [application.name, application.description],
+  );
+
   return (
     <Page>
       <Page.Header title={application.name}>
@@ -345,22 +409,11 @@ const ApplicationContent = ({ application }: ApplicationContentProps) => {
         </Alert>
 
         <Card className="h-100 border-0 p-3 shadow-sm mb-3">
-          <Form.Group as={Row} controlId="application" className="mt-3 mb-4">
-            <Form.Label column sm={2}>
-              <FormattedMessage
-                id="pages.Application.description"
-                defaultMessage="Description"
-              />
-            </Form.Label>
-            <Col sm={10}>
-              <Form.Control
-                as="textarea"
-                value={application.description ?? ""}
-                rows={5}
-                readOnly
-              />
-            </Col>
-          </Form.Group>
+          <CreateApplicationForm
+            defaultValues={defaultValues}
+            onSubmit={handleUpdateApplication}
+            isLoading={isUpdatingApplication}
+          />
         </Card>
 
         <Tabs

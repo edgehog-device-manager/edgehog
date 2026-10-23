@@ -2365,8 +2365,14 @@
   "forms.CreateApplication.nameLabel": {
     "defaultMessage": "Name"
   },
+  "forms.CreateApplication.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateApplication.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateApplication.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -3631,6 +3637,15 @@
   "forms.UpdateImageCredential.labelLabel": {
     "defaultMessage": "Label"
   },
+  "forms.UpdateImageCredential.passwordLabel": {
+    "defaultMessage": "Password"
+  },
+  "forms.UpdateImageCredential.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateImageCredential.submitButton": {
+    "defaultMessage": "Update"
+  },
   "forms.UpdateImageCredential.usernameLabel": {
     "defaultMessage": "Username"
   },
@@ -4642,14 +4657,14 @@
   "pages.Application.createButton": {
     "defaultMessage": "Create Release"
   },
-  "pages.Application.description": {
-    "defaultMessage": "Description"
-  },
   "pages.Application.devices": {
     "defaultMessage": "Devices"
   },
   "pages.Application.releases": {
     "defaultMessage": "Releases"
+  },
+  "pages.Application.updateErrorFeedback": {
+    "defaultMessage": "Could not update the application, please try again."
   },
   "pages.ApplicationCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the application, please try again."
@@ -5056,6 +5071,9 @@
   },
   "pages.ImageCredential.imageCredentialNotFound.title": {
     "defaultMessage": "Image Credentials not found."
+  },
+  "pages.ImageCredential.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Image Credentials, please try again."
   },
   "pages.ImageCredentialCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Image Credentials, please try again."

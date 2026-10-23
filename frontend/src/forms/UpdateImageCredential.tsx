@@ -19,7 +19,8 @@
  */
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
+import { InputGroup } from "react-bootstrap";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
@@ -27,6 +28,8 @@ import { graphql, useFragment } from "react-relay/hooks";
 import type { UpdateImageCredential_imageCredential_Fragment$key } from "@/api/__generated__/UpdateImageCredential_imageCredential_Fragment.graphql";
 import Button from "@/components/ui/button/Button";
 import Form from "@/components/ui/form/Form";
+import Icon from "@/components/ui/icon/Icon";
+import Spinner from "@/components/ui/spinner/Spinner";
 import Stack from "@/components/ui/stack/Stack";
 import { FormRow } from "@/components/ui/form-row/FormRow";
 import {
@@ -46,10 +49,19 @@ const IMAGE_CREDENTIAL_FRAGMENT = graphql`
 interface Props {
   imageCredentialRef: UpdateImageCredential_imageCredential_Fragment$key;
   isLoading?: boolean;
+  onSubmit: (
+    data: ImageCredentialUpdateFormData,
+    onSuccess?: () => void,
+  ) => void;
   onDelete(): void;
 }
 
-const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
+const UpdateImageCredentialForm = ({
+  imageCredentialRef,
+  isLoading = false,
+  onSubmit,
+  onDelete,
+}: Props) => {
   const { id, label, username } = useFragment(
     IMAGE_CREDENTIAL_FRAGMENT,
     imageCredentialRef,
@@ -60,21 +72,40 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
       id,
       label,
       username,
+      password: "",
     }),
     [id, label, username],
   );
 
   const {
     register,
-    formState: { errors },
+    reset,
+    handleSubmit,
+    formState: { errors, isDirty },
   } = useForm<ImageCredentialUpdateFormData>({
     mode: "onTouched",
     defaultValues,
     resolver: zodResolver(imageCredentialUpdateSchema),
   });
 
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
+
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleFormSubmit = (data: ImageCredentialUpdateFormData) => {
+    setShowPassword(false);
+    onSubmit(data, () => reset(defaultValues));
+  };
+
+  const canSubmit = !isLoading && isDirty;
+  const canReset = isDirty && !isLoading;
+
   return (
-    <form>
+    <form onSubmit={handleSubmit(handleFormSubmit)} autoComplete="off">
       <Stack gap={3}>
         <FormRow
           id="image-credential-form-label"
@@ -85,11 +116,7 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
             />
           }
         >
-          <Form.Control
-            {...register("label")}
-            readOnly
-            isInvalid={!!errors.label}
-          />
+          <Form.Control {...register("label")} isInvalid={!!errors.label} />
 
           <FormFeedback feedback={errors.label?.message} />
         </FormRow>
@@ -104,16 +131,70 @@ const UpdateImageCredentialForm = ({ imageCredentialRef, onDelete }: Props) => {
         >
           <Form.Control
             {...register("username")}
-            readOnly
+            autoComplete="off"
             isInvalid={!!errors.username}
           />
           <FormFeedback feedback={errors.username?.message} />
+        </FormRow>
+        <FormRow
+          id="image-credential-form-password"
+          label={
+            <FormattedMessage
+              id="forms.UpdateImageCredential.passwordLabel"
+              defaultMessage="Password"
+            />
+          }
+        >
+          <InputGroup>
+            <Form.Control
+              {...register("password")}
+              type={showPassword ? "text" : "password"}
+              isInvalid={!!errors.password}
+              autoComplete="off"
+              onCopy={(e) => e.preventDefault()}
+              onCut={(e) => e.preventDefault()}
+            />
+            <Button
+              variant={"outlined"}
+              onClick={() => setShowPassword(!showPassword)}
+              style={{
+                borderTopRightRadius: "0.25rem",
+                borderBottomRightRadius: "0.25rem",
+                borderTopLeftRadius: "0",
+                borderBottomLeftRadius: "0",
+                backgroundColor: "#e0e0e0",
+              }}
+            >
+              <Icon
+                icon={showPassword ? "showPassword" : "hidePassword"}
+                style={{ width: "1.4em" }}
+              />
+            </Button>
+            <FormFeedback feedback={errors.password?.message} />
+          </InputGroup>
         </FormRow>
         <Stack
           direction="horizontal"
           gap={3}
           className="justify-content-end align-items-center"
         >
+          <Button variant="primary" type="submit" disabled={!canSubmit}>
+            {isLoading && <Spinner size="sm" className="me-2" />}
+            <FormattedMessage
+              id="forms.UpdateImageCredential.submitButton"
+              defaultMessage="Update"
+            />
+          </Button>
+          <Button
+            variant="secondary"
+            disabled={!canReset}
+            onClick={() => reset()}
+          >
+            <FormattedMessage
+              id="forms.UpdateImageCredential.resetButton"
+              defaultMessage="Reset"
+            />
+          </Button>
           <Button variant="danger" onClick={onDelete}>
             <FormattedMessage
               id="forms.UpdateImageCredential.deleteButton"
