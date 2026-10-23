@@ -26,6 +26,7 @@ defmodule Edgehog.Containers.Release do
 
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Validations.UniquePlainResource
   alias Edgehog.Validations
 
   graphql do
@@ -76,6 +77,9 @@ defmodule Edgehog.Containers.Release do
       change manage_relationship(:required_system_models, :system_models, type: :append)
 
       change manage_relationship(:container_dependencies, type: :create)
+
+      validate {UniquePlainResource,
+                keys: [:version, :application_id], read_action: :plain_releases, field: :version}
 
       validate Release.Validations.NoCircularDependencies
     end
@@ -141,10 +145,6 @@ defmodule Edgehog.Containers.Release do
       through Edgehog.Containers.ReleaseSystemModel
       public? true
     end
-  end
-
-  identities do
-    identity :application_version, [:version, :application_id]
   end
 
   postgres do

@@ -173,7 +173,7 @@ defmodule Edgehog.Containers.Container do
 
       change manage_relationship(:image,
                on_no_match: :create,
-               on_lookup: :relate,
+               on_lookup: {:relate, :create, :plain_images},
                on_match: :ignore,
                use_identities: [:reference_credentials]
              )
@@ -190,6 +190,9 @@ defmodule Edgehog.Containers.Container do
       change manage_relationship(:device_requests,
                type: :create
              )
+
+      validate {Edgehog.Containers.Validations.UniquePlainResource,
+                keys: [:name], read_action: :plain_containers, field: :name}
     end
 
     read :filter_by_image do
@@ -203,6 +206,9 @@ defmodule Edgehog.Containers.Container do
       require_atomic? false
 
       accept [:name]
+
+      validate {Edgehog.Containers.Validations.UniquePlainResource,
+                keys: [:name], read_action: :plain_containers, field: :name}
     end
 
     destroy :destroy do
@@ -641,10 +647,6 @@ defmodule Edgehog.Containers.Container do
 
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
-  end
-
-  identities do
-    identity :name, [:name]
   end
 
   postgres do

@@ -44,9 +44,16 @@ defmodule Edgehog.Containers.Volume do
     defaults [
       :read,
       :destroy,
-      create: [:label, :driver, :options],
       update: [:driver, :options]
     ]
+
+    create :create do
+      primary? true
+      accept [:label, :driver, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_volumes, field: :label}
+    end
 
     read :plain_volumes do
       pagination offset?: true, keyset?: true, required?: false
@@ -111,10 +118,6 @@ defmodule Edgehog.Containers.Volume do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
-  end
-
-  identities do
-    identity :label, [:label]
   end
 
   postgres do
