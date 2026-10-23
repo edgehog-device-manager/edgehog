@@ -48,7 +48,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers do
       |> Ash.load!(:device)
       |> Map.get(:device)
 
-    case Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id) do
+    case Containers.deployment_by_identity(
+           device.id,
+           release.application_id,
+           release.version,
+           tenant: target.tenant_id
+         ) do
       {:ok, _deployment} ->
         true
 
@@ -77,7 +82,12 @@ defmodule Edgehog.Campaigns.CampaignMechanism.Helpers do
       |> Map.get(:device)
 
     {:ok, deployment} =
-      Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id)
+      Containers.deployment_by_identity(
+        device.id,
+        release.application_id,
+        release.version,
+        tenant: target.tenant_id
+      )
 
     Campaigns.set_target_deployment(target, deployment.id, tenant: target.tenant_id)
   end
