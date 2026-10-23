@@ -46,154 +46,151 @@ const GET_CONTAINERS_QUERY = graphql`
   }
 `;
 
-const GET_CONTAINER_DETAILS_QUERY = graphql`
-  query ReuseContainerModal_getContainerDetails_Query($id: ID!) {
-    container(id: $id) {
-      id
-      name
-      domainname
-      user
-      command
-      healthcheckTest
-      healthcheckInterval
-      healthcheckTimeout
-      healthcheckRetries
-      healthcheckStartPeriod
-      healthcheckStartInterval
-      workingDirectory
-      entrypoint
-      networkDisabled
-      labelKeys
-      labelValues
-      stopSignal
-      stopTimeout
-      restartPolicy
-      restartPolicyMaximumRetryCount
-      env {
-        key
-        value
+export const CONTAINER_FORM_FRAGMENT = graphql`
+  fragment ReuseContainerModal_ContainerFragment on Container {
+    id
+    name
+    domainname
+    user
+    command
+    healthcheckTest
+    healthcheckInterval
+    healthcheckTimeout
+    healthcheckRetries
+    healthcheckStartPeriod
+    healthcheckStartInterval
+    workingDirectory
+    entrypoint
+    networkDisabled
+    labelKeys
+    labelValues
+    stopSignal
+    stopTimeout
+    restartPolicy
+    restartPolicyMaximumRetryCount
+    env {
+      key
+      value
+    }
+    extraHosts
+    hostname
+    networkMode
+    portBindings
+    exposedPorts
+    binds
+    privileged
+    memory
+    memorySwap
+    memoryReservation
+    memorySwappiness
+    cpuShares
+    cpusetCpus
+    cpuPeriod
+    cpuQuota
+    cpuRealtimePeriod
+    cpuRealtimeRuntime
+    shmSize
+    oomScoreAdjustment
+    blkioWeight
+    blkioWeightDevicePath
+    blkioWeightDeviceWeight
+    blkioDeviceReadBpsPath
+    blkioDeviceReadBpsRate
+    blkioDeviceWriteBpsPath
+    blkioDeviceWriteBpsRate
+    blkioDeviceReadIopsPath
+    blkioDeviceReadIopsRate
+    blkioDeviceWriteIopsPath
+    blkioDeviceWriteIopsRate
+    tmpfsPaths
+    tmpfsOptions
+    storageOptKeys
+    storageOptValues
+    readOnlyRootfs
+    autoRemove
+    cgroupsMode
+    dns
+    dnsOptions
+    dnsSearch
+    groupAdd
+    ipcMode
+    usernsMode
+    sysctlsKeys
+    sysctlsValues
+    runtime
+    logType
+    logConfigKeys
+    logConfigValues
+    capAdd
+    capDrop
+    securityopt
+    pidMode
+    maskedPaths
+    readonlyPaths
+    deviceCgroupRules
+    ulimitsName
+    ulimitsSoft
+    ulimitsHard
+    volumeDriver
+    image {
+      reference
+      credentials {
+        id
+        label
+        username
       }
-      extraHosts
-      hostname
-      networkMode
-      portBindings
-      exposedPorts
-      binds
-      restartPolicy
-      privileged
-      memory
-      memorySwap
-      memoryReservation
-      memorySwappiness
-      cpuShares
-      cpusetCpus
-      cpuPeriod
-      cpuQuota
-      cpuRealtimePeriod
-      cpuRealtimeRuntime
-      shmSize
-      oomScoreAdjustment
-      blkioWeight
-      blkioWeightDevicePath
-      blkioWeightDeviceWeight
-      blkioDeviceReadBpsPath
-      blkioDeviceReadBpsRate
-      blkioDeviceWriteBpsPath
-      blkioDeviceWriteBpsRate
-      blkioDeviceReadIopsPath
-      blkioDeviceReadIopsRate
-      blkioDeviceWriteIopsPath
-      blkioDeviceWriteIopsRate
-      tmpfsPaths
-      tmpfsOptions
-      storageOptKeys
-      storageOptValues
-      readOnlyRootfs
-      autoRemove
-      cgroupsMode
-      dns
-      dnsOptions
-      dnsSearch
-      groupAdd
-      ipcMode
-      usernsMode
-      sysctlsKeys
-      sysctlsValues
-      runtime
-      logType
-      logConfigKeys
-      logConfigValues
-      capAdd
-      capDrop
-      securityopt
-      pidMode
-      maskedPaths
-      readonlyPaths
-      deviceCgroupRules
-      ulimitsName
-      ulimitsSoft
-      ulimitsHard
-      volumeDriver
-      image {
-        reference
-        credentials {
+    }
+    networks {
+      edges {
+        node {
           id
-          label
-          username
         }
       }
-      networks {
-        edges {
-          node {
+    }
+    containerVolumes {
+      edges {
+        node {
+          target
+          volume {
             id
           }
         }
       }
-      containerVolumes {
-        edges {
-          node {
-            target
-            volume {
-              id
-            }
-          }
+    }
+    deviceMappings {
+      edges {
+        node {
+          pathInContainer
+          pathOnHost
+          cgroupPermissions
         }
       }
-      deviceMappings {
-        edges {
-          node {
-            pathInContainer
-            pathOnHost
-            cgroupPermissions
-          }
+    }
+    deviceRequests {
+      edges {
+        node {
+          driver
+          count
+          deviceIds
+          capabilities
+          options
         }
       }
-      deviceRequests {
-        edges {
-          node {
-            driver
-            count
-            deviceIds
-            capabilities
-            options
-          }
-        }
-      }
-      fileMounts {
-        edges {
-          node {
-            mountpoint
-            required
-            defaultFileId
-            fileMode
-            userId
-            groupId
-            defaultFile {
-              id
+    }
+    fileMounts {
+      edges {
+        node {
+          mountpoint
+          required
+          defaultFileId
+          fileMode
+          userId
+          groupId
+          defaultFile {
+            id
+            name
+            repository {
               name
-              repository {
-                name
-              }
             }
           }
         }
@@ -202,13 +199,296 @@ const GET_CONTAINER_DETAILS_QUERY = graphql`
   }
 `;
 
+const GET_CONTAINER_DETAILS_QUERY = graphql`
+  query ReuseContainerModal_getContainerDetails_Query($id: ID!) {
+    container(id: $id) {
+      ...ReuseContainerModal_ContainerFragment @relay(mask: false)
+    }
+  }
+`;
+
 type ContainersData = ReuseContainerModal_getContainers_Query["response"];
+
+type ContainerDetails = NonNullable<
+  ReuseContainerModal_getContainerDetails_Query["response"]["container"]
+>;
 
 type ContainerEdge = NonNullable<
   NonNullable<ContainersData["containers"]>["edges"]
 >[number];
 
 type Container = NonNullable<ContainerEdge>["node"];
+
+export const mapContainerToFormData = (
+  c: ContainerDetails,
+  includeName = false,
+): Partial<ContainerInputData> => ({
+  ...(includeName ? { name: c.name } : {}),
+  image: c.image
+    ? {
+        reference: c.image.reference,
+        imageCredentialsId: c.image.credentials?.id,
+      }
+    : undefined,
+  hostname: c.hostname ?? undefined,
+  networkMode: c.networkMode ?? undefined,
+  networks: c.networks?.edges
+    ? c.networks.edges.reduce<{ id: string }[]>((networks, edge) => {
+        const node = edge?.node;
+
+        if (node) {
+          networks.push({
+            id: node.id,
+          });
+        }
+
+        return networks;
+      }, [])
+    : undefined,
+  extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
+  portBindings: c.portBindings ? [...c.portBindings] : undefined,
+  binds: c.binds ? [...c.binds] : undefined,
+  volumes: c.containerVolumes?.edges
+    ? c.containerVolumes.edges.reduce<{ id: string; target: string }[]>(
+        (volumes, edge) => {
+          const node = edge?.node;
+
+          if (node) {
+            volumes.push({
+              id: node.volume.id,
+              target: node.target,
+            });
+          }
+
+          return volumes;
+        },
+        [],
+      )
+    : undefined,
+  volumeDriver: c.volumeDriver ?? undefined,
+  storageOpts: c.storageOptKeys
+    ? c.storageOptKeys.map((k, i) => ({
+        key: k,
+        value: c.storageOptValues?.[i] ?? "",
+      }))
+    : undefined,
+  tmpfs: c.tmpfsPaths
+    ? c.tmpfsPaths.map((p, i) => ({
+        path: p,
+        options: c.tmpfsOptions?.[i] ?? "",
+      }))
+    : undefined,
+  readOnlyRootfs: c.readOnlyRootfs ?? undefined,
+  autoRemove: c.autoRemove ?? undefined,
+  domainname: c.domainname ?? undefined,
+  user: c.user ?? undefined,
+  command: c.command?.join(" ") ?? undefined,
+  healthcheckTest: c.healthcheckTest?.join(" ") ?? undefined,
+  healthcheckInterval: c.healthcheckInterval ?? undefined,
+  healthcheckTimeout: c.healthcheckTimeout ?? undefined,
+  healthcheckRetries: c.healthcheckRetries ?? undefined,
+  healthcheckStartPeriod: c.healthcheckStartPeriod ?? undefined,
+  healthcheckStartInterval: c.healthcheckStartInterval ?? undefined,
+  workingDirectory: c.workingDirectory ?? undefined,
+  entrypoint: c.entrypoint?.join(" ") ?? undefined,
+  networkDisabled: c.networkDisabled ?? undefined,
+  labels: c.labelKeys
+    ? c.labelKeys.map((k, i) => ({
+        key: k,
+        value: c.labelValues?.[i] ?? "",
+      }))
+    : undefined,
+  stopSignal: c.stopSignal ?? undefined,
+  stopTimeout: c.stopTimeout ?? undefined,
+  restartPolicyMaximumRetryCount: c.restartPolicyMaximumRetryCount ?? undefined,
+  exposedPorts: c.exposedPorts ? [...c.exposedPorts] : undefined,
+  cpuShares: c.cpuShares ?? undefined,
+  cpusetCpus: c.cpusetCpus ?? undefined,
+  shmSize: c.shmSize ?? undefined,
+  oomScoreAdjustment: c.oomScoreAdjustment ?? undefined,
+  deviceCgroupRules: c.deviceCgroupRules ? [...c.deviceCgroupRules] : undefined,
+  ulimits: c.ulimitsName
+    ? c.ulimitsName.map((n, i) => ({
+        name: n,
+        soft: c.ulimitsSoft?.[i] ?? 0,
+        hard: c.ulimitsHard?.[i] ?? 0,
+      }))
+    : undefined,
+  cgroupsMode: c.cgroupsMode as
+    string | null | undefined as unknown as ContainerInputData["cgroupsMode"],
+  dns: c.dns ? [...c.dns] : undefined,
+  dnsOptions: c.dnsOptions ? [...c.dnsOptions] : undefined,
+  dnsSearch: c.dnsSearch ? [...c.dnsSearch] : undefined,
+  groupAdd: c.groupAdd ? [...c.groupAdd] : undefined,
+  ipcMode: c.ipcMode ?? undefined,
+  usernsMode: c.usernsMode ?? undefined,
+  sysctls: c.sysctlsKeys
+    ? c.sysctlsKeys.map((k, i) => ({
+        key: k,
+        value: c.sysctlsValues?.[i] ?? "",
+      }))
+    : undefined,
+  runtime: c.runtime ?? undefined,
+  logType: c.logType ?? undefined,
+  logConfig: c.logConfigKeys
+    ? c.logConfigKeys.map((k, i) => ({
+        key: k,
+        value: c.logConfigValues?.[i] ?? "",
+      }))
+    : undefined,
+  blkioWeight: c.blkioWeight ?? undefined,
+  blkioWeightDevice: c.blkioWeightDevicePath
+    ? c.blkioWeightDevicePath.map((p, i) => ({
+        path: p,
+        weight: c.blkioWeightDeviceWeight?.[i] ?? 0,
+      }))
+    : undefined,
+  blkioDeviceReadBps: c.blkioDeviceReadBpsPath
+    ? c.blkioDeviceReadBpsPath.map((p, i) => ({
+        path: p,
+        rate: c.blkioDeviceReadBpsRate?.[i] ?? 0,
+      }))
+    : undefined,
+  blkioDeviceWriteBps: c.blkioDeviceWriteBpsPath
+    ? c.blkioDeviceWriteBpsPath.map((p, i) => ({
+        path: p,
+        rate: c.blkioDeviceWriteBpsRate?.[i] ?? 0,
+      }))
+    : undefined,
+  blkioDeviceReadIops: c.blkioDeviceReadIopsPath
+    ? c.blkioDeviceReadIopsPath.map((p, i) => ({
+        path: p,
+        rate: c.blkioDeviceReadIopsRate?.[i] ?? 0,
+      }))
+    : undefined,
+  blkioDeviceWriteIops: c.blkioDeviceWriteIopsPath
+    ? c.blkioDeviceWriteIopsPath.map((p, i) => ({
+        path: p,
+        rate: c.blkioDeviceWriteIopsRate?.[i] ?? 0,
+      }))
+    : undefined,
+  securityopt: c.securityopt ? [...c.securityopt] : undefined,
+  pidMode: c.pidMode ?? undefined,
+  maskedPaths: c.maskedPaths ? [...c.maskedPaths] : undefined,
+  readonlyPaths: c.readonlyPaths ? [...c.readonlyPaths] : undefined,
+  memory: c.memory ?? undefined,
+  memoryReservation: c.memoryReservation ?? undefined,
+  memorySwap: c.memorySwap ?? undefined,
+  memorySwappiness: c.memorySwappiness ?? undefined,
+  cpuPeriod: c.cpuPeriod ?? undefined,
+  cpuQuota: c.cpuQuota ?? undefined,
+  cpuRealtimePeriod: c.cpuRealtimePeriod ?? undefined,
+  cpuRealtimeRuntime: c.cpuRealtimeRuntime ?? undefined,
+  privileged: c.privileged ?? undefined,
+  capAdd: c.capAdd ? (c.capAdd as (typeof CapAddList)[number][]) : undefined,
+  capDrop: c.capDrop
+    ? (c.capDrop as (typeof CapDropList)[number][])
+    : undefined,
+  restartPolicy: c.restartPolicy ?? undefined,
+  env: Array.isArray(c.env)
+    ? c.env.map((item) => ({
+        key: item?.key ?? "",
+        value: item?.value ?? "",
+      }))
+    : undefined,
+  deviceMappings: c.deviceMappings?.edges
+    ? c.deviceMappings.edges.reduce<
+        {
+          pathInContainer: string;
+          pathOnHost: string;
+          cgroupPermissions: string;
+        }[]
+      >((deviceMappings, edge) => {
+        const node = edge?.node;
+
+        if (node) {
+          deviceMappings.push({
+            pathInContainer: node.pathInContainer,
+            pathOnHost: node.pathOnHost,
+            cgroupPermissions: node.cgroupPermissions,
+          });
+        }
+
+        return deviceMappings;
+      }, [])
+    : undefined,
+  deviceRequests: c.deviceRequests?.edges
+    ? c.deviceRequests.edges.reduce<
+        {
+          driver: string;
+          count: number;
+          deviceIds: string[];
+          capabilities: string[];
+          options: string;
+        }[]
+      >((deviceRequests, edge) => {
+        const node = edge?.node;
+
+        if (node) {
+          deviceRequests.push({
+            driver: node.driver ?? "",
+            count: node.count ?? -1,
+            deviceIds: node.deviceIds ? [...node.deviceIds] : [],
+            capabilities:
+              node.capabilities?.map((group) => group.join(",")) ?? [],
+            options: node.options ?? "",
+          });
+        }
+
+        return deviceRequests;
+      }, [])
+    : undefined,
+  fileMounts: c.fileMounts?.edges
+    ? c.fileMounts.edges.reduce<
+        {
+          mountpoint: string;
+          required: boolean;
+          defaultFileId?: string | { id: string; value: string; label: string };
+          fileMode?: number;
+          userId?: number;
+          groupId?: number;
+        }[]
+      >((fileMounts, edge) => {
+        const node = edge?.node;
+
+        if (node) {
+          const fileId =
+            node.defaultFileId ?? node.defaultFile?.id ?? undefined;
+
+          const repoName = node.defaultFile?.repository?.name;
+          const fileName = node.defaultFile?.name;
+          const fileLabel =
+            repoName && fileName
+              ? `${repoName} / ${fileName}`
+              : (fileName ?? undefined);
+
+          fileMounts.push({
+            mountpoint: node.mountpoint,
+            required: node.required,
+            defaultFileId: fileId
+              ? fileLabel
+                ? { id: fileId, value: fileId, label: fileLabel }
+                : fileId
+              : undefined,
+            fileMode:
+              node.fileMode !== undefined && node.fileMode !== null
+                ? node.fileMode
+                : undefined,
+            userId:
+              node.userId !== undefined && node.userId !== null
+                ? node.userId
+                : undefined,
+            groupId:
+              node.groupId !== undefined && node.groupId !== null
+                ? node.groupId
+                : undefined,
+          });
+        }
+
+        return fileMounts;
+      }, [])
+    : undefined,
+});
 
 type ReuseContainerModalProps = {
   open: boolean;
@@ -279,285 +559,7 @@ const ReuseContainerModal = ({
               return;
             }
 
-            const initialData: Partial<ContainerInputData> = {
-              image: c.image
-                ? {
-                    reference: c.image.reference,
-                    imageCredentialsId: c.image.credentials?.id,
-                  }
-                : undefined,
-              hostname: c.hostname ?? undefined,
-              networkMode: c.networkMode ?? undefined,
-              networks: c.networks?.edges
-                ? c.networks.edges.reduce<{ id: string }[]>(
-                    (networks, edge) => {
-                      const node = edge?.node;
-
-                      if (node) {
-                        networks.push({
-                          id: node.id,
-                        });
-                      }
-
-                      return networks;
-                    },
-                    [],
-                  )
-                : undefined,
-              extraHosts: c.extraHosts ? [...c.extraHosts] : undefined,
-              portBindings: c.portBindings ? [...c.portBindings] : undefined,
-              binds: c.binds ? [...c.binds] : undefined,
-              volumes: c.containerVolumes?.edges
-                ? c.containerVolumes.edges.reduce<
-                    { id: string; target: string }[]
-                  >((volumes, edge) => {
-                    const node = edge?.node;
-
-                    if (node) {
-                      volumes.push({
-                        id: node.volume.id,
-                        target: node.target,
-                      });
-                    }
-
-                    return volumes;
-                  }, [])
-                : undefined,
-              volumeDriver: c.volumeDriver ?? undefined,
-              storageOpts: c.storageOptKeys
-                ? c.storageOptKeys.map((k, i) => ({
-                    key: k,
-                    value: c.storageOptValues?.[i] ?? "",
-                  }))
-                : undefined,
-              tmpfs: c.tmpfsPaths
-                ? c.tmpfsPaths.map((p, i) => ({
-                    path: p,
-                    options: c.tmpfsOptions?.[i] ?? "",
-                  }))
-                : undefined,
-              readOnlyRootfs: c.readOnlyRootfs ?? undefined,
-              autoRemove: c.autoRemove ?? undefined,
-              domainname: c.domainname ?? undefined,
-              user: c.user ?? undefined,
-              command: c.command?.join(" ") ?? undefined,
-              healthcheckTest: c.healthcheckTest?.join(" ") ?? undefined,
-              healthcheckInterval: c.healthcheckInterval ?? undefined,
-              healthcheckTimeout: c.healthcheckTimeout ?? undefined,
-              healthcheckRetries: c.healthcheckRetries ?? undefined,
-              healthcheckStartPeriod: c.healthcheckStartPeriod ?? undefined,
-              healthcheckStartInterval: c.healthcheckStartInterval ?? undefined,
-              workingDirectory: c.workingDirectory ?? undefined,
-              entrypoint: c.entrypoint?.join(" ") ?? undefined,
-              networkDisabled: c.networkDisabled ?? undefined,
-              labels: c.labelKeys
-                ? c.labelKeys.map((k, i) => ({
-                    key: k,
-                    value: c.labelValues?.[i] ?? "",
-                  }))
-                : undefined,
-              stopSignal: c.stopSignal ?? undefined,
-              stopTimeout: c.stopTimeout ?? undefined,
-              restartPolicyMaximumRetryCount:
-                c.restartPolicyMaximumRetryCount ?? undefined,
-              exposedPorts: c.exposedPorts ? [...c.exposedPorts] : undefined,
-              cpuShares: c.cpuShares ?? undefined,
-              cpusetCpus: c.cpusetCpus ?? undefined,
-              shmSize: c.shmSize ?? undefined,
-              oomScoreAdjustment: c.oomScoreAdjustment ?? undefined,
-              deviceCgroupRules: c.deviceCgroupRules
-                ? [...c.deviceCgroupRules]
-                : undefined,
-              ulimits: c.ulimitsName
-                ? c.ulimitsName.map((n, i) => ({
-                    name: n,
-                    soft: c.ulimitsSoft?.[i] ?? 0,
-                    hard: c.ulimitsHard?.[i] ?? 0,
-                  }))
-                : undefined,
-              cgroupsMode: c.cgroupsMode as
-                | string
-                | null
-                | undefined as unknown as ContainerInputData["cgroupsMode"],
-              dns: c.dns ? [...c.dns] : undefined,
-              dnsOptions: c.dnsOptions ? [...c.dnsOptions] : undefined,
-              dnsSearch: c.dnsSearch ? [...c.dnsSearch] : undefined,
-              groupAdd: c.groupAdd ? [...c.groupAdd] : undefined,
-              ipcMode: c.ipcMode ?? undefined,
-              usernsMode: c.usernsMode ?? undefined,
-              sysctls: c.sysctlsKeys
-                ? c.sysctlsKeys.map((k, i) => ({
-                    key: k,
-                    value: c.sysctlsValues?.[i] ?? "",
-                  }))
-                : undefined,
-              runtime: c.runtime ?? undefined,
-              logType: c.logType ?? undefined,
-              logConfig: c.logConfigKeys
-                ? c.logConfigKeys.map((k, i) => ({
-                    key: k,
-                    value: c.logConfigValues?.[i] ?? "",
-                  }))
-                : undefined,
-              blkioWeight: c.blkioWeight ?? undefined,
-              blkioWeightDevice: c.blkioWeightDevicePath
-                ? c.blkioWeightDevicePath.map((p, i) => ({
-                    path: p,
-                    weight: c.blkioWeightDeviceWeight?.[i] ?? 0,
-                  }))
-                : undefined,
-              blkioDeviceReadBps: c.blkioDeviceReadBpsPath
-                ? c.blkioDeviceReadBpsPath.map((p, i) => ({
-                    path: p,
-                    rate: c.blkioDeviceReadBpsRate?.[i] ?? 0,
-                  }))
-                : undefined,
-              blkioDeviceWriteBps: c.blkioDeviceWriteBpsPath
-                ? c.blkioDeviceWriteBpsPath.map((p, i) => ({
-                    path: p,
-                    rate: c.blkioDeviceWriteBpsRate?.[i] ?? 0,
-                  }))
-                : undefined,
-              blkioDeviceReadIops: c.blkioDeviceReadIopsPath
-                ? c.blkioDeviceReadIopsPath.map((p, i) => ({
-                    path: p,
-                    rate: c.blkioDeviceReadIopsRate?.[i] ?? 0,
-                  }))
-                : undefined,
-              blkioDeviceWriteIops: c.blkioDeviceWriteIopsPath
-                ? c.blkioDeviceWriteIopsPath.map((p, i) => ({
-                    path: p,
-                    rate: c.blkioDeviceWriteIopsRate?.[i] ?? 0,
-                  }))
-                : undefined,
-              securityopt: c.securityopt ? [...c.securityopt] : undefined,
-              pidMode: c.pidMode ?? undefined,
-              maskedPaths: c.maskedPaths ? [...c.maskedPaths] : undefined,
-              readonlyPaths: c.readonlyPaths ? [...c.readonlyPaths] : undefined,
-              memory: c.memory ?? undefined,
-              memoryReservation: c.memoryReservation ?? undefined,
-              memorySwap: c.memorySwap ?? undefined,
-              memorySwappiness: c.memorySwappiness ?? undefined,
-              cpuPeriod: c.cpuPeriod ?? undefined,
-              cpuQuota: c.cpuQuota ?? undefined,
-              cpuRealtimePeriod: c.cpuRealtimePeriod ?? undefined,
-              cpuRealtimeRuntime: c.cpuRealtimeRuntime ?? undefined,
-              privileged: c.privileged ?? undefined,
-              capAdd: c.capAdd
-                ? (c.capAdd as (typeof CapAddList)[number][])
-                : undefined,
-              capDrop: c.capDrop
-                ? (c.capDrop as (typeof CapDropList)[number][])
-                : undefined,
-              restartPolicy: c.restartPolicy ?? undefined,
-              env: Array.isArray(c.env)
-                ? c.env.map((item) => ({
-                    key: item?.key ?? "",
-                    value: item?.value ?? "",
-                  }))
-                : undefined,
-              deviceMappings: c.deviceMappings?.edges
-                ? c.deviceMappings.edges.reduce<
-                    {
-                      pathInContainer: string;
-                      pathOnHost: string;
-                      cgroupPermissions: string;
-                    }[]
-                  >((deviceMappings, edge) => {
-                    const node = edge?.node;
-
-                    if (node) {
-                      deviceMappings.push({
-                        pathInContainer: node.pathInContainer,
-                        pathOnHost: node.pathOnHost,
-                        cgroupPermissions: node.cgroupPermissions,
-                      });
-                    }
-
-                    return deviceMappings;
-                  }, [])
-                : undefined,
-              deviceRequests: c.deviceRequests?.edges
-                ? c.deviceRequests.edges.reduce<
-                    {
-                      driver: string;
-                      count: number;
-                      deviceIds: string[];
-                      capabilities: string[];
-                      options: string;
-                    }[]
-                  >((deviceRequests, edge) => {
-                    const node = edge?.node;
-
-                    if (node) {
-                      deviceRequests.push({
-                        driver: node.driver ?? "",
-                        count: node.count ?? -1,
-                        deviceIds: node.deviceIds ? [...node.deviceIds] : [],
-                        capabilities:
-                          node.capabilities?.map((group) => group.join(",")) ??
-                          [],
-                        options: node.options ?? "",
-                      });
-                    }
-
-                    return deviceRequests;
-                  }, [])
-                : undefined,
-              fileMounts: c.fileMounts?.edges
-                ? c.fileMounts.edges.reduce<
-                    {
-                      mountpoint: string;
-                      required: boolean;
-                      defaultFileId?:
-                        string | { id: string; value: string; label: string };
-                      fileMode?: number;
-                      userId?: number;
-                      groupId?: number;
-                    }[]
-                  >((fileMounts, edge) => {
-                    const node = edge?.node;
-
-                    if (node) {
-                      const fileId =
-                        node.defaultFileId ?? node.defaultFile?.id ?? undefined;
-
-                      const repoName = node.defaultFile?.repository?.name;
-                      const fileName = node.defaultFile?.name;
-                      const fileLabel =
-                        repoName && fileName
-                          ? `${repoName} / ${fileName}`
-                          : (fileName ?? undefined);
-
-                      fileMounts.push({
-                        mountpoint: node.mountpoint,
-                        required: node.required,
-                        defaultFileId: fileId
-                          ? fileLabel
-                            ? { id: fileId, value: fileId, label: fileLabel }
-                            : fileId
-                          : undefined,
-                        fileMode:
-                          node.fileMode !== undefined && node.fileMode !== null
-                            ? node.fileMode
-                            : undefined,
-                        userId:
-                          node.userId !== undefined && node.userId !== null
-                            ? node.userId
-                            : undefined,
-                        groupId:
-                          node.groupId !== undefined && node.groupId !== null
-                            ? node.groupId
-                            : undefined,
-                      });
-                    }
-
-                    return fileMounts;
-                  }, [])
-                : undefined,
-            };
-
-            setInitialData(initialData);
+            setInitialData(mapContainerToFormData(c));
             onToggleModal(false);
           })
           .finally(() => {
