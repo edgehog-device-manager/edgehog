@@ -219,8 +219,16 @@ defmodule Edgehog.Containers.Container do
       require_atomic? false
       validate NoRefs
 
-      change {Changes.MaybeDestroyChildren,
-              children: [:image, :device_mappings, :device_requests]}
+      change {Changes.MaybeDestroyChildren, children: [:image, :volumes, :networks]}
+    end
+
+    destroy :destroy_if_dangling do
+      description "Destroys the container if it's dangling (not referenced by any release or deployment)"
+
+      require_atomic? false
+      validate NoRefs
+
+      change {Changes.MaybeDestroyChildren, children: [:image, :volumes, :networks]}
     end
   end
 

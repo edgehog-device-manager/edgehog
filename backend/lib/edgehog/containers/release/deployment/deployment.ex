@@ -300,7 +300,9 @@ defmodule Edgehog.Containers.Release.Deployment do
 
     destroy :destroy_and_gc do
       require_atomic? false
-      change {Edgehog.Containers.Changes.MaybeDestroyChildren, children: [:container_deployments]}
+
+      change {Edgehog.Containers.Changes.MaybeDestroyChildren,
+              children: [:container_deployments, :release]}
     end
   end
 
