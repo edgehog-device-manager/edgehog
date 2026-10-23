@@ -168,6 +168,24 @@ defmodule Edgehog.Containers do
                               ]
       end
 
+      update Release, :update_release, :update do
+        description "Update a release."
+        read_action :plain_releases
+
+        relay_id_translations input: [
+                                containers: [
+                                  id: :container
+                                ],
+                                container_dependencies: [
+                                  container_id: :container,
+                                  dependency_id: :container
+                                ],
+                                required_system_models: [
+                                  id: :system_model
+                                ]
+                              ]
+      end
+
       create Container, :create_container, :create_and_relate do
         description "Create a new container"
 

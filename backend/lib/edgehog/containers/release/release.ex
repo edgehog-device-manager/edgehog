@@ -38,7 +38,7 @@ defmodule Edgehog.Containers.Release do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :release do
-        actions [:create, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 
@@ -79,6 +79,43 @@ defmodule Edgehog.Containers.Release do
       change manage_relationship(:required_system_models, :system_models, type: :append)
 
       change manage_relationship(:container_dependencies, type: :create)
+
+      validate {UniquePlainResource,
+                keys: [:version, :application_id], read_action: :plain_releases, field: :version}
+
+      validate Release.Validations.NoCircularDependencies
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+
+      accept [:version]
+
+      argument :containers, {:array, :map}
+
+      argument :container_dependencies, {:array, :map} do
+        default []
+      end
+
+      argument :required_system_models, {:array, :map}
+
+      change manage_relationship(:containers,
+               on_lookup: :relate,
+               on_no_match: :error,
+               on_match: :ignore,
+               on_missing: :unrelate
+             )
+
+      change manage_relationship(:required_system_models, :system_models,
+               type: :append_and_remove
+             )
+
+      change manage_relationship(:container_dependencies,
+               on_lookup: :ignore,
+               on_no_match: :create,
+               on_missing: :destroy
+             )
 
       validate {UniquePlainResource,
                 keys: [:version, :application_id], read_action: :plain_releases, field: :version}
