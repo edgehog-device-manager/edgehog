@@ -48,6 +48,16 @@ defmodule Edgehog.Containers.Volume do
       update: [:driver, :options]
     ]
 
+    read :plain_volumes do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(volume_deployments, true))
+    end
+
+    read :deployed_volumes do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(volume_deployments, true))
+    end
+
     destroy :destroy_if_dangling do
       description "Destroys the volume if it's dangling (not referenced by any container)"
 

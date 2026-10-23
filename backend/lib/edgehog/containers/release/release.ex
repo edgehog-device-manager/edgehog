@@ -47,6 +47,16 @@ defmodule Edgehog.Containers.Release do
   actions do
     defaults [:read]
 
+    read :plain_releases do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(deployments, true))
+    end
+
+    read :deployed_releases do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(deployments, true))
+    end
+
     create :create do
       primary? true
 

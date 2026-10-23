@@ -44,6 +44,16 @@ defmodule Edgehog.Containers.Network do
   actions do
     defaults [:read, :destroy, create: [:label, :driver, :internal, :enable_ipv6, :options]]
 
+    read :plain_networks do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(network_deployments, true))
+    end
+
+    read :deployed_networks do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(network_deployments, true))
+    end
+
     destroy :destroy_if_dangling do
       description "Destroys the network if it's dangling (not referenced by any container)"
 
