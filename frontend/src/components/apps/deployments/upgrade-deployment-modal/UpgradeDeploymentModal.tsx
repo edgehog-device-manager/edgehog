@@ -165,10 +165,15 @@ const UPGRADE_DEPLOYMENT_MUTATION = graphql`
               id
               container {
                 id
+                name
               }
               fileBinds {
                 id
                 fileMountId
+                fileMount {
+                  id
+                  mountpoint
+                }
                 uploaded
                 uploadUrl
               }
@@ -242,6 +247,15 @@ type SelectOption = {
   value: string;
   label: string;
   disabled: boolean;
+};
+
+type PendingFileBindUpload = PendingUploadData & {
+  containerName: string;
+  mountpoint: string;
+};
+
+type PendingEnvFileUpload = EnvFilePendingUpload & {
+  containerName: string;
 };
 
 const UpgradeDeploymentModal = ({
@@ -602,8 +616,8 @@ const UpgradeDeploymentModal = ({
     setErrorFeedback(null);
 
     try {
-      const pendingUploads: PendingUploadData[] = [];
-      const pendingEnvUploads: EnvFilePendingUpload[] = [];
+      const pendingUploads: PendingFileBindUpload[] = [];
+      const pendingEnvUploads: PendingEnvFileUpload[] = [];
       const mountSpecs: Record<string, FileBindSpecInput> = {};
       const envFileSpecs: Record<string, EnvFileSpecInput> = {};
 
@@ -615,7 +629,11 @@ const UpgradeDeploymentModal = ({
             if (res?.spec) {
               mountSpecs[mount.id] = res.spec;
               if (res.pendingUpload) {
-                pendingUploads.push(res.pendingUpload);
+                pendingUploads.push({
+                  ...res.pendingUpload,
+                  containerName: container.name,
+                  mountpoint: mount.mountpoint,
+                });
               }
             } else if (
               mount.required &&
@@ -645,7 +663,10 @@ const UpgradeDeploymentModal = ({
           if (res?.spec) {
             envFileSpecs[container.id] = res.spec;
             if (res.pendingUpload) {
-              pendingEnvUploads.push(res.pendingUpload);
+              pendingEnvUploads.push({
+                ...res.pendingUpload,
+                containerName: container.name,
+              });
             }
           }
         }
@@ -752,23 +773,12 @@ const UpgradeDeploymentModal = ({
                       (node): node is NonNullable<typeof node> => !!node,
                     ) ?? [];
 
-                const allFileBinds = containerDeployments.flatMap(
-                  (cd) => cd.fileBinds ?? [],
-                );
-
                 for (const pending of pendingUploads) {
-                  let decodedMountId: string;
-                  try {
-                    decodedMountId =
-                      atob(pending.fileMountId).split(":")[1] ||
-                      pending.fileMountId;
-                  } catch {
-                    decodedMountId = pending.fileMountId;
-                  }
-                  const matchingBind = allFileBinds.find(
-                    (fb) =>
-                      fb.fileMountId === decodedMountId ||
-                      fb.fileMountId === pending.fileMountId,
+                  const matchingDeployment = containerDeployments.find(
+                    (cd) => cd.container?.name === pending.containerName,
+                  );
+                  const matchingBind = matchingDeployment?.fileBinds?.find(
+                    (fb) => fb.fileMount?.mountpoint === pending.mountpoint,
                   );
 
                   if (!matchingBind || !matchingBind.uploadUrl) {
@@ -806,7 +816,7 @@ const UpgradeDeploymentModal = ({
 
                 for (const pending of pendingEnvUploads) {
                   const matchingDeployment = containerDeployments.find(
-                    (cd) => cd.container?.id === pending.containerId,
+                    (cd) => cd.container?.name === pending.containerName,
                   );
                   const matchingEnvFile = matchingDeployment?.envFiles?.find(
                     (envFile) => envFile.uploadUrl,

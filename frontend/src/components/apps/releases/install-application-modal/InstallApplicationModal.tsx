@@ -158,12 +158,14 @@ const DEPLOY_RELEASE_MUTATION = graphql`
               id
               container {
                 id
+                name
               }
               fileBinds {
                 id
                 fileMountId
                 fileMount {
                   id
+                  mountpoint
                 }
                 uploaded
                 uploadUrl
@@ -233,6 +235,15 @@ type SelectOption = {
   value: string;
   label: string;
   disabled: boolean;
+};
+
+type PendingFileBindUpload = PendingUploadData & {
+  containerName: string;
+  mountpoint: string;
+};
+
+type PendingEnvFileUpload = EnvFilePendingUpload & {
+  containerName: string;
 };
 
 const InstallApplicationModal = ({
@@ -634,8 +645,8 @@ const InstallApplicationModal = ({
     setErrorFeedback(null);
 
     try {
-      const pendingUploads: PendingUploadData[] = [];
-      const pendingEnvUploads: EnvFilePendingUpload[] = [];
+      const pendingUploads: PendingFileBindUpload[] = [];
+      const pendingEnvUploads: PendingEnvFileUpload[] = [];
       const mountSpecs: Record<string, FileBindSpecInput> = {};
       const envFileSpecs: Record<string, EnvFileSpecInput> = {};
 
@@ -647,7 +658,11 @@ const InstallApplicationModal = ({
             if (res?.spec) {
               mountSpecs[mount.id] = res.spec;
               if (res.pendingUpload) {
-                pendingUploads.push(res.pendingUpload);
+                pendingUploads.push({
+                  ...res.pendingUpload,
+                  containerName: container.name,
+                  mountpoint: mount.mountpoint,
+                });
               }
             } else if (
               mount.required &&
@@ -679,7 +694,10 @@ const InstallApplicationModal = ({
           if (res?.spec) {
             envFileSpecs[container.id] = res.spec;
             if (res.pendingUpload) {
-              pendingEnvUploads.push(res.pendingUpload);
+              pendingEnvUploads.push({
+                ...res.pendingUpload,
+                containerName: container.name,
+              });
             }
           }
         }
@@ -764,13 +782,12 @@ const InstallApplicationModal = ({
                       (node): node is NonNullable<typeof node> => !!node,
                     ) ?? [];
 
-                const allFileBinds = containerDeployments.flatMap(
-                  (cd) => cd.fileBinds ?? [],
-                );
-
                 for (const pending of pendingUploads) {
-                  const matchingBind = allFileBinds.find(
-                    (fb) => fb.fileMount.id === pending.fileMountId,
+                  const matchingDeployment = containerDeployments.find(
+                    (cd) => cd.container?.name === pending.containerName,
+                  );
+                  const matchingBind = matchingDeployment?.fileBinds?.find(
+                    (fb) => fb.fileMount?.mountpoint === pending.mountpoint,
                   );
 
                   if (!matchingBind || !matchingBind.uploadUrl) {
@@ -807,10 +824,8 @@ const InstallApplicationModal = ({
                 }
 
                 for (const pending of pendingEnvUploads) {
-                  // pending.containerId and cd.container.id are both GraphQL
-                  // global IDs of the container, so they compare directly.
                   const matchingDeployment = containerDeployments.find(
-                    (cd) => cd.container?.id === pending.containerId,
+                    (cd) => cd.container?.name === pending.containerName,
                   );
                   const matchingEnvFile = matchingDeployment?.envFiles?.find(
                     (envFile) => envFile.uploadUrl,

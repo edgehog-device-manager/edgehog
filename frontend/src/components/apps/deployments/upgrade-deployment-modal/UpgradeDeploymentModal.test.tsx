@@ -506,7 +506,7 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
                 {
                   node: {
                     id: "cd-1",
-                    container: { id: "container-1" },
+                    container: { id: "copied-container-1", name: "app" },
                     fileBinds: [],
                     envFiles: [
                       {
@@ -637,11 +637,15 @@ it("uploads a file mount via presigned URL and marks it as uploaded", async () =
                 {
                   node: {
                     id: "cd-1",
-                    container: { id: "container-1" },
+                    container: { id: "copied-container-1", name: "app" },
                     fileBinds: [
                       {
                         id: "file-bind-1",
-                        fileMountId: "mount-1",
+                        fileMountId: "copied-mount-1",
+                        fileMount: {
+                          id: "copied-mount-1",
+                          mountpoint: "/etc/app.conf",
+                        },
                         uploaded: false,
                         uploadUrl: "https://s3.example.com/upload-bind",
                       },
