@@ -6287,6 +6287,7 @@ input ApplicationFilterInput {
   name: ApplicationFilterName
   description: ApplicationFilterDescription
   releases: ReleaseFilterInput
+  deployments: DeploymentFilterInput
 }
 
 input ApplicationSortInput {
@@ -6317,6 +6318,25 @@ type Application implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ReleaseConnection!
+  deployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection!
 }
 
 type system_model_part_number_result {
@@ -10885,7 +10905,10 @@ type RootQueryType {
   """
   forwarderConfig: ForwarderConfig
 
-  "Fetches a forwarder session by its token and the device ID. Returns the authorized"
+  """
+  Fetches a forwarder session by its token and the device ID.
+  Returns a signed token for future requests to the edgehog device forwarder.
+  """
   forwarderSession(
     token: String!
     protocol: String
