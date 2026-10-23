@@ -3111,11 +3111,17 @@
   "forms.CreateRelease.dependsOnLabel": {
     "defaultMessage": "Depends on"
   },
+  "forms.CreateRelease.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateRelease.submitButton": {
     "defaultMessage": "Create"
   },
   "forms.CreateRelease.supportedSystemModelsLabels": {
     "defaultMessage": "Supported System Models"
+  },
+  "forms.CreateRelease.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
@@ -5176,6 +5182,9 @@
   },
   "pages.Release.systemModels": {
     "defaultMessage": "System Models"
+  },
+  "pages.Release.updateErrorFeedback": {
+    "defaultMessage": "Could not update the release, please try again."
   },
   "pages.ReleaseCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the release, please try again."
