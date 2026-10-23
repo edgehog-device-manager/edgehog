@@ -18,12 +18,13 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage, useIntl } from "react-intl";
 import {
   graphql,
   PreloadedQuery,
+  useMutation,
   usePaginationFragment,
   usePreloadedQuery,
   useQueryLoader,
@@ -38,6 +39,10 @@ import type {
   Release_getRelease_Query,
   Release_getRelease_Query$data,
 } from "@/api/__generated__/Release_getRelease_Query.graphql";
+import type {
+  Release_updateRelease_Mutation,
+  UpdateReleaseInput,
+} from "@/api/__generated__/Release_updateRelease_Mutation.graphql";
 import { ReleaseDevices_PaginationQuery } from "@/api/__generated__/ReleaseDevices_PaginationQuery.graphql";
 
 import Alert from "@/components/ui/alert/Alert";
@@ -50,24 +55,90 @@ import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
 import Tabs, { Tab } from "@/components/ui/tabs/Tabs";
 import { RECORDS_TO_LOAD_FIRST } from "@/constants";
+import CreateRelease from "@/forms/CreateRelease";
+import { ReleaseFormData } from "@/forms/validation";
 import useRelayConnectionPagination from "@/hooks/useRelayConnectionPagination";
 import { Link, Route, useNavigate } from "@/Navigation";
 
 const GET_RELEASE_QUERY = graphql`
   query Release_getRelease_Query($releaseId: ID!, $first: Int, $after: String) {
     release(id: $releaseId) {
+      id
       version
       application {
         name
+      }
+      systemModels {
+        id
+      }
+      selectedContainers: containers {
+        edges {
+          node {
+            id
+          }
+        }
+      }
+      containerDependencies {
+        edges {
+          node {
+            container {
+              id
+            }
+            dependency {
+              id
+            }
+          }
+        }
       }
       ...Release_ContainersFragment
       ...ReleaseSystemModelsTable_SystemModelsFragment
       ...Release_DeploymentsFragment
     }
+    ...hooks_SystemModelsOptionsFragment
+    ...hooks_ContainersOptionsFragment
   }
 `;
 
-/* eslint-disable relay/unused-fields */
+const UPDATE_RELEASE_MUTATION = graphql`
+  mutation Release_updateRelease_Mutation(
+    $releaseId: ID!
+    $input: UpdateReleaseInput!
+    $first: Int
+    $after: String
+  ) {
+    updateRelease(id: $releaseId, input: $input) {
+      result {
+        id
+        version
+        systemModels {
+          id
+        }
+        selectedContainers: containers {
+          edges {
+            node {
+              id
+            }
+          }
+        }
+        containerDependencies {
+          edges {
+            node {
+              container {
+                id
+              }
+              dependency {
+                id
+              }
+            }
+          }
+        }
+        ...Release_ContainersFragment
+        ...ReleaseSystemModelsTable_SystemModelsFragment
+      }
+    }
+  }
+`;
+
 const DEPLOYMENTS_FRAGMENT = graphql`
   fragment Release_DeploymentsFragment on Release
   @refetchable(queryName: "ReleaseDevices_PaginationQuery") {
@@ -83,7 +154,6 @@ const DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
-/* eslint-disable relay/unused-fields */
 const CONTAINERS_FRAGMENT = graphql`
   fragment Release_ContainersFragment on Release
   @refetchable(queryName: "ReleaseContainers_PaginationQuery") {
@@ -184,9 +254,10 @@ const ReleaseDevicesLayoutContainer = ({
 
 interface ReleaseContentProps {
   release: NonNullable<Release_getRelease_Query$data["release"]>;
+  queryData: Release_getRelease_Query$data;
 }
 
-const ReleaseContent = ({ release }: ReleaseContentProps) => {
+const ReleaseContent = ({ release, queryData }: ReleaseContentProps) => {
   const intl = useIntl();
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
@@ -194,6 +265,74 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
   const navigate = useNavigate();
 
   const currentTabKey = activeTab || TAB_KEYS[0];
+
+  const [updateRelease, isUpdatingRelease] =
+    useMutation<Release_updateRelease_Mutation>(UPDATE_RELEASE_MUTATION);
+
+  const handleUpdateRelease = useCallback(
+    (releaseData: UpdateReleaseInput) => {
+      updateRelease({
+        variables: {
+          releaseId,
+          input: releaseData,
+          first: RECORDS_TO_LOAD_FIRST,
+        },
+        onCompleted(_data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.Release.updateErrorFeedback"
+              defaultMessage="Could not update the release, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateRelease, releaseId],
+  );
+
+  const defaultValues = useMemo<ReleaseFormData>(() => {
+    const dependenciesByContainer = new Map<string, string[]>();
+    for (const edge of release.containerDependencies.edges ?? []) {
+      if (!edge?.node) continue;
+      const containerId = edge.node.container.id;
+      const dependencyId = edge.node.dependency.id;
+      const deps = dependenciesByContainer.get(containerId) ?? [];
+      deps.push(dependencyId);
+      dependenciesByContainer.set(containerId, deps);
+    }
+
+    return {
+      version: release.version,
+      requiredSystemModels: release.systemModels.map((sm) => ({ id: sm.id })),
+      containers:
+        release.selectedContainers.edges?.flatMap((e) =>
+          e?.node ? [{ id: e.node.id }] : [],
+        ) ?? [],
+      containerDependencies: Array.from(
+        dependenciesByContainer.entries(),
+        ([containerId, dependencies]) => ({
+          containerId,
+          dependencies,
+        }),
+      ),
+    };
+  }, [
+    release.version,
+    release.systemModels,
+    release.selectedContainers,
+    release.containerDependencies,
+  ]);
 
   return (
     <Page>
@@ -209,6 +348,16 @@ const ReleaseContent = ({ release }: ReleaseContentProps) => {
         >
           {errorFeedback}
         </Alert>
+
+        <Card className="border-0 p-3 shadow-sm mb-3">
+          <CreateRelease
+            requiredSystemModelsOptionsRef={queryData}
+            containersOptionsRef={queryData}
+            defaultValues={defaultValues}
+            onSubmit={handleUpdateRelease}
+            isLoading={isUpdatingRelease}
+          />
+        </Card>
 
         <Tabs
           className="pt-3 d-flex flex-column flex-grow-1"
@@ -258,10 +407,11 @@ type ReleaseWrapperProps = {
 };
 
 const ReleaseWrapper = ({ getReleaseQuery }: ReleaseWrapperProps) => {
-  const { release } = usePreloadedQuery<Release_getRelease_Query>(
+  const queryData = usePreloadedQuery<Release_getRelease_Query>(
     GET_RELEASE_QUERY,
     getReleaseQuery,
   );
+  const { release } = queryData;
 
   if (!release) {
     return (
@@ -283,7 +433,7 @@ const ReleaseWrapper = ({ getReleaseQuery }: ReleaseWrapperProps) => {
     );
   }
 
-  return <ReleaseContent release={release} />;
+  return <ReleaseContent release={release} queryData={queryData} />;
 };
 
 const ReleasePage = () => {
