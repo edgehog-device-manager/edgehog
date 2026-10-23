@@ -22,6 +22,7 @@ defmodule EdgehogWeb.Schema.Query.ApplicationsTest do
   use EdgehogWeb.GraphqlCase, async: true
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
 
   test "can access releases through a relationship", %{tenant: tenant} do
     app = application_fixture(tenant: tenant)
@@ -53,6 +54,83 @@ defmodule EdgehogWeb.Schema.Query.ApplicationsTest do
     for {release, result} <- Enum.zip(releases, results) do
       assert result["version"] == release.version
     end
+  end
+
+  test "can access deployments of an application through a relationship", %{tenant: tenant} do
+    app = application_fixture(tenant: tenant)
+
+    release =
+      release_fixture(
+        application_id: app.id,
+        version: "1.2.0",
+        system_models: 1,
+        tenant: tenant
+      )
+
+    device = device_fixture_compatible_with_release(release_id: release.id, tenant: tenant)
+
+    deployment =
+      deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
+
+    document =
+      """
+      query ($id: ID!) {
+        application(id: $id) {
+          releases {
+            edges {
+              node {
+                id
+                version
+              }
+            }
+          }
+          deployments {
+            edges {
+              node {
+                id
+                device {
+                  id
+                }
+                release {
+                  version
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+    id = AshGraphql.Resource.encode_relay_id(app)
+
+    application =
+      [tenant: tenant, id: id, document: document]
+      |> get_application()
+      |> extract_result!()
+
+    release_nodes =
+      application
+      |> get_in(["application", "releases", "edges"])
+      |> Enum.map(& &1["node"])
+
+    assert [%{"id" => plain_release_id, "version" => "1.2.0"}] = release_nodes
+    assert plain_release_id == AshGraphql.Resource.encode_relay_id(release)
+
+    deployment_nodes =
+      application
+      |> get_in(["application", "deployments", "edges"])
+      |> Enum.map(& &1["node"])
+
+    assert [
+             %{
+               "id" => deployment_id,
+               "device" => %{"id" => device_id},
+               "release" => %{"version" => "1.2.0"}
+             }
+           ] = deployment_nodes
+
+    assert deployment_id == AshGraphql.Resource.encode_relay_id(deployment)
+    assert device_id == AshGraphql.Resource.encode_relay_id(device)
   end
 
   defp get_application(opts) do
