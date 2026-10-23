@@ -354,7 +354,7 @@ const baseImageStartingVersionRequirementSchema = z
 
 const imageSchema = z.object({
   reference: z.string().min(1),
-  imageCredentialsId: z.string().optional(),
+  imageCredentialsId: z.string().nullish(),
 });
 
 const nullableTrimString = z

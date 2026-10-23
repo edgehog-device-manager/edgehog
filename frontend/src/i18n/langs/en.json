@@ -2475,6 +2475,9 @@
   "forms.CreateContainer.blkioWeightValueLabel": {
     "defaultMessage": "Weight"
   },
+  "forms.CreateContainer.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "forms.CreateContainer.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
   },
@@ -2624,6 +2627,9 @@
   },
   "forms.CreateContainer.requestsAddButton": {
     "defaultMessage": "Add Request"
+  },
+  "forms.CreateContainer.resetButton": {
+    "defaultMessage": "Reset"
   },
   "forms.CreateContainer.resourceLimitsCpuPeriodLabel": {
     "defaultMessage": "CPU Period (microseconds)"
@@ -2810,6 +2816,9 @@
   },
   "forms.CreateContainer.ulimitsSoftLabel": {
     "defaultMessage": "Soft"
+  },
+  "forms.CreateContainer.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateDeploymentCampaign.applicationLabel": {
     "defaultMessage": "Application"
@@ -4825,9 +4834,6 @@
   "pages.Container.containerNotFound.title": {
     "defaultMessage": "Container not found."
   },
-  "pages.Container.deleteButton": {
-    "defaultMessage": "Delete"
-  },
   "pages.Container.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Container <bold>{name}</bold>."
   },
@@ -4836,9 +4842,6 @@
   },
   "pages.Container.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Container, please try again."
-  },
-  "pages.Container.name": {
-    "defaultMessage": "Container Name"
   },
   "pages.Container.updateContainerErrorFeedback": {
     "defaultMessage": "Could not update the container, please try again."
