@@ -402,6 +402,7 @@ defmodule Edgehog.Containers.Release.Deployment do
 
     references do
       reference :device, on_delete: :delete
+      reference :release, on_delete: :delete
     end
   end
 end
