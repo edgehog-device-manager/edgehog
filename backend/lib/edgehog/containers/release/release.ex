@@ -38,7 +38,7 @@ defmodule Edgehog.Containers.Release do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :release do
-        action_types [:create, :destroy]
+        actions [:create, :destroy]
       end
     end
 
