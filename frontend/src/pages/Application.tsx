@@ -33,6 +33,8 @@ import {
 } from "react-relay/hooks";
 import { useParams } from "react-router-dom";
 
+import { ApplicationDeployments_PaginationQuery } from "@/api/__generated__/ApplicationDeployments_PaginationQuery.graphql";
+import { Application_DeploymentsFragment$key } from "@/api/__generated__/Application_DeploymentsFragment.graphql";
 import { Application_ReleasesFragment$key } from "@/api/__generated__/Application_ReleasesFragment.graphql";
 import type {
   Application_getApplication_Query,
@@ -67,6 +69,8 @@ const GET_APPLICATION_QUERY = graphql`
       description
       ...Application_ReleasesFragment
         @arguments(first: $first, after: $after, filter: $filter)
+      ...Application_DeploymentsFragment
+        @arguments(first: $first, after: $after)
     }
   }
 `;
@@ -89,7 +93,23 @@ const RELEASES_FRAGMENT = graphql`
         }
       }
       ...ReleasesTable_ReleaseEdgeFragment
-      ...ApplicationDevicesTable_ReleaseEdgeFragment
+    }
+  }
+`;
+
+/* eslint-disable relay/unused-fields */
+const DEPLOYMENTS_FRAGMENT = graphql`
+  fragment Application_DeploymentsFragment on Application
+  @refetchable(queryName: "ApplicationDeployments_PaginationQuery")
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    deployments(first: $first, after: $after)
+      @connection(key: "Application_deployments") {
+      edges {
+        node {
+          __typename
+        }
+      }
+      ...ApplicationDevicesTable_DeploymentEdgeFragment
     }
   }
 `;
@@ -261,9 +281,9 @@ const DevicesLayoutContainer = ({
   applicationRef,
 }: DevicesLayoutContainerProps) => {
   const { data, loadNext, hasNext, isLoadingNext } = usePaginationFragment<
-    Releases_PaginationQuery,
-    Application_ReleasesFragment$key
-  >(RELEASES_FRAGMENT, applicationRef);
+    ApplicationDeployments_PaginationQuery,
+    Application_DeploymentsFragment$key
+  >(DEPLOYMENTS_FRAGMENT, applicationRef);
 
   const { onLoadMore } = useRelayConnectionPagination({
     hasNext,
@@ -271,7 +291,7 @@ const DevicesLayoutContainer = ({
     loadNext,
   });
 
-  const applicationDevicesRef = data?.releases;
+  const applicationDevicesRef = data?.deployments;
 
   if (!applicationDevicesRef) {
     return null;
