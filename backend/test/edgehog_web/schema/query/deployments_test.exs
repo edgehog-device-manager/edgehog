@@ -56,16 +56,17 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
   end
 
   test "can access release and device trough relationships", context do
-    %{tenant: tenant, deployment: deployment, device: device, release: release} = context
+    %{tenant: tenant, deployment: deployment, device: device} = context
 
     id = AshGraphql.Resource.encode_relay_id(deployment)
+    deployment = Ash.load!(deployment, :release, tenant: tenant)
 
     deployment_result =
       [tenant: tenant, id: id]
       |> list_deployments()
       |> extract_result!()
 
-    expected_release_id = AshGraphql.Resource.encode_relay_id(release)
+    expected_release_id = AshGraphql.Resource.encode_relay_id(deployment.release)
     expected_device_id = AshGraphql.Resource.encode_relay_id(device)
 
     assert [deployment_result] = deployment_result["deployments"]["edges"]
@@ -77,7 +78,10 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
     %{tenant: tenant, release: release} = context
     device = device_fixture(tenant: tenant)
 
-    deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
+    deployment =
+      [device_id: device.id, release_id: release.id, tenant: tenant]
+      |> deployment_fixture()
+      |> Ash.load!(:release, tenant: tenant)
 
     document =
       """
@@ -101,7 +105,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
       |> list_deployments()
       |> extract_result!()
 
-    expected_release_id = AshGraphql.Resource.encode_relay_id(release)
+    expected_release_id = AshGraphql.Resource.encode_relay_id(deployment.release)
 
     assert [deployment_result] = deployment_result["deployments"]["edges"]
     assert deployment_result["node"]["release"]["id"] == expected_release_id
@@ -112,7 +116,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
 
     release = release_fixture(application_id: app.id, tenant: tenant)
 
-    deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
+    deployment = deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
 
     document =
       """
@@ -129,7 +133,7 @@ defmodule EdgehogWeb.Schema.Query.DeploymentsTest do
       }
       """
 
-    variables = %{"filter" => %{"release" => %{"id" => %{"eq" => release.id}}}}
+    variables = %{"filter" => %{"release" => %{"id" => %{"eq" => deployment.release_id}}}}
 
     deployment_result =
       [tenant: tenant, document: document, variables: variables]

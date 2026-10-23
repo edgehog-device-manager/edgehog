@@ -224,12 +224,22 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
         target_count,
         fn deployment, tenant ->
           # The upgraded deployment must already have its container deployments
-          # visible to the supervisor
-          deployment = Ash.load!(deployment, :container_deployments, tenant: tenant)
+          # visible to the supervisor, referencing the copied containers of the new release
+          deployment =
+            Ash.load!(deployment, [:container_deployments, release: :containers], tenant: tenant)
 
-          assert deployment.container_deployments
-                 |> Enum.map(& &1.container_id)
-                 |> Enum.sort() == target_container_ids
+          deployed_container_ids =
+            deployment.container_deployments
+            |> Enum.map(& &1.container_id)
+            |> Enum.sort()
+
+          release_container_ids =
+            deployment.release.containers
+            |> Enum.map(& &1.id)
+            |> Enum.sort()
+
+          assert deployed_container_ids == release_container_ids
+          assert deployed_container_ids != target_container_ids
 
           device_id =
             deployment

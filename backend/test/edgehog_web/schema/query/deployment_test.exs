@@ -54,17 +54,17 @@ defmodule EdgehogWeb.Schema.Query.DeploymentTest do
   test "can access release and device trough relationships", %{
     tenant: tenant,
     deployment: deployment,
-    release: release,
     device: device
   } do
     id = AshGraphql.Resource.encode_relay_id(deployment)
+    deployment = Ash.load!(deployment, :release, tenant: tenant)
 
     deployment_result =
       [tenant: tenant, id: id]
       |> get_deployment()
       |> extract_result!()
 
-    expected_release_id = AshGraphql.Resource.encode_relay_id(release)
+    expected_release_id = AshGraphql.Resource.encode_relay_id(deployment.release)
     expected_device_id = AshGraphql.Resource.encode_relay_id(device)
 
     assert deployment_result["release"]["id"] == expected_release_id

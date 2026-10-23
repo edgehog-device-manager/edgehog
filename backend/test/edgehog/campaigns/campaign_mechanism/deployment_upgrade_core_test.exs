@@ -181,7 +181,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -280,7 +281,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -307,10 +309,11 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       [container_deployment] = deployment.container_deployments
 
       file_binds =
-        Ash.load!(container_deployment, :file_binds, tenant: tenant.tenant_id).file_binds
+        Ash.load!(container_deployment, [file_binds: :file_mount], tenant: tenant.tenant_id).file_binds
 
       assert [file_bind] = file_binds
-      assert file_bind.file_mount_id == file_mount.id
+      assert file_bind.file_mount_id != file_mount.id
+      assert file_bind.file_mount.mountpoint == file_mount.mountpoint
       assert file_bind.file_download_request_id == request.id
     end
 
@@ -398,7 +401,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, old_deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -413,24 +417,26 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
 
       assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
 
-      updated_target = Ash.load!(updated_target, [:deployment], tenant: tenant.tenant_id)
+      updated_target = Ash.load!(updated_target, [deployment: :release], tenant: tenant.tenant_id)
       new_deployment = updated_target.deployment
 
-      assert new_deployment.release_id == target_release.id
+      assert new_deployment.release_id != target_release.id
+      assert new_deployment.release.version == target_release.version
       assert new_deployment.id != old_deployment.id
 
       requests = Ash.read!(FileDownloadRequest, tenant: tenant.tenant_id)
       assert [request] = Enum.filter(requests, &(&1.device_id == target.device_id))
 
       new_deployment =
-        Ash.load!(new_deployment, [container_deployments: [:file_binds]],
+        Ash.load!(new_deployment, [container_deployments: [file_binds: :file_mount]],
           tenant: tenant.tenant_id
         )
 
       assert [container_deployment] = new_deployment.container_deployments
       assert container_deployment.env == [%{key: "FOO", value: "bar"}]
       assert [file_bind] = container_deployment.file_binds
-      assert file_bind.file_mount_id == file_mount.id
+      assert file_bind.file_mount_id != file_mount.id
+      assert file_bind.file_mount.mountpoint == file_mount.mountpoint
       assert file_bind.file_download_request_id == request.id
 
       # 3. Configs reach the device through the provisioners (Astarte level).
@@ -542,7 +548,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -591,7 +598,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -609,7 +617,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, target_deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.target_release.id,
+          mechanism.target_release.application_id,
+          mechanism.target_release.version,
           tenant: tenant.tenant_id
         )
 
@@ -671,7 +680,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 

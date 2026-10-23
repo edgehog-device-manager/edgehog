@@ -56,20 +56,35 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
       application = application_fixture(tenant: tenant)
       release = release_fixture(application_id: application.id, tenant: tenant)
       device = device_fixture(tenant: tenant)
-      deployment_fixture(release_id: release.id, device_id: device.id, tenant: tenant)
 
-      release_id = AshGraphql.Resource.encode_relay_id(release)
+      deployment =
+        deployment_fixture(release_id: release.id, device_id: device.id, tenant: tenant)
 
-      # Try to delete the release
+      deployed_release = Ash.get!(Release, deployment.release_id, tenant: tenant)
+      deployed_release_id = AshGraphql.Resource.encode_relay_id(deployed_release)
+
+      # Try to delete the deployed release copy
       error =
-        [tenant: tenant, id: release_id]
+        [tenant: tenant, id: deployed_release_id]
         |> delete_release()
         |> extract_error!()
 
       assert is_binary(error.message)
 
-      # Verify release still exists and wasn't deleted
-      assert {:ok, _release} = Ash.get(Release, release.id, tenant: tenant)
+      # Verify deployed release still exists and wasn't deleted
+      assert {:ok, _release} = Ash.get(Release, deployed_release.id, tenant: tenant)
+
+      # The original plain release can still be deleted without affecting the deployment
+      plain_release_id = AshGraphql.Resource.encode_relay_id(release)
+
+      deleted_plain =
+        [tenant: tenant, id: plain_release_id]
+        |> delete_release()
+        |> extract_result!()
+
+      assert deleted_plain["id"] == plain_release_id
+      assert {:error, %Invalid{}} = Ash.get(Release, release.id, tenant: tenant)
+      assert {:ok, _release} = Ash.get(Release, deployed_release.id, tenant: tenant)
     end
 
     test "does not delete containers referenced by other releases", %{tenant: tenant} do

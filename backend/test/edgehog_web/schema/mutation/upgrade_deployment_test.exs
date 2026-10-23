@@ -70,9 +70,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpgradeDeploymentTest do
     new_deployment =
       Edgehog.Containers.Release.Deployment
       |> Ash.get!(decoded_id, tenant: tenant)
-      |> Ash.load!([container_deployments: [:file_binds]], tenant: tenant)
+      |> Ash.load!([:release, container_deployments: [file_binds: :file_mount]], tenant: tenant)
 
-    assert new_deployment.release_id == target_release.id
+    assert new_deployment.release_id != target_release.id
+    assert new_deployment.release.version == target_release.version
     assert length(new_deployment.container_deployments) == 1
 
     [container_deployment] = new_deployment.container_deployments
@@ -81,7 +82,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpgradeDeploymentTest do
     assert length(container_deployment.file_binds) == 1
 
     [file_bind] = container_deployment.file_binds
-    assert file_bind.file_mount_id == file_mount.id
+    assert file_bind.file_mount_id != file_mount.id
+    assert file_bind.file_mount.mountpoint == file_mount.mountpoint
   end
 
   defp ready_deployment_fixture(tenant: tenant) do

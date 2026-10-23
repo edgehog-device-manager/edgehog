@@ -114,13 +114,16 @@ defmodule EdgehogWeb.Schema.Mutation.SendDeploymentUpgradeTest do
       assert_receive {^ref, supervised_deployment}, 1000
 
       assert supervised_deployment.id == deployment_id
-      assert supervised_deployment.release_id == release_0_0_2.id
+      assert supervised_deployment.release_id != release_0_0_2.id
 
-      # The supervisor must see the container deployments of the new release
+      supervised_deployment =
+        Ash.load!(supervised_deployment, [release: :containers], tenant: tenant)
+
+      assert supervised_deployment.release.version == release_0_0_2.version
+
+      # The supervisor must see the container deployments of the new copied release
       container_ids =
-        release_0_0_2
-        |> Ash.load!(:containers, tenant: tenant)
-        |> Map.fetch!(:containers)
+        supervised_deployment.release.containers
         |> Enum.map(& &1.id)
         |> Enum.sort()
 
