@@ -287,7 +287,11 @@ defmodule Edgehog.Containers do
       define :fetch_deployment, action: :read, get_by: [:id]
       define :delete_deployment, action: :destroy
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
-      define :deployment_by_identity, action: :read, get_by_identity: :release_instance
+
+      define :deployment_by_identity,
+        action: :by_device_and_release,
+        args: [:device_id, :application_id, :version]
+
       define :run_ready_actions, action: :run_ready_actions
       define :set_deployment_state, action: :set_state
       define :send_deployment, action: :send_deployment
