@@ -24,8 +24,10 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Validations.Dangling
   alias Edgehog.Containers.Validations.UniquePlainResource
   alias Edgehog.Validations
 
@@ -89,6 +91,17 @@ defmodule Edgehog.Containers.Release do
       require_atomic? false
 
       validate Release.Validations.CheckDeployments
+
+      change {Changes.MaybeDestroyChildren, children: [:containers]}
+    end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+
+      validate Dangling
+      validate Release.Validations.CheckDeployments
+
+      change {Changes.MaybeDestroyChildren, children: [:containers]}
     end
   end
 
@@ -145,6 +158,12 @@ defmodule Edgehog.Containers.Release do
       through Edgehog.Containers.ReleaseSystemModel
       public? true
     end
+  end
+
+  calculations do
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :deployments]}
   end
 
   postgres do
