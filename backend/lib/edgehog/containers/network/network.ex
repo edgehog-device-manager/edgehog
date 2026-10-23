@@ -60,6 +60,15 @@ defmodule Edgehog.Containers.Network do
       change set_attribute(:id, arg(:id), set_when_nil?: false)
     end
 
+    update :update do
+      primary? true
+      require_atomic? false
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_networks, field: :label}
+    end
+
     read :plain_networks do
       pagination offset?: true, keyset?: true, required?: false
       filter expr(not exists(network_deployments, true))

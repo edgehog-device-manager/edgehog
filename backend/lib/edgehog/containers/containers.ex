@@ -140,6 +140,10 @@ defmodule Edgehog.Containers do
 
       destroy Application, :delete_application, :destroy
 
+      update Application, :update_application, :update do
+        description "Update an application."
+      end
+
       create Release, :create_release, :create do
         description "Create a new release."
 
@@ -183,10 +187,19 @@ defmodule Edgehog.Containers do
         description "Create image credentials."
       end
 
+      update ImageCredentials, :update_image_credentials, :update do
+        description "Update image credentials."
+      end
+
       destroy ImageCredentials, :delete_image_credentials, :destroy
 
       create Volume, :create_volume, :create do
         description "Create a new volume."
+      end
+
+      update Volume, :update_volume, :update do
+        description "Update a volume."
+        read_action :plain_volumes
       end
 
       destroy Volume, :delete_volume, :destroy do
@@ -195,6 +208,11 @@ defmodule Edgehog.Containers do
 
       create Network, :create_network, :create do
         description "Create a new network."
+      end
+
+      update Network, :update_network, :update do
+        description "Update a network."
+        read_action :plain_networks
       end
 
       destroy Network, :delete_network, :destroy do
