@@ -3060,6 +3060,9 @@
   "forms.CreateImageCredential.usernameLabel": {
     "defaultMessage": "Username"
   },
+  "forms.CreateNetwork.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "forms.CreateNetwork.driverLabel": {
     "defaultMessage": "Driver"
   },
@@ -3075,8 +3078,14 @@
   "forms.CreateNetwork.optionsLabel": {
     "defaultMessage": "Options"
   },
+  "forms.CreateNetwork.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateNetwork.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateNetwork.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateRelease.addDependenciesButton": {
     "defaultMessage": "Add Dependencies"
@@ -3204,6 +3213,9 @@
   "forms.CreateUpdateCampaign.submitButton": {
     "defaultMessage": "Create"
   },
+  "forms.CreateVolume.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "forms.CreateVolume.driverLabel": {
     "defaultMessage": "Driver"
   },
@@ -3213,8 +3225,14 @@
   "forms.CreateVolume.optionsLabel": {
     "defaultMessage": "Options"
   },
+  "forms.CreateVolume.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateVolume.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateVolume.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.DeploymentCampaignForm.applicationLabel": {
     "defaultMessage": "Application"
@@ -5111,9 +5129,6 @@
   "pages.Logout.title": {
     "defaultMessage": "Logout"
   },
-  "pages.Network.deleteButton": {
-    "defaultMessage": "Delete"
-  },
   "pages.Network.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Network <bold>{network}</bold>."
   },
@@ -5123,26 +5138,14 @@
   "pages.Network.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Network, please try again."
   },
-  "pages.Network.driver": {
-    "defaultMessage": "Driver"
-  },
-  "pages.Network.enableIpv6": {
-    "defaultMessage": "Enable IPv6"
-  },
-  "pages.Network.internal": {
-    "defaultMessage": "Internal"
-  },
-  "pages.Network.label": {
-    "defaultMessage": "Label"
-  },
   "pages.Network.networkNotFound.message": {
     "defaultMessage": "Return to the networks list."
   },
   "pages.Network.networkNotFound.title": {
     "defaultMessage": "Network not found."
   },
-  "pages.Network.options": {
-    "defaultMessage": "Options"
+  "pages.Network.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Network, please try again."
   },
   "pages.NetworkCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Network, please try again."
@@ -5304,9 +5307,6 @@
   "pages.UpdateCampaigns.title": {
     "defaultMessage": "Update Campaigns"
   },
-  "pages.Volume.deleteButton": {
-    "defaultMessage": "Delete"
-  },
   "pages.Volume.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Volume <bold>{volume}</bold>."
   },
@@ -5316,14 +5316,8 @@
   "pages.Volume.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Volume, please try again."
   },
-  "pages.Volume.driver": {
-    "defaultMessage": "Driver"
-  },
-  "pages.Volume.label": {
-    "defaultMessage": "Label"
-  },
-  "pages.Volume.options": {
-    "defaultMessage": "Options"
+  "pages.Volume.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Volume, please try again."
   },
   "pages.Volume.volumeNotFound.message": {
     "defaultMessage": "Return to the volumes list."
