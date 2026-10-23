@@ -52,12 +52,12 @@ defmodule Edgehog.Containers.Release do
 
     read :plain_releases do
       pagination offset?: true, keyset?: true, required?: false
-      filter expr(not exists(deployments, true))
+      filter expr(not exists(deployment, true))
     end
 
     read :deployed_releases do
       pagination offset?: true, keyset?: true, required?: false
-      filter expr(exists(deployments, true))
+      filter expr(exists(deployment, true))
     end
 
     create :create do
@@ -139,13 +139,22 @@ defmodule Edgehog.Containers.Release do
       public? true
     end
 
+    has_one :deployment, Deployment
+
     has_many :deployments, Deployment do
       public? true
+      source_attribute :tenant_id
+      destination_attribute :tenant_id
+
+      filter expr(
+               release.application_id == parent(application_id) and
+                 release.version == parent(version)
+             )
     end
 
     many_to_many :devices, Edgehog.Devices.Device do
       through Deployment
-      join_relationship :deployments
+      join_relationship :deployment
     end
 
     many_to_many :containers, Edgehog.Containers.Container do
@@ -174,7 +183,7 @@ defmodule Edgehog.Containers.Release do
   calculations do
     calculate :dangling?,
               :boolean,
-              {Edgehog.Containers.Calculations.Dangling, [parent: :deployments]}
+              {Edgehog.Containers.Calculations.Dangling, [parent: :deployment]}
   end
 
   postgres do
