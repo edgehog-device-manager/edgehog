@@ -24,7 +24,7 @@ defmodule Edgehog.BaseImages do
   use Ash.Domain,
     extensions: [
       AshGraphql.Domain,
-      Ash.Authorizer
+      Ash.Policy.Authorizer
     ]
 
   alias Edgehog.BaseImages.BaseImage
