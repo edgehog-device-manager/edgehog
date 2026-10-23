@@ -162,7 +162,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStartCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -204,7 +205,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStartCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 
@@ -272,7 +274,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentStartCoreTest do
       {:ok, deployment} =
         Containers.deployment_by_identity(
           target.device.id,
-          mechanism.release.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
           tenant: tenant.tenant_id
         )
 

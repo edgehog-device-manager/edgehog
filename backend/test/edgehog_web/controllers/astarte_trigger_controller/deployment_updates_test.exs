@@ -166,16 +166,12 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: [:image])
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :stopped]
         |> deployment_fixture()
-        |> Ash.load!(:container_deployments)
+        |> Ash.load!(container_deployments: [:image_deployment])
 
       [container_deployment] = deployment.container_deployments
       set_ready(container_deployment)
@@ -185,7 +181,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableImages",
-          path: "/" <> container.image.id <> "/pulled",
+          path: "/" <> container_deployment.image_deployment.image_id <> "/pulled",
           value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -206,19 +202,15 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, container_params: [volumes: 1], tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: :volumes)
-
-      [container] = release.containers
-      [volume] = container.volumes
+        release_fixture(containers: 1, container_params: [volumes: 1], tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :stopped]
         |> deployment_fixture()
-        |> Ash.load!(container_deployments: [:image_deployment])
+        |> Ash.load!(container_deployments: [:image_deployment, :volume_deployments])
 
       [container_deployment] = deployment.container_deployments
+      [volume_deployment] = container_deployment.volume_deployments
       set_ready(container_deployment)
 
       image_deployment = container_deployment.image_deployment
@@ -232,7 +224,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableVolumes",
-          path: "/" <> volume.id <> "/created",
+          path: "/" <> volume_deployment.volume_id <> "/created",
           value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -253,11 +245,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(:containers)
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
@@ -273,7 +261,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container.id <> "/status",
+          path: "/" <> container_deployment.container_id <> "/status",
           value: "Created"
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -482,11 +470,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(containers: [:image])
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :stopped]
@@ -501,7 +485,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableImages",
-          path: "/" <> container.image.id <> "/pulled",
+          path: "/" <> image_deployment.image_id <> "/pulled",
           value: false
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -532,7 +516,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableImages",
-          path: "/" <> image.id <> "/pulled",
+          path: "/" <> image_deployment.image_id <> "/pulled",
           value: nil
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -561,7 +545,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableNetworks",
-          path: "/" <> network.id <> "/created",
+          path: "/" <> network_deployment.network_id <> "/created",
           value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -593,7 +577,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableNetworks",
-          path: "/" <> network.id <> "/created",
+          path: "/" <> network_deployment.network_id <> "/created",
           value: false
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -623,7 +607,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableNetworks",
-          path: "/" <> network.id <> "/created",
+          path: "/" <> network_deployment.network_id <> "/created",
           value: nil
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -654,7 +638,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableVolumes",
-          path: "/" <> volume.id <> "/created",
+          path: "/" <> volume_deployment.volume_id <> "/created",
           value: false
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -684,7 +668,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableVolumes",
-          path: "/" <> volume.id <> "/created",
+          path: "/" <> volume_deployment.volume_id <> "/created",
           value: nil
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -717,7 +701,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
-          path: "/" <> device_mapping.id <> "/present",
+          path: "/" <> device_mapping_deployment.device_mapping_id <> "/present",
           value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -753,7 +737,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
-          path: "/" <> device_mapping.id <> "/present",
+          path: "/" <> device_mapping_deployment.device_mapping_id <> "/present",
           value: false
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -787,7 +771,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableDeviceMappings",
-          path: "/" <> device_mapping.id <> "/present",
+          path: "/" <> device_mapping_deployment.device_mapping_id <> "/present",
           value: nil
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -821,7 +805,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
-          path: "/" <> device_request.id <> "/present",
+          path: "/" <> device_request_deployment.device_request_id <> "/present",
           value: true
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -855,7 +839,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
-          path: "/" <> device_request.id <> "/present",
+          path: "/" <> device_request_deployment.device_request_id <> "/present",
           value: false
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -889,7 +873,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableDeviceRequests",
-          path: "/" <> device_request.id <> "/present",
+          path: "/" <> device_request_deployment.device_request_id <> "/present",
           value: nil
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -993,11 +977,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(:containers)
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
@@ -1011,7 +991,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container.id <> "/status",
+          path: "/" <> container_deployment.container_id <> "/status",
           value: "Received"
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -1032,11 +1012,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(:containers)
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
@@ -1050,7 +1026,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container.id <> "/status",
+          path: "/" <> container_deployment.container_id <> "/status",
           value: "Running"
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -1071,11 +1047,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(:containers)
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
@@ -1089,7 +1061,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container.id <> "/status",
+          path: "/" <> container_deployment.container_id <> "/status",
           value: "Stopped"
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())
@@ -1110,11 +1082,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
       release =
-        [containers: 1, tenant: tenant]
-        |> release_fixture()
-        |> Ash.load!(:containers)
-
-      [container] = release.containers
+        release_fixture(containers: 1, tenant: tenant)
 
       deployment =
         [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
@@ -1128,7 +1096,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         event: %{
           type: "incoming_data",
           interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container.id <> "/status",
+          path: "/" <> container_deployment.container_id <> "/status",
           value: nil
         },
         timestamp: DateTime.to_iso8601(DateTime.utc_now())

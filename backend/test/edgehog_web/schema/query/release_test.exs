@@ -80,24 +80,21 @@ defmodule EdgehogWeb.Schema.Query.ReleaseTest do
     assert network_result["id"] == AshGraphql.Resource.encode_relay_id(network)
 
     deployments_edges = get_in(release, ["release", "deployments", "edges"])
-    assert length(deployments_edges) == 2
+    assert deployments_edges == []
 
-    deployment_ids =
-      deployments_edges
-      |> Enum.map(&get_in(&1, ["node", "id"]))
-      |> Enum.sort()
+    deployment1 = Ash.load!(deployment1, :release, tenant: tenant)
+    deployed_release_id = AshGraphql.Resource.encode_relay_id(deployment1.release)
 
-    expected_ids =
-      [deployment1, deployment2]
-      |> Enum.map(&AshGraphql.Resource.encode_relay_id/1)
-      |> Enum.sort()
+    deployed_release =
+      [tenant: tenant, id: deployed_release_id] |> get_release() |> extract_result!()
 
-    assert deployment_ids == expected_ids
+    deployed_edges = get_in(deployed_release, ["release", "deployments", "edges"])
+    assert length(deployed_edges) == 1
 
-    for edge <- deployments_edges do
-      device_node = get_in(edge, ["node", "device"])
-      assert device_node["id"]
-    end
+    [edge] = deployed_edges
+    assert get_in(edge, ["node", "id"]) == AshGraphql.Resource.encode_relay_id(deployment1)
+    assert get_in(edge, ["node", "device", "id"])
+    assert is_map(deployment2)
 
     system_model_ids = release |> get_in(["release", "system_models"]) |> Enum.map(& &1["id"])
     expected_system_model_ids = Enum.map(system_models, &AshGraphql.Resource.encode_id(&1, true))
