@@ -124,7 +124,7 @@ const DeploymentActionButtons = ({
 
       <Button
         onClick={onDelete}
-        disabled={isDeleting || isNotReady}
+        disabled={isDeleting}
         className="btn p-0 border-0 bg-transparent icon-click"
         title={intl.formatMessage({
           id: "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.deleteButtonTitle",

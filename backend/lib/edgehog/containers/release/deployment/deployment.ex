@@ -141,7 +141,6 @@ defmodule Edgehog.Containers.Release.Deployment do
       Sends a :delete command to the release on the device.
       """
 
-      validate Validations.IsReady
       validate {Validations.NoConflictingCampaign, action_type: :deployment_delete}
 
       change set_attribute(:context, :delete_message_sent)
