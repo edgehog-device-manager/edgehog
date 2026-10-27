@@ -769,3 +769,52 @@ it("prevents form submission when required fields are missing", async () => {
     );
   expect(upgradeOps.length).toBe(0);
 });
+
+it("allows selecting the current release version to update configuration on the spot", async () => {
+  const { relayEnvironment, onToggleModal, setErrorFeedback } = renderModal();
+  resolveUpgradeDataQuery(relayEnvironment);
+
+  await screen.findByText("Upgrade Deployment");
+
+  const [releaseCombobox] = screen.getAllByRole("combobox");
+  await selectEvent.select(releaseCombobox, "1.0.0 (Current)", {
+    container: document.body,
+  });
+
+  const upgradeButton = screen.getByRole("button", { name: "Upgrade" });
+  expect(upgradeButton).toBeEnabled();
+
+  await userEvent.click(upgradeButton);
+
+  const upgradeOperation = await waitForOperation(
+    relayEnvironment,
+    UPGRADE_DEPLOYMENT_MUTATION_NAME,
+  );
+
+  expect(upgradeOperation.request.variables).toEqual({
+    id: "deployment-1",
+    input: {
+      target: "rel-1",
+    },
+  });
+
+  act(() => {
+    relayEnvironment.mock.resolve(upgradeOperation, {
+      data: {
+        upgradeDeployment: {
+          result: {
+            id: "deployment-2",
+            state: "SUCCESS",
+            containerDeployments: { edges: [] },
+          },
+          errors: [],
+        },
+      },
+    });
+  });
+
+  await waitFor(() => {
+    expect(onToggleModal).toHaveBeenCalledWith(false);
+  });
+  expect(setErrorFeedback).toHaveBeenCalledWith(null);
+});
