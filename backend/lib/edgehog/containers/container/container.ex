@@ -170,19 +170,16 @@ defmodule Edgehog.Containers.Container do
       change set_attribute(:id, arg(:id), set_when_nil?: false)
 
       change manage_relationship(:image,
-               on_no_match: {:create, :copy},
-               on_lookup: :relate
+               on_no_match: {:create, :copy}
              )
 
       change manage_relationship(:volumes,
                on_no_match: {:create, :copy},
-               on_lookup: :relate,
                join_keys: [:target]
              )
 
       change manage_relationship(:networks,
-               on_no_match: {:create, :copy},
-               on_lookup: :relate
+               on_no_match: {:create, :copy}
              )
 
       change manage_relationship(:file_mounts,

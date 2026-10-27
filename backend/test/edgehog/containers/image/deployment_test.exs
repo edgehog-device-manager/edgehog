@@ -58,7 +58,7 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
       assert container_deployment1.image_deployment.image.reference == image.reference
     end
 
-    test "creates independent image copies across different release deployments", %{
+    test "reuses unchanged image deployment across release deployments on the same device", %{
       tenant: tenant,
       image: image
     } do
@@ -86,13 +86,11 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
         |> Ash.load!(container_deployments: [image_deployment: [:image]])
         |> Map.get(:container_deployments)
 
-      assert container_deployment1.image_deployment.id !=
+      assert container_deployment1.image_deployment.id ==
                container_deployment2.image_deployment.id
 
       assert container_deployment1.image_deployment.image_id != image.id
-      assert container_deployment2.image_deployment.image_id != image.id
       assert container_deployment1.image_deployment.image.reference == image.reference
-      assert container_deployment2.image_deployment.image.reference == image.reference
     end
 
     test "copies image credentials and tracks provenance onto deployed image copy", %{
@@ -127,6 +125,18 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
       assert deployed_image.credentials.label == credentials.label
       assert deployed_image.credentials.username == credentials.username
       assert deployed_image.credentials.password == credentials.password
+
+      # Updating the plain credentials does not alter the copied credentials on the deployed image
+      credentials
+      |> Ash.Changeset.for_update(:update, %{password: "updated-password"}, tenant: tenant)
+      |> Ash.update!(tenant: tenant)
+
+      reloaded_deployed_image =
+        Edgehog.Containers.Image
+        |> Ash.get!(deployed_image.id, tenant: tenant)
+        |> Ash.load!(:credentials, tenant: tenant)
+
+      assert reloaded_deployed_image.credentials.password == credentials.password
     end
   end
 end

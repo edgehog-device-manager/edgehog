@@ -96,14 +96,15 @@ defmodule Edgehog.Containers.Image do
         :image_credentials_id
       ]
 
-      argument :id, :uuid
       argument :credentials, :map
 
-      change set_attribute(:id, arg(:id), set_when_nil?: false)
+      upsert? true
+      upsert_identity :copied_image
+      upsert_fields []
 
       change manage_relationship(:credentials,
                on_no_match: {:create, :copy},
-               on_lookup: :relate,
+               on_lookup: :ignore,
                on_match: :ignore
              )
     end
@@ -226,6 +227,21 @@ defmodule Edgehog.Containers.Image do
   end
 
   identities do
+    identity :copied_image, [
+      :source_image_id,
+      :registry_host,
+      :registry_port,
+      :repository,
+      :image,
+      :tag,
+      :digest,
+      :pull_policy,
+      :image_credentials_id
+    ] do
+      nils_distinct? false
+      where expr(not is_nil(source_image_id))
+    end
+
     identity :reference_credentials,
              [
                :registry_host,
@@ -247,6 +263,7 @@ defmodule Edgehog.Containers.Image do
   postgres do
     table "images"
     skip_unique_indexes [:reference_credentials]
+    identity_wheres_to_sql copied_image: "source_image_id IS NOT NULL"
 
     references do
       reference :source_image, on_delete: :nilify

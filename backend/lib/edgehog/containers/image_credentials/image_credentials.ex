@@ -63,9 +63,9 @@ defmodule Edgehog.Containers.ImageCredentials do
     create :copy do
       accept [:label, :username, :password, :source_image_credentials_id]
 
-      argument :id, :uuid
-
-      change set_attribute(:id, arg(:id), set_when_nil?: false)
+      upsert? true
+      upsert_identity :copied_image_credentials
+      upsert_fields []
     end
 
     update :update do
@@ -143,9 +143,21 @@ defmodule Edgehog.Containers.ImageCredentials do
               expr(not is_nil(source_image_credentials_id) and not exists(images, true))
   end
 
+  identities do
+    identity :copied_image_credentials, [
+      :source_image_credentials_id,
+      :label,
+      :username,
+      :password
+    ] do
+      where expr(not is_nil(source_image_credentials_id))
+    end
+  end
+
   postgres do
     table "image_credentials"
     repo Edgehog.Repo
+    identity_wheres_to_sql copied_image_credentials: "source_image_credentials_id IS NOT NULL"
 
     references do
       reference :source_image_credentials, on_delete: :nilify

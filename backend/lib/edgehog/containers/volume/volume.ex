@@ -57,9 +57,9 @@ defmodule Edgehog.Containers.Volume do
     create :copy do
       accept [:label, :driver, :options, :source_volume_id]
 
-      argument :id, :uuid
-
-      change set_attribute(:id, arg(:id), set_when_nil?: false)
+      upsert? true
+      upsert_identity :copied_volume
+      upsert_fields []
     end
 
     update :update do
@@ -145,9 +145,16 @@ defmodule Edgehog.Containers.Volume do
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
+  identities do
+    identity :copied_volume, [:source_volume_id, :label, :driver, :options] do
+      where expr(not is_nil(source_volume_id))
+    end
+  end
+
   postgres do
     table "volumes"
     repo Edgehog.Repo
+    identity_wheres_to_sql copied_volume: "source_volume_id IS NOT NULL"
 
     references do
       reference :source_volume, on_delete: :nilify
