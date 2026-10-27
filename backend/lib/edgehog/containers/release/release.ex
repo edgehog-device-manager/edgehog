@@ -227,6 +227,19 @@ defmodule Edgehog.Containers.Release do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :deployment]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:version],
+               relationships: [
+                 {:system_models, :id},
+                 :containers,
+                 :container_dependencies
+               ]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   postgres do

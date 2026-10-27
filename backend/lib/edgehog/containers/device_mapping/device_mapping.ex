@@ -70,6 +70,15 @@ defmodule Edgehog.Containers.DeviceMapping do
     end
   end
 
+  calculations do
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:path_on_host, :path_in_container, :cgroup_permissions]} do
+      allow_nil? false
+    end
+  end
+
   postgres do
     table "device_mappings"
     repo Edgehog.Repo

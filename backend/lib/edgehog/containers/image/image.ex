@@ -127,6 +127,18 @@ defmodule Edgehog.Containers.Image do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+
+    calculate :effective_registry_auth,
+              :string,
+              Image.Calculations.EffectiveRegistryAuth
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:reference, :image_credentials_id, :effective_registry_auth]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do

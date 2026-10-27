@@ -765,6 +765,22 @@ defmodule Edgehog.Containers.Container do
 
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: @container_attributes,
+               relationships: [
+                 :image,
+                 :container_volumes,
+                 :networks,
+                 :file_mounts,
+                 :device_mappings,
+                 :device_requests
+               ]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   postgres do

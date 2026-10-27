@@ -228,6 +228,284 @@ defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
       assert file_bind.file_mount_id != file_mount.id
       assert file_bind.file_mount.mountpoint == file_mount.mountpoint
     end
+
+    test "detects drift via hash and upgrades to edited same-version release", %{
+      tenant: tenant
+    } do
+      application = application_fixture(tenant: tenant)
+
+      container =
+        [
+          tenant: tenant,
+          hostname: "v1-host",
+          file_mounts: [%{mountpoint: "/etc/app.conf", required: false}]
+        ]
+        |> container_fixture()
+        |> Ash.load!(:file_mounts)
+
+      %{file_mounts: [file_mount]} = container
+
+      release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "1.0.0",
+          container_ids: [container.id]
+        )
+
+      deployment =
+        [tenant: tenant, release_id: release.id]
+        |> deployment_fixture()
+        |> make_deployment_ready!(tenant)
+        |> Ash.load!(
+          [
+            release: [
+              :hash,
+              source_release: [:hash],
+              containers: [:hash, source_container: [:hash]]
+            ]
+          ],
+          tenant: tenant
+        )
+
+      assert deployment.release.source_release_id == release.id
+      assert deployment.release.hash == deployment.release.source_release.hash
+
+      assert [%{hash: container_hash, source_container: %{hash: container_hash}}] =
+               deployment.release.containers
+
+      assert {:ok, updated_container} =
+               container
+               |> Ash.Changeset.for_update(:update, %{hostname: "v1-updated-host"},
+                 tenant: tenant
+               )
+               |> Ash.update(tenant: tenant)
+
+      assert updated_container.hostname == "v1-updated-host"
+
+      deployed_release =
+        Ash.load!(
+          deployment.release,
+          [:hash, source_release: [:hash], containers: [:hash, source_container: [:hash]]],
+          tenant: tenant,
+          reuse_values?: false
+        )
+
+      assert deployed_release.hash != deployed_release.source_release.hash
+      [deployed_container] = deployed_release.containers
+      assert deployed_container.hash != deployed_container.source_container.hash
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _, _ -> :ok end)
+
+      assert {:ok, upgraded_deployment} =
+               deployment
+               |> Ash.Changeset.for_update(
+                 :upgrade_release,
+                 %{
+                   target: release.id,
+                   configs: [
+                     %{
+                       container_id: container.id,
+                       env_strategy: :merge,
+                       env: [%{key: "UPDATED", value: "true"}],
+                       file_binds: [%{file_mount_id: file_mount.id}]
+                     }
+                   ]
+                 },
+                 tenant: tenant
+               )
+               |> Ash.update(tenant: tenant)
+
+      upgraded_deployment =
+        Ash.load!(
+          upgraded_deployment,
+          [
+            release: [:hash, source_release: [:hash]],
+            container_deployments: [:container, file_binds: [:file_mount]]
+          ],
+          tenant: tenant
+        )
+
+      assert upgraded_deployment.id != deployment.id
+      assert upgraded_deployment.release_id != deployment.release_id
+      assert upgraded_deployment.release.source_release_id == release.id
+      assert upgraded_deployment.release.hash == upgraded_deployment.release.source_release.hash
+
+      [container_deployment] = upgraded_deployment.container_deployments
+      assert container_deployment.container.hostname == "v1-updated-host"
+      assert container_deployment.env == [%{key: "UPDATED", value: "true"}]
+
+      assert {:ok, fetched} =
+               Edgehog.Containers.deployment_by_identity(
+                 deployment.device_id,
+                 application.id,
+                 "1.0.0",
+                 tenant: tenant
+               )
+
+      assert fetched.id == upgraded_deployment.id
+    end
+
+    test "creates a new deployment on same-version upgrade without configs", %{
+      tenant: tenant
+    } do
+      application = application_fixture(tenant: tenant)
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          hostname: "v1-host"
+        )
+
+      release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "1.0.0",
+          container_ids: [container.id]
+        )
+
+      deployment =
+        [tenant: tenant, release_id: release.id]
+        |> deployment_fixture()
+        |> make_deployment_ready!(tenant)
+
+      assert {:ok, _updated_container} =
+               container
+               |> Ash.Changeset.for_update(:update, %{hostname: "v1-updated-host"},
+                 tenant: tenant
+               )
+               |> Ash.update(tenant: tenant)
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _, _ -> :ok end)
+
+      assert {:ok, upgraded_deployment} =
+               deployment
+               |> Ash.Changeset.for_update(:upgrade_release, %{target: release.id, configs: []},
+                 tenant: tenant
+               )
+               |> Ash.update(tenant: tenant)
+
+      upgraded_deployment =
+        Ash.load!(
+          upgraded_deployment,
+          [
+            release: [:hash, source_release: [:hash]],
+            container_deployments: [:container]
+          ],
+          tenant: tenant
+        )
+
+      assert upgraded_deployment.id != deployment.id
+      assert upgraded_deployment.release_id != deployment.release_id
+      assert upgraded_deployment.release.source_release_id == release.id
+      assert upgraded_deployment.release.hash == upgraded_deployment.release.source_release.hash
+
+      [container_deployment] = upgraded_deployment.container_deployments
+      assert container_deployment.container.hostname == "v1-updated-host"
+    end
+
+    test "computes hash across underlying resources", %{tenant: tenant} do
+      application = application_fixture(tenant: tenant)
+      image = image_fixture(tenant: tenant, reference: "nginx:1.25")
+      volume = volume_fixture(tenant: tenant, label: "data-vol", driver: "local")
+      network = network_fixture(tenant: tenant, label: "app-net", driver: "bridge")
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          image: image,
+          networks: [network.id],
+          volumes: [%{id: volume.id, target: "/data"}]
+        )
+
+      release =
+        release_fixture(
+          tenant: tenant,
+          application_id: application.id,
+          version: "1.0.0",
+          container_ids: [container.id]
+        )
+
+      deployment =
+        [tenant: tenant, release_id: release.id]
+        |> deployment_fixture()
+        |> make_deployment_ready!(tenant)
+        |> Ash.load!(
+          [
+            release: [
+              :hash,
+              source_release: [:hash],
+              containers: [
+                :hash,
+                source_container: [:hash],
+                image: [:hash, source_image: [:hash]],
+                networks: [:hash, source_network: [:hash]],
+                container_volumes: [:hash, volume: [:hash, source_volume: [:hash]]]
+              ]
+            ]
+          ],
+          tenant: tenant
+        )
+
+      deployed_release = deployment.release
+      assert is_binary(deployed_release.hash)
+      assert deployed_release.hash == deployed_release.source_release.hash
+
+      [deployed_container] = deployed_release.containers
+      assert is_binary(deployed_container.hash)
+      assert deployed_container.hash == deployed_container.source_container.hash
+
+      assert deployed_container.image.hash == deployed_container.image.source_image.hash
+
+      assert [%{hash: net_hash, source_network: %{hash: net_hash}}] =
+               deployed_container.networks
+
+      assert [
+               %{
+                 hash: cv_hash,
+                 volume: %{hash: vol_hash, source_volume: %{hash: vol_hash}}
+               }
+             ] = deployed_container.container_volumes
+
+      assert is_binary(cv_hash)
+      assert is_binary(vol_hash)
+
+      assert {:ok, _updated_volume} =
+               volume
+               |> Ash.Changeset.for_update(:update, %{driver: "custom"}, tenant: tenant)
+               |> Ash.update(tenant: tenant)
+
+      deployed_release =
+        Ash.load!(
+          deployment.release,
+          [
+            :hash,
+            source_release: [:hash],
+            containers: [
+              :hash,
+              source_container: [:hash],
+              image: [:hash, source_image: [:hash]],
+              networks: [:hash, source_network: [:hash]],
+              container_volumes: [:hash, volume: [:hash, source_volume: [:hash]]]
+            ]
+          ],
+          tenant: tenant,
+          reuse_values?: false
+        )
+
+      assert deployed_release.hash != deployed_release.source_release.hash
+
+      [deployed_container] = deployed_release.containers
+      assert deployed_container.hash != deployed_container.source_container.hash
+      assert deployed_container.image.hash == deployed_container.image.source_image.hash
+
+      assert [%{hash: net_hash, source_network: %{hash: net_hash}}] =
+               deployed_container.networks
+
+      assert [%{volume: updated_deployed_volume}] = deployed_container.container_volumes
+      assert updated_deployed_volume.hash != updated_deployed_volume.source_volume.hash
+    end
   end
 
   defp ready_deployment_fixture(tenant: tenant) do

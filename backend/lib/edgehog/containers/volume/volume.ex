@@ -135,6 +135,13 @@ defmodule Edgehog.Containers.Volume do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash, fields: [:label, :driver, :options]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do

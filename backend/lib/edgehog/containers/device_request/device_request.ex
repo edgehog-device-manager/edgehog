@@ -148,6 +148,13 @@ defmodule Edgehog.Containers.DeviceRequest do
 
       calculation Edgehog.Containers.DeviceRequest.Calculations.Capabilities
     end
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:driver, :count, :device_ids, :db_capabilities, :options]} do
+      allow_nil? false
+    end
   end
 
   postgres do

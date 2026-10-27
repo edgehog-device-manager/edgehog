@@ -63,6 +63,12 @@ defmodule Edgehog.Containers.ContainerVolume do
 
   calculations do
     calculate :binding, :string, expr(volume_id <> ":" <> target)
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash, fields: [:target], relationships: [:volume]} do
+      allow_nil? false
+    end
   end
 
   postgres do

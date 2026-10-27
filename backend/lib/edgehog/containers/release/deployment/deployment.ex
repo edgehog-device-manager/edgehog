@@ -304,6 +304,8 @@ defmodule Edgehog.Containers.Release.Deployment do
       argument :version, :string, allow_nil?: false
       get? true
 
+      prepare build(sort: [context: :desc_nils_first, inserted_at: :desc], limit: 1)
+
       filter expr(
                device_id == ^arg(:device_id) and
                  release.application_id == ^arg(:application_id) and

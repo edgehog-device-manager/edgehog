@@ -66,6 +66,14 @@ defmodule Edgehog.Containers.ReleaseContainerDependencies do
     end
   end
 
+  calculations do
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash, relationships: [:container, :dependency]} do
+      allow_nil? false
+    end
+  end
+
   postgres do
     table "application_release_container_dependencies"
 

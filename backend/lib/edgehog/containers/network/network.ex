@@ -143,6 +143,14 @@ defmodule Edgehog.Containers.Network do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:label, :driver, :internal, :enable_ipv6, :options]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do
