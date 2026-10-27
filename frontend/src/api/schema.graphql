@@ -1228,6 +1228,7 @@ input ImageDescInput {
   repository: String
   registryPort: Int
   registryHost: String
+  pullPolicy: String
   imageCredentialsId: ID
   image: String!
   digest: String
@@ -1768,6 +1769,116 @@ input ReleaseUpdateContainerDependenciesInput {
 
 input ReleaseUpdateRequiredSystemModelsInput {
   id: ID
+}
+
+"The result of the :delete_allowed_registry mutation"
+type DeleteAllowedRegistryResult {
+  "The record that was successfully deleted"
+  result: AllowedRegistry
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+"The result of the :update_allowed_registry mutation"
+type UpdateAllowedRegistryResult {
+  "The successful result of the mutation"
+  result: AllowedRegistry
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateAllowedRegistryInput {
+  registry: String
+}
+
+"The result of the :create_allowed_registry mutation"
+type CreateAllowedRegistryResult {
+  "The successful result of the mutation"
+  result: AllowedRegistry
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input CreateAllowedRegistryInput {
+  registry: String!
+}
+
+enum AllowedRegistrySortField {
+  ID
+  REGISTRY
+}
+
+":allowed_registry connection"
+type AllowedRegistryConnection {
+  "Total count on all pages"
+  count: Int
+
+  "Page information"
+  pageInfo: PageInfo!
+
+  ":allowed_registry edges"
+  edges: [AllowedRegistryEdge!]
+}
+
+":allowed_registry edge"
+type AllowedRegistryEdge {
+  "Cursor"
+  cursor: String!
+
+  ":allowed_registry node"
+  node: AllowedRegistry!
+}
+
+input AllowedRegistryFilterRegistry {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input AllowedRegistryFilterId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
+input AllowedRegistryFilterInput {
+  and: [AllowedRegistryFilterInput!]
+  or: [AllowedRegistryFilterInput!]
+  not: [AllowedRegistryFilterInput!]
+  id: AllowedRegistryFilterId
+  registry: AllowedRegistryFilterRegistry
+}
+
+input AllowedRegistrySortInput {
+  order: SortOrder
+  field: AllowedRegistrySortField!
+}
+
+type AllowedRegistry implements Node {
+  id: ID!
+  registry: String!
 }
 
 "The result of the :mark_env_file_as_uploaded mutation"
@@ -3432,6 +3543,7 @@ type Volume implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerVolumeConnection!
+  hash: String!
 }
 
 enum NetworkDeploymentSortField {
@@ -3783,6 +3895,7 @@ type Network implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceConnection!
+  hash: String!
 }
 
 type release_result {
@@ -3837,6 +3950,7 @@ enum ReleaseSortField {
   ID
   VERSION
   APPLICATION_ID
+  SOURCE_RELEASE_ID
 }
 
 ":release connection"
@@ -3858,6 +3972,19 @@ type ReleaseEdge {
 
   ":release node"
   node: Release!
+}
+
+input ReleaseFilterSourceReleaseId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ReleaseFilterApplicationId {
@@ -3911,7 +4038,9 @@ input ReleaseFilterInput {
   id: ReleaseFilterId
   version: ReleaseFilterVersion
   applicationId: ReleaseFilterApplicationId
+  sourceReleaseId: ReleaseFilterSourceReleaseId
   application: ApplicationFilterInput
+  sourceRelease: ReleaseFilterInput
   deployments: DeploymentFilterInput
   containers: ContainerFilterInput
   containerDependencies: ReleaseContainerDependenciesFilterInput
@@ -3927,7 +4056,9 @@ type Release implements Node {
   id: ID!
   version: String!
   applicationId: ID
+  sourceReleaseId: ID
   application: Application
+  sourceRelease: Release
   deployments(
     "How to sort the records in the response"
     sort: [DeploymentSortInput]
@@ -3995,6 +4126,7 @@ type Release implements Node {
     "The number of records to skip."
     offset: Int
   ): [SystemModel!]!
+  hash: String!
 }
 
 type image_credentials_result {
@@ -4046,6 +4178,7 @@ enum ImageCredentialsSortField {
   ID
   LABEL
   USERNAME
+  SOURCE_IMAGE_CREDENTIALS_ID
 }
 
 ":image_credentials connection"
@@ -4067,6 +4200,19 @@ type ImageCredentialsEdge {
 
   ":image_credentials node"
   node: ImageCredentials!
+}
+
+input ImageCredentialsFilterSourceImageCredentialsId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ImageCredentialsFilterUsername {
@@ -4125,6 +4271,8 @@ input ImageCredentialsFilterInput {
   id: ImageCredentialsFilterId
   label: ImageCredentialsFilterLabel
   username: ImageCredentialsFilterUsername
+  sourceImageCredentialsId: ImageCredentialsFilterSourceImageCredentialsId
+  sourceImageCredentials: ImageCredentialsFilterInput
 }
 
 input ImageCredentialsSortInput {
@@ -4143,6 +4291,9 @@ type ImageCredentials implements Node {
   id: ID!
   label: String!
   username: String!
+  sourceImageCredentialsId: ID
+  sourceImageCredentials: ImageCredentials
+  hash: String!
 }
 
 input ImageDeploymentFilterIsReady {
@@ -4232,6 +4383,19 @@ input ImageFilterImageCredentialsId {
   greaterThanOrEqual: ID
   isDistinctFrom: ID
   isNotDistinctFrom: ID
+}
+
+input ImageFilterPullPolicy {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input ImageFilterDigest {
@@ -4361,6 +4525,7 @@ input ImageFilterInput {
   image: ImageFilterImage
   tag: ImageFilterTag
   digest: ImageFilterDigest
+  pullPolicy: ImageFilterPullPolicy
   imageCredentialsId: ImageFilterImageCredentialsId
   credentials: ImageCredentialsFilterInput
   devices: DeviceFilterInput
@@ -4375,6 +4540,7 @@ type Image {
   image: String!
   tag: String
   digest: String
+  pullPolicy: String!
   imageCredentialsId: ID
   credentials: ImageCredentials
   devices(
@@ -4410,6 +4576,7 @@ type Image {
     offset: Int
   ): [Container!]!
   reference: String!
+  hash: String!
 }
 
 type deployment_event_result {
@@ -6475,6 +6642,7 @@ type Container implements Node {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+  hash: String!
 }
 
 type application_result {
@@ -11508,6 +11676,30 @@ type RootQueryType {
   "Returns the desired env file, including the presigned upload URL for target-less env files."
   envFile("The id of the record" id: ID!): EnvFile
 
+  "Returns the desired allowed registry."
+  allowedRegistry("The id of the record" id: ID!): AllowedRegistry
+
+  "Returns all available allowed registries."
+  allowedRegistries(
+    "How to sort the records in the response"
+    sort: [AllowedRegistrySortInput]
+
+    "A filter to limit the results"
+    filter: AllowedRegistryFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): AllowedRegistryConnection
+
   "Retrieves a Node from its global id"
   node("The Node unique identifier" id: ID!): Node!
 
@@ -11764,6 +11956,20 @@ type RootMutationType {
     id: ID!
     input: MarkEnvFileAsUploadedInput
   ): MarkEnvFileAsUploadedResult
+
+  "Creates a new allowed registry."
+  createAllowedRegistry(
+    input: CreateAllowedRegistryInput!
+  ): CreateAllowedRegistryResult
+
+  "Updates an existing allowed registry."
+  updateAllowedRegistry(
+    id: ID!
+    input: UpdateAllowedRegistryInput
+  ): UpdateAllowedRegistryResult
+
+  "Deletes an allowed registry."
+  deleteAllowedRegistry(id: ID!): DeleteAllowedRegistryResult
 
   "Create a new base image in a base image collection."
   createBaseImage(input: CreateBaseImageInput!): CreateBaseImageResult
