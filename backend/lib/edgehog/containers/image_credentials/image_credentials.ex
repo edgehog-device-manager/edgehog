@@ -141,6 +141,13 @@ defmodule Edgehog.Containers.ImageCredentials do
     calculate :dangling?,
               :boolean,
               expr(not is_nil(source_image_credentials_id) and not exists(images, true))
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash, fields: [:label, :username, :password]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do

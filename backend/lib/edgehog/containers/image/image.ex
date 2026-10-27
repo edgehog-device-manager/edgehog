@@ -224,6 +224,14 @@ defmodule Edgehog.Containers.Image do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:reference, :pull_policy], relationships: [:credentials]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do

@@ -86,6 +86,102 @@ defmodule EdgehogWeb.Schema.Mutation.UpgradeDeploymentTest do
     assert file_bind.file_mount.mountpoint == file_mount.mountpoint
   end
 
+  test "upgradeDeployment upgrades a deployment to the same release version", %{tenant: tenant} do
+    application = application_fixture(tenant: tenant)
+    container = container_fixture(tenant: tenant, hostname: "v1-host")
+
+    release =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id,
+        version: "1.0.0",
+        container_ids: [container.id]
+      )
+
+    deployment =
+      [tenant: tenant, release_id: release.id]
+      |> deployment_fixture()
+      |> make_deployment_ready!(tenant)
+      |> Ash.load!(:release, tenant: tenant)
+
+    assert {:ok, _updated_container} =
+             container
+             |> Ash.Changeset.for_update(:update, %{hostname: "v1-updated-host"}, tenant: tenant)
+             |> Ash.update(tenant: tenant)
+
+    expect(Deployment.Orchestrator, :conduct, fn _, _ -> :ok end)
+
+    result =
+      [
+        tenant: tenant,
+        id: AshGraphql.Resource.encode_relay_id(deployment),
+        target: AshGraphql.Resource.encode_relay_id(release),
+        configs: []
+      ]
+      |> upgrade_deployment_mutation()
+      |> extract_result!()
+
+    assert %{"id" => deployment_id} = result
+
+    {:ok, %{id: decoded_id}} = AshGraphql.Resource.decode_relay_id(deployment_id)
+
+    new_deployment =
+      Edgehog.Containers.Release.Deployment
+      |> Ash.get!(decoded_id, tenant: tenant)
+      |> Ash.load!([release: [:hash, source_release: [:hash]], container_deployments: :container],
+        tenant: tenant
+      )
+
+    assert new_deployment.id != deployment.id
+    assert new_deployment.release.source_release_id == release.id
+    assert new_deployment.release.hash == new_deployment.release.source_release.hash
+
+    [container_deployment] = new_deployment.container_deployments
+    assert container_deployment.container.hostname == "v1-updated-host"
+  end
+
+  test "upgradeDeployment fails when target release version is lower than current", %{
+    tenant: tenant
+  } do
+    application = application_fixture(tenant: tenant)
+
+    older_release =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id,
+        version: "1.0.0",
+        containers: 1
+      )
+
+    newer_release =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id,
+        version: "2.0.0",
+        containers: 1
+      )
+
+    deployment =
+      [tenant: tenant, release_id: newer_release.id]
+      |> deployment_fixture()
+      |> make_deployment_ready!(tenant)
+
+    result =
+      upgrade_deployment_mutation(
+        tenant: tenant,
+        id: AshGraphql.Resource.encode_relay_id(deployment),
+        target: AshGraphql.Resource.encode_relay_id(older_release),
+        configs: []
+      )
+
+    assert %{
+             data: %{"upgradeDeployment" => nil},
+             errors: [%{message: message}]
+           } = result
+
+    assert message =~ "must be a newer release than the currently installed version"
+  end
+
   defp ready_deployment_fixture(tenant: tenant) do
     application = application_fixture(tenant: tenant)
 

@@ -111,6 +111,15 @@ defmodule Edgehog.Containers.Container.FileMount do
     end
   end
 
+  calculations do
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:mountpoint, :required, :default_file_id, :file_mode, :user_id, :group_id]} do
+      allow_nil? false
+    end
+  end
+
   identities do
     identity :container_mountpoint, [:container_id, :mountpoint]
   end
