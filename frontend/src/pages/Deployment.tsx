@@ -94,6 +94,12 @@ const GET_DEPLOYMENT_QUERY = graphql`
       release {
         id
         version
+        hash
+        sourceReleaseId
+        sourceRelease {
+          id
+          hash
+        }
         application {
           id
           name
@@ -133,6 +139,12 @@ const DEPLOYMENT_UPDATED_SUBSCRIPTION = graphql`
         release {
           id
           version
+          hash
+          sourceReleaseId
+          sourceRelease {
+            id
+            hash
+          }
           application {
             id
             name

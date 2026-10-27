@@ -593,6 +593,9 @@
   "components.apps.deployments.deployment-details.DeploymentDetails.none": {
     "defaultMessage": "None"
   },
+  "components.apps.deployments.deployment-details.DeploymentDetails.outdated": {
+    "defaultMessage": "Outdated"
+  },
   "components.apps.deployments.deployment-details.DeploymentDetails.releaseVersion": {
     "defaultMessage": "v.{version}"
   },
@@ -763,6 +766,9 @@
   },
   "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.containerLabel": {
     "defaultMessage": "Container: {containerName}"
+  },
+  "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.currentVersion": {
+    "defaultMessage": "{version} (Current)"
   },
   "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.description": {
     "defaultMessage": "Upgrade deployment <bold>{application}</bold> from version <bold>{currentVersion}</bold> to version:"

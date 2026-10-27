@@ -238,6 +238,7 @@ type UpgradeDeploymentModalProps = {
   applicationId: string;
   applicationName: string;
   currentVersion: string;
+  sourceReleaseId?: string | null;
   systemModelName: string | undefined;
   isOnline: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
@@ -266,6 +267,7 @@ const UpgradeDeploymentModal = ({
   applicationId,
   applicationName,
   currentVersion,
+  sourceReleaseId,
   systemModelName,
   isOnline,
   setErrorFeedback,
@@ -314,15 +316,18 @@ const UpgradeDeploymentModal = ({
 
     return releaseEdges.reduce<SelectOption[]>((options, edge) => {
       const release = edge?.node;
-      if (!release || release.version === currentVersion) {
+      if (!release) {
         return options;
       }
+
+      const isCurrentRelease =
+        release.id === sourceReleaseId || release.version === currentVersion;
 
       const parsedCurrentVersion = semver.valid(currentVersion);
       const parsedTargetVersion = semver.valid(release.version);
 
-      if (parsedCurrentVersion && parsedTargetVersion) {
-        if (!semver.gt(parsedTargetVersion, parsedCurrentVersion)) {
+      if (!isCurrentRelease && parsedCurrentVersion && parsedTargetVersion) {
+        if (!semver.gte(parsedTargetVersion, parsedCurrentVersion)) {
           return options;
         }
       }
@@ -333,15 +338,25 @@ const UpgradeDeploymentModal = ({
         appliesToAll ||
         (systemModelName && systemModelNames.includes(systemModelName));
 
+      const versionLabel = isCurrentRelease
+        ? intl.formatMessage(
+            {
+              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.currentVersion",
+              defaultMessage: "{version} (Current)",
+            },
+            { version: release.version },
+          )
+        : release.version;
+
       const label = !matchesSystemModel
         ? intl.formatMessage(
             {
               id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.incompatibleVersion",
               defaultMessage: "{version} (Incompatible system model)",
             },
-            { version: release.version },
+            { version: versionLabel },
           )
-        : release.version;
+        : versionLabel;
 
       options.push({
         value: release.id,
@@ -351,7 +366,7 @@ const UpgradeDeploymentModal = ({
 
       return options;
     }, []);
-  }, [releaseEdges, currentVersion, systemModelName, intl]);
+  }, [releaseEdges, currentVersion, sourceReleaseId, systemModelName, intl]);
 
   const selectedReleaseOption = useMemo(() => {
     return (
