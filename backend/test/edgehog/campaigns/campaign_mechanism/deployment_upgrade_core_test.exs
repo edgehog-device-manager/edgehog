@@ -197,6 +197,82 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       assert updated_target.id == target.id
     end
 
+    test "upgrades the deployment to an edited same-version release", %{tenant: tenant} do
+      release = release_fixture(tenant: tenant, containers: 1, system_models: 1)
+      [container] = Ash.load!(release, :containers, tenant: tenant).containers
+
+      target =
+        target_fixture(
+          tenant: tenant,
+          mechanism_type: :deployment_upgrade,
+          release_id: release.id,
+          target_release_id: release.id
+        )
+
+      target = Ash.load!(target, [:device], tenant: tenant.tenant_id)
+      updated_hostname = unique_container_hostname()
+
+      assert {:ok, _updated_container} =
+               container
+               |> Ash.Changeset.for_update(:update, %{hostname: updated_hostname}, tenant: tenant)
+               |> Ash.update(tenant: tenant)
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.get(:campaign)
+        |> Ash.load!(
+          [
+            campaign_mechanism: [
+              deployment_upgrade: [
+                :release,
+                :target_release
+              ]
+            ]
+          ],
+          tenant: tenant.tenant_id
+        )
+
+      mechanism = campaign.campaign_mechanism.value
+
+      {:ok, deployment} =
+        Containers.deployment_by_identity(
+          target.device.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
+          tenant: tenant.tenant_id
+        )
+
+      {:ok, _deployment} =
+        Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
+
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
+      assert updated_target.id == target.id
+      assert updated_target.deployment_id != deployment.id
+
+      deployment =
+        updated_target
+        |> Ash.load!(
+          [
+            deployment: [
+              release: [:hash, source_release: [:hash]],
+              container_deployments: [:container]
+            ]
+          ],
+          tenant: tenant.tenant_id
+        )
+        |> Map.fetch!(:deployment)
+
+      assert deployment.release.hash == deployment.release.source_release.hash
+      assert deployment.release.source_release_id == release.id
+      [container_deployment] = deployment.container_deployments
+      assert container_deployment.container.hostname == updated_hostname
+    end
+
     test "upgrades the deployment with configs and creates download requests for file binds", %{
       tenant: tenant
     } do
