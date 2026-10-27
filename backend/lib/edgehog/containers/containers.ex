@@ -53,7 +53,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired image credentials."
       end
 
-      list ImageCredentials, :list_image_credentials, :read do
+      list ImageCredentials, :list_image_credentials, :plain_image_credentials do
         description "Returns all available image credentials."
         paginate_with :keyset
         relay? true
@@ -227,6 +227,7 @@ defmodule Edgehog.Containers do
 
       update ImageCredentials, :update_image_credentials, :update do
         description "Update image credentials."
+        read_action :plain_image_credentials
       end
 
       destroy ImageCredentials, :delete_image_credentials, :destroy

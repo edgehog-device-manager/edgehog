@@ -28,11 +28,11 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
     :system_models,
     :container_dependencies,
     containers: [
-      :image,
       :networks,
       :file_mounts,
       :device_mappings,
       :device_requests,
+      image: [:credentials],
       container_volumes: [:volume]
     ]
   ]
@@ -43,6 +43,12 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
          {:ok, release} <- Ash.load(release, @release_loads, tenant: tenant) do
       container_id_map = build_id_map(release.containers)
       image_id_map = release.containers |> Enum.map(& &1.image) |> build_id_map()
+
+      credentials_id_map =
+        release.containers
+        |> Enum.map(& &1.image.credentials)
+        |> Enum.reject(&is_nil/1)
+        |> build_id_map()
 
       volume_id_map =
         release.containers
@@ -61,6 +67,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
             container,
             container_id_map,
             image_id_map,
+            credentials_id_map,
             volume_id_map,
             network_id_map
           )
@@ -104,9 +111,21 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
          container,
          container_id_map,
          image_id_map,
+         credentials_id_map,
          volume_id_map,
          network_id_map
        ) do
+    credentials_input =
+      case container.image.credentials do
+        nil ->
+          nil
+
+        credentials ->
+          credentials
+          |> Map.from_struct()
+          |> Map.put(:id, Map.fetch!(credentials_id_map, credentials.id))
+      end
+
     image_input =
       container.image
       |> Map.take([
@@ -119,6 +138,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
         :image_credentials_id
       ])
       |> Map.put(:id, Map.fetch!(image_id_map, container.image.id))
+      |> Map.put(:credentials, credentials_input)
 
     volumes_inputs =
       Enum.map(container.container_volumes, fn cv ->

@@ -26,10 +26,10 @@ defmodule Edgehog.Containers.Validations.Dangling do
   use Ash.Resource.Validation
 
   @impl Ash.Resource.Validation
-  def validate(changeset, _opts, _context) do
+  def validate(changeset, _opts, context) do
     resource = changeset.data
 
-    with {:ok, resource} <- Ash.load(resource, :dangling?) do
+    with {:ok, resource} <- Ash.load(resource, :dangling?, tenant: context.tenant) do
       dangling? = Map.get(resource, :dangling?)
 
       if dangling?,

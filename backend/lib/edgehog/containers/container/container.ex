@@ -45,7 +45,7 @@ defmodule Edgehog.Containers.Container do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :container do
-        action_types [:create, :update, :destroy]
+        actions [:create, :create_and_relate, :update, :destroy]
       end
     end
 

@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Volume do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :volume do
-        action_types [:create, :update, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 

@@ -41,7 +41,7 @@ defmodule Edgehog.Containers.Changes.MaybeDestroyChildren do
     children =
       opts
       |> Keyword.fetch!(@children_key)
-      |> compute_children(changeset.data)
+      |> compute_children(changeset.data, tenant)
 
     with {:ok, children} <- children do
       Ash.Changeset.after_action(
@@ -51,12 +51,13 @@ defmodule Edgehog.Containers.Changes.MaybeDestroyChildren do
     end
   end
 
-  defp compute_children(children_keys, resource) do
-    with {:ok, resource} <- Ash.load(resource, children_keys) do
+  defp compute_children(children_keys, resource, tenant) do
+    with {:ok, resource} <- Ash.load(resource, children_keys, tenant: tenant) do
       children =
         children_keys
         |> Enum.map(&Map.get(resource, &1, nil))
         |> List.flatten()
+        |> Enum.reject(&is_nil/1)
 
       {:ok, children}
     end

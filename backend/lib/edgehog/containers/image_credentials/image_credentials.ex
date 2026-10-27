@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.ImageCredentials do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.ImageCredentials.Base64JsonEncoding
+  alias Edgehog.Containers.Validations
 
   resource do
     description """
@@ -43,7 +44,7 @@ defmodule Edgehog.Containers.ImageCredentials do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :image_credentials do
-        action_types [:create, :update, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
   end
@@ -54,11 +55,45 @@ defmodule Edgehog.Containers.ImageCredentials do
     create :create do
       primary? true
       accept [:label, :username, :password]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_image_credentials, field: :label}
+    end
+
+    create :copy do
+      accept [:label, :username, :password]
+
+      argument :id, :uuid
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
     end
 
     update :update do
       primary? true
+      require_atomic? false
       accept [:label, :username, :password]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_image_credentials, field: :label}
+    end
+
+    read :plain_image_credentials do
+      pagination offset?: true, keyset?: true, required?: false
+
+      filter expr(not exists(images.image_deployments, not is_nil(id)))
+    end
+
+    read :deployed_image_credentials do
+      pagination offset?: true, keyset?: true, required?: false
+
+      filter expr(exists(images.image_deployments, not is_nil(id)))
+    end
+
+    destroy :destroy_if_dangling do
+      description "Destroys the image credentials if they are dangling (copied and not referenced by any image)"
+
+      require_atomic? false
+      validate Validations.Dangling
     end
   end
 
@@ -90,10 +125,10 @@ defmodule Edgehog.Containers.ImageCredentials do
 
   calculations do
     calculate :base64_json, :string, Base64JsonEncoding
-  end
 
-  identities do
-    identity :label, [:label]
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :images]}
   end
 
   postgres do

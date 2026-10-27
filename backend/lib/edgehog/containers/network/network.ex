@@ -34,7 +34,7 @@ defmodule Edgehog.Containers.Network do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :network do
-        action_types [:create, :update, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 

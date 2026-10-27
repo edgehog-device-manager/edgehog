@@ -80,13 +80,23 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
     }
     """
 
-    test "updates image credentials label, username, and password", %{tenant: tenant} do
+    test "updates plain image credentials and rejects duplicate plain label or deployed copy", %{
+      tenant: tenant
+    } do
       creds =
         image_credentials_fixture(
           tenant: tenant,
           label: "old-creds",
           username: "old-user",
           password: "old-password"
+        )
+
+      creds2 =
+        image_credentials_fixture(
+          tenant: tenant,
+          label: "other-creds",
+          username: "other-user",
+          password: "other-password"
         )
 
       creds_id = AshGraphql.Resource.encode_relay_id(creds)
@@ -118,6 +128,47 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
 
       updated = Ash.get!(ImageCredentials, creds.id, tenant: tenant)
       assert updated.password == "new-password"
+
+      # Rejects duplicate plain credentials label
+      dup_res =
+        Absinthe.run!(@update_credentials_doc, EdgehogWeb.Schema,
+          variables: %{
+            "id" => creds_id,
+            "input" => %{"label" => creds2.label}
+          },
+          context: %{tenant: tenant}
+        )
+
+      assert %{data: %{"updateImageCredentials" => nil}, errors: [_ | _]} = dup_res
+
+      # Deploying a container with creds2 creates a deployed copy that cannot be updated via GraphQL
+      image = image_fixture(tenant: tenant, image_credentials_id: creds2.id)
+      container = container_fixture(tenant: tenant, image: image)
+      release = release_fixture(tenant: tenant, container_ids: [container.id])
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id]
+        |> deployment_fixture()
+        |> Ash.load!([release: [containers: [image: :credentials]]], tenant: tenant)
+
+      [deployed_container] = deployment.release.containers
+      deployed_creds = deployed_container.image.credentials
+      deployed_creds_id = AshGraphql.Resource.encode_relay_id(deployed_creds)
+
+      deployed_res =
+        Absinthe.run!(@update_credentials_doc, EdgehogWeb.Schema,
+          variables: %{
+            "id" => deployed_creds_id,
+            "input" => %{"username" => "mutated-user"}
+          },
+          context: %{tenant: tenant}
+        )
+
+      assert %{data: %{"updateImageCredentials" => nil}, errors: [_ | _]} = deployed_res
+
+      reloaded_deployed_creds = Ash.get!(ImageCredentials, deployed_creds.id, tenant: tenant)
+      assert reloaded_deployed_creds.username == "other-user"
     end
   end
 

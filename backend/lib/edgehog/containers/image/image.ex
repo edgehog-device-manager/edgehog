@@ -24,6 +24,7 @@ defmodule Edgehog.Containers.Image do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.ImageCredentials
@@ -42,7 +43,7 @@ defmodule Edgehog.Containers.Image do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :image do
-        action_types [:create, :destroy]
+        actions [:create, :destroy]
       end
     end
 
@@ -95,8 +96,15 @@ defmodule Edgehog.Containers.Image do
       ]
 
       argument :id, :uuid
+      argument :credentials, :map
 
       change set_attribute(:id, arg(:id), set_when_nil?: false)
+
+      change manage_relationship(:credentials,
+               on_no_match: {:create, :copy},
+               on_lookup: :relate,
+               on_match: :ignore
+             )
     end
 
     read :plain_images do
@@ -114,6 +122,8 @@ defmodule Edgehog.Containers.Image do
 
       require_atomic? false
       validate Validations.Dangling
+
+      change {Changes.MaybeDestroyChildren, children: [:credentials]}
     end
   end
 
