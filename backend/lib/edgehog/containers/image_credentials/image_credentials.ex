@@ -61,7 +61,7 @@ defmodule Edgehog.Containers.ImageCredentials do
     end
 
     create :copy do
-      accept [:label, :username, :password]
+      accept [:label, :username, :password, :source_image_credentials_id]
 
       argument :id, :uuid
 
@@ -80,13 +80,19 @@ defmodule Edgehog.Containers.ImageCredentials do
     read :plain_image_credentials do
       pagination offset?: true, keyset?: true, required?: false
 
-      filter expr(not exists(images.image_deployments, not is_nil(id)))
+      filter expr(
+               is_nil(source_image_credentials_id) and
+                 not exists(images.image_deployments, not is_nil(id))
+             )
     end
 
     read :deployed_image_credentials do
       pagination offset?: true, keyset?: true, required?: false
 
-      filter expr(exists(images.image_deployments, not is_nil(id)))
+      filter expr(
+               not is_nil(source_image_credentials_id) or
+                 exists(images.image_deployments, not is_nil(id))
+             )
     end
 
     destroy :destroy_if_dangling do
@@ -120,6 +126,12 @@ defmodule Edgehog.Containers.ImageCredentials do
   end
 
   relationships do
+    belongs_to :source_image_credentials, __MODULE__ do
+      attribute_type :uuid
+      allow_nil? true
+      public? true
+    end
+
     has_many :images, Edgehog.Containers.Image
   end
 
@@ -128,11 +140,15 @@ defmodule Edgehog.Containers.ImageCredentials do
 
     calculate :dangling?,
               :boolean,
-              {Edgehog.Containers.Calculations.Dangling, [parent: :images]}
+              expr(not is_nil(source_image_credentials_id) and not exists(images, true))
   end
 
   postgres do
     table "image_credentials"
     repo Edgehog.Repo
+
+    references do
+      reference :source_image_credentials, on_delete: :nilify
+    end
   end
 end

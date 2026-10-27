@@ -94,5 +94,39 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
       assert container_deployment1.image_deployment.image.reference == image.reference
       assert container_deployment2.image_deployment.image.reference == image.reference
     end
+
+    test "copies image credentials and tracks provenance onto deployed image copy", %{
+      tenant: tenant
+    } do
+      credentials = image_credentials_fixture(tenant: tenant)
+
+      image =
+        image_fixture(
+          tenant: tenant,
+          image_credentials_id: credentials.id
+        )
+
+      release =
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      [container_deployment] =
+        deployment
+        |> Ash.load!(container_deployments: [image_deployment: [image: [:credentials]]])
+        |> Map.get(:container_deployments)
+
+      deployed_image = container_deployment.image_deployment.image
+
+      assert deployed_image.source_image_id == image.id
+      assert deployed_image.image_credentials_id != credentials.id
+      assert deployed_image.credentials.source_image_credentials_id == credentials.id
+      assert deployed_image.credentials.label == credentials.label
+      assert deployed_image.credentials.username == credentials.username
+      assert deployed_image.credentials.password == credentials.password
+    end
   end
 end

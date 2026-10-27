@@ -84,6 +84,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
       changeset
       |> Ash.Changeset.force_change_attribute(:application_id, release.application_id)
       |> Ash.Changeset.force_change_attribute(:version, release.version)
+      |> Ash.Changeset.force_change_attribute(:source_release_id, release.id)
       |> Ash.Changeset.manage_relationship(:containers, containers_inputs,
         on_no_match: {:create, :copy},
         on_lookup: :relate
@@ -124,6 +125,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
           credentials
           |> Map.from_struct()
           |> Map.put(:id, Map.fetch!(credentials_id_map, credentials.id))
+          |> Map.put(:source_image_credentials_id, credentials.id)
       end
 
     image_input =
@@ -138,6 +140,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
         :image_credentials_id
       ])
       |> Map.put(:id, Map.fetch!(image_id_map, container.image.id))
+      |> Map.put(:source_image_id, container.image.id)
       |> Map.put(:credentials, credentials_input)
 
     volumes_inputs =
@@ -145,6 +148,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
         cv.volume
         |> Map.from_struct()
         |> Map.put(:id, Map.fetch!(volume_id_map, cv.volume.id))
+        |> Map.put(:source_volume_id, cv.volume.id)
         |> Map.put(:target, cv.target)
       end)
 
@@ -153,6 +157,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
         network
         |> Map.from_struct()
         |> Map.put(:id, Map.fetch!(network_id_map, network.id))
+        |> Map.put(:source_network_id, network.id)
       end)
 
     file_mounts_inputs =
@@ -180,6 +185,7 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
     |> Map.take(Container.container_attributes())
     |> Map.merge(%{
       id: Map.fetch!(container_id_map, container.id),
+      source_container_id: container.id,
       image: image_input,
       volumes: volumes_inputs,
       networks: networks_inputs,

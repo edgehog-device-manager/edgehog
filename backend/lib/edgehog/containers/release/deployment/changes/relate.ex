@@ -71,16 +71,19 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.Relate do
   end
 
   defp remap_configs(configs, orig_containers, copied_containers) do
-    copied_by_name = Map.new(copied_containers, &{&1.name, &1})
+    copied_by_source_id =
+      Map.new(copied_containers, fn copied ->
+        {to_string(copied.source_container_id || copied.id), copied}
+      end)
 
     container_map =
       Map.new(orig_containers, fn orig ->
-        {to_string(orig.id), Map.fetch!(copied_by_name, orig.name)}
+        {to_string(orig.id), Map.fetch!(copied_by_source_id, to_string(orig.id))}
       end)
 
     file_mount_map =
       Enum.reduce(orig_containers, %{}, fn orig, acc ->
-        copied = Map.fetch!(copied_by_name, orig.name)
+        copied = Map.fetch!(container_map, to_string(orig.id))
         copied_mounts_by_mp = Map.new(copied.file_mounts || [], &{&1.mountpoint, &1.id})
 
         Enum.reduce(orig.file_mounts || [], acc, fn fm, inner_acc ->

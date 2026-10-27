@@ -92,6 +92,7 @@ defmodule Edgehog.Containers.Image do
         :tag,
         :digest,
         :pull_policy,
+        :source_image_id,
         :image_credentials_id
       ]
 
@@ -187,6 +188,11 @@ defmodule Edgehog.Containers.Image do
   end
 
   relationships do
+    belongs_to :source_image, Image do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     belongs_to :credentials, ImageCredentials do
       source_attribute :image_credentials_id
       attribute_type :uuid
@@ -241,5 +247,9 @@ defmodule Edgehog.Containers.Image do
   postgres do
     table "images"
     skip_unique_indexes [:reference_credentials]
+
+    references do
+      reference :source_image, on_delete: :nilify
+    end
   end
 end

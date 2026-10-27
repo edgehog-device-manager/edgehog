@@ -30,6 +30,7 @@ defmodule Edgehog.Containers.DeploymentTest do
   alias Edgehog.Containers.DeviceMapping
   alias Edgehog.Containers.DeviceRequest
   alias Edgehog.Containers.Image
+  alias Edgehog.Containers.ImageCredentials
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Volume
@@ -87,7 +88,8 @@ defmodule Edgehog.Containers.DeploymentTest do
 
   test "deploy deep-copies resources, keeps originals in plain_*, and allows editing plain resources",
        %{tenant: tenant} do
-    plain_image = image_fixture(tenant: tenant)
+    plain_credentials = image_credentials_fixture(tenant: tenant)
+    plain_image = image_fixture(tenant: tenant, image_credentials_id: plain_credentials.id)
     plain_volume = volume_fixture(tenant: tenant, driver: "local", options: %{"o" => "1"})
     plain_network = network_fixture(tenant: tenant, driver: "bridge")
     plain_dm = device_mapping_fixture(tenant: tenant)
@@ -125,12 +127,12 @@ defmodule Edgehog.Containers.DeploymentTest do
           :release,
           container_deployments: [
             container: [
-              :image,
               :volumes,
               :networks,
               :device_mappings,
               :device_requests,
-              :file_mounts
+              :file_mounts,
+              image: [:credentials]
             ]
           ]
         ],
@@ -140,6 +142,7 @@ defmodule Edgehog.Containers.DeploymentTest do
     deployed_release = deployment.release
     [container_deployment] = deployment.container_deployments
     deployed_container = container_deployment.container
+    deployed_credentials = deployed_container.image.credentials
     [deployed_volume] = deployed_container.volumes
     [deployed_network] = deployed_container.networks
     [deployed_dm] = deployed_container.device_mappings
@@ -152,6 +155,9 @@ defmodule Edgehog.Containers.DeploymentTest do
     assert deployed_container.name == plain_container.name
     assert deployed_container.image.id != plain_image.id
     assert deployed_container.image.reference == plain_image.reference
+    assert deployed_credentials.id != plain_credentials.id
+    assert deployed_credentials.source_image_credentials_id == plain_credentials.id
+    assert deployed_credentials.label == plain_credentials.label
     assert deployed_volume.id != plain_volume.id
     assert deployed_volume.label == plain_volume.label
     assert deployed_network.id != plain_network.id
@@ -197,6 +203,23 @@ defmodule Edgehog.Containers.DeploymentTest do
     assert deployed_container.id in deployed_container_ids
     refute plain_container.id in deployed_container_ids
 
+    plain_credentials_ids =
+      ImageCredentials
+      |> Ash.Query.for_read(:plain_image_credentials, %{}, tenant: tenant)
+      |> Ash.read!()
+      |> Enum.map(& &1.id)
+
+    deployed_credentials_ids =
+      ImageCredentials
+      |> Ash.Query.for_read(:deployed_image_credentials, %{}, tenant: tenant)
+      |> Ash.read!()
+      |> Enum.map(& &1.id)
+
+    assert plain_credentials.id in plain_credentials_ids
+    refute deployed_credentials.id in plain_credentials_ids
+    assert deployed_credentials.id in deployed_credentials_ids
+    refute plain_credentials.id in deployed_credentials_ids
+
     # Editing the plain volume does not mutate the deployed volume copy
     updated_plain_volume =
       plain_volume
@@ -218,6 +241,7 @@ defmodule Edgehog.Containers.DeploymentTest do
     assert {:error, _} = Ash.get(Release, deployed_release.id, tenant: tenant)
     assert {:error, _} = Ash.get(Container, deployed_container.id, tenant: tenant)
     assert {:error, _} = Ash.get(Image, deployed_container.image.id, tenant: tenant)
+    assert {:error, _} = Ash.get(ImageCredentials, deployed_credentials.id, tenant: tenant)
     assert {:error, _} = Ash.get(Volume, deployed_volume.id, tenant: tenant)
     assert {:error, _} = Ash.get(Network, deployed_network.id, tenant: tenant)
     assert {:error, _} = Ash.get(DeviceMapping, deployed_dm.id, tenant: tenant)
@@ -226,8 +250,20 @@ defmodule Edgehog.Containers.DeploymentTest do
     assert {:ok, _} = Ash.get(Release, plain_release.id, tenant: tenant)
     assert {:ok, _} = Ash.get(Container, plain_container.id, tenant: tenant)
     assert {:ok, _} = Ash.get(Image, plain_image.id, tenant: tenant)
+    assert {:ok, _} = Ash.get(ImageCredentials, plain_credentials.id, tenant: tenant)
     assert {:ok, _} = Ash.get(Volume, plain_volume.id, tenant: tenant)
     assert {:ok, _} = Ash.get(Network, plain_network.id, tenant: tenant)
+
+    # Destroying a dangling plain image does not garbage-collect its plain catalog credentials
+    unreferenced_plain_image =
+      image_fixture(tenant: tenant, image_credentials_id: plain_credentials.id)
+
+    unreferenced_plain_image
+    |> Ash.Changeset.for_destroy(:destroy_if_dangling, %{}, tenant: tenant)
+    |> Ash.destroy!(tenant: tenant)
+
+    assert {:error, _} = Ash.get(Image, unreferenced_plain_image.id, tenant: tenant)
+    assert {:ok, _} = Ash.get(ImageCredentials, plain_credentials.id, tenant: tenant)
   end
 
   test "shared volume and network across containers are preserved if only one container is destroyed",
