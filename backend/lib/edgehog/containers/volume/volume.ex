@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Volume do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :volume do
-        action_types [:create, :update, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 
@@ -55,7 +55,7 @@ defmodule Edgehog.Containers.Volume do
     end
 
     create :copy do
-      accept [:label, :driver, :options]
+      accept [:label, :driver, :options, :source_volume_id]
 
       argument :id, :uuid
 
@@ -113,6 +113,11 @@ defmodule Edgehog.Containers.Volume do
   end
 
   relationships do
+    belongs_to :source_volume, __MODULE__ do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     many_to_many :devices, Edgehog.Devices.Device do
       through Edgehog.Containers.Volume.Deployment
       join_relationship :volume_deployments
@@ -139,5 +144,9 @@ defmodule Edgehog.Containers.Volume do
   postgres do
     table "volumes"
     repo Edgehog.Repo
+
+    references do
+      reference :source_volume, on_delete: :nilify
+    end
   end
 end

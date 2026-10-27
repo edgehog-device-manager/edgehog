@@ -176,6 +176,12 @@ defmodule Edgehog.Containers.Release do
       public? true
     end
 
+    belongs_to :source_release, Release do
+      attribute_type :uuid
+      allow_nil? true
+      public? true
+    end
+
     has_one :deployment, Deployment
 
     has_many :deployments, Deployment do
@@ -184,8 +190,8 @@ defmodule Edgehog.Containers.Release do
       destination_attribute :tenant_id
 
       filter expr(
-               release.application_id == parent(application_id) and
-                 release.version == parent(version)
+               release_id == parent(id) or
+                 release.source_release_id == parent(id)
              )
     end
 
@@ -225,5 +231,9 @@ defmodule Edgehog.Containers.Release do
 
   postgres do
     table "application_releases"
+
+    references do
+      reference :source_release, on_delete: :nilify
+    end
   end
 end

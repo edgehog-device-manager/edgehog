@@ -36,7 +36,7 @@ defmodule Edgehog.Containers.Image do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :image do
-        action_types [:create, :destroy]
+        actions [:create, :destroy]
       end
     end
 
@@ -58,11 +58,12 @@ defmodule Edgehog.Containers.Image do
     end
 
     create :copy do
-      accept [:reference, :image_credentials_id]
+      accept [:reference, :image_credentials_id, :source_image_id]
 
       argument :id, :uuid
 
       change set_attribute(:id, arg(:id), set_when_nil?: false)
+      change Image.Changes.SnapshotRegistryAuth
     end
 
     read :plain_images do
@@ -91,10 +92,19 @@ defmodule Edgehog.Containers.Image do
       public? true
     end
 
+    attribute :registry_auth, :string do
+      sensitive? true
+    end
+
     timestamps()
   end
 
   relationships do
+    belongs_to :source_image, Image do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     belongs_to :credentials, ImageCredentials do
       source_attribute :image_credentials_id
       attribute_type :uuid
@@ -131,5 +141,9 @@ defmodule Edgehog.Containers.Image do
   postgres do
     table "images"
     skip_unique_indexes [:reference_credentials]
+
+    references do
+      reference :source_image, on_delete: :nilify
+    end
   end
 end

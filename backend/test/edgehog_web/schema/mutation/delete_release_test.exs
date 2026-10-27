@@ -74,16 +74,16 @@ defmodule EdgehogWeb.Schema.Mutation.DeleteReleaseTest do
       # Verify deployed release still exists and wasn't deleted
       assert {:ok, _release} = Ash.get(Release, deployed_release.id, tenant: tenant)
 
-      # The original plain release can still be deleted without affecting the deployment
+      # The original plain release also cannot be deleted while active deployments exist
       plain_release_id = AshGraphql.Resource.encode_relay_id(release)
 
-      deleted_plain =
+      plain_error =
         [tenant: tenant, id: plain_release_id]
         |> delete_release()
-        |> extract_result!()
+        |> extract_error!()
 
-      assert deleted_plain["id"] == plain_release_id
-      assert {:error, %Invalid{}} = Ash.get(Release, release.id, tenant: tenant)
+      assert is_binary(plain_error.message)
+      assert {:ok, _release} = Ash.get(Release, release.id, tenant: tenant)
       assert {:ok, _release} = Ash.get(Release, deployed_release.id, tenant: tenant)
     end
 

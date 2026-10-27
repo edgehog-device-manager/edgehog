@@ -94,5 +94,37 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
       assert container_deployment1.image_deployment.image.reference == image.reference
       assert container_deployment2.image_deployment.image.reference == image.reference
     end
+
+    test "snapshots registry_auth and provenance onto deployed image copy", %{tenant: tenant} do
+      credentials =
+        [tenant: tenant]
+        |> image_credentials_fixture()
+        |> Ash.load!(:base64_json, tenant: tenant)
+
+      image =
+        image_fixture(
+          tenant: tenant,
+          image_credentials_id: credentials.id
+        )
+
+      release =
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      [container_deployment] =
+        deployment
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
+        |> Map.get(:container_deployments)
+
+      deployed_image = container_deployment.image_deployment.image
+
+      assert deployed_image.source_image_id == image.id
+      assert deployed_image.registry_auth == credentials.base64_json
+      assert deployed_image.image_credentials_id == credentials.id
+    end
   end
 end

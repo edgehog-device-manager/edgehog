@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
          {:ok, image} <- Ash.Changeset.fetch_argument(changeset, :image),
          {:ok, image} <- Ash.load(image, credentials: [:base64_json]),
          {:ok, device} <- Ash.load(device, :appengine_client) do
-      credentials = image.credentials.base64_json |> get_in() |> to_string()
+      credentials =
+        image.registry_auth || image.credentials.base64_json |> get_in() |> to_string()
 
       data = %RequestData{
         id: image.id,

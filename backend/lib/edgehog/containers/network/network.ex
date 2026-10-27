@@ -34,7 +34,7 @@ defmodule Edgehog.Containers.Network do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :network do
-        action_types [:create, :update, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 
@@ -53,7 +53,7 @@ defmodule Edgehog.Containers.Network do
     end
 
     create :copy do
-      accept [:label, :driver, :internal, :enable_ipv6, :options]
+      accept [:label, :driver, :internal, :enable_ipv6, :options, :source_network_id]
 
       argument :id, :uuid
 
@@ -122,6 +122,11 @@ defmodule Edgehog.Containers.Network do
   end
 
   relationships do
+    belongs_to :source_network, __MODULE__ do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     many_to_many :containers, Edgehog.Containers.Container do
       through ContainerNetwork
       public? true
@@ -147,5 +152,9 @@ defmodule Edgehog.Containers.Network do
   postgres do
     table "networks"
     repo Edgehog.Repo
+
+    references do
+      reference :source_network, on_delete: :nilify
+    end
   end
 end

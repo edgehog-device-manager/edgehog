@@ -45,7 +45,7 @@ defmodule Edgehog.Containers.Container do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :container do
-        action_types [:create, :update, :destroy]
+        actions [:create, :create_and_relate, :update, :destroy]
       end
     end
 
@@ -157,7 +157,7 @@ defmodule Edgehog.Containers.Container do
     end
 
     create :copy do
-      accept @container_attributes
+      accept [:source_container_id | @container_attributes]
 
       argument :id, :uuid
       argument :image, :map
@@ -702,6 +702,11 @@ defmodule Edgehog.Containers.Container do
   end
 
   relationships do
+    belongs_to :source_container, __MODULE__ do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     belongs_to :image, Image do
       source_attribute :image_id
       attribute_type :uuid
@@ -758,5 +763,9 @@ defmodule Edgehog.Containers.Container do
 
   postgres do
     table "containers"
+
+    references do
+      reference :source_container, on_delete: :nilify
+    end
   end
 end
