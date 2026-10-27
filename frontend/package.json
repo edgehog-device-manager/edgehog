@@ -136,5 +136,8 @@
     "react-select-event": "^5.5.1",
     "relay-test-utils": "^21.0.1",
     "vitest": "^4.1.11"
+  },
+  "allowScripts": {
+    "@parcel/watcher@2.6.0": true
   }
 }
