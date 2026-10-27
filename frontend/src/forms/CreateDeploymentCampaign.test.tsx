@@ -767,6 +767,37 @@ describe("CreateDeploymentCampaignForm file mounts", { timeout: 15000 }, () => {
     });
   });
 
+  it("allows selecting and submitting the same release as target release for upgrade campaigns", async () => {
+    const { relayEnvironment, onSubmit } = await renderForm();
+
+    await selectOperationType("Upgrade");
+    await selectApplicationAndRelease("rel-1");
+    await userEvent.selectOptions(
+      screen.getByLabelText("Target release"),
+      "rel-1",
+    );
+    await screen.findByTestId("deployment-campaign-file-mounts");
+    expect(screen.getByTestId("container-mounts-container-1")).toBeVisible();
+
+    await completeRequiredFields();
+    await pickRepositoryFile(relayEnvironment);
+
+    const submitButton = await screen.findByRole("button", {
+      name: /Create upgrade campaign/i,
+    });
+    await waitFor(() => expect(submitButton).toBeEnabled(), { timeout: 5000 });
+    await userEvent.click(submitButton);
+
+    await waitFor(() => expect(onSubmit).toHaveBeenCalledTimes(1));
+
+    expect(onSubmit.mock.calls[0][0].campaignMechanism).toEqual({
+      deploymentUpgrade: expect.objectContaining({
+        releaseId: "rel-1",
+        targetReleaseId: "rel-1",
+      }),
+    });
+  });
+
   it("sends the target release environment configuration for upgrade campaigns", async () => {
     const { relayEnvironment, onSubmit } = await renderForm();
 
