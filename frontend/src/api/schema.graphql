@@ -3387,6 +3387,7 @@ type Volume implements Node {
     "The number of records to skip."
     offset: Int
   ): [Container!]!
+  hash: String!
 }
 
 enum NetworkDeploymentSortField {
@@ -3738,6 +3739,7 @@ type Network implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceConnection!
+  hash: String!
 }
 
 type release_result {
@@ -3792,6 +3794,7 @@ enum ReleaseSortField {
   ID
   VERSION
   APPLICATION_ID
+  SOURCE_RELEASE_ID
 }
 
 ":release connection"
@@ -3813,6 +3816,19 @@ type ReleaseEdge {
 
   ":release node"
   node: Release!
+}
+
+input ReleaseFilterSourceReleaseId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
 }
 
 input ReleaseFilterApplicationId {
@@ -3866,7 +3882,9 @@ input ReleaseFilterInput {
   id: ReleaseFilterId
   version: ReleaseFilterVersion
   applicationId: ReleaseFilterApplicationId
+  sourceReleaseId: ReleaseFilterSourceReleaseId
   application: ApplicationFilterInput
+  sourceRelease: ReleaseFilterInput
   deployments: DeploymentFilterInput
   containers: ContainerFilterInput
   containerDependencies: ReleaseContainerDependenciesFilterInput
@@ -3882,7 +3900,9 @@ type Release implements Node {
   id: ID!
   version: String!
   applicationId: ID
+  sourceReleaseId: ID
   application: Application
+  sourceRelease: Release
   deployments(
     "How to sort the records in the response"
     sort: [DeploymentSortInput]
@@ -3950,6 +3970,7 @@ type Release implements Node {
     "The number of records to skip."
     offset: Int
   ): [SystemModel!]!
+  hash: String!
 }
 
 type image_credentials_result {
@@ -4269,6 +4290,7 @@ type Image {
     "The number of records to skip."
     offset: Int
   ): [Container!]!
+  hash: String!
 }
 
 type deployment_event_result {
@@ -6334,6 +6356,7 @@ type Container implements Node {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+  hash: String!
 }
 
 type application_result {
