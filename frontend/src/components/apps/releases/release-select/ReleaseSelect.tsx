@@ -157,7 +157,7 @@ const ReleaseSelect = ({
     if (isTarget && selectedApp && selectedRelease) {
       const targetReleases =
         releases.filter((release) =>
-          semver.gt(release.version, selectedRelease.version || "0.0.0"),
+          semver.gte(release.version, selectedRelease.version || "0.0.0"),
         ) ?? [];
       return targetReleases;
     }
@@ -270,12 +270,12 @@ const ReleaseSelectWrapper = ({
 
   useEffect(fetchApplication, [fetchApplication]);
 
-  // Clear selected target release if selectedRelease is >= currently selected target release
+  // Clear selected target release if selectedRelease is > currently selected target release
   useEffect(() => {
     if (
       controllerProps.value &&
       selectedRelease &&
-      semver.gte(selectedRelease.version, controllerProps.value.version)
+      semver.gt(selectedRelease.version, controllerProps.value.version)
     ) {
       controllerProps.onChange(null);
     }
