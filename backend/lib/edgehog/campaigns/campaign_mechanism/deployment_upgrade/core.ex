@@ -183,7 +183,7 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
 
   defp upgrade(target, release, target_release, configs) do
     cond do
-      Helpers.application_deployed?(target, target_release) ->
+      release.id != target_release.id and Helpers.application_deployed?(target, target_release) ->
         {:ok, :already_in_desired_state}
 
       Helpers.application_deployed?(target, release) ->

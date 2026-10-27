@@ -339,6 +339,46 @@ defmodule EdgehogWeb.Schema.Mutation.CreateCampaignTest do
       assert_campaign_executor_started(tenant, campaign_data, :deployment_upgrade)
     end
 
+    test "creates deployment_upgrade campaign with same release as targetRelease", %{
+      tenant: tenant
+    } do
+      release = release_fixture(tenant: tenant, version: "1.0.0", system_models: 1)
+
+      target_group = device_group_fixture(selector: ~s<"upgrade-same" in tags>, tenant: tenant)
+      channel = channel_fixture(target_group_ids: [target_group.id], tenant: tenant)
+
+      device =
+        [release_id: release.id, tenant: tenant]
+        |> device_fixture_compatible_with_release()
+        |> add_tags(["upgrade-same"])
+
+      _deployment =
+        deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
+
+      release_id = AshGraphql.Resource.encode_relay_id(release)
+      channel_id = AshGraphql.Resource.encode_relay_id(channel)
+
+      campaign_mechanism =
+        build_deployment_mechanism(:deployment_upgrade, release_id, target_release_id: release_id)
+
+      campaign_data =
+        [
+          name: "Same Version Upgrade Campaign",
+          campaign_mechanism: campaign_mechanism,
+          channel_id: channel_id,
+          tenant: tenant
+        ]
+        |> create_campaign_mutation()
+        |> extract_result!()
+
+      assert campaign_data["name"] == "Same Version Upgrade Campaign"
+      assert campaign_data["status"] == "IDLE"
+      assert campaign_data["campaignMechanism"]["release"]["id"] == release_id
+      assert campaign_data["campaignMechanism"]["targetRelease"]["id"] == release_id
+
+      assert_campaign_executor_started(tenant, campaign_data, :deployment_upgrade)
+    end
+
     test "creates deployment_upgrade campaign with configs and file binds", %{tenant: tenant} do
       # 1. Base release for the application
       release = release_fixture(tenant: tenant, version: "1.0.0", system_models: 1)
