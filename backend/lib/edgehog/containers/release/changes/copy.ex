@@ -28,11 +28,11 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
     :system_models,
     :container_dependencies,
     containers: [
-      :image,
       :networks,
       :file_mounts,
       :device_mappings,
       :device_requests,
+      image: [credentials: [:base64_json]],
       container_volumes: [:volume]
     ]
   ]
@@ -42,28 +42,10 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
     with {:ok, release} <- Ash.Changeset.fetch_argument(changeset, :release),
          {:ok, release} <- Ash.load(release, @release_loads, tenant: tenant) do
       container_id_map = build_id_map(release.containers)
-      image_id_map = release.containers |> Enum.map(& &1.image) |> build_id_map()
-
-      volume_id_map =
-        release.containers
-        |> Enum.flat_map(& &1.container_volumes)
-        |> Enum.map(& &1.volume)
-        |> build_id_map()
-
-      network_id_map =
-        release.containers
-        |> Enum.flat_map(& &1.networks)
-        |> build_id_map()
 
       containers_inputs =
         Enum.map(release.containers, fn container ->
-          build_container_input(
-            container,
-            container_id_map,
-            image_id_map,
-            volume_id_map,
-            network_id_map
-          )
+          build_container_input(container, container_id_map)
         end)
 
       dependencies_inputs =
@@ -101,33 +83,32 @@ defmodule Edgehog.Containers.Release.Changes.Copy do
     |> Map.new(&{&1.id, Ash.UUID.generate()})
   end
 
-  defp build_container_input(
-         container,
-         container_id_map,
-         image_id_map,
-         volume_id_map,
-         network_id_map
-       ) do
+  defp build_container_input(container, container_id_map) do
     image_input =
       container.image
       |> Map.from_struct()
-      |> Map.put(:id, Map.fetch!(image_id_map, container.image.id))
-      |> Map.put(:source_image_id, container.image.id)
+      |> Map.drop([:id])
+      |> Map.merge(%{
+        source_image_id: container.image.id,
+        registry_auth: get_in(container.image.credentials.base64_json)
+      })
 
     volumes_inputs =
       Enum.map(container.container_volumes, fn cv ->
         cv.volume
         |> Map.from_struct()
-        |> Map.put(:id, Map.fetch!(volume_id_map, cv.volume.id))
-        |> Map.put(:source_volume_id, cv.volume.id)
-        |> Map.put(:target, cv.target)
+        |> Map.drop([:id])
+        |> Map.merge(%{
+          source_volume_id: cv.volume.id,
+          target: cv.target
+        })
       end)
 
     networks_inputs =
       Enum.map(container.networks, fn network ->
         network
         |> Map.from_struct()
-        |> Map.put(:id, Map.fetch!(network_id_map, network.id))
+        |> Map.drop([:id])
         |> Map.put(:source_network_id, network.id)
       end)
 

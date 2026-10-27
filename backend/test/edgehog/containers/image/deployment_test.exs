@@ -58,7 +58,7 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
       assert container_deployment1.image_deployment.image.reference == image.reference
     end
 
-    test "creates independent image copies across different release deployments", %{
+    test "reuses unchanged image deployment across release deployments on the same device", %{
       tenant: tenant,
       image: image
     } do
@@ -86,13 +86,11 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
         |> Ash.load!(container_deployments: [image_deployment: [:image]])
         |> Map.get(:container_deployments)
 
-      assert container_deployment1.image_deployment.id !=
+      assert container_deployment1.image_deployment.id ==
                container_deployment2.image_deployment.id
 
       assert container_deployment1.image_deployment.image_id != image.id
-      assert container_deployment2.image_deployment.image_id != image.id
       assert container_deployment1.image_deployment.image.reference == image.reference
-      assert container_deployment2.image_deployment.image.reference == image.reference
     end
 
     test "snapshots registry_auth and provenance onto deployed image copy", %{tenant: tenant} do
@@ -125,6 +123,16 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
       assert deployed_image.source_image_id == image.id
       assert deployed_image.registry_auth == credentials.base64_json
       assert deployed_image.image_credentials_id == credentials.id
+
+      # Updating the credentials does not alter the snapshotted registry_auth on the deployed copy
+      credentials
+      |> Ash.Changeset.for_update(:update, %{password: "updated-password"}, tenant: tenant)
+      |> Ash.update!(tenant: tenant)
+
+      reloaded_deployed_image =
+        Ash.get!(Edgehog.Containers.Image, deployed_image.id, tenant: tenant)
+
+      assert reloaded_deployed_image.registry_auth == credentials.base64_json
     end
   end
 end

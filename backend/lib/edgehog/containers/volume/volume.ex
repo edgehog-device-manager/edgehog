@@ -56,10 +56,6 @@ defmodule Edgehog.Containers.Volume do
 
     create :copy do
       accept [:label, :driver, :options, :source_volume_id]
-
-      argument :id, :uuid
-
-      change set_attribute(:id, arg(:id), set_when_nil?: false)
     end
 
     update :update do
@@ -141,9 +137,14 @@ defmodule Edgehog.Containers.Volume do
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
+  identities do
+    identity :copied_volume, [:source_volume_id, :label, :driver]
+  end
+
   postgres do
     table "volumes"
     repo Edgehog.Repo
+    skip_unique_indexes [:copied_volume]
 
     references do
       reference :source_volume, on_delete: :nilify

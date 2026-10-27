@@ -286,4 +286,124 @@ defmodule Edgehog.Containers.DeploymentTest do
     assert {:ok, _} = Ash.get(Volume, vol1.id, tenant: tenant)
     assert {:ok, _} = Ash.get(Network, net1.id, tenant: tenant)
   end
+
+  test "reuses unchanged volume, network, and image across release deployments on the same device and preserves them on GC",
+       %{tenant: tenant} do
+    application = application_fixture(tenant: tenant)
+    plain_image = image_fixture(tenant: tenant)
+    plain_volume = volume_fixture(tenant: tenant, driver: "local", options: %{"o" => "1"})
+    plain_network = network_fixture(tenant: tenant, driver: "bridge", internal: false)
+
+    c1 =
+      container_fixture(
+        tenant: tenant,
+        image: plain_image,
+        volumes: [{plain_volume, "/data"}],
+        networks: [plain_network]
+      )
+
+    c2 =
+      container_fixture(
+        tenant: tenant,
+        image: plain_image,
+        volumes: [{plain_volume, "/data"}],
+        networks: [plain_network]
+      )
+
+    release_v1 =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id,
+        version: "1.0.0",
+        container_ids: [c1.id]
+      )
+
+    release_v2 =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id,
+        version: "2.0.0",
+        container_ids: [c2.id]
+      )
+
+    device = device_fixture(tenant: tenant)
+
+    dep_v1 =
+      [tenant: tenant, device_id: device.id, release_id: release_v1.id]
+      |> deployment_fixture()
+      |> Ash.load!(
+        [
+          container_deployments: [
+            :image_deployment,
+            :volume_deployments,
+            :network_deployments
+          ]
+        ],
+        tenant: tenant
+      )
+
+    dep_v2 =
+      [tenant: tenant, device_id: device.id, release_id: release_v2.id]
+      |> deployment_fixture()
+      |> Ash.load!(
+        [
+          container_deployments: [
+            :image_deployment,
+            :volume_deployments,
+            :network_deployments
+          ]
+        ],
+        tenant: tenant
+      )
+
+    [cd_v1] = dep_v1.container_deployments
+    [cd_v2] = dep_v2.container_deployments
+    [vd_v1] = cd_v1.volume_deployments
+    [vd_v2] = cd_v2.volume_deployments
+    [net_dep_v1] = cd_v1.network_deployments
+    [net_dep_v2] = cd_v2.network_deployments
+
+    assert cd_v1.image_deployment.id == cd_v2.image_deployment.id
+    assert vd_v1.id == vd_v2.id
+    assert net_dep_v1.id == net_dep_v2.id
+
+    # Destroying v1 preserves the shared volume, network, and image deployments used by v2
+    dep_v1
+    |> Ash.Changeset.for_destroy(:destroy_and_gc, %{}, tenant: tenant)
+    |> Ash.destroy!(tenant: tenant)
+
+    assert {:ok, _} = Ash.get(Volume.Deployment, vd_v2.id, tenant: tenant)
+    assert {:ok, _} = Ash.get(Volume, vd_v2.volume_id, tenant: tenant)
+    assert {:ok, _} = Ash.get(Network.Deployment, net_dep_v2.id, tenant: tenant)
+    assert {:ok, _} = Ash.get(Network, net_dep_v2.network_id, tenant: tenant)
+    assert {:ok, _} = Ash.get(Image.Deployment, cd_v2.image_deployment.id, tenant: tenant)
+    assert {:ok, _} = Ash.get(Image, cd_v2.image_deployment.image_id, tenant: tenant)
+
+    # Editing plain_volume before deploying v3 creates a distinct Volume.Deployment for v3
+    plain_volume
+    |> Ash.Changeset.for_update(:update, %{driver: "nfs", options: %{"o" => "2"}}, tenant: tenant)
+    |> Ash.update!(tenant: tenant)
+
+    release_v3 =
+      release_fixture(
+        tenant: tenant,
+        application_id: application.id,
+        version: "3.0.0",
+        container_ids: [c2.id]
+      )
+
+    dep_v3 =
+      [tenant: tenant, device_id: device.id, release_id: release_v3.id]
+      |> deployment_fixture()
+      |> Ash.load!([container_deployments: [:volume_deployments, :network_deployments]],
+        tenant: tenant
+      )
+
+    [cd_v3] = dep_v3.container_deployments
+    [vd_v3] = cd_v3.volume_deployments
+    [net_dep_v3] = cd_v3.network_deployments
+
+    assert vd_v3.id != vd_v2.id
+    assert net_dep_v3.id == net_dep_v2.id
+  end
 end

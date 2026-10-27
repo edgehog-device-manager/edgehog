@@ -54,10 +54,6 @@ defmodule Edgehog.Containers.Network do
 
     create :copy do
       accept [:label, :driver, :internal, :enable_ipv6, :options, :source_network_id]
-
-      argument :id, :uuid
-
-      change set_attribute(:id, arg(:id), set_when_nil?: false)
     end
 
     update :update do
@@ -149,9 +145,14 @@ defmodule Edgehog.Containers.Network do
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
+  identities do
+    identity :copied_network, [:source_network_id, :label, :driver, :internal, :enable_ipv6]
+  end
+
   postgres do
     table "networks"
     repo Edgehog.Repo
+    skip_unique_indexes [:copied_network]
 
     references do
       reference :source_network, on_delete: :nilify

@@ -58,11 +58,8 @@ defmodule Edgehog.Containers.Image do
     end
 
     create :copy do
-      accept [:reference, :image_credentials_id, :source_image_id]
+      accept [:reference, :registry_auth, :image_credentials_id, :source_image_id]
 
-      argument :id, :uuid
-
-      change set_attribute(:id, arg(:id), set_when_nil?: false)
       change Image.Changes.SnapshotRegistryAuth
     end
 
@@ -136,11 +133,15 @@ defmodule Edgehog.Containers.Image do
     identity :reference_credentials, [:reference, :image_credentials_id] do
       nils_distinct? false
     end
+
+    identity :copied_image, [:source_image_id, :reference, :registry_auth] do
+      nils_distinct? false
+    end
   end
 
   postgres do
     table "images"
-    skip_unique_indexes [:reference_credentials]
+    skip_unique_indexes [:reference_credentials, :copied_image]
 
     references do
       reference :source_image, on_delete: :nilify
