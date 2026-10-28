@@ -52,6 +52,14 @@ defmodule Edgehog.Containers.Network do
                 keys: [:label], read_action: :plain_networks, field: :label}
     end
 
+    create :copy do
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      argument :id, :uuid
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
+    end
+
     read :plain_networks do
       pagination offset?: true, keyset?: true, required?: false
       filter expr(not exists(network_deployments, true))

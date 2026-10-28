@@ -34,9 +34,13 @@ defmodule Edgehog.Containers.DeviceMapping do
     defaults [
       :read,
       :destroy,
-      create: [:path_on_host, :path_in_container, :cgroup_permissions],
+      create: [:path_on_host, :path_in_container, :cgroup_permissions, :container_id],
       update: [:path_on_host, :path_in_container, :cgroup_permissions]
     ]
+
+    create :copy do
+      accept [:path_on_host, :path_in_container, :cgroup_permissions, :container_id]
+    end
   end
 
   attributes do

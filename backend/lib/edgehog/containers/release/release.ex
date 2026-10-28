@@ -86,6 +86,17 @@ defmodule Edgehog.Containers.Release do
       validate Release.Validations.NoCircularDependencies
     end
 
+    create :copy do
+      argument :release, :struct do
+        constraints instance_of: __MODULE__
+        allow_nil? false
+      end
+
+      change Release.Changes.Copy
+
+      validate Release.Validations.NoCircularDependencies
+    end
+
     destroy :destroy do
       primary? true
       require_atomic? false

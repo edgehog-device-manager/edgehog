@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.DeviceRequest do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
+  alias Edgehog.Containers.DeviceRequest.Changes
 
   graphql do
     type :device_request
@@ -40,7 +41,7 @@ defmodule Edgehog.Containers.DeviceRequest do
     create :create do
       primary? true
 
-      accept [:driver, :count, :device_ids, :options]
+      accept [:driver, :count, :device_ids, :options, :container_id]
 
       argument :capabilities, {:array, {:array, :string}} do
         description """
@@ -54,19 +55,11 @@ defmodule Edgehog.Containers.DeviceRequest do
         """
       end
 
-      change fn changeset, _context ->
-        capabilities =
-          changeset
-          |> Ash.Changeset.get_argument(:capabilities)
-          |> Kernel.||([])
-          |> Enum.map(&Jason.encode!/1)
+      change Changes.EncodeCapabilities
+    end
 
-        Ash.Changeset.change_attribute(
-          changeset,
-          :db_capabilities,
-          capabilities
-        )
-      end
+    create :copy do
+      accept [:driver, :count, :device_ids, :options, :db_capabilities, :container_id]
     end
   end
 

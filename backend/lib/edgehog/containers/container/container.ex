@@ -58,8 +58,93 @@ defmodule Edgehog.Containers.Container do
                                device_requests: :relay
   end
 
+  @container_attributes [
+    :name,
+    :hostname,
+    :domainname,
+    :user,
+    :command,
+    :healthcheck_test,
+    :healthcheck_interval,
+    :healthcheck_timeout,
+    :healthcheck_retries,
+    :healthcheck_start_period,
+    :healthcheck_start_interval,
+    :working_directory,
+    :entrypoint,
+    :network_disabled,
+    :label_keys,
+    :label_values,
+    :stop_signal,
+    :stop_timeout,
+    :restart_policy,
+    :restart_policy_maximum_retry_count,
+    :env,
+    :binds,
+    :network_mode,
+    :port_bindings,
+    :exposed_ports,
+    :extra_hosts,
+    :cap_add,
+    :cap_drop,
+    :cpu_shares,
+    :cpuset_cpus,
+    :cpu_period,
+    :cpu_quota,
+    :cpu_realtime_period,
+    :cpu_realtime_runtime,
+    :memory,
+    :memory_reservation,
+    :memory_swap,
+    :memory_swappiness,
+    :device_cgroup_rules,
+    :ulimits_name,
+    :ulimits_soft,
+    :ulimits_hard,
+    :auto_remove,
+    :volume_driver,
+    :storage_opt_keys,
+    :storage_opt_values,
+    :read_only_rootfs,
+    :tmpfs_paths,
+    :tmpfs_options,
+    :cgroups_mode,
+    :dns,
+    :dns_options,
+    :dns_search,
+    :group_add,
+    :ipc_mode,
+    :oom_score_adjustment,
+    :userns_mode,
+    :sysctls_keys,
+    :sysctls_values,
+    :shm_size,
+    :runtime,
+    :privileged,
+    :log_type,
+    :log_config_keys,
+    :log_config_values,
+    :blkio_weight,
+    :blkio_weight_device_path,
+    :blkio_weight_device_weight,
+    :blkio_device_read_bps_path,
+    :blkio_device_read_bps_rate,
+    :blkio_device_write_bps_path,
+    :blkio_device_write_bps_rate,
+    :blkio_device_read_iops_path,
+    :blkio_device_read_iops_rate,
+    :blkio_device_write_iops_path,
+    :blkio_device_write_iops_rate,
+    :securityopt,
+    :pid_mode,
+    :masked_paths,
+    :readonly_paths
+  ]
+
+  def container_attributes, do: @container_attributes
+
   actions do
-    defaults [:read, :create]
+    defaults [:read, create: [:image_id | @container_attributes]]
 
     read :plain_containers do
       pagination offset?: true, keyset?: true, required?: false
@@ -71,89 +156,52 @@ defmodule Edgehog.Containers.Container do
       filter expr(exists(container_deployments, true))
     end
 
+    create :copy do
+      accept @container_attributes
+
+      argument :id, :uuid
+      argument :image, :map
+      argument :volumes, {:array, :map}
+      argument :networks, {:array, :map}
+      argument :file_mounts, {:array, :map}
+      argument :device_mappings, {:array, :map}
+      argument :device_requests, {:array, :map}
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
+
+      change manage_relationship(:image,
+               on_no_match: {:create, :copy},
+               on_lookup: :relate
+             )
+
+      change manage_relationship(:volumes,
+               on_no_match: {:create, :copy},
+               on_lookup: :relate,
+               join_keys: [:target]
+             )
+
+      change manage_relationship(:networks,
+               on_no_match: {:create, :copy},
+               on_lookup: :relate
+             )
+
+      change manage_relationship(:file_mounts,
+               type: :create
+             )
+
+      change manage_relationship(:device_mappings,
+               type: :create,
+               on_no_match: {:create, :copy}
+             )
+
+      change manage_relationship(:device_requests,
+               type: :create,
+               on_no_match: {:create, :copy}
+             )
+    end
+
     create :create_and_relate do
-      accept [
-        :name,
-        :hostname,
-        :domainname,
-        :user,
-        :command,
-        :healthcheck_test,
-        :healthcheck_interval,
-        :healthcheck_timeout,
-        :healthcheck_retries,
-        :healthcheck_start_period,
-        :healthcheck_start_interval,
-        :working_directory,
-        :entrypoint,
-        :network_disabled,
-        :label_keys,
-        :label_values,
-        :stop_signal,
-        :stop_timeout,
-        :restart_policy,
-        :restart_policy_maximum_retry_count,
-        :env,
-        :binds,
-        :network_mode,
-        :port_bindings,
-        :exposed_ports,
-        :extra_hosts,
-        :cap_add,
-        :cap_drop,
-        :cpu_shares,
-        :cpuset_cpus,
-        :cpu_period,
-        :cpu_quota,
-        :cpu_realtime_period,
-        :cpu_realtime_runtime,
-        :memory,
-        :memory_reservation,
-        :memory_swap,
-        :memory_swappiness,
-        :device_cgroup_rules,
-        :ulimits_name,
-        :ulimits_soft,
-        :ulimits_hard,
-        :auto_remove,
-        :volume_driver,
-        :storage_opt_keys,
-        :storage_opt_values,
-        :read_only_rootfs,
-        :tmpfs_paths,
-        :tmpfs_options,
-        :cgroups_mode,
-        :dns,
-        :dns_options,
-        :dns_search,
-        :group_add,
-        :ipc_mode,
-        :oom_score_adjustment,
-        :userns_mode,
-        :sysctls_keys,
-        :sysctls_values,
-        :shm_size,
-        :runtime,
-        :privileged,
-        :log_type,
-        :log_config_keys,
-        :log_config_values,
-        :blkio_weight,
-        :blkio_weight_device_path,
-        :blkio_weight_device_weight,
-        :blkio_device_read_bps_path,
-        :blkio_device_read_bps_rate,
-        :blkio_device_write_bps_path,
-        :blkio_device_write_bps_rate,
-        :blkio_device_read_iops_path,
-        :blkio_device_read_iops_rate,
-        :blkio_device_write_iops_path,
-        :blkio_device_write_iops_rate,
-        :securityopt,
-        :pid_mode,
-        :masked_paths,
-        :readonly_paths
-      ]
+      accept @container_attributes
 
       argument :image, Types.Image
       argument :networks, {:array, Types.Network}

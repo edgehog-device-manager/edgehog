@@ -55,6 +55,14 @@ defmodule Edgehog.Containers.Volume do
                 keys: [:label], read_action: :plain_volumes, field: :label}
     end
 
+    create :copy do
+      accept [:label, :driver, :options]
+
+      argument :id, :uuid
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
+    end
+
     read :plain_volumes do
       pagination offset?: true, keyset?: true, required?: false
       filter expr(not exists(volume_deployments, true))
