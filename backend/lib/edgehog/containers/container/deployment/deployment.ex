@@ -84,7 +84,14 @@ defmodule Edgehog.Containers.Container.Deployment do
       change set_attribute(:state, :created)
       change manage_relationship(:container, type: :append)
       change manage_relationship(:device, type: :append)
-      change Changes.Relate
+      change Changes.ResolveEnv
+      change Changes.RelateEnvFiles
+      change Changes.DeployImage
+      change Changes.DeployNetworks
+      change Changes.DeployVolumes
+      change Changes.DeployDeviceMappings
+      change Changes.DeployDeviceRequests
+      change Changes.RelateFileBinds
     end
 
     update :send_deployment do
