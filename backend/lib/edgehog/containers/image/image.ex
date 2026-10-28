@@ -57,6 +57,14 @@ defmodule Edgehog.Containers.Image do
                 nils_distinct?: false}
     end
 
+    create :copy do
+      accept [:reference, :image_credentials_id]
+
+      argument :id, :uuid
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
+    end
+
     read :plain_images do
       pagination offset?: true, keyset?: true, required?: false
       filter expr(not exists(image_deployments, true))
