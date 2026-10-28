@@ -30,14 +30,13 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.SendUpgrade do
   alias Edgehog.Containers.Release.Deployment.ReadyAction
 
   @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
+  def change(changeset, _opts, %{tenant: tenant}) do
     changeset
-    |> Ash.Changeset.after_action(&register_ready_action/2)
-    |> Ash.Changeset.after_transaction(&start_supervisor/2)
+    |> Ash.Changeset.after_action(&register_ready_action(&1, &2, tenant))
+    |> Ash.Changeset.after_transaction(&start_supervisor(&1, &2, tenant))
   end
 
-  defp register_ready_action(changeset, deployment) do
-    tenant = changeset.tenant
+  defp register_ready_action(changeset, deployment, tenant) do
     device_id = deployment.device_id
     # SAFETY: we have validated the parameter in the validations, so it must exist.
     target_id = Ash.Changeset.get_argument(changeset, :target)
@@ -58,13 +57,12 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.SendUpgrade do
     end
   end
 
-  defp start_supervisor(changeset, {:ok, new_deployment}) do
-    tenant = changeset.tenant
-
-    Deployment.Orchestrator.conduct(new_deployment, tenant)
-
-    {:ok, new_deployment}
+  defp start_supervisor(_changeset, {:ok, new_deployment}, tenant) do
+    case Deployment.Orchestrator.conduct(new_deployment, tenant) do
+      {:error, reason} -> {:error, reason}
+      _ -> {:ok, new_deployment}
+    end
   end
 
-  defp start_supervisor(_changeset, error), do: error
+  defp start_supervisor(_changeset, error, _tenant), do: error
 end

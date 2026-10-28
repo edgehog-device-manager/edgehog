@@ -186,16 +186,29 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
     else
       target = do_deploy(target, release, configs)
 
+      # TODO: we're getting here the tenant from the resource to deploy. It's
+      # not really a problem since we're scoping the API per tenant, therefore
+      # this is not really callable for another tenant. However, we should get
+      # the main campaign functions have an opts keyword list in their
+      # signature, so that passing arguments (such as the tenant) becomes
+      # trivial.
       deployment_result =
         target
-        |> Ash.load!(:deployment, tenant: target.tenant_id)
+        |> Ash.load!([deployment: :tenant], tenant: target.tenant_id)
         |> Map.fetch(:deployment)
 
       with {:ok, deployment} <- deployment_result do
-        Deployment.Orchestrator.conduct(deployment, target.tenant_id)
+        tenant = deployment.tenant
 
-        {:ok, target}
+        start_orchestrator(target, deployment, tenant)
       end
+    end
+  end
+
+  defp start_orchestrator(target, deployment, tenant) do
+    case Deployment.Orchestrator.conduct(deployment, tenant) do
+      {:error, reason} -> {:error, reason}
+      _ -> {:ok, target}
     end
   end
 
