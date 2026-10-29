@@ -36,7 +36,6 @@ import type {
   ContainerEnvVarInput,
   CreateContainerInput,
 } from "@/api/__generated__/ContainerCreate_createContainer_Mutation.graphql";
-import type { ContainerCreate_getOptions_Query$data } from "@/api/__generated__/ContainerCreate_getOptions_Query.graphql";
 
 import Button from "@/components/ui/button/Button";
 import { useCollapsibleSections } from "@/components/ui/collapse-item/CollapseItem";
@@ -90,7 +89,7 @@ export const cgroupsModeOptions = [
 const mapEnv = (
   env?: KeyValue<string>[] | null,
 ): ContainerEnvVarInput[] | undefined => {
-  if (!env?.length) return undefined;
+  if (!env) return undefined;
 
   return env
     .filter(
@@ -104,7 +103,7 @@ const mapEnv = (
 };
 
 const mapKeyValuePairs = (pairs?: { key: string; value: string }[] | null) => {
-  if (!pairs?.length) return { keys: undefined, values: undefined };
+  if (!pairs) return { keys: undefined, values: undefined };
   const keys = pairs.map((p) => p.key);
   const values = pairs.map((p) => p.value);
   return { keys, values };
@@ -138,6 +137,7 @@ const omit = <T extends Record<string, unknown>, K extends keyof T>(
 
 const mapCreateContainerToInput = (
   data: ContainerInputData,
+  isUpdate = false,
 ): CreateContainerInput => {
   const { keys: labelKeys, values: labelValues } = mapKeyValuePairs(
     data.labels,
@@ -170,7 +170,7 @@ const mapCreateContainerToInput = (
   const blkioDeviceWriteIopsRate = data.blkioDeviceWriteIops?.map(
     (d) => d.rate,
   );
-  const fileMounts = data.fileMounts?.length
+  const fileMounts = data.fileMounts
     ? data.fileMounts.map((mount) => ({
         mountpoint: mount.mountpoint,
         required: mount.required,
@@ -243,16 +243,22 @@ const mapCreateContainerToInput = (
   return {
     ...rest,
     cgroupsMode: rest.cgroupsMode ?? undefined,
-    command: command ? splitBySpace(command) : undefined,
-    entrypoint: entrypoint ? splitBySpace(entrypoint) : undefined,
+    command: command ? splitBySpace(command) : isUpdate ? [] : undefined,
+    entrypoint: entrypoint
+      ? splitBySpace(entrypoint)
+      : isUpdate
+        ? []
+        : undefined,
     healthcheckTest: healthcheckTest
       ? splitBySpace(healthcheckTest)
-      : undefined,
-    env: mapEnv(env),
+      : isUpdate
+        ? []
+        : undefined,
+    env: mapEnv(env) ?? (isUpdate ? [] : undefined),
     image: image
       ? {
           reference: image.reference,
-          imageCredentialsId: image.imageCredentialsId,
+          imageCredentialsId: image.imageCredentialsId ?? null,
         }
       : undefined,
     deviceRequests: mapDeviceRequests(deviceRequests),
@@ -261,8 +267,8 @@ const mapCreateContainerToInput = (
     labelValues,
     storageOptKeys,
     storageOptValues,
-    tmpfsPaths: tmpfsPaths?.length ? tmpfsPaths : undefined,
-    tmpfsOptions: tmpfsOptions?.length ? tmpfsOptions : undefined,
+    tmpfsPaths,
+    tmpfsOptions,
     sysctlsKeys,
     sysctlsValues,
     logConfigKeys,
@@ -283,6 +289,13 @@ const mapCreateContainerToInput = (
   };
 };
 
+type ContainerOptionsQueryRef = Parameters<
+  typeof useImageCredentialOptions
+>[0] &
+  Parameters<typeof useNetworkOptions>[0] &
+  Parameters<typeof useVolumeOptions>[0] &
+  Parameters<typeof useFilesOptions>[0];
+
 type BaseSectionProps = {
   form: UseFormReturn<ContainerInputData>;
   open: boolean;
@@ -290,7 +303,7 @@ type BaseSectionProps = {
 };
 
 type SectionWithQueryProps = BaseSectionProps & {
-  queryRef: ContainerCreate_getOptions_Query$data;
+  queryRef: ContainerOptionsQueryRef;
 };
 
 const NameSection = ({ form }: { form: UseFormReturn<ContainerInputData> }) => {
@@ -369,6 +382,7 @@ const ImageSection = ({
             control={control}
             name="image.imageCredentialsId"
             options={imageCredentialsOptions}
+            isClearable
           />
         </FieldHelp>
       </FormRow>
@@ -3269,9 +3283,10 @@ const FileMountsSection = ({
 };
 
 type CreateContainerProps = {
-  queryRef: ContainerCreate_getOptions_Query$data;
+  queryRef: ContainerOptionsQueryRef;
   isLoading?: boolean;
   onSubmit: (data: CreateContainerInput) => void;
+  onDelete?: () => void;
   initialData: Partial<ContainerInputData>;
 };
 
@@ -3279,6 +3294,7 @@ const CreateContainer = ({
   queryRef,
   isLoading,
   onSubmit,
+  onDelete,
   initialData,
 }: CreateContainerProps) => {
   const form = useForm<ContainerInputData>({
@@ -3286,7 +3302,15 @@ const CreateContainer = ({
     resolver: zodResolver(containerSchema) as never,
   });
 
-  const { handleSubmit, reset } = form;
+  const {
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = form;
+
+  const isUpdate = Boolean(onDelete);
+  const canSubmit = !isLoading && (!isUpdate || isDirty);
+  const canReset = isDirty && !isLoading;
 
   useEffect(() => {
     reset(initialData);
@@ -3298,7 +3322,7 @@ const CreateContainer = ({
   return (
     <Form
       onSubmit={handleSubmit((data) =>
-        onSubmit(mapCreateContainerToInput(data)),
+        onSubmit(mapCreateContainerToInput(data, isUpdate)),
       )}
     >
       <div className="containerFormLayout">
@@ -3387,14 +3411,48 @@ const CreateContainer = ({
         />
       </div>
 
-      <div className="d-flex justify-content-end mt-3">
-        <Button type="submit" disabled={isLoading}>
-          <FormattedMessage
-            id="forms.CreateContainer.submitButton"
-            defaultMessage="Create Container"
-          />
+      <Stack
+        direction="horizontal"
+        gap={3}
+        className="justify-content-end align-items-center mt-3"
+      >
+        <Button type="submit" disabled={!canSubmit}>
+          {isUpdate ? (
+            <FormattedMessage
+              id="forms.CreateContainer.updateButton"
+              defaultMessage="Update"
+            />
+          ) : (
+            <FormattedMessage
+              id="forms.CreateContainer.submitButton"
+              defaultMessage="Create Container"
+            />
+          )}
         </Button>
-      </div>
+
+        {isUpdate && (
+          <Button
+            variant="secondary"
+            type="button"
+            disabled={!canReset}
+            onClick={() => reset(initialData)}
+          >
+            <FormattedMessage
+              id="forms.CreateContainer.resetButton"
+              defaultMessage="Reset"
+            />
+          </Button>
+        )}
+
+        {onDelete && (
+          <Button variant="danger" type="button" onClick={onDelete}>
+            <FormattedMessage
+              id="forms.CreateContainer.deleteButton"
+              defaultMessage="Delete"
+            />
+          </Button>
+        )}
+      </Stack>
     </Form>
   );
 };

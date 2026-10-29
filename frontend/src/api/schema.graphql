@@ -1752,6 +1752,19 @@ input ReleaseCreateRequiredSystemModelsInput {
   id: ID
 }
 
+input ReleaseUpdateContainersInput {
+  id: ID
+}
+
+input ReleaseUpdateContainerDependenciesInput {
+  containerId: ID!
+  dependencyId: ID!
+}
+
+input ReleaseUpdateRequiredSystemModelsInput {
+  id: ID
+}
+
 "The result of the :mark_env_file_as_uploaded mutation"
 type MarkEnvFileAsUploadedResult {
   "The successful result of the mutation"
@@ -3187,6 +3200,7 @@ type VolumeDeployment {
 
 type volume_result {
   created: Volume
+  updated: Volume
   destroyed: ID
 }
 
@@ -3197,6 +3211,21 @@ type DeleteVolumeResult {
 
   "Any errors generated, if the mutation failed"
   errors: [MutationError!]!
+}
+
+"The result of the :update_volume mutation"
+type UpdateVolumeResult {
+  "The successful result of the mutation"
+  result: Volume
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateVolumeInput {
+  label: String
+  driver: String
+  options: JsonString
 }
 
 "The result of the :create_volume mutation"
@@ -3493,6 +3522,23 @@ type DeleteNetworkResult {
   errors: [MutationError!]!
 }
 
+"The result of the :update_network mutation"
+type UpdateNetworkResult {
+  "The successful result of the mutation"
+  result: Network
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateNetworkInput {
+  label: String
+  driver: String
+  internal: Boolean
+  enableIpv6: Boolean
+  options: JsonString
+}
+
 "The result of the :create_network mutation"
 type CreateNetworkResult {
   "The successful result of the mutation"
@@ -3696,6 +3742,7 @@ type Network implements Node {
 
 type release_result {
   created: Release
+  updated: Release
   destroyed: ID
 }
 
@@ -3706,6 +3753,22 @@ type DeleteReleaseResult {
 
   "Any errors generated, if the mutation failed"
   errors: [MutationError!]!
+}
+
+"The result of the :update_release mutation"
+type UpdateReleaseResult {
+  "The successful result of the mutation"
+  result: Release
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateReleaseInput {
+  version: String
+  containers: [ReleaseUpdateContainersInput!]
+  containerDependencies: [ReleaseUpdateContainerDependenciesInput!]
+  requiredSystemModels: [ReleaseUpdateRequiredSystemModelsInput!]
 }
 
 "The result of the :create_release mutation"
@@ -3891,6 +3954,7 @@ type Release implements Node {
 
 type image_credentials_result {
   created: ImageCredentials
+  updated: ImageCredentials
   destroyed: ID
 }
 
@@ -3901,6 +3965,21 @@ type DeleteImageCredentialsResult {
 
   "Any errors generated, if the mutation failed"
   errors: [MutationError!]!
+}
+
+"The result of the :update_image_credentials mutation"
+type UpdateImageCredentialsResult {
+  "The successful result of the mutation"
+  result: ImageCredentials
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateImageCredentialsInput {
+  label: String
+  username: String
+  password: String
 }
 
 "The result of the :create_image_credentials mutation"
@@ -5092,6 +5171,91 @@ type UpdateContainerResult {
 
 input UpdateContainerInput {
   name: String
+  hostname: String
+  domainname: String
+  user: String
+  command: [String!]
+  healthcheckTest: [String!]
+  healthcheckInterval: Int
+  healthcheckTimeout: Int
+  healthcheckRetries: Int
+  healthcheckStartPeriod: Int
+  healthcheckStartInterval: Int
+  workingDirectory: String
+  entrypoint: [String!]
+  networkDisabled: Boolean
+  labelKeys: [String!]
+  labelValues: [String!]
+  stopSignal: String
+  stopTimeout: Int
+  restartPolicy: String
+  restartPolicyMaximumRetryCount: Int
+  env: [ContainerEnvVarInput!]
+  binds: [String!]
+  networkMode: String
+  portBindings: [String!]
+  exposedPorts: [String!]
+  extraHosts: [String!]
+  capAdd: [String!]
+  capDrop: [String!]
+  cpuShares: Int
+  cpusetCpus: String
+  cpuPeriod: Int
+  cpuQuota: Int
+  cpuRealtimePeriod: Int
+  cpuRealtimeRuntime: Int
+  memory: Int
+  memoryReservation: Int
+  memorySwap: Int
+  memorySwappiness: Int
+  deviceCgroupRules: [String!]
+  ulimitsName: [String!]
+  ulimitsSoft: [Int!]
+  ulimitsHard: [Int!]
+  autoRemove: Boolean
+  volumeDriver: String
+  storageOptKeys: [String!]
+  storageOptValues: [String!]
+  readOnlyRootfs: Boolean
+  tmpfsPaths: [String!]
+  tmpfsOptions: [String!]
+  cgroupsMode: String
+  dns: [String!]
+  dnsOptions: [String!]
+  dnsSearch: [String!]
+  groupAdd: [String!]
+  ipcMode: String
+  oomScoreAdjustment: Int
+  usernsMode: String
+  sysctlsKeys: [String!]
+  sysctlsValues: [String!]
+  shmSize: Int
+  runtime: String
+  privileged: Boolean
+  logType: String
+  logConfigKeys: [String!]
+  logConfigValues: [String!]
+  blkioWeight: Int
+  blkioWeightDevicePath: [String!]
+  blkioWeightDeviceWeight: [Int!]
+  blkioDeviceReadBpsPath: [String!]
+  blkioDeviceReadBpsRate: [Int!]
+  blkioDeviceWriteBpsPath: [String!]
+  blkioDeviceWriteBpsRate: [Int!]
+  blkioDeviceReadIopsPath: [String!]
+  blkioDeviceReadIopsRate: [Int!]
+  blkioDeviceWriteIopsPath: [String!]
+  blkioDeviceWriteIopsRate: [Int!]
+  securityopt: [String!]
+  pidMode: String
+  maskedPaths: [String!]
+  readonlyPaths: [String!]
+  image: ImageDescInput
+  networks: [NetworkDescInput!]
+  volumes: [VolumeDescInput!]
+  fileMounts: [FileMountDescInput!]
+  deviceMappings: [DeviceMappingDescInput!]
+  deviceRequests: [DeviceRequestDescInput!]
 }
 
 "The result of the :create_container mutation"
@@ -6178,6 +6342,20 @@ type application_result {
   destroyed: ID
 }
 
+"The result of the :update_application mutation"
+type UpdateApplicationResult {
+  "The successful result of the mutation"
+  result: Application
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
+input UpdateApplicationInput {
+  name: String
+  description: String
+}
+
 "The result of the :delete_application mutation"
 type DeleteApplicationResult {
   "The record that was successfully deleted"
@@ -6287,6 +6465,7 @@ input ApplicationFilterInput {
   name: ApplicationFilterName
   description: ApplicationFilterDescription
   releases: ReleaseFilterInput
+  deployments: DeploymentFilterInput
 }
 
 input ApplicationSortInput {
@@ -6317,6 +6496,25 @@ type Application implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ReleaseConnection!
+  deployments(
+    "How to sort the records in the response"
+    sort: [DeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: DeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): DeploymentConnection!
 }
 
 type system_model_part_number_result {
@@ -10885,7 +11083,10 @@ type RootQueryType {
   """
   forwarderConfig: ForwarderConfig
 
-  "Fetches a forwarder session by its token and the device ID. Returns the authorized"
+  """
+  Fetches a forwarder session by its token and the device ID.
+  Returns a signed token for future requests to the edgehog device forwarder.
+  """
   forwarderSession(
     token: String!
     protocol: String
@@ -11311,10 +11512,16 @@ type RootMutationType {
 
   deleteApplication(id: ID!): DeleteApplicationResult
 
+  "Update an application."
+  updateApplication(
+    id: ID!
+    input: UpdateApplicationInput
+  ): UpdateApplicationResult
+
   "Create a new container"
   createContainer(input: CreateContainerInput!): CreateContainerResult
 
-  "Updates a container."
+  "Update a container."
   updateContainer(id: ID!, input: UpdateContainerInput): UpdateContainerResult
 
   "Destroys the container if it's dangling (not referenced by any release or deployment)"
@@ -11348,10 +11555,19 @@ type RootMutationType {
     input: CreateImageCredentialsInput!
   ): CreateImageCredentialsResult
 
+  "Update image credentials."
+  updateImageCredentials(
+    id: ID!
+    input: UpdateImageCredentialsInput
+  ): UpdateImageCredentialsResult
+
   deleteImageCredentials(id: ID!): DeleteImageCredentialsResult
 
   "Create a new release."
   createRelease(input: CreateReleaseInput!): CreateReleaseResult
+
+  "Update a release."
+  updateRelease(id: ID!, input: UpdateReleaseInput): UpdateReleaseResult
 
   "Delete a release and cleanup dangling resources"
   deleteRelease(id: ID!): DeleteReleaseResult
@@ -11359,11 +11575,17 @@ type RootMutationType {
   "Create a new network."
   createNetwork(input: CreateNetworkInput): CreateNetworkResult
 
+  "Update a network."
+  updateNetwork(id: ID!, input: UpdateNetworkInput): UpdateNetworkResult
+
   "Delete a network if not used by any container."
   deleteNetwork(id: ID!): DeleteNetworkResult
 
   "Create a new volume."
   createVolume(input: CreateVolumeInput!): CreateVolumeResult
+
+  "Update a volume."
+  updateVolume(id: ID!, input: UpdateVolumeInput): UpdateVolumeResult
 
   "Delete a volume if not used by any container."
   deleteVolume(id: ID!): DeleteVolumeResult

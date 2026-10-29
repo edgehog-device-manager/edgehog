@@ -34,6 +34,8 @@ const DEPLOY_RELEASE_MUTATION_NAME =
   "InstallApplicationModal_DeployRelease_Mutation";
 const MARK_ENV_FILE_AS_UPLOADED_MUTATION_NAME =
   "InstallApplicationModal_markEnvFileAsUploaded_Mutation";
+const MARK_FILE_BIND_AS_UPLOADED_MUTATION_NAME =
+  "InstallApplicationModal_markFileBindAsUploaded_Mutation";
 
 const applicationsData = {
   device: {
@@ -452,7 +454,7 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
                   {
                     node: {
                       id: "container-deployment-1",
-                      container: { id: "container-1" },
+                      container: { id: "copied-container-1", name: "app" },
                       fileBinds: [],
                       envFiles: [
                         {
@@ -502,6 +504,160 @@ it("uploads an env file via presigned URL and marks it as uploaded", async () =>
         data: {
           markEnvFileAsUploaded: {
             result: { id: "env-file-1", uploaded: true, state: "CREATED" },
+            errors: [],
+          },
+        },
+      });
+    });
+
+    await waitFor(() => expect(onToggleModal).toHaveBeenCalledWith(false));
+  } finally {
+    vi.unstubAllGlobals();
+  }
+});
+
+it("uploads a file mount via presigned URL and marks it as uploaded", async () => {
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValue(new Response(null, { status: 200 }));
+  vi.stubGlobal("fetch", fetchMock);
+
+  try {
+    const { relayEnvironment, onToggleModal } = renderModal();
+    resolveApplicationsQuery(relayEnvironment);
+
+    await screen.findByText("Install Application");
+
+    const [appCombobox] = screen.getAllByRole("combobox");
+    await selectEvent.select(appCombobox, "App One", {
+      container: document.body,
+    });
+    await selectEvent.select(screen.getAllByRole("combobox")[1], "4.0.0", {
+      container: document.body,
+    });
+
+    await userEvent.click(
+      await screen.findByRole("button", {
+        name: "File Mounts Configuration",
+      }),
+    );
+
+    await userEvent.click(screen.getByRole("radio", { name: "Upload" }));
+    await userEvent.click(screen.getByText("File Picker"));
+
+    // eslint-disable-next-line testing-library/no-node-access
+    const fileInput = document.querySelector(
+      'input[type="file"]',
+    ) as HTMLInputElement;
+    expect(fileInput).not.toBeNull();
+    const file = new File(["CONFIG=1"], "app.conf", { type: "text/plain" });
+    await userEvent.upload(fileInput, file);
+
+    await userEvent.click(screen.getByRole("button", { name: "Deploy" }));
+
+    await waitFor(() =>
+      expect(
+        relayEnvironment.mock
+          .getAllOperations()
+          .some(
+            (op) =>
+              op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+          ),
+      ).toBe(true),
+    );
+
+    const mutationOperation = relayEnvironment.mock.findOperation(
+      (op) => op.request.node.params.name === DEPLOY_RELEASE_MUTATION_NAME,
+    );
+    expect(mutationOperation.request.variables).toEqual({
+      input: {
+        deviceId: "device-1",
+        releaseId: "rel-4",
+        configs: [
+          {
+            containerId: "container-2",
+            envStrategy: "merge",
+            fileBinds: [
+              {
+                fileMountId: "mount-1",
+              },
+            ],
+          },
+        ],
+      },
+    });
+
+    act(() => {
+      relayEnvironment.mock.resolve(mutationOperation, {
+        data: {
+          deployRelease: {
+            result: {
+              id: "deployment-1",
+              state: "STARTED",
+              containerDeployments: {
+                edges: [
+                  {
+                    node: {
+                      id: "container-deployment-1",
+                      container: {
+                        id: "copied-container-2",
+                        name: "app-with-mount",
+                      },
+                      fileBinds: [
+                        {
+                          id: "file-bind-1",
+                          fileMountId: "copied-mount-1",
+                          fileMount: {
+                            id: "copied-mount-1",
+                            mountpoint: "/etc/app.conf",
+                          },
+                          uploaded: false,
+                          uploadUrl: "https://s3.example/upload-bind",
+                        },
+                      ],
+                      envFiles: [],
+                    },
+                  },
+                ],
+              },
+            },
+            errors: [],
+          },
+        },
+      });
+    });
+
+    await waitFor(() =>
+      expect(fetchMock).toHaveBeenCalledWith(
+        "https://s3.example/upload-bind",
+        expect.objectContaining({
+          method: "PUT",
+          headers: { "Content-Type": "text/plain" },
+        }),
+      ),
+    );
+    expect((fetchMock.mock.calls[0] as any)?.[1]?.body).toBeInstanceOf(File);
+
+    const markUploadedOperation = relayEnvironment.mock.findOperation(
+      (op) =>
+        op.request.node.params.name ===
+        MARK_FILE_BIND_AS_UPLOADED_MUTATION_NAME,
+    );
+    expect(markUploadedOperation.request.variables).toEqual({
+      id: "file-bind-1",
+      input: {
+        fileName: "app.conf",
+        uncompressedFileSizeBytes: 8,
+        digest: expect.stringMatching(/^sha256:[0-9a-f]{64}$/),
+        encoding: "",
+      },
+    });
+
+    act(() => {
+      relayEnvironment.mock.resolve(markUploadedOperation, {
+        data: {
+          markFileBindAsUploaded: {
+            result: { id: "file-bind-1", uploaded: true, state: "CREATED" },
             errors: [],
           },
         },

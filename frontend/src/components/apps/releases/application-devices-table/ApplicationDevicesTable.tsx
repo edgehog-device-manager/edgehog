@@ -22,9 +22,9 @@ import { FormattedMessage } from "react-intl";
 import { graphql, useFragment } from "react-relay/hooks";
 
 import type {
-  ApplicationDevicesTable_ReleaseEdgeFragment$data,
-  ApplicationDevicesTable_ReleaseEdgeFragment$key,
-} from "@/api/__generated__/ApplicationDevicesTable_ReleaseEdgeFragment.graphql";
+  ApplicationDevicesTable_DeploymentEdgeFragment$data,
+  ApplicationDevicesTable_DeploymentEdgeFragment$key,
+} from "@/api/__generated__/ApplicationDevicesTable_DeploymentEdgeFragment.graphql";
 
 import ConnectionStatus from "@/components/fleet/devices/connection-status/ConnectionStatus";
 import DeploymentStateComponent, {
@@ -37,42 +37,32 @@ import InfiniteTable from "@/components/ui/infinite-table/InfiniteTable";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const APPLICATION_DEVICES_TABLE_FRAGMENT = graphql`
-  fragment ApplicationDevicesTable_ReleaseEdgeFragment on ReleaseConnection {
+  fragment ApplicationDevicesTable_DeploymentEdgeFragment on DeploymentConnection {
     edges {
       node {
-        deployments {
-          edges {
-            node {
-              id
-              state
-              isReady
-              device {
-                id
-                name
-                online
-              }
-              release {
-                version
-              }
-            }
-          }
+        id
+        state
+        isReady
+        device {
+          id
+          name
+          online
+        }
+        release {
+          version
         }
       }
     }
   }
 `;
 
-type ReleaseRecord = NonNullable<
-  ApplicationDevicesTable_ReleaseEdgeFragment$data["edges"]
->[number]["node"];
-
 type TableRecord = NonNullable<
-  ReleaseRecord["deployments"]["edges"]
+  ApplicationDevicesTable_DeploymentEdgeFragment$data["edges"]
 >[number]["node"];
 
 type ApplicationDevicesTableProps = {
   className?: string;
-  applicationDevicesRef: ApplicationDevicesTable_ReleaseEdgeFragment$key;
+  applicationDevicesRef: ApplicationDevicesTable_DeploymentEdgeFragment$key;
   loading?: boolean;
   onLoadMore?: () => void;
 };
@@ -87,15 +77,11 @@ const ApplicationDevicesTable = ({
     APPLICATION_DEVICES_TABLE_FRAGMENT,
     applicationDevicesRef || null,
   );
-  const releases = useMemo<ReleaseRecord[]>(() => {
+  const tableData = useMemo<TableRecord[]>(() => {
     return (
       compact(applicationDevicesFragment?.edges?.map((e) => e?.node)) ?? []
     );
   }, [applicationDevicesFragment]);
-
-  const tableData = releases.flatMap(
-    (release) => release.deployments?.edges?.map((edge) => edge.node) ?? [],
-  );
 
   const columnHelper = createColumnHelper<TableRecord>();
   const columns = [

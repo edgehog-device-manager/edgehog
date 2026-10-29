@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,7 @@ defmodule Edgehog.Containers.ContainerVolume do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:target, :container_id, :volume_id]]
+    defaults [:read, :destroy, create: [:target, :container_id, :volume_id], update: [:target]]
 
     read :containers_by_volume do
       argument :volume_id, :uuid

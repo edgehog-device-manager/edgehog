@@ -34,7 +34,6 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentStop
   alias Edgehog.Campaigns.CampaignMechanism.DeploymentStop.Executor
   alias Edgehog.Containers
-  alias Edgehog.Containers.Release.Deployment
 
   setup do
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->
@@ -696,7 +695,12 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
   end
 
   defp fetch_deployment(device, release) do
-    Ash.get(Deployment, %{device_id: device.id, release_id: release.id}, tenant: device.tenant_id)
+    Containers.deployment_by_identity(
+      device.id,
+      release.application_id,
+      release.version,
+      tenant: device.tenant_id
+    )
   end
 
   defp max_failed_targets_for_success(target_count, max_failure_percentage) do

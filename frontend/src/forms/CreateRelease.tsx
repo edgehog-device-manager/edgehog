@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Col, Container, Row } from "react-bootstrap";
 import { useFieldArray, useForm, useWatch } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
@@ -61,12 +61,14 @@ const initialData: ReleaseFormData = {
 const EMPTY_CONTAINERS: NonNullable<ReleaseFormData["containers"]> = [];
 
 const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
+  const selectedContainerIds = new Set(data.containers.map((c) => c.id));
   const containers = data.containers.map((container) => ({
     id: container.id,
-    dependencies:
+    dependencies: (
       data.containerDependencies?.find(
         (contDep) => contDep.containerId === container.id,
-      )?.dependencies ?? [],
+      )?.dependencies ?? []
+    ).filter((depId) => selectedContainerIds.has(depId)),
   }));
 
   const releaseContainers = containers.flatMap((container) =>
@@ -89,11 +91,13 @@ const transformOutputData = (data: ReleaseFormData): ReleaseSubmitData => {
 type CreateReleaseProps = {
   requiredSystemModelsOptionsRef: hooks_SystemModelsOptionsFragment$key;
   containersOptionsRef: hooks_ContainersOptionsFragment$key;
+  defaultValues?: ReleaseFormData;
   isLoading?: boolean;
   onSubmit: (data: ReleaseSubmitData) => void;
 };
 
 const CreateRelease = ({
+  defaultValues = initialData,
   isLoading = false,
   requiredSystemModelsOptionsRef,
   containersOptionsRef,
@@ -104,12 +108,17 @@ const CreateRelease = ({
     handleSubmit,
     control,
     setValue,
-    formState: { errors },
+    reset,
+    formState: { errors, isDirty },
   } = useForm<ReleaseFormData>({
     mode: "onTouched",
-    defaultValues: initialData,
+    defaultValues,
     resolver: zodResolver(releaseSchema),
   });
+
+  useEffect(() => {
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   const systemModelOptions = useSystemModelOptions(
     requiredSystemModelsOptionsRef,
@@ -152,6 +161,10 @@ const CreateRelease = ({
     watchedDependencies.every(
       (v) => v?.containerId?.trim() && v?.dependencies?.length > 0,
     );
+
+  const isUpdate = defaultValues !== initialData;
+  const canSubmit = !isLoading && (!isUpdate || isDirty);
+  const canReset = isDirty && !isLoading;
 
   const onFormSubmit = (data: ReleaseFormData) =>
     onSubmit(transformOutputData(data));
@@ -326,15 +339,39 @@ const CreateRelease = ({
           </div>
         </FormRow>
 
-        <div className="d-flex justify-content-end align-items-center">
-          <Button variant="primary" type="submit" disabled={isLoading}>
+        <Stack
+          direction="horizontal"
+          gap={2}
+          className="justify-content-end align-items-center"
+        >
+          <Button variant="primary" type="submit" disabled={!canSubmit}>
             {isLoading && <Spinner size="sm" className="me-2" />}
-            <FormattedMessage
-              id="forms.CreateRelease.submitButton"
-              defaultMessage="Create"
-            />
+            {isUpdate ? (
+              <FormattedMessage
+                id="forms.CreateRelease.updateButton"
+                defaultMessage="Update"
+              />
+            ) : (
+              <FormattedMessage
+                id="forms.CreateRelease.submitButton"
+                defaultMessage="Create"
+              />
+            )}
           </Button>
-        </div>
+          {isUpdate && (
+            <Button
+              variant="secondary"
+              type="button"
+              disabled={!canReset}
+              onClick={() => reset(defaultValues)}
+            >
+              <FormattedMessage
+                id="forms.CreateRelease.resetButton"
+                defaultMessage="Reset"
+              />
+            </Button>
+          )}
+        </Stack>
       </Stack>
     </Form>
   );

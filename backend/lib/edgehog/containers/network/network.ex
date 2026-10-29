@@ -42,7 +42,42 @@ defmodule Edgehog.Containers.Network do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:label, :driver, :internal, :enable_ipv6, :options]]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_networks, field: :label}
+    end
+
+    create :copy do
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      argument :id, :uuid
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_networks, field: :label}
+    end
+
+    read :plain_networks do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(network_deployments, true))
+    end
+
+    read :deployed_networks do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(network_deployments, true))
+    end
 
     destroy :destroy_if_dangling do
       description "Destroys the network if it's dangling (not referenced by any container)"
@@ -107,10 +142,6 @@ defmodule Edgehog.Containers.Network do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
-  end
-
-  identities do
-    identity :label, [:label]
   end
 
   postgres do

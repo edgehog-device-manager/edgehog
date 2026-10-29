@@ -16,8 +16,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { Card, Form, Stack } from "react-bootstrap";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Card } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -30,6 +30,7 @@ import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 
 import type { Network_deleteNetwork_Mutation } from "@/api/__generated__/Network_deleteNetwork_Mutation.graphql";
+import type { Network_updateNetwork_Mutation } from "@/api/__generated__/Network_updateNetwork_Mutation.graphql";
 import type {
   Network_getNetwork_Query,
   Network_getNetwork_Query$data,
@@ -41,19 +42,37 @@ import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
-import Button from "@/components/ui/button/Button";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
-import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
-import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
+import CreateNetworkForm from "@/forms/CreateNetwork";
+import { NetworkFormData } from "@/forms/validation";
 
 const GET_NETWORK_QUERY = graphql`
   query Network_getNetwork_Query($networkId: ID!) {
     network(id: $networkId) {
+      id
       label
       driver
       internal
       enableIpv6
       options
+    }
+  }
+`;
+
+const UPDATE_NETWORK_MUTATION = graphql`
+  mutation Network_updateNetwork_Mutation(
+    $networkId: ID!
+    $input: UpdateNetworkInput!
+  ) {
+    updateNetwork(id: $networkId, input: $input) {
+      result {
+        id
+        label
+        driver
+        internal
+        enableIpv6
+        options
+      }
     }
   }
 `;
@@ -114,18 +133,64 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
     });
   }, [deleteNetwork, networkId, navigate]);
 
-  const getPrettyOptions = () => {
+  const [updateNetwork, isUpdatingNetwork] =
+    useMutation<Network_updateNetwork_Mutation>(UPDATE_NETWORK_MUTATION);
+
+  const handleUpdateNetwork = useCallback(
+    (networkData: NetworkFormData) => {
+      const input = {
+        label: networkData.label.trim(),
+        driver: networkData.driver?.trim() || null,
+        internal: networkData.internal,
+        enableIpv6: networkData.enableIpv6,
+        options: networkData.options?.trim() || "{}",
+      };
+      updateNetwork({
+        variables: { networkId, input },
+        onCompleted(_data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.Network.updateErrorFeedback"
+              defaultMessage="Could not update the Network, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateNetwork, networkId],
+  );
+
+  const defaultValues = useMemo<NetworkFormData>(() => {
+    let options = "{}";
     try {
-      if (!network.options) return "";
-      if (typeof network.options === "string") {
-        return JSON.stringify(JSON.parse(network.options), null, 2);
+      if (network.options) {
+        options =
+          typeof network.options === "string"
+            ? JSON.stringify(JSON.parse(network.options), null, 2)
+            : JSON.stringify(network.options, null, 2);
       }
-      return JSON.stringify(network.options, null, 2);
     } catch {
-      setErrorFeedback("Failed to parse network options JSON.");
-      return "";
+      options = "{}";
     }
-  };
+    return {
+      label: network.label ?? "",
+      driver: network.driver ?? "",
+      internal: network.internal,
+      enableIpv6: network.enableIpv6,
+      options,
+    };
+  }, [network]);
 
   return (
     <Page>
@@ -140,84 +205,12 @@ const NetworkContent = ({ network }: NetworkContentProps) => {
           {errorFeedback}
         </Alert>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <FormRow
-            id="networkLabel"
-            label={
-              <FormattedMessage
-                id="pages.Network.label"
-                defaultMessage="Label"
-              />
-            }
-          >
-            <Form.Control value={network.label ?? ""} readOnly />
-          </FormRow>
-
-          <FormRow
-            id="networkDriver"
-            label={
-              <FormattedMessage
-                id="pages.Network.driver"
-                defaultMessage="Driver"
-              />
-            }
-          >
-            <Form.Control value={network.driver ?? ""} readOnly />
-          </FormRow>
-
-          <FormRow
-            id="networkOptions"
-            label={
-              <FormattedMessage
-                id="pages.Network.options"
-                defaultMessage="Options"
-              />
-            }
-          >
-            <MonacoJsonEditor
-              value={getPrettyOptions()}
-              onChange={() => {}}
-              defaultValue={getPrettyOptions()}
-              readonly={true}
-              initialLines={1}
-            />
-          </FormRow>
-
-          <FormRow
-            id="networkInternal"
-            label={
-              <FormattedMessage
-                id="pages.Network.internal"
-                defaultMessage="Internal"
-              />
-            }
-          >
-            <Form.Check type="checkbox" checked={network.internal} readOnly />
-          </FormRow>
-
-          <FormRow
-            id="networkLabelEnableIpv6"
-            label={
-              <FormattedMessage
-                id="pages.Network.enableIpv6"
-                defaultMessage="Enable IPv6"
-              />
-            }
-          >
-            <Form.Check type="checkbox" checked={network.enableIpv6} readOnly />
-          </FormRow>
-
-          <Stack
-            direction="horizontal"
-            gap={3}
-            className="justify-content-end align-items-center"
-          >
-            <Button variant="danger" onClick={handleShowDeleteModal}>
-              <FormattedMessage
-                id="pages.Network.deleteButton"
-                defaultMessage="Delete"
-              />
-            </Button>
-          </Stack>
+          <CreateNetworkForm
+            defaultValues={defaultValues}
+            onSubmit={handleUpdateNetwork}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingNetwork}
+          />
         </Card>
 
         {showDeleteModal && (

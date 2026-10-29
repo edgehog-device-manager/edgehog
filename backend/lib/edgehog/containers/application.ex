@@ -37,7 +37,8 @@ defmodule Edgehog.Containers.Application do
       end
     end
 
-    paginate_relationship_with releases: :relay
+    paginate_relationship_with releases: :relay,
+                               deployments: :relay
   end
 
   actions do
@@ -82,6 +83,14 @@ defmodule Edgehog.Containers.Application do
   relationships do
     has_many :releases, Edgehog.Containers.Release do
       public? true
+      read_action :plain_releases
+    end
+
+    has_many :deployments, Edgehog.Containers.Release.Deployment do
+      public? true
+      source_attribute :tenant_id
+      destination_attribute :tenant_id
+      filter expr(release.application_id == parent(id))
     end
   end
 end

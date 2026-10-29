@@ -16,8 +16,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { Stack } from "react-bootstrap";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { FormattedMessage } from "react-intl";
 import type { PreloadedQuery } from "react-relay/hooks";
@@ -34,29 +33,31 @@ import type {
   Container_getContainer_Query,
   Container_getContainer_Query$data,
 } from "@/api/__generated__/Container_getContainer_Query.graphql";
-import { Container_updateContainer_Mutation } from "@/api/__generated__/Container_updateContainer_Mutation.graphql";
+import type {
+  Container_updateContainer_Mutation,
+  UpdateContainerInput,
+} from "@/api/__generated__/Container_updateContainer_Mutation.graphql";
 import type { Container_deleteContainer_Mutation } from "@/api/__generated__/Container_deleteContainer_Mutation.graphql";
 
 import { Link, Route, useNavigate } from "@/Navigation";
 import Alert from "@/components/ui/alert/Alert";
-import Button from "@/components/ui/button/Button";
 import Center from "@/components/ui/center/Center";
-import ContainerDetails from "@/components/apps/containers/container-details/ContainerDetails";
+import { mapContainerToFormData } from "@/components/apps/containers/reuse-container-modal/ReuseContainerModal";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
-import Form from "@/components/ui/form/Form";
-import { FormRow } from "@/components/ui/form-row/FormRow";
-import Icon from "@/components/ui/icon/Icon";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
+import CreateContainerForm from "@/forms/CreateContainer";
 
 const GET_CONTAINER_QUERY = graphql`
   query Container_getContainer_Query($containerId: ID!) {
     container(id: $containerId) {
-      id
-      name
-      ...ContainerDetailsFragment
+      ...ReuseContainerModal_ContainerFragment @relay(mask: false)
     }
+    ...hooks_VolumesOptionsFragment
+    ...hooks_ImageCredentialsOptionsFragment
+    ...hooks_NetworksOptionsFragment
+    ...hooks_FilesOptionsFragment
   }
 `;
 
@@ -67,8 +68,7 @@ const UPDATE_CONTAINER_MUTATION = graphql`
   ) {
     updateContainer(id: $containerId, input: $input) {
       result {
-        id
-        name
+        ...ReuseContainerModal_ContainerFragment @relay(mask: false)
       }
     }
   }
@@ -85,28 +85,27 @@ const DELETE_CONTAINER_MUTATION = graphql`
 `;
 
 interface ContainerContentProps {
+  queryData: Container_getContainer_Query$data;
   container: NonNullable<Container_getContainer_Query$data["container"]>;
 }
 
-const ContainerContent = ({ container }: ContainerContentProps) => {
+const ContainerContent = ({ queryData, container }: ContainerContentProps) => {
   const { containerId = "" } = useParams();
   const navigate = useNavigate();
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
 
-  const [containerDraftName, setContainerDraftName] = useState(
-    container?.name || "",
-  );
-  const [isSavingName, setIsSavingName] = useState(false);
-  const [isEditingName, setIsEditingName] = useState(false);
-
-  const [updateContainer] = useMutation<Container_updateContainer_Mutation>(
-    UPDATE_CONTAINER_MUTATION,
-  );
+  const [updateContainer, isUpdatingContainer] =
+    useMutation<Container_updateContainer_Mutation>(UPDATE_CONTAINER_MUTATION);
 
   const [deleteContainer, isDeletingContainer] =
     useMutation<Container_deleteContainer_Mutation>(DELETE_CONTAINER_MUTATION);
+
+  const initialData = useMemo(
+    () => mapContainerToFormData(container, true),
+    [container],
+  );
 
   const handleAPIErrors = useCallback((errors: PayloadError[]) => {
     const errorFeedback = errors
@@ -150,36 +149,33 @@ const ContainerContent = ({ container }: ContainerContentProps) => {
     });
   }, [deleteContainer, containerId, navigate]);
 
-  const handleEditClick = useCallback(() => {
-    setIsSavingName(true);
+  const handleUpdateContainer = useCallback(
+    (input: UpdateContainerInput) => {
+      updateContainer({
+        variables: {
+          containerId,
+          input,
+        },
+        onCompleted(_data, errors) {
+          if (errors) {
+            handleAPIErrors(errors);
+            return;
+          }
 
-    updateContainer({
-      variables: {
-        containerId,
-        input: { name: containerDraftName },
-      },
-      onCompleted(_data, errors) {
-        setIsSavingName(false);
-
-        if (errors) {
-          handleAPIErrors(errors);
-          return;
-        }
-
-        setIsEditingName(false);
-      },
-      onError() {
-        setIsSavingName(false);
-
-        setErrorFeedback(
-          <FormattedMessage
-            id="pages.Container.updateContainerErrorFeedback"
-            defaultMessage="Could not update the container, please try again."
-          />,
-        );
-      },
-    });
-  }, [containerDraftName, updateContainer, containerId, handleAPIErrors]);
+          setErrorFeedback(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.Container.updateContainerErrorFeedback"
+              defaultMessage="Could not update the container, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateContainer, containerId, handleAPIErrors],
+  );
 
   return (
     <Page>
@@ -197,64 +193,13 @@ const ContainerContent = ({ container }: ContainerContentProps) => {
             {errorFeedback}
           </Alert>
 
-          <div className="ps-2 border-bottom mb-3">
-            <FormRow
-              id="name"
-              label={
-                <FormattedMessage
-                  id="pages.Container.name"
-                  defaultMessage="Container Name"
-                />
-              }
-            >
-              <div className="position-relative w-100 mb-2">
-                <Form.Control
-                  type="text"
-                  value={containerDraftName}
-                  readOnly={!isEditingName}
-                  onChange={(e) => setContainerDraftName(e.target.value)}
-                  className="pe-5"
-                />
-
-                <div
-                  className="position-absolute top-50 end-0 translate-middle-y d-flex align-items-center gap-2 pe-3"
-                  style={{ zIndex: 5 }}
-                >
-                  {isEditingName ? (
-                    <>
-                      <Button
-                        type="button"
-                        className="border-0 bg-transparent p-0 d-flex"
-                        disabled={isSavingName}
-                        onClick={handleEditClick}
-                      >
-                        <Icon icon="check" className="text-success" />
-                      </Button>
-
-                      <Icon
-                        icon="xMark"
-                        className="text-danger"
-                        role="button"
-                        onClick={() => {
-                          setContainerDraftName(container.name);
-                          setIsEditingName(false);
-                        }}
-                      />
-                    </>
-                  ) : (
-                    <Icon
-                      icon="edit"
-                      className="text-secondary"
-                      role="button"
-                      onClick={() => setIsEditingName(true)}
-                    />
-                  )}
-                </div>
-              </div>
-            </FormRow>
-          </div>
-
-          <ContainerDetails container={container} />
+          <CreateContainerForm
+            queryRef={queryData}
+            initialData={initialData}
+            onSubmit={handleUpdateContainer}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingContainer}
+          />
         </div>
 
         {showDeleteModal && (
@@ -282,19 +227,6 @@ const ContainerContent = ({ container }: ContainerContentProps) => {
             </p>
           </DeleteModal>
         )}
-
-        <Stack
-          direction="horizontal"
-          gap={3}
-          className="justify-content-end align-items-center mt-2"
-        >
-          <Button variant="danger" onClick={handleShowDeleteModal}>
-            <FormattedMessage
-              id="pages.Container.deleteButton"
-              defaultMessage="Delete"
-            />
-          </Button>
-        </Stack>
       </Page.Main>
     </Page>
   );
@@ -305,12 +237,12 @@ type ContainerWrapperProps = {
 };
 
 const ContainerWrapper = ({ getContainerQuery }: ContainerWrapperProps) => {
-  const { container } = usePreloadedQuery<Container_getContainer_Query>(
+  const queryData = usePreloadedQuery<Container_getContainer_Query>(
     GET_CONTAINER_QUERY,
     getContainerQuery,
   );
 
-  if (!container) {
+  if (!queryData.container) {
     return (
       <Result.NotFound
         title={
@@ -330,7 +262,9 @@ const ContainerWrapper = ({ getContainerQuery }: ContainerWrapperProps) => {
     );
   }
 
-  return <ContainerContent container={container} />;
+  return (
+    <ContainerContent queryData={queryData} container={queryData.container} />
+  );
 };
 
 const ContainerPage = () => {

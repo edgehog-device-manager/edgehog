@@ -164,6 +164,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
     references do
       reference :device, on_delete: :delete
+      reference :volume, on_delete: :delete
     end
   end
 end

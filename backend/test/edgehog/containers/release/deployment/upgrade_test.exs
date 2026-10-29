@@ -54,7 +54,8 @@ defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
         [
           tenant: tenant,
           application_id: deployment.release.application_id,
-          version: "0.0.2"
+          version: "0.0.2",
+          containers: 1
         ]
         |> release_fixture()
         |> Ash.load!(:containers, tenant: tenant)
@@ -77,27 +78,48 @@ defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
                )
                |> Ash.update(tenant: tenant)
 
-      assert new_deployment.release_id == target_release.id
+      new_deployment = Ash.load!(new_deployment, :release, tenant: tenant)
+
+      assert new_deployment.release_id != target_release.id
+      assert new_deployment.release.version == target_release.version
+      assert new_deployment.release.application_id == target_release.application_id
       assert new_deployment.id != deployment.id
 
       assert_receive {^ref, supervised_deployment}, 1000
 
       assert supervised_deployment.id == new_deployment.id
-      assert supervised_deployment.release_id == target_release.id
+      assert supervised_deployment.release_id == new_deployment.release_id
 
-      supervised_containers =
+      supervised_deployment =
+        Ash.load!(supervised_deployment, [container_deployments: [:container]], tenant: tenant)
+
+      supervised_container_ids =
         supervised_deployment
         |> Map.get(:container_deployments, [])
         |> Enum.map(& &1.container_id)
         |> Enum.sort()
 
-      target_containers =
+      target_container_ids =
         target_release
         |> Map.get(:containers, [])
         |> Enum.map(& &1.id)
         |> Enum.sort()
 
-      assert supervised_containers == target_containers
+      assert supervised_container_ids != target_container_ids
+
+      supervised_container_names =
+        supervised_deployment
+        |> Map.get(:container_deployments, [])
+        |> Enum.map(& &1.container.name)
+        |> Enum.sort()
+
+      target_container_names =
+        target_release
+        |> Map.get(:containers, [])
+        |> Enum.map(& &1.name)
+        |> Enum.sort()
+
+      assert supervised_container_names == target_container_names
 
       # The upgrade ready action is registered for the new deployment and
       # references the deployment it upgrades
@@ -138,7 +160,9 @@ defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
                )
                |> Ash.update(tenant: tenant)
 
-      assert new_deployment.release_id == target_release.id
+      new_deployment = Ash.load!(new_deployment, :release, tenant: tenant)
+      assert new_deployment.release_id != target_release.id
+      assert new_deployment.release.version == target_release.version
     end
 
     test "applies configs to the new deployment", %{tenant: tenant} do
@@ -183,10 +207,15 @@ defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
                )
                |> Ash.update(tenant: tenant)
 
-      assert new_deployment.release_id == target_release.id
-
       new_deployment =
-        Ash.load!(new_deployment, [container_deployments: [:file_binds]], tenant: tenant)
+        Ash.load!(
+          new_deployment,
+          [:release, container_deployments: [file_binds: [:file_mount]]],
+          tenant: tenant
+        )
+
+      assert new_deployment.release_id != target_release.id
+      assert new_deployment.release.version == target_release.version
 
       assert length(new_deployment.container_deployments) == 1
 
@@ -196,7 +225,8 @@ defmodule Edgehog.Containers.Release.Deployment.UpgradeTest do
       assert length(container_deployment.file_binds) == 1
 
       [file_bind] = container_deployment.file_binds
-      assert file_bind.file_mount_id == file_mount.id
+      assert file_bind.file_mount_id != file_mount.id
+      assert file_bind.file_mount.mountpoint == file_mount.mountpoint
     end
   end
 

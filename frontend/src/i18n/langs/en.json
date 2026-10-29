@@ -2365,8 +2365,14 @@
   "forms.CreateApplication.nameLabel": {
     "defaultMessage": "Name"
   },
+  "forms.CreateApplication.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateApplication.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateApplication.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
@@ -2468,6 +2474,9 @@
   },
   "forms.CreateContainer.blkioWeightValueLabel": {
     "defaultMessage": "Weight"
+  },
+  "forms.CreateContainer.deleteButton": {
+    "defaultMessage": "Delete"
   },
   "forms.CreateContainer.deviceMappingsLabel": {
     "defaultMessage": "Device Mappings"
@@ -2618,6 +2627,9 @@
   },
   "forms.CreateContainer.requestsAddButton": {
     "defaultMessage": "Add Request"
+  },
+  "forms.CreateContainer.resetButton": {
+    "defaultMessage": "Reset"
   },
   "forms.CreateContainer.resourceLimitsCpuPeriodLabel": {
     "defaultMessage": "CPU Period (microseconds)"
@@ -2804,6 +2816,9 @@
   },
   "forms.CreateContainer.ulimitsSoftLabel": {
     "defaultMessage": "Soft"
+  },
+  "forms.CreateContainer.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateDeploymentCampaign.applicationLabel": {
     "defaultMessage": "Application"
@@ -3054,6 +3069,9 @@
   "forms.CreateImageCredential.usernameLabel": {
     "defaultMessage": "Username"
   },
+  "forms.CreateNetwork.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "forms.CreateNetwork.driverLabel": {
     "defaultMessage": "Driver"
   },
@@ -3069,8 +3087,14 @@
   "forms.CreateNetwork.optionsLabel": {
     "defaultMessage": "Options"
   },
+  "forms.CreateNetwork.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateNetwork.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateNetwork.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateRelease.addDependenciesButton": {
     "defaultMessage": "Add Dependencies"
@@ -3087,11 +3111,17 @@
   "forms.CreateRelease.dependsOnLabel": {
     "defaultMessage": "Depends on"
   },
+  "forms.CreateRelease.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateRelease.submitButton": {
     "defaultMessage": "Create"
   },
   "forms.CreateRelease.supportedSystemModelsLabels": {
     "defaultMessage": "Supported System Models"
+  },
+  "forms.CreateRelease.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.CreateRelease.versionLabel": {
     "defaultMessage": "Version"
@@ -3198,6 +3228,9 @@
   "forms.CreateUpdateCampaign.submitButton": {
     "defaultMessage": "Create"
   },
+  "forms.CreateVolume.deleteButton": {
+    "defaultMessage": "Delete"
+  },
   "forms.CreateVolume.driverLabel": {
     "defaultMessage": "Driver"
   },
@@ -3207,8 +3240,14 @@
   "forms.CreateVolume.optionsLabel": {
     "defaultMessage": "Options"
   },
+  "forms.CreateVolume.resetButton": {
+    "defaultMessage": "Reset"
+  },
   "forms.CreateVolume.submitButton": {
     "defaultMessage": "Create"
+  },
+  "forms.CreateVolume.updateButton": {
+    "defaultMessage": "Update"
   },
   "forms.DeploymentCampaignForm.applicationLabel": {
     "defaultMessage": "Application"
@@ -3630,6 +3669,15 @@
   },
   "forms.UpdateImageCredential.labelLabel": {
     "defaultMessage": "Label"
+  },
+  "forms.UpdateImageCredential.passwordLabel": {
+    "defaultMessage": "Password"
+  },
+  "forms.UpdateImageCredential.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateImageCredential.submitButton": {
+    "defaultMessage": "Update"
   },
   "forms.UpdateImageCredential.usernameLabel": {
     "defaultMessage": "Username"
@@ -4642,14 +4690,14 @@
   "pages.Application.createButton": {
     "defaultMessage": "Create Release"
   },
-  "pages.Application.description": {
-    "defaultMessage": "Description"
-  },
   "pages.Application.devices": {
     "defaultMessage": "Devices"
   },
   "pages.Application.releases": {
     "defaultMessage": "Releases"
+  },
+  "pages.Application.updateErrorFeedback": {
+    "defaultMessage": "Could not update the application, please try again."
   },
   "pages.ApplicationCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the application, please try again."
@@ -4792,9 +4840,6 @@
   "pages.Container.containerNotFound.title": {
     "defaultMessage": "Container not found."
   },
-  "pages.Container.deleteButton": {
-    "defaultMessage": "Delete"
-  },
   "pages.Container.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Container <bold>{name}</bold>."
   },
@@ -4803,9 +4848,6 @@
   },
   "pages.Container.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Container, please try again."
-  },
-  "pages.Container.name": {
-    "defaultMessage": "Container Name"
   },
   "pages.Container.updateContainerErrorFeedback": {
     "defaultMessage": "Could not update the container, please try again."
@@ -5057,6 +5099,9 @@
   "pages.ImageCredential.imageCredentialNotFound.title": {
     "defaultMessage": "Image Credentials not found."
   },
+  "pages.ImageCredential.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Image Credentials, please try again."
+  },
   "pages.ImageCredentialCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Image Credentials, please try again."
   },
@@ -5093,9 +5138,6 @@
   "pages.Logout.title": {
     "defaultMessage": "Logout"
   },
-  "pages.Network.deleteButton": {
-    "defaultMessage": "Delete"
-  },
   "pages.Network.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Network <bold>{network}</bold>."
   },
@@ -5105,26 +5147,14 @@
   "pages.Network.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Network, please try again."
   },
-  "pages.Network.driver": {
-    "defaultMessage": "Driver"
-  },
-  "pages.Network.enableIpv6": {
-    "defaultMessage": "Enable IPv6"
-  },
-  "pages.Network.internal": {
-    "defaultMessage": "Internal"
-  },
-  "pages.Network.label": {
-    "defaultMessage": "Label"
-  },
   "pages.Network.networkNotFound.message": {
     "defaultMessage": "Return to the networks list."
   },
   "pages.Network.networkNotFound.title": {
     "defaultMessage": "Network not found."
   },
-  "pages.Network.options": {
-    "defaultMessage": "Options"
+  "pages.Network.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Network, please try again."
   },
   "pages.NetworkCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the Network, please try again."
@@ -5152,6 +5182,9 @@
   },
   "pages.Release.systemModels": {
     "defaultMessage": "System Models"
+  },
+  "pages.Release.updateErrorFeedback": {
+    "defaultMessage": "Could not update the release, please try again."
   },
   "pages.ReleaseCreate.creationErrorFeedback": {
     "defaultMessage": "Could not create the release, please try again."
@@ -5286,9 +5319,6 @@
   "pages.UpdateCampaigns.title": {
     "defaultMessage": "Update Campaigns"
   },
-  "pages.Volume.deleteButton": {
-    "defaultMessage": "Delete"
-  },
   "pages.Volume.deleteModal.description": {
     "defaultMessage": "This action cannot be undone. This will permanently delete the Volume <bold>{volume}</bold>."
   },
@@ -5298,14 +5328,8 @@
   "pages.Volume.deletionErrorFeedback": {
     "defaultMessage": "Could not delete the Volume, please try again."
   },
-  "pages.Volume.driver": {
-    "defaultMessage": "Driver"
-  },
-  "pages.Volume.label": {
-    "defaultMessage": "Label"
-  },
-  "pages.Volume.options": {
-    "defaultMessage": "Options"
+  "pages.Volume.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Volume, please try again."
   },
   "pages.Volume.volumeNotFound.message": {
     "defaultMessage": "Return to the volumes list."

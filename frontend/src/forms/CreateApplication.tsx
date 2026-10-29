@@ -18,6 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -35,20 +36,35 @@ const initialData: ApplicationFormData = {
 };
 
 type Props = {
+  defaultValues?: ApplicationFormData;
   isLoading?: boolean;
   onSubmit: (data: ApplicationFormData) => void;
 };
 
-const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
+const CreateApplication = ({
+  defaultValues,
+  isLoading = false,
+  onSubmit,
+}: Props) => {
   const {
     register,
+    reset,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<ApplicationFormData>({
     mode: "onTouched",
-    defaultValues: initialData,
+    defaultValues: defaultValues ?? initialData,
     resolver: zodResolver(applicationSchema),
   });
+
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (defaultValues && prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
+
+  const canSubmit = !isLoading && (!defaultValues || isDirty);
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -84,13 +100,39 @@ const CreateApplication = ({ isLoading = false, onSubmit }: Props) => {
           <FormFeedback feedback={errors.description?.message} />
         </FormRow>
         <div className="d-flex justify-content-end align-items-center">
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading && <Spinner size="sm" className="me-2" />}
-            <FormattedMessage
-              id="forms.CreateApplication.submitButton"
-              defaultMessage="Create"
-            />
-          </Button>
+          {defaultValues ? (
+            <Stack
+              direction="horizontal"
+              gap={3}
+              className="justify-content-end align-items-center"
+            >
+              <Button variant="primary" type="submit" disabled={!canSubmit}>
+                {isLoading && <Spinner size="sm" className="me-2" />}
+                <FormattedMessage
+                  id="forms.CreateApplication.updateButton"
+                  defaultMessage="Update"
+                />
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!canReset}
+                onClick={() => reset()}
+              >
+                <FormattedMessage
+                  id="forms.CreateApplication.resetButton"
+                  defaultMessage="Reset"
+                />
+              </Button>
+            </Stack>
+          ) : (
+            <Button variant="primary" type="submit" disabled={!canSubmit}>
+              {isLoading && <Spinner size="sm" className="me-2" />}
+              <FormattedMessage
+                id="forms.CreateApplication.submitButton"
+                defaultMessage="Create"
+              />
+            </Button>
+          )}
         </div>
       </Stack>
     </form>

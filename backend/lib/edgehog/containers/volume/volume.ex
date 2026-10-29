@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Volume do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :volume do
-        action_types [:create, :destroy]
+        action_types [:create, :update, :destroy]
       end
     end
 
@@ -43,10 +43,43 @@ defmodule Edgehog.Containers.Volume do
   actions do
     defaults [
       :read,
-      :destroy,
-      create: [:label, :driver, :options],
-      update: [:driver, :options]
+      :destroy
     ]
+
+    create :create do
+      primary? true
+      accept [:label, :driver, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_volumes, field: :label}
+    end
+
+    create :copy do
+      accept [:label, :driver, :options]
+
+      argument :id, :uuid
+
+      change set_attribute(:id, arg(:id), set_when_nil?: false)
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+      accept [:label, :driver, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_volumes, field: :label}
+    end
+
+    read :plain_volumes do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(volume_deployments, true))
+    end
+
+    read :deployed_volumes do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(volume_deployments, true))
+    end
 
     destroy :destroy_if_dangling do
       description "Destroys the volume if it's dangling (not referenced by any container)"
@@ -101,10 +134,6 @@ defmodule Edgehog.Containers.Volume do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
-  end
-
-  identities do
-    identity :label, [:label]
   end
 
   postgres do

@@ -71,7 +71,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired volume."
       end
 
-      list Volume, :volumes, :read do
+      list Volume, :volumes, :plain_volumes do
         description "Returns all available volumes."
         paginate_with :keyset
         relay? true
@@ -81,7 +81,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired network."
       end
 
-      list Network, :networks, :read do
+      list Network, :networks, :plain_networks do
         description "Returns all available networks."
         paginate_with :keyset
         relay? true
@@ -97,7 +97,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired deployment."
       end
 
-      list Container, :containers, :read do
+      list Container, :containers, :plain_containers do
         description "Returns all available containers"
         paginate_with :keyset
         relay? true
@@ -140,6 +140,10 @@ defmodule Edgehog.Containers do
 
       destroy Application, :delete_application, :destroy
 
+      update Application, :update_application, :update do
+        description "Update an application."
+      end
+
       create Release, :create_release, :create do
         description "Create a new release."
 
@@ -164,6 +168,24 @@ defmodule Edgehog.Containers do
                               ]
       end
 
+      update Release, :update_release, :update do
+        description "Update a release."
+        read_action :plain_releases
+
+        relay_id_translations input: [
+                                containers: [
+                                  id: :container
+                                ],
+                                container_dependencies: [
+                                  container_id: :container,
+                                  dependency_id: :container
+                                ],
+                                required_system_models: [
+                                  id: :system_model
+                                ]
+                              ]
+      end
+
       create Container, :create_container, :create_and_relate do
         description "Create a new container"
 
@@ -175,12 +197,26 @@ defmodule Edgehog.Containers do
                               ]
       end
 
-      update Container, :update_container, :update
+      update Container, :update_container, :update do
+        description "Update a container."
+        read_action :plain_containers
+
+        relay_id_translations input: [
+                                image: [image_credentials_id: :image_credentials],
+                                networks: [id: :network],
+                                volumes: [id: :volume],
+                                file_mounts: [default_file_id: :file]
+                              ]
+      end
 
       destroy Container, :delete_container, :destroy
 
       create ImageCredentials, :create_image_credentials, :create do
         description "Create image credentials."
+      end
+
+      update ImageCredentials, :update_image_credentials, :update do
+        description "Update image credentials."
       end
 
       destroy ImageCredentials, :delete_image_credentials, :destroy
@@ -189,12 +225,22 @@ defmodule Edgehog.Containers do
         description "Create a new volume."
       end
 
+      update Volume, :update_volume, :update do
+        description "Update a volume."
+        read_action :plain_volumes
+      end
+
       destroy Volume, :delete_volume, :destroy do
         description "Delete a volume if not used by any container."
       end
 
       create Network, :create_network, :create do
         description "Create a new network."
+      end
+
+      update Network, :update_network, :update do
+        description "Update a network."
+        read_action :plain_networks
       end
 
       destroy Network, :delete_network, :destroy do
@@ -287,7 +333,11 @@ defmodule Edgehog.Containers do
       define :fetch_deployment, action: :read, get_by: [:id]
       define :delete_deployment, action: :destroy
       define :deployments_with_release, action: :filter_by_release, args: [:release_id]
-      define :deployment_by_identity, action: :read, get_by_identity: :release_instance
+
+      define :deployment_by_identity,
+        action: :by_device_and_release,
+        args: [:device_id, :application_id, :version]
+
       define :run_ready_actions, action: :run_ready_actions
       define :set_deployment_state, action: :set_state
       define :send_deployment, action: :send_deployment

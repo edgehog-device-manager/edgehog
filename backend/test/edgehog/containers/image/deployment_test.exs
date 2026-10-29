@@ -34,7 +34,34 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
   end
 
   describe "Image deployment" do
-    test "links up to container deployments", %{tenant: tenant, image: image} do
+    test "reuses copied image deployment across containers in the same release", %{
+      tenant: tenant,
+      image: image
+    } do
+      release =
+        release_fixture(tenant: tenant, containers: 2, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      [container_deployment1, container_deployment2] =
+        deployment
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
+        |> Map.get(:container_deployments)
+
+      assert container_deployment1.image_deployment.id ==
+               container_deployment2.image_deployment.id
+
+      assert container_deployment1.image_deployment.image_id != image.id
+      assert container_deployment1.image_deployment.image.reference == image.reference
+    end
+
+    test "creates independent image copies across different release deployments", %{
+      tenant: tenant,
+      image: image
+    } do
       release1 =
         release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
 
@@ -51,15 +78,21 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
 
       [container_deployment1] =
         deployment1
-        |> Ash.load!(container_deployments: [:image_deployment])
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
         |> Map.get(:container_deployments)
 
       [container_deployment2] =
         deployment2
-        |> Ash.load!(container_deployments: [:image_deployment])
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
         |> Map.get(:container_deployments)
 
-      assert container_deployment1.image_deployment == container_deployment2.image_deployment
+      assert container_deployment1.image_deployment.id !=
+               container_deployment2.image_deployment.id
+
+      assert container_deployment1.image_deployment.image_id != image.id
+      assert container_deployment2.image_deployment.image_id != image.id
+      assert container_deployment1.image_deployment.image.reference == image.reference
+      assert container_deployment2.image_deployment.image.reference == image.reference
     end
   end
 end
