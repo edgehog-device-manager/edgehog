@@ -105,7 +105,7 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     deployment =
       Edgehog.Containers.Release.Deployment
       |> Ash.get!(decoded_id, tenant: tenant)
-      |> Ash.load!([container_deployments: [:file_binds]], tenant: tenant)
+      |> Ash.load!([container_deployments: [file_binds: [:file_mount]]], tenant: tenant)
 
     assert length(deployment.container_deployments) == 1
 
@@ -113,7 +113,8 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
     assert length(container_deployment.file_binds) == 1
 
     [file_bind] = container_deployment.file_binds
-    assert file_bind.file_mount_id == file_mount.id
+    assert file_bind.file_mount_id != file_mount.id
+    assert file_bind.file_mount.mountpoint == file_mount.mountpoint
   end
 
   test "deployRelease returns an error when a required mount has no bind", %{
@@ -175,14 +176,16 @@ defmodule EdgehogWeb.Schema.Mutation.DeployReleaseTest do
       )
 
     ordered_containers = [container_1.id, container_3.id, container_2.id]
+    ordered_names = [container_1.name, container_3.name, container_2.name]
 
     expect(Deployment.Orchestrator, :conduct, fn deployment, _ ->
-      {:ok, ids} =
-        deployment
-        |> Ash.load!(release: [:containers, :container_dependencies])
-        |> sort_containers()
+      deployment = Ash.load!(deployment, release: [:containers, :container_dependencies])
+      {:ok, ids} = sort_containers(deployment)
 
-      assert ids == ordered_containers
+      assert ids != ordered_containers
+
+      containers_by_id = Map.new(deployment.release.containers, &{&1.id, &1.name})
+      assert Enum.map(ids, &Map.fetch!(containers_by_id, &1)) == ordered_names
 
       :ok
     end)

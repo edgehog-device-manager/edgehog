@@ -203,7 +203,12 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
       |> Map.get(:device)
 
     {:ok, current_deployment} =
-      Containers.deployment_by_identity(device.id, release.id, tenant: target.tenant_id)
+      Containers.deployment_by_identity(
+        device.id,
+        release.application_id,
+        release.version,
+        tenant: target.tenant_id
+      )
 
     if current_deployment.state == :deleting do
       {:error, :deployment_deleting}

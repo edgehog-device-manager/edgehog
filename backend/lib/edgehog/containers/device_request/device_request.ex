@@ -25,7 +25,7 @@ defmodule Edgehog.Containers.DeviceRequest do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Validations
+  alias Edgehog.Containers.DeviceRequest.Changes
 
   graphql do
     type :device_request
@@ -41,7 +41,7 @@ defmodule Edgehog.Containers.DeviceRequest do
     create :create do
       primary? true
 
-      accept [:driver, :count, :device_ids, :options]
+      accept [:driver, :count, :device_ids, :options, :container_id]
 
       argument :capabilities, {:array, {:array, :string}} do
         description """
@@ -55,26 +55,11 @@ defmodule Edgehog.Containers.DeviceRequest do
         """
       end
 
-      change fn changeset, _context ->
-        capabilities =
-          changeset
-          |> Ash.Changeset.get_argument(:capabilities)
-          |> Kernel.||([])
-          |> Enum.map(&Jason.encode!/1)
-
-        Ash.Changeset.change_attribute(
-          changeset,
-          :db_capabilities,
-          capabilities
-        )
-      end
+      change Changes.EncodeCapabilities
     end
 
-    destroy :destroy_if_dangling do
-      description "Destroys the device request if it's dangling (not referenced by any container)"
-
-      require_atomic? false
-      validate Validations.Dangling
+    create :copy do
+      accept [:driver, :count, :device_ids, :options, :db_capabilities, :container_id]
     end
   end
 
@@ -163,14 +148,14 @@ defmodule Edgehog.Containers.DeviceRequest do
 
       calculation Edgehog.Containers.DeviceRequest.Calculations.Capabilities
     end
-
-    calculate :dangling?,
-              :boolean,
-              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   postgres do
     table "device_requests"
     repo Edgehog.Repo
+
+    references do
+      reference :container, on_delete: :delete
+    end
   end
 end

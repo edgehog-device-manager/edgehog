@@ -162,7 +162,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
           [
             campaign_targets: [
               device: [],
-              deployment: [container_deployments: [:file_binds]]
+              deployment: [container_deployments: [file_binds: :file_mount]]
             ]
           ],
           tenant: tenant.tenant_id
@@ -172,7 +172,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
       [container_deployment] = target.deployment.container_deployments
       [file_bind] = container_deployment.file_binds
 
-      assert file_bind.file_mount_id == file_binds_fixture.file_mount.id
+      assert file_bind.file_mount_id != file_binds_fixture.file_mount.id
+      assert file_bind.file_mount.mountpoint == file_binds_fixture.file_mount.mountpoint
       refute is_nil(file_bind.file_download_request_id)
 
       request =

@@ -1,0 +1,59 @@
+#
+# This file is part of Edgehog.
+#
+# Copyright 2026 SECO Mind Srl
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+
+defmodule Edgehog.Containers.Container.Deployment.Changes.DeployDeviceRequests do
+  @moduledoc """
+  Deploys `DeviceRequest.Deployment` records for each device request of the
+  container and relates `:device_request_deployments`.
+  """
+
+  use Ash.Resource.Change
+
+  @impl Ash.Resource.Change
+  def change(changeset, _opts, %{tenant: tenant}) do
+    with true <- changeset.valid?,
+         {:ok, container} <- Ash.Changeset.fetch_argument(changeset, :container),
+         {:ok, device} <- Ash.Changeset.fetch_argument(changeset, :device),
+         {:ok, container} <- Ash.load(container, [:device_requests], tenant: tenant) do
+      inputs =
+        Enum.map(container.device_requests || [], fn dr ->
+          %{
+            device_request_id: dr.id,
+            device_id: device.id,
+            device_request: dr,
+            device: device
+          }
+        end)
+
+      Ash.Changeset.manage_relationship(
+        changeset,
+        :device_request_deployments,
+        inputs,
+        on_no_match: {:create, :deploy},
+        on_match: :ignore,
+        on_lookup: :relate,
+        use_identities: [:device_request_instance]
+      )
+    else
+      {:error, error} -> Ash.Changeset.add_error(changeset, error)
+      _ -> changeset
+    end
+  end
+end

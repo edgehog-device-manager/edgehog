@@ -297,9 +297,24 @@ defmodule Edgehog.Containers.Release.Deployment do
       get_by :device_id
     end
 
+    read :by_device_and_release do
+      argument :device_id, :id, allow_nil?: false
+      argument :application_id, :uuid, allow_nil?: false
+      argument :version, :string, allow_nil?: false
+      get? true
+
+      filter expr(
+               device_id == ^arg(:device_id) and
+                 release.application_id == ^arg(:application_id) and
+                 release.version == ^arg(:version)
+             )
+    end
+
     destroy :destroy_and_gc do
       require_atomic? false
-      change {Edgehog.Containers.Changes.MaybeDestroyChildren, children: [:container_deployments]}
+
+      change {Edgehog.Containers.Changes.MaybeDestroyChildren,
+              children: [:container_deployments, :release]}
     end
   end
 
@@ -401,6 +416,7 @@ defmodule Edgehog.Containers.Release.Deployment do
 
     references do
       reference :device, on_delete: :delete
+      reference :release, on_delete: :delete
     end
   end
 end
