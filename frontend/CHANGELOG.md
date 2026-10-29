@@ -8,6 +8,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- NOTICE -->
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
+## [0.14.1](https://github.com/edgehog-device-manager/edgehog/compare/v0.14.0...v0.14.1) (2026-10-29)
+
+
+### Bug Fixes
+
+* Allow deleting stuck deployments ([d61a8c4](https://github.com/edgehog-device-manager/edgehog/commit/d61a8c4c24667fdcb8d24ea9e1b16890b2b3964a))
+* resolve npm audit vulnerabilities ([59ba3d9](https://github.com/edgehog-device-manager/edgehog/commit/59ba3d9e4b2cbfc8aae1875d9c29e4553594b1aa))
+
 ## [0.14.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.1...v0.14.0) (2026-10-02)
 
 
