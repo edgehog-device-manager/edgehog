@@ -19,19 +19,27 @@ defmodule Edgehog.Containers.Changes.DestroyRelatedReleases do
   @moduledoc false
   use Ash.Resource.Change
 
+  alias Edgehog.Containers.Release
+
+  require Ash.Query
+
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    application = Ash.load!(changeset.data, [:releases], tenant: tenant)
+    releases = list_application_releases(changeset.data.id, tenant)
 
-    case undeletable_releases(application.releases) do
+    case undeletable_releases(releases) do
       [] ->
         Ash.Changeset.before_action(changeset, fn cs ->
-          destroy_related_releases(cs, tenant)
+          destroy_related_releases(releases, tenant)
           cs
         end)
 
-      releases ->
-        versions = Enum.map_join(releases, ", ", & &1.version)
+      undeletable ->
+        versions =
+          undeletable
+          |> Enum.map(& &1.version)
+          |> Enum.uniq()
+          |> Enum.join(", ")
 
         Ash.Changeset.add_error(
           changeset,
@@ -41,6 +49,12 @@ defmodule Edgehog.Containers.Changes.DestroyRelatedReleases do
     end
   end
 
+  defp list_application_releases(application_id, tenant) do
+    Release
+    |> Ash.Query.filter(application_id == ^application_id)
+    |> Ash.read!(tenant: tenant)
+  end
+
   defp undeletable_releases(releases) do
     Enum.reject(releases, fn release ->
       %{valid?: valid} = Ash.Changeset.for_destroy(release, :destroy)
@@ -48,10 +62,8 @@ defmodule Edgehog.Containers.Changes.DestroyRelatedReleases do
     end)
   end
 
-  defp destroy_related_releases(changeset, tenant) do
-    application = Ash.load!(changeset.data, [:releases], reuse_values?: true)
-
-    Enum.each(application.releases, fn release ->
+  defp destroy_related_releases(releases, tenant) do
+    Enum.each(releases, fn release ->
       Ash.destroy!(release, tenant: tenant)
     end)
   end

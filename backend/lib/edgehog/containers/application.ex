@@ -82,6 +82,7 @@ defmodule Edgehog.Containers.Application do
   relationships do
     has_many :releases, Edgehog.Containers.Release do
       public? true
+      read_action :plain_releases
     end
   end
 end

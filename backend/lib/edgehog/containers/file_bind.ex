@@ -271,6 +271,7 @@ defmodule Edgehog.Containers.FileBind do
     references do
       reference :container_deployment, on_delete: :delete
       reference :device, on_delete: :delete
+      reference :file_mount, on_delete: :delete
     end
 
     identity_index_names unique_file_mount_per_deployment: "file_binds_unique_mount_idx"

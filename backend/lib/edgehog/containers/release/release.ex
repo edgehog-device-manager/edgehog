@@ -24,8 +24,11 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Validations.Dangling
+  alias Edgehog.Containers.Validations.UniquePlainResource
   alias Edgehog.Validations
 
   graphql do
@@ -47,6 +50,16 @@ defmodule Edgehog.Containers.Release do
   actions do
     defaults [:read]
 
+    read :plain_releases do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(deployments, true))
+    end
+
+    read :deployed_releases do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(deployments, true))
+    end
+
     create :create do
       primary? true
 
@@ -67,6 +80,9 @@ defmodule Edgehog.Containers.Release do
 
       change manage_relationship(:container_dependencies, type: :create)
 
+      validate {UniquePlainResource,
+                keys: [:version, :application_id], read_action: :plain_releases, field: :version}
+
       validate Release.Validations.NoCircularDependencies
     end
 
@@ -75,6 +91,17 @@ defmodule Edgehog.Containers.Release do
       require_atomic? false
 
       validate Release.Validations.CheckDeployments
+
+      change {Changes.MaybeDestroyChildren, children: [:containers]}
+    end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+
+      validate Dangling
+      validate Release.Validations.CheckDeployments
+
+      change {Changes.MaybeDestroyChildren, children: [:containers]}
     end
   end
 
@@ -133,8 +160,10 @@ defmodule Edgehog.Containers.Release do
     end
   end
 
-  identities do
-    identity :application_version, [:version, :application_id]
+  calculations do
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :deployments]}
   end
 
   postgres do

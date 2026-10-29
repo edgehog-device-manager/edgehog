@@ -61,6 +61,16 @@ defmodule Edgehog.Containers.Container do
   actions do
     defaults [:read, :create]
 
+    read :plain_containers do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(container_deployments, true))
+    end
+
+    read :deployed_containers do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(container_deployments, true))
+    end
+
     create :create_and_relate do
       accept [
         :name,
@@ -163,7 +173,7 @@ defmodule Edgehog.Containers.Container do
 
       change manage_relationship(:image,
                on_no_match: :create,
-               on_lookup: :relate,
+               on_lookup: {:relate, :create, :plain_images},
                on_match: :ignore,
                use_identities: [:reference_credentials]
              )
@@ -180,6 +190,9 @@ defmodule Edgehog.Containers.Container do
       change manage_relationship(:device_requests,
                type: :create
              )
+
+      validate {Edgehog.Containers.Validations.UniquePlainResource,
+                keys: [:name], read_action: :plain_containers, field: :name}
     end
 
     read :filter_by_image do
@@ -193,6 +206,9 @@ defmodule Edgehog.Containers.Container do
       require_atomic? false
 
       accept [:name]
+
+      validate {Edgehog.Containers.Validations.UniquePlainResource,
+                keys: [:name], read_action: :plain_containers, field: :name}
     end
 
     destroy :destroy do
@@ -203,8 +219,16 @@ defmodule Edgehog.Containers.Container do
       require_atomic? false
       validate NoRefs
 
-      change {Changes.MaybeDestroyChildren,
-              children: [:image, :device_mappings, :device_requests]}
+      change {Changes.MaybeDestroyChildren, children: [:image, :volumes, :networks]}
+    end
+
+    destroy :destroy_if_dangling do
+      description "Destroys the container if it's dangling (not referenced by any release or deployment)"
+
+      require_atomic? false
+      validate NoRefs
+
+      change {Changes.MaybeDestroyChildren, children: [:image, :volumes, :networks]}
     end
   end
 
@@ -631,10 +655,6 @@ defmodule Edgehog.Containers.Container do
 
   calculations do
     calculate :env_encoding, :vector, EnvEncoding
-  end
-
-  identities do
-    identity :name, [:name]
   end
 
   postgres do

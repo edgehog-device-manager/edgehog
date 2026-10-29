@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.DeviceRequest do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Validations
 
   graphql do
     type :device_request
@@ -68,13 +67,6 @@ defmodule Edgehog.Containers.DeviceRequest do
           capabilities
         )
       end
-    end
-
-    destroy :destroy_if_dangling do
-      description "Destroys the device request if it's dangling (not referenced by any container)"
-
-      require_atomic? false
-      validate Validations.Dangling
     end
   end
 
@@ -163,14 +155,14 @@ defmodule Edgehog.Containers.DeviceRequest do
 
       calculation Edgehog.Containers.DeviceRequest.Calculations.Capabilities
     end
-
-    calculate :dangling?,
-              :boolean,
-              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
   end
 
   postgres do
     table "device_requests"
     repo Edgehog.Repo
+
+    references do
+      reference :container, on_delete: :delete
+    end
   end
 end

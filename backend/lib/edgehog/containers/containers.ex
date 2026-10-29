@@ -71,7 +71,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired volume."
       end
 
-      list Volume, :volumes, :read do
+      list Volume, :volumes, :plain_volumes do
         description "Returns all available volumes."
         paginate_with :keyset
         relay? true
@@ -81,7 +81,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired network."
       end
 
-      list Network, :networks, :read do
+      list Network, :networks, :plain_networks do
         description "Returns all available networks."
         paginate_with :keyset
         relay? true
@@ -97,7 +97,7 @@ defmodule Edgehog.Containers do
         description "Returns the desired deployment."
       end
 
-      list Container, :containers, :read do
+      list Container, :containers, :plain_containers do
         description "Returns all available containers"
         paginate_with :keyset
         relay? true

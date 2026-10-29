@@ -145,7 +145,8 @@ defmodule Edgehog.Containers.Container.Deployment do
                 :image_deployment,
                 :volume_deployments,
                 :network_deployments,
-                :device_mapping_deployments
+                :device_mapping_deployments,
+                :device_request_deployments
               ]}
     end
   end
