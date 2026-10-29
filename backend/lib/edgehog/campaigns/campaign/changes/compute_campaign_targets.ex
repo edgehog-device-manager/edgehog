@@ -197,12 +197,18 @@ defmodule Edgehog.Campaigns.Campaign.Changes.ComputeCampaignTargets do
   # For other operations (start, stop, upgrade, delete), filter devices that have the release deployed
   defp filter_devices_by_operation(devices, _operation, release, tenant) do
     devices
-    |> Ash.load!([:application_deployments], tenant: tenant)
-    |> Enum.filter(&has_release_deployed?(&1, release))
+    |> Ash.load!([application_deployments: :release], tenant: tenant)
+    |> Enum.filter(&has_release_deployed?(&1, release, tenant))
   end
 
-  defp has_release_deployed?(device, release) do
-    Enum.any?(device.application_deployments, &(&1.release_id == release.id))
+  defp has_release_deployed?(device, release, tenant) do
+    Edgehog.Containers.Release.Deployment
+    |> Ash.Query.for_read(:by_device_and_release, %{
+      device_id: device.id,
+      application_id: release.application_id,
+      version: release.version
+    })
+    |> Ash.exists?(tenant: tenant)
   end
 
   defp maybe_schedule_campaign_start(campaign) do

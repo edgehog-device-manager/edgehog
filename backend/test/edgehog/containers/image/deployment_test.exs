@@ -34,7 +34,34 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
   end
 
   describe "Image deployment" do
-    test "links up to container deployments", %{tenant: tenant, image: image} do
+    test "reuses copied image deployment across containers in the same release", %{
+      tenant: tenant,
+      image: image
+    } do
+      release =
+        release_fixture(tenant: tenant, containers: 2, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      [container_deployment1, container_deployment2] =
+        deployment
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
+        |> Map.get(:container_deployments)
+
+      assert container_deployment1.image_deployment.id ==
+               container_deployment2.image_deployment.id
+
+      assert container_deployment1.image_deployment.image_id != image.id
+      assert container_deployment1.image_deployment.image.reference == image.reference
+    end
+
+    test "reuses unchanged image deployment across release deployments on the same device", %{
+      tenant: tenant,
+      image: image
+    } do
       release1 =
         release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
 
@@ -51,15 +78,61 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
 
       [container_deployment1] =
         deployment1
-        |> Ash.load!(container_deployments: [:image_deployment])
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
         |> Map.get(:container_deployments)
 
       [container_deployment2] =
         deployment2
-        |> Ash.load!(container_deployments: [:image_deployment])
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
         |> Map.get(:container_deployments)
 
-      assert container_deployment1.image_deployment == container_deployment2.image_deployment
+      assert container_deployment1.image_deployment.id ==
+               container_deployment2.image_deployment.id
+
+      assert container_deployment1.image_deployment.image_id != image.id
+      assert container_deployment1.image_deployment.image.reference == image.reference
+    end
+
+    test "snapshots registry_auth and provenance onto deployed image copy", %{tenant: tenant} do
+      credentials =
+        [tenant: tenant]
+        |> image_credentials_fixture()
+        |> Ash.load!(:base64_json, tenant: tenant)
+
+      image =
+        image_fixture(
+          tenant: tenant,
+          image_credentials_id: credentials.id
+        )
+
+      release =
+        release_fixture(tenant: tenant, containers: 1, container_params: [image: image])
+
+      device = device_fixture(tenant: tenant)
+
+      deployment =
+        deployment_fixture(tenant: tenant, device_id: device.id, release_id: release.id)
+
+      [container_deployment] =
+        deployment
+        |> Ash.load!(container_deployments: [image_deployment: [:image]])
+        |> Map.get(:container_deployments)
+
+      deployed_image = container_deployment.image_deployment.image
+
+      assert deployed_image.source_image_id == image.id
+      assert deployed_image.registry_auth == credentials.base64_json
+      assert deployed_image.image_credentials_id == credentials.id
+
+      # Updating the credentials does not alter the snapshotted registry_auth on the deployed copy
+      credentials
+      |> Ash.Changeset.for_update(:update, %{password: "updated-password"}, tenant: tenant)
+      |> Ash.update!(tenant: tenant)
+
+      reloaded_deployed_image =
+        Ash.get!(Edgehog.Containers.Image, deployed_image.id, tenant: tenant)
+
+      assert reloaded_deployed_image.registry_auth == credentials.base64_json
     end
   end
 end

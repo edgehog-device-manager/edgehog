@@ -24,8 +24,11 @@ defmodule Edgehog.Containers.Release do
     domain: Edgehog.Containers,
     extensions: [AshGraphql.Resource]
 
+  alias Edgehog.Containers.Changes
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment
+  alias Edgehog.Containers.Validations.Dangling
+  alias Edgehog.Containers.Validations.UniquePlainResource
   alias Edgehog.Validations
 
   graphql do
@@ -35,7 +38,7 @@ defmodule Edgehog.Containers.Release do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :release do
-        action_types [:create, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 
@@ -46,6 +49,16 @@ defmodule Edgehog.Containers.Release do
 
   actions do
     defaults [:read]
+
+    read :plain_releases do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(deployment, true))
+    end
+
+    read :deployed_releases do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(deployment, true))
+    end
 
     create :create do
       primary? true
@@ -67,6 +80,57 @@ defmodule Edgehog.Containers.Release do
 
       change manage_relationship(:container_dependencies, type: :create)
 
+      validate {UniquePlainResource,
+                keys: [:version, :application_id], read_action: :plain_releases, field: :version}
+
+      validate Release.Validations.NoCircularDependencies
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+
+      accept [:version]
+
+      argument :containers, {:array, :map}
+
+      argument :container_dependencies, {:array, :map} do
+        default []
+      end
+
+      argument :required_system_models, {:array, :map}
+
+      change manage_relationship(:containers,
+               on_lookup: :relate,
+               on_no_match: :error,
+               on_match: :ignore,
+               on_missing: :unrelate
+             )
+
+      change manage_relationship(:required_system_models, :system_models,
+               type: :append_and_remove
+             )
+
+      change manage_relationship(:container_dependencies,
+               on_lookup: :ignore,
+               on_no_match: :create,
+               on_missing: :destroy
+             )
+
+      validate {UniquePlainResource,
+                keys: [:version, :application_id], read_action: :plain_releases, field: :version}
+
+      validate Release.Validations.NoCircularDependencies
+    end
+
+    create :copy do
+      argument :release, :struct do
+        constraints instance_of: __MODULE__
+        allow_nil? false
+      end
+
+      change Release.Changes.Copy
+
       validate Release.Validations.NoCircularDependencies
     end
 
@@ -75,6 +139,17 @@ defmodule Edgehog.Containers.Release do
       require_atomic? false
 
       validate Release.Validations.CheckDeployments
+
+      change {Changes.MaybeDestroyChildren, children: [:containers]}
+    end
+
+    destroy :destroy_if_dangling do
+      require_atomic? false
+
+      validate Dangling
+      validate Release.Validations.CheckDeployments
+
+      change {Changes.MaybeDestroyChildren, children: [:containers]}
     end
   end
 
@@ -101,13 +176,28 @@ defmodule Edgehog.Containers.Release do
       public? true
     end
 
+    belongs_to :source_release, Release do
+      attribute_type :uuid
+      allow_nil? true
+      public? true
+    end
+
+    has_one :deployment, Deployment
+
     has_many :deployments, Deployment do
       public? true
+      source_attribute :tenant_id
+      destination_attribute :tenant_id
+
+      filter expr(
+               release_id == parent(id) or
+                 release.source_release_id == parent(id)
+             )
     end
 
     many_to_many :devices, Edgehog.Devices.Device do
       through Deployment
-      join_relationship :deployments
+      join_relationship :deployment
     end
 
     many_to_many :containers, Edgehog.Containers.Container do
@@ -133,11 +223,30 @@ defmodule Edgehog.Containers.Release do
     end
   end
 
-  identities do
-    identity :application_version, [:version, :application_id]
+  calculations do
+    calculate :dangling?,
+              :boolean,
+              {Edgehog.Containers.Calculations.Dangling, [parent: :deployment]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:version],
+               relationships: [
+                 {:system_models, :id},
+                 :containers,
+                 :container_dependencies
+               ]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   postgres do
     table "application_releases"
+
+    references do
+      reference :source_release, on_delete: :nilify
+    end
   end
 end

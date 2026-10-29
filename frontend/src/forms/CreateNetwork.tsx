@@ -18,7 +18,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from "react";
+import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
@@ -28,6 +28,7 @@ import Col from "@/components/ui/col/Col";
 import Form from "@/components/ui/form/Form";
 import Row from "@/components/ui/row/Row";
 import Spinner from "@/components/ui/spinner/Spinner";
+import Stack from "@/components/ui/stack/Stack";
 
 import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
 import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
@@ -39,21 +40,38 @@ const initialData: NetworkFormData = {
 };
 
 interface Props {
+  defaultValues?: NetworkFormData;
   isLoading?: boolean;
   onSubmit: (data: NetworkFormData) => void;
+  onDelete?: () => void;
 }
 
-const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
+const CreateNetwork = ({
+  defaultValues,
+  isLoading = false,
+  onSubmit,
+  onDelete,
+}: Props) => {
   const {
     register,
+    reset,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isDirty },
   } = useForm<NetworkFormData>({
     mode: "onTouched",
-    defaultValues: initialData,
+    defaultValues: defaultValues ?? initialData,
     resolver: zodResolver(networkSchema),
   });
+
+  const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
+  if (defaultValues && prevDefaultValues !== defaultValues) {
+    reset(defaultValues);
+    setPrevDefaultValues(defaultValues);
+  }
+
+  const canSubmit = !isLoading && (!defaultValues || isDirty);
+  const canReset = isDirty && !isLoading;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
@@ -147,17 +165,51 @@ const CreateNetwork = React.memo(({ isLoading = false, onSubmit }: Props) => {
           sm={{ span: 10, offset: 2 }}
           className="d-flex justify-content-end"
         >
-          <Button variant="primary" type="submit" disabled={isLoading}>
-            {isLoading && <Spinner size="sm" className="me-2" />}
-            <FormattedMessage
-              id="forms.CreateNetwork.submitButton"
-              defaultMessage="Create"
-            />
-          </Button>
+          {defaultValues ? (
+            <Stack
+              direction="horizontal"
+              gap={3}
+              className="justify-content-end align-items-center"
+            >
+              <Button variant="primary" type="submit" disabled={!canSubmit}>
+                {isLoading && <Spinner size="sm" className="me-2" />}
+                <FormattedMessage
+                  id="forms.CreateNetwork.updateButton"
+                  defaultMessage="Update"
+                />
+              </Button>
+              <Button
+                variant="secondary"
+                disabled={!canReset}
+                onClick={() => reset()}
+              >
+                <FormattedMessage
+                  id="forms.CreateNetwork.resetButton"
+                  defaultMessage="Reset"
+                />
+              </Button>
+              {onDelete && (
+                <Button variant="danger" onClick={onDelete}>
+                  <FormattedMessage
+                    id="forms.CreateNetwork.deleteButton"
+                    defaultMessage="Delete"
+                  />
+                </Button>
+              )}
+            </Stack>
+          ) : (
+            <Button variant="primary" type="submit" disabled={!canSubmit}>
+              {isLoading && <Spinner size="sm" className="me-2" />}
+              <FormattedMessage
+                id="forms.CreateNetwork.submitButton"
+                defaultMessage="Create"
+              />
+            </Button>
+          )}
         </Col>
       </Row>
     </form>
   );
-});
+};
 
-export default CreateNetwork;
+export default React.memo(CreateNetwork);

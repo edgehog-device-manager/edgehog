@@ -354,7 +354,7 @@ const baseImageStartingVersionRequirementSchema = z
 
 const imageSchema = z.object({
   reference: z.string().min(1),
-  imageCredentialsId: z.string().optional(),
+  imageCredentialsId: z.string().nullish(),
 });
 
 const nullableTrimString = z
@@ -512,6 +512,7 @@ const imageCredentialUpdateSchema = z.object({
   id: z.string().min(1),
   label: z.string().min(1),
   username: z.string().min(1),
+  password: z.string().optional(),
 });
 type ImageCredentialUpdateFormData = z.infer<
   typeof imageCredentialUpdateSchema

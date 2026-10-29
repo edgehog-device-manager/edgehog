@@ -270,10 +270,11 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentDeployCoreTest do
       [container_deployment] = deployment.container_deployments
 
       file_binds =
-        Ash.load!(container_deployment, :file_binds, tenant: tenant.tenant_id).file_binds
+        Ash.load!(container_deployment, [file_binds: :file_mount], tenant: tenant.tenant_id).file_binds
 
       assert [file_bind] = file_binds
-      assert file_bind.file_mount_id == file_binds_fixture.file_mount.id
+      assert file_bind.file_mount_id != file_binds_fixture.file_mount.id
+      assert file_bind.file_mount.mountpoint == file_binds_fixture.file_mount.mountpoint
       assert file_bind.file_download_request_id == request.id
     end
 

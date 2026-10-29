@@ -17,7 +17,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
-import { Card, Col, Row } from "react-bootstrap";
+import { Badge, Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
 import { graphql, useFragment, usePaginationFragment } from "react-relay";
@@ -642,7 +642,14 @@ const DeploymentDetails = ({
     application,
     version: releaseVersion,
     id: releaseId = "Unknown",
+    hash: releaseHash,
+    sourceReleaseId,
+    sourceRelease,
   } = release || {};
+
+  const isOutdated = Boolean(
+    sourceRelease?.hash && releaseHash && sourceRelease.hash !== releaseHash,
+  );
 
   const { name: applicationName = "Unknown", id: applicationId = "Unknown" } =
     application || {};
@@ -673,13 +680,28 @@ const DeploymentDetails = ({
                 {applicationName}
               </Link>
 
-              <Link route={Route.release} params={{ applicationId, releaseId }}>
+              <Link
+                route={Route.release}
+                params={{
+                  applicationId,
+                  releaseId: sourceReleaseId ?? releaseId,
+                }}
+              >
                 <FormattedMessage
                   id="components.apps.deployments.deployment-details.DeploymentDetails.releaseVersion"
                   defaultMessage="v.{version}"
                   values={{ version: releaseVersion }}
                 />
               </Link>
+
+              {isOutdated && (
+                <Badge bg="warning" text="dark">
+                  <FormattedMessage
+                    id="components.apps.deployments.deployment-details.DeploymentDetails.outdated"
+                    defaultMessage="Outdated"
+                  />
+                </Badge>
+              )}
             </Col>
 
             <Col
@@ -746,6 +768,7 @@ const DeploymentDetails = ({
             applicationId={applicationId}
             applicationName={applicationName}
             currentVersion={releaseVersion ?? ""}
+            sourceReleaseId={sourceReleaseId}
             systemModelName={deploymentRef.device?.systemModel?.name}
             isOnline={deploymentRef.device?.online ?? false}
             setErrorFeedback={setErrorFeedback}

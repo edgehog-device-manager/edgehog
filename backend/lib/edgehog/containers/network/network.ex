@@ -34,7 +34,7 @@ defmodule Edgehog.Containers.Network do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :network do
-        action_types [:create, :update, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 
@@ -42,7 +42,38 @@ defmodule Edgehog.Containers.Network do
   end
 
   actions do
-    defaults [:read, :destroy, create: [:label, :driver, :internal, :enable_ipv6, :options]]
+    defaults [:read, :destroy]
+
+    create :create do
+      primary? true
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_networks, field: :label}
+    end
+
+    create :copy do
+      accept [:label, :driver, :internal, :enable_ipv6, :options, :source_network_id]
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+      accept [:label, :driver, :internal, :enable_ipv6, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_networks, field: :label}
+    end
+
+    read :plain_networks do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(network_deployments, true))
+    end
+
+    read :deployed_networks do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(network_deployments, true))
+    end
 
     destroy :destroy_if_dangling do
       description "Destroys the network if it's dangling (not referenced by any container)"
@@ -87,6 +118,11 @@ defmodule Edgehog.Containers.Network do
   end
 
   relationships do
+    belongs_to :source_network, __MODULE__ do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     many_to_many :containers, Edgehog.Containers.Container do
       through ContainerNetwork
       public? true
@@ -107,14 +143,27 @@ defmodule Edgehog.Containers.Network do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:label, :driver, :internal, :enable_ipv6, :options]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do
-    identity :label, [:label]
+    identity :copied_network, [:source_network_id, :label, :driver, :internal, :enable_ipv6]
   end
 
   postgres do
     table "networks"
     repo Edgehog.Repo
+    skip_unique_indexes [:copied_network]
+
+    references do
+      reference :source_network, on_delete: :nilify
+    end
   end
 end

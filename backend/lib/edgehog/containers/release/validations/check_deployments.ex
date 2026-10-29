@@ -32,7 +32,7 @@ defmodule Edgehog.Containers.Release.Validations.CheckDeployments do
 
     deployed? =
       Edgehog.Containers.Release.Deployment
-      |> Ash.Query.filter(release_id: id)
+      |> Ash.Query.filter(release_id == ^id or release.source_release_id == ^id)
       |> Ash.exists?(tenant: tenant)
 
     if deployed?,

@@ -33,7 +33,7 @@ defmodule Edgehog.Containers.Volume do
       pubsub EdgehogWeb.Endpoint
 
       subscribe :volume do
-        action_types [:create, :destroy]
+        actions [:create, :update, :destroy]
       end
     end
 
@@ -43,10 +43,39 @@ defmodule Edgehog.Containers.Volume do
   actions do
     defaults [
       :read,
-      :destroy,
-      create: [:label, :driver, :options],
-      update: [:driver, :options]
+      :destroy
     ]
+
+    create :create do
+      primary? true
+      accept [:label, :driver, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_volumes, field: :label}
+    end
+
+    create :copy do
+      accept [:label, :driver, :options, :source_volume_id]
+    end
+
+    update :update do
+      primary? true
+      require_atomic? false
+      accept [:label, :driver, :options]
+
+      validate {Validations.UniquePlainResource,
+                keys: [:label], read_action: :plain_volumes, field: :label}
+    end
+
+    read :plain_volumes do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(not exists(volume_deployments, true))
+    end
+
+    read :deployed_volumes do
+      pagination offset?: true, keyset?: true, required?: false
+      filter expr(exists(volume_deployments, true))
+    end
 
     destroy :destroy_if_dangling do
       description "Destroys the volume if it's dangling (not referenced by any container)"
@@ -80,6 +109,11 @@ defmodule Edgehog.Containers.Volume do
   end
 
   relationships do
+    belongs_to :source_volume, __MODULE__ do
+      attribute_type :uuid
+      allow_nil? true
+    end
+
     many_to_many :devices, Edgehog.Devices.Device do
       through Edgehog.Containers.Volume.Deployment
       join_relationship :volume_deployments
@@ -101,14 +135,26 @@ defmodule Edgehog.Containers.Volume do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash, fields: [:label, :driver, :options]} do
+      allow_nil? false
+      public? true
+    end
   end
 
   identities do
-    identity :label, [:label]
+    identity :copied_volume, [:source_volume_id, :label, :driver]
   end
 
   postgres do
     table "volumes"
     repo Edgehog.Repo
+    skip_unique_indexes [:copied_volume]
+
+    references do
+      reference :source_volume, on_delete: :nilify
+    end
   end
 end

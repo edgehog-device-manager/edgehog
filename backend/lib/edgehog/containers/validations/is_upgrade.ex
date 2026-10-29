@@ -33,7 +33,8 @@ defmodule Edgehog.Containers.Validations.IsUpgrade do
          {:ok, target} <- Ash.get(Release, target_id, reuse_values?: true, tenant: tenant),
          {:ok, current_version} <- parse_version(current),
          {:ok, target_version} <- parse_version(target) do
-      if Version.compare(target_version, current_version) == :gt do
+      if current.source_release_id == target.id or
+           Version.compare(target_version, current_version) in [:gt, :eq] do
         :ok
       else
         {:error,

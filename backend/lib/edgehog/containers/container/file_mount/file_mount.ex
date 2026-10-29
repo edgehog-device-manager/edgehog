@@ -41,6 +41,14 @@ defmodule Edgehog.Containers.Container.FileMount do
         :file_mode,
         :user_id,
         :group_id
+      ],
+      update: [
+        :mountpoint,
+        :required,
+        :default_file_id,
+        :file_mode,
+        :user_id,
+        :group_id
       ]
     ]
   end
@@ -100,6 +108,15 @@ defmodule Edgehog.Containers.Container.FileMount do
     belongs_to :default_file, Edgehog.Files.File do
       attribute_type :uuid_v7
       public? true
+    end
+  end
+
+  calculations do
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:mountpoint, :required, :default_file_id, :file_mode, :user_id, :group_id]} do
+      allow_nil? false
     end
   end
 

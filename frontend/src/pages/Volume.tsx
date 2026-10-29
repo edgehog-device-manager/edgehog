@@ -16,8 +16,8 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 
-import { Suspense, useCallback, useEffect, useState } from "react";
-import { Card, Form, Stack } from "react-bootstrap";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { Card } from "react-bootstrap";
 import { useParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import {
@@ -30,6 +30,7 @@ import type { PreloadedQuery } from "react-relay/hooks";
 import { FormattedMessage } from "react-intl";
 
 import type { Volume_deleteVolume_Mutation } from "@/api/__generated__/Volume_deleteVolume_Mutation.graphql";
+import type { Volume_updateVolume_Mutation } from "@/api/__generated__/Volume_updateVolume_Mutation.graphql";
 import type {
   Volume_getVolume_Query,
   Volume_getVolume_Query$data,
@@ -41,17 +42,33 @@ import Center from "@/components/ui/center/Center";
 import Page from "@/components/ui/page/Page";
 import Result from "@/components/ui/result/Result";
 import Spinner from "@/components/ui/spinner/Spinner";
-import Button from "@/components/ui/button/Button";
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
-import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEditor";
-import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
+import CreateVolumeForm from "@/forms/CreateVolume";
+import { VolumeFormData } from "@/forms/validation";
 
 const GET_VOLUME_QUERY = graphql`
   query Volume_getVolume_Query($volumeId: ID!) {
     volume(id: $volumeId) {
+      id
       label
       driver
       options
+    }
+  }
+`;
+
+const UPDATE_VOLUME_MUTATION = graphql`
+  mutation Volume_updateVolume_Mutation(
+    $volumeId: ID!
+    $input: UpdateVolumeInput!
+  ) {
+    updateVolume(id: $volumeId, input: $input) {
+      result {
+        id
+        label
+        driver
+        options
+      }
     }
   }
 `;
@@ -112,18 +129,60 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
     });
   }, [deleteVolume, volumeId, navigate]);
 
-  const getPrettyOptions = () => {
+  const [updateVolume, isUpdatingVolume] =
+    useMutation<Volume_updateVolume_Mutation>(UPDATE_VOLUME_MUTATION);
+
+  const handleUpdateVolume = useCallback(
+    (volumeData: VolumeFormData) => {
+      const input = {
+        label: volumeData.label.trim(),
+        driver: volumeData.driver?.trim() || null,
+        options: volumeData.options?.trim() || "{}",
+      };
+      updateVolume({
+        variables: { volumeId, input },
+        onCompleted(_data, errors) {
+          if (errors) {
+            const errorFeedback = errors
+              .map(({ fields, message }) =>
+                fields.length ? `${fields.join(" ")} ${message}` : message,
+              )
+              .join(". \n");
+            return setErrorFeedback(errorFeedback);
+          }
+          setErrorFeedback(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="pages.Volume.updateErrorFeedback"
+              defaultMessage="Could not update the Volume, please try again."
+            />,
+          );
+        },
+      });
+    },
+    [updateVolume, volumeId],
+  );
+
+  const defaultValues = useMemo<VolumeFormData>(() => {
+    let options = "{}";
     try {
-      if (!volume.options) return "";
-      if (typeof volume.options === "string") {
-        return JSON.stringify(JSON.parse(volume.options), null, 2);
+      if (volume.options) {
+        options =
+          typeof volume.options === "string"
+            ? JSON.stringify(JSON.parse(volume.options), null, 2)
+            : JSON.stringify(volume.options, null, 2);
       }
-      return JSON.stringify(volume.options, null, 2);
     } catch {
-      setErrorFeedback("Failed to parse volume options JSON.");
-      return "";
+      options = "{}";
     }
-  };
+    return {
+      label: volume.label,
+      driver: volume.driver ?? "",
+      options,
+    };
+  }, [volume]);
 
   return (
     <Page>
@@ -138,60 +197,12 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
           {errorFeedback}
         </Alert>
         <Card className="gap-2 border-0 shadow-sm flex-grow-1 p-4">
-          <FormRow
-            id="volumeLabel"
-            label={
-              <FormattedMessage
-                id="pages.Volume.label"
-                defaultMessage="Label"
-              />
-            }
-          >
-            <Form.Control value={volume.label ?? ""} readOnly />
-          </FormRow>
-
-          <FormRow
-            id="volumeDriver"
-            label={
-              <FormattedMessage
-                id="pages.Volume.driver"
-                defaultMessage="Driver"
-              />
-            }
-          >
-            <Form.Control value={volume.driver ?? ""} readOnly />
-          </FormRow>
-
-          <FormRow
-            id="volumeOptions"
-            label={
-              <FormattedMessage
-                id="pages.Volume.options"
-                defaultMessage="Options"
-              />
-            }
-          >
-            <MonacoJsonEditor
-              value={getPrettyOptions()}
-              onChange={() => {}}
-              defaultValue={getPrettyOptions()}
-              readonly={true}
-              initialLines={1}
-            />
-          </FormRow>
-
-          <Stack
-            direction="horizontal"
-            gap={3}
-            className="justify-content-end align-items-center"
-          >
-            <Button variant="danger" onClick={handleShowDeleteModal}>
-              <FormattedMessage
-                id="pages.Volume.deleteButton"
-                defaultMessage="Delete"
-              />
-            </Button>
-          </Stack>
+          <CreateVolumeForm
+            defaultValues={defaultValues}
+            onSubmit={handleUpdateVolume}
+            onDelete={handleShowDeleteModal}
+            isLoading={isUpdatingVolume}
+          />
         </Card>
         {showDeleteModal && (
           <DeleteModal

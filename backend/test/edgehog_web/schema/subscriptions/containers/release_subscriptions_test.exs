@@ -23,6 +23,7 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.ReleaseSubscriptionsTest do
   use EdgehogWeb.SubsCase
 
   import Edgehog.ContainersFixtures
+  import Edgehog.DevicesFixtures
 
   describe "Release subscriptions" do
     test "receive data on release creation", %{socket: socket, tenant: tenant} do
@@ -48,6 +49,26 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.ReleaseSubscriptionsTest do
       assert_destroyed("release", release_id, push)
 
       assert release_id == AshGraphql.Resource.encode_relay_id(release)
+    end
+
+    test "do not receive data on release copy or destroy_if_dangling", %{
+      socket: socket,
+      tenant: tenant
+    } do
+      release = release_fixture(system_models: 1, tenant: tenant)
+      device = device_fixture_compatible_with_release(release_id: release.id, tenant: tenant)
+
+      subscribe(socket, query: release_created_query())
+      subscribe(socket, query: release_destroyed_query())
+
+      deployment =
+        deployment_fixture(device_id: device.id, release_id: release.id, tenant: tenant)
+
+      refute_push "subscription:data", _
+
+      Ash.destroy!(deployment, action: :destroy_and_gc, tenant: tenant)
+
+      refute_push "subscription:data", _
     end
   end
 

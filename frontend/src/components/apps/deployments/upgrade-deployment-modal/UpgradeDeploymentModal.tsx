@@ -165,10 +165,15 @@ const UPGRADE_DEPLOYMENT_MUTATION = graphql`
               id
               container {
                 id
+                name
               }
               fileBinds {
                 id
                 fileMountId
+                fileMount {
+                  id
+                  mountpoint
+                }
                 uploaded
                 uploadUrl
               }
@@ -233,6 +238,7 @@ type UpgradeDeploymentModalProps = {
   applicationId: string;
   applicationName: string;
   currentVersion: string;
+  sourceReleaseId?: string | null;
   systemModelName: string | undefined;
   isOnline: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
@@ -244,6 +250,15 @@ type SelectOption = {
   disabled: boolean;
 };
 
+type PendingFileBindUpload = PendingUploadData & {
+  containerName: string;
+  mountpoint: string;
+};
+
+type PendingEnvFileUpload = EnvFilePendingUpload & {
+  containerName: string;
+};
+
 const UpgradeDeploymentModal = ({
   open,
   onToggleModal,
@@ -252,6 +267,7 @@ const UpgradeDeploymentModal = ({
   applicationId,
   applicationName,
   currentVersion,
+  sourceReleaseId,
   systemModelName,
   isOnline,
   setErrorFeedback,
@@ -300,15 +316,18 @@ const UpgradeDeploymentModal = ({
 
     return releaseEdges.reduce<SelectOption[]>((options, edge) => {
       const release = edge?.node;
-      if (!release || release.version === currentVersion) {
+      if (!release) {
         return options;
       }
+
+      const isCurrentRelease =
+        release.id === sourceReleaseId || release.version === currentVersion;
 
       const parsedCurrentVersion = semver.valid(currentVersion);
       const parsedTargetVersion = semver.valid(release.version);
 
-      if (parsedCurrentVersion && parsedTargetVersion) {
-        if (!semver.gt(parsedTargetVersion, parsedCurrentVersion)) {
+      if (!isCurrentRelease && parsedCurrentVersion && parsedTargetVersion) {
+        if (!semver.gte(parsedTargetVersion, parsedCurrentVersion)) {
           return options;
         }
       }
@@ -319,15 +338,25 @@ const UpgradeDeploymentModal = ({
         appliesToAll ||
         (systemModelName && systemModelNames.includes(systemModelName));
 
+      const versionLabel = isCurrentRelease
+        ? intl.formatMessage(
+            {
+              id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.currentVersion",
+              defaultMessage: "{version} (Current)",
+            },
+            { version: release.version },
+          )
+        : release.version;
+
       const label = !matchesSystemModel
         ? intl.formatMessage(
             {
               id: "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.incompatibleVersion",
               defaultMessage: "{version} (Incompatible system model)",
             },
-            { version: release.version },
+            { version: versionLabel },
           )
-        : release.version;
+        : versionLabel;
 
       options.push({
         value: release.id,
@@ -337,7 +366,7 @@ const UpgradeDeploymentModal = ({
 
       return options;
     }, []);
-  }, [releaseEdges, currentVersion, systemModelName, intl]);
+  }, [releaseEdges, currentVersion, sourceReleaseId, systemModelName, intl]);
 
   const selectedReleaseOption = useMemo(() => {
     return (
@@ -602,8 +631,8 @@ const UpgradeDeploymentModal = ({
     setErrorFeedback(null);
 
     try {
-      const pendingUploads: PendingUploadData[] = [];
-      const pendingEnvUploads: EnvFilePendingUpload[] = [];
+      const pendingUploads: PendingFileBindUpload[] = [];
+      const pendingEnvUploads: PendingEnvFileUpload[] = [];
       const mountSpecs: Record<string, FileBindSpecInput> = {};
       const envFileSpecs: Record<string, EnvFileSpecInput> = {};
 
@@ -615,7 +644,11 @@ const UpgradeDeploymentModal = ({
             if (res?.spec) {
               mountSpecs[mount.id] = res.spec;
               if (res.pendingUpload) {
-                pendingUploads.push(res.pendingUpload);
+                pendingUploads.push({
+                  ...res.pendingUpload,
+                  containerName: container.name,
+                  mountpoint: mount.mountpoint,
+                });
               }
             } else if (
               mount.required &&
@@ -645,7 +678,10 @@ const UpgradeDeploymentModal = ({
           if (res?.spec) {
             envFileSpecs[container.id] = res.spec;
             if (res.pendingUpload) {
-              pendingEnvUploads.push(res.pendingUpload);
+              pendingEnvUploads.push({
+                ...res.pendingUpload,
+                containerName: container.name,
+              });
             }
           }
         }
@@ -752,23 +788,12 @@ const UpgradeDeploymentModal = ({
                       (node): node is NonNullable<typeof node> => !!node,
                     ) ?? [];
 
-                const allFileBinds = containerDeployments.flatMap(
-                  (cd) => cd.fileBinds ?? [],
-                );
-
                 for (const pending of pendingUploads) {
-                  let decodedMountId: string;
-                  try {
-                    decodedMountId =
-                      atob(pending.fileMountId).split(":")[1] ||
-                      pending.fileMountId;
-                  } catch {
-                    decodedMountId = pending.fileMountId;
-                  }
-                  const matchingBind = allFileBinds.find(
-                    (fb) =>
-                      fb.fileMountId === decodedMountId ||
-                      fb.fileMountId === pending.fileMountId,
+                  const matchingDeployment = containerDeployments.find(
+                    (cd) => cd.container?.name === pending.containerName,
+                  );
+                  const matchingBind = matchingDeployment?.fileBinds?.find(
+                    (fb) => fb.fileMount?.mountpoint === pending.mountpoint,
                   );
 
                   if (!matchingBind || !matchingBind.uploadUrl) {
@@ -806,7 +831,7 @@ const UpgradeDeploymentModal = ({
 
                 for (const pending of pendingEnvUploads) {
                   const matchingDeployment = containerDeployments.find(
-                    (cd) => cd.container?.id === pending.containerId,
+                    (cd) => cd.container?.name === pending.containerName,
                   );
                   const matchingEnvFile = matchingDeployment?.envFiles?.find(
                     (envFile) => envFile.uploadUrl,

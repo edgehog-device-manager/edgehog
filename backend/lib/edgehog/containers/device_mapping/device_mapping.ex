@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ defmodule Edgehog.Containers.DeviceMapping do
     extensions: [AshGraphql.Resource]
 
   alias Edgehog.Containers.Container
-  alias Edgehog.Containers.Validations
 
   graphql do
     type :device_mapping
@@ -35,15 +34,12 @@ defmodule Edgehog.Containers.DeviceMapping do
     defaults [
       :read,
       :destroy,
-      create: [:path_on_host, :path_in_container, :cgroup_permissions],
+      create: [:path_on_host, :path_in_container, :cgroup_permissions, :container_id],
       update: [:path_on_host, :path_in_container, :cgroup_permissions]
     ]
 
-    destroy :destroy_if_dangling do
-      description "Destroys the network if it's dangling (not referenced by any container)"
-
-      require_atomic? false
-      validate Validations.Dangling
+    create :copy do
+      accept [:path_on_host, :path_in_container, :cgroup_permissions, :container_id]
     end
   end
 
@@ -75,13 +71,20 @@ defmodule Edgehog.Containers.DeviceMapping do
   end
 
   calculations do
-    calculate :dangling?,
-              :boolean,
-              {Edgehog.Containers.Calculations.Dangling, [parent: :containers]}
+    calculate :hash,
+              :string,
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:path_on_host, :path_in_container, :cgroup_permissions]} do
+      allow_nil? false
+    end
   end
 
   postgres do
     table "device_mappings"
     repo Edgehog.Repo
+
+    references do
+      reference :container, on_delete: :delete
+    end
   end
 end
