@@ -46,7 +46,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
       openfga:
-        image: openfga/openfga:v1.21.0
+        image: openfga/openfga:v1.22.0
         command: run
         ports:
           - 8080:8080
@@ -75,7 +75,7 @@ jobs:
           auth_model_id=$(jq -r '.model.authorization_model_id' store_response.json)
           echo "store_id=$store_id" >> $GITHUB_OUTPUT
           echo "auth_model_id=$auth_model_id" >> $GITHUB_OUTPUT
-      - uses: team-alembic/staple-actions/actions/mix-task@eb07547a6626ccf508fb4b293b821fde0253ed4f # main
+      - uses: team-alembic/staple-actions/actions/mix-task@680d093207d057f7f6a7248dbeadb506013f5674 # main
         with:
           mix-env: test
           working-directory: backend

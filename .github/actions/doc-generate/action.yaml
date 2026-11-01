@@ -46,7 +46,7 @@ runs:
       shell: bash
       run: |
         ln -s ${{ inputs.edgehog }}/.tool-versions .tool-versions
-    - uses: team-alembic/staple-actions/actions/mix-task@eb07547a6626ccf508fb4b293b821fde0253ed4f # main
+    - uses: team-alembic/staple-actions/actions/mix-task@680d093207d057f7f6a7248dbeadb506013f5674 # main
       with:
         working-directory: ${{ inputs.edgehog }}/backend
         mix-env: dev
@@ -72,7 +72,7 @@ runs:
       run: |
         rm ${{ inputs.version }}/docs_config.js || true
         ln -s ../versions.js ${{ inputs.version }}/docs_config.js
-    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
       with:
         name: edgehog-docs-bundle
         path: ${{ inputs.docs }}

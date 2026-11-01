@@ -41,7 +41,7 @@ jobs:
       - name: Optimize Cache
         uses: ./.github/actions/restore-cache-mtimes
 
-      - uses: team-alembic/staple-actions/actions/mix-task@eb07547a6626ccf508fb4b293b821fde0253ed4f # main
+      - uses: team-alembic/staple-actions/actions/mix-task@680d093207d057f7f6a7248dbeadb506013f5674 # main
         with:
           task: "deps.audit --ignore-advisory-ids GHSA-g2wm-735q-3f56"
           working-directory: backend
