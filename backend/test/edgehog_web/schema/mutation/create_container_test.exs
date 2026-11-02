@@ -390,6 +390,65 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
     end
   end
 
+  test "creates a container with image pull policy always", %{tenant: tenant} do
+    input = %{
+      "name" => "pull-policy-always",
+      "image" => %{
+        "reference" => "ghcr.io/my-repo/pull-policy-always:latest",
+        "pull_policy" => "ALWAYS"
+      }
+    }
+
+    response = create_container(tenant: tenant, input: input)
+    result = extract_result!(response)
+
+    {:ok, %{id: container_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+    db_container =
+      Containers.fetch_container!(container_id, tenant: tenant, load: :image)
+
+    assert db_container.image.pull_policy == :always
+  end
+
+  test "creates a container with image pull policy if_not_present", %{tenant: tenant} do
+    input = %{
+      "name" => "pull-policy-if-not-present",
+      "image" => %{
+        "reference" => "ghcr.io/my-repo/pull-policy-if-not-present:latest",
+        "pull_policy" => "IF_NOT_PRESENT"
+      }
+    }
+
+    response = create_container(tenant: tenant, input: input)
+    result = extract_result!(response)
+
+    {:ok, %{id: container_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+    db_container =
+      Containers.fetch_container!(container_id, tenant: tenant, load: :image)
+
+    assert db_container.image.pull_policy == :if_not_present
+  end
+
+  test "defaults image pull policy to if_not_present", %{tenant: tenant} do
+    input = %{
+      "name" => "pull-policy-default",
+      "image" => %{
+        "reference" => "ghcr.io/my-repo/pull-policy-default:latest"
+      }
+    }
+
+    response = create_container(tenant: tenant, input: input)
+    result = extract_result!(response)
+
+    {:ok, %{id: container_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
+
+    db_container =
+      Containers.fetch_container!(container_id, tenant: tenant, load: :image)
+
+    assert db_container.image.pull_policy == :if_not_present
+  end
+
   defp create_container(opts) do
     tenant = Keyword.fetch!(opts, :tenant)
     input = Keyword.get(opts, :input, %{})

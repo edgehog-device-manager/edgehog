@@ -48,17 +48,17 @@ defmodule Edgehog.Containers.Image do
 
     create :create do
       primary? true
-      accept [:reference, :image_credentials_id]
+      accept [:reference, :image_credentials_id, :pull_policy]
 
       validate {Validations.UniquePlainResource,
-                keys: [:reference, :image_credentials_id],
+                keys: [:reference, :image_credentials_id, :pull_policy],
                 read_action: :plain_images,
                 field: :reference,
                 nils_distinct?: false}
     end
 
     create :copy do
-      accept [:reference, :image_credentials_id]
+      accept [:reference, :image_credentials_id, :pull_policy]
 
       argument :id, :uuid
 
@@ -88,6 +88,12 @@ defmodule Edgehog.Containers.Image do
 
     attribute :reference, :string do
       allow_nil? false
+      public? true
+    end
+
+    attribute :pull_policy, Edgehog.Containers.Types.PullPolicy do
+      allow_nil? false
+      default :if_not_present
       public? true
     end
 

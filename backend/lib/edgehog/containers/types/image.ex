@@ -43,6 +43,10 @@ defmodule Edgehog.Containers.Types.Image do
         image_credentials_id: [
           type: :uuid,
           allow_nil?: true
+        ],
+        pull_policy: [
+          type: Edgehog.Containers.Types.PullPolicy,
+          allow_nil?: true
         ]
       ]
     ]

@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -44,7 +44,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
         id: image.id,
         deploymentId: deployment.id,
         reference: image.reference,
-        registryAuth: credentials
+        registryAuth: credentials,
+        pullPolicy: to_string(image.pull_policy)
       }
 
       with :ok <-

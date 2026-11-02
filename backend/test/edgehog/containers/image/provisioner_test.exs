@@ -121,12 +121,14 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
         %Edgehog.Astarte.Device.CreateImageRequest.RequestData{
           id: id,
           deploymentId: deployment_id,
-          reference: reference
+          reference: reference,
+          pullPolicy: pull_policy
         } = data
 
         assert id == image_deployment.image.id
         assert deployment_id == deployment.id
         assert reference == image_deployment.image.reference
+        assert pull_policy == to_string(image_deployment.image.pull_policy)
 
         # Update the image deployment to be ready
 
@@ -164,12 +166,14 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
         %Edgehog.Astarte.Device.CreateImageRequest.RequestData{
           id: id,
           deploymentId: deployment_id,
-          reference: reference
+          reference: reference,
+          pullPolicy: pull_policy
         } = data
 
         assert id == image_deployment.image.id
         assert deployment_id == deployment.id
         assert reference == image_deployment.image.reference
+        assert pull_policy == to_string(image_deployment.image.pull_policy)
 
         image_deployment
         |> Ash.Changeset.for_update(:mark_as_unpulled, %{})
