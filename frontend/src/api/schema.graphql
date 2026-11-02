@@ -2451,6 +2451,7 @@ type ReleaseContainerDependencies {
 
 enum ContainerVolumeSortField {
   TARGET
+  CONTAINER_ID
   VOLUME_ID
 }
 
@@ -2488,6 +2489,19 @@ input ContainerVolumeFilterVolumeId {
   isNotDistinctFrom: ID
 }
 
+input ContainerVolumeFilterContainerId {
+  isNil: Boolean
+  eq: ID
+  notEq: ID
+  in: [ID!]
+  lessThan: ID
+  greaterThan: ID
+  lessThanOrEqual: ID
+  greaterThanOrEqual: ID
+  isDistinctFrom: ID
+  isNotDistinctFrom: ID
+}
+
 input ContainerVolumeFilterTarget {
   isNil: Boolean
   eq: String
@@ -2511,7 +2525,9 @@ input ContainerVolumeFilterInput {
   or: [ContainerVolumeFilterInput!]
   not: [ContainerVolumeFilterInput!]
   target: ContainerVolumeFilterTarget
+  containerId: ContainerVolumeFilterContainerId
   volumeId: ContainerVolumeFilterVolumeId
+  container: ContainerFilterInput
   volume: VolumeFilterInput
 }
 
@@ -2526,7 +2542,11 @@ type ContainerVolume {
 
   target: String!
 
+  containerId: ID!
+
   volumeId: ID!
+
+  container: Container!
 
   volume: Volume!
 }
@@ -3343,6 +3363,7 @@ input VolumeFilterInput {
   options: VolumeFilterOptions
   devices: DeviceFilterInput
   containers: ContainerFilterInput
+  containerVolumes: ContainerVolumeFilterInput
 }
 
 input VolumeSortInput {
@@ -3387,6 +3408,25 @@ type Volume implements Node {
     "The number of records to skip."
     offset: Int
   ): [Container!]!
+  containerVolumes(
+    "How to sort the records in the response"
+    sort: [ContainerVolumeSortInput]
+
+    "A filter to limit the results"
+    filter: ContainerVolumeFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): ContainerVolumeConnection!
 }
 
 enum NetworkDeploymentSortField {
@@ -7481,6 +7521,8 @@ input DeviceFilterInput {
   deviceFiles: DeviceFileFilterInput
 
   applicationDeployments: DeploymentFilterInput
+
+  volumeDeployments: VolumeDeploymentFilterInput
 }
 
 input DeviceSortInput {
@@ -7684,6 +7726,26 @@ type Device implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeploymentConnection!
+
+  volumeDeployments(
+    "How to sort the records in the response"
+    sort: [VolumeDeploymentSortInput]
+
+    "A filter to limit the results"
+    filter: VolumeDeploymentFilterInput
+
+    "The number of records to return from the beginning. Maximum 250"
+    first: Int
+
+    "Show records before the specified keyset."
+    before: String
+
+    "Show records after the specified keyset."
+    after: String
+
+    "The number of records to return to the end. Maximum 250"
+    last: Int
+  ): VolumeDeploymentConnection!
 
   availableImages: [ImageStatus!]
 
