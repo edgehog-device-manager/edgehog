@@ -37,7 +37,7 @@ defmodule Edgehog.Containers.Volume do
       end
     end
 
-    paginate_relationship_with devices: :relay
+    paginate_relationship_with devices: :relay, container_volumes: :relay
   end
 
   actions do
@@ -122,6 +122,10 @@ defmodule Edgehog.Containers.Volume do
     many_to_many :containers, Edgehog.Containers.Container do
       through Edgehog.Containers.ContainerVolume
       join_relationship :container_volumes
+      public? true
+    end
+
+    has_many :container_volumes, Edgehog.Containers.ContainerVolume do
       public? true
     end
   end
