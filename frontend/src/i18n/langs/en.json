@@ -1963,6 +1963,9 @@
   "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.uptimeMilliseconds": {
     "defaultMessage": "Last boot at"
   },
+  "components.fleet.devices.tabs.volumes-tab.VolumesTab.title": {
+    "defaultMessage": "Volumes"
+  },
   "components.fleet.devices.tabs.wifi-scan-results-tab.WiFiScanResultsTab.title": {
     "defaultMessage": "WiFi APs"
   },

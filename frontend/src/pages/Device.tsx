@@ -56,6 +56,7 @@ import DeviceWiFiScanResultsTab from "@/components/fleet/devices/tabs/wifi-scan-
 import DeviceSoftwareUpdateTab from "@/components/fleet/devices/tabs/software-update-tab/SoftwareUpdateTab";
 import DeviceFileManagementTab from "@/components/fleet/devices/tabs/file-management-tab/FileManagementTab";
 import DeviceApplicationsTab from "@/components/fleet/devices/tabs/applications-tab/ApplicationsTab";
+import DeviceVolumesTab from "@/components/fleet/devices/tabs/volumes-tab/VolumesTab";
 
 const GET_DEVICE_QUERY = graphql`
   query Device_getDevice_Query($id: ID!, $first: Int, $after: String) {
@@ -79,6 +80,7 @@ const GET_DEVICE_QUERY = graphql`
       ...NetworkInterfacesTab_networkInterfaces
       ...FileManagementTab_fileManagement
         @arguments(storageFirst: $first, storageAfter: $after)
+      ...VolumesTab_volumeDeployments
     }
     ...ApplicationsTab_deployedApplications
   }
@@ -111,6 +113,7 @@ const TAB_KEYS = [
   "device-software-update-tab",
   "device-file-management-tab",
   "device-applications-tab",
+  "device-volumes-tab",
 ];
 
 interface DeviceContentProps {
@@ -225,6 +228,7 @@ const DeviceContent = ({
             <DeviceSoftwareUpdateTab deviceRef={device} />
             <DeviceFileManagementTab deviceRef={device} />
             <DeviceApplicationsTab deviceRef={deviceData} />
+            <DeviceVolumesTab deviceRef={device} />
           </Tabs>
         </Stack>
       </Page.Main>
