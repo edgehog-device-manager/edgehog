@@ -70,7 +70,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainerTest do
       net1 = network_fixture(tenant: tenant, label: "net-1")
       net2 = network_fixture(tenant: tenant, label: "net-2")
 
-      image1 = image_fixture(tenant: tenant, reference: "alpine:3.18")
+      image1 = image_fixture(tenant: tenant, image: "alpine", tag: "3.18")
       dm1 = device_mapping_fixture(tenant: tenant, path_on_host: "/dev/ttyS0")
       dr1 = device_request_fixture(tenant: tenant, driver: "nvidia", count: 1)
 
@@ -167,7 +167,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainerTest do
               "hostname" => "updated-host",
               "restartPolicy" => "ALWAYS",
               "privileged" => true,
-              "image" => %{"reference" => "alpine:3.18"},
+              "image" => %{"image" => "alpine", "tag" => "3.18"},
               "volumes" => [
                 %{"id" => vol1_id, "target" => "/mnt/v1-new"},
                 %{"id" => vol3_id, "target" => "/mnt/v3"}
@@ -227,7 +227,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainerTest do
         Absinthe.run!(document, EdgehogWeb.Schema,
           variables: %{
             "id" => container_id,
-            "input" => %{"image" => %{"reference" => "alpine:3.19"}}
+            "input" => %{"image" => %{"image" => "alpine", "tag" => "3.19"}}
           },
           context: %{tenant: tenant}
         )

@@ -36,15 +36,23 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
       credentials = image_credentials_fixture(tenant: tenant)
       credentials_id = AshGraphql.Resource.encode_relay_id(credentials)
 
-      reference = "ghcr.io/my-repo/my-image:latest"
-
       _image =
-        image_fixture(tenant: tenant, reference: reference, image_credentials_id: credentials.id)
+        image_fixture(
+          tenant: tenant,
+          registry_host: "ghcr.io",
+          repository: "my-repo",
+          image: "my-image",
+          tag: "latest",
+          image_credentials_id: credentials.id
+        )
 
       input = %{
         "name" => "worker-node",
         "image" => %{
-          "reference" => reference,
+          "registry_host" => "ghcr.io",
+          "repository" => "my-repo",
+          "image" => "my-image",
+          "tag" => "latest",
           "image_credentials_id" => credentials_id
         },
         "restartPolicy" => "ALWAYS"
@@ -60,7 +68,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
       {:ok, %{id: container_id}} = AshGraphql.Resource.decode_relay_id(result["id"])
       db_container = Containers.fetch_container!(container_id, tenant: tenant, load: :image)
 
-      assert db_container.image.reference == reference
+      assert db_container.image.reference == "ghcr.io/my-repo/my-image:latest"
     end
 
     test "fails when container name already exists (unique constraint)", %{tenant: tenant} do
@@ -69,7 +77,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => existing.name,
-        "image" => %{"reference" => image.reference}
+        "image" => %{"image" => image.image}
       }
 
       result = create_container(tenant: tenant, input: input)
@@ -112,7 +120,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "db-service",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "networks" => [%{"id" => network_id}],
         "volumes" => [
           %{
@@ -143,7 +151,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
       input = %{
         "name" => "fail-container",
         "image" => %{
-          "reference" => "non-existent-reference",
+          "image" => "non-existent-reference",
           "image_credentials_id" => creds_id
         }
       }
@@ -163,7 +171,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "env-container",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "env" => env_vars
       }
 
@@ -182,7 +190,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "device-container",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "device_mappings" => [
           %{
             "path_on_host" => "/dev/ttyUSB0",
@@ -225,7 +233,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "device-container",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "device_requests" => [
           %{
             "driver" => "driver",
@@ -288,7 +296,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "cpu-fail-container",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "cpu_period" => 2_000_000
       }
 
@@ -304,7 +312,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "failing-rollback-test",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "volumes" => [%{"target" => "/data", "id" => bad_id}]
       }
 
@@ -326,7 +334,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "bad-policy-container",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "restartPolicy" => "NOT_A_REAL_POLICY"
       }
 
@@ -343,7 +351,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "multi-net",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "networks" => [
           %{"id" => AshGraphql.Resource.encode_relay_id(n1)},
           %{"id" => AshGraphql.Resource.encode_relay_id(n2)}
@@ -380,7 +388,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
 
       input = %{
         "name" => "cross-tenant-attempt",
-        "image" => %{"reference" => image.reference},
+        "image" => %{"image" => image.image},
         "networks" => [%{"id" => other_network_id}]
       }
 
@@ -394,7 +402,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
     input = %{
       "name" => "pull-policy-always",
       "image" => %{
-        "reference" => "ghcr.io/my-repo/pull-policy-always:latest",
+        "registry_host" => "ghcr.io",
+        "repository" => "my-repo",
+        "image" => "pull-policy-always",
+        "tag" => "latest",
         "pull_policy" => "ALWAYS"
       }
     }
@@ -414,7 +425,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
     input = %{
       "name" => "pull-policy-if-not-present",
       "image" => %{
-        "reference" => "ghcr.io/my-repo/pull-policy-if-not-present:latest",
+        "registry_host" => "ghcr.io",
+        "repository" => "my-repo",
+        "image" => "pull-policy-if-not-present",
+        "tag" => "latest",
         "pull_policy" => "IF_NOT_PRESENT"
       }
     }
@@ -434,7 +448,10 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
     input = %{
       "name" => "pull-policy-default",
       "image" => %{
-        "reference" => "ghcr.io/my-repo/pull-policy-default:latest"
+        "registry_host" => "ghcr.io",
+        "repository" => "my-repo",
+        "image" => "pull-policy-test",
+        "tag" => "latest"
       }
     }
 

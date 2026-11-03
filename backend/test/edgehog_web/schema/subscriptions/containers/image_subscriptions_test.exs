@@ -28,14 +28,15 @@ defmodule EdgehogWeb.Schema.Subscriptions.Containers.ImageSubscriptionsTest do
     test "receive data on image creation", %{socket: socket, tenant: tenant} do
       subscribe(socket)
 
-      reference = unique_image_reference()
-      image = image_fixture(tenant: tenant, reference: reference)
+      image_name = unique_image_name()
+      tag = unique_image_tag()
+      image = image_fixture(tenant: tenant, image: image_name, tag: tag)
 
       assert_push "subscription:data", push
       assert_created "image", image_data, push
 
       assert image_data["id"] == AshGraphql.Resource.encode_relay_id(image)
-      assert image_data["reference"] == reference
+      assert image_data["reference"] == "#{image_name}:#{tag}"
     end
 
     test "receive data on image destroy", %{socket: socket, tenant: tenant} do

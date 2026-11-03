@@ -53,9 +53,43 @@ defmodule Edgehog.ContainersFixtures do
   def unique_container_name, do: "container#{System.unique_integer()}"
 
   @doc """
-  Generate a unique image reference.
+  Generate a unique image registry host.
   """
-  def unique_image_reference, do: "image#{System.unique_integer()}"
+  def unique_image_registry_host, do: "registry#{System.unique_integer([:positive])}.example.com"
+
+  @doc """
+  Generate a unique image registry port.
+  """
+  def unique_image_registry_port, do: rem(System.unique_integer([:positive]), 65_535) + 1
+
+  @doc """
+  Generate a unique image repository.
+  """
+  def unique_image_repository, do: "repo#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique image name.
+  """
+  def unique_image_name, do: "image#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique image tag.
+  """
+  def unique_image_tag, do: "v1.0.#{System.unique_integer([:positive])}"
+
+  @doc """
+  Generate a unique image digest.
+  """
+  def unique_image_digest do
+    hex =
+      [:positive]
+      |> System.unique_integer()
+      |> Integer.to_string(16)
+      |> String.downcase()
+      |> String.pad_leading(64, "0")
+
+    "sha256:#{hex}"
+  end
 
   @doc """
   Generate a unique volume target.
@@ -207,7 +241,7 @@ defmodule Edgehog.ContainersFixtures do
 
     params =
       Enum.into(opts, %{
-        reference: unique_image_reference()
+        image: unique_image_name()
       })
 
     Ash.create!(Image, params, tenant: tenant)
@@ -228,7 +262,7 @@ defmodule Edgehog.ContainersFixtures do
   ## Options
 
     * `:tenant` (required) - the tenant to create the container in.
-    * `:image` - `%Image{}` struct, image id, or `%{reference: ...}` map.
+    * `:image` - `%Image{}` struct, image id, or `%{image: ...}` map.
       Defaults to a fresh `image_fixture/1`.
     * `:volumes` - list of volume bindings, defaults to `[]` (no volumes).
       Each entry can be:
@@ -280,6 +314,16 @@ defmodule Edgehog.ContainersFixtures do
     |> Ash.create!()
   end
 
+  @image_segment_keys [
+    :registry_host,
+    :registry_port,
+    :repository,
+    :image,
+    :tag,
+    :digest,
+    :image_credentials_id
+  ]
+
   defp resolve_container_image(nil, tenant) do
     [tenant: tenant]
     |> image_fixture()
@@ -290,8 +334,8 @@ defmodule Edgehog.ContainersFixtures do
     container_image_reference(image)
   end
 
-  defp resolve_container_image(%{reference: _reference} = image, _tenant) do
-    Map.take(image, [:reference, :image_credentials_id])
+  defp resolve_container_image(%{image: _image} = image, _tenant) do
+    Map.take(image, @image_segment_keys)
   end
 
   defp resolve_container_image(image_id, tenant) when is_binary(image_id) do
@@ -301,13 +345,7 @@ defmodule Edgehog.ContainersFixtures do
   end
 
   defp container_image_reference(%Image{} = image) do
-    maybe_put_image_credentials(%{reference: image.reference}, image)
-  end
-
-  defp maybe_put_image_credentials(params, %{image_credentials_id: nil}), do: params
-
-  defp maybe_put_image_credentials(params, %{image_credentials_id: credentials_id}) do
-    Map.put(params, :image_credentials_id, credentials_id)
+    Map.take(image, @image_segment_keys)
   end
 
   defp normalize_container_volumes(n, tenant) when is_integer(n) do
