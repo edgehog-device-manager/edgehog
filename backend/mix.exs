@@ -82,7 +82,7 @@ defmodule Edgehog.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:phoenix, "~> 1.8.13"},
+      {:phoenix, "~> 1.8.14"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_ecto, "~> 4.7"},
       {:ecto_sql, "~> 3.13"},
@@ -101,7 +101,7 @@ defmodule Edgehog.MixProject do
       {:x509, "~> 0.9"},
       {:mimic, "~> 2.3", only: :test},
       {:tesla, "~> 1.18"},
-      {:finch, "~> 0.23", override: true},
+      {:finch, "~> 0.24", override: true},
       {:waffle, "~> 2.0.0", override: true},
       {:req, "~> 0.7"},
       {:envar, "~> 1.1"},
@@ -137,7 +137,7 @@ defmodule Edgehog.MixProject do
       {:open_api_spex, "~> 3.22"},
       {:ymlr, "~> 5.1"},
       {:sourceror, "~> 1.12", only: [:dev, :test]},
-      {:phoenix_pubsub, "~> 2.3"},
+      {:phoenix_pubsub, "~> 2.4"},
       {:absinthe_phoenix, "~> 2.0"},
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:sobelow, "~> 0.14", only: [:dev, :test], runtime: false},
