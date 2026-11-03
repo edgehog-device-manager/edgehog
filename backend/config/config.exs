@@ -60,6 +60,7 @@ resource_section_order = [
 
 config :ash, :custom_types, id: Edgehog.Types.Id
 config :ash, :default_belongs_to_type, :integer
+config :ash, :default_string_length_count, :codepoints
 
 # Configures the mailer
 #
