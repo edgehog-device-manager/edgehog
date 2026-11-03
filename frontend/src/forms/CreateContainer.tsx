@@ -29,6 +29,7 @@ import { FormattedMessage, useIntl } from "react-intl";
 import { Card, Col, Container, Row } from "react-bootstrap";
 
 import FilePermissionsInput from "@/components/ui/file-permissions/FilePermissionsInput";
+import ImageReferenceInput from "@/components/apps/containers/image-reference-input/ImageReferenceInput";
 import { modeToOctal } from "@/lib/permissions";
 import { envToString } from "@/lib/environment";
 
@@ -257,7 +258,12 @@ const mapCreateContainerToInput = (
     env: mapEnv(env) ?? (isUpdate ? [] : undefined),
     image: image
       ? {
-          reference: image.reference,
+          registryHost: image.registryHost ?? null,
+          registryPort: image.registryPort ?? null,
+          repository: image.repository ?? null,
+          image: image.image,
+          tag: image.tag ?? null,
+          digest: image.digest ?? null,
           imageCredentialsId: image.imageCredentialsId ?? null,
         }
       : undefined,
@@ -336,11 +342,7 @@ const ImageSection = ({
   open,
   onToggle,
 }: SectionWithQueryProps) => {
-  const {
-    register,
-    control,
-    formState: { errors },
-  } = form;
+  const { control } = form;
 
   const imageCredentialsOptions = useImageCredentialOptions(queryRef);
 
@@ -350,23 +352,7 @@ const ImageSection = ({
       onToggle={onToggle}
       label={messages.imageConfigSection}
     >
-      <FormRow
-        id="image-reference"
-        label={
-          <FormattedMessage
-            id="forms.CreateContainer.ReferenceLabel"
-            defaultMessage="Image Reference"
-          />
-        }
-      >
-        <FieldHelp id="imageReference">
-          <Form.Control
-            {...register("image.reference")}
-            isInvalid={!!errors.image?.reference}
-          />
-          <FormFeedback feedback={errors.image?.reference?.message} />
-        </FieldHelp>
-      </FormRow>
+      <ImageReferenceInput form={form} />
 
       <FormRow
         id="image-credentials"

@@ -170,6 +170,29 @@ const messages = defineMessages({
     id: "forms.validation.mountpoint.duplicate",
     defaultMessage: "Duplicate mountpoint value.",
   },
+  imageRegistryPortRange: {
+    id: "forms.validation.imageRegistryPortRange",
+    defaultMessage: "Registry port must be between 1 and 65535.",
+  },
+  imageRegistryPortRequiresHost: {
+    id: "forms.validation.imageRegistryPortRequiresHost",
+    defaultMessage:
+      "Registry host is required when registry port is specified.",
+  },
+  imageTagFormat: {
+    id: "forms.validation.imageTagFormat",
+    defaultMessage:
+      "Invalid tag format. Must start with a word character and contain at most 128 word, '.' or '-' characters.",
+  },
+  imageDigestFormat: {
+    id: "forms.validation.imageDigestFormat",
+    defaultMessage:
+      "Invalid digest format. Expected algorithm:hex (e.g. sha256:...).",
+  },
+  imageTagDigestMutuallyExclusive: {
+    id: "forms.validation.imageTagDigestMutuallyExclusive",
+    defaultMessage: "Tag and digest are mutually exclusive; specify only one.",
+  },
 });
 
 /* ----------------------------- Constants ----------------------------- */
@@ -352,15 +375,54 @@ const baseImageStartingVersionRequirementSchema = z
     message: messages.baseImageStartingVersionRequirementFormat.id,
   });
 
-const imageSchema = z.object({
-  reference: z.string().min(1),
-  imageCredentialsId: z.string().nullish(),
-});
-
 const nullableTrimString = z
   .string()
   .trim()
   .transform((val) => val || undefined);
+
+const imageTagRegex = /^[\w][\w.-]{0,127}$/;
+const imageDigestRegex =
+  /^[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*:[0-9a-fA-F]{32,}$/;
+
+const imageSchema = z
+  .object({
+    registryHost: nullableTrimString.optional(),
+    registryPort: z
+      .number(messages.number.id)
+      .int()
+      .min(1, messages.imageRegistryPortRange.id)
+      .max(65535, messages.imageRegistryPortRange.id)
+      .optional(),
+    repository: nullableTrimString.optional(),
+    image: z.string().trim().min(1),
+    tag: nullableTrimString
+      .optional()
+      .refine((v) => !v || imageTagRegex.test(v), {
+        message: messages.imageTagFormat.id,
+      }),
+    digest: nullableTrimString
+      .optional()
+      .refine((v) => !v || imageDigestRegex.test(v), {
+        message: messages.imageDigestFormat.id,
+      }),
+    imageCredentialsId: z.string().nullish(),
+  })
+  .superRefine((img, ctx) => {
+    if (img.registryPort != null && !img.registryHost) {
+      ctx.addIssue({
+        path: ["registryPort"],
+        code: "custom",
+        message: messages.imageRegistryPortRequiresHost.id,
+      });
+    }
+    if (img.tag && img.digest) {
+      ctx.addIssue({
+        path: ["digest"],
+        code: "custom",
+        message: messages.imageTagDigestMutuallyExclusive.id,
+      });
+    }
+  });
 
 const targetGroup = z.object({
   channel: z
@@ -1574,6 +1636,7 @@ export {
   fileDownloadCampaignSchema,
   releaseSchema,
   containerSchema,
+  imageSchema,
   CapAddList,
   CapDropList,
   repositorySchema,

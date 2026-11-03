@@ -481,6 +481,30 @@
   "components.apps.containers.image-credentials-table.ImageCredentialsTable.usernameTitle": {
     "defaultMessage": "Username"
   },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.digestButton": {
+    "defaultMessage": "Digest"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.imageNameLabel": {
+    "defaultMessage": "Image Name"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.referencePreviewLabel": {
+    "defaultMessage": "Reference Preview"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.registryHostLabel": {
+    "defaultMessage": "Registry Host"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.registryPortLabel": {
+    "defaultMessage": "Registry Port"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.repositoryLabel": {
+    "defaultMessage": "Repository"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.tagButton": {
+    "defaultMessage": "Tag"
+  },
+  "components.apps.containers.image-reference-input.ImageReferenceInput.versionLabel": {
+    "defaultMessage": "Image Version"
+  },
   "components.apps.containers.networks-table.NetworksTable.driverTitle": {
     "defaultMessage": "Driver",
     "description": "Title for the Driver column of the networks table"
@@ -2461,9 +2485,6 @@
   "forms.CreateChannel.targetGroupsLabel": {
     "defaultMessage": "Target Groups"
   },
-  "forms.CreateContainer.ReferenceLabel": {
-    "defaultMessage": "Image Reference"
-  },
   "forms.CreateContainer.addFileMountButton": {
     "defaultMessage": "Add File Mount"
   },
@@ -4142,14 +4163,59 @@
   "forms.fieldExplanation.imageCredentials.title": {
     "defaultMessage": "Image Credentials"
   },
-  "forms.fieldExplanation.imageReference.description": {
-    "defaultMessage": "The complete reference for the container image you want to use, including registry, repository, and tag."
+  "forms.fieldExplanation.imageDigest.description": {
+    "defaultMessage": "Content-addressable digest identifying an immutable image revision. Mutually exclusive with Tag."
   },
-  "forms.fieldExplanation.imageReference.example": {
-    "defaultMessage": "my-image:latest or registry.example.com/my-app:v1.0"
+  "forms.fieldExplanation.imageDigest.example": {
+    "defaultMessage": "sha256:4c0fdaa8b6341bfdeca5f18f7837462c80cff90527ee35ef185571e1c327beac"
   },
-  "forms.fieldExplanation.imageReference.title": {
-    "defaultMessage": "Image Reference"
+  "forms.fieldExplanation.imageDigest.title": {
+    "defaultMessage": "Image Digest"
+  },
+  "forms.fieldExplanation.imageName.description": {
+    "defaultMessage": "Name of the container image to run."
+  },
+  "forms.fieldExplanation.imageName.example": {
+    "defaultMessage": "nginx"
+  },
+  "forms.fieldExplanation.imageName.title": {
+    "defaultMessage": "Image Name"
+  },
+  "forms.fieldExplanation.imageRegistryHost.description": {
+    "defaultMessage": "Hostname or IP address of the container registry. Leave empty to use the runtime default registry."
+  },
+  "forms.fieldExplanation.imageRegistryHost.example": {
+    "defaultMessage": "docker.io or registry.example.com"
+  },
+  "forms.fieldExplanation.imageRegistryHost.title": {
+    "defaultMessage": "Registry Host"
+  },
+  "forms.fieldExplanation.imageRegistryPort.description": {
+    "defaultMessage": "TCP port number (1-65535) of the container registry. Requires Registry Host to be specified."
+  },
+  "forms.fieldExplanation.imageRegistryPort.example": {
+    "defaultMessage": "5000"
+  },
+  "forms.fieldExplanation.imageRegistryPort.title": {
+    "defaultMessage": "Registry Port"
+  },
+  "forms.fieldExplanation.imageRepository.description": {
+    "defaultMessage": "Optional repository or namespace path preceding the image name."
+  },
+  "forms.fieldExplanation.imageRepository.example": {
+    "defaultMessage": "library or my-org/subpath"
+  },
+  "forms.fieldExplanation.imageRepository.title": {
+    "defaultMessage": "Repository"
+  },
+  "forms.fieldExplanation.imageTag.description": {
+    "defaultMessage": "Tag identifying the image version. Mutually exclusive with Digest."
+  },
+  "forms.fieldExplanation.imageTag.example": {
+    "defaultMessage": "latest or 1.25-alpine"
+  },
+  "forms.fieldExplanation.imageTag.title": {
+    "defaultMessage": "Image Tag"
   },
   "forms.fieldExplanation.ipcMode.description": {
     "defaultMessage": "IPC namespace mode to use for the container."
@@ -4483,6 +4549,21 @@
   },
   "forms.validation.healthcheckInterval": {
     "defaultMessage": "Must be 0 or at least 1000000."
+  },
+  "forms.validation.imageDigestFormat": {
+    "defaultMessage": "Invalid digest format. Expected algorithm:hex (e.g. sha256:...)."
+  },
+  "forms.validation.imageRegistryPortRange": {
+    "defaultMessage": "Registry port must be between 1 and 65535."
+  },
+  "forms.validation.imageRegistryPortRequiresHost": {
+    "defaultMessage": "Registry host is required when registry port is specified."
+  },
+  "forms.validation.imageTagDigestMutuallyExclusive": {
+    "defaultMessage": "Tag and digest are mutually exclusive; specify only one."
+  },
+  "forms.validation.imageTagFormat": {
+    "defaultMessage": "Invalid tag format. Must start with a word character and contain at most 128 word, '.' or '-' characters."
   },
   "forms.validation.invalidJson": {
     "defaultMessage": "Must be a valid JSON string."

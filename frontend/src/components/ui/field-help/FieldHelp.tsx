@@ -25,7 +25,12 @@ import { fieldExplanations } from "@/forms/index";
 import Icon from "@/components/ui/icon/Icon";
 
 type FieldKey =
-  | "imageReference"
+  | "imageRegistryHost"
+  | "imageRegistryPort"
+  | "imageRepository"
+  | "imageName"
+  | "imageTag"
+  | "imageDigest"
   | "imageCredentials"
   | "hostname"
   | "domainname"

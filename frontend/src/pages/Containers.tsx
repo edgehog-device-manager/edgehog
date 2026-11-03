@@ -97,7 +97,11 @@ const ContainersLayoutContainer = ({
       return {
         or: [
           { name: { ilike: `%${text}%` } },
-          { image: { reference: { ilike: `%${text}%` } } },
+          { image: { registryHost: { ilike: `%${text}%` } } },
+          { image: { repository: { ilike: `%${text}%` } } },
+          { image: { image: { ilike: `%${text}%` } } },
+          { image: { tag: { ilike: `%${text}%` } } },
+          { image: { digest: { ilike: `%${text}%` } } },
         ],
       };
     },

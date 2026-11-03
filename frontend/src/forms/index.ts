@@ -22,18 +22,83 @@ import { defineMessages } from "react-intl";
 
 /* ----------------------------- Field Explanations ----------------------------- */
 const fieldExplanations = defineMessages({
-  imageReferenceTitle: {
-    id: "forms.fieldExplanation.imageReference.title",
-    defaultMessage: "Image Reference",
+  imageRegistryHostTitle: {
+    id: "forms.fieldExplanation.imageRegistryHost.title",
+    defaultMessage: "Registry Host",
   },
-  imageReferenceDescription: {
-    id: "forms.fieldExplanation.imageReference.description",
+  imageRegistryHostDescription: {
+    id: "forms.fieldExplanation.imageRegistryHost.description",
     defaultMessage:
-      "The complete reference for the container image you want to use, including registry, repository, and tag.",
+      "Hostname or IP address of the container registry. Leave empty to use the runtime default registry.",
   },
-  imageReferenceExample: {
-    id: "forms.fieldExplanation.imageReference.example",
-    defaultMessage: "my-image:latest or registry.example.com/my-app:v1.0",
+  imageRegistryHostExample: {
+    id: "forms.fieldExplanation.imageRegistryHost.example",
+    defaultMessage: "docker.io or registry.example.com",
+  },
+  imageRegistryPortTitle: {
+    id: "forms.fieldExplanation.imageRegistryPort.title",
+    defaultMessage: "Registry Port",
+  },
+  imageRegistryPortDescription: {
+    id: "forms.fieldExplanation.imageRegistryPort.description",
+    defaultMessage:
+      "TCP port number (1-65535) of the container registry. Requires Registry Host to be specified.",
+  },
+  imageRegistryPortExample: {
+    id: "forms.fieldExplanation.imageRegistryPort.example",
+    defaultMessage: "5000",
+  },
+  imageRepositoryTitle: {
+    id: "forms.fieldExplanation.imageRepository.title",
+    defaultMessage: "Repository",
+  },
+  imageRepositoryDescription: {
+    id: "forms.fieldExplanation.imageRepository.description",
+    defaultMessage:
+      "Optional repository or namespace path preceding the image name.",
+  },
+  imageRepositoryExample: {
+    id: "forms.fieldExplanation.imageRepository.example",
+    defaultMessage: "library or my-org/subpath",
+  },
+  imageNameTitle: {
+    id: "forms.fieldExplanation.imageName.title",
+    defaultMessage: "Image Name",
+  },
+  imageNameDescription: {
+    id: "forms.fieldExplanation.imageName.description",
+    defaultMessage: "Name of the container image to run.",
+  },
+  imageNameExample: {
+    id: "forms.fieldExplanation.imageName.example",
+    defaultMessage: "nginx",
+  },
+  imageTagTitle: {
+    id: "forms.fieldExplanation.imageTag.title",
+    defaultMessage: "Image Tag",
+  },
+  imageTagDescription: {
+    id: "forms.fieldExplanation.imageTag.description",
+    defaultMessage:
+      "Tag identifying the image version. Mutually exclusive with Digest.",
+  },
+  imageTagExample: {
+    id: "forms.fieldExplanation.imageTag.example",
+    defaultMessage: "latest or 1.25-alpine",
+  },
+  imageDigestTitle: {
+    id: "forms.fieldExplanation.imageDigest.title",
+    defaultMessage: "Image Digest",
+  },
+  imageDigestDescription: {
+    id: "forms.fieldExplanation.imageDigest.description",
+    defaultMessage:
+      "Content-addressable digest identifying an immutable image revision. Mutually exclusive with Tag.",
+  },
+  imageDigestExample: {
+    id: "forms.fieldExplanation.imageDigest.example",
+    defaultMessage:
+      "sha256:4c0fdaa8b6341bfdeca5f18f7837462c80cff90527ee35ef185571e1c327beac",
   },
   imageCredentialsTitle: {
     id: "forms.fieldExplanation.imageCredentials.title",

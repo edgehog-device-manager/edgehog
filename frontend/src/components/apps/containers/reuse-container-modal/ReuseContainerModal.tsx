@@ -133,7 +133,12 @@ export const CONTAINER_FORM_FRAGMENT = graphql`
     ulimitsHard
     volumeDriver
     image {
-      reference
+      registryHost
+      registryPort
+      repository
+      image
+      tag
+      digest
       credentials {
         id
         label
@@ -226,7 +231,12 @@ export const mapContainerToFormData = (
   ...(includeName ? { name: c.name } : {}),
   image: c.image
     ? {
-        reference: c.image.reference,
+        registryHost: c.image.registryHost ?? undefined,
+        registryPort: c.image.registryPort ?? undefined,
+        repository: c.image.repository ?? undefined,
+        image: c.image.image,
+        tag: c.image.tag ?? undefined,
+        digest: c.image.digest ?? undefined,
         imageCredentialsId: c.image.credentials?.id,
       }
     : undefined,
