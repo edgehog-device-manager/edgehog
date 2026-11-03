@@ -21,7 +21,7 @@ defmodule Edgehog.Forwarder do
   use Ash.Domain,
     extensions: [
       AshGraphql.Domain,
-      Ash.Authorizer
+      Ash.Policy.Authorizer
     ]
 
   alias Edgehog.Forwarder.Config
