@@ -227,6 +227,30 @@ defmodule Edgehog.Config do
     os_env: "EDGEHOG_FORWARDER_SECRET_KEY_BASE",
     type: :binary
 
+  @envdoc "Whether audit events should be logged via Elixir's Logger."
+  app_env :audit_log_events, :edgehog, :audit_log_events,
+    os_env: "EDGEHOG_AUDIT_LOG_EVENTS",
+    type: :boolean,
+    default: true
+
+  @envdoc "Whether audit events should be stored in the database."
+  app_env :audit_store_events, :edgehog, :audit_store_events,
+    os_env: "EDGEHOG_AUDIT_STORE_EVENTS",
+    type: :boolean,
+    default: true
+
+  @doc """
+  Returns true if audit events should be logged via Logger.
+  """
+  @spec audit_log_events?() :: boolean()
+  def audit_log_events?, do: audit_log_events!()
+
+  @doc """
+  Returns true if audit events should be persisted in the database.
+  """
+  @spec audit_store_events?() :: boolean()
+  def audit_store_events?, do: audit_store_events!()
+
   @doc """
   Returns true if edgehog should use an ssl connection with the database.
   """
