@@ -100,6 +100,7 @@ config :edgehog, Oban,
 config :edgehog, :ash_domains, [
   Edgehog.Astarte,
   Edgehog.Actors,
+  Edgehog.Audit,
   Edgehog.BaseImages,
   Edgehog.Campaigns,
   Edgehog.Containers,
