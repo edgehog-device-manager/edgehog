@@ -1224,8 +1224,13 @@ input NetworkDescInput {
 }
 
 input ImageDescInput {
-  reference: String!
+  tag: String
+  repository: String
+  registryPort: Int
+  registryHost: String
   imageCredentialsId: ID
+  image: String!
+  digest: String
 }
 
 input ContainerEnvVarInput {
@@ -4229,11 +4234,96 @@ input ImageFilterImageCredentialsId {
   isNotDistinctFrom: ID
 }
 
-input ImageFilterReference {
+input ImageFilterDigest {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ImageFilterTag {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ImageFilterImage {
   isNil: Boolean
   eq: String
   notEq: String
   in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ImageFilterRepository {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  contains: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+  stringEndsWith: String
+  stringStartsWith: String
+  like: String
+  ilike: String
+}
+
+input ImageFilterRegistryPort {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ImageFilterRegistryHost {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
   lessThan: String
   greaterThan: String
   lessThanOrEqual: String
@@ -4265,7 +4355,12 @@ input ImageFilterInput {
   or: [ImageFilterInput!]
   not: [ImageFilterInput!]
   id: ImageFilterId
-  reference: ImageFilterReference
+  registryHost: ImageFilterRegistryHost
+  registryPort: ImageFilterRegistryPort
+  repository: ImageFilterRepository
+  image: ImageFilterImage
+  tag: ImageFilterTag
+  digest: ImageFilterDigest
   imageCredentialsId: ImageFilterImageCredentialsId
   credentials: ImageCredentialsFilterInput
   devices: DeviceFilterInput
@@ -4274,7 +4369,12 @@ input ImageFilterInput {
 
 type Image {
   id: ID!
-  reference: String!
+  registryHost: String
+  registryPort: Int
+  repository: String
+  image: String!
+  tag: String
+  digest: String
   imageCredentialsId: ID
   credentials: ImageCredentials
   devices(
@@ -4309,6 +4409,7 @@ type Image {
     "The number of records to skip."
     offset: Int
   ): [Container!]!
+  reference: String!
 }
 
 type deployment_event_result {
