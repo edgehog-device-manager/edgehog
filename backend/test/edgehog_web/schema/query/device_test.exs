@@ -844,6 +844,97 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
     end
   end
 
+  describe "device volumeDeployments field" do
+    import Edgehog.ContainersFixtures
+
+    test "returns volume deployments with volume and container volumes", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      device_id = AshGraphql.Resource.encode_relay_id(device)
+
+      volume = volume_fixture(tenant: tenant, label: "data-vol", driver: "local")
+      container = container_fixture(tenant: tenant, name: "app-cnt", volumes: [{volume, "/data"}])
+
+      volume_deployment =
+        volume_deployment_fixture(
+          tenant: tenant,
+          device_id: device.id,
+          volume_id: volume.id,
+          state: :available
+        )
+
+      document = """
+      query ($id: ID!) {
+        device(id: $id) {
+          volumeDeployments {
+            edges {
+              node {
+                id
+                state
+                isReady
+                volume {
+                  id
+                  label
+                  driver
+                  containerVolumes {
+                    edges {
+                      node {
+                        target
+                        container {
+                          id
+                          name
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+      """
+
+      expected_volume_deployment_id = AshGraphql.Resource.encode_relay_id(volume_deployment)
+      expected_volume_id = AshGraphql.Resource.encode_relay_id(volume)
+      expected_container_id = AshGraphql.Resource.encode_relay_id(container)
+
+      assert %{
+               "volumeDeployments" => %{
+                 "edges" => [
+                   %{
+                     "node" => %{
+                       "id" => ^expected_volume_deployment_id,
+                       "state" => "available",
+                       "isReady" => true,
+                       "volume" => %{
+                         "id" => ^expected_volume_id,
+                         "label" => "data-vol",
+                         "driver" => "local",
+                         "containerVolumes" => %{
+                           "edges" => [
+                             %{
+                               "node" => %{
+                                 "target" => "/data",
+                                 "container" => %{
+                                   "id" => ^expected_container_id,
+                                   "name" => "app-cnt"
+                                 }
+                               }
+                             }
+                           ]
+                         }
+                       }
+                     }
+                   }
+                 ]
+               }
+             } =
+               [document: document, tenant: tenant, id: device_id]
+               |> device_query()
+               |> extract_result!()
+    end
+  end
+
   describe "device location/position" do
     alias Edgehog.Geolocation.Location
     alias Edgehog.Geolocation.Position

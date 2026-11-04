@@ -48,6 +48,7 @@ defmodule Edgehog.Containers.ContainerVolume do
 
   relationships do
     belongs_to :container, Edgehog.Containers.Container do
+      public? true
       primary_key? true
       allow_nil? false
       attribute_type :uuid

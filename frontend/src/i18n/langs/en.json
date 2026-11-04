@@ -1963,8 +1963,33 @@
   "components.fleet.devices.tabs.system-status-tab.SystemStatusTab.uptimeMilliseconds": {
     "defaultMessage": "Last boot at"
   },
+  "components.fleet.devices.tabs.volumes-tab.VolumesTab.title": {
+    "defaultMessage": "Volumes"
+  },
   "components.fleet.devices.tabs.wifi-scan-results-tab.WiFiScanResultsTab.title": {
     "defaultMessage": "WiFi APs"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.driverTitle": {
+    "defaultMessage": "Driver",
+    "description": "Title for the Driver column of the device volumes table"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.labelTitle": {
+    "defaultMessage": "Label",
+    "description": "Title for the Label column of the device volumes table"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.mountpointsTitle": {
+    "defaultMessage": "Mountpoints",
+    "description": "Title for the Mountpoints column of the device volumes table"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.noVolumes.message": {
+    "defaultMessage": "The device has no volumes."
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.noVolumes.title": {
+    "defaultMessage": "No volumes"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.stateTitle": {
+    "defaultMessage": "State",
+    "description": "Title for the State column of the device volumes table"
   },
   "components.fleet.devices.wifi-scan-results-table.WiFiScanResultsTable.apChannelTitle": {
     "defaultMessage": "Channel"

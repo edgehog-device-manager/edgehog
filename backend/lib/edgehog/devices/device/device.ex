@@ -71,7 +71,8 @@ defmodule Edgehog.Devices.Device do
                                file_download_requests: :relay,
                                file_upload_requests: :relay,
                                file_delete_requests: :relay,
-                               device_files: :relay
+                               device_files: :relay,
+                               volume_deployments: :relay
 
     subscriptions do
       pubsub EdgehogWeb.Endpoint
@@ -598,7 +599,11 @@ defmodule Edgehog.Devices.Device do
 
     has_many :container_deployments, Edgehog.Containers.Container.Deployment
     has_many :network_deployments, Edgehog.Containers.Network.Deployment
-    has_many :volume_deployments, Edgehog.Containers.Volume.Deployment
+
+    has_many :volume_deployments, Edgehog.Containers.Volume.Deployment do
+      public? true
+    end
+
     has_many :image_deployments, Edgehog.Containers.Image.Deployment
     has_many :device_mapping_deployments, Edgehog.Containers.DeviceMapping.Deployment
 
