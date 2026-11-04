@@ -40,6 +40,9 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
     interface = Keyword.fetch!(opts, :interface)
     resource_id_key = Keyword.fetch!(opts, :resource_id_key)
     event_type = Keyword.fetch!(opts, :event_type)
+    limit = Keyword.get(opts, :limit)
+
+    query = maybe_add_limit([], limit)
 
     Enum.map(deployments, fn deployment ->
       %{
@@ -54,7 +57,13 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
 
       with :ok <- validate_appengine_client_exist(appengine_client),
            {:ok, events} <-
-             @resource_event_module.get(appengine_client, device_id, interface, resource_id) do
+             @resource_event_module.get(
+               appengine_client,
+               device_id,
+               interface,
+               resource_id,
+               query
+             ) do
         Enum.map(events, &cast_event!(&1, event_type))
       else
         {:error, _reason} -> nil
@@ -76,4 +85,7 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
     {:ok, value} = Ash.Type.cast_input(event_type, input, event_type.subtype_constraints())
     value
   end
+
+  defp maybe_add_limit(opts, nil), do: opts
+  defp maybe_add_limit(opts, limit), do: [{:limit, limit} | opts]
 end

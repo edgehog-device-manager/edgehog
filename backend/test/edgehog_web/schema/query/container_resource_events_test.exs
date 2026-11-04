@@ -128,7 +128,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     env_file_id = env_file.id
     file_bind_id = file_bind.id
 
-    expect(ResourceEvent, :get, 7, fn _client, ^device_id, interface, resource_id ->
+    expect(ResourceEvent, :get, 7, fn _client, ^device_id, interface, resource_id, [] ->
       case {interface, resource_id} do
         {"io.edgehog.devicemanager.apps.DeploymentEvent", ^deployment_id} ->
           {:ok,
@@ -420,7 +420,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     device_id = device.device_id
     deployment_id = deployment.id
 
-    expect(ResourceEvent, :get, 2, fn _client, ^device_id, interface, resource_id ->
+    expect(ResourceEvent, :get, 2, fn _client, ^device_id, interface, resource_id, [] ->
       case {interface, resource_id} do
         {"io.edgehog.devicemanager.apps.DeploymentEvent", ^deployment_id} ->
           {:ok, []}
@@ -476,7 +476,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     device_id = device.device_id
     deployment_id = deployment.id
 
-    expect(ResourceEvent, :get, 2, fn _client, ^device_id, interface, resource_id ->
+    expect(ResourceEvent, :get, 2, fn _client, ^device_id, interface, resource_id, [] ->
       case {interface, resource_id} do
         {"io.edgehog.devicemanager.apps.DeploymentEvent", ^deployment_id} ->
           {:error, :astarte_error}
