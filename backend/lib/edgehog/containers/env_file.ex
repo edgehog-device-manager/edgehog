@@ -24,9 +24,11 @@ defmodule Edgehog.Containers.EnvFile do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.EnvFile.Calculations
   alias Edgehog.Containers.EnvFile.Changes
+  alias Edgehog.Containers.EnvFile.Types
   alias Edgehog.Containers.EnvFile.Validations.NoMultipleTargets
   alias Edgehog.Devices.Device
   alias Edgehog.Files.DeviceFile
@@ -208,6 +210,16 @@ defmodule Edgehog.Containers.EnvFile do
     end
 
     calculate :is_ready, :boolean, expr(state in [:available, :unavailable]) do
+      public? true
+    end
+
+    calculate :events,
+              {:array, Types.Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.EnvFileEvent",
+               resource_id_key: :id,
+               event_type: Types.Event} do
+      description "Lifecycle events reported by the device for this env file."
       public? true
     end
   end
