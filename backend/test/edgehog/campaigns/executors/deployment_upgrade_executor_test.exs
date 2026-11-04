@@ -43,7 +43,10 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   setup do
     # Stub the deployment request mock (for upgrade/deploy operation)
     stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
-    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id -> {:ok, []} end)
+
+    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id, _query ->
+      {:ok, []}
+    end)
 
     # Stub the deployment command mock (for start operation after upgrade)
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->

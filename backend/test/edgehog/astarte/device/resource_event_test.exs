@@ -69,7 +69,7 @@ defmodule Edgehog.Astarte.Device.ResourceEventTest do
         "/devices/#{device.device_id}/interfaces/#{interface}/#{resource_id}"
 
       mock(fn
-        %{method: :get, url: api_url, query: [limit: 1000]} ->
+        %{method: :get, url: api_url, query: []} ->
           assert String.ends_with?(api_url, expected_url_suffix)
           json(response)
       end)

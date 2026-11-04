@@ -42,7 +42,10 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
   setup do
     stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
-    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id -> {:ok, []} end)
+
+    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id, _query ->
+      {:ok, []}
+    end)
 
     %{tenant: tenant_fixture()}
   end
