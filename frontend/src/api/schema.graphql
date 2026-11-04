@@ -1083,6 +1083,9 @@ enum DeviceCapability {
   "The device telemetry can be configured."
   TELEMETRY_CONFIG
 
+  "The device supports volume commands."
+  VOLUME_COMMANDS
+
   "The device provides information about surrounding WiFi APs."
   WIFI
 }
@@ -1098,7 +1101,54 @@ enum DeviceLedBehavior {
   SLOW_BLINK
 }
 
-enum DeploymentEventType {
+enum EnvFileEventStatus {
+  ERROR
+}
+
+enum FileBindEventStatus {
+  ERROR
+}
+
+enum VolumeDeploymentEventStatus {
+  CREATE
+  DESTROY
+  ERROR
+  MOUNT
+  PRUNE
+  UNMOUNT
+}
+
+enum VolumeCommand {
+  "Delete the volume."
+  DELETE
+}
+
+enum NetworkDeploymentEventStatus {
+  CONNECT
+  CREATE
+  DESTROY
+  DISCONNECT
+  ERROR
+  PRUNE
+  REMOVE
+  UPDATE
+}
+
+enum ImageDeploymentEventStatus {
+  CREATE
+  DELETE
+  ERROR
+  IMPORT
+  LOAD
+  PRUNE
+  PULL
+  PUSH
+  SAVE
+  TAG
+  UNTAG
+}
+
+enum DeploymentEventStatus {
   "The deployment is getting deleted."
   DELETING
 
@@ -1135,6 +1185,35 @@ enum ApplicationDeploymentState {
   STOPPED
 }
 
+enum ContainerDeploymentEventStatus {
+  ATTACH
+  COMMIT
+  COPY
+  CREATE
+  DESTROY
+  DETACH
+  DIE
+  ERROR
+  EXEC_CREATE
+  EXEC_DETACH
+  EXEC_DIE
+  EXEC_START
+  EXPORT
+  HEALTH_STATUS
+  KILL
+  OOM
+  PAUSE
+  PRUNE
+  RENAME
+  RESIZE
+  RESTART
+  START
+  STOP
+  TOP
+  UNPAUSE
+  UPDATE
+}
+
 input FileDataInput {
   url: String!
   digest: String!
@@ -1143,6 +1222,90 @@ input FileDataInput {
 type FileData {
   url: String!
   digest: String!
+}
+
+type EnvFileEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this env file event."
+  status: EnvFileEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type FileBindEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this file bind event."
+  status: FileBindEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type VolumeDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this volume event."
+  status: VolumeDeploymentEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type NetworkDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this network event."
+  status: NetworkDeploymentEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type ImageDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this image event."
+  status: ImageDeploymentEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type DeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this deployment event."
+  status: DeploymentEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
 }
 
 input EnvFileSpecInput {
@@ -1189,6 +1352,20 @@ type DeploymentConfigSpec {
   envFiles: [EnvFileSpec]
   env: [ContainerEnvVar]
   containerId: ID!
+}
+
+type ContainerDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this container event."
+  status: ContainerDeploymentEventStatus!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
 }
 
 input DeviceRequestDescInput {
@@ -2161,6 +2338,9 @@ type EnvFile implements Node {
   uploadUrl: String
 
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this env file."
+  events: [EnvFileEvent!]
 }
 
 "The result of the :mark_file_bind_as_uploaded mutation"
@@ -2525,6 +2705,9 @@ type FileBind implements Node {
   uploadUrl: String
 
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this file bind."
+  events: [FileBindEvent!]
 }
 
 ":release_container_dependencies connection"
@@ -3315,9 +3498,13 @@ input VolumeDeploymentSortInput {
 
 type VolumeDeployment {
   id: ID!
+
   state: String
+
   volumeId: ID
+
   volume: Volume
+
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -3331,13 +3518,26 @@ type VolumeDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this volume deployment."
+  events: [VolumeDeploymentEvent!]
 }
 
 type volume_result {
   created: Volume
   updated: Volume
   destroyed: ID
+}
+
+"The result of the :send_volume_command mutation"
+type SendVolumeCommandResult {
+  "The successful result of the mutation"
+  result: Volume
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
 }
 
 "The result of the :delete_volume mutation"
@@ -3645,9 +3845,13 @@ input NetworkDeploymentSortInput {
 
 type NetworkDeployment {
   id: ID!
+
   state: String
+
   networkId: ID
+
   network: Network
+
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -3661,7 +3865,11 @@ type NetworkDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this network deployment."
+  events: [NetworkDeploymentEvent!]
 }
 
 type network_result {
@@ -4361,10 +4569,17 @@ input ImageDeploymentFilterInput {
 
 type ImageDeployment {
   id: ID!
+
   state: String
+
   imageId: ID
+
   image: Image
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this image deployment."
+  events: [ImageDeploymentEvent!]
 }
 
 type image_result {
@@ -4577,134 +4792,6 @@ type Image {
   ): [Container!]!
   reference: String!
   hash: String!
-}
-
-type deployment_event_result {
-  created: DeploymentEvent
-}
-
-enum DeploymentEventSortField {
-  ID
-  TYPE
-  MESSAGE
-  INSERTED_AT
-  UPDATED_AT
-}
-
-":deployment_event connection"
-type DeploymentEventConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":deployment_event edges"
-  edges: [DeploymentEventEdge!]
-}
-
-":deployment_event edge"
-type DeploymentEventEdge {
-  "Cursor"
-  cursor: String!
-
-  ":deployment_event node"
-  node: DeploymentEvent!
-}
-
-input DeploymentEventFilterUpdatedAt {
-  isNil: Boolean
-  eq: DateTime
-  notEq: DateTime
-  in: [DateTime!]
-  lessThan: DateTime
-  greaterThan: DateTime
-  lessThanOrEqual: DateTime
-  greaterThanOrEqual: DateTime
-  isDistinctFrom: DateTime
-  isNotDistinctFrom: DateTime
-}
-
-input DeploymentEventFilterInsertedAt {
-  isNil: Boolean
-  eq: DateTime
-  notEq: DateTime
-  in: [DateTime!]
-  lessThan: DateTime
-  greaterThan: DateTime
-  lessThanOrEqual: DateTime
-  greaterThanOrEqual: DateTime
-  isDistinctFrom: DateTime
-  isNotDistinctFrom: DateTime
-}
-
-input DeploymentEventFilterMessage {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  contains: String
-  isDistinctFrom: String
-  isNotDistinctFrom: String
-  stringEndsWith: String
-  stringStartsWith: String
-  like: String
-  ilike: String
-}
-
-input DeploymentEventFilterType {
-  isNil: Boolean
-  eq: DeploymentEventType
-  notEq: DeploymentEventType
-  in: [DeploymentEventType!]
-  lessThan: DeploymentEventType
-  greaterThan: DeploymentEventType
-  lessThanOrEqual: DeploymentEventType
-  greaterThanOrEqual: DeploymentEventType
-  isDistinctFrom: DeploymentEventType
-  isNotDistinctFrom: DeploymentEventType
-}
-
-input DeploymentEventFilterId {
-  isNil: Boolean
-  eq: ID
-  notEq: ID
-  in: [ID!]
-  lessThan: ID
-  greaterThan: ID
-  lessThanOrEqual: ID
-  greaterThanOrEqual: ID
-  isDistinctFrom: ID
-  isNotDistinctFrom: ID
-}
-
-input DeploymentEventFilterInput {
-  and: [DeploymentEventFilterInput!]
-  or: [DeploymentEventFilterInput!]
-  not: [DeploymentEventFilterInput!]
-  id: DeploymentEventFilterId
-  type: DeploymentEventFilterType
-  message: DeploymentEventFilterMessage
-  insertedAt: DeploymentEventFilterInsertedAt
-  updatedAt: DeploymentEventFilterUpdatedAt
-}
-
-input DeploymentEventSortInput {
-  order: SortOrder
-  field: DeploymentEventSortField!
-}
-
-type DeploymentEvent {
-  id: ID!
-  type: DeploymentEventType!
-  message: String
-  addInfo: [String!]
-  insertedAt: DateTime!
-  updatedAt: DateTime!
 }
 
 type deployments_by_device_result {
@@ -4921,8 +5008,6 @@ input DeploymentFilterInput {
 
   containerDeployments: ContainerDeploymentFilterInput
 
-  events: DeploymentEventFilterInput
-
   """
   The deployment target of a deployment campaign that created this deployment.
   Only returns targets for deploy and upgrade operation campaigns.
@@ -4971,26 +5056,6 @@ type Deployment implements Node {
     last: Int
   ): ContainerDeploymentConnection!
 
-  events(
-    "How to sort the records in the response"
-    sort: [DeploymentEventSortInput]
-
-    "A filter to limit the results"
-    filter: DeploymentEventFilterInput
-
-    "The number of records to return from the beginning. Maximum 250"
-    first: Int
-
-    "Show records before the specified keyset."
-    before: String
-
-    "Show records after the specified keyset."
-    after: String
-
-    "The number of records to return to the end. Maximum 250"
-    last: Int
-  ): DeploymentEventConnection!
-
   """
   The deployment target of a deployment campaign that created this deployment.
   Only returns targets for deploy and upgrade operation campaigns.
@@ -4999,6 +5064,9 @@ type Deployment implements Node {
   campaignTarget: CampaignTarget
 
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this deployment."
+  events: [DeploymentEvent!]
 }
 
 enum ContainerDeploymentSortField {
@@ -5137,15 +5205,25 @@ input ContainerDeploymentSortInput {
 
 type ContainerDeployment {
   id: ID!
+
   state: String
+
   env: [ContainerEnvVar!]!
+
   envStrategy: String!
+
   containerId: ID
+
   deviceId: Int
+
   imageDeploymentId: ID
+
   container: Container
+
   device: Device
+
   imageDeployment: ImageDeployment
+
   networkDeployments(
     "How to sort the records in the response"
     sort: [NetworkDeploymentSortInput]
@@ -5165,6 +5243,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): NetworkDeploymentConnection!
+
   volumeDeployments(
     "How to sort the records in the response"
     sort: [VolumeDeploymentSortInput]
@@ -5184,6 +5263,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): VolumeDeploymentConnection!
+
   deviceMappingDeployments(
     "How to sort the records in the response"
     sort: [DeviceMappingDeploymentSortInput]
@@ -5203,6 +5283,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceMappingDeploymentConnection!
+
   deviceRequestDeployments(
     "How to sort the records in the response"
     sort: [DeviceRequestDeploymentSortInput]
@@ -5222,6 +5303,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceRequestDeploymentConnection!
+
   fileBinds(
     "How to sort the records in the response"
     sort: [FileBindSortInput]
@@ -5235,6 +5317,7 @@ type ContainerDeployment {
     "The number of records to skip."
     offset: Int
   ): [FileBind!]!
+
   envFiles(
     "How to sort the records in the response"
     sort: [EnvFileSortInput]
@@ -5248,7 +5331,11 @@ type ContainerDeployment {
     "The number of records to skip."
     offset: Int
   ): [EnvFile!]!
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this container deployment."
+  events: [ContainerDeploymentEvent!]
 }
 
 enum ContainerFileMountSortField {
@@ -7863,12 +7950,6 @@ type Device implements Node {
 
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
   ): [DeviceGroup!]!
 
   "The existing OTA operations for this device"
@@ -10080,12 +10161,6 @@ type DeviceGroup implements Node {
 
     "A filter to limit the results"
     filter: DeviceFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
   ): [Device!]!
 
   "The channel associated with the group, if present."
@@ -11945,6 +12020,13 @@ type RootMutationType {
   "Delete a volume if not used by any container."
   deleteVolume(id: ID!): DeleteVolumeResult
 
+  "Send a command to a volume on a device."
+  sendVolumeCommand(
+    id: ID!
+    deviceId: ID!
+    command: VolumeCommand!
+  ): SendVolumeCommandResult
+
   "Marks the file uploaded through the presigned upload URL as uploaded."
   markFileBindAsUploaded(
     id: ID!
@@ -12116,10 +12198,6 @@ type RootSubscriptionType {
 
     deviceId: ID!
   ): deployments_by_device_result
-  deploymentEvent(
-    "A filter to limit the results"
-    filter: DeploymentEventFilterInput
-  ): deployment_event_result
   image("A filter to limit the results" filter: ImageFilterInput): image_result
   imageCredentials(
     "A filter to limit the results"
