@@ -25,8 +25,10 @@ defmodule Edgehog.Containers.Network.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.Network
   alias Edgehog.Containers.Network.Deployment.Changes
+  alias Edgehog.Containers.Network.Deployment.Types
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
@@ -143,6 +145,16 @@ defmodule Edgehog.Containers.Network.Deployment do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :container_deployments]}
+
+    calculate :events,
+              {:array, Types.Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.NetworkEvent",
+               resource_id_key: :network_id,
+               event_type: Types.Event} do
+      description "Lifecycle events reported by the device for this network deployment."
+      public? true
+    end
   end
 
   identities do
