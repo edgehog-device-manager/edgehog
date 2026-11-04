@@ -25,11 +25,13 @@ defmodule Edgehog.Containers.Volume.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Containers.Volume
   alias Edgehog.Containers.Volume.Deployment.Changes
+  alias Edgehog.Containers.Volume.Deployment.Types
   alias Edgehog.Devices.Device
 
   graphql do
@@ -156,6 +158,16 @@ defmodule Edgehog.Containers.Volume.Deployment do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :container_deployments]}
+
+    calculate :events,
+              {:array, Types.Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.VolumeEvent",
+               resource_id_key: :volume_id,
+               event_type: Types.Event} do
+      description "Lifecycle events reported by the device for this volume deployment."
+      public? true
+    end
   end
 
   identities do
