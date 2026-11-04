@@ -114,6 +114,16 @@ defmodule Edgehog.Containers do
       get Edgehog.Containers.EnvFile, :env_file, :read do
         description "Returns the desired env file, including the presigned upload URL for target-less env files."
       end
+
+      get Edgehog.Containers.AllowedRegistry, :allowed_registry, :read do
+        description "Returns the desired allowed registry."
+      end
+
+      list Edgehog.Containers.AllowedRegistry, :allowed_registries, :read do
+        description "Returns all available allowed registries."
+        paginate_with :keyset
+        relay? true
+      end
     end
 
     mutations do
@@ -255,6 +265,18 @@ defmodule Edgehog.Containers do
 
       destroy Release, :delete_release, :destroy do
         description "Delete a release and cleanup dangling resources"
+      end
+
+      create Edgehog.Containers.AllowedRegistry, :create_allowed_registry, :create do
+        description "Creates a new allowed registry."
+      end
+
+      update Edgehog.Containers.AllowedRegistry, :update_allowed_registry, :update do
+        description "Updates an existing allowed registry."
+      end
+
+      destroy Edgehog.Containers.AllowedRegistry, :delete_allowed_registry, :destroy do
+        description "Deletes an allowed registry."
       end
     end
   end
@@ -447,5 +469,7 @@ defmodule Edgehog.Containers do
       define :mark_env_file_as_errored, action: :mark_as_errored, args: [:message]
       define :destroy_env_file, action: :destroy
     end
+
+    resource Edgehog.Containers.AllowedRegistry
   end
 end
