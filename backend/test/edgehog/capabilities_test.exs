@@ -481,5 +481,82 @@ defmodule Edgehog.CapabilitiesTest do
 
       refute :container_management in device_capabilities
     end
+
+    test "returns container_management capability with the v1 set of interfaces" do
+      device_introspection = %{
+        "io.edgehog.devicemanager.apps.AvailableContainers" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableDeployments" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableImages" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableNetworks" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableVolumes" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.AvailableDeviceMappings" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.AvailableDeviceRequests" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.ContainerEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.CreateContainerRequest" => %InterfaceVersion{
+          major: 1,
+          minor: 0
+        },
+        "io.edgehog.devicemanager.apps.CreateDeploymentRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateImageRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateNetworkRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest" => %InterfaceVersion{
+          major: 0,
+          minor: 1
+        },
+        "io.edgehog.devicemanager.apps.CreateDeviceRequest" => %InterfaceVersion{
+          major: 1,
+          minor: 0
+        },
+        "io.edgehog.devicemanager.apps.DeploymentCommand" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.DeploymentUpdate" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.EnvFileEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.FileBindEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.ImageEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.NetworkEvent" => %InterfaceVersion{major: 0, minor: 1},
+        "io.edgehog.devicemanager.apps.VolumeEvent" => %InterfaceVersion{major: 0, minor: 1}
+      }
+
+      device_capabilities = Capabilities.from_introspection(device_introspection)
+
+      assert :container_management in device_capabilities
+
+      for event_interface <- [
+            "io.edgehog.devicemanager.apps.ContainerEvent",
+            "io.edgehog.devicemanager.apps.EnvFileEvent",
+            "io.edgehog.devicemanager.apps.FileBindEvent",
+            "io.edgehog.devicemanager.apps.ImageEvent",
+            "io.edgehog.devicemanager.apps.NetworkEvent",
+            "io.edgehog.devicemanager.apps.VolumeEvent"
+          ] do
+        incomplete_introspection = Map.delete(device_introspection, event_interface)
+        refute :container_management in Capabilities.from_introspection(incomplete_introspection)
+      end
+    end
   end
 end

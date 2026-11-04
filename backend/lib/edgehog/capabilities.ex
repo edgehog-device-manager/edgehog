@@ -132,6 +132,36 @@ defmodule Edgehog.Capabilities do
                                             "io.edgehog.devicemanager.apps.CreateDeviceRequest",
                                           major: 1,
                                           minor: 0
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name: "io.edgehog.devicemanager.apps.ContainerEvent",
+                                          major: 0,
+                                          minor: 1
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name: "io.edgehog.devicemanager.apps.EnvFileEvent",
+                                          major: 0,
+                                          minor: 1
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name: "io.edgehog.devicemanager.apps.FileBindEvent",
+                                          major: 0,
+                                          minor: 1
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name: "io.edgehog.devicemanager.apps.ImageEvent",
+                                          major: 0,
+                                          minor: 1
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name: "io.edgehog.devicemanager.apps.NetworkEvent",
+                                          major: 0,
+                                          minor: 1
+                                        },
+                                        %Astarte.InterfaceID{
+                                          name: "io.edgehog.devicemanager.apps.VolumeEvent",
+                                          major: 0,
+                                          minor: 1
                                         }
                                       ])
 
