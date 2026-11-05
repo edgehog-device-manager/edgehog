@@ -26,10 +26,11 @@ defmodule Edgehog.Containers.Image.Deployment.Changes.DeployImageOnDevice do
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
-    image_deployment = changeset.data
 
     Ash.Changeset.after_action(changeset, fn _changeset, result ->
-      Provisioner.provision(image_deployment, tenant, deployment: deployment)
+      image_deployment = Ash.load!(result, :tenant, tenant: tenant)
+
+      Provisioner.provision(image_deployment, image_deployment.tenant, deployment: deployment)
 
       {:ok, result}
     end)

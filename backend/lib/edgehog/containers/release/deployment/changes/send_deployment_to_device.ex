@@ -39,12 +39,13 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.SendDeploymentToDevice d
       Ash.load!(
         deployment,
         [
+          :tenant,
           container_deployments: [:image_deployment, :volume_deployments, :network_deployments]
         ],
         tenant: tenant
       )
 
-    case Orchestrator.conduct(loaded_deployment, tenant) do
+    case Orchestrator.conduct(loaded_deployment, loaded_deployment.tenant) do
       {:error, reason} -> {:error, reason}
       _ -> {:ok, deployment}
     end
