@@ -58,7 +58,9 @@ defmodule Edgehog.Containers.Release.Deployment.Changes.SendUpgrade do
   end
 
   defp start_supervisor(_changeset, {:ok, new_deployment}, tenant) do
-    case Deployment.Orchestrator.conduct(new_deployment, tenant) do
+    new_deployment = Ash.load!(new_deployment, :tenant, tenant: tenant)
+
+    case Deployment.Orchestrator.conduct(new_deployment, new_deployment.tenant) do
       {:error, reason} -> {:error, reason}
       _ -> {:ok, new_deployment}
     end

@@ -48,6 +48,7 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
   alias Edgehog.Containers.Release.Deployment.Provisioner.Core, as: DeploymentProvisionerCore
   alias Edgehog.Files.FileDownloadRequest
   alias Edgehog.Files.FileDownloadRequest.Provisioner, as: FileDownloadRequestProvisioner
+  alias Edgehog.Tenants.Tenant
   alias Phoenix.Socket.Broadcast
 
   require Ash.Query
@@ -189,7 +190,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 
@@ -246,7 +248,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 
@@ -289,7 +292,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         :ok
       end)
 
-      stub(FileDownloadRequestProvisioner, :provision, fn _request, _tenant ->
+      stub(FileDownloadRequestProvisioner, :provision, fn _request, provisioner_tenant ->
+        assert %Tenant{} = provisioner_tenant
         {:ok, self()}
       end)
 
@@ -365,7 +369,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 
@@ -393,6 +398,116 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       assert file_bind.file_download_request_id == request.id
     end
 
+    test "upgrades a same-version edited release with file binds and passes Tenant structs to provisioner and orchestrator",
+         %{tenant: tenant} do
+      stub(FileTransferCapabilities, :get, fn _client, _device_id ->
+        {:ok,
+         %FileTransferCapabilities{
+           unix_permissions: false,
+           server_to_device: %{storage: ["tar.gz"], streaming: nil, filesystem: nil},
+           device_to_server: %{storage: nil, streaming: nil, filesystem: nil}
+         }}
+      end)
+
+      stub(AstarteFileDownloadRequest, :request_download, fn _client, _device_id, _request_data ->
+        :ok
+      end)
+
+      file = file_fixture(tenant: tenant)
+
+      container =
+        container_fixture(
+          tenant: tenant,
+          file_mounts: [
+            %{
+              mountpoint: "/etc/app.conf",
+              required: false
+            }
+          ]
+        )
+
+      [file_mount] = Ash.load!(container, :file_mounts, tenant: tenant).file_mounts
+
+      release =
+        release_fixture(
+          tenant: tenant,
+          version: "1.0.0",
+          container_ids: [container.id],
+          system_models: 1
+        )
+
+      config = %{
+        container_id: container.id,
+        env: [],
+        env_strategy: :merge,
+        file_binds: [%{file_id: file.id, file_mount_id: file_mount.id}]
+      }
+
+      target =
+        target_fixture(
+          tenant: tenant,
+          mechanism_type: :deployment_upgrade,
+          release_id: release.id,
+          target_release_id: release.id,
+          campaign_mechanism: [configs: [config]]
+        )
+
+      target = Ash.load!(target, [:device], tenant: tenant.tenant_id)
+
+      assert {:ok, _updated_container} =
+               container
+               |> Ash.Changeset.for_update(:update, %{hostname: unique_container_hostname()},
+                 tenant: tenant
+               )
+               |> Ash.update(tenant: tenant)
+
+      campaign =
+        target
+        |> Ash.load!(:campaign, tenant: tenant.tenant_id)
+        |> Map.get(:campaign)
+        |> Ash.load!(
+          [
+            campaign_mechanism: [
+              deployment_upgrade: [
+                :release,
+                :target_release
+              ]
+            ]
+          ],
+          tenant: tenant.tenant_id
+        )
+
+      mechanism = campaign.campaign_mechanism.value
+
+      {:ok, deployment} =
+        Containers.deployment_by_identity(
+          target.device.id,
+          mechanism.release.application_id,
+          mechanism.release.version,
+          tenant: tenant.tenant_id
+        )
+
+      {:ok, _deployment} =
+        Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
+
+      tenant_id = tenant.tenant_id
+
+      expect(FileDownloadRequestProvisioner, :provision, 1, fn _request, provisioner_tenant ->
+        assert %Tenant{tenant_id: ^tenant_id} = provisioner_tenant
+        {:ok, self()}
+      end)
+
+      expect(Deployment.Orchestrator, :conduct, 2, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{tenant_id: ^tenant_id} = orchestrator_tenant
+        {:ok, :mock_pid}
+      end)
+
+      assert {:ok, updated_target} = MechanismCore.do_operation(mechanism, target)
+      updated_target = Ash.load!(updated_target, [:deployment], tenant: tenant.tenant_id)
+
+      assert :ok = MechanismCore.retry_operation(mechanism, updated_target)
+    end
+
     test "propagates configs down to Astarte provisioners and sends upgrade with ids only", %{
       tenant: tenant
     } do
@@ -409,7 +524,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         :ok
       end)
 
-      stub(FileDownloadRequestProvisioner, :provision, fn _request, _tenant ->
+      stub(FileDownloadRequestProvisioner, :provision, fn _request, provisioner_tenant ->
+        assert %Tenant{} = provisioner_tenant
         {:ok, self()}
       end)
 
@@ -487,7 +603,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
 
       # Do not start a real orchestrator tree: we drive the Astarte-level
       # provisioner cores manually below.
-      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 
@@ -633,7 +750,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
       # First do the operation to link the deployment to the target
-      expect(Deployment.Orchestrator, :conduct, 2, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 2, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 
@@ -683,7 +801,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
       # First do the operation to link the deployment to the target
-      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 
@@ -764,7 +883,8 @@ defmodule Edgehog.Campaigns.CampaignMechanism.DeploymentUpgradeCoreTest do
       {:ok, _deployment} =
         Containers.mark_deployment_as_started(deployment, tenant: tenant.tenant_id)
 
-      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, _tenant ->
+      expect(Deployment.Orchestrator, :conduct, 1, fn _deployment, orchestrator_tenant ->
+        assert %Tenant{} = orchestrator_tenant
         {:ok, :mock_pid}
       end)
 

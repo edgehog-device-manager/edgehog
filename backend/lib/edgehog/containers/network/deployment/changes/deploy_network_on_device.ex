@@ -24,11 +24,12 @@ defmodule Edgehog.Containers.Network.Deployment.Changes.DeployNetworkOnDevice do
 
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
-    network_deployment = changeset.data
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
 
     Ash.Changeset.after_action(changeset, fn _changeset, result ->
-      Provisioner.provision(network_deployment, tenant, deployment: deployment)
+      network_deployment = Ash.load!(result, :tenant, tenant: tenant)
+
+      Provisioner.provision(network_deployment, network_deployment.tenant, deployment: deployment)
 
       {:ok, result}
     end)

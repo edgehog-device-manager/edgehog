@@ -25,10 +25,11 @@ defmodule Edgehog.Containers.Volume.Deployment.Changes.DeployVolumeOnDevice do
   @impl Ash.Resource.Change
   def change(changeset, _opts, %{tenant: tenant}) do
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
-    volume_deployment = changeset.data
 
     Ash.Changeset.after_action(changeset, fn _changeset, result ->
-      Provisioner.provision(volume_deployment, tenant, deployment: deployment)
+      volume_deployment = Ash.load!(result, :tenant, tenant: tenant)
+
+      Provisioner.provision(volume_deployment, volume_deployment.tenant, deployment: deployment)
 
       {:ok, result}
     end)
