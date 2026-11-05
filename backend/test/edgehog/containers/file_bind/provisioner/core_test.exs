@@ -298,6 +298,70 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
                Core.send_to_device(file_bind, tenant: tenant, deployment: deployment)
     end
 
+    test "send_to_device/2 reloads a stale file_bind struct after mark_as_uploaded and reuses linked download request on retry",
+         context do
+      %{tenant: tenant, device: device, deployment: deployment, container: container} = context
+
+      %{file_mounts: [file_mount]} = container
+
+      {:ok, container_deployment} =
+        Deployment
+        |> Ash.Changeset.for_create(
+          :deploy,
+          [
+            container: container,
+            device: device,
+            deployment: deployment,
+            file_binds: [%{file_mount_id: file_mount.id}]
+          ],
+          tenant: tenant
+        )
+        |> Ash.create()
+
+      [stale_file_bind] =
+        Ash.load!(container_deployment, :file_binds, tenant: tenant).file_binds
+
+      refute stale_file_bind.uploaded
+      assert stale_file_bind.file_download_request_id == nil
+
+      assert {:error, :file_not_uploaded} ==
+               Core.send_to_device(stale_file_bind, tenant: tenant, deployment: deployment)
+
+      {:ok, _uploaded_file_bind} =
+        stale_file_bind
+        |> Ash.Changeset.for_update(:mark_as_uploaded, %{
+          file_name: "app.conf",
+          uncompressed_file_size_bytes: 128,
+          digest: "sha256:abcd",
+          encoding: ""
+        })
+        |> Ash.update(tenant: tenant)
+
+      expect(CreateBind, :send_bind, 2, fn _client, _device_id, data ->
+        assert data.id == stale_file_bind.id
+        assert data.deploymentId == deployment.id
+        assert data.targetType == "storage"
+        assert data.mountpoint == "/etc/app.conf"
+
+        :ok
+      end)
+
+      # Passing the stale in-memory struct (uploaded: false, file_download_request_id: nil)
+      # reloads from the database and succeeds
+      assert :ok ==
+               Core.send_to_device(stale_file_bind, tenant: tenant, deployment: deployment)
+
+      first_linked = Ash.get!(Edgehog.Containers.FileBind, stale_file_bind.id, tenant: tenant)
+      assert first_linked.file_download_request_id != nil
+
+      # Retrying again with the stale struct reuses the already-linked download request
+      assert :ok ==
+               Core.send_to_device(stale_file_bind, tenant: tenant, deployment: deployment)
+
+      second_linked = Ash.get!(Edgehog.Containers.FileBind, stale_file_bind.id, tenant: tenant)
+      assert second_linked.file_download_request_id == first_linked.file_download_request_id
+    end
+
     test "reconcile/2 marks the bind as available when the device reports it", context do
       %{tenant: tenant, device: device} = context
 
@@ -358,6 +422,11 @@ defmodule Edgehog.Containers.FileBind.Provisioner.CoreTest do
 
       error = :other
       assert Core.temporary_error?({:error, error}) == Core.temporary_error?(error)
+    end
+
+    test "temporary_error?/1 returns true for :file_not_uploaded", _context do
+      assert Core.temporary_error?(:file_not_uploaded)
+      assert Core.temporary_error?({:error, :file_not_uploaded})
     end
 
     test "temporary_error?/1 returns true for \"connection refused\" errors", _context do
