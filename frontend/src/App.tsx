@@ -45,6 +45,9 @@ import HardwareTypes from "@/pages/HardwareTypes";
 import ImageCredential from "@/pages/ImageCredential";
 import ImageCredentialCreate from "@/pages/ImageCredentialCreate";
 import ImageCredentials from "@/pages/ImageCredentials";
+import AllowedRegistries from "@/pages/AllowedRegistries";
+import AllowedRegistry from "@/pages/AllowedRegistry";
+import AllowedRegistryCreate from "@/pages/AllowedRegistryCreate";
 import Login from "@/pages/Login";
 import Logout from "@/pages/Logout";
 import Release from "@/pages/Release";
@@ -117,6 +120,9 @@ const authenticatedRoutes: RouterRule[] = [
   { path: Route.imageCredentials, element: <ImageCredentials /> },
   { path: Route.imageCredentialsEdit, element: <ImageCredential /> },
   { path: Route.imageCredentialsNew, element: <ImageCredentialCreate /> },
+  { path: Route.allowedRegistries, element: <AllowedRegistries /> },
+  { path: Route.allowedRegistriesEdit, element: <AllowedRegistry /> },
+  { path: Route.allowedRegistriesNew, element: <AllowedRegistryCreate /> },
   { path: Route.channels, element: <Channels /> },
   { path: Route.channelsEdit, element: <ChannelsEdit /> },
   { path: Route.channelsNew, element: <ChannelsCreate /> },

@@ -193,6 +193,11 @@ const messages = defineMessages({
     id: "forms.validation.imageTagDigestMutuallyExclusive",
     defaultMessage: "Tag and digest are mutually exclusive; specify only one.",
   },
+  allowedRegistryHostFormat: {
+    id: "forms.validation.allowedRegistryHost.format",
+    defaultMessage:
+      "Must be a valid domain name, IPv4 address, or [IPv6 address].",
+  },
 });
 
 /* ----------------------------- Constants ----------------------------- */
@@ -579,6 +584,54 @@ const imageCredentialUpdateSchema = z.object({
 type ImageCredentialUpdateFormData = z.infer<
   typeof imageCredentialUpdateSchema
 >;
+
+const isValidIPv4 = (host: string): boolean => {
+  if (!/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return false;
+  const parts = host.split(".");
+  return parts.every((p) => {
+    const num = Number(p);
+    return num >= 0 && num <= 255;
+  });
+};
+
+const isValidIPv6 = (host: string): boolean => {
+  const clean =
+    host.startsWith("[") && host.endsWith("]") ? host.slice(1, -1) : host;
+  const ipv6Regex =
+    /^(([0-9a-fA-F]{1,4}:){7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$/;
+  return ipv6Regex.test(clean);
+};
+
+const isValidDomain = (host: string): boolean => {
+  if (host.length > 253) return false;
+  const labels = host.split(".");
+  const labelRegex = /^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?$/;
+  return labels.every(
+    (label) =>
+      label.length >= 1 && label.length <= 63 && labelRegex.test(label),
+  );
+};
+
+const isValidRegistryHost = (host: string): boolean => {
+  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) {
+    return isValidIPv4(host);
+  }
+  if (host.includes(":")) {
+    return isValidIPv6(host);
+  }
+  return isValidDomain(host);
+};
+
+const allowedRegistrySchema = z.object({
+  registry: z
+    .string()
+    .trim()
+    .min(1, messages.required.id)
+    .refine((val) => isValidRegistryHost(val), {
+      message: messages.allowedRegistryHostFormat.id,
+    }),
+});
+type AllowedRegistryFormData = z.infer<typeof allowedRegistrySchema>;
 
 const hardwareTypeSchema = z.object({
   name: z.string().min(1),
@@ -1602,6 +1655,7 @@ export type {
   FileDestinationType,
   FileSourceType,
   ManualFileUploadRequestData,
+  AllowedRegistryFormData,
 };
 
 export {
@@ -1611,6 +1665,8 @@ export {
   channelSchema,
   deviceGroupSchema,
   imageCredentialSchema,
+  allowedRegistrySchema,
+  isValidRegistryHost,
   updateChannelSchema,
   targetGroupExtended,
   hardwareTypeSchema,
