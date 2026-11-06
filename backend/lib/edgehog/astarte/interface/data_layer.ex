@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,8 +28,11 @@ defmodule Edgehog.Astarte.Interface.DataLayer do
               interface_major :: non_neg_integer
             ) :: {:ok, map()} | {:error, term()}
 
-  @callback create(client :: RealmManagement.t(), interface_json :: map()) ::
-              :ok | {:error, term()}
+  @callback create(
+              client :: RealmManagement.t(),
+              interface_json :: map(),
+              opts :: keyword()
+            ) :: :ok | {:error, term()}
 
   @callback update(
               client :: RealmManagement.t(),

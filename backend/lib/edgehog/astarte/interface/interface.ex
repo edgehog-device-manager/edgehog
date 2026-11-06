@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,6 +40,6 @@ defmodule Edgehog.Astarte.Interface do
     end
   end
 
-  defdelegate create(client, interface_json), to: @data_layer
+  defdelegate create(client, interface_json, opts \\ []), to: @data_layer
   defdelegate update(client, interface_name, interface_major, interface_json), to: @data_layer
 end
