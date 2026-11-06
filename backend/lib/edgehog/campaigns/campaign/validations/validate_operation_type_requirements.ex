@@ -97,7 +97,7 @@ defmodule Edgehog.Campaigns.Campaign.Validations.ValidateOperationTypeRequiremen
   defp validate_is_upgrade(current_release, target_release) do
     with {:ok, current_version} <- parse_version(current_release),
          {:ok, target_version} <- parse_version(target_release) do
-      if Version.compare(target_version, current_version) == :gt do
+      if Version.compare(target_version, current_version) in [:gt, :eq] do
         :ok
       else
         {:error,

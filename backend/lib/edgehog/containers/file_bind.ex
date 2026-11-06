@@ -257,6 +257,8 @@ defmodule Edgehog.Containers.FileBind do
     prefix "file_binds"
     module EdgehogWeb.Endpoint
 
+    publish :mark_as_uploaded, [[:id, "*"]]
+    publish :link_file_download_request, [[:id, "*"]]
     publish :mark_as_sent, [[:id, "*"]]
     publish :mark_as_available, [[:id, "*"]]
     publish :mark_as_unavailable, [[:id, "*"]]

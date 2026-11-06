@@ -53,6 +53,11 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
     do: {:via, Registry, {Edgehog.Containers.EnvFile.Provisioner.Registry, id}}
 
   @impl Edgehog.Provisioner.Core.Behaviour
+  def temporary_error?(:file_not_uploaded), do: true
+  def temporary_error?({:error, :file_not_uploaded}), do: true
+  def temporary_error?(error), do: super(error)
+
+  @impl Edgehog.Provisioner.Core.Behaviour
   def send_to_device(resource, opts) do
     tenant = Keyword.fetch!(opts, :tenant)
     deployment = Keyword.fetch!(opts, :deployment)
@@ -94,9 +99,10 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
          %{file_download_request_id: nil, device_file_id: nil} = env_file,
          tenant
        ) do
-    loads = [:uploaded, :file_download_request_id, :device_file_id, container_deployment: []]
+    loads = [container_deployment: []]
 
-    with {:ok, env_file} <- Ash.load(env_file, loads, tenant: tenant),
+    with {:ok, env_file} <- Ash.reload(env_file, tenant: tenant),
+         {:ok, env_file} <- Ash.load(env_file, loads, tenant: tenant),
          :needs_target <- check_still_needs_target(env_file),
          {:ok, file_download_request} <- create_file_download_request(env_file, tenant) do
       link_env_file(env_file, file_download_request, tenant)

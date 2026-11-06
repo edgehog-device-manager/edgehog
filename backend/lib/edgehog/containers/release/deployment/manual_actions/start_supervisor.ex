@@ -29,9 +29,9 @@ defmodule Edgehog.Containers.Release.Deployment.ManualActions.StartSupervisor do
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, %{tenant: tenant}) do
-    deployment = changeset.data
+    deployment = Ash.load!(changeset.data, :tenant, tenant: tenant)
 
-    with {:ok, _pid} <- Orchestrator.conduct(deployment, tenant) do
+    with {:ok, _pid} <- Orchestrator.conduct(deployment, deployment.tenant) do
       {:ok, deployment}
     end
   end

@@ -33,7 +33,8 @@ defmodule Edgehog.Files.FileDownloadRequest.Changes.SendFileDownloadRequest do
     Ash.Changeset.after_transaction(changeset, fn _changeset, result ->
       with {:ok, file_download_request} <- result,
            file_download_request = Ash.load!(file_download_request, :tenant, tenant: tenant),
-           {:ok, _pid} <- Provisioner.provision(file_download_request, tenant) do
+           {:ok, _pid} <-
+             Provisioner.provision(file_download_request, file_download_request.tenant) do
         {:ok, file_download_request}
       end
     end)

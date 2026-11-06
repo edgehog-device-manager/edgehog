@@ -26,10 +26,13 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Changes.DeployDeviceReques
   def change(changeset, _opts, context) do
     %{tenant: tenant} = context
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
-    device_request_deployment = changeset.data
 
     Ash.Changeset.after_action(changeset, fn _changeset, result ->
-      Provisioner.provision(device_request_deployment, tenant, deployment: deployment)
+      device_request_deployment = Ash.load!(result, :tenant, tenant: tenant)
+
+      Provisioner.provision(device_request_deployment, device_request_deployment.tenant,
+        deployment: deployment
+      )
 
       {:ok, result}
     end)

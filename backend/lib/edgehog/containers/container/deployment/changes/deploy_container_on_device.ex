@@ -29,8 +29,10 @@ defmodule Edgehog.Containers.Container.Deployment.Changes.DeployContainerOnDevic
 
   defp send_deployment(changeset, {:ok, container_deployment}, tenant) do
     deployment = Ash.Changeset.get_argument(changeset, :deployment)
+    container_deployment = Ash.load!(container_deployment, :tenant, tenant: tenant)
 
-    with {:ok, _pid} <- Orchestrator.conduct(container_deployment, deployment, tenant) do
+    with {:ok, _pid} <-
+           Orchestrator.conduct(container_deployment, deployment, container_deployment.tenant) do
       {:ok, container_deployment}
     end
   end

@@ -263,6 +263,70 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
       wait_for_state(pid, :wait_for_campaign_completion)
     end
 
+    test "same-version upgrade requests when target_release_id equals release_id", %{
+      tenant: tenant
+    } do
+      release = release_fixture(tenant: tenant, containers: 1, system_models: 1)
+      [container] = Ash.load!(release, :containers, tenant: tenant).containers
+
+      target_count = 3
+
+      campaign =
+        target_count
+        |> campaign_with_targets_fixture(
+          mechanism_type: :deployment_upgrade,
+          release_id: release.id,
+          target_release_id: release.id,
+          campaign_mechanism: [max_in_progress_operations: target_count],
+          tenant: tenant
+        )
+        |> Ash.load!(campaign_targets: [device: [:device_id]])
+
+      updated_hostname = unique_container_hostname()
+
+      assert {:ok, _updated_container} =
+               container
+               |> Ash.Changeset.for_update(:update, %{hostname: updated_hostname}, tenant: tenant)
+               |> Ash.update(tenant: tenant)
+
+      parent = self()
+      ref = make_ref()
+      target_device_ids = Enum.map(campaign.campaign_targets, & &1.device.device_id)
+
+      expect(
+        Deployment.Orchestrator,
+        :conduct,
+        target_count,
+        fn deployment, _orchestrator_tenant ->
+          deployment =
+            Ash.load!(
+              deployment,
+              [
+                :device,
+                release: [:hash, source_release: [:hash]],
+                container_deployments: [:container]
+              ],
+              tenant: tenant
+            )
+
+          assert deployment.release.hash == deployment.release.source_release.hash
+          [container_deployment] = deployment.container_deployments
+          assert container_deployment.container.hostname == updated_hostname
+
+          send_sync(parent, {ref, deployment.device.device_id})
+          :ok
+        end
+      )
+
+      pid = start_executor!(campaign)
+
+      target_device_ids
+      |> Enum.map(&{ref, &1})
+      |> wait_for_sync!()
+
+      wait_for_state(pid, :wait_for_campaign_completion)
+    end
+
     test "at most `max_in_progress_operations` upgrade requests", %{tenant: tenant} do
       target_count = Enum.random(10..20)
       max_in_progress_operations = Enum.random(2..5)
