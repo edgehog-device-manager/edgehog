@@ -41,7 +41,7 @@ jobs:
       - name: Optimize Cache
         uses: ./.github/actions/restore-cache-mtimes
 
-      - uses: team-alembic/staple-actions/actions/mix-task@680d093207d057f7f6a7248dbeadb506013f5674 # main
+      - uses: team-alembic/staple-actions/actions/mix-task@d0100ed95465c8874abf7e7a0e3a95d0402ca010 # main
         with:
           task: sobelow --config
           working-directory: backend

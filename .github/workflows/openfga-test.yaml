@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       openfga:
-        image: openfga/openfga:v1.22.0
+        image: openfga/openfga:v1.22.1
         command: run
         ports:
           - 8080:8080
@@ -53,7 +53,7 @@ jobs:
       - name: Validate OpenFGA model
         run: |
           fga model validate --file fga/openfga/fga.mod --format modular
-      - uses: openfga/action-openfga-test@738c7e4a124849955b46190816bc7b9c3a4646fa # v0.1.3
+      - uses: openfga/action-openfga-test@4c0f4d245aa1375be20f0db8d242d84354c7bf10 # v0.2.0
         with:
           test_path: fga/openfga/tests
           fga_cli_version: "v0.7.20"
