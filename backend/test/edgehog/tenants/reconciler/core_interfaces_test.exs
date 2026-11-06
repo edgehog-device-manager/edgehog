@@ -101,7 +101,9 @@ defmodule Edgehog.Tenants.Reconciler.CoreInterfacesTest do
       |> expect(:get, fn ^client, ^name, ^major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, fn ^client, ^interface ->
+      |> expect(:create, fn ^client, ^interface, opts ->
+        assert opts == [query: [async: false]]
+
         :ok
       end)
 

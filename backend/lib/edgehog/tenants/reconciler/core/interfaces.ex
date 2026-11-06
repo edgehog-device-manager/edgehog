@@ -178,7 +178,7 @@ defmodule Edgehog.Tenants.Reconciler.Core.Interfaces do
     %{tenant: tenant} = context
     id = tenant.tenant_id
 
-    case Interface.create(rm_client, interface) do
+    case Interface.create(rm_client, interface, query: [async: false]) do
       :ok ->
         context
 

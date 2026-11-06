@@ -67,7 +67,9 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, interface_count, fn _client, _interface_map ->
+      |> expect(:create, interface_count, fn _client, _interface_map, opts ->
+        assert opts == [query: [async: false]]
+
         send(test_pid, {:interface_reconciled, ref})
 
         :ok
@@ -128,7 +130,9 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, interface_count, fn _client, _interface_map ->
+      |> expect(:create, interface_count, fn _client, _interface_map, opts ->
+        assert opts == [query: [async: false]]
+
         send(test_pid, {:interface_reconciled, ref})
 
         :ok
