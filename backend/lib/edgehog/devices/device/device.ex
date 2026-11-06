@@ -292,6 +292,22 @@ defmodule Edgehog.Devices.Device do
       manual ManualActions.SendCreateVolume
     end
 
+    update :send_volume_command do
+      description "Sends a command for the given device volume."
+
+      argument :volume, :struct do
+        constraints instance_of: Volume
+        description "The volume target of the command."
+        allow_nil? false
+      end
+
+      argument :command, Edgehog.Devices.Device.VolumeCommand do
+        allow_nil? false
+      end
+
+      manual Edgehog.Devices.Device.ManualActions.SendVolumeCommand
+    end
+
     update :remove_tags do
       description "Remove tags from a device."
 

@@ -751,6 +751,7 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
         "SYSTEM_INFO",
         "SYSTEM_STATUS",
         "TELEMETRY_CONFIG",
+        "VOLUME_COMMANDS",
         "WIFI"
       ]
 

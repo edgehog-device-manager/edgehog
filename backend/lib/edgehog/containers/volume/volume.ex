@@ -71,6 +71,23 @@ defmodule Edgehog.Containers.Volume do
                 keys: [:label], read_action: :plain_volumes, field: :label}
     end
 
+    update :send_command do
+      description "Send a command to this volume on a device."
+      transaction? false
+
+      argument :device_id, :id do
+        allow_nil? false
+        public? true
+      end
+
+      argument :command, Edgehog.Devices.Device.VolumeCommand do
+        allow_nil? false
+        public? true
+      end
+
+      manual Edgehog.Containers.ManualActions.SendVolumeCommand
+    end
+
     read :plain_volumes do
       pagination offset?: true, keyset?: true, required?: false
       filter expr(not exists(volume_deployments, true))

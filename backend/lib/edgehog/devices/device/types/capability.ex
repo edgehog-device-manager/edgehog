@@ -45,6 +45,7 @@ defmodule Edgehog.Devices.Device.Types.Capability do
       system_info: "The device provides information about its system.",
       system_status: "The device provides information about its system status.",
       telemetry_config: "The device telemetry can be configured.",
+      volume_commands: "The device supports volume commands.",
       wifi: "The device provides information about surrounding WiFi APs."
     ]
 

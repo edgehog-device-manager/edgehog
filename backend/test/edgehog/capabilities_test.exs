@@ -141,6 +141,10 @@ defmodule Edgehog.CapabilitiesTest do
         "io.edgehog.devicemanager.apps.CreateFileBindRequest" => %InterfaceVersion{
           major: 0,
           minor: 1
+        },
+        "io.edgehog.devicemanager.apps.VolumeCommand" => %InterfaceVersion{
+          major: 0,
+          minor: 1
         }
       }
 
@@ -166,7 +170,8 @@ defmodule Edgehog.CapabilitiesTest do
         :system_info,
         :system_status,
         :telemetry_config,
-        :wifi
+        :wifi,
+        :volume_commands
       ]
 
       device_capabilities = Capabilities.from_introspection(device_introspection)

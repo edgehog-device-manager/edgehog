@@ -245,6 +245,12 @@ defmodule Edgehog.Containers do
         description "Delete a volume if not used by any container."
       end
 
+      update Volume, :send_volume_command, :send_command do
+        description "Send a command to a volume on a device."
+        args [:device_id, :command]
+        relay_id_translations device_id: :device
+      end
+
       create Network, :create_network, :create do
         description "Create a new network."
       end

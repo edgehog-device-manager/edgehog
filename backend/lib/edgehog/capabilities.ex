@@ -352,6 +352,13 @@ defmodule Edgehog.Capabilities do
         minor: 1
       }
     ],
+    volume_commands: [
+      %Astarte.InterfaceID{
+        name: "io.edgehog.devicemanager.apps.VolumeCommand",
+        major: 0,
+        minor: 1
+      }
+    ],
     wifi: [
       %Astarte.InterfaceID{
         name: "io.edgehog.devicemanager.WiFiScanResults",

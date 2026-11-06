@@ -109,6 +109,10 @@ defmodule Edgehog.Devices do
         action: :send_create_volume_request,
         args: [:volume, :deployment]
 
+      define :send_volume_command_request,
+        action: :send_volume_command,
+        args: [:volume, :command]
+
       define :send_create_device_mapping_request,
         action: :send_create_device_mapping_request,
         args: [:device_mapping, :deployment]
