@@ -2066,6 +2066,9 @@
   "components.layout.sidebar.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"
   },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.allowedRegistriesLabel": {
+    "defaultMessage": "Allowed Registries"
+  },
   "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel": {
     "defaultMessage": "Applications"
   },
@@ -4633,6 +4636,15 @@
   },
   "forms.validation.volumeTarget.duplicate": {
     "defaultMessage": "Duplicate target value."
+  },
+  "navigation.routeTitle.AllowedRegistries": {
+    "defaultMessage": "Allowed Registries"
+  },
+  "navigation.routeTitle.AllowedRegistryEdit": {
+    "defaultMessage": "Allowed Registry Details"
+  },
+  "navigation.routeTitle.AllowedRegistryNew": {
+    "defaultMessage": "Create Allowed Registry"
   },
   "navigation.routeTitle.Application": {
     "defaultMessage": "Application"

@@ -186,6 +186,10 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.imageCredentialsNew:
         return [{ route: Route.imageCredentials }, currentRoute];
 
+      case Route.allowedRegistriesEdit:
+      case Route.allowedRegistriesNew:
+        return [{ route: Route.allowedRegistries }, currentRoute];
+
       case Route.volumeEdit:
       case Route.volumesNew:
         return [{ route: Route.volumes }, currentRoute];
