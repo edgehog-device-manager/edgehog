@@ -38,13 +38,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: dprint/check@7dc032d8874778fc024f6f9b4a7e6d896782c330 # v2.5
+      - uses: dprint/check@371a959e3c77f34a76a03d2c50df2e3f2302d016 # v2.6
   spelling:
     name: Files spelling
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - uses: crate-ci/typos@00f422f3b19c57bc6338715ebfe3316d38768461 # v1.50.3
+      - uses: crate-ci/typos@dcea7116aaf94953292ab6ce0907fe483ef15406 # v1.51.0
   committed:
     name: Commits follow conventional commits
     runs-on: ubuntu-latest
@@ -54,7 +54,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Lint Commits
-        uses: crate-ci/committed@faeed42f2e10c244533a01525f13c4d8b6ce383f # v1.1.11
+        uses: crate-ci/committed@02af07ed1d11ad69a96ab75f08c9831a4e2c00da # v1.1.12
   typos-in-commit-message:
     name: Commits spelling
     runs-on: ubuntu-latest
@@ -66,6 +66,6 @@ jobs:
       - name: Extract commit messages
         run: git --no-pager log --pretty=%B "origin/${{ github.base_ref }}..HEAD" > commit-messages.txt
       - name: Spellcheck Commits
-        uses: crate-ci/typos@00f422f3b19c57bc6338715ebfe3316d38768461 # v1.50.3
+        uses: crate-ci/typos@dcea7116aaf94953292ab6ce0907fe483ef15406 # v1.51.0
         with:
           files: ./commit-messages.txt
