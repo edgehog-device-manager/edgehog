@@ -87,7 +87,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
     end
   end
 
-  describe "create/2" do
+  describe "create" do
     setup do
       client =
         realm_fixture()
@@ -100,13 +100,28 @@ defmodule Edgehog.Astarte.InterfaceTest do
       {:ok, client: client, interface_map: interface_map}
     end
 
+    test "forwards options to create interfaces", %{client: client, interface_map: interface_map} do
+      Tesla.Mock.mock(fn
+        %{method: :post, query: query} = env ->
+          assert URI.parse(env.url).path =~ "/interfaces"
+          assert query[:async] == false
+          %Tesla.Env{status: 201}
+      end)
+
+      assert :ok = AstarteDataLayer.create(client, interface_map, query: [async: false])
+    end
+
     test "returns :ok if Astarte replies successfully", ctx do
       %{
         client: client,
         interface_map: interface_map
       } = ctx
 
-      expect(AstarteDataLayer, :create, fn ^client, ^interface_map -> :ok end)
+      expect(AstarteDataLayer, :create, fn ^client, ^interface_map, opts ->
+        assert opts == []
+        :ok
+      end)
+
       assert :ok = Interface.create(client, interface_map)
     end
 
@@ -116,7 +131,8 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      expect(AstarteDataLayer, :create, fn ^client, ^interface_map ->
+      expect(AstarteDataLayer, :create, fn ^client, ^interface_map, opts ->
+        assert opts == []
         {:error, api_error(status: 422, message: "Invalid Entity")}
       end)
 
