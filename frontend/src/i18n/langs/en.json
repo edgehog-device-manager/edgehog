@@ -1,4 +1,7 @@
 {
+  "components.apps.containers.allowed-registries-table.AllowedRegistriesTable.registryTitle": {
+    "defaultMessage": "Registry Host"
+  },
   "components.apps.containers.container-details.ContainerDetails.autoRemoveLabel": {
     "defaultMessage": "Auto Remove"
   },
@@ -2066,6 +2069,9 @@
   "components.layout.sidebar.Sidebar.devicesLabel": {
     "defaultMessage": "Devices"
   },
+  "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.allowedRegistriesLabel": {
+    "defaultMessage": "Allowed Registries"
+  },
   "components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.applicationsLabel": {
     "defaultMessage": "Applications"
   },
@@ -2413,6 +2419,12 @@
   },
   "components.ui.table.Table.showing": {
     "defaultMessage": "Showing {start} to {end} of {total} entries"
+  },
+  "forms.CreateAllowedRegistry.registryLabel": {
+    "defaultMessage": "Registry Host"
+  },
+  "forms.CreateAllowedRegistry.submitButton": {
+    "defaultMessage": "Create"
   },
   "forms.CreateApplication.descriptionLabel": {
     "defaultMessage": "Description"
@@ -3574,6 +3586,18 @@
   "forms.ManualOtaFromFileForm.update": {
     "defaultMessage": "Update"
   },
+  "forms.UpdateAllowedRegistry.deleteButton": {
+    "defaultMessage": "Delete"
+  },
+  "forms.UpdateAllowedRegistry.registryLabel": {
+    "defaultMessage": "Registry Host"
+  },
+  "forms.UpdateAllowedRegistry.resetButton": {
+    "defaultMessage": "Reset"
+  },
+  "forms.UpdateAllowedRegistry.submitButton": {
+    "defaultMessage": "Update"
+  },
   "forms.UpdateBaseImage.baseImageCollectionLabel": {
     "defaultMessage": "Base Image Collection"
   },
@@ -4517,6 +4541,9 @@
   "forms.fieldExplanation.workingDirectory.title": {
     "defaultMessage": "Working Directory"
   },
+  "forms.validation.allowedRegistryHost.format": {
+    "defaultMessage": "Must be a valid domain name, IPv4 address, or [IPv6 address]."
+  },
   "forms.validation.baseImageFile.required": {
     "defaultMessage": "Required."
   },
@@ -4633,6 +4660,15 @@
   },
   "forms.validation.volumeTarget.duplicate": {
     "defaultMessage": "Duplicate target value."
+  },
+  "navigation.routeTitle.AllowedRegistries": {
+    "defaultMessage": "Allowed Registries"
+  },
+  "navigation.routeTitle.AllowedRegistryEdit": {
+    "defaultMessage": "Allowed Registry Details"
+  },
+  "navigation.routeTitle.AllowedRegistryNew": {
+    "defaultMessage": "Create Allowed Registry"
   },
   "navigation.routeTitle.Application": {
     "defaultMessage": "Application"
@@ -4792,6 +4828,36 @@
   },
   "navigation.routeTitle.VolumesNew": {
     "defaultMessage": "Create Volumes"
+  },
+  "pages.AllowedRegistries.createButton": {
+    "defaultMessage": "Create Allowed Registry"
+  },
+  "pages.AllowedRegistries.title": {
+    "defaultMessage": "Allowed Registries"
+  },
+  "pages.AllowedRegistry.allowedRegistryNotFound.message": {
+    "defaultMessage": "Return to the Allowed Registries list."
+  },
+  "pages.AllowedRegistry.allowedRegistryNotFound.title": {
+    "defaultMessage": "Allowed Registry not found."
+  },
+  "pages.AllowedRegistry.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete the Allowed Registry <bold>{registry}</bold>."
+  },
+  "pages.AllowedRegistry.deleteModal.title": {
+    "defaultMessage": "Delete Allowed Registry"
+  },
+  "pages.AllowedRegistry.deletionErrorFeedback": {
+    "defaultMessage": "Could not delete the Allowed Registry, please try again."
+  },
+  "pages.AllowedRegistry.updateErrorFeedback": {
+    "defaultMessage": "Could not update the Allowed Registry, please try again."
+  },
+  "pages.AllowedRegistryCreate.creationErrorFeedback": {
+    "defaultMessage": "Could not create the Allowed Registry, please try again."
+  },
+  "pages.AllowedRegistryCreate.title": {
+    "defaultMessage": "Create Allowed Registry"
   },
   "pages.Application.applicationNotFound.message": {
     "defaultMessage": "Return to the applications list."

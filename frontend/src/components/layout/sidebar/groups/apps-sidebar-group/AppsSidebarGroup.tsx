@@ -61,6 +61,22 @@ const AppsSidebarGroup = ({ collapsed }: AppsSidebarGroupProps) => {
       <SidebarItem
         label={
           <FormattedMessage
+            id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.allowedRegistriesLabel"
+            defaultMessage="Allowed Registries"
+          />
+        }
+        icon="allowedRegistries"
+        route={Route.allowedRegistries}
+        activeRoutes={[
+          Route.allowedRegistries,
+          Route.allowedRegistriesNew,
+          Route.allowedRegistriesEdit,
+        ]}
+      />
+
+      <SidebarItem
+        label={
+          <FormattedMessage
             id="components.layout.sidebar.groups.apps-sidebar-group.AppsSidebarGroup.volumesLabel"
             defaultMessage="Volumes"
           />

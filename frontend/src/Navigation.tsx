@@ -66,6 +66,9 @@ enum Route {
   imageCredentials = "/image-credentials",
   imageCredentialsEdit = "/image-credentials/:imageCredentialId/edit",
   imageCredentialsNew = "/image-credentials/new",
+  allowedRegistries = "/allowed-registries",
+  allowedRegistriesEdit = "/allowed-registries/:allowedRegistryId/edit",
+  allowedRegistriesNew = "/allowed-registries/new",
   volumes = "/volumes",
   volumeEdit = "/volumes/:volumeId",
   volumesNew = "/volumes/new",
@@ -142,6 +145,8 @@ const matchingParametricRoute = (
     case Route.applicationNew:
     case Route.imageCredentials:
     case Route.imageCredentialsNew:
+    case Route.allowedRegistries:
+    case Route.allowedRegistriesNew:
     case Route.volumes:
     case Route.volumesNew:
     case Route.networks:
@@ -291,6 +296,13 @@ const matchingParametricRoute = (
         ? {
             route,
             params: { imageCredentialId: params.imageCredentialId },
+          }
+        : null;
+    case Route.allowedRegistriesEdit:
+      return params && typeof params["allowedRegistryId"] === "string"
+        ? {
+            route,
+            params: { allowedRegistryId: params.allowedRegistryId },
           }
         : null;
     case Route.volumeEdit:
@@ -519,6 +531,18 @@ const routeTitles: Record<Route, MessageDescriptor> = defineMessages({
   [Route.imageCredentialsEdit]: {
     id: "navigation.routeTitle.ImageCredentialEdit",
     defaultMessage: "Image Credentials Details",
+  },
+  [Route.allowedRegistries]: {
+    id: "navigation.routeTitle.AllowedRegistries",
+    defaultMessage: "Allowed Registries",
+  },
+  [Route.allowedRegistriesNew]: {
+    id: "navigation.routeTitle.AllowedRegistryNew",
+    defaultMessage: "Create Allowed Registry",
+  },
+  [Route.allowedRegistriesEdit]: {
+    id: "navigation.routeTitle.AllowedRegistryEdit",
+    defaultMessage: "Allowed Registry Details",
   },
   [Route.login]: {
     id: "navigation.routeTitle.Login",
