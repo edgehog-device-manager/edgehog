@@ -118,29 +118,48 @@ defmodule Edgehog.Containers.Container.Deployment do
       change set_attribute(:state, :received)
     end
 
+    update :mark_as_missing do
+      change set_attribute(:state, :missing)
+    end
+
+    update :mark_as_creating do
+      change set_attribute(:state, :creating)
+    end
+
     update :mark_as_created do
       change set_attribute(:state, :device_created)
     end
 
-    update :mark_as_stopped do
-      change set_attribute(:state, :stopped)
+    update :mark_as_starting do
+      change set_attribute(:state, :starting)
     end
 
     update :mark_as_running do
       change set_attribute(:state, :running)
     end
 
-    update :mark_as_errored do
-      argument :message, :string do
-        allow_nil? false
-      end
+    update :mark_as_stopping do
+      change set_attribute(:state, :stopping)
+    end
 
-      change set_attribute(:last_message, arg(:message))
+    update :mark_as_stopped do
+      change set_attribute(:state, :stopped)
+    end
+
+    update :mark_as_deleting do
+      change set_attribute(:state, :deleting)
+    end
+
+    update :mark_as_errored do
       change set_attribute(:state, :error)
     end
 
     update :set_state do
       accept [:state]
+    end
+
+    update :update_from_device do
+      accept [:exit_code, :health_status, :health_failed_count, :restart_count]
     end
 
     destroy :destroy_if_dangling do
@@ -165,7 +184,19 @@ defmodule Edgehog.Containers.Container.Deployment do
 
     attribute :state, :atom,
       constraints: [
-        one_of: [:created, :sent, :received, :device_created, :stopped, :running, :error]
+        one_of: [
+          :received,
+          :missing,
+          :creating,
+          :created,
+          :running,
+          :stopping,
+          :stopped,
+          :deleting,
+          :error,
+          :sent,
+          :device_created
+        ]
       ],
       public?: true
 
@@ -178,6 +209,30 @@ defmodule Edgehog.Containers.Container.Deployment do
     attribute :env_strategy, Types.EnvStrategy do
       default :merge
       allow_nil? false
+      public? true
+    end
+
+    attribute :exit_code, :integer do
+      allow_nil? true
+      public? true
+    end
+
+    attribute :health_status, :atom,
+      constraints: [
+        one_of: [
+          :healthy,
+          :unhealthy,
+          :starting,
+          :none
+        ]
+      ],
+      public?: true
+
+    attribute :health_failed_count, :integer do
+      public? true
+    end
+
+    attribute :restart_count, :integer do
       public? true
     end
 
@@ -263,10 +318,16 @@ defmodule Edgehog.Containers.Container.Deployment do
     module EdgehogWeb.Endpoint
 
     publish :mark_as_received, [[:id, "*"]]
+    publish :mark_as_missing, [[:id, "*"]]
+    publish :mark_as_creating, [[:id, "*"]]
     publish :mark_as_created, [[:id, "*"]]
-    publish :mark_as_stopped, [[:id, "*"]]
+    publish :mark_as_starting, [[:id, "*"]]
     publish :mark_as_running, [[:id, "*"]]
+    publish :mark_as_stopping, [[:id, "*"]]
+    publish :mark_as_stopped, [[:id, "*"]]
+    publish :mark_as_deleting, [[:id, "*"]]
     publish :mark_as_errored, [[:id, "*"]]
+    publish :update_from_device, [[:id, "*"]]
   end
 
   postgres do

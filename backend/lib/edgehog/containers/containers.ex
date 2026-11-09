@@ -350,10 +350,16 @@ defmodule Edgehog.Containers do
       define :fetch_container_deployment, action: :read, get_by_identity: :container_instance
       define :mark_container_deployment_as_sent, action: :mark_as_sent
       define :mark_container_deployment_as_received, action: :mark_as_received
+      define :mark_container_deployment_as_missing, action: :mark_as_missing
+      define :mark_container_deployment_as_creating, action: :mark_as_creating
       define :mark_container_deployment_as_created, action: :mark_as_created
-      define :mark_container_deployment_as_stopped, action: :mark_as_stopped
+      define :mark_container_deployment_as_starting, action: :mark_as_starting
       define :mark_container_deployment_as_running, action: :mark_as_running
-      define :mark_container_deployment_as_errored, action: :mark_as_errored, args: [:message]
+      define :mark_container_deployment_as_stopping, action: :mark_as_stopping
+      define :mark_container_deployment_as_stopped, action: :mark_as_stopped
+      define :mark_container_deployment_as_deleting, action: :mark_as_deleting
+      define :mark_container_deployment_as_errored, action: :mark_as_errored
+      define :update_container_deployment_from_device, action: :update_from_device
     end
 
     resource Deployment do
