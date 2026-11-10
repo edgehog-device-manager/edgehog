@@ -242,6 +242,10 @@ type UpgradeDeploymentModalProps = {
   systemModelName: string | undefined;
   isOnline: boolean;
   setErrorFeedback: (errorMessages: React.ReactNode) => void;
+  onUpgradeSuccess?: (params: {
+    newDeploymentId: string;
+    targetVersion: string;
+  }) => void;
 };
 
 type SelectOption = {
@@ -271,6 +275,7 @@ const UpgradeDeploymentModal = ({
   systemModelName,
   isOnline,
   setErrorFeedback,
+  onUpgradeSuccess,
 }: UpgradeDeploymentModalProps) => {
   const intl = useIntl();
   const navigate = useNavigate();
@@ -882,6 +887,13 @@ const UpgradeDeploymentModal = ({
             setErrorFeedback(null);
             onToggleModal(false);
 
+            if (onUpgradeSuccess) {
+              return onUpgradeSuccess({
+                newDeploymentId,
+                targetVersion: selectedReleaseNode?.version ?? "",
+              });
+            }
+
             return navigate({
               route: Route.deploymentEdit,
               params: { deviceId, deploymentId: newDeploymentId },
@@ -906,6 +918,7 @@ const UpgradeDeploymentModal = ({
     }
   }, [
     selectedRelease,
+    selectedReleaseNode,
     allRequiredMountsConfigured,
     allEnvJsonValid,
     containersWithMounts,
@@ -921,6 +934,7 @@ const UpgradeDeploymentModal = ({
     resetSelections,
     setErrorFeedback,
     onToggleModal,
+    onUpgradeSuccess,
     navigate,
   ]);
 

@@ -29,6 +29,7 @@ type DeploymentActionButtonsProps = {
   state: DeploymentState;
   isReady: boolean | null;
   isDeleting?: boolean;
+  isUpgrading?: boolean;
   onStart: () => void;
   onStop: () => void;
   onRedeploy: () => void;
@@ -40,6 +41,7 @@ const DeploymentActionButtons = ({
   state,
   isReady,
   isDeleting,
+  isUpgrading,
   onStart,
   onStop,
   onRedeploy,
@@ -67,6 +69,14 @@ const DeploymentActionButtons = ({
     }
 
     if (state === "STOPPED" || state === "ERROR") {
+      if (isUpgrading) {
+        return (
+          <Button className="btn p-0 border-0 bg-transparent" disabled>
+            <Icon icon="play" className="text-muted" />
+          </Button>
+        );
+      }
+
       return (
         <Button
           onClick={onStart}
@@ -112,7 +122,7 @@ const DeploymentActionButtons = ({
 
       <Button
         onClick={onUpgrade}
-        disabled={isDeleting || isNotReady}
+        disabled={isDeleting || isNotReady || isUpgrading}
         className="btn p-0 border-0 bg-transparent icon-click"
         title={intl.formatMessage({
           id: "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.upgradeButtonTitle",
