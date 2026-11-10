@@ -27,21 +27,109 @@ defmodule Edgehog.Repo.Migrations.SeparateImageSegments do
 
   use Ecto.Migration
 
+  import Ecto.Query
+
+  alias Edgehog.Repo
+
+  @image_ref ~r"""
+  \A
+  (?:
+    # Only treat the first segment as a registry if it has a dot,
+    # is "localhost", or is a single label followed by a port.
+    (?=[^/@:]*\. | localhost[:/] | [^/@:]+:\d+/)
+    (?<host>[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*)
+    (?::(?<port>\d+))?
+    /
+  )?
+  (?:
+    (?<repository>
+      [a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*
+      (?:/[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*)*
+    )
+    /
+  )?
+  (?<image>[a-z0-9]+(?:(?:[._]|__|-+)[a-z0-9]+)*)
+  (?::(?<tag>\w[\w.-]{0,127}))?
+  (?:@(?<digest>[A-Za-z][A-Za-z0-9]*(?:[-_+.][A-Za-z][A-Za-z0-9]*)*:[0-9a-fA-F]{32,}))?
+  \z
+  """x
+
   def up do
     alter table(:images) do
       add :registry_host, :text
       add :registry_port, :bigint
       add :repository, :text
-      add :image, :text, null: false
+      add :image, :text
       add :tag, :text
       add :digest, :text
+    end
+
+    flush()
+
+    query = from(image in "images", select: {image.id, image.reference})
+    stream = Repo.stream(query, skip_tenant_id: true, schema_migration: true)
+
+    Repo.transaction(fn ->
+      Enum.each(stream, fn {id, ref} ->
+        captures = Regex.named_captures(@image_ref, ref)
+
+        args = [
+          registry_host: blank_to_nil(captures["host"]),
+          registry_port: parse_port(captures["port"]),
+          repository: blank_to_nil(captures["repository"]),
+          image: captures["image"],
+          tag: blank_to_nil(captures["tag"]),
+          digest: blank_to_nil(captures["digest"])
+        ]
+
+        update_query = from(image in "images", where: image.id == ^id)
+        Repo.update_all(update_query, [set: args], skip_tenant_id: true, schema_migration: true)
+      end)
+    end)
+
+    alter table(:images) do
+      modify :image, :text, null: false
       remove :reference
     end
   end
 
   def down do
     alter table(:images) do
-      add :reference, :text, null: false
+      add :reference, :text
+    end
+
+    flush()
+
+    query =
+      from(image in "images",
+        select: %{
+          id: image.id,
+          registry_host: image.registry_host,
+          registry_port: image.registry_port,
+          repository: image.repository,
+          image: image.image,
+          tag: image.tag,
+          digest: image.digest
+        }
+      )
+
+    stream = Repo.stream(query, skip_tenant_id: true, schema_migration: true)
+
+    Repo.transaction(fn ->
+      Enum.each(stream, fn row ->
+        reference = build_reference(row)
+
+        update_query = from(image in "images", where: image.id == ^row.id)
+
+        Repo.update_all(update_query, [set: [reference: reference]],
+          skip_tenant_id: true,
+          schema_migration: true
+        )
+      end)
+    end)
+
+    alter table(:images) do
+      modify :reference, :text, null: false
       remove :digest
       remove :tag
       remove :image
@@ -50,4 +138,41 @@ defmodule Edgehog.Repo.Migrations.SeparateImageSegments do
       remove :registry_host
     end
   end
+
+  defp blank_to_nil(""), do: nil
+  defp blank_to_nil(value), do: value
+
+  defp parse_port(""), do: nil
+  defp parse_port(nil), do: nil
+  defp parse_port(port), do: String.to_integer(port)
+
+  defp build_reference(row) do
+    registry = build_registry(row.registry_host, row.registry_port)
+
+    prefix =
+      [registry, row.repository]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join("/")
+
+    name_with_prefix =
+      if prefix == "" do
+        row.image
+      else
+        "#{prefix}/#{row.image}"
+      end
+
+    name_with_prefix
+    |> append_tag(row.tag)
+    |> append_digest(row.digest)
+  end
+
+  defp build_registry(nil, _port), do: nil
+  defp build_registry(host, nil), do: host
+  defp build_registry(host, port), do: "#{host}:#{port}"
+
+  defp append_tag(ref, nil), do: ref
+  defp append_tag(ref, tag), do: "#{ref}:#{tag}"
+
+  defp append_digest(ref, nil), do: ref
+  defp append_digest(ref, digest), do: "#{ref}@#{digest}"
 end
