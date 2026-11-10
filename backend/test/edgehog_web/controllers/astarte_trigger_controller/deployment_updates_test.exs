@@ -75,13 +75,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       |> put_req_header("astarte-realm", realm.name)
       |> post(path, deployment_event)
       |> response(200)
-
-      # Deployment must be reloaded from the db
-      deployment =
-        Ash.get!(Deployment, deployment.id, tenant: tenant, load: :events)
-
-      assert [event] = deployment.events
-      assert event.type == :error
     end
 
     test "deployment events get queued (event with add_info field)", context do
@@ -115,14 +108,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       |> put_req_header("astarte-realm", realm.name)
       |> post(path, deployment_event)
       |> response(200)
-
-      # Deployment must be reloaded from the db
-      deployment =
-        Ash.get!(Deployment, deployment.id, tenant: tenant, load: :events)
-
-      assert [event] = deployment.events
-      assert event.type == :error
-      assert event.add_info == ["additional info about the event"]
     end
 
     test "Starting status does not update a Started deployment", context do

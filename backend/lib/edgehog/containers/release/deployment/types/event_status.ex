@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2025 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,9 +18,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release.Deployment.EventType do
+defmodule Edgehog.Containers.Release.Deployment.Types.EventStatus do
   @moduledoc """
-  Expresses the type of event a device can communicate to the backend trough the `DeploymentEvent` interface.
+  Expresses the status of an event a device can communicate to the backend through the `DeploymentEvent` interface.
   """
 
   use Ash.Type.Enum,
@@ -34,5 +34,5 @@ defmodule Edgehog.Containers.Release.Deployment.EventType do
       error: "The deployment encountered an error."
     ]
 
-  def graphql_type(_), do: :deployment_event_type
+  def graphql_type(_), do: :deployment_event_status
 end

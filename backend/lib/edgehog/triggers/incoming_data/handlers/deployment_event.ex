@@ -37,9 +37,12 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.DeploymentEvent do
 
     add_info = Map.get(event.value, "addInfo", [])
 
-    with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      event = %{type: state, message: message, add_info: add_info}
-      Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
+    with {:ok, _deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
+      _event = %{status: state, message: message, add_info: add_info}
+      # TODO: this was meant to trigger an event on the deployment.
+      # Here we should trigger an event for frontend users.
+      # Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
+      :ok
     end
   end
 end

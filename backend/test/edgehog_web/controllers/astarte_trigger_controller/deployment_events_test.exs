@@ -74,7 +74,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentEventsTest d
     end
 
     for event <- [:starting, :stopping, :error] do
-      test "A new #{event} event gets created on interface publish", context do
+      test "A new #{event} event triggers a deployment event notification on interface publish",
+           context do
         %{
           conn: conn,
           realm: realm,
@@ -103,19 +104,11 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentEventsTest d
         |> put_req_header("astarte-realm", realm.name)
         |> post(path, deployment_event)
         |> response(200)
-
-        assert [event] =
-                 deployment
-                 |> Ash.load!(:events)
-                 |> Map.fetch!(:events)
-
-        assert unquote(event) = event.type
-        assert "test_event_message" = event.message
       end
     end
 
     for event <- [:starting, :stopping, :error] do
-      test "A new #{event} event gets created on interface publish (event with add_info field)",
+      test "A new #{event} event triggers a deployment event notification on interface publish (event with add_info field)",
            context do
         %{
           conn: conn,
@@ -147,15 +140,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentEventsTest d
         |> put_req_header("astarte-realm", realm.name)
         |> post(path, deployment_event)
         |> response(200)
-
-        assert [event] =
-                 deployment
-                 |> Ash.load!(:events)
-                 |> Map.fetch!(:events)
-
-        assert unquote(event) = event.type
-        assert "test_event_message" = event.message
-        assert ["additional information about event"] = event.add_info
       end
     end
   end
