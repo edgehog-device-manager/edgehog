@@ -28,6 +28,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
   alias Ecto.Adapters.SQL
   alias Edgehog.Astarte.Device.DeploymentCommand
+  alias Edgehog.Astarte.Device.ResourceEvent
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
@@ -39,6 +40,8 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->
       :ok
     end)
+
+    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id -> {:ok, []} end)
 
     %{tenant: tenant_fixture()}
   end
@@ -766,6 +769,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentStopExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatus,
+    ResourceEvent,
     DeploymentCommand
   ]
 

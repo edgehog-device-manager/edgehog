@@ -376,15 +376,12 @@ defmodule Edgehog.Containers do
       define :run_ready_actions, action: :run_ready_actions
       define :set_deployment_state, action: :set_state
       define :send_deployment, action: :send_deployment
-      define :append_deployment_event, action: :append_event
 
       define :mark_deployment_as_sent, action: :mark_as_sent
       define :mark_deployment_as_started, action: :mark_as_started
       define :mark_deployment_as_stopped, action: :mark_as_stopped
       define :mark_deployment_as_timed_out, action: :mark_as_timed_out
     end
-
-    resource Edgehog.Containers.Release.Deployment.Event
 
     resource Edgehog.Containers.Image do
       define :fetch_image, action: :read, get_by: [:id]
