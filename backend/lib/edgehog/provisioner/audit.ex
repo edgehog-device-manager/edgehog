@@ -53,6 +53,8 @@ defmodule Edgehog.Provisioner.Audit do
     quote do
       @behaviour Audit.Behaviour
 
+      alias Edgehog.Audit.AuditService
+
       require Logger
 
       @impl Audit.Behaviour
@@ -75,14 +77,17 @@ defmodule Edgehog.Provisioner.Audit do
       end
 
       @impl Audit.Behaviour
-      def sent_to_device(%{id: id} = resource, %{device_id: device_id} = _device) do
+      def sent_to_device(%{id: id} = resource, %{device_id: device_id} = _device, tenant) do
         name = Info.short_name(resource)
 
-        Logger.debug("Resource #{id} of type #{inspect(name)} sent to the device #{device_id}")
+        AuditService.debug(
+          "Resource #{id} of type #{inspect(name)} sent to the device #{device_id}",
+          tenant: tenant
+        )
       end
 
       @impl Audit.Behaviour
-      def api_error(%{id: id} = resource, error) do
+      def api_error(%{id: id} = resource, error, _tenant) do
         name = Info.short_name(resource)
 
         Logger.debug("Error #{inspect(error)} on resource #{id} of type #{inspect(name)}")

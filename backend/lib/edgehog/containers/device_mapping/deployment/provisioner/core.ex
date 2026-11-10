@@ -57,7 +57,7 @@ defmodule Edgehog.Containers.DeviceMapping.Deployment.Provisioner.Core do
            Devices.send_create_device_mapping_request(device, actual_resource, deployment,
              tenant: tenant
            ) do
-      Audit.sent_to_device(actual_resource, device)
+      Audit.sent_to_device(actual_resource, device, tenant)
     end
   end
 

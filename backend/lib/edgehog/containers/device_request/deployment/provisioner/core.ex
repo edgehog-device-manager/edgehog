@@ -57,7 +57,7 @@ defmodule Edgehog.Containers.DeviceRequest.Deployment.Provisioner.Core do
            Devices.send_create_device_request_request(device, actual_resource, deployment,
              tenant: tenant
            ) do
-      Audit.sent_to_device(actual_resource, device)
+      Audit.sent_to_device(actual_resource, device, tenant)
     end
   end
 

@@ -160,6 +160,54 @@ defmodule Edgehog.Audit.AuditServiceTest do
     end
   end
 
+  describe "convenience functions" do
+    test "info/2, warning/2, error/2 and debug/2 use the correct log levels", %{
+      tenant: tenant
+    } do
+      stub(Config, :audit_log_events?, fn -> false end)
+      stub(Config, :audit_store_events?, fn -> true end)
+
+      assert :ok = AuditService.info("info event", tenant: tenant)
+      assert :ok = AuditService.warning("warning event", tenant: tenant)
+      assert :ok = AuditService.error("error event", tenant: tenant)
+      assert :ok = AuditService.debug("debug event", tenant: tenant)
+
+      events = Ash.read!(Event, tenant: tenant)
+
+      assert length(events) == 4
+
+      assert Map.new(events, &{&1.message, &1.log_level}) == %{
+               "info event" => :info,
+               "warning event" => :warning,
+               "error event" => :error,
+               "debug event" => :debug
+             }
+    end
+
+    test "convenience functions pass metadata and Ash action information", %{tenant: tenant} do
+      stub(Config, :audit_log_events?, fn -> false end)
+      stub(Config, :audit_store_events?, fn -> true end)
+
+      record_id = Ash.UUIDv7.generate()
+      ash_action_info = action_event_info(record_id)
+
+      assert :ok =
+               AuditService.info(
+                 "event with details",
+                 tenant: tenant,
+                 metadata: %{resource_type: "container_deployment"},
+                 ash_action_info: ash_action_info
+               )
+
+      assert [event] = Ash.read!(Event, tenant: tenant)
+      assert event.message == "event with details"
+      assert event.metadata == %{"resource_type" => "container_deployment"}
+      assert event.ash_action_info.resource_module == Edgehog.Devices.Device
+      assert %Ash.Union{value: ^record_id, type: :uuid} = event.ash_action_info.record_id
+      assert event.tenant_id == tenant.tenant_id
+    end
+  end
+
   defp action_event_info(record_id) do
     %{
       resource_module: Edgehog.Devices.Device,
