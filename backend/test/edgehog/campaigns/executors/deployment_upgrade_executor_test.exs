@@ -31,7 +31,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   alias Edgehog.Astarte.Device.DeploymentCommand
   alias Edgehog.Astarte.Device.DeploymentUpdate
   alias Edgehog.Astarte.Device.FileTransferCapabilities
-  alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.ResourceEvent
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
@@ -43,6 +43,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
   setup do
     # Stub the deployment request mock (for upgrade/deploy operation)
     stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
+    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id -> {:ok, []} end)
 
     # Stub the deployment command mock (for start operation after upgrade)
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->
@@ -951,6 +952,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentUpgradeExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatus,
+    ResourceEvent,
     Deployment.Orchestrator,
     DeploymentCommand,
     FileTransferCapabilities

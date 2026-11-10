@@ -124,11 +124,29 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     file_bind: file_bind
   } do
     device_id = device.device_id
+    deployment_id = deployment.id
     env_file_id = env_file.id
     file_bind_id = file_bind.id
 
-    expect(ResourceEvent, :get, 6, fn _client, ^device_id, interface, resource_id ->
+    expect(ResourceEvent, :get, 7, fn _client, ^device_id, interface, resource_id ->
       case {interface, resource_id} do
+        {"io.edgehog.devicemanager.apps.DeploymentEvent", ^deployment_id} ->
+          {:ok,
+           [
+             %ResourceEvent{
+               status: "Starting",
+               message: "Deployment starting",
+               add_info: ["release=1.0.0"],
+               timestamp: ~U[2026-03-19 09:54:00Z]
+             },
+             %ResourceEvent{
+               status: "Started",
+               message: "Deployment started",
+               add_info: [],
+               timestamp: ~U[2026-03-19 10:03:00Z]
+             }
+           ]}
+
         {"io.edgehog.devicemanager.apps.ContainerEvent", ^container_id} ->
           {:ok,
            [
@@ -212,6 +230,12 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     document = """
     query($id: ID!) {
       deployment(id: $id) {
+        events {
+          status
+          message
+          addInfo
+          timestamp
+        }
         containerDeployments {
           edges {
             node {
@@ -282,6 +306,21 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
       [tenant: tenant, id: id, document: document]
       |> get_deployment()
       |> extract_result!()
+
+    assert [
+             %{
+               "status" => "STARTING",
+               "message" => "Deployment starting",
+               "addInfo" => ["release=1.0.0"],
+               "timestamp" => "2026-03-19T09:54:00Z"
+             },
+             %{
+               "status" => "STARTED",
+               "message" => "Deployment started",
+               "addInfo" => [],
+               "timestamp" => "2026-03-19T10:03:00Z"
+             }
+           ] = result["events"]
 
     assert [%{"node" => container_node}] = result["containerDeployments"]["edges"]
 
@@ -379,17 +418,27 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     container_id: container_id
   } do
     device_id = device.device_id
+    deployment_id = deployment.id
 
-    expect(ResourceEvent, :get, fn _client,
-                                   ^device_id,
-                                   "io.edgehog.devicemanager.apps.ContainerEvent",
-                                   ^container_id ->
-      {:ok, []}
+    expect(ResourceEvent, :get, 2, fn _client, ^device_id, interface, resource_id ->
+      case {interface, resource_id} do
+        {"io.edgehog.devicemanager.apps.DeploymentEvent", ^deployment_id} ->
+          {:ok, []}
+
+        {"io.edgehog.devicemanager.apps.ContainerEvent", ^container_id} ->
+          {:ok, []}
+      end
     end)
 
     document = """
     query($id: ID!) {
       deployment(id: $id) {
+        events {
+          status
+          message
+          addInfo
+          timestamp
+        }
         containerDeployments {
           edges {
             node {
@@ -411,6 +460,8 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
       [tenant: tenant, id: id, document: document]
       |> get_deployment()
       |> extract_result!()
+
+    assert result["events"] == []
 
     assert [%{"node" => %{"events" => []}}] =
              result["containerDeployments"]["edges"]
@@ -423,17 +474,27 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     container_id: container_id
   } do
     device_id = device.device_id
+    deployment_id = deployment.id
 
-    expect(ResourceEvent, :get, fn _client,
-                                   ^device_id,
-                                   "io.edgehog.devicemanager.apps.ContainerEvent",
-                                   ^container_id ->
-      {:error, :astarte_error}
+    expect(ResourceEvent, :get, 2, fn _client, ^device_id, interface, resource_id ->
+      case {interface, resource_id} do
+        {"io.edgehog.devicemanager.apps.DeploymentEvent", ^deployment_id} ->
+          {:error, :astarte_error}
+
+        {"io.edgehog.devicemanager.apps.ContainerEvent", ^container_id} ->
+          {:error, :astarte_error}
+      end
     end)
 
     document = """
     query($id: ID!) {
       deployment(id: $id) {
+        events {
+          status
+          message
+          addInfo
+          timestamp
+        }
         containerDeployments {
           edges {
             node {
@@ -455,6 +516,8 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
       [tenant: tenant, id: id, document: document]
       |> get_deployment()
       |> extract_result!()
+
+    assert result["events"] == nil
 
     assert [%{"node" => %{"events" => nil}}] =
              result["containerDeployments"]["edges"]
