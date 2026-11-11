@@ -1006,6 +1006,10 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
 
       updated = Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant)
       assert updated.state == :received
+      assert is_nil(updated.exit_code)
+      assert is_nil(updated.health_status)
+      assert is_nil(updated.health_failed_count)
+      assert is_nil(updated.restart_count)
     end
 
     test "AvailableContainers with Running status marks container as running", context do
@@ -1076,6 +1080,49 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
 
       updated = Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant)
       assert updated.state == :stopped
+    end
+
+    test "AvailableContainers updates container runtime fields", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release = release_fixture(containers: 1, tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
+        |> deployment_fixture()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      for {property, value} <- [
+            {"exitCode", 17},
+            {"health/status", "Healthy"},
+            {"health/failed", 2},
+            {"restartCount", 3}
+          ] do
+        event = %{
+          device_id: device.device_id,
+          event: %{
+            type: "incoming_data",
+            interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+            path: "/" <> container_deployment.container_id <> "/" <> property,
+            value: value
+          },
+          timestamp: DateTime.to_iso8601(DateTime.utc_now())
+        }
+
+        build_conn()
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, event)
+        |> response(200)
+      end
+
+      updated = Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant)
+      assert updated.exit_code == 17
+      assert updated.health_status == :healthy
+      assert updated.health_failed_count == 2
+      assert updated.restart_count == 3
     end
 
     test "AvailableContainers with nil destroys container deployment", context do

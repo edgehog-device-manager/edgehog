@@ -1,4 +1,6 @@
 {
-  "ash_functions_version": 6,
-  "installed": ["ash-functions"]
+  "ash_functions_version": 7,
+  "installed": [
+    "ash-functions"
+  ]
 }

@@ -38,6 +38,19 @@ defmodule Edgehog.Containers.Reconciler.Core do
   # 5 minmutes
   @five_min 5 * 60 * 1000
 
+  @container_states %{
+    "Received" => {:received, &Containers.mark_container_deployment_as_received/2},
+    "Missing" => {:missing, &Containers.mark_container_deployment_as_missing/2},
+    "Creating" => {:creating, &Containers.mark_container_deployment_as_creating/2},
+    "Created" => {:device_created, &Containers.mark_container_deployment_as_created/2},
+    "Starting" => {:starting, &Containers.mark_container_deployment_as_starting/2},
+    "Running" => {:running, &Containers.mark_container_deployment_as_running/2},
+    "Stopping" => {:stopping, &Containers.mark_container_deployment_as_stopping/2},
+    "Stopped" => {:stopped, &Containers.mark_container_deployment_as_stopped/2},
+    "Deleting" => {:deleting, &Containers.mark_container_deployment_as_deleting/2},
+    "Errored" => {:error, &Containers.mark_container_deployment_as_errored/2}
+  }
+
   @spec reconcile(%{device_id: integer(), tenant: Edgehog.Tenants.Tenant.t()}) ::
           :ok | {:error, term()}
   def reconcile(%{device_id: device_id, tenant: tenant}) do
@@ -253,20 +266,8 @@ defmodule Edgehog.Containers.Reconciler.Core do
           "state #{inspect(container_deployment.state)} inconsistent with property in astarte: #{inspect(container_desc.status)}"
       )
 
-      marking =
-        case container_desc.status do
-          "Received" ->
-            Containers.mark_container_deployment_as_received(container_deployment, tenant: tenant)
-
-          "Created" ->
-            Containers.mark_container_deployment_as_created(container_deployment, tenant: tenant)
-
-          "Running" ->
-            Containers.mark_container_deployment_as_running(container_deployment, tenant: tenant)
-
-          "Stopped" ->
-            Containers.mark_container_deployment_as_stopped(container_deployment, tenant: tenant)
-        end
+      {_, mark} = Map.fetch!(@container_states, container_desc.status)
+      marking = mark.(container_deployment, tenant: tenant)
 
       with {:ok, _} <- marking, do: :ok
     end
@@ -309,11 +310,8 @@ defmodule Edgehog.Containers.Reconciler.Core do
   defp reconcile_device_mapping?(_, _), do: :reconcile
 
   defp reconcile_container?(state, status) do
-    case {state, status} do
-      {:received, "Received"} -> :ok
-      {:device_created, "Created"} -> :ok
-      {:stopped, "Stopped"} -> :ok
-      {:running, "Running"} -> :ok
+    case Map.fetch(@container_states, status) do
+      {:ok, {^state, _mark}} -> :ok
       _ -> :reconcile
     end
   end
