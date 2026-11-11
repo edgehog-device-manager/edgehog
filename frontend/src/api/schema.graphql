@@ -1101,12 +1101,54 @@ enum DeviceLedBehavior {
   SLOW_BLINK
 }
 
+enum EnvFileEventStatus {
+  ERROR
+}
+
+enum FileBindEventStatus {
+  ERROR
+}
+
+enum VolumeDeploymentEventStatus {
+  CREATE
+  DESTROY
+  ERROR
+  MOUNT
+  PRUNE
+  UNMOUNT
+}
+
 enum VolumeCommand {
   "Delete the volume."
   DELETE
 }
 
-enum DeploymentEventType {
+enum NetworkDeploymentEventStatus {
+  CONNECT
+  CREATE
+  DESTROY
+  DISCONNECT
+  ERROR
+  PRUNE
+  REMOVE
+  UPDATE
+}
+
+enum ImageDeploymentEventStatus {
+  CREATE
+  DELETE
+  ERROR
+  IMPORT
+  LOAD
+  PRUNE
+  PULL
+  PUSH
+  SAVE
+  TAG
+  UNTAG
+}
+
+enum DeploymentEventStatus {
   "The deployment is getting deleted."
   DELETING
 
@@ -1143,6 +1185,35 @@ enum ApplicationDeploymentState {
   STOPPED
 }
 
+enum ContainerDeploymentEventStatus {
+  ATTACH
+  COMMIT
+  COPY
+  CREATE
+  DESTROY
+  DETACH
+  DIE
+  ERROR
+  EXEC_CREATE
+  EXEC_DETACH
+  EXEC_DIE
+  EXEC_START
+  EXPORT
+  HEALTH_STATUS
+  KILL
+  OOM
+  PAUSE
+  PRUNE
+  RENAME
+  RESIZE
+  RESTART
+  START
+  STOP
+  TOP
+  UNPAUSE
+  UPDATE
+}
+
 input FileDataInput {
   url: String!
   digest: String!
@@ -1151,6 +1222,108 @@ input FileDataInput {
 type FileData {
   url: String!
   digest: String!
+}
+
+type EnvFileEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this env file event."
+  status: EnvFileEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type FileBindEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this file bind event."
+  status: FileBindEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type VolumeDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this volume event."
+  status: VolumeDeploymentEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type NetworkDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this network event."
+  status: NetworkDeploymentEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type ImageDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this image event."
+  status: ImageDeploymentEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
+}
+
+type DeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this deployment event."
+  status: DeploymentEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
 }
 
 input EnvFileSpecInput {
@@ -1197,6 +1370,23 @@ type DeploymentConfigSpec {
   envFiles: [EnvFileSpec]
   env: [ContainerEnvVar]
   containerId: ID!
+}
+
+type ContainerDeploymentEvent {
+  "The timestamp when the event was recorded by Astarte."
+  timestamp: DateTime
+
+  "The status value reported by the device for this container event."
+  status: ContainerDeploymentEventStatus!
+
+  "The GraphQL Relay ID of the resource deployment that emitted this event."
+  resourceId: ID!
+
+  "Additional human-readable context or error details reported with the event."
+  message: String!
+
+  "Additional information or diagnostic details for the event."
+  addInfo: [String!]!
 }
 
 input DeviceRequestDescInput {
@@ -2169,6 +2359,9 @@ type EnvFile implements Node {
   uploadUrl: String
 
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this env file."
+  events: [EnvFileEvent!]
 }
 
 "The result of the :mark_file_bind_as_uploaded mutation"
@@ -2533,6 +2726,9 @@ type FileBind implements Node {
   uploadUrl: String
 
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this file bind."
+  events: [FileBindEvent!]
 }
 
 ":release_container_dependencies connection"
@@ -3230,6 +3426,15 @@ type volume_deployments_by_device_result {
   destroyed: ID
 }
 
+"The result of the :send_volume_command mutation"
+type SendVolumeCommandResult {
+  "The successful result of the mutation"
+  result: VolumeDeployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 enum VolumeDeploymentSortField {
   ID
   STATE
@@ -3329,9 +3534,13 @@ input VolumeDeploymentSortInput {
 
 type VolumeDeployment {
   id: ID!
+
   state: String
+
   volumeId: ID
+
   volume: Volume
+
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -3345,22 +3554,17 @@ type VolumeDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this volume deployment."
+  events: [VolumeDeploymentEvent!]
 }
 
 type volume_result {
   created: Volume
   updated: Volume
   destroyed: ID
-}
-
-"The result of the :send_volume_command mutation"
-type SendVolumeCommandResult {
-  "The successful result of the mutation"
-  result: Volume
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
 }
 
 "The result of the :delete_volume mutation"
@@ -3668,9 +3872,13 @@ input NetworkDeploymentSortInput {
 
 type NetworkDeployment {
   id: ID!
+
   state: String
+
   networkId: ID
+
   network: Network
+
   containerDeployments(
     "How to sort the records in the response"
     sort: [ContainerDeploymentSortInput]
@@ -3684,7 +3892,11 @@ type NetworkDeployment {
     "The number of records to skip."
     offset: Int
   ): [ContainerDeployment!]!
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this network deployment."
+  events: [NetworkDeploymentEvent!]
 }
 
 type network_result {
@@ -4384,10 +4596,17 @@ input ImageDeploymentFilterInput {
 
 type ImageDeployment {
   id: ID!
+
   state: String
+
   imageId: ID
+
   image: Image
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this image deployment."
+  events: [ImageDeploymentEvent!]
 }
 
 type image_result {
@@ -4600,134 +4819,6 @@ type Image {
   ): [Container!]!
   reference: String!
   hash: String!
-}
-
-type deployment_event_result {
-  created: DeploymentEvent
-}
-
-enum DeploymentEventSortField {
-  ID
-  TYPE
-  MESSAGE
-  INSERTED_AT
-  UPDATED_AT
-}
-
-":deployment_event connection"
-type DeploymentEventConnection {
-  "Total count on all pages"
-  count: Int
-
-  "Page information"
-  pageInfo: PageInfo!
-
-  ":deployment_event edges"
-  edges: [DeploymentEventEdge!]
-}
-
-":deployment_event edge"
-type DeploymentEventEdge {
-  "Cursor"
-  cursor: String!
-
-  ":deployment_event node"
-  node: DeploymentEvent!
-}
-
-input DeploymentEventFilterUpdatedAt {
-  isNil: Boolean
-  eq: DateTime
-  notEq: DateTime
-  in: [DateTime!]
-  lessThan: DateTime
-  greaterThan: DateTime
-  lessThanOrEqual: DateTime
-  greaterThanOrEqual: DateTime
-  isDistinctFrom: DateTime
-  isNotDistinctFrom: DateTime
-}
-
-input DeploymentEventFilterInsertedAt {
-  isNil: Boolean
-  eq: DateTime
-  notEq: DateTime
-  in: [DateTime!]
-  lessThan: DateTime
-  greaterThan: DateTime
-  lessThanOrEqual: DateTime
-  greaterThanOrEqual: DateTime
-  isDistinctFrom: DateTime
-  isNotDistinctFrom: DateTime
-}
-
-input DeploymentEventFilterMessage {
-  isNil: Boolean
-  eq: String
-  notEq: String
-  in: [String]
-  lessThan: String
-  greaterThan: String
-  lessThanOrEqual: String
-  greaterThanOrEqual: String
-  contains: String
-  isDistinctFrom: String
-  isNotDistinctFrom: String
-  stringEndsWith: String
-  stringStartsWith: String
-  like: String
-  ilike: String
-}
-
-input DeploymentEventFilterType {
-  isNil: Boolean
-  eq: DeploymentEventType
-  notEq: DeploymentEventType
-  in: [DeploymentEventType!]
-  lessThan: DeploymentEventType
-  greaterThan: DeploymentEventType
-  lessThanOrEqual: DeploymentEventType
-  greaterThanOrEqual: DeploymentEventType
-  isDistinctFrom: DeploymentEventType
-  isNotDistinctFrom: DeploymentEventType
-}
-
-input DeploymentEventFilterId {
-  isNil: Boolean
-  eq: ID
-  notEq: ID
-  in: [ID!]
-  lessThan: ID
-  greaterThan: ID
-  lessThanOrEqual: ID
-  greaterThanOrEqual: ID
-  isDistinctFrom: ID
-  isNotDistinctFrom: ID
-}
-
-input DeploymentEventFilterInput {
-  and: [DeploymentEventFilterInput!]
-  or: [DeploymentEventFilterInput!]
-  not: [DeploymentEventFilterInput!]
-  id: DeploymentEventFilterId
-  type: DeploymentEventFilterType
-  message: DeploymentEventFilterMessage
-  insertedAt: DeploymentEventFilterInsertedAt
-  updatedAt: DeploymentEventFilterUpdatedAt
-}
-
-input DeploymentEventSortInput {
-  order: SortOrder
-  field: DeploymentEventSortField!
-}
-
-type DeploymentEvent {
-  id: ID!
-  type: DeploymentEventType!
-  message: String
-  addInfo: [String!]
-  insertedAt: DateTime!
-  updatedAt: DateTime!
 }
 
 type deployments_by_device_result {
@@ -4944,8 +5035,6 @@ input DeploymentFilterInput {
 
   containerDeployments: ContainerDeploymentFilterInput
 
-  events: DeploymentEventFilterInput
-
   """
   The deployment target of a deployment campaign that created this deployment.
   Only returns targets for deploy and upgrade operation campaigns.
@@ -4994,26 +5083,6 @@ type Deployment implements Node {
     last: Int
   ): ContainerDeploymentConnection!
 
-  events(
-    "How to sort the records in the response"
-    sort: [DeploymentEventSortInput]
-
-    "A filter to limit the results"
-    filter: DeploymentEventFilterInput
-
-    "The number of records to return from the beginning. Maximum 250"
-    first: Int
-
-    "Show records before the specified keyset."
-    before: String
-
-    "Show records after the specified keyset."
-    after: String
-
-    "The number of records to return to the end. Maximum 250"
-    last: Int
-  ): DeploymentEventConnection!
-
   """
   The deployment target of a deployment campaign that created this deployment.
   Only returns targets for deploy and upgrade operation campaigns.
@@ -5022,12 +5091,19 @@ type Deployment implements Node {
   campaignTarget: CampaignTarget
 
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this deployment."
+  events: [DeploymentEvent!]
 }
 
 enum ContainerDeploymentSortField {
   ID
   STATE
   ENV_STRATEGY
+  EXIT_CODE
+  HEALTH_STATUS
+  HEALTH_FAILED_COUNT
+  RESTART_COUNT
   CONTAINER_ID
   DEVICE_ID
   IMAGE_DEPLOYMENT_ID
@@ -5093,6 +5169,58 @@ input ContainerDeploymentFilterContainerId {
   isNotDistinctFrom: ID
 }
 
+input ContainerDeploymentFilterRestartCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerDeploymentFilterHealthFailedCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerDeploymentFilterHealthStatus {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
+input ContainerDeploymentFilterExitCode {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
 input ContainerDeploymentFilterEnvStrategy {
   isNil: Boolean
   eq: String
@@ -5139,6 +5267,10 @@ input ContainerDeploymentFilterInput {
   id: ContainerDeploymentFilterId
   state: ContainerDeploymentFilterState
   envStrategy: ContainerDeploymentFilterEnvStrategy
+  exitCode: ContainerDeploymentFilterExitCode
+  healthStatus: ContainerDeploymentFilterHealthStatus
+  healthFailedCount: ContainerDeploymentFilterHealthFailedCount
+  restartCount: ContainerDeploymentFilterRestartCount
   containerId: ContainerDeploymentFilterContainerId
   deviceId: ContainerDeploymentFilterDeviceId
   imageDeploymentId: ContainerDeploymentFilterImageDeploymentId
@@ -5160,15 +5292,33 @@ input ContainerDeploymentSortInput {
 
 type ContainerDeployment {
   id: ID!
+
   state: String
+
   env: [ContainerEnvVar!]!
+
   envStrategy: String!
+
+  exitCode: Int
+
+  healthStatus: String
+
+  healthFailedCount: Int
+
+  restartCount: Int
+
   containerId: ID
+
   deviceId: Int
+
   imageDeploymentId: ID
+
   container: Container
+
   device: Device
+
   imageDeployment: ImageDeployment
+
   networkDeployments(
     "How to sort the records in the response"
     sort: [NetworkDeploymentSortInput]
@@ -5188,6 +5338,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): NetworkDeploymentConnection!
+
   volumeDeployments(
     "How to sort the records in the response"
     sort: [VolumeDeploymentSortInput]
@@ -5207,6 +5358,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): VolumeDeploymentConnection!
+
   deviceMappingDeployments(
     "How to sort the records in the response"
     sort: [DeviceMappingDeploymentSortInput]
@@ -5226,6 +5378,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceMappingDeploymentConnection!
+
   deviceRequestDeployments(
     "How to sort the records in the response"
     sort: [DeviceRequestDeploymentSortInput]
@@ -5245,6 +5398,7 @@ type ContainerDeployment {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceRequestDeploymentConnection!
+
   fileBinds(
     "How to sort the records in the response"
     sort: [FileBindSortInput]
@@ -5258,6 +5412,7 @@ type ContainerDeployment {
     "The number of records to skip."
     offset: Int
   ): [FileBind!]!
+
   envFiles(
     "How to sort the records in the response"
     sort: [EnvFileSortInput]
@@ -5271,7 +5426,11 @@ type ContainerDeployment {
     "The number of records to skip."
     offset: Int
   ): [EnvFile!]!
+
   isReady: Boolean
+
+  "Lifecycle events reported by the device for this container deployment."
+  events: [ContainerDeploymentEvent!]
 }
 
 enum ContainerFileMountSortField {
@@ -11956,12 +12115,8 @@ type RootMutationType {
   "Delete a volume if not used by any container."
   deleteVolume(id: ID!): DeleteVolumeResult
 
-  "Send a command to a volume on a device."
-  sendVolumeCommand(
-    id: ID!
-    deviceId: ID!
-    command: VolumeCommand!
-  ): SendVolumeCommandResult
+  "Send a command to a volume deployment."
+  sendVolumeCommand(id: ID!, command: VolumeCommand!): SendVolumeCommandResult
 
   "Marks the file uploaded through the presigned upload URL as uploaded."
   markFileBindAsUploaded(
@@ -12014,157 +12169,207 @@ type RootMutationType {
 }
 
 type RootSubscriptionType {
+  "Subscribes to events for a release deployment and all of its child container resources."
+  releaseDeploymentEvents(id: ID!): ReleaseDeploymentEventPayload
+
+  "Subscribes to events for a container deployment and all of its child resources."
+  containerDeploymentEvents(id: ID!): ContainerDeploymentEventPayload
+
+  "Subscribes to events for an image deployment."
+  imageDeploymentEvents(id: ID!): ImageDeploymentEvent
+
+  "Subscribes to events for a volume deployment."
+  volumeDeploymentEvents(id: ID!): VolumeDeploymentEvent
+
+  "Subscribes to events for a network deployment."
+  networkDeploymentEvents(id: ID!): NetworkDeploymentEvent
+
+  "Subscribes to events for an env file deployment."
+  envFileDeploymentEvents(id: ID!): EnvFileEvent
+
+  "Subscribes to events for a file bind deployment."
+  fileBindDeploymentEvents(id: ID!): FileBindEvent
+
   campaigns(
     "A filter to limit the results"
     filter: CampaignFilterInput
   ): campaigns_result
+
   deploymentCampaigns(
     "A filter to limit the results"
     filter: CampaignFilterInput
   ): deployment_campaigns_result
+
   updateCampaigns(
     "A filter to limit the results"
     filter: CampaignFilterInput
   ): update_campaigns_result
+
   fileDownloadCampaigns(
     "A filter to limit the results"
     filter: CampaignFilterInput
   ): file_download_campaigns_result
+
   campaign(
     "A filter to limit the results"
     filter: CampaignFilterInput
 
     id: ID!
   ): campaign_result
+
   campaignTargetsByCampaign(
     "A filter to limit the results"
     filter: CampaignTargetFilterInput
 
     campaignId: ID!
   ): campaign_targets_by_campaign_result
+
   channels(
     "A filter to limit the results"
     filter: ChannelFilterInput
   ): channels_result
+
   otaOperation(
     "A filter to limit the results"
     filter: OtaOperationFilterInput
   ): ota_operation_result
+
   deviceGroup(
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
   ): device_group_result
+
   fileDownloadRequests(
     "A filter to limit the results"
     filter: FileDownloadRequestFilterInput
   ): file_download_requests_result
+
   fileDownloadRequestsByDevice(
     "A filter to limit the results"
     filter: FileDownloadRequestFilterInput
 
     deviceId: ID!
   ): file_download_requests_by_device_result
+
   fileUploadRequests(
     "A filter to limit the results"
     filter: FileUploadRequestFilterInput
   ): file_upload_requests_result
+
   fileUploadRequestsByDevice(
     "A filter to limit the results"
     filter: FileUploadRequestFilterInput
 
     deviceId: ID!
   ): file_upload_requests_by_device_result
+
   fileDeleteRequests(
     "A filter to limit the results"
     filter: FileDeleteRequestFilterInput
   ): file_delete_requests_result
+
   fileDeleteRequestsByDevice(
     "A filter to limit the results"
     filter: FileDeleteRequestFilterInput
 
     deviceId: ID!
   ): file_delete_requests_by_device_result
+
   deviceFiles(
     "A filter to limit the results"
     filter: DeviceFileFilterInput
   ): device_files_result
+
   deviceFilesByDevice(
     "A filter to limit the results"
     filter: DeviceFileFilterInput
 
     deviceId: ID!
   ): device_files_by_device_result
+
   deviceChanged(
     "A filter to limit the results"
     filter: DeviceFilterInput
   ): device_changed_result
+
   hardwareType(
     "A filter to limit the results"
     filter: HardwareTypeFilterInput
   ): hardware_type_result
+
   hardwareTypePartNumber(
     "A filter to limit the results"
     filter: HardwareTypePartNumberFilterInput
   ): hardware_type_part_number_result
+
   systemModelPartNumber(
     "A filter to limit the results"
     filter: SystemModelPartNumberFilterInput
   ): system_model_part_number_result
+
   application(
     "A filter to limit the results"
     filter: ApplicationFilterInput
   ): application_result
+
   container(
     "A filter to limit the results"
     filter: ContainerFilterInput
   ): container_result
+
   deployment(
     "A filter to limit the results"
     filter: DeploymentFilterInput
   ): deployment_result
+
   deploymentById(
     "A filter to limit the results"
     filter: DeploymentFilterInput
 
     deploymentId: ID!
   ): deployment_by_id_result
+
   deploymentsByDevice(
     "A filter to limit the results"
     filter: DeploymentFilterInput
 
     deviceId: ID!
   ): deployments_by_device_result
-  deploymentEvent(
-    "A filter to limit the results"
-    filter: DeploymentEventFilterInput
-  ): deployment_event_result
+
   image("A filter to limit the results" filter: ImageFilterInput): image_result
+
   imageCredentials(
     "A filter to limit the results"
     filter: ImageCredentialsFilterInput
   ): image_credentials_result
+
   release(
     "A filter to limit the results"
     filter: ReleaseFilterInput
   ): release_result
+
   network(
     "A filter to limit the results"
     filter: NetworkFilterInput
   ): network_result
+
   volume(
     "A filter to limit the results"
     filter: VolumeFilterInput
   ): volume_result
+
   volumeDeploymentsByDevice(
     "A filter to limit the results"
     filter: VolumeDeploymentFilterInput
 
     deviceId: ID!
   ): volume_deployments_by_device_result
+
   baseImage(
     "A filter to limit the results"
     filter: BaseImageFilterInput
   ): base_image_result
+
   baseImageCollection(
     "A filter to limit the results"
     filter: BaseImageCollectionFilterInput
@@ -12195,6 +12400,25 @@ scalar DateTime
 
 "Represents an uploaded file."
 scalar Upload
+
+"An event occurring on a release deployment or any of its child container resources."
+union ReleaseDeploymentEventPayload =
+  | DeploymentEvent
+  | ContainerDeploymentEvent
+  | ImageDeploymentEvent
+  | VolumeDeploymentEvent
+  | NetworkDeploymentEvent
+  | EnvFileEvent
+  | FileBindEvent
+
+"An event occurring on a container deployment or any of its child resources."
+union ContainerDeploymentEventPayload =
+  | ContainerDeploymentEvent
+  | ImageDeploymentEvent
+  | VolumeDeploymentEvent
+  | NetworkDeploymentEvent
+  | EnvFileEvent
+  | FileBindEvent
 
 """
 Describes hardware-related info of a device.
