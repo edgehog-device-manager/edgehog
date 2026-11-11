@@ -641,11 +641,104 @@
   "components.apps.deployments.deployment-event-message.DeploymentEventMessage.noShortMessage": {
     "defaultMessage": "No short message. Click to show extended info."
   },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Attach": {
+    "defaultMessage": "Attach"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Commit": {
+    "defaultMessage": "Commit"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Connect": {
+    "defaultMessage": "Connect"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Copy": {
+    "defaultMessage": "Copy"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Create": {
+    "defaultMessage": "Create"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Delete": {
+    "defaultMessage": "Delete"
+  },
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Deleting": {
     "defaultMessage": "Deleting"
   },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Destroy": {
+    "defaultMessage": "Destroy"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Detach": {
+    "defaultMessage": "Detach"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Die": {
+    "defaultMessage": "Die"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Disconnect": {
+    "defaultMessage": "Disconnect"
+  },
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Error": {
     "defaultMessage": "Error"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.ExecCreate": {
+    "defaultMessage": "Exec Create"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.ExecDetach": {
+    "defaultMessage": "Exec Detach"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.ExecDie": {
+    "defaultMessage": "Exec Die"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.ExecStart": {
+    "defaultMessage": "Exec Start"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Export": {
+    "defaultMessage": "Export"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.HealthStatus": {
+    "defaultMessage": "Health Status"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Import": {
+    "defaultMessage": "Import"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Kill": {
+    "defaultMessage": "Kill"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Load": {
+    "defaultMessage": "Load"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Mount": {
+    "defaultMessage": "Mount"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Oom": {
+    "defaultMessage": "Out of Memory"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Pause": {
+    "defaultMessage": "Pause"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Prune": {
+    "defaultMessage": "Prune"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Pull": {
+    "defaultMessage": "Pull"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Push": {
+    "defaultMessage": "Push"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Remove": {
+    "defaultMessage": "Remove"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Rename": {
+    "defaultMessage": "Rename"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Resize": {
+    "defaultMessage": "Resize"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Restart": {
+    "defaultMessage": "Restart"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Save": {
+    "defaultMessage": "Save"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Start": {
+    "defaultMessage": "Start"
   },
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Started": {
     "defaultMessage": "Started"
@@ -653,14 +746,62 @@
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Starting": {
     "defaultMessage": "Starting"
   },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Stop": {
+    "defaultMessage": "Stop"
+  },
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Stopped": {
     "defaultMessage": "Stopped"
   },
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Stopping": {
     "defaultMessage": "Stopping"
   },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Tag": {
+    "defaultMessage": "Tag"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Top": {
+    "defaultMessage": "Top"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Unmount": {
+    "defaultMessage": "Unmount"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Unpause": {
+    "defaultMessage": "Unpause"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Untag": {
+    "defaultMessage": "Untag"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Update": {
+    "defaultMessage": "Update"
+  },
   "components.apps.deployments.deployment-events-card.DeploymentEventsCard.Updating": {
     "defaultMessage": "Updating"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.eventTypeFilterLabel": {
+    "defaultMessage": "Event Type"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.Container": {
+    "defaultMessage": "Container"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.Deployment": {
+    "defaultMessage": "Deployment"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.EnvFile": {
+    "defaultMessage": "Env File"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.FileBind": {
+    "defaultMessage": "File Bind"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.Image": {
+    "defaultMessage": "Image"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.Network": {
+    "defaultMessage": "Network"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceType.Volume": {
+    "defaultMessage": "Volume"
+  },
+  "components.apps.deployments.deployment-events-card.DeploymentEventsCard.resourceTypeFilterLabel": {
+    "defaultMessage": "Resource Type"
   },
   "components.apps.deployments.deployment-readiness.DeploymentReadiness.notReady": {
     "defaultMessage": "Deploying"

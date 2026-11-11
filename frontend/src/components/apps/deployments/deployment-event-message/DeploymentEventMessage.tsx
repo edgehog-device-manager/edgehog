@@ -21,18 +21,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { FormattedMessage } from "react-intl";
 
-import { DeploymentTargetsTable_CampaignTargetEdgeFragment$data } from "@/api/__generated__/DeploymentTargetsTable_CampaignTargetEdgeFragment.graphql";
-
 import CollapseItem from "@/components/ui/collapse-item/CollapseItem";
 
 type DeploymentEventMessageProps = {
-  event: NonNullable<
-    NonNullable<
-      NonNullable<
-        DeploymentTargetsTable_CampaignTargetEdgeFragment$data["edges"]
-      >[number]["node"]["deployment"]
-    >["events"]["edges"]
-  >[number]["node"];
+  event: {
+    message?: string | null;
+    addInfo?: readonly string[] | null;
+  };
 };
 
 const DeploymentEventMessage = ({ event }: DeploymentEventMessageProps) => {
@@ -60,7 +55,7 @@ const DeploymentEventMessage = ({ event }: DeploymentEventMessageProps) => {
   if (!event.addInfo || event.addInfo.length === 0) {
     return (
       <>
-        {event.message ?? (
+        {event.message || (
           <FormattedMessage
             id="components.apps.deployments.deployment-event-message.DeploymentEventMessage.noMessage"
             defaultMessage="No message in event."
@@ -73,7 +68,7 @@ const DeploymentEventMessage = ({ event }: DeploymentEventMessageProps) => {
   return (
     <CollapseItem
       title={
-        event.message ?? (
+        event.message || (
           <FormattedMessage
             id="components.apps.deployments.deployment-event-message.DeploymentEventMessage.noShortMessage"
             defaultMessage="No short message. Click to show extended info."

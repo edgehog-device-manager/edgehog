@@ -52,19 +52,11 @@ const CAMPAIGN_TARGETS_TABLE_FRAGMENT = graphql`
         deployment {
           state
           isReady
-          events(
-            filter: { type: { eq: ERROR } }
-            sort: [{ field: INSERTED_AT, order: DESC }]
-            first: 1
-          ) {
-            edges {
-              node {
-                message
-                type
-                insertedAt
-                addInfo
-              }
-            }
+          events {
+            message
+            status
+            timestamp
+            addInfo
           }
         }
       }
@@ -161,7 +153,9 @@ const columns = [
   ),
   columnHelper.accessor(
     (campaignTarget) =>
-      campaignTarget.deployment?.events?.edges?.[0]?.node ?? null,
+      campaignTarget.deployment?.events?.find(
+        (event) => event.status === "ERROR",
+      ) ?? null,
     {
       id: "lastErrorMessage",
       header: () => (

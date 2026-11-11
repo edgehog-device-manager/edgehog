@@ -20,22 +20,27 @@ import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Badge, Card, Col, Row } from "react-bootstrap";
 import Tree, { useTreeState } from "react-hyper-tree";
 import { FormattedMessage, useIntl } from "react-intl";
-import { graphql, useFragment, usePaginationFragment } from "react-relay";
+import {
+  graphql,
+  useFragment,
+  usePaginationFragment,
+  useSubscription,
+} from "react-relay";
 
 import type { Deployment_getDeployment_Query$data } from "@/api/__generated__/Deployment_getDeployment_Query.graphql";
 import type { DeploymentContainerDeploymentsPaginationQuery } from "@/api/__generated__/DeploymentContainerDeploymentsPaginationQuery.graphql";
 import type { DeploymentDetails_containerDeployments$key } from "@/api/__generated__/DeploymentDetails_containerDeployments.graphql";
 import type { DeploymentDetails_deviceMappingDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceMappingDeployments.graphql";
 import type { DeploymentDetails_deviceRequestDeployments$key } from "@/api/__generated__/DeploymentDetails_deviceRequestDeployments.graphql";
-import type {
-  DeploymentDetails_events$data,
-  DeploymentDetails_events$key,
-} from "@/api/__generated__/DeploymentDetails_events.graphql";
+import type { DeploymentDetails_events$key } from "@/api/__generated__/DeploymentDetails_events.graphql";
 import type { DeploymentDetails_fileBinds$key } from "@/api/__generated__/DeploymentDetails_fileBinds.graphql";
 import type { DeploymentDetails_envFiles$key } from "@/api/__generated__/DeploymentDetails_envFiles.graphql";
 import type { DeploymentDetails_networkDeployments$key } from "@/api/__generated__/DeploymentDetails_networkDeployments.graphql";
+import type {
+  DeploymentDetails_releaseDeploymentEvents_Subscription,
+  DeploymentDetails_releaseDeploymentEvents_Subscription$data,
+} from "@/api/__generated__/DeploymentDetails_releaseDeploymentEvents_Subscription.graphql";
 import type { DeploymentDetails_volumeDeployments$key } from "@/api/__generated__/DeploymentDetails_volumeDeployments.graphql";
-import type { DeploymentEventsPaginationQuery } from "@/api/__generated__/DeploymentEventsPaginationQuery.graphql";
 
 import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
 import DeploymentActionButtons from "@/components/apps/deployments/deployment-action-buttons/DeploymentActionButtons";
@@ -49,27 +54,19 @@ import UpgradeDeploymentModal from "@/components/apps/deployments/upgrade-deploy
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
-  fragment DeploymentDetails_events on Deployment
-  @refetchable(queryName: "DeploymentEventsPaginationQuery") {
+  fragment DeploymentDetails_events on Deployment {
     id
-    events(
-      first: $first
-      after: $after
-      sort: [{ field: INSERTED_AT, order: DESC }]
-    ) @connection(key: "DeploymentDetails_events") {
-      edges {
-        node {
-          type
-          message
-          addInfo
-          insertedAt
-        }
-      }
+    events {
+      __typename
+      resourceId
+      status
+      message
+      addInfo
+      timestamp
     }
   }
 `;
 
-/* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_containerDeployments on Deployment
   @refetchable(queryName: "DeploymentContainerDeploymentsPaginationQuery") {
@@ -80,17 +77,86 @@ const DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT = graphql`
           id
           state
           isReady
+          events {
+            __typename
+            resourceId
+            status
+            message
+            addInfo
+            timestamp
+          }
           container {
             image {
               reference
             }
           }
           imageDeployment {
+            id
             state
             isReady
             image {
               id
               reference
+            }
+            events {
+              __typename
+              resourceId
+              status
+              message
+              addInfo
+              timestamp
+            }
+          }
+          fileBinds {
+            id
+            events {
+              __typename
+              resourceId
+              status
+              message
+              addInfo
+              timestamp
+            }
+          }
+          envFiles {
+            id
+            events {
+              __typename
+              resourceId
+              status
+              message
+              addInfo
+              timestamp
+            }
+          }
+          networkDeployments(first: $first, after: $after) {
+            edges {
+              node {
+                id
+                events {
+                  __typename
+                  resourceId
+                  status
+                  message
+                  addInfo
+                  timestamp
+                }
+              }
+            }
+          }
+          volumeDeployments(first: $first, after: $after) {
+            edges {
+              node {
+                id
+                events {
+                  __typename
+                  resourceId
+                  status
+                  message
+                  addInfo
+                  timestamp
+                }
+              }
             }
           }
           ...DeploymentDetails_deviceRequestDeployments
@@ -113,6 +179,14 @@ const DEPLOYMENT_DETAILS_FILE_BINDS_FRAGMENT = graphql`
       fileName
       state
       isReady
+      events {
+        __typename
+        resourceId
+        status
+        message
+        addInfo
+        timestamp
+      }
       fileMount {
         id
         mountpoint
@@ -137,6 +211,14 @@ const DEPLOYMENT_DETAILS_ENV_FILES_FRAGMENT = graphql`
       fileName
       state
       isReady
+      events {
+        __typename
+        resourceId
+        status
+        message
+        addInfo
+        timestamp
+      }
       fileDownloadRequest {
         id
         fileName
@@ -158,6 +240,14 @@ const DEPLOYMENT_DETAILS_NETWORK_DEPLOYMENTS_FRAGMENT = graphql`
           id
           state
           isReady
+          events {
+            __typename
+            resourceId
+            status
+            message
+            addInfo
+            timestamp
+          }
           network {
             id
             label
@@ -177,6 +267,14 @@ const DEPLOYMENT_DETAILS_VOLUME_DEPLOYMENTS_FRAGMENT = graphql`
           id
           state
           isReady
+          events {
+            __typename
+            resourceId
+            status
+            message
+            addInfo
+            timestamp
+          }
           volume {
             id
             label
@@ -187,7 +285,65 @@ const DEPLOYMENT_DETAILS_VOLUME_DEPLOYMENTS_FRAGMENT = graphql`
   }
 `;
 
-/* eslint-disable relay/unused-fields */
+const RELEASE_DEPLOYMENT_EVENTS_SUBSCRIPTION = graphql`
+  subscription DeploymentDetails_releaseDeploymentEvents_Subscription(
+    $id: ID!
+  ) {
+    releaseDeploymentEvents(id: $id) {
+      __typename
+      ... on DeploymentEvent {
+        resourceId
+        deploymentStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on ContainerDeploymentEvent {
+        resourceId
+        containerStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on ImageDeploymentEvent {
+        resourceId
+        imageStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on VolumeDeploymentEvent {
+        resourceId
+        volumeStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on NetworkDeploymentEvent {
+        resourceId
+        networkStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on EnvFileEvent {
+        resourceId
+        envFileStatus: status
+        message
+        addInfo
+        timestamp
+      }
+      ... on FileBindEvent {
+        resourceId
+        fileBindStatus: status
+        message
+        addInfo
+        timestamp
+      }
+    }
+  }
+`;
+
 const DEPLOYMENT_DETAILS_DEVICE_MAPPING_DEPLOYMENTS_FRAGMENT = graphql`
   fragment DeploymentDetails_deviceMappingDeployments on ContainerDeployment {
     id
@@ -234,9 +390,23 @@ const DEPLOYMENT_DETAILS_DEVICE_REQUEST_DEPLOYMENTS_FRAGMENT = graphql`
 
 type Deployment = Deployment_getDeployment_Query$data["deployment"];
 
-export type Event = NonNullable<
-  NonNullable<DeploymentDetails_events$data["events"]["edges"]>[number]["node"]
->;
+export type ResourceEventType =
+  | "DeploymentEvent"
+  | "ContainerDeploymentEvent"
+  | "ImageDeploymentEvent"
+  | "VolumeDeploymentEvent"
+  | "NetworkDeploymentEvent"
+  | "EnvFileEvent"
+  | "FileBindEvent";
+
+export type Event = {
+  readonly __typename: ResourceEventType | string;
+  readonly resourceId: string;
+  readonly status: string;
+  readonly message: string;
+  readonly addInfo: readonly string[];
+  readonly timestamp?: string | null;
+};
 
 type TreeNode = {
   id: string;
@@ -617,19 +787,20 @@ const DeploymentDetails = ({
   onRedeploy,
   onDelete,
 }: DeploymentDetailsProps) => {
-  const { data: eventsData } = usePaginationFragment<
-    DeploymentEventsPaginationQuery,
-    DeploymentDetails_events$key
-  >(DEPLOYMENT_DETAILS_EVENTS_FRAGMENT, deploymentRef);
+  const eventsData = useFragment<DeploymentDetails_events$key>(
+    DEPLOYMENT_DETAILS_EVENTS_FRAGMENT,
+    deploymentRef,
+  );
 
   const { data: containersData } = usePaginationFragment<
     DeploymentContainerDeploymentsPaginationQuery,
     DeploymentDetails_containerDeployments$key
   >(DEPLOYMENT_DETAILS_CONTAINER_DEPLOYMENTS_FRAGMENT, deploymentRef);
 
-  const events = eventsData?.events?.edges?.map((e) => e.node) ?? [];
-  const containerNodes =
-    containersData?.containerDeployments?.edges?.map((e) => e.node) ?? [];
+  const containerNodes = useMemo(
+    () => containersData?.containerDeployments?.edges?.map((e) => e.node) ?? [],
+    [containersData],
+  );
 
   const {
     release,
@@ -637,6 +808,157 @@ const DeploymentDetails = ({
     isReady = false,
     id: deploymentId,
   } = deploymentRef || {};
+
+  const [liveEventsByDeployment, setLiveEventsByDeployment] = useState<
+    Record<string, Event[]>
+  >({});
+
+  const liveEvents = useMemo(
+    () => (deploymentId ? (liveEventsByDeployment[deploymentId] ?? []) : []),
+    [deploymentId, liveEventsByDeployment],
+  );
+
+  const subscriptionConfig = useMemo(
+    () => ({
+      subscription: RELEASE_DEPLOYMENT_EVENTS_SUBSCRIPTION,
+      variables: { id: deploymentId ?? "" },
+      onNext: (
+        response:
+          | DeploymentDetails_releaseDeploymentEvents_Subscription$data
+          | null
+          | undefined,
+      ) => {
+        const rawEvent = response?.releaseDeploymentEvents;
+        if (!rawEvent || !deploymentId) return;
+
+        let status: string | undefined;
+        switch (rawEvent.__typename) {
+          case "DeploymentEvent":
+            status = rawEvent.deploymentStatus;
+            break;
+          case "ContainerDeploymentEvent":
+            status = rawEvent.containerStatus;
+            break;
+          case "ImageDeploymentEvent":
+            status = rawEvent.imageStatus;
+            break;
+          case "VolumeDeploymentEvent":
+            status = rawEvent.volumeStatus;
+            break;
+          case "NetworkDeploymentEvent":
+            status = rawEvent.networkStatus;
+            break;
+          case "EnvFileEvent":
+            status = rawEvent.envFileStatus;
+            break;
+          case "FileBindEvent":
+            status = rawEvent.fileBindStatus;
+            break;
+          default:
+            return;
+        }
+
+        const newEvent: Event = {
+          __typename: rawEvent.__typename,
+          resourceId: rawEvent.resourceId,
+          status,
+          message: rawEvent.message,
+          addInfo: rawEvent.addInfo,
+          timestamp: rawEvent.timestamp,
+        };
+        setLiveEventsByDeployment((prev) => ({
+          ...prev,
+          [deploymentId]: [newEvent, ...(prev[deploymentId] ?? [])],
+        }));
+      },
+    }),
+    [deploymentId],
+  );
+
+  useSubscription<DeploymentDetails_releaseDeploymentEvents_Subscription>(
+    subscriptionConfig,
+  );
+
+  const events = useMemo(() => {
+    const initialEvents: Event[] = [];
+    const seenResources = new Set<string>();
+
+    if (eventsData?.events) {
+      initialEvents.push(...eventsData.events);
+    }
+
+    for (const container of containerNodes) {
+      if (container.id && !seenResources.has(container.id)) {
+        seenResources.add(container.id);
+        if (container.events) {
+          initialEvents.push(...container.events);
+        }
+      }
+
+      const imageDeployment = container.imageDeployment;
+      if (imageDeployment?.id && !seenResources.has(imageDeployment.id)) {
+        seenResources.add(imageDeployment.id);
+        if (imageDeployment.events) {
+          initialEvents.push(...imageDeployment.events);
+        }
+      }
+
+      for (const edge of container.networkDeployments?.edges ?? []) {
+        const networkDeployment = edge?.node;
+        if (networkDeployment?.id && !seenResources.has(networkDeployment.id)) {
+          seenResources.add(networkDeployment.id);
+          if (networkDeployment.events) {
+            initialEvents.push(...networkDeployment.events);
+          }
+        }
+      }
+
+      for (const edge of container.volumeDeployments?.edges ?? []) {
+        const volumeDeployment = edge?.node;
+        if (volumeDeployment?.id && !seenResources.has(volumeDeployment.id)) {
+          seenResources.add(volumeDeployment.id);
+          if (volumeDeployment.events) {
+            initialEvents.push(...volumeDeployment.events);
+          }
+        }
+      }
+
+      for (const fileBind of container.fileBinds ?? []) {
+        if (fileBind.id && !seenResources.has(fileBind.id)) {
+          seenResources.add(fileBind.id);
+          if (fileBind.events) {
+            initialEvents.push(...fileBind.events);
+          }
+        }
+      }
+
+      for (const envFile of container.envFiles ?? []) {
+        if (envFile.id && !seenResources.has(envFile.id)) {
+          seenResources.add(envFile.id);
+          if (envFile.events) {
+            initialEvents.push(...envFile.events);
+          }
+        }
+      }
+    }
+
+    const seenEvents = new Set<string>();
+    const uniqueEvents: Event[] = [];
+
+    for (const event of [...liveEvents, ...initialEvents]) {
+      const key = `${event.__typename}:${event.resourceId}:${event.status}:${event.timestamp ?? ""}:${event.message}:${(event.addInfo ?? []).join("\n")}`;
+      if (!seenEvents.has(key)) {
+        seenEvents.add(key);
+        uniqueEvents.push(event);
+      }
+    }
+
+    return uniqueEvents.sort((a, b) => {
+      const timeA = a.timestamp ? new Date(a.timestamp).getTime() : 0;
+      const timeB = b.timestamp ? new Date(b.timestamp).getTime() : 0;
+      return timeB - timeA;
+    });
+  }, [eventsData, containerNodes, liveEvents]);
 
   const {
     application,
