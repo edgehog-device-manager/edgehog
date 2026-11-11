@@ -30,14 +30,18 @@ defmodule EdgehogWeb.Schema.Mutation.SendVolumeCommandTest do
   setup %{tenant: tenant} do
     volume = volume_fixture(tenant: tenant)
     device = device_fixture(tenant: tenant)
-    volume_deployment_fixture(tenant: tenant, volume_id: volume.id, device_id: device.id)
-    %{volume: volume, device: device}
+
+    volume_deployment =
+      volume_deployment_fixture(tenant: tenant, volume_id: volume.id, device_id: device.id)
+
+    %{volume: volume, device: device, volume_deployment: volume_deployment}
   end
 
   test "sends the command to the selected device", %{
     tenant: tenant,
     volume: volume,
-    device: device
+    device: device,
+    volume_deployment: volume_deployment
   } do
     other_device = device_fixture(tenant: tenant)
     volume_deployment_fixture(tenant: tenant, volume_id: volume.id, device_id: other_device.id)
@@ -54,73 +58,58 @@ defmodule EdgehogWeb.Schema.Mutation.SendVolumeCommandTest do
     end)
 
     assert %{data: %{"sendVolumeCommand" => %{"result" => %{"id" => id}}}} =
-             mutation(tenant, volume, device)
+             mutation(tenant, volume_deployment)
 
-    assert id == AshGraphql.Resource.encode_relay_id(volume)
+    assert id == AshGraphql.Resource.encode_relay_id(volume_deployment)
   end
 
-  test "rejects a device without the volume deployment", %{tenant: tenant, volume: volume} do
-    other_device = device_fixture(tenant: tenant)
+  test "rejects a missing volume deployment", %{
+    tenant: tenant,
+    volume_deployment: volume_deployment
+  } do
     reject(&VolumeCommand.send_volume_command/3)
+    missing_deployment = %{volume_deployment | id: Ash.UUID.generate()}
 
-    assert %{errors: [_ | _]} = mutation(tenant, volume, other_device)
+    assert %{errors: [_ | _]} = mutation(tenant, missing_deployment)
   end
 
-  test "rejects a missing device", %{tenant: tenant, volume: volume, device: device} do
-    reject(&VolumeCommand.send_volume_command/3)
-    missing_device = %{device | id: Ash.UUID.generate()}
-
-    assert %{errors: [_ | _]} = mutation(tenant, volume, missing_device)
-  end
-
-  test "rejects a device from another tenant", %{tenant: tenant, volume: volume} do
+  test "rejects a volume deployment from another tenant", %{tenant: tenant} do
     other_tenant = Edgehog.TenantsFixtures.tenant_fixture()
-    other_device = device_fixture(tenant: other_tenant)
+    other_deployment = volume_deployment_fixture(tenant: other_tenant)
     reject(&VolumeCommand.send_volume_command/3)
 
-    assert %{errors: [_ | _]} = mutation(tenant, volume, other_device)
+    assert %{errors: [_ | _]} = mutation(tenant, other_deployment)
   end
 
-  test "rejects a volume ID passed as a device ID", %{tenant: tenant, volume: volume} do
+  test "rejects an invalid or missing command", %{
+    tenant: tenant,
+    volume_deployment: volume_deployment
+  } do
     reject(&VolumeCommand.send_volume_command/3)
 
-    assert %{errors: [_ | _]} = mutation(tenant, volume, volume)
+    assert %{errors: [_ | _]} = mutation(tenant, volume_deployment, "INVALID")
+    assert %{errors: [_ | _]} = mutation(tenant, volume_deployment, nil)
   end
 
-  test "rejects a missing volume", %{tenant: tenant, volume: volume, device: device} do
-    reject(&VolumeCommand.send_volume_command/3)
-    missing_volume = %{volume | id: Ash.UUID.generate()}
-
-    assert %{errors: [_ | _]} = mutation(tenant, missing_volume, device)
-  end
-
-  test "rejects an invalid or missing command", %{tenant: tenant, volume: volume, device: device} do
-    reject(&VolumeCommand.send_volume_command/3)
-
-    assert %{errors: [_ | _]} = mutation(tenant, volume, device, "INVALID")
-    assert %{errors: [_ | _]} = mutation(tenant, volume, device, nil)
-  end
-
-  test "reports a failure from Astarte", %{tenant: tenant, volume: volume, device: device} do
+  test "reports a failure from Astarte", %{tenant: tenant, volume_deployment: volume_deployment} do
     expect(VolumeCommand, :send_volume_command, fn _, _, _ ->
       {:error, %RuntimeError{message: "Astarte unavailable"}}
     end)
 
-    assert %{errors: [_ | _]} = mutation(tenant, volume, device)
+    assert %{errors: [_ | _]} = mutation(tenant, volume_deployment)
   end
 
-  defp mutation(tenant, volume, device, command \\ "DELETE") do
+  defp mutation(tenant, volume_deployment, command \\ "DELETE") do
     document = """
-    mutation SendVolumeCommand($volumeId: ID!, $deviceId: ID!, $command: VolumeCommand!) {
-      sendVolumeCommand(id: $volumeId, deviceId: $deviceId, command: $command) {
+    mutation SendVolumeCommand($id: ID!, $command: VolumeCommand!) {
+      sendVolumeCommand(id: $id, command: $command) {
         result { id }
       }
     }
     """
 
     variables = %{
-      "volumeId" => AshGraphql.Resource.encode_relay_id(volume),
-      "deviceId" => AshGraphql.Resource.encode_relay_id(device),
+      "id" => AshGraphql.Resource.encode_relay_id(volume_deployment),
       "command" => command
     }
 

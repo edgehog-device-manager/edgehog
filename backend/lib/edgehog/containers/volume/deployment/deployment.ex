@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Volume.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Containers.Volume
@@ -72,6 +73,18 @@ defmodule Edgehog.Containers.Volume.Deployment do
       require_atomic? false
 
       change Changes.DeployVolumeOnDevice
+    end
+
+    update :send_command do
+      description "Send a command to this volume deployment."
+      transaction? false
+
+      argument :command, Edgehog.Devices.Device.VolumeCommand do
+        allow_nil? false
+        public? true
+      end
+
+      manual ManualActions.SendVolumeCommand
     end
 
     update :mark_as_sent do

@@ -34,6 +34,7 @@ defmodule Edgehog.Containers do
   alias Edgehog.Containers.Release.Deployment.ReadyAction
   alias Edgehog.Containers.Release.Deployment.ReadyAction.Upgrade
   alias Edgehog.Containers.Volume
+  alias Edgehog.Containers.Volume.Deployment, as: VolumeDeployment
 
   authorization do
     authorize :when_requested
@@ -245,10 +246,9 @@ defmodule Edgehog.Containers do
         description "Delete a volume if not used by any container."
       end
 
-      update Volume, :send_volume_command, :send_command do
-        description "Send a command to a volume on a device."
-        args [:device_id, :command]
-        relay_id_translations device_id: :device
+      update VolumeDeployment, :send_volume_command, :send_command do
+        description "Send a command to a volume deployment."
+        args [:command]
       end
 
       create Network, :create_network, :create do
