@@ -104,6 +104,7 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.updateCampaigns:
       case Route.applications:
       case Route.imageCredentials:
+      case Route.allowedRegistries:
       case Route.volumes:
       case Route.networks:
       case Route.containers:
