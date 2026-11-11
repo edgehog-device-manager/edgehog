@@ -32,7 +32,7 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
 
   @impl Calculation
   def load(_query, opts, _context) do
-    [opts[:resource_id_key], device: [:device_id, :appengine_client]]
+    Enum.uniq([:id, opts[:resource_id_key], device: [:device_id, :appengine_client]])
   end
 
   @impl Calculation
@@ -64,20 +64,18 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
                resource_id,
                query
              ) do
-        Enum.map(events, &cast_event!(&1, event_type))
+        Enum.map(events, &cast_event!(deployment, &1, event_type))
       else
         {:error, _reason} -> nil
       end
     end)
   end
 
-  defp validate_appengine_client_exist(nil), do: {:error, :appengine_client_not_loaded}
-  defp validate_appengine_client_exist(_), do: :ok
-
-  defp cast_event!(event, event_type) do
+  def cast_event!(record, event, event_type) do
     input = %{
+      resource_id: AshGraphql.Resource.encode_relay_id(record),
       status: Macro.underscore(event.status),
-      message: event.message,
+      message: event.message || "",
       add_info: event.add_info || [],
       timestamp: event.timestamp
     }
@@ -85,6 +83,9 @@ defmodule Edgehog.Containers.Calculations.ResourceEvents do
     {:ok, value} = Ash.Type.cast_input(event_type, input, event_type.subtype_constraints())
     value
   end
+
+  defp validate_appengine_client_exist(nil), do: {:error, :appengine_client_not_loaded}
+  defp validate_appengine_client_exist(_), do: :ok
 
   defp maybe_add_limit(opts, nil), do: opts
   defp maybe_add_limit(opts, limit), do: [{:limit, limit} | opts]

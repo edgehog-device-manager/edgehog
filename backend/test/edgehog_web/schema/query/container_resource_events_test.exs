@@ -103,6 +103,10 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     %{
       deployment: deployment,
       device: device,
+      container_deployment: container_deployment,
+      image_deployment: container_deployment.image_deployment,
+      volume_deployment: volume_deployment,
+      network_deployment: network_deployment,
       container_id: container_deployment.container_id,
       image_id: container_deployment.image_deployment.image_id,
       volume_id: volume_deployment.volume_id,
@@ -116,6 +120,10 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     tenant: tenant,
     deployment: deployment,
     device: device,
+    container_deployment: container_deployment,
+    image_deployment: image_deployment,
+    volume_deployment: volume_deployment,
+    network_deployment: network_deployment,
     container_id: container_id,
     image_id: image_id,
     volume_id: volume_id,
@@ -231,6 +239,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     query($id: ID!) {
       deployment(id: $id) {
         events {
+          resourceId
           status
           message
           addInfo
@@ -240,6 +249,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
           edges {
             node {
               events {
+                resourceId
                 status
                 message
                 addInfo
@@ -247,6 +257,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
               }
               imageDeployment {
                 events {
+                  resourceId
                   status
                   message
                   addInfo
@@ -257,6 +268,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
                 edges {
                   node {
                     events {
+                      resourceId
                       status
                       message
                       addInfo
@@ -269,6 +281,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
                 edges {
                   node {
                     events {
+                      resourceId
                       status
                       message
                       addInfo
@@ -279,6 +292,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
               }
               envFiles {
                 events {
+                  resourceId
                   status
                   message
                   addInfo
@@ -287,6 +301,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
               }
               fileBinds {
                 events {
+                  resourceId
                   status
                   message
                   addInfo
@@ -301,6 +316,12 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
     """
 
     id = AshGraphql.Resource.encode_relay_id(deployment)
+    container_deployment_relay_id = AshGraphql.Resource.encode_relay_id(container_deployment)
+    image_deployment_relay_id = AshGraphql.Resource.encode_relay_id(image_deployment)
+    volume_deployment_relay_id = AshGraphql.Resource.encode_relay_id(volume_deployment)
+    network_deployment_relay_id = AshGraphql.Resource.encode_relay_id(network_deployment)
+    env_file_relay_id = AshGraphql.Resource.encode_relay_id(env_file)
+    file_bind_relay_id = AshGraphql.Resource.encode_relay_id(file_bind)
 
     result =
       [tenant: tenant, id: id, document: document]
@@ -309,12 +330,14 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
 
     assert [
              %{
+               "resourceId" => ^id,
                "status" => "STARTING",
                "message" => "Deployment starting",
                "addInfo" => ["release=1.0.0"],
                "timestamp" => "2026-03-19T09:54:00Z"
              },
              %{
+               "resourceId" => ^id,
                "status" => "STARTED",
                "message" => "Deployment started",
                "addInfo" => [],
@@ -326,18 +349,21 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
 
     assert [
              %{
+               "resourceId" => ^container_deployment_relay_id,
                "status" => "CREATE",
                "message" => "Container created",
                "addInfo" => ["id=123"],
                "timestamp" => "2026-03-19T10:00:00Z"
              },
              %{
+               "resourceId" => ^container_deployment_relay_id,
                "status" => "EXEC_CREATE",
                "message" => "Exec created",
                "addInfo" => [],
                "timestamp" => "2026-03-19T10:01:00Z"
              },
              %{
+               "resourceId" => ^container_deployment_relay_id,
                "status" => "HEALTH_STATUS",
                "message" => "Healthy",
                "addInfo" => [],
@@ -347,6 +373,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
 
     assert [
              %{
+               "resourceId" => ^image_deployment_relay_id,
                "status" => "PULL",
                "message" => "Image pulled",
                "addInfo" => ["tag=latest"],
@@ -359,6 +386,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
                "node" => %{
                  "events" => [
                    %{
+                     "resourceId" => ^volume_deployment_relay_id,
                      "status" => "MOUNT",
                      "message" => "Volume mounted",
                      "addInfo" => ["/data"],
@@ -374,6 +402,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
                "node" => %{
                  "events" => [
                    %{
+                     "resourceId" => ^network_deployment_relay_id,
                      "status" => "CONNECT",
                      "message" => "Network connected",
                      "addInfo" => ["driver=bridge"],
@@ -388,6 +417,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
              %{
                "events" => [
                  %{
+                   "resourceId" => ^env_file_relay_id,
                    "status" => "ERROR",
                    "message" => "Env file created",
                    "addInfo" => [".env"],
@@ -401,6 +431,7 @@ defmodule EdgehogWeb.Schema.Query.ContainerResourceEventsTest do
              %{
                "events" => [
                  %{
+                   "resourceId" => ^file_bind_relay_id,
                    "status" => "ERROR",
                    "message" => "Bind mount failed",
                    "addInfo" => ["permission denied"],

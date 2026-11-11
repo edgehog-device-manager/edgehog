@@ -26,6 +26,11 @@ defmodule Edgehog.Containers.Container.Deployment.Types.Event do
     subtype_of: :map,
     constraints: [
       fields: [
+        resource_id: [
+          type: Edgehog.Containers.Types.RelayId,
+          description: "The GraphQL Relay ID of the resource deployment that emitted this event.",
+          allow_nil?: false
+        ],
         status: [
           type: Edgehog.Containers.Container.Deployment.Types.EventStatus,
           description: "The status value reported by the device for this container event.",
@@ -35,7 +40,8 @@ defmodule Edgehog.Containers.Container.Deployment.Types.Event do
           type: :string,
           description:
             "Additional human-readable context or error details reported with the event.",
-          allow_nil?: false
+          allow_nil?: false,
+          constraints: [allow_empty?: true]
         ],
         add_info: [
           type: {:array, :string},
