@@ -23,19 +23,22 @@ defmodule Edgehog.Containers.ManualActions.SendVolumeCommand do
   use Ash.Resource.ManualUpdate
 
   alias Edgehog.Devices
-  alias Edgehog.Devices.Device
 
   @impl Ash.Resource.ManualUpdate
   def update(changeset, _opts, context) do
-    volume = changeset.data
+    deployment = changeset.data
     %{tenant: tenant} = context
 
     with {:ok, command} <- Ash.Changeset.fetch_argument(changeset, :command),
-         {:ok, device_id} <- Ash.Changeset.fetch_argument(changeset, :device_id),
-         {:ok, device} <- Ash.get(Device, device_id, tenant: tenant),
+         {:ok, deployment} <- Ash.load(deployment, [:device, :volume], tenant: tenant),
          {:ok, _device} <-
-           Devices.send_volume_command_request(device, volume, command, tenant: tenant) do
-      {:ok, volume}
+           Devices.send_volume_command_request(
+             deployment.device,
+             deployment.volume,
+             command,
+             tenant: tenant
+           ) do
+      {:ok, deployment}
     end
   end
 end
