@@ -31,7 +31,7 @@ defmodule EdgehogWeb.GqlSocket do
         |> assign(:tenant, tenant)
         |> assign(:claims, claims)
         |> assign(:actor, actor)
-        |> Absinthe.Phoenix.Socket.put_options(context: %{actor: actor})
+        |> Absinthe.Phoenix.Socket.put_options(context: %{actor: actor, current_tenant: tenant})
 
       {:ok, socket}
     end
