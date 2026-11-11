@@ -142,6 +142,36 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentEventsTest d
         |> response(200)
       end
     end
+
+    test "returns 422 when deployment does not exist", context do
+      %{
+        conn: conn,
+        realm: realm,
+        device: device,
+        tenant: tenant
+      } = context
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+          path: "/" <> Ecto.UUID.generate(),
+          value: %{
+            "status" => "Starting",
+            "message" => "starting"
+          }
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(422)
+    end
   end
 
   defp event_value(event, message),
