@@ -269,7 +269,7 @@ defmodule Edgehog.OSManagement.OTAOperation do
     references do
       reference :device,
         index?: true,
-        on_delete: :nothing,
+        on_delete: :delete,
         match_type: :full,
         match_with: [tenant_id: :tenant_id]
     end
