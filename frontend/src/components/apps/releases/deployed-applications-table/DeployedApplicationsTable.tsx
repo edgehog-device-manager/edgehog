@@ -64,8 +64,6 @@ const DEPLOYED_APPLICATIONS_TABLE_FRAGMENT = graphql`
               name
             }
           }
-          ...DeploymentDetails_events
-          ...DeploymentDetails_containerDeployments
         }
       }
     }

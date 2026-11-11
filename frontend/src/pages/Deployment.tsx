@@ -159,7 +159,6 @@ const DEPLOYMENT_UPDATED_SUBSCRIPTION = graphql`
             }
           }
         }
-        ...DeploymentDetails_events
         ...DeploymentDetails_containerDeployments
       }
     }
