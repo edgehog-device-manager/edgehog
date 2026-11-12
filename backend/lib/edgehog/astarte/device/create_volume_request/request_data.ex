@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,13 +25,15 @@ defmodule Edgehog.Astarte.Device.CreateVolumeRequest.RequestData do
     :id,
     :deploymentId,
     :driver,
-    :options
+    :options,
+    :reclaimPolicy
   ]
 
   @type t() :: %__MODULE__{
           id: String.t(),
           deploymentId: String.t(),
           driver: String.t(),
-          options: list(String.t())
+          options: list(String.t()),
+          reclaimPolicy: String.t()
         }
 end

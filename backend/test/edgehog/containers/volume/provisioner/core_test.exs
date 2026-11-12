@@ -96,18 +96,23 @@ defmodule Edgehog.Containers.Volume.Deployment.Provisioner.CoreTest do
         tenant: tenant
       } = context
 
-      expect(CreateVolumeRequest, :send_create_volume_request, fn _, _, data ->
-        assert data.id == volume_deployment.volume.id
-        assert data.deploymentId == deployment.id
+      for policy <- ["Delete", "Retain"] do
+        volume = Ash.update!(volume_deployment.volume, %{reclaim_policy: policy}, tenant: tenant)
 
-        :ok
-      end)
+        expect(CreateVolumeRequest, :send_create_volume_request, fn _, _, data ->
+          assert data.id == volume.id
+          assert data.deploymentId == deployment.id
+          assert data.reclaimPolicy == policy
+          assert Map.from_struct(data)[:reclaimPolicy] == policy
+          :ok
+        end)
 
-      assert :ok ==
-               Core.send_to_device(volume_deployment,
-                 tenant: tenant,
-                 deployment: deployment
-               )
+        assert :ok ==
+                 Core.send_to_device(volume_deployment,
+                   tenant: tenant,
+                   deployment: deployment
+                 )
+      end
     end
 
     test "reconcile/2 updates the resource when the status is reported by the device", context do

@@ -35,6 +35,30 @@ defmodule EdgehogWeb.Schema.Mutation.CreateVolumeTest do
         |> extract_result!()
 
       assert volume["label"] == label
+      assert volume["reclaimPolicy"] == "Delete"
+    end
+
+    test "create volume with each reclaim policy", %{tenant: tenant} do
+      for policy <- ["Retain", "Delete"] do
+        volume =
+          [tenant: tenant, input: %{"label" => unique_volume_label(), "reclaimPolicy" => policy}]
+          |> create_volume_mutation()
+          |> extract_result!()
+
+        assert volume["reclaimPolicy"] == policy
+      end
+    end
+
+    test "rejects an invalid reclaim policy", %{tenant: tenant} do
+      error =
+        [
+          tenant: tenant,
+          input: %{"label" => unique_volume_label(), "reclaimPolicy" => "not_in_enum"}
+        ]
+        |> create_volume_mutation()
+        |> extract_error!()
+
+      assert :reclaim_policy in error.fields
     end
 
     test "create volume with invalid data throws error", %{tenant: tenant} do
@@ -56,6 +80,7 @@ defmodule EdgehogWeb.Schema.Mutation.CreateVolumeTest do
       createVolume(input: $input) {
         result {
           label
+          reclaimPolicy
         }
       }
     }

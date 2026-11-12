@@ -84,7 +84,7 @@ defmodule Edgehog.Capabilities do
     %Astarte.InterfaceID{
       name: "io.edgehog.devicemanager.apps.CreateVolumeRequest",
       major: 0,
-      minor: 1
+      minor: 2
     },
     %Astarte.InterfaceID{
       name: "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest",

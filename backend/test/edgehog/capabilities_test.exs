@@ -124,7 +124,7 @@ defmodule Edgehog.CapabilitiesTest do
         },
         "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
           major: 0,
-          minor: 1
+          minor: 2
         },
         "io.edgehog.devicemanager.apps.CreateDeviceRequest" => %InterfaceVersion{
           major: 0,
@@ -423,7 +423,7 @@ defmodule Edgehog.CapabilitiesTest do
         },
         "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
           major: 0,
-          minor: 1
+          minor: 2
         },
         "io.edgehog.devicemanager.apps.CreateDeviceMappingRequest" => %InterfaceVersion{
           major: 0,
@@ -474,7 +474,7 @@ defmodule Edgehog.CapabilitiesTest do
         },
         "io.edgehog.devicemanager.apps.CreateVolumeRequest" => %InterfaceVersion{
           major: 0,
-          minor: 1
+          minor: 2
         },
         "io.edgehog.devicemanager.apps.CreateDeviceRequest" => %InterfaceVersion{
           major: 0,

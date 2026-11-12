@@ -48,14 +48,14 @@ defmodule Edgehog.Containers.Volume do
 
     create :create do
       primary? true
-      accept [:label, :driver, :options]
+      accept [:label, :driver, :options, :reclaim_policy]
 
       validate {Validations.UniquePlainResource,
                 keys: [:label], read_action: :plain_volumes, field: :label}
     end
 
     create :copy do
-      accept [:label, :driver, :options, :source_volume_id]
+      accept [:label, :driver, :options, :reclaim_policy, :source_volume_id]
 
       upsert? true
       upsert_identity :copied_volume
@@ -65,7 +65,7 @@ defmodule Edgehog.Containers.Volume do
     update :update do
       primary? true
       require_atomic? false
-      accept [:label, :driver, :options]
+      accept [:label, :driver, :options, :reclaim_policy]
 
       validate {Validations.UniquePlainResource,
                 keys: [:label], read_action: :plain_volumes, field: :label}
@@ -109,6 +109,13 @@ defmodule Edgehog.Containers.Volume do
       public? true
     end
 
+    attribute :reclaim_policy, Edgehog.Containers.Types.ReclaimPolicy do
+      description "Whether the device should retain or delete the volume when its deployment is deleted."
+      default "Delete"
+      allow_nil? false
+      public? true
+    end
+
     timestamps()
   end
 
@@ -146,14 +153,15 @@ defmodule Edgehog.Containers.Volume do
 
     calculate :hash,
               :string,
-              {Edgehog.Containers.Calculations.Hash, fields: [:label, :driver, :options]} do
+              {Edgehog.Containers.Calculations.Hash,
+               fields: [:label, :driver, :options, :reclaim_policy]} do
       allow_nil? false
       public? true
     end
   end
 
   identities do
-    identity :copied_volume, [:source_volume_id, :label, :driver, :options] do
+    identity :copied_volume, [:source_volume_id, :label, :driver, :options, :reclaim_policy] do
       where expr(not is_nil(source_volume_id))
     end
   end
