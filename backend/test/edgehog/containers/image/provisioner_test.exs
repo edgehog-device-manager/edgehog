@@ -125,10 +125,17 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
           pullPolicy: pull_policy
         } = data
 
+        expected_policy =
+          image_deployment
+          |> Map.get(:image, %{})
+          |> Map.get(:pull_policy, :unknown)
+          |> to_string()
+          |> Macro.camelize()
+
         assert id == image_deployment.image.id
         assert deployment_id == deployment.id
         assert reference == image_deployment.image.reference
-        assert pull_policy == to_string(image_deployment.image.pull_policy)
+        assert pull_policy == expected_policy
 
         # Update the image deployment to be ready
 
@@ -170,10 +177,17 @@ defmodule Edgehog.Containers.Image.Deployment.ProvisionerTest do
           pullPolicy: pull_policy
         } = data
 
+        expected_policy =
+          image_deployment
+          |> Map.get(:image, %{})
+          |> Map.get(:pull_policy, :unknown)
+          |> to_string()
+          |> Macro.camelize()
+
         assert id == image_deployment.image.id
         assert deployment_id == deployment.id
         assert reference == image_deployment.image.reference
-        assert pull_policy == to_string(image_deployment.image.pull_policy)
+        assert pull_policy == expected_policy
 
         image_deployment
         |> Ash.Changeset.for_update(:mark_as_unpulled, %{})
