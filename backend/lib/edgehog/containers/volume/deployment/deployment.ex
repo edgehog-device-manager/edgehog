@@ -34,6 +34,16 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
   graphql do
     type :volume_deployment
+
+    subscriptions do
+      pubsub EdgehogWeb.Endpoint
+
+      subscribe :volume_deployments_by_device do
+        action_types [:create, :update, :destroy]
+        read_action :read_by_device
+        relay_id_translations device_id: :device
+      end
+    end
   end
 
   actions do
@@ -110,6 +120,12 @@ defmodule Edgehog.Containers.Volume.Deployment do
 
     update :set_state do
       accept [:state]
+    end
+
+    read :read_by_device do
+      argument :device_id, :id, allow_nil?: false
+
+      get_by :device_id
     end
 
     destroy :destroy_if_dangling do
