@@ -1083,6 +1083,9 @@ enum DeviceCapability {
   "The device telemetry can be configured."
   TELEMETRY_CONFIG
 
+  "The device supports volume commands."
+  VOLUME_COMMANDS
+
   "The device provides information about surrounding WiFi APs."
   WIFI
 }
@@ -1096,6 +1099,11 @@ enum DeviceLedBehavior {
 
   "Slow blink for 60 seconds."
   SLOW_BLINK
+}
+
+enum VolumeCommand {
+  "Delete the volume."
+  DELETE
 }
 
 enum DeploymentEventType {
@@ -3216,6 +3224,12 @@ type DeviceMapping {
   container: Container
 }
 
+type volume_deployments_by_device_result {
+  created: VolumeDeployment
+  updated: VolumeDeployment
+  destroyed: ID
+}
+
 enum VolumeDeploymentSortField {
   ID
   STATE
@@ -3338,6 +3352,15 @@ type volume_result {
   created: Volume
   updated: Volume
   destroyed: ID
+}
+
+"The result of the :send_volume_command mutation"
+type SendVolumeCommandResult {
+  "The successful result of the mutation"
+  result: Volume
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
 }
 
 "The result of the :delete_volume mutation"
@@ -7863,12 +7886,6 @@ type Device implements Node {
 
     "A filter to limit the results"
     filter: DeviceGroupFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
   ): [DeviceGroup!]!
 
   "The existing OTA operations for this device"
@@ -10080,12 +10097,6 @@ type DeviceGroup implements Node {
 
     "A filter to limit the results"
     filter: DeviceFilterInput
-
-    "The number of records to return."
-    limit: Int
-
-    "The number of records to skip."
-    offset: Int
   ): [Device!]!
 
   "The channel associated with the group, if present."
@@ -11945,6 +11956,13 @@ type RootMutationType {
   "Delete a volume if not used by any container."
   deleteVolume(id: ID!): DeleteVolumeResult
 
+  "Send a command to a volume on a device."
+  sendVolumeCommand(
+    id: ID!
+    deviceId: ID!
+    command: VolumeCommand!
+  ): SendVolumeCommandResult
+
   "Marks the file uploaded through the presigned upload URL as uploaded."
   markFileBindAsUploaded(
     id: ID!
@@ -12137,6 +12155,12 @@ type RootSubscriptionType {
     "A filter to limit the results"
     filter: VolumeFilterInput
   ): volume_result
+  volumeDeploymentsByDevice(
+    "A filter to limit the results"
+    filter: VolumeDeploymentFilterInput
+
+    deviceId: ID!
+  ): volume_deployments_by_device_result
   baseImage(
     "A filter to limit the results"
     filter: BaseImageFilterInput

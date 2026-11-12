@@ -21,8 +21,9 @@
 import compact from "lodash/compact";
 import { useMemo } from "react";
 import { FormattedMessage } from "react-intl";
-import { graphql, useFragment } from "react-relay/hooks";
+import { graphql, usePaginationFragment } from "react-relay/hooks";
 
+import type { VolumesTable_PaginationQuery } from "@/api/__generated__/VolumesTable_PaginationQuery.graphql";
 import type {
   VolumesTable_volumeDeployments$data,
   VolumesTable_volumeDeployments$key,
@@ -36,8 +37,11 @@ import Table, { createColumnHelper } from "@/components/ui/table/Table";
 // We use graphql fields below in columns configuration
 /* eslint-disable relay/unused-fields */
 const VOLUMES_TABLE_FRAGMENT = graphql`
-  fragment VolumesTable_volumeDeployments on Device {
-    volumeDeployments {
+  fragment VolumesTable_volumeDeployments on Device
+  @refetchable(queryName: "VolumesTable_PaginationQuery")
+  @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    volumeDeployments(first: $first, after: $after)
+      @connection(key: "VolumesTable_volumeDeployments") {
       edges {
         node {
           id
@@ -163,7 +167,12 @@ type Props = {
 };
 
 const VolumesTable = ({ className, deviceRef }: Props) => {
-  const { volumeDeployments } = useFragment(VOLUMES_TABLE_FRAGMENT, deviceRef);
+  const { data } = usePaginationFragment<
+    VolumesTable_PaginationQuery,
+    VolumesTable_volumeDeployments$key
+  >(VOLUMES_TABLE_FRAGMENT, deviceRef);
+
+  const { volumeDeployments } = data;
 
   const volumes = useMemo<VolumeDeploymentNode[]>(
     () => compact(volumeDeployments?.edges?.map((edge) => edge?.node)) ?? [],
