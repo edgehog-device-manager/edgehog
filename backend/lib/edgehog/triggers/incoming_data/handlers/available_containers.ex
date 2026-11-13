@@ -80,6 +80,12 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableContainers do
   defp handle_property(["", container_id, "restartCount"], value, device_id, tenant),
     do: update_container_deployment(container_id, device_id, %{restart_count: value}, tenant)
 
+  defp handle_property(["", container_id, "imageId"], value, device_id, tenant),
+    do: update_container_deployment(container_id, device_id, %{docker_image_id: value}, tenant)
+
+  defp handle_property(["", container_id, "oomKilled"], value, device_id, tenant),
+    do: update_container_deployment(container_id, device_id, %{oom_killed: value}, tenant)
+
   defp handle_property(_path, _value, _device_id, _tenant), do: {:error, :invalid_event_path}
 
   defp handle_status(container_id, nil, device_id, tenant) do
@@ -104,9 +110,15 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableContainers do
   end
 
   defp update_container_deployment(container_id, device_id, attrs, tenant) do
-    container_id
-    |> Containers.fetch_container_deployment!(device_id, tenant: tenant)
-    |> Containers.update_container_deployment_from_device(attrs, tenant: tenant)
+    case Containers.fetch_container_deployment(container_id, device_id, tenant: tenant) do
+      {:ok, container_deployment} ->
+        Containers.update_container_deployment_from_device(container_deployment, attrs,
+          tenant: tenant
+        )
+
+      {:error, _reason} = error ->
+        if attrs |> Map.values() |> Enum.all?(&is_nil/1), do: :ok, else: error
+    end
   end
 
   defp health_status("None"), do: {:ok, :none}

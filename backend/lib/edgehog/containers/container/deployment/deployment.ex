@@ -159,7 +159,14 @@ defmodule Edgehog.Containers.Container.Deployment do
     end
 
     update :update_from_device do
-      accept [:exit_code, :health_status, :health_failed_count, :restart_count]
+      accept [
+        :exit_code,
+        :health_status,
+        :health_failed_count,
+        :restart_count,
+        :docker_image_id,
+        :oom_killed
+      ]
     end
 
     destroy :destroy_if_dangling do
@@ -233,6 +240,22 @@ defmodule Edgehog.Containers.Container.Deployment do
     end
 
     attribute :restart_count, :integer do
+      public? true
+    end
+
+    attribute :docker_image_id, :string do
+      description """
+      The image ID (digest) used for this container.
+      """
+
+      public? true
+    end
+
+    attribute :oom_killed, :boolean do
+      description """
+      States whether the container was OOM Killed.
+      """
+
       public? true
     end
 
