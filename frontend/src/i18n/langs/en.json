@@ -857,6 +857,54 @@
   "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.upgradeErrorFeedback": {
     "defaultMessage": "Could not upgrade the deployment, please try again."
   },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.dismiss": {
+    "defaultMessage": "Dismiss"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.pleaseWait": {
+    "defaultMessage": "Please wait while the upgrade completes..."
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.runningVersionNotice": {
+    "defaultMessage": "Your application is now running v{toVersion}."
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.stepPreparing": {
+    "defaultMessage": "Preparing new deployment"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.stepStarting": {
+    "defaultMessage": "Starting new deployment"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.stepStopping": {
+    "defaultMessage": "Stopping previous deployment"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.successTitle": {
+    "defaultMessage": "Upgrade completed successfully!"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.summaryNewStarted": {
+    "defaultMessage": "New deployment started"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.summaryPreviousStopped": {
+    "defaultMessage": "Previous deployment stopped"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.summaryUpgradeCompleted": {
+    "defaultMessage": "Upgrade completed"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.targetNotFoundDescription": {
+    "defaultMessage": "The new deployment for this upgrade was deleted or could not be found."
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.targetNotFoundTitle": {
+    "defaultMessage": "Upgrade target deployment not found"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.upgradeAvailableInfo": {
+    "defaultMessage": "This application has been upgraded to version {toVersion}."
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.upgradeFailedTitle": {
+    "defaultMessage": "Upgrade failed"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.upgradingTitle": {
+    "defaultMessage": "Upgrading application: v{fromVersion} → v{toVersion}"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.viewNewDeployment": {
+    "defaultMessage": "View new deployment"
+  },
   "components.apps.releases.application-devices-table.ApplicationDevicesTable.applicationStateTitle": {
     "defaultMessage": "Application State",
     "description": "Title for the Application State column of the application devices table"

@@ -405,6 +405,7 @@ const DeploymentContent = ({
         </Alert>
 
         <DeploymentDetails
+          key={deployment.id}
           deploymentRef={deployment}
           isDeletingDeployment={isDeletingDeployment}
           setErrorFeedback={setErrorFeedback}

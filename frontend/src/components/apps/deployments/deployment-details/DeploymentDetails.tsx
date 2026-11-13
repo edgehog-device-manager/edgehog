@@ -46,6 +46,7 @@ import ResourceState from "@/components/apps/resource-state/ResourceState";
 import { Link, Route } from "@/Navigation";
 import FullHeightCard from "@/components/ui/full-height-card/FullHeightCard";
 import UpgradeDeploymentModal from "@/components/apps/deployments/upgrade-deployment-modal/UpgradeDeploymentModal";
+import UpgradeProgressBanner from "@/components/apps/deployments/upgrade-progress-banner/UpgradeProgressBanner";
 
 /* eslint-disable relay/unused-fields */
 const DEPLOYMENT_DETAILS_EVENTS_FRAGMENT = graphql`
@@ -598,6 +599,42 @@ const ContainerDeploymentItem = ({
   );
 };
 
+type ActiveUpgrade = {
+  targetDeploymentId: string;
+  fromVersion: string;
+  toVersion: string;
+  isCompleted?: boolean;
+  isInfoOnly?: boolean;
+};
+
+const getStoredUpgrade = (key: string | null): ActiveUpgrade | null => {
+  if (!key) return null;
+  try {
+    const stored = localStorage.getItem(key);
+    return stored ? JSON.parse(stored) : null;
+  } catch {
+    return null;
+  }
+};
+
+const setStoredUpgrade = (key: string | null, value: ActiveUpgrade) => {
+  if (!key) return;
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch {
+    //ignore
+  }
+};
+
+const removeStoredUpgrade = (key: string | null) => {
+  if (!key) return;
+  try {
+    localStorage.removeItem(key);
+  } catch {
+    //ignore
+  }
+};
+
 type DeploymentDetailsProps = {
   deploymentRef: Deployment;
   isDeletingDeployment: boolean;
@@ -655,16 +692,101 @@ const DeploymentDetails = ({
 
   const deploymentState = parseDeploymentState(state ?? undefined);
 
+  const storageKey = deploymentId
+    ? `edgehog:active_upgrade:${deploymentId}`
+    : null;
+
+  const [activeUpgrade, setActiveUpgrade] = useState<ActiveUpgrade | null>(() =>
+    getStoredUpgrade(storageKey),
+  );
+
+  const [isUpgradeCompleted, setIsUpgradeCompleted] = useState(() =>
+    Boolean(activeUpgrade?.isCompleted),
+  );
+  const [isUpgradeFailed, setIsUpgradeFailed] = useState(false);
+
+  const [prevDeploymentId, setPrevDeploymentId] = useState(deploymentId);
+  if (prevDeploymentId !== deploymentId) {
+    setPrevDeploymentId(deploymentId);
+    const storedUpgrade = getStoredUpgrade(storageKey);
+    setActiveUpgrade(storedUpgrade);
+    setIsUpgradeCompleted(Boolean(storedUpgrade?.isCompleted));
+    setIsUpgradeFailed(false);
+  }
+
+  const isTargetDeployment = Boolean(
+    activeUpgrade && activeUpgrade.targetDeploymentId === deploymentId,
+  );
+  const shouldShowBanner = Boolean(activeUpgrade && !isTargetDeployment);
+
+  const handleUpgradeSuccess = useCallback(
+    ({
+      newDeploymentId,
+      targetVersion,
+    }: {
+      newDeploymentId: string;
+      targetVersion: string;
+    }) => {
+      const newActiveUpgrade: ActiveUpgrade = {
+        targetDeploymentId: newDeploymentId,
+        fromVersion: releaseVersion ?? "",
+        toVersion: targetVersion,
+        isCompleted: false,
+        isInfoOnly: false,
+      };
+      setActiveUpgrade(newActiveUpgrade);
+      setIsUpgradeCompleted(false);
+      setIsUpgradeFailed(false);
+      setStoredUpgrade(storageKey, newActiveUpgrade);
+    },
+    [releaseVersion, storageKey],
+  );
+
+  const handleDismissUpgrade = useCallback(() => {
+    setActiveUpgrade(null);
+    setIsUpgradeCompleted(false);
+    setIsUpgradeFailed(false);
+    removeStoredUpgrade(storageKey);
+  }, [storageKey]);
+
+  const handleTargetNotFound = useCallback(() => {
+    setIsUpgradeFailed(true);
+    removeStoredUpgrade(storageKey);
+  }, [storageKey]);
+
+  const handleUpgradeComplete = useCallback(() => {
+    setIsUpgradeCompleted(true);
+    if (activeUpgrade && !activeUpgrade.isCompleted) {
+      const updated: ActiveUpgrade = {
+        ...activeUpgrade,
+        isCompleted: true,
+      };
+      setActiveUpgrade(updated);
+      setStoredUpgrade(storageKey, updated);
+    }
+  }, [activeUpgrade, storageKey]);
+
+  const handleViewNewDeployment = useCallback(() => {
+    if (activeUpgrade) {
+      const updated: ActiveUpgrade = {
+        ...activeUpgrade,
+        isCompleted: true,
+        isInfoOnly: true,
+      };
+      setStoredUpgrade(storageKey, updated);
+    }
+  }, [activeUpgrade, storageKey]);
+
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   const handleShowDeleteModal = useCallback(() => {
     setShowDeleteModal(true);
-  }, [setShowDeleteModal]);
+  }, []);
 
   const handleShowUpgradeModal = useCallback(() => {
     setShowUpgradeModal(true);
-  }, [setShowUpgradeModal]);
+  }, []);
 
   return (
     <div className="d-flex flex-column h-100">
@@ -711,15 +833,17 @@ const DeploymentDetails = ({
                 state={deploymentState}
                 isReady={isReady}
                 isDeleting={deploymentState === "DELETING"}
+                isUpgrading={Boolean(
+                  shouldShowBanner &&
+                  !isUpgradeCompleted &&
+                  !isUpgradeFailed &&
+                  !activeUpgrade?.isInfoOnly,
+                )}
                 onStart={() => deploymentId && onStart(deploymentId)}
                 onStop={() => deploymentId && onStop(deploymentId)}
                 onRedeploy={() => deploymentId && onRedeploy(deploymentId)}
-                onUpgrade={() => {
-                  handleShowUpgradeModal();
-                }}
-                onDelete={() => {
-                  handleShowDeleteModal();
-                }}
+                onUpgrade={handleShowUpgradeModal}
+                onDelete={handleShowDeleteModal}
               />
             </Col>
           </Row>
@@ -732,6 +856,7 @@ const DeploymentDetails = ({
           onConfirm={() => {
             if (deploymentRef?.id) {
               onDelete(deploymentRef.id);
+              handleDismissUpgrade();
             }
             setShowDeleteModal(false);
           }}
@@ -771,8 +896,24 @@ const DeploymentDetails = ({
             systemModelName={deploymentRef.device?.systemModel?.name}
             isOnline={deploymentRef.device?.online ?? false}
             setErrorFeedback={setErrorFeedback}
+            onUpgradeSuccess={handleUpgradeSuccess}
           />
         </Suspense>
+      )}
+      {shouldShowBanner && activeUpgrade && (
+        <UpgradeProgressBanner
+          targetDeploymentId={activeUpgrade.targetDeploymentId}
+          currentDeploymentState={state}
+          fromVersion={activeUpgrade.fromVersion}
+          toVersion={activeUpgrade.toVersion}
+          deviceId={deploymentRef?.device?.id ?? ""}
+          isInfoOnly={Boolean(activeUpgrade.isInfoOnly)}
+          onDismiss={handleDismissUpgrade}
+          onViewNewDeployment={handleViewNewDeployment}
+          onUpgradeComplete={handleUpgradeComplete}
+          onUpgradeFailed={() => setIsUpgradeFailed(true)}
+          onTargetNotFound={handleTargetNotFound}
+        />
       )}
       <div
         className="flex-md-fill"
