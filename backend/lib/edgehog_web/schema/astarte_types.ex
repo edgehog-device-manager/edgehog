@@ -1,4 +1,3 @@
-#
 # This file is part of Edgehog.
 #
 # Copyright 2021-2026 SECO Mind Srl
@@ -196,11 +195,36 @@ defmodule EdgehogWeb.Schema.AstarteTypes do
 
   @desc "Describe the available images on the device."
   object :image_status do
-    @desc "The image id."
+    @desc "The image resource id."
     field :id, :string
 
     @desc "Whether the image is pulled or not."
     field :pulled, :boolean
+
+    @desc "The status of the image."
+    field :status, :string do
+      resolve fn image, _, _ ->
+        status =
+          case image.status do
+            nil -> nil
+            value -> value |> Atom.to_string() |> Macro.camelize()
+          end
+
+        {:ok, status}
+      end
+    end
+
+    @desc "The Docker image id."
+    field :image_id, :string
+
+    @desc "The repository tags associated with the image."
+    field :repo_tags, list_of(:string)
+
+    @desc "The repository digests associated with the image."
+    field :repo_digests, list_of(:string)
+
+    @desc "Total size of the image in bytes"
+    field :size, :integer
   end
 
   @desc "Describes the status of a deployment on a device."
