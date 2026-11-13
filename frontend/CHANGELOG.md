@@ -8,6 +8,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- NOTICE -->
 <!-- Starting from v0.11 changelogs are separated per-project. The changes below
 refer to both the frontend *and* the backend of edgehog -->
+## [0.15.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.14.0...v0.15.0) (2026-11-13)
+
+
+### Features
+
+* Add breadcrumbs to allowed registries page ([4661ff4](https://github.com/edgehog-device-manager/edgehog/commit/4661ff421a22f80d81e783ec5d4045340f3bf420))
+* **frontend:** add real-time updates to device volumes tab ([6aba5e2](https://github.com/edgehog-device-manager/edgehog/commit/6aba5e2d53e0be719ccd7b8f1f0c6ebe54d93176))
+* **frontend:** allow editing release version, models, and containers ([c0ddd6f](https://github.com/edgehog-device-manager/edgehog/commit/c0ddd6f892c2194beef2002e758c246d5e686bde))
+* **frontend:** allow same-version target release in upgrade campaigns ([1bd736a](https://github.com/edgehog-device-manager/edgehog/commit/1bd736a727f7c3d1c66364b9f5bc12f640ceef2d))
+* **frontend:** allow updating application and image credentials ([016bde2](https://github.com/edgehog-device-manager/edgehog/commit/016bde2e88a36bdbcf1b140bce28f33cb44cd92f))
+* **frontend:** allow updating volumes and networks ([6f36314](https://github.com/edgehog-device-manager/edgehog/commit/6f36314c419805f364f4ce189011fee7a3906b0e))
+* **frontend:** enable editing all container configuration fields ([c9d718a](https://github.com/edgehog-device-manager/edgehog/commit/c9d718a53e34de586c5e48e56d881a549852fdcb))
+* **frontend:** support discrete container image segments ([3e9be89](https://github.com/edgehog-device-manager/edgehog/commit/3e9be89bcb636c99fca822dc85f81d7fa1c75664))
+* **frontend:** support same-version deployment upgrades ([6d59ba3](https://github.com/edgehog-device-manager/edgehog/commit/6d59ba344487db6cbdbfd6252c5f3c6d4f1874e6))
+* volumes tab in device's page ([#1731](https://github.com/edgehog-device-manager/edgehog/issues/1731)) ([88f899c](https://github.com/edgehog-device-manager/edgehog/commit/88f899cc528ee2262e764a3d6f358b45f2bed81c))
+
+
+### Bug Fixes
+
+* Allow deleting stuck deployments ([d61a8c4](https://github.com/edgehog-device-manager/edgehog/commit/d61a8c4c24667fdcb8d24ea9e1b16890b2b3964a))
+* **containers:** pass loaded tenant struct when starting supervisors ([e444ef2](https://github.com/edgehog-device-manager/edgehog/commit/e444ef2b6abf4e0fc8ab407bf58860c3921cde5f))
+* **frontend:** match presigned uploads by container name and mountpoint ([bd4a414](https://github.com/edgehog-device-manager/edgehog/commit/bd4a414d9863653b203d935b2fab639129989668))
+* **frontend:** query application deployments ([8d4a8ef](https://github.com/edgehog-device-manager/edgehog/commit/8d4a8efd2f2f3b0021ef3898b11776d3739a9949))
+* resolve npm audit vulnerabilities ([59ba3d9](https://github.com/edgehog-device-manager/edgehog/commit/59ba3d9e4b2cbfc8aae1875d9c29e4553594b1aa))
+
 ## [0.14.0](https://github.com/edgehog-device-manager/edgehog/compare/v0.13.1...v0.14.0) (2026-10-02)
 
 
