@@ -71,22 +71,21 @@ defmodule EdgehogWeb.Schema.Mutation.CreateContainerTest do
       assert db_container.image.reference == "ghcr.io/my-repo/my-image:latest"
     end
 
-    test "fails when container name already exists (unique constraint)", %{tenant: tenant} do
-      existing = container_fixture(tenant: tenant, name: "duplicate-me")
+    test "allows creating containers with duplicate names", %{tenant: tenant} do
       image = image_fixture(tenant: tenant)
 
+      container_fixture(tenant: tenant, name: "not-unique-anymore")
+
       input = %{
-        "name" => existing.name,
+        "name" => "not-unique-anymore",
         "image" => %{"image" => image.image}
       }
 
-      result = create_container(tenant: tenant, input: input)
+      response = create_container(tenant: tenant, input: input)
 
-      assert %{
-               errors: [
-                 %{code: "invalid_attribute", message: "has already been taken", fields: [:name]}
-               ]
-             } = result
+      result = extract_result!(response)
+
+      assert result["name"] == "not-unique-anymore"
     end
 
     test "creates a container with nested networks and volumes", %{tenant: tenant} do
