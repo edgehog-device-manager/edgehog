@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,11 +23,21 @@ defmodule Edgehog.Astarte.Device.AvailableImages.ImageStatus do
   @enforce_keys [:id, :pulled]
   defstruct [
     :id,
-    :pulled
+    :pulled,
+    :status,
+    :image_id,
+    :repo_tags,
+    :repo_digests,
+    :size
   ]
 
   @type t() :: %__MODULE__{
           id: String.t(),
-          pulled: boolean()
+          pulled: boolean(),
+          status: String.t() | nil,
+          image_id: String.t() | nil,
+          repo_tags: list(String.t()) | nil,
+          repo_digests: list(String.t()) | nil,
+          size: integer() | nil
         }
 end
