@@ -608,7 +608,17 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
       device_id: device_id
     } do
       expect(Edgehog.Astarte.Device.AvailableImages, :get, fn _client, ^device_id ->
-        {:ok, available_images_fixture()}
+        {:ok,
+         available_images_fixture({
+           [
+             status: "Pulled",
+             image_id: "sha256:abc123",
+             repo_tags: ["nginx:latest"],
+             repo_digests: ["nginx@sha256:abc123"],
+             size: 3_000_000_000
+           ],
+           []
+         })}
       end)
 
       document = """
@@ -617,6 +627,11 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
           availableImages {
             id
             pulled
+            status
+            imageId
+            repoTags
+            repoDigests
+            size
           }
         }
       }
@@ -627,8 +642,25 @@ defmodule EdgehogWeb.Schema.Query.DeviceTest do
                |> device_query()
                |> extract_result!()
 
-      assert first_image["pulled"]
-      refute second_image["pulled"]
+      assert %{
+               "id" => "uniqueid1",
+               "pulled" => true,
+               "status" => "Pulled",
+               "imageId" => "sha256:abc123",
+               "repoTags" => ["nginx:latest"],
+               "repoDigests" => ["nginx@sha256:abc123"],
+               "size" => 3_000_000_000
+             } = first_image
+
+      assert %{
+               "id" => "uniqueid2",
+               "pulled" => false,
+               "status" => nil,
+               "imageId" => nil,
+               "repoTags" => nil,
+               "repoDigests" => nil,
+               "size" => nil
+             } = second_image
     end
 
     test "Queries available networks on the device with their status", %{

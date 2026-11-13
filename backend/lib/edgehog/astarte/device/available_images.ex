@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2024 SECO Mind Srl
+# Copyright 2024 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,10 +36,25 @@ defmodule Edgehog.Astarte.Device.AvailableImages do
     end
   end
 
-  defp parse_image_properties({image_id, properties}) do
+  defp parse_image_properties({image_path_id, properties}) do
     %ImageStatus{
-      id: image_id,
-      pulled: properties["pulled"]
+      id: image_path_id,
+      pulled: properties["pulled"],
+      status: properties["status"],
+      image_id: properties["imageId"],
+      repo_tags: properties["repoTags"],
+      repo_digests: properties["repoDigests"],
+      size: parse_longinteger(properties["size"])
     }
+  end
+
+  defp parse_longinteger(nil), do: nil
+  defp parse_longinteger(value) when is_integer(value), do: value
+
+  defp parse_longinteger(value) when is_binary(value) do
+    case Integer.parse(value) do
+      {integer, ""} -> integer
+      _ -> nil
+    end
   end
 end
