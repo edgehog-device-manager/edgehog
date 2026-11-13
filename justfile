@@ -210,7 +210,7 @@ dev-backend:
 
 dev-frontend: (_wait-edgehog "localhost:4000")
     #!/usr/bin/env bash
-    @echo "🚀 Initializing Edgehog frontend in dev environment..."
+    echo "🚀 Initializing Edgehog frontend in dev environment..."
     cd frontend
     npm install
     npm run start

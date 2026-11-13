@@ -40,12 +40,18 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateImageRequest do
          {:ok, device} <- Ash.load(device, :appengine_client) do
       credentials = image.credentials.base64_json |> get_in() |> to_string()
 
+      pull_policy =
+        image
+        |> Map.get(:pull_policy, :if_not_present)
+        |> to_string()
+        |> Macro.camelize()
+
       data = %RequestData{
         id: image.id,
         deploymentId: deployment.id,
         reference: image.reference,
         registryAuth: credentials,
-        pullPolicy: to_string(image.pull_policy)
+        pullPolicy: pull_policy
       }
 
       with :ok <-
