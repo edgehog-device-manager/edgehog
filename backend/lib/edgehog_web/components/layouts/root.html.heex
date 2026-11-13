@@ -1,0 +1,48 @@
+<% branding = Branding.current() %>
+<% css_vars = Branding.custom_css_vars() %> <!DOCTYPE html>
+<html lang="en" class="h-full antialiased" data-theme={branding.default_theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="csrf-token" content={get_csrf_token()} />
+    <.live_title
+      default={branding.app_name}
+      suffix={" · #{branding.subtitle}"}
+    >
+      {assigns[:page_title]}
+    </.live_title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link phx-track-static rel="stylesheet" href="/assets/app.css" />
+    <style :if={css_vars != ""}>
+      <%= Phoenix.HTML.raw(css_vars) %>
+    </style>
+    <script>
+      (() => {
+        const defaultTheme = "<%= branding.default_theme %>";
+        const storedTheme = localStorage.getItem("phx:theme") || defaultTheme;
+
+        const applyTheme = (mode) => {
+          if (!mode || mode === "system") {
+            const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+            document.documentElement.setAttribute("data-theme", prefersDark ? "dark" : "light");
+            document.documentElement.setAttribute("data-theme-mode", "system");
+          } else {
+            document.documentElement.setAttribute("data-theme", mode);
+            document.documentElement.setAttribute("data-theme-mode", mode);
+          }
+        };
+
+        applyTheme(storedTheme);
+
+        window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+          if (!localStorage.getItem("phx:theme")) applyTheme("system");
+        });
+      })();
+    </script>
+    <script defer phx-track-static type="text/javascript" src="/assets/app.js">
+    </script>
+  </head>
+  <body class="min-h-full bg-base-200 text-base-content selection:bg-primary/20 selection:text-primary">
+    {@inner_content}
+  </body>
+</html>
