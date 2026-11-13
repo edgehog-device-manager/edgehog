@@ -53,6 +53,7 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.CoreTest do
 
     test "ready?/1 returns true when the state is a ready one", _context do
       assert Core.ready?(%{state: :received})
+      assert Core.ready?(%{state: :missing})
       assert Core.ready?(%{state: :device_created})
       assert Core.ready?(%{state: :stopped})
       assert Core.ready?(%{state: :running})
@@ -61,6 +62,11 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.CoreTest do
     test "ready?/1 returns false when the state is not a ready one", _context do
       refute Core.ready?(%{state: :created})
       refute Core.ready?(%{state: :sent})
+      refute Core.ready?(%{state: :creating})
+      refute Core.ready?(%{state: :starting})
+      refute Core.ready?(%{state: :stopping})
+      refute Core.ready?(%{state: :deleting})
+      refute Core.ready?(%{state: :error})
     end
 
     test "topic/1 returns the topic on which readiness is broadcast", _context do
@@ -110,13 +116,26 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.CoreTest do
     test "reconcile/2 updates the resource when the status is reported by the device", context do
       %{container_deployment: container_deployment, tenant: tenant} = context
 
-      expect(AvailableContainers, :get, fn _client, _device_id ->
-        {:ok, [%ContainerStatus{id: container_deployment.container.id, status: "Created"}]}
-      end)
+      for {status, expected_state} <- [
+            {"Received", :received},
+            {"Missing", :missing},
+            {"Creating", :creating},
+            {"Created", :device_created},
+            {"Starting", :starting},
+            {"Running", :running},
+            {"Stopping", :stopping},
+            {"Stopped", :stopped},
+            {"Deleting", :deleting},
+            {"Error", :error}
+          ] do
+        expect(AvailableContainers, :get, fn _client, _device_id ->
+          {:ok, [%ContainerStatus{id: container_deployment.container.id, status: status}]}
+        end)
 
-      assert {:ok, updated} = Core.reconcile(container_deployment, tenant: tenant)
-      assert updated.id == container_deployment.id
-      assert updated.state == :device_created
+        assert {:ok, updated} = Core.reconcile(container_deployment, tenant: tenant)
+        assert updated.id == container_deployment.id
+        assert updated.state == expected_state
+      end
     end
 
     test "reconcile/2 returns :not_found when the status is not reported by the device",

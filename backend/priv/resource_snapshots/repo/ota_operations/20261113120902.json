@@ -21,7 +21,43 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "type",
+      "source": "base_image_url",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "\"pending\"",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "status",
+      "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "0",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "status_progress",
+      "type": "bigint"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "status_code",
       "type": "text"
     },
     {
@@ -38,18 +74,15 @@
     },
     {
       "allow_nil?": true,
-      "default": "nil",
+      "default": "false",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "add_info",
-      "type": [
-        "array",
-        "text"
-      ]
+      "source": "is_manual",
+      "type": "boolean"
     },
     {
       "allow_nil?": false,
@@ -87,6 +120,8 @@
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
         "index?": false,
+        "index_where": null,
+        "match_tenant?": false,
         "match_type": null,
         "match_with": null,
         "multitenancy": {
@@ -94,7 +129,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "deployment_events_tenant_id_fkey",
+        "name": "ota_operations_tenant_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
@@ -117,29 +152,34 @@
         "destination_attribute": "id",
         "destination_attribute_default": null,
         "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
+        "index?": true,
+        "index_where": null,
+        "match_tenant?": false,
+        "match_type": "full",
+        "match_with": {
+          "tenant_id": "tenant_id"
+        },
         "multitenancy": {
           "attribute": "tenant_id",
           "global": false,
           "strategy": "attribute"
         },
-        "name": "deployment_events_deployment_id_fkey",
+        "name": "ota_operations_device_id_fkey",
         "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "application_deployments"
+        "table": "devices"
       },
       "scale": null,
       "size": null,
-      "source": "deployment_id",
-      "type": "uuid"
+      "source": "device_id",
+      "type": "bigint"
     }
   ],
   "base_filter": null,
   "check_constraints": [],
+  "create_table_options": null,
   "custom_indexes": [
     {
       "all_tenants?": true,
@@ -159,6 +199,7 @@
         }
       ],
       "include": null,
+      "include_base_filter?": true,
       "message": null,
       "name": null,
       "nulls_distinct": true,
@@ -181,6 +222,7 @@
         }
       ],
       "include": null,
+      "include_base_filter?": true,
       "message": null,
       "name": null,
       "nulls_distinct": true,
@@ -193,7 +235,7 @@
   ],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "BF61349E95F23EA6067837A16ED6C12D4D07463D24396F0619B284D78BAE9537",
+  "hash": "429395B350965C9EA346324C9844256977332A3F7D085C59A6E160990A626993",
   "identities": [],
   "multitenancy": {
     "attribute": "tenant_id",
@@ -202,5 +244,6 @@
   },
   "repo": "Elixir.Edgehog.Repo",
   "schema": null,
-  "table": "deployment_events"
+  "table": "ota_operations",
+  "temporal": null
 }

@@ -25,9 +25,11 @@ defmodule Edgehog.Containers.Container.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.Container
   alias Edgehog.Containers.Container.Deployment.Calculations
   alias Edgehog.Containers.Container.Deployment.Changes
+  alias Edgehog.Containers.Container.Deployment.Types.Event
   alias Edgehog.Containers.Container.Deployment.Validations
   alias Edgehog.Containers.Container.Types.EnvVar
   alias Edgehog.Containers.Release.Deployment
@@ -159,7 +161,14 @@ defmodule Edgehog.Containers.Container.Deployment do
     end
 
     update :update_from_device do
-      accept [:exit_code, :health_status, :health_failed_count, :restart_count]
+      accept [
+        :exit_code,
+        :health_status,
+        :health_failed_count,
+        :restart_count,
+        :docker_image_id,
+        :oom_killed
+      ]
     end
 
     destroy :destroy_if_dangling do
@@ -189,6 +198,7 @@ defmodule Edgehog.Containers.Container.Deployment do
           :missing,
           :creating,
           :created,
+          :starting,
           :running,
           :stopping,
           :stopped,
@@ -233,6 +243,22 @@ defmodule Edgehog.Containers.Container.Deployment do
     end
 
     attribute :restart_count, :integer do
+      public? true
+    end
+
+    attribute :docker_image_id, :string do
+      description """
+      The image ID (digest) used for this container.
+      """
+
+      public? true
+    end
+
+    attribute :oom_killed, :boolean do
+      description """
+      States whether the container was OOM Killed.
+      """
+
       public? true
     end
 
@@ -307,6 +333,16 @@ defmodule Edgehog.Containers.Container.Deployment do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :deployments]}
+
+    calculate :events,
+              {:array, Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.ContainerEvent",
+               resource_id_key: :container_id,
+               event_type: Event} do
+      description "Lifecycle events reported by the device for this container deployment."
+      public? true
+    end
   end
 
   identities do

@@ -29,6 +29,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
   alias Ecto.Adapters.SQL
   alias Edgehog.Astarte.Device.FileDownloadRequest, as: AstarteFileDownloadRequest
   alias Edgehog.Astarte.Device.FileTransferCapabilities
+  alias Edgehog.Astarte.Device.ResourceEvent
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
@@ -41,6 +42,10 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
 
   setup do
     stub(Deployment.Orchestrator, :conduct, fn _deployment, _tenant -> :ok end)
+
+    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id, _query ->
+      {:ok, []}
+    end)
 
     %{tenant: tenant_fixture()}
   end
@@ -908,6 +913,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeployExecutorTest do
     Edgehog.Astarte.Device.DeviceStatus,
     Edgehog.Astarte.Device.FileDownloadRequest,
     Edgehog.Astarte.Device.FileTransferCapabilities,
+    ResourceEvent,
     Deployment.Orchestrator,
     FileDownloadRequestProvisioner
   ]

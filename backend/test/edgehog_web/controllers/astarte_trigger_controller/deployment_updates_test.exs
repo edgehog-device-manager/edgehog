@@ -75,13 +75,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       |> put_req_header("astarte-realm", realm.name)
       |> post(path, deployment_event)
       |> response(200)
-
-      # Deployment must be reloaded from the db
-      deployment =
-        Ash.get!(Deployment, deployment.id, tenant: tenant, load: :events)
-
-      assert [event] = deployment.events
-      assert event.type == :error
     end
 
     test "deployment events get queued (event with add_info field)", context do
@@ -115,14 +108,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       |> put_req_header("astarte-realm", realm.name)
       |> post(path, deployment_event)
       |> response(200)
-
-      # Deployment must be reloaded from the db
-      deployment =
-        Ash.get!(Deployment, deployment.id, tenant: tenant, load: :events)
-
-      assert [event] = deployment.events
-      assert event.type == :error
-      assert event.add_info == ["additional info about the event"]
     end
 
     test "Starting status does not update a Started deployment", context do
@@ -1012,6 +997,85 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       assert is_nil(updated.restart_count)
     end
 
+    test "AvailableContainers with Missing status marks container as missing and ready",
+         context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release =
+        release_fixture(containers: 1, tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
+        |> deployment_fixture()
+        |> set_ready()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+      set_ready(container_deployment.image_deployment)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+          path: "/" <> container_deployment.container_id <> "/status",
+          value: "Missing"
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated =
+        Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant, load: :is_ready)
+
+      assert updated.state == :missing
+      assert updated.is_ready
+
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
+      assert deployment.is_ready
+    end
+
+    test "AvailableContainers with Starting status marks container as starting", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release =
+        release_fixture(containers: 1, tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
+        |> deployment_fixture()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+          path: "/" <> container_deployment.container_id <> "/status",
+          value: "Starting"
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated = Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant)
+      assert updated.state == :starting
+    end
+
     test "AvailableContainers with Running status marks container as running", context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 
@@ -1099,7 +1163,9 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
             {"exitCode", 17},
             {"health/status", "Healthy"},
             {"health/failed", 2},
-            {"restartCount", 3}
+            {"restartCount", 3},
+            {"imageId", "sha256:123456"},
+            {"oomKilled", false}
           ] do
         event = %{
           device_id: device.device_id,
@@ -1115,6 +1181,7 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         build_conn()
         |> put_req_header("astarte-realm", realm.name)
         |> post(path, event)
+        |> dbg()
         |> response(200)
       end
 
@@ -1123,6 +1190,8 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       assert updated.health_status == :healthy
       assert updated.health_failed_count == 2
       assert updated.restart_count == 3
+      assert updated.docker_image_id == "sha256:123456"
+      assert updated.oom_killed == false
     end
 
     test "AvailableContainers with nil destroys container deployment", context do
@@ -1137,24 +1206,33 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         |> Ash.load!(container_deployments: [:image_deployment])
 
       [container_deployment] = deployment.container_deployments
-
-      deployment_event = %{
-        device_id: device.device_id,
-        event: %{
-          type: "incoming_data",
-          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
-          path: "/" <> container_deployment.container_id <> "/status",
-          value: nil
-        },
-        timestamp: DateTime.to_iso8601(DateTime.utc_now())
-      }
-
       path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
 
-      conn
-      |> put_req_header("astarte-realm", realm.name)
-      |> post(path, deployment_event)
-      |> response(200)
+      for property <- [
+            "status",
+            "imageId",
+            "oomKilled",
+            "exitCode",
+            "health/status",
+            "health/failed",
+            "restartCount"
+          ] do
+        deployment_event = %{
+          device_id: device.device_id,
+          event: %{
+            type: "incoming_data",
+            interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+            path: "/" <> container_deployment.container_id <> "/" <> property,
+            value: nil
+          },
+          timestamp: DateTime.to_iso8601(DateTime.utc_now())
+        }
+
+        build_conn()
+        |> put_req_header("astarte-realm", realm.name)
+        |> post(path, deployment_event)
+        |> response(200)
+      end
 
       assert {:error, _} = Ash.get(Container.Deployment, container_deployment.id, tenant: tenant)
     end

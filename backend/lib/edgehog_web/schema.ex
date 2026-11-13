@@ -38,6 +38,7 @@ defmodule EdgehogWeb.Schema do
     relay_ids?: true
 
   import_types EdgehogWeb.Schema.AstarteTypes
+  import_types EdgehogWeb.Schema.ContainerEventSubscriptions
   import_types Absinthe.Plug.Types
   import_types Absinthe.Type.Custom
 
@@ -48,5 +49,6 @@ defmodule EdgehogWeb.Schema do
   end
 
   subscription do
+    import_fields :container_event_subscriptions
   end
 end
