@@ -1012,6 +1012,85 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
       assert is_nil(updated.restart_count)
     end
 
+    test "AvailableContainers with Missing status marks container as missing and ready",
+         context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release =
+        release_fixture(containers: 1, tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
+        |> deployment_fixture()
+        |> set_ready()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+      set_ready(container_deployment.image_deployment)
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+          path: "/" <> container_deployment.container_id <> "/status",
+          value: "Missing"
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated =
+        Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant, load: :is_ready)
+
+      assert updated.state == :missing
+      assert updated.is_ready
+
+      deployment = Ash.get!(Deployment, deployment.id, tenant: tenant, load: :is_ready)
+      assert deployment.is_ready
+    end
+
+    test "AvailableContainers with Starting status marks container as starting", context do
+      %{conn: conn, realm: realm, device: device, tenant: tenant} = context
+
+      release =
+        release_fixture(containers: 1, tenant: tenant)
+
+      deployment =
+        [tenant: tenant, device_id: device.id, release_id: release.id, state: :sent]
+        |> deployment_fixture()
+        |> Ash.load!(container_deployments: [:image_deployment])
+
+      [container_deployment] = deployment.container_deployments
+
+      deployment_event = %{
+        device_id: device.device_id,
+        event: %{
+          type: "incoming_data",
+          interface: "io.edgehog.devicemanager.apps.AvailableContainers",
+          path: "/" <> container_deployment.container_id <> "/status",
+          value: "Starting"
+        },
+        timestamp: DateTime.to_iso8601(DateTime.utc_now())
+      }
+
+      path = Routes.astarte_trigger_path(conn, :process_event, tenant.slug)
+
+      conn
+      |> put_req_header("astarte-realm", realm.name)
+      |> post(path, deployment_event)
+      |> response(200)
+
+      updated = Ash.get!(Container.Deployment, container_deployment.id, tenant: tenant)
+      assert updated.state == :starting
+    end
+
     test "AvailableContainers with Running status marks container as running", context do
       %{conn: conn, realm: realm, device: device, tenant: tenant} = context
 

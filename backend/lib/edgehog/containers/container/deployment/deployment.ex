@@ -196,6 +196,7 @@ defmodule Edgehog.Containers.Container.Deployment do
           :missing,
           :creating,
           :created,
+          :starting,
           :running,
           :stopping,
           :stopped,
