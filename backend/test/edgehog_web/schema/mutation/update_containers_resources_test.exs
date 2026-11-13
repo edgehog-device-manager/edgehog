@@ -181,6 +181,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
           label
           driver
           options
+          reclaimPolicy
         }
       }
     }
@@ -190,7 +191,10 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
       tenant: tenant
     } do
       vol1 = volume_fixture(tenant: tenant, label: "vol-1", driver: "local")
-      vol2 = volume_fixture(tenant: tenant, label: "vol-2", driver: "local")
+
+      vol2 =
+        volume_fixture(tenant: tenant, label: "vol-2", driver: "local", reclaim_policy: "Retain")
+
       vol1_id = AshGraphql.Resource.encode_relay_id(vol1)
 
       res =
@@ -200,7 +204,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
             "input" => %{
               "label" => "vol-1-renamed",
               "driver" => "nfs",
-              "options" => Jason.encode!(%{"addr" => "10.0.0.1"})
+              "options" => Jason.encode!(%{"addr" => "10.0.0.1"}),
+              "reclaimPolicy" => "Retain"
             }
           },
           context: %{tenant: tenant}
@@ -213,7 +218,8 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
                      "id" => ^vol1_id,
                      "label" => "vol-1-renamed",
                      "driver" => "nfs",
-                     "options" => "{\"addr\":\"10.0.0.1\"}"
+                     "options" => "{\"addr\":\"10.0.0.1\"}",
+                     "reclaimPolicy" => "Retain"
                    }
                  }
                }
@@ -243,6 +249,7 @@ defmodule EdgehogWeb.Schema.Mutation.UpdateContainersResourcesTest do
 
       [deployed_container] = deployment.release.containers
       [deployed_volume] = deployed_container.volumes
+      assert deployed_volume.reclaim_policy == "Retain"
       deployed_vol_id = AshGraphql.Resource.encode_relay_id(deployed_volume)
 
       deployed_res =

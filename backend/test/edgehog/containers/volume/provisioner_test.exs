@@ -113,13 +113,15 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
           id: id,
           deploymentId: deployment_id,
           driver: driver,
-          options: options
+          options: options,
+          reclaimPolicy: reclaim_policy
         } = data
 
         assert id == volume_deployment.volume.id
         assert deployment_id == deployment.id
         assert driver == volume_deployment.volume.driver
         assert options == Enum.into(volume_deployment.volume.options, [])
+        assert reclaim_policy == volume_deployment.volume.reclaim_policy
 
         # Update the volume deployment to be ready
 
@@ -158,13 +160,15 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
           id: id,
           deploymentId: deployment_id,
           driver: driver,
-          options: options
+          options: options,
+          reclaimPolicy: reclaim_policy
         } = data
 
         assert id == volume_deployment.volume.id
         assert deployment_id == deployment.id
         assert driver == volume_deployment.volume.driver
         assert options == Enum.into(volume_deployment.volume.options, [])
+        assert reclaim_policy == volume_deployment.volume.reclaim_policy
 
         volume_deployment
         |> Ash.Changeset.for_update(:mark_as_unavailable, %{})
@@ -195,13 +199,15 @@ defmodule Edgehog.Containers.Volume.Deployment.ProvisionerTest do
           id: id,
           deploymentId: deployment_id,
           driver: driver,
-          options: options
+          options: options,
+          reclaimPolicy: reclaim_policy
         } = data
 
         assert id == volume_deployment.volume.id
         assert deployment_id == deployment.id
         assert driver == volume_deployment.volume.driver
         assert options == Enum.into(volume_deployment.volume.options, [])
+        assert reclaim_policy == volume_deployment.volume.reclaim_policy
 
         volume_deployment
         |> Ash.Changeset.for_update(:mark_as_unavailable, %{})

@@ -37,7 +37,8 @@ defmodule Edgehog.Devices.Device.ManualActions.SendCreateVolume do
         id: volume.id,
         deploymentId: deployment.id,
         driver: volume.driver,
-        options: volume.options_encoding
+        options: volume.options_encoding,
+        reclaimPolicy: volume.reclaim_policy
       }
 
       with :ok <-
