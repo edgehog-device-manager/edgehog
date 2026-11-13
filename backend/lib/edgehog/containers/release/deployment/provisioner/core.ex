@@ -57,7 +57,7 @@ defmodule Edgehog.Containers.Release.Deployment.Provisioner.Core do
       |> Ash.Changeset.for_update(:mark_as_sent, %{}, tenant: tenant)
       |> Ash.update!()
 
-      Audit.sent_to_device(deployment, device)
+      Audit.sent_to_device(deployment, device, tenant)
     end
   end
 

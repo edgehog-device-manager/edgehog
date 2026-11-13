@@ -55,7 +55,7 @@ defmodule Edgehog.Containers.Image.Deployment.Provisioner.Core do
          {:ok, device} <- Map.fetch(resource, :device),
          {:ok, device} <-
            Devices.send_create_image_request(device, actual_resource, deployment, tenant: tenant) do
-      Audit.sent_to_device(actual_resource, device)
+      Audit.sent_to_device(actual_resource, device, tenant)
     end
   end
 

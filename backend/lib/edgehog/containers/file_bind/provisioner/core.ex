@@ -69,7 +69,7 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Core do
            Ash.load(file_bind, [:device, :file_mount], tenant: tenant),
          {:ok, device} <-
            Devices.send_create_file_bind_request(device, file_bind, deployment, tenant: tenant) do
-      Audit.sent_to_device(file_bind, device)
+      Audit.sent_to_device(file_bind, device, tenant)
     end
   end
 

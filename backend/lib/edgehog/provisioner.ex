@@ -379,7 +379,7 @@ defmodule Edgehog.Provisioner do
             {:noreply, new_state, timeout}
 
           error ->
-            Audit.api_error(resource, error)
+            Audit.api_error(resource, error, tenant)
             timeout = timeout(state)
 
             if Core.temporary_error?(error),

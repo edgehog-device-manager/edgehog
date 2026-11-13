@@ -26,10 +26,9 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Audit do
   """
   use Edgehog.Provisioner.Audit
 
+  alias Edgehog.Audit.AuditService
   alias Edgehog.Containers.FileBind.Provisioner.Core
   alias Edgehog.Containers.Telemetry
-
-  require Logger
 
   @impl Edgehog.Provisioner.Audit.Behaviour
   def provisioning_started(resource, context) do
@@ -37,35 +36,72 @@ defmodule Edgehog.Containers.FileBind.Provisioner.Audit do
   end
 
   @impl Edgehog.Provisioner.Audit.Behaviour
-  def sent_to_device(resource, device) do
-    Logger.info("""
-    FileBind #{resource.id} provisioned on device #{device.device_id}. Waiting events
-    """)
+  def sent_to_device(resource, device, tenant) do
+    AuditService.info(
+      "FileBind #{resource.id} sent to device #{device.device_id}.",
+      tenant: tenant,
+      metadata: %{
+        resource_type: "file_bind",
+        resource_id: resource.id,
+        device_id: device.device_id
+      }
+    )
   end
 
   @impl Edgehog.Provisioner.Audit.Behaviour
-  def api_error(resource, error) do
-    if Core.temporary_error?(error) do
-      Logger.warning(
-        "Error while sending the file bind #{resource.id}: #{inspect(error)}. The operation will be retried shortly."
-      )
-    else
-      Logger.error(
-        "Unrecoverable error while sending the file bind #{resource.id}: #{inspect(error)}. Terminating."
-      )
-    end
+  def api_error(resource, error, tenant) do
+    {log_level, message} =
+      if Core.temporary_error?(error) do
+        {:warning,
+         "Error while sending the file bind #{resource.id}: #{inspect(error)}. The operation will be retried shortly."}
+      else
+        {:error,
+         "Unrecoverable error while sending the file bind #{resource.id}: #{inspect(error)}. Terminating."}
+      end
+
+    AuditService.register_event(
+      message,
+      log_level,
+      nil,
+      %{
+        resource_type: "file_bind",
+        resource_id: resource.id,
+        error: inspect(error)
+      },
+      tenant: tenant
+    )
   end
 
   @impl Edgehog.Provisioner.Audit.Behaviour
   def provisioning_completed(resource, context, started_at, retries, result) do
-    Logger.info("FileBind #{resource.id} successfully provisioned after #{retries} retries.")
+    tenant = Keyword.fetch!(context, :tenant)
+
+    AuditService.info(
+      "FileBind #{resource.id} successfully provisioned after #{retries} retries.",
+      tenant: tenant,
+      metadata: %{
+        resource_type: "file_bind",
+        resource_id: resource.id,
+        retries: retries
+      }
+    )
+
     Telemetry.provisioning_completed(resource, context, started_at, retries, result)
   end
 
   @impl Edgehog.Provisioner.Audit.Behaviour
   def provisioning_failed(resource, context, started_at, retries, reason) do
-    Logger.info(
-      "Provisioner for file bind #{resource.id} gave up with reason #{inspect(reason)}."
+    tenant = Keyword.fetch!(context, :tenant)
+
+    AuditService.info(
+      "Provisioner for file bind #{resource.id} gave up with reason #{inspect(reason)}.",
+      tenant: tenant,
+      metadata: %{
+        resource_type: "file_bind",
+        resource_id: resource.id,
+        retries: retries,
+        reason: inspect(reason)
+      }
     )
 
     Telemetry.provisioning_failed(resource, context, started_at, retries, reason)

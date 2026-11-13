@@ -38,6 +38,7 @@ defmodule Edgehog.Provisioner.Audit.Behaviour do
   """
 
   alias Edgehog.Provisioner
+  alias Edgehog.Tenants.Tenant
 
   @doc """
   Audits the subscription to resource events on the given topic.
@@ -62,12 +63,12 @@ defmodule Edgehog.Provisioner.Audit.Behaviour do
 
   Receives the actual resource that was sent and the device it was sent to.
   """
-  @callback sent_to_device(resource(), resource()) :: term()
+  @callback sent_to_device(resource(), resource(), Tenant.t()) :: term()
 
   @doc """
   Audits a failed send to device operation.
   """
-  @callback api_error(resource(), error()) :: term()
+  @callback api_error(resource(), error(), Tenant.t()) :: term()
 
   @doc """
   Audits a successful provisioning.

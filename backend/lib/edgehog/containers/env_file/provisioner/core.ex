@@ -67,7 +67,7 @@ defmodule Edgehog.Containers.EnvFile.Provisioner.Core do
            Ash.load(env_file, [:device], tenant: tenant),
          {:ok, device} <-
            Devices.send_create_env_file_request(device, env_file, deployment, tenant: tenant) do
-      Audit.sent_to_device(env_file, device)
+      Audit.sent_to_device(env_file, device, tenant)
     end
   end
 

@@ -32,6 +32,11 @@ defmodule Edgehog.Audit.AuditService do
 
   @type option :: {:tenant, Tenant.t() | integer() | nil}
 
+  @type convenience_option ::
+          option()
+          | {:metadata, map()}
+          | {:ash_action_info, ActionEventInfo.t() | nil}
+
   @doc """
   Registers an event by logging the given message and creating an `Edgehog.Audit.Event`
   resource, if configured.
@@ -54,6 +59,35 @@ defmodule Edgehog.Audit.AuditService do
 
     maybe_log_event(message, log_level, ash_action_info, metadata, tenant)
     maybe_store_event(message, log_level, ash_action_info, metadata, tenant)
+  end
+
+  @doc "Registers an audit event at debug level."
+  @spec debug(String.t(), [convenience_option()]) :: :ok | {:error, term()}
+  def debug(message, opts \\ []), do: register_with_level(message, :debug, opts)
+
+  @doc "Registers an audit event at info level."
+  @spec info(String.t(), [convenience_option()]) :: :ok | {:error, term()}
+  def info(message, opts \\ []), do: register_with_level(message, :info, opts)
+
+  @doc "Registers an audit event at warning level."
+  @spec warning(String.t(), [convenience_option()]) :: :ok | {:error, term()}
+  def warning(message, opts \\ []), do: register_with_level(message, :warning, opts)
+
+  @doc "Registers an audit event at error level."
+  @spec error(String.t(), [convenience_option()]) :: :ok | {:error, term()}
+  def error(message, opts \\ []), do: register_with_level(message, :error, opts)
+
+  defp register_with_level(message, level, opts) do
+    ash_action_info = Keyword.get(opts, :ash_action_info)
+    metadata = Keyword.get(opts, :metadata, %{})
+
+    register_event(
+      message,
+      level,
+      ash_action_info,
+      metadata,
+      Keyword.take(opts, [:tenant])
+    )
   end
 
   defp maybe_log_event(message, log_level, ash_action_info, metadata, tenant) do
