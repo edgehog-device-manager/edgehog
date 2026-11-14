@@ -26,7 +26,7 @@ services:
       - postgres-data:/var/lib/postgresql
 
   pgadmin:
-    image: dpage/pgadmin4:9.18.0
+    image: dpage/pgadmin4:9.19.0
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
@@ -308,7 +308,7 @@ services:
       - registry-auth:/auth
 
   registry-init:
-    image: docker:29.8.1-dind
+    image: docker:29.8.2-dind
     depends_on:
       - registry
     privileged: true
