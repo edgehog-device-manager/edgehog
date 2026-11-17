@@ -39,6 +39,7 @@ const VOLUMES_TABLE_FRAGMENT = graphql`
         label
         driver
         options
+        reclaimPolicy
       }
     }
   }
@@ -85,6 +86,19 @@ const columns = [
     meta: {
       label: "Driver",
     },
+  }),
+  columnHelper.accessor("reclaimPolicy", {
+    header: () => (
+      <FormattedMessage
+        id="components.apps.containers.volumes-table.VolumesTable.reclaimPolicyTitle"
+        defaultMessage="Reclaim Policy"
+        description="Title for the Reclaim Policy column of the volumes table"
+      />
+    ),
+    meta: {
+      label: "Reclaim Policy",
+    },
+    cell: ({ getValue }) => getValue(),
   }),
 ];
 

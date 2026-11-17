@@ -540,10 +540,14 @@ const networkSchema = z.object({
 });
 type NetworkFormData = z.infer<typeof networkSchema>;
 
+const reclaimPolicySchema = z.enum(["Delete", "Retain"]);
+type ReclaimPolicy = z.infer<typeof reclaimPolicySchema>;
+
 const volumeSchema = z.object({
   label: z.string().min(1),
   driver: z.string().optional(),
   options: optionsSchema.optional(),
+  reclaimPolicy: reclaimPolicySchema,
 });
 type VolumeFormData = z.infer<typeof volumeSchema>;
 
@@ -1621,6 +1625,7 @@ export type {
   ApplicationFormData,
   NetworkFormData,
   VolumeFormData,
+  ReclaimPolicy,
   ChannelFormData,
   DeviceGroupFormData,
   ImageCredentialFormData,
@@ -1662,6 +1667,7 @@ export {
   applicationSchema,
   networkSchema,
   volumeSchema,
+  reclaimPolicySchema,
   channelSchema,
   deviceGroupSchema,
   imageCredentialSchema,

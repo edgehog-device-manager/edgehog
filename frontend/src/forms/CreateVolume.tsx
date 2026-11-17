@@ -18,10 +18,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
+import { FormattedMessage, useIntl } from "react-intl";
 
 import Button from "@/components/ui/button/Button";
 import Col from "@/components/ui/col/Col";
@@ -34,9 +34,11 @@ import MonacoJsonEditor from "@/components/ui/monaco-json-editor/MonacoJsonEdito
 import { FormRowWithMargin as FormRow } from "@/components/ui/form-row/FormRow";
 import { VolumeFormData, volumeSchema } from "@/forms/validation";
 import FormFeedback from "@/forms/FormFeedback";
+import SelectFormField from "@/forms/SelectFormFIeld";
 
 const initialData: VolumeFormData = {
   label: "",
+  reclaimPolicy: "Delete",
 };
 
 interface Props {
@@ -63,6 +65,28 @@ const CreateVolume = ({
     defaultValues: defaultValues ?? initialData,
     resolver: zodResolver(volumeSchema),
   });
+
+  const intl = useIntl();
+
+  const reclaimPolicyOptions = useMemo(
+    () => [
+      {
+        value: "Delete",
+        label: intl.formatMessage({
+          id: "forms.CreateVolume.reclaimPolicyDelete",
+          defaultMessage: "Delete",
+        }),
+      },
+      {
+        value: "Retain",
+        label: intl.formatMessage({
+          id: "forms.CreateVolume.reclaimPolicyRetain",
+          defaultMessage: "Retain",
+        }),
+      },
+    ],
+    [intl],
+  );
 
   const [prevDefaultValues, setPrevDefaultValues] = useState(defaultValues);
   if (defaultValues && prevDefaultValues !== defaultValues) {
@@ -134,6 +158,29 @@ const CreateVolume = ({
             />
           )}
         />
+      </FormRow>
+
+      <FormRow
+        id="volumeReclaimPolicy"
+        label={
+          <FormattedMessage
+            id="forms.CreateVolume.reclaimPolicyLabel"
+            defaultMessage="Reclaim Policy"
+          />
+        }
+      >
+        <SelectFormField
+          control={control}
+          name="reclaimPolicy"
+          options={reclaimPolicyOptions}
+        />
+        <Form.Text className="text-muted">
+          <FormattedMessage
+            id="forms.CreateVolume.reclaimPolicyHelp"
+            defaultMessage="Determines whether the volume is deleted or retained on the device when its deployment is deleted."
+          />
+        </Form.Text>
+        <FormFeedback feedback={errors.reclaimPolicy?.message} />
       </FormRow>
 
       <Row className="mt-4">

@@ -36,6 +36,7 @@ const CREATE_VOLUME_MUTATION = graphql`
     createVolume(input: $input) {
       result {
         id
+        reclaimPolicy
       }
     }
   }
@@ -52,6 +53,7 @@ const VolumeCreatePage = () => {
     (volume: VolumeFormData) => {
       const input: VolumeFormData = {
         label: volume.label.trim(),
+        reclaimPolicy: volume.reclaimPolicy,
       };
       if (volume.driver && volume.driver.trim() !== "") {
         input.driver = volume.driver.trim();

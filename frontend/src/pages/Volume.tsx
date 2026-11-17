@@ -53,6 +53,7 @@ const GET_VOLUME_QUERY = graphql`
       label
       driver
       options
+      reclaimPolicy
     }
   }
 `;
@@ -68,6 +69,7 @@ const UPDATE_VOLUME_MUTATION = graphql`
         label
         driver
         options
+        reclaimPolicy
       }
     }
   }
@@ -138,6 +140,7 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
         label: volumeData.label.trim(),
         driver: volumeData.driver?.trim() || null,
         options: volumeData.options?.trim() || "{}",
+        reclaimPolicy: volumeData.reclaimPolicy,
       };
       updateVolume({
         variables: { volumeId, input },
@@ -177,10 +180,13 @@ const VolumeContent = ({ volume }: VolumeContentProps) => {
     } catch {
       options = "{}";
     }
+    const reclaimPolicy =
+      volume.reclaimPolicy === "Retain" ? "Retain" : "Delete";
     return {
       label: volume.label,
       driver: volume.driver ?? "",
       options,
+      reclaimPolicy,
     };
   }, [volume]);
 

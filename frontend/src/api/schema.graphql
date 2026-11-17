@@ -3230,6 +3230,15 @@ type volume_deployments_by_device_result {
   destroyed: ID
 }
 
+"The result of the :send_volume_command mutation"
+type SendVolumeCommandResult {
+  "The successful result of the mutation"
+  result: VolumeDeployment
+
+  "Any errors generated, if the mutation failed"
+  errors: [MutationError!]!
+}
+
 enum VolumeDeploymentSortField {
   ID
   STATE
@@ -3354,15 +3363,6 @@ type volume_result {
   destroyed: ID
 }
 
-"The result of the :send_volume_command mutation"
-type SendVolumeCommandResult {
-  "The successful result of the mutation"
-  result: Volume
-
-  "Any errors generated, if the mutation failed"
-  errors: [MutationError!]!
-}
-
 "The result of the :delete_volume mutation"
 type DeleteVolumeResult {
   "The record that was successfully deleted"
@@ -3383,8 +3383,13 @@ type UpdateVolumeResult {
 
 input UpdateVolumeInput {
   label: String
+
   driver: String
+
   options: JsonString
+
+  "Whether the device should retain or delete the volume when its deployment is deleted."
+  reclaimPolicy: String
 }
 
 "The result of the :create_volume mutation"
@@ -3398,8 +3403,13 @@ type CreateVolumeResult {
 
 input CreateVolumeInput {
   label: String!
+
   driver: String
+
   options: JsonString
+
+  "Whether the device should retain or delete the volume when its deployment is deleted."
+  reclaimPolicy: String
 }
 
 enum VolumeSortField {
@@ -3407,6 +3417,7 @@ enum VolumeSortField {
   LABEL
   DRIVER
   OPTIONS
+  RECLAIM_POLICY
 }
 
 ":volume connection"
@@ -3428,6 +3439,19 @@ type VolumeEdge {
 
   ":volume node"
   node: Volume!
+}
+
+input VolumeFilterReclaimPolicy {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String!]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
 }
 
 input VolumeFilterOptions {
@@ -3494,14 +3518,26 @@ input VolumeFilterId {
 
 input VolumeFilterInput {
   and: [VolumeFilterInput!]
+
   or: [VolumeFilterInput!]
+
   not: [VolumeFilterInput!]
+
   id: VolumeFilterId
+
   label: VolumeFilterLabel
+
   driver: VolumeFilterDriver
+
   options: VolumeFilterOptions
+
+  "Whether the device should retain or delete the volume when its deployment is deleted."
+  reclaimPolicy: VolumeFilterReclaimPolicy
+
   devices: DeviceFilterInput
+
   containers: ContainerFilterInput
+
   containerVolumes: ContainerVolumeFilterInput
 }
 
@@ -3512,9 +3548,16 @@ input VolumeSortInput {
 
 type Volume implements Node {
   id: ID!
+
   label: String!
+
   driver: String!
+
   options: JsonString!
+
+  "Whether the device should retain or delete the volume when its deployment is deleted."
+  reclaimPolicy: String!
+
   devices(
     "How to sort the records in the response"
     sort: [DeviceSortInput]
@@ -3534,6 +3577,7 @@ type Volume implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): DeviceConnection!
+
   containers(
     "How to sort the records in the response"
     sort: [ContainerSortInput]
@@ -3547,6 +3591,7 @@ type Volume implements Node {
     "The number of records to skip."
     offset: Int
   ): [Container!]!
+
   containerVolumes(
     "How to sort the records in the response"
     sort: [ContainerVolumeSortInput]
@@ -3566,6 +3611,7 @@ type Volume implements Node {
     "The number of records to return to the end. Maximum 250"
     last: Int
   ): ContainerVolumeConnection!
+
   hash: String!
 }
 
@@ -5028,6 +5074,10 @@ enum ContainerDeploymentSortField {
   ID
   STATE
   ENV_STRATEGY
+  EXIT_CODE
+  HEALTH_STATUS
+  HEALTH_FAILED_COUNT
+  RESTART_COUNT
   CONTAINER_ID
   DEVICE_ID
   IMAGE_DEPLOYMENT_ID
@@ -5093,6 +5143,58 @@ input ContainerDeploymentFilterContainerId {
   isNotDistinctFrom: ID
 }
 
+input ContainerDeploymentFilterRestartCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerDeploymentFilterHealthFailedCount {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
+input ContainerDeploymentFilterHealthStatus {
+  isNil: Boolean
+  eq: String
+  notEq: String
+  in: [String]
+  lessThan: String
+  greaterThan: String
+  lessThanOrEqual: String
+  greaterThanOrEqual: String
+  isDistinctFrom: String
+  isNotDistinctFrom: String
+}
+
+input ContainerDeploymentFilterExitCode {
+  isNil: Boolean
+  eq: Int
+  notEq: Int
+  in: [Int]
+  lessThan: Int
+  greaterThan: Int
+  lessThanOrEqual: Int
+  greaterThanOrEqual: Int
+  isDistinctFrom: Int
+  isNotDistinctFrom: Int
+}
+
 input ContainerDeploymentFilterEnvStrategy {
   isNil: Boolean
   eq: String
@@ -5139,6 +5241,10 @@ input ContainerDeploymentFilterInput {
   id: ContainerDeploymentFilterId
   state: ContainerDeploymentFilterState
   envStrategy: ContainerDeploymentFilterEnvStrategy
+  exitCode: ContainerDeploymentFilterExitCode
+  healthStatus: ContainerDeploymentFilterHealthStatus
+  healthFailedCount: ContainerDeploymentFilterHealthFailedCount
+  restartCount: ContainerDeploymentFilterRestartCount
   containerId: ContainerDeploymentFilterContainerId
   deviceId: ContainerDeploymentFilterDeviceId
   imageDeploymentId: ContainerDeploymentFilterImageDeploymentId
@@ -5163,6 +5269,10 @@ type ContainerDeployment {
   state: String
   env: [ContainerEnvVar!]!
   envStrategy: String!
+  exitCode: Int
+  healthStatus: String
+  healthFailedCount: Int
+  restartCount: Int
   containerId: ID
   deviceId: Int
   imageDeploymentId: ID
@@ -11956,12 +12066,8 @@ type RootMutationType {
   "Delete a volume if not used by any container."
   deleteVolume(id: ID!): DeleteVolumeResult
 
-  "Send a command to a volume on a device."
-  sendVolumeCommand(
-    id: ID!
-    deviceId: ID!
-    command: VolumeCommand!
-  ): SendVolumeCommandResult
+  "Send a command to a volume deployment."
+  sendVolumeCommand(id: ID!, command: VolumeCommand!): SendVolumeCommandResult
 
   "Marks the file uploaded through the presigned upload URL as uploaded."
   markFileBindAsUploaded(
