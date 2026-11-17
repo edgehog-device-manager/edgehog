@@ -23,6 +23,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
   alias Ash.Error.Action.InvalidArgument
   alias Edgehog.Devices.Device
   alias Edgehog.Forwarder
+  alias Edgehog.Forwarder.Telemetry
 
   @forwarder_session_module Application.compile_env(
                               :edgehog,
@@ -41,7 +42,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
              load: [:online, :appengine_client, :forwarder_sessions]
            ) do
       case get_available_session(device.forwarder_sessions) do
-        nil -> request_new_session_token(device)
+        nil -> request_new_session_token(device, tenant)
         session -> {:ok, session.token}
       end
     end
@@ -52,7 +53,7 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
       Enum.find(sessions, &(&1.status == :connecting))
   end
 
-  defp request_new_session_token(device) do
+  defp request_new_session_token(device, tenant) do
     session_token = Ash.UUID.generate()
 
     with {:ok, forwarder_config} <- fetch_forwarder_config(),
@@ -66,6 +67,8 @@ defmodule Edgehog.Forwarder.Session.ManualActions.RequestSession do
              forwarder_config.port,
              forwarder_config.secure_sessions
            ) do
+      Telemetry.session_requested(tenant)
+
       {:ok, session_token}
     end
   end

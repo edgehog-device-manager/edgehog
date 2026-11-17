@@ -24,7 +24,9 @@ defmodule Edgehog.Devices.PromExPluginTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
+  alias Edgehog.Astarte.Device.ForwarderSession
   alias Edgehog.Devices.PromExPlugin
+  alias Edgehog.Forwarder.Telemetry
 
   test "exports connected device counts and sample timestamps per tenant" do
     tenant_a = tenant_fixture()
@@ -36,7 +38,7 @@ defmodule Edgehog.Devices.PromExPluginTest do
     device_fixture(tenant: tenant_b, online: true)
     device_fixture(tenant: tenant_b, online: true)
 
-    [polling] = PromExPlugin.polling_metrics([])
+    [polling, _] = PromExPlugin.polling_metrics([])
     assert polling.poll_rate == 300_000
     assert Edgehog.Devices.PromExPlugin in Edgehog.PromEx.plugins()
 
@@ -78,5 +80,84 @@ defmodule Edgehog.Devices.PromExPluginTest do
     metrics = TelemetryMetricsPrometheus.Core.scrape(:fleet_metrics_test)
     labels = ~s(tenant_slug="#{tenant_a.slug}")
     assert ~s(edgehog_fleet_connected_devices{#{labels}} 0) in String.split(metrics, "\n")
+  end
+
+  test "exports active forwarder sessions per tenant" do
+    tenant_a = tenant_fixture()
+    tenant_b = tenant_fixture()
+
+    device_a = device_fixture(tenant: tenant_a, online: true)
+    device_fixture(tenant: tenant_a, online: false)
+    device_fixture(tenant: tenant_b, online: true)
+
+    device_id = device_a.device_id
+
+    stub(ForwarderSession, :list_sessions, fn _client, id ->
+      sessions =
+        if id == device_id do
+          [:connected, :connecting, :connected]
+        else
+          [:connecting]
+        end
+
+      {:ok,
+       Enum.map(sessions, fn status ->
+         %ForwarderSession{
+           token: Ash.UUID.generate(),
+           status: status,
+           secure: false,
+           forwarder_hostname: "localhost",
+           forwarder_port: 4001
+         }
+       end)}
+    end)
+
+    [_, polling] = PromExPlugin.polling_metrics([])
+
+    start_supervised!(
+      {TelemetryMetricsPrometheus.Core,
+       name: :fleet_forwarder_metrics_test,
+       metrics: polling.metrics,
+       require_seconds: false,
+       start_async: false}
+    )
+
+    PromExPlugin.emit_active_forwarder_sessions_count()
+
+    lines =
+      :fleet_forwarder_metrics_test
+      |> TelemetryMetricsPrometheus.Core.scrape()
+      |> String.split("\n")
+
+    assert ~s(edgehog_fleet_active_forwarder_sessions{tenant_slug="#{tenant_a.slug}"} 2) in lines
+    assert ~s(edgehog_fleet_active_forwarder_sessions{tenant_slug="#{tenant_b.slug}"} 0) in lines
+  end
+
+  test "counts requested forwarder sessions per tenant" do
+    tenant_a = tenant_fixture()
+    tenant_b = tenant_fixture()
+
+    [metrics] = PromExPlugin.event_metrics([])
+
+    start_supervised!(
+      {TelemetryMetricsPrometheus.Core,
+       name: :fleet_forwarder_requests_test,
+       metrics: metrics.metrics,
+       require_seconds: false,
+       start_async: false}
+    )
+
+    Telemetry.session_requested(tenant_a)
+    Telemetry.session_requested(tenant_a)
+    Telemetry.session_requested(tenant_b)
+
+    lines =
+      :fleet_forwarder_requests_test
+      |> TelemetryMetricsPrometheus.Core.scrape()
+      |> String.split("\n")
+
+    assert ~s(edgehog_fleet_forwarder_sessions_requested_total{tenant_slug="#{tenant_a.slug}"} 2) in lines
+
+    assert ~s(edgehog_fleet_forwarder_sessions_requested_total{tenant_slug="#{tenant_b.slug}"} 1) in lines
   end
 end
