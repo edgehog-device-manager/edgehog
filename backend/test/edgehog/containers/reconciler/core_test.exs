@@ -505,6 +505,34 @@ defmodule Edgehog.Containers.Reconciler.CoreTest do
 
       assert :device_created = new_state
     end
+
+    test "Updates the container state for Missing, Starting, and Error statuses", %{
+      tenant: tenant,
+      container_deployment: container_deployment,
+      device: device
+    } do
+      device_id = device.device_id
+
+      for {status, expected_state} <- [
+            {"Missing", :missing},
+            {"Starting", :starting},
+            {"Error", :error}
+          ] do
+        expect(AvailableContainers, :get, fn _client, ^device_id ->
+          {:ok,
+           [struct!(%ContainerStatus{id: container_deployment.container_id, status: status})]}
+        end)
+
+        assert :ok = Reconciler.Core.reconcile_containers(device, tenant)
+
+        new_state =
+          container_deployment
+          |> Ash.load!(:state)
+          |> Map.get(:state)
+
+        assert ^expected_state = new_state
+      end
+    end
   end
 
   describe "reconcile_deployments/2" do

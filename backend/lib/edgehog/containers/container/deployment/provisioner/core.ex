@@ -30,8 +30,22 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.Core do
   alias Edgehog.Containers.Container.Deployment.Provisioner.Audit
   alias Edgehog.Devices
 
+  @status_actions %{
+    "Received" => :mark_as_received,
+    "Missing" => :mark_as_missing,
+    "Creating" => :mark_as_creating,
+    "Created" => :mark_as_created,
+    "Starting" => :mark_as_starting,
+    "Running" => :mark_as_running,
+    "Stopping" => :mark_as_stopping,
+    "Stopped" => :mark_as_stopped,
+    "Deleting" => :mark_as_deleting,
+    "Error" => :mark_as_errored
+  }
+
   @impl Edgehog.Provisioner.Core.Behaviour
-  def ready?(%{state: state}), do: state in [:received, :device_created, :stopped, :running]
+  def ready?(%{state: state}),
+    do: state in [:received, :missing, :device_created, :stopped, :running]
 
   @impl Edgehog.Provisioner.Core.Behaviour
   def topic(%{id: id}), do: "container_deployments:provisioning:#{id}"
@@ -76,13 +90,7 @@ defmodule Edgehog.Containers.Container.Deployment.Provisioner.Core do
   end
 
   def maybe_update(%ContainerStatus{status: status}, resource, tenant) do
-    action =
-      case status do
-        "Received" -> :mark_as_received
-        "Created" -> :mark_as_created
-        "Running" -> :mark_as_running
-        "Stopped" -> :mark_as_stopped
-      end
+    action = Map.fetch!(@status_actions, status)
 
     # NOTE: this will trigger a publish on the appropriate topic, the
     # provisioner will react to it.

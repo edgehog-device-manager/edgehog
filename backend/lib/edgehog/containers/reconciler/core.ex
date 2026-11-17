@@ -48,7 +48,7 @@ defmodule Edgehog.Containers.Reconciler.Core do
     "Stopping" => {:stopping, &Containers.mark_container_deployment_as_stopping/2},
     "Stopped" => {:stopped, &Containers.mark_container_deployment_as_stopped/2},
     "Deleting" => {:deleting, &Containers.mark_container_deployment_as_deleting/2},
-    "Errored" => {:error, &Containers.mark_container_deployment_as_errored/2}
+    "Error" => {:error, &Containers.mark_container_deployment_as_errored/2}
   }
 
   @spec reconcile(%{device_id: integer(), tenant: Edgehog.Tenants.Tenant.t()}) ::
