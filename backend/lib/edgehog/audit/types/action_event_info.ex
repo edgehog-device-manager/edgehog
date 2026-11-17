@@ -44,8 +44,8 @@ defmodule Edgehog.Audit.Types.ActionEventInfo do
         ],
         record_id: [
           type: :union,
-          description: "The ID of the record targeted by the action.",
-          allow_nil?: false,
+          description: "The ID of the record targeted by the action, if any.",
+          allow_nil?: true,
           constraints: [
             types: [
               integer: [
@@ -67,7 +67,7 @@ defmodule Edgehog.Audit.Types.ActionEventInfo do
           description: "Type of the action being executed.",
           allow_nil?: false,
           constraints: [
-            one_of: [:create, :read, :update, :destroy, :action]
+            one_of: [:create, :update, :destroy, :action]
           ]
         ],
         action_inputs: [
@@ -90,9 +90,9 @@ defmodule Edgehog.Audit.Types.ActionEventInfo do
 
   @type t :: %{
           resource_module: module(),
-          record_id: integer() | String.t() | Ash.Union.t(),
+          record_id: integer() | String.t() | Ash.Union.t() | nil,
           action_name: atom(),
-          action_type: :create | :read | :update | :destroy | :action,
+          action_type: :create | :update | :destroy | :action,
           action_inputs: map(),
           changed_attributes: map(),
           actor: map() | nil

@@ -1196,7 +1196,6 @@ defmodule EdgehogWeb.Controllers.AstarteTriggerController.DeploymentUpdatesTest 
         build_conn()
         |> put_req_header("astarte-realm", realm.name)
         |> post(path, event)
-        |> dbg()
         |> response(200)
       end
 
