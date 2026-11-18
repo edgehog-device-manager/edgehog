@@ -857,11 +857,26 @@
   "components.apps.deployments.upgrade-deployment-modal.UpgradeDeploymentModal.upgradeErrorFeedback": {
     "defaultMessage": "Could not upgrade the deployment, please try again."
   },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.configFailedTitle": {
+    "defaultMessage": "Configuration update failed"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.configSuccessTitle": {
+    "defaultMessage": "Configuration updated successfully!"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.configUpdateAvailableInfo": {
+    "defaultMessage": "A new deployment with updated configuration is running for version {toVersion}."
+  },
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.dismiss": {
     "defaultMessage": "Dismiss"
   },
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.pleaseWait": {
     "defaultMessage": "Please wait while the upgrade completes..."
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.pleaseWaitConfigUpdate": {
+    "defaultMessage": "Please wait while the configuration update completes..."
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.runningConfigVersionNotice": {
+    "defaultMessage": "Your application is now running v{toVersion} with updated configuration."
   },
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.runningVersionNotice": {
     "defaultMessage": "Your application is now running v{toVersion}."
@@ -878,6 +893,9 @@
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.successTitle": {
     "defaultMessage": "Upgrade completed successfully!"
   },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.summaryConfigCompleted": {
+    "defaultMessage": "Configuration update completed"
+  },
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.summaryNewStarted": {
     "defaultMessage": "New deployment started"
   },
@@ -892,6 +910,9 @@
   },
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.targetNotFoundTitle": {
     "defaultMessage": "Upgrade target deployment not found"
+  },
+  "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.updatingConfigTitle": {
+    "defaultMessage": "Updating application configuration: v{toVersion}"
   },
   "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.upgradeAvailableInfo": {
     "defaultMessage": "This application has been upgraded to version {toVersion}."

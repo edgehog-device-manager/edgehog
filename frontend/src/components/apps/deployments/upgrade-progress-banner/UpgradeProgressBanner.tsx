@@ -143,6 +143,36 @@ const messages = defineMessages({
     defaultMessage:
       "This application has been upgraded to version {toVersion}.",
   },
+  updatingConfigTitle: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.updatingConfigTitle",
+    defaultMessage: "Updating application configuration: v{toVersion}",
+  },
+  pleaseWaitConfigUpdate: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.pleaseWaitConfigUpdate",
+    defaultMessage: "Please wait while the configuration update completes...",
+  },
+  configSuccessTitle: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.configSuccessTitle",
+    defaultMessage: "Configuration updated successfully!",
+  },
+  runningConfigVersionNotice: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.runningConfigVersionNotice",
+    defaultMessage:
+      "Your application is now running v{toVersion} with updated configuration.",
+  },
+  summaryConfigCompleted: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.summaryConfigCompleted",
+    defaultMessage: "Configuration update completed",
+  },
+  configFailedTitle: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.configFailedTitle",
+    defaultMessage: "Configuration update failed",
+  },
+  configUpdateAvailableInfo: {
+    id: "components.apps.deployments.upgrade-progress-banner.UpgradeProgressBanner.configUpdateAvailableInfo",
+    defaultMessage:
+      "A new deployment with updated configuration is running for version {toVersion}.",
+  },
 });
 
 type UpgradeProgressBannerContentProps = {
@@ -179,8 +209,11 @@ const UpgradeProgressBannerContent = ({
   const intl = useIntl();
   const navigate = useNavigate();
 
-  const effectiveToVersion =
-    targetDeployment?.release?.version ?? toVersion ?? "";
+  const targetVersion = targetDeployment?.release?.version ?? toVersion ?? "";
+
+  const isSameVersion = Boolean(
+    fromVersion && targetVersion && fromVersion === targetVersion,
+  );
 
   const isFailed =
     Boolean(targetDeployment?.timedOut) ||
@@ -262,7 +295,11 @@ const UpgradeProgressBannerContent = ({
             <div className="d-flex align-items-center gap-2">
               <Icon icon="warning" className="text-danger" />
               <h5 className="mb-0 text-danger fw-semibold">
-                <FormattedMessage {...messages.upgradeFailedTitle} />
+                <FormattedMessage
+                  {...(isSameVersion
+                    ? messages.configFailedTitle
+                    : messages.upgradeFailedTitle)}
+                />
               </h5>
             </div>
             {onDismiss && (
@@ -306,7 +343,9 @@ const UpgradeProgressBannerContent = ({
           />
           <span>
             <FormattedMessage
-              {...messages.upgradeAvailableInfo}
+              {...(isSameVersion
+                ? messages.configUpdateAvailableInfo
+                : messages.upgradeAvailableInfo)}
               values={{
                 toVersion: (
                   <span
@@ -333,7 +372,7 @@ const UpgradeProgressBannerContent = ({
                       }
                     }}
                   >
-                    {effectiveToVersion}
+                    {targetVersion}
                   </span>
                 ),
               }}
@@ -352,7 +391,11 @@ const UpgradeProgressBannerContent = ({
             <div className="d-flex align-items-center gap-2">
               <Icon icon="check" className="text-success" />
               <h5 className="mb-0 text-success fw-semibold">
-                <FormattedMessage {...messages.successTitle} />
+                <FormattedMessage
+                  {...(isSameVersion
+                    ? messages.configSuccessTitle
+                    : messages.successTitle)}
+                />
               </h5>
             </div>
             {onDismiss && (
@@ -369,15 +412,23 @@ const UpgradeProgressBannerContent = ({
 
           <p className="text-muted mb-3">
             <FormattedMessage
-              {...messages.runningVersionNotice}
-              values={{ toVersion }}
+              {...(isSameVersion
+                ? messages.runningConfigVersionNotice
+                : messages.runningVersionNotice)}
+              values={{ toVersion: targetVersion }}
             />
           </p>
 
           <div className="version-transition-badge text-muted mb-3">
-            <span>{`v${fromVersion}`}</span>
-            <Icon icon="arrowRight" size="0.9em" />
-            <span className="text-dark">{`v${toVersion}`}</span>
+            {isSameVersion ? (
+              <span className="text-dark">{`v${targetVersion}`}</span>
+            ) : (
+              <>
+                <span>{`v${fromVersion}`}</span>
+                <Icon icon="arrowRight" size="0.9em" />
+                <span className="text-dark">{`v${targetVersion}`}</span>
+              </>
+            )}
           </div>
 
           <div className="upgrade-steps-list mb-3">
@@ -402,7 +453,11 @@ const UpgradeProgressBannerContent = ({
                 <Icon icon="check" className="text-success" />
               </span>
               <span>
-                <FormattedMessage {...messages.summaryUpgradeCompleted} />
+                <FormattedMessage
+                  {...(isSameVersion
+                    ? messages.summaryConfigCompleted
+                    : messages.summaryUpgradeCompleted)}
+                />
               </span>
             </div>
           </div>
@@ -434,10 +489,17 @@ const UpgradeProgressBannerContent = ({
           <div className="d-flex align-items-center gap-2">
             <Icon icon="spinner" className="text-primary spin-animation" />
             <h5 className="mb-0 fw-semibold">
-              <FormattedMessage
-                {...messages.upgradingTitle}
-                values={{ fromVersion, toVersion }}
-              />
+              {isSameVersion ? (
+                <FormattedMessage
+                  {...messages.updatingConfigTitle}
+                  values={{ toVersion: targetVersion }}
+                />
+              ) : (
+                <FormattedMessage
+                  {...messages.upgradingTitle}
+                  values={{ fromVersion, toVersion: targetVersion }}
+                />
+              )}
             </h5>
           </div>
           {onDismiss && (
@@ -521,7 +583,11 @@ const UpgradeProgressBannerContent = ({
         </div>
 
         <div className="text-muted small">
-          <FormattedMessage {...messages.pleaseWait} />
+          <FormattedMessage
+            {...(isSameVersion
+              ? messages.pleaseWaitConfigUpdate
+              : messages.pleaseWait)}
+          />
         </div>
       </Card.Body>
     </Card>
@@ -580,6 +646,12 @@ const UpgradeProgressBannerQueryLoader = (
 };
 
 const UpgradeProgressBanner = (props: UpgradeProgressBannerProps) => {
+  const isSameVersion = Boolean(
+    props.fromVersion &&
+    props.toVersion &&
+    props.fromVersion === props.toVersion,
+  );
+
   return (
     <Suspense
       fallback={
@@ -587,7 +659,11 @@ const UpgradeProgressBanner = (props: UpgradeProgressBannerProps) => {
           <Card.Body className="d-flex align-items-center gap-2">
             <Spinner animation="border" size="sm" variant="primary" />
             <span className="text-muted small">
-              <FormattedMessage {...messages.pleaseWait} />
+              <FormattedMessage
+                {...(isSameVersion
+                  ? messages.pleaseWaitConfigUpdate
+                  : messages.pleaseWait)}
+              />
             </span>
           </Card.Body>
         </Card>
