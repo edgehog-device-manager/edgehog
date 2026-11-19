@@ -422,7 +422,7 @@ spec:
             - name: admin-public-key
               mountPath: /keys
               readOnly: true
-          image: edgehogdevicemanager/edgehog-backend:0.13.1
+          image: edgehogdevicemanager/edgehog-backend:0.13.2
           imagePullPolicy: Always
           name: edgehog-backend
           ports:
@@ -493,7 +493,7 @@ spec:
               value: <BACKEND-HOST>
             - name: HIDE_NAVIGATION_ELEMENTS
               value: <HIDE-NAVIGATION-ELEMENTS>
-          image: edgehogdevicemanager/edgehog-frontend:0.13.1
+          image: edgehogdevicemanager/edgehog-frontend:0.13.2
           imagePullPolicy: Always
           name: edgehog-frontend
           ports:
