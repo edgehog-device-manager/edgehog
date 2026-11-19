@@ -399,6 +399,7 @@ defmodule Edgehog.Containers do
       define :mark_image_deployment_as_unpulled, action: :mark_as_unpulled
       define :mark_image_deployment_as_pulled, action: :mark_as_pulled
       define :mark_image_deployment_as_errored, action: :mark_as_errored, args: [:message]
+      define :update_image_deployment_from_device, action: :update_from_device
     end
 
     resource ImageCredentials

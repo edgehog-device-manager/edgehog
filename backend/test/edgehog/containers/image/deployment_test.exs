@@ -26,6 +26,9 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
   import Edgehog.DevicesFixtures
   import Edgehog.TenantsFixtures
 
+  alias Edgehog.Containers
+  alias Edgehog.Triggers.IncomingData.Handlers.AvailableImages
+
   setup do
     tenant = tenant_fixture()
     image = image_fixture(tenant: tenant)
@@ -56,6 +59,144 @@ defmodule Edgehog.Containers.Image.DeploymentTest do
 
       assert container_deployment1.image_deployment.image_id != image.id
       assert container_deployment1.image_deployment.image.reference == image.reference
+    end
+
+    test "updates image size from device", %{tenant: tenant} do
+      deployment = image_deployment_fixture(tenant: tenant)
+
+      assert {:ok, _updated} =
+               Containers.update_image_deployment_from_device(
+                 deployment,
+                 %{size: 3_000_000_000},
+                 tenant: tenant
+               )
+
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+
+      assert saved.size == 3_000_000_000
+    end
+
+    test "updates image status from Astarte trigger", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      deployment = image_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      event = %{
+        path: "/#{deployment.image_id}/status",
+        value: "Pulling"
+      }
+
+      assert {:ok, _updated} =
+               AvailableImages.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: device.realm_id,
+                 device_id: device.device_id
+               })
+
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+
+      assert saved.status == "Pulling"
+    end
+
+    test "updates image size from Astarte trigger", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      deployment = image_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      event = %{
+        path: "/#{deployment.image_id}/size",
+        value: 3_000_000_000
+      }
+
+      assert {:ok, _updated} =
+               AvailableImages.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: device.realm_id,
+                 device_id: device.device_id
+               })
+
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+
+      assert saved.size == 3_000_000_000
+    end
+
+    test "updates Docker image ID from Astarte trigger", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      deployment = image_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      event = %{
+        path: "/#{deployment.image_id}/imageId",
+        value: "sha256:abc123"
+      }
+
+      assert {:ok, _updated} =
+               AvailableImages.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: device.realm_id,
+                 device_id: device.device_id
+               })
+
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+
+      assert saved.docker_image_id == "sha256:abc123"
+    end
+
+    test "updates image repository tags from Astarte trigger", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      deployment = image_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      event = %{
+        path: "/#{deployment.image_id}/repoTags",
+        value: ["nginx:latest", "nginx:1.27"]
+      }
+
+      assert {:ok, _updated} =
+               AvailableImages.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: device.realm_id,
+                 device_id: device.device_id
+               })
+
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+
+      assert saved.repo_tags == ["nginx:latest", "nginx:1.27"]
+    end
+
+    test "updates image repository digests from Astarte trigger", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      deployment = image_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      event = %{
+        path: "/#{deployment.image_id}/repoDigests",
+        value: ["nginx@sha256:abc123", "nginx@sha256:def456"]
+      }
+
+      assert {:ok, _updated} =
+               AvailableImages.handle_event(event, [], %{
+                 tenant: tenant,
+                 realm_id: device.realm_id,
+                 device_id: device.device_id
+               })
+
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+
+      assert saved.repo_digests == ["nginx@sha256:abc123", "nginx@sha256:def456"]
+    end
+
+    test "clears image status when Astarte unsets the property", %{tenant: tenant} do
+      device = device_fixture(tenant: tenant)
+      deployment = image_deployment_fixture(tenant: tenant, device_id: device.id)
+
+      context = %{
+        tenant: tenant,
+        realm_id: device.realm_id,
+        device_id: device.device_id
+      }
+
+      event = %{path: "/#{deployment.image_id}/status", value: "Pulling"}
+      assert {:ok, _} = AvailableImages.handle_event(event, [], context)
+      unset_event = %{event | value: nil}
+      assert {:ok, _} = AvailableImages.handle_event(unset_event, [], context)
+      saved = Ash.get!(Edgehog.Containers.Image.Deployment, deployment.id, tenant: tenant)
+      assert saved.status == nil
     end
 
     test "reuses unchanged image deployment across release deployments on the same device", %{

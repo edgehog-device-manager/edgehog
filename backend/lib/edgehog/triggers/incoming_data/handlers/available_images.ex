@@ -35,23 +35,52 @@ defmodule Edgehog.Triggers.IncomingData.Handlers.AvailableImages do
 
     case String.split(event.path, "/") do
       ["", image_id, "pulled"] ->
-        image_deployment =
-          Containers.fetch_image_deployment!(image_id, device.id, tenant: tenant)
+        handle_pulled(image_id, event.value, device.id, tenant)
 
-        case event.value do
-          true ->
-            Containers.mark_image_deployment_as_pulled(image_deployment, tenant: tenant)
+      ["", image_id, "status"] ->
+        update_image_deployment(image_id, device.id, %{status: event.value}, tenant)
 
-          false ->
-            Containers.mark_image_deployment_as_unpulled(image_deployment, tenant: tenant)
+      ["", image_id, "imageId"] ->
+        update_image_deployment(image_id, device.id, %{docker_image_id: event.value}, tenant)
 
-          nil ->
-            Containers.destroy_image_deployment!(image_deployment, tenant: tenant)
-            {:ok, image_deployment}
-        end
+      ["", image_id, "repoTags"] ->
+        update_image_deployment(image_id, device.id, %{repo_tags: event.value}, tenant)
+
+      ["", image_id, "repoDigests"] ->
+        update_image_deployment(image_id, device.id, %{repo_digests: event.value}, tenant)
+
+      ["", image_id, "size"] ->
+        update_image_deployment(image_id, device.id, %{size: event.value}, tenant)
 
       _ ->
         {:error, :invalid_event_path}
+    end
+  end
+
+  defp handle_pulled(image_id, value, device_id, tenant) do
+    image_deployment =
+      Containers.fetch_image_deployment!(image_id, device_id, tenant: tenant)
+
+    case value do
+      true ->
+        Containers.mark_image_deployment_as_pulled(image_deployment, tenant: tenant)
+
+      false ->
+        Containers.mark_image_deployment_as_unpulled(image_deployment, tenant: tenant)
+
+      nil ->
+        Containers.destroy_image_deployment!(image_deployment, tenant: tenant)
+        {:ok, image_deployment}
+    end
+  end
+
+  defp update_image_deployment(image_id, device_id, attrs, tenant) do
+    case Containers.fetch_image_deployment(image_id, device_id, tenant: tenant) do
+      {:ok, image_deployment} ->
+        Containers.update_image_deployment_from_device(image_deployment, attrs, tenant: tenant)
+
+      {:error, _reason} = error ->
+        if attrs |> Map.values() |> Enum.all?(&is_nil/1), do: :ok, else: error
     end
   end
 end
