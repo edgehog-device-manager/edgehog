@@ -167,14 +167,14 @@ defmodule Edgehog.Tenants.Reconciler.Core do
 
   defp update_interface!(rm_client, name, major, interface_json) do
     # TODO: crash with a nicer exception instead of MatchError
-    :ok = Interface.update(rm_client, name, major, interface_json)
+    :ok = Interface.update(rm_client, name, major, interface_json, query: [async: false])
 
     :ok
   end
 
   defp install_interface!(rm_client, interface_json) do
     # TODO: crash with a nicer exception instead of MatchError
-    :ok = Interface.create(rm_client, interface_json)
+    :ok = Interface.create(rm_client, interface_json, query: [async: false])
 
     :ok
   end

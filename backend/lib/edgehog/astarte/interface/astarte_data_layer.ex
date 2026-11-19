@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023-2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,12 +31,24 @@ defmodule Edgehog.Astarte.Interface.AstarteDataLayer do
   end
 
   @impl DataLayer
-  def create(%RealmManagement{} = client, interface_json) do
-    RealmManagement.Interfaces.create(client, interface_json)
+  def create(%RealmManagement{} = client, interface_json, opts \\ []) do
+    RealmManagement.Interfaces.create(client, interface_json, opts)
   end
 
   @impl DataLayer
-  def update(%RealmManagement{} = client, interface_name, interface_major, interface_json) do
-    RealmManagement.Interfaces.update(client, interface_name, interface_major, interface_json)
+  def update(
+        %RealmManagement{} = client,
+        interface_name,
+        interface_major,
+        interface_json,
+        opts \\ []
+      ) do
+    RealmManagement.Interfaces.update(
+      client,
+      interface_name,
+      interface_major,
+      interface_json,
+      opts
+    )
   end
 end
