@@ -78,8 +78,6 @@ jobs:
   docs:
     uses: ./.github/workflows/docs-ci.yaml
     with:
-      release-made: false
-      release-version: snapshot
       publish: false
     secrets:
       publish-key: ${{ secrets.DOCS_DEPLOY_KEY }}
