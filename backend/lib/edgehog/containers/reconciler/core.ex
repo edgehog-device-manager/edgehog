@@ -35,6 +35,7 @@ defmodule Edgehog.Containers.Reconciler.Core do
       Task.start(fn -> reconcile_images(device, tenant) end)
       Task.start(fn -> reconcile_volumes(device, tenant) end)
       Task.start(fn -> reconcile_networks(device, tenant) end)
+      Task.start(fn -> reconcile_device_mappings(device, tenant) end)
       Task.start(fn -> reconcile_containers(device, tenant) end)
       Task.start(fn -> reconcile_deployments(device, tenant) end)
 
