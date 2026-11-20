@@ -83,6 +83,8 @@ defmodule Edgehog.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.8.14"},
+      {:phoenix_html, "~> 4.3"},
+      {:phoenix_live_view, "~> 1.2"},
       {:phoenix_view, "~> 2.0"},
       {:phoenix_ecto, "~> 4.7"},
       {:ecto_sql, "~> 3.13"},
@@ -131,6 +133,18 @@ defmodule Edgehog.MixProject do
       {:ash_postgres, "~> 2.9"},
       {:ash_graphql, "~> 1.9"},
       {:ash_json_api, "~> 1.6"},
+      {:ash_phoenix, "~> 2.3"},
+      {:cinder, "~> 0.17"},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.2.0",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
+      {:tailwind, "~> 0.5", runtime: Mix.env() == :dev},
+      {:lazy_html, "~> 0.1", only: :test},
       {:oban, "~> 2.3"},
       {:igniter, "~> 0.7", only: [:dev, :test]},
       {:picosat_elixir, "~> 0.2"},
@@ -269,9 +283,20 @@ defmodule Edgehog.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get", "ecto.setup"],
+      setup: ["deps.get", "assets.setup", "ecto.setup"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
+      "assets.setup": [
+        "tailwind.install --if-missing",
+        "esbuild.install --if-missing"
+      ],
+      "assets.build": ["assets.setup", "tailwind edgehog", "esbuild edgehog"],
+      "assets.deploy": [
+        "assets.setup",
+        "tailwind edgehog --minify",
+        "esbuild edgehog --minify",
+        "phx.digest"
+      ],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       # Workaround for https://github.com/ash-project/spark/issues/78
       format: ["compile", "format"],

@@ -19,6 +19,15 @@
 defmodule EdgehogWeb.Router do
   use EdgehogWeb, :router
 
+  pipeline :browser do
+    plug :accepts, ["html"]
+    plug :fetch_session
+    plug :fetch_live_flash
+    plug :put_root_layout, html: {EdgehogWeb.Layouts, :root}
+    plug :protect_from_forgery
+    plug :put_secure_browser_headers
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
     plug EdgehogWeb.PopulateTenant
@@ -56,7 +65,31 @@ defmodule EdgehogWeb.Router do
 
   get "/version", EdgehogWeb.VersionController, :show
 
+  scope "/", EdgehogWeb do
+    pipe_through :browser
+
+    get "/", SessionController, :root
+    post "/session", SessionController, :create
+    get "/session/auto", SessionController, :auto
+    post "/session/dev", SessionController, :dev_create
+    delete "/session", SessionController, :delete
+
+    live_session :public,
+      on_mount: [{EdgehogWeb.LiveAuth, :redirect_if_authenticated}] do
+      live "/login", Auth.LoginLive, :index
+    end
+  end
+
   scope "/tenants/:tenant_slug" do
+    scope "/", EdgehogWeb do
+      pipe_through :browser
+
+      live_session :tenant_authenticated,
+        on_mount: [{EdgehogWeb.LiveAuth, :require_authenticated}] do
+        live "/devices", DevicesLive.Index, :index
+      end
+    end
+
     scope "/api" do
       pipe_through :api
 

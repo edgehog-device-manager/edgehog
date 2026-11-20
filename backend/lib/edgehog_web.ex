@@ -39,11 +39,57 @@ defmodule EdgehogWeb do
   def controller do
     quote do
       use Gettext, backend: EdgehogWeb.Gettext
-      use Phoenix.Controller, formats: [json: "View"]
+
+      use Phoenix.Controller,
+        formats: [:html, :json],
+        layouts: [html: EdgehogWeb.Layouts]
 
       import Plug.Conn
 
       alias EdgehogWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
+    end
+  end
+
+  def live_view do
+    quote do
+      use Phoenix.LiveView,
+        layout: {EdgehogWeb.Layouts, :app}
+
+      unquote(html_helpers())
+    end
+  end
+
+  def live_component do
+    quote do
+      use Phoenix.LiveComponent
+
+      unquote(html_helpers())
+    end
+  end
+
+  def html do
+    quote do
+      use Phoenix.Component
+
+      import Phoenix.Controller,
+        only: [get_csrf_token: 0, view_module: 1, view_template: 1]
+
+      unquote(html_helpers())
+    end
+  end
+
+  defp html_helpers do
+    quote do
+      use Gettext, backend: EdgehogWeb.Gettext
+
+      import EdgehogWeb.Components.FlashComponents
+      import EdgehogWeb.Components.FormComponents
+      import EdgehogWeb.Components.IconComponents
+      import Phoenix.HTML
+
+      alias Phoenix.LiveView.JS
 
       unquote(verified_routes())
     end
@@ -69,6 +115,7 @@ defmodule EdgehogWeb do
       use Phoenix.Router
 
       import Phoenix.Controller
+      import Phoenix.LiveView.Router
       import Plug.Conn
     end
   end
