@@ -21,7 +21,7 @@
 defmodule Edgehog.MixProject do
   use Mix.Project
 
-  @version "0.13.2"
+  @version "0.13.3"
 
   def project do
     [
