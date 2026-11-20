@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 - 2025 SECO Mind Srl
+# Copyright 2023 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, interface_count, fn _client, _interface_map ->
+      |> expect(:create, interface_count, fn _client, _interface_map, _options ->
         send(test_pid, {:interface_reconciled, ref})
 
         :ok
@@ -142,7 +142,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, interface_count, fn _client, _interface_map ->
+      |> expect(:create, interface_count, fn _client, _interface_map, _options ->
         send(test_pid, {:interface_reconciled, ref})
 
         :ok
@@ -203,7 +203,7 @@ defmodule Edgehog.Tenants.ReconcilerTest do
       |> expect(:get, interface_count, fn _client, _interface_name, _major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, interface_count, fn _client, _interface_map ->
+      |> expect(:create, interface_count, fn _client, _interface_map, _options ->
         send(test_pid, {:interface_reconciled, ref})
 
         :ok

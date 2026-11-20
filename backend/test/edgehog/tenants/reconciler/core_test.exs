@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2021 - 2025 SECO Mind Srl
+# Copyright 2021 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -125,7 +125,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:error, api_error(status: 404)}
       end)
-      |> expect(:create, fn ^client, ^interface_map ->
+      |> expect(:create, fn ^client, ^interface_map, _options ->
         :ok
       end)
 
@@ -144,8 +144,10 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => interface_map}}
       end)
-      |> expect(:create, 0, fn _client, _interface_map -> :ok end)
-      |> expect(:update, 0, fn _client, _interface_name, _major, _interface_map -> :ok end)
+      |> expect(:create, 0, fn _client, _interface_map, _options -> :ok end)
+      |> expect(:update, 0, fn _client, _interface_name, _major, _interface_map, _options ->
+        :ok
+      end)
 
       assert :ok = Core.reconcile_interface!(client, interface_map)
     end
@@ -163,8 +165,10 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => put_minor_version(interface_map, minor + 1)}}
       end)
-      |> expect(:create, 0, fn _client, _interface_map -> :ok end)
-      |> expect(:update, 0, fn _client, _interface_name, _major, _interface_map -> :ok end)
+      |> expect(:create, 0, fn _client, _interface_map, _options -> :ok end)
+      |> expect(:update, 0, fn _client, _interface_name, _major, _interface_map, _options ->
+        :ok
+      end)
 
       assert :ok = Core.reconcile_interface!(client, interface_map)
     end
@@ -182,7 +186,7 @@ defmodule Edgehog.Tenants.Reconciler.CoreTest do
       |> expect(:get, fn ^client, ^interface_name, ^major ->
         {:ok, %{"data" => put_minor_version(interface_map, minor - 1)}}
       end)
-      |> expect(:update, fn ^client, ^interface_name, ^major, ^interface_map ->
+      |> expect(:update, fn ^client, ^interface_name, ^major, ^interface_map, _options ->
         :ok
       end)
 

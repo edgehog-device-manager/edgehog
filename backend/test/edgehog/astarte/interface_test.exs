@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2023 SECO Mind Srl
+# Copyright 2023 - 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,7 +106,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      expect(MockDataLayer, :create, fn ^client, ^interface_map -> :ok end)
+      expect(MockDataLayer, :create, fn ^client, ^interface_map, _options -> :ok end)
       assert :ok = Interface.create(client, interface_map)
     end
 
@@ -116,7 +116,7 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      expect(MockDataLayer, :create, fn ^client, ^interface_map ->
+      expect(MockDataLayer, :create, fn ^client, ^interface_map, _options ->
         {:error, api_error(status: 422, message: "Invalid Entity")}
       end)
 
@@ -158,7 +158,11 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      expect(MockDataLayer, :update, fn ^client, ^interface_name, ^major, ^interface_map ->
+      expect(MockDataLayer, :update, fn ^client,
+                                        ^interface_name,
+                                        ^major,
+                                        ^interface_map,
+                                        _options ->
         :ok
       end)
 
@@ -173,7 +177,11 @@ defmodule Edgehog.Astarte.InterfaceTest do
         interface_map: interface_map
       } = ctx
 
-      expect(MockDataLayer, :update, fn ^client, ^interface_name, ^major, ^interface_map ->
+      expect(MockDataLayer, :update, fn ^client,
+                                        ^interface_name,
+                                        ^major,
+                                        ^interface_map,
+                                        _options ->
         {:error, api_error(status: 403, message: "Forbidden")}
       end)
 

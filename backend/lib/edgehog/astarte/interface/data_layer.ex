@@ -28,13 +28,14 @@ defmodule Edgehog.Astarte.Interface.DataLayer do
               interface_major :: non_neg_integer
             ) :: {:ok, map()} | {:error, term()}
 
-  @callback create(client :: RealmManagement.t(), interface_json :: map()) ::
+  @callback create(client :: RealmManagement.t(), interface_json :: map(), options :: keyword()) ::
               :ok | {:error, term()}
 
   @callback update(
               client :: RealmManagement.t(),
               interface_name :: String.t(),
               interface_major :: non_neg_integer,
-              interface_json :: map()
+              interface_json :: map(),
+              options :: keyword()
             ) :: :ok | {:error, term()}
 end
