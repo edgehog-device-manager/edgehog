@@ -55,7 +55,6 @@ const sidebarLinks = [
   ["Image Credentials", "/image-credentials"],
   ["Volumes", "/volumes"],
   ["Networks", "/networks"],
-  ["Containers", "/containers"],
   ["Deployments", "/deployments"],
   ["Application Campaigns", "/deployment-campaigns"],
   ["Logout", "/logout"],

@@ -107,7 +107,6 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.allowedRegistries:
       case Route.volumes:
       case Route.networks:
-      case Route.containers:
       case Route.deployments:
       case Route.deploymentCampaigns:
       case Route.repositories:
@@ -198,10 +197,6 @@ const useBreadcrumbItems = (): BreadcrumbItem[] => {
       case Route.networksEdit:
       case Route.networksNew:
         return [{ route: Route.networks }, currentRoute];
-
-      case Route.containersEdit:
-      case Route.containersNew:
-        return [{ route: Route.containers }, currentRoute];
 
       case Route.deploymentCampaignsEdit:
       case Route.deploymentCampaignsNew:

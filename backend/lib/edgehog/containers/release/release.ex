@@ -71,7 +71,7 @@ defmodule Edgehog.Containers.Release do
       argument :required_system_models, {:array, :map}
 
       change manage_relationship(:containers,
-               on_no_match: :error,
+               on_no_match: {:create, :create_from_release},
                on_match: :ignore,
                on_lookup: :relate
              )
@@ -120,6 +120,8 @@ defmodule Edgehog.Containers.Release do
       validate {UniquePlainResource,
                 keys: [:version, :application_id], read_action: :plain_releases, field: :version}
 
+      validate Release.Validations.UniqueContainerNames
+      validate Release.Validations.ResolvableDependencies
       validate Release.Validations.NoCircularDependencies
     end
 
@@ -132,6 +134,8 @@ defmodule Edgehog.Containers.Release do
       change Release.Changes.Copy
 
       validate Release.Validations.NoCircularDependencies
+
+      change Release.Changes.CreateDependencies
     end
 
     destroy :destroy do
