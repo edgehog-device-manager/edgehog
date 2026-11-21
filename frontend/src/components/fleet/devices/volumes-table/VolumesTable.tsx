@@ -35,7 +35,7 @@ import Result from "@/components/ui/result/Result";
 import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
 // We use graphql fields below in columns configuration
-/* eslint-disable relay/unused-fields */
+
 const VOLUMES_TABLE_FRAGMENT = graphql`
   fragment VolumesTable_volumeDeployments on Device
   @refetchable(queryName: "VolumesTable_PaginationQuery")
