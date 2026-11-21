@@ -100,6 +100,16 @@ defmodule Edgehog.Containers.Image.Deployment do
       accept [:state]
     end
 
+    update :update_from_device do
+      accept [
+        :status,
+        :docker_image_id,
+        :repo_tags,
+        :repo_digests,
+        :size
+      ]
+    end
+
     destroy :destroy_if_dangling do
       require_atomic? false
       validate Validations.Dangling
@@ -116,6 +126,26 @@ defmodule Edgehog.Containers.Image.Deployment do
         one_of: [:created, :sent, :pulled, :unpulled, :error]
       ],
       public?: true
+
+    attribute :docker_image_id, :string do
+      public? true
+    end
+
+    attribute :repo_tags, {:array, :string} do
+      public? true
+    end
+
+    attribute :repo_digests, {:array, :string} do
+      public? true
+    end
+
+    attribute :size, :integer do
+      public? true
+    end
+
+    attribute :status, :string do
+      public? true
+    end
 
     timestamps()
   end
