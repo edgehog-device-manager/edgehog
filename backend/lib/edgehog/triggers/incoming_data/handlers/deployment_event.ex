@@ -20,26 +20,43 @@
 
 defmodule Edgehog.Triggers.IncomingData.Handlers.DeploymentEvent do
   @moduledoc """
-  Available Images handler
+  Deployment Event handler
   """
   @behaviour Ash.Astarte.Triggers.HandlerBehavior
 
   alias Edgehog.Containers
+  alias Edgehog.Containers.Calculations.ResourceEvents
+  alias Edgehog.Containers.Release.Deployment.Types.Event
+  alias EdgehogWeb.Endpoint
 
   @impl Ash.Astarte.Triggers.HandlerBehavior
-  def handle_event(event, _opts, %{tenant: tenant}) do
+  def handle_event(event, _opts, %{timestamp: timestamp, tenant: tenant}) do
     "/" <> deployment_id = event.path
 
     %{
-      "status" => state,
+      "status" => status,
       "message" => message
     } = event.value
 
     add_info = Map.get(event.value, "addInfo", [])
 
     with {:ok, deployment} <- Containers.fetch_deployment(deployment_id, tenant: tenant) do
-      event = %{type: state, message: message, add_info: add_info}
-      Containers.append_deployment_event(deployment, %{event: event}, tenant: tenant)
+      raw_event = %{
+        status: status,
+        message: message,
+        add_info: add_info,
+        timestamp: timestamp
+      }
+
+      payload =
+        deployment
+        |> ResourceEvents.cast_event!(raw_event, Event)
+        |> Map.put(:__type__, Event.graphql_type([]))
+
+      topics = [release_deployment_events: "#{tenant.tenant_id}:#{deployment.id}"]
+
+      Absinthe.Subscription.publish(Endpoint, payload, topics)
+      :ok
     end
   end
 end

@@ -25,9 +25,11 @@ defmodule Edgehog.Containers.Image.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.Container.Deployment
   alias Edgehog.Containers.Image
   alias Edgehog.Containers.Image.Deployment.Changes
+  alias Edgehog.Containers.Image.Deployment.Types
   alias Edgehog.Containers.Release.Deployment
   alias Edgehog.Containers.Validations
   alias Edgehog.Devices.Device
@@ -141,6 +143,16 @@ defmodule Edgehog.Containers.Image.Deployment do
     calculate :dangling?,
               :boolean,
               {Edgehog.Containers.Calculations.Dangling, [parent: :container_deployments]}
+
+    calculate :events,
+              {:array, Types.Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.ImageEvent",
+               resource_id_key: :image_id,
+               event_type: Types.Event} do
+      description "Lifecycle events reported by the device for this image deployment."
+      public? true
+    end
   end
 
   identities do

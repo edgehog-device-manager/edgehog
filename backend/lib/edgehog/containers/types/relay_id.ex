@@ -1,7 +1,7 @@
 #
 # This file is part of Edgehog.
 #
-# Copyright 2025 SECO Mind Srl
+# Copyright 2026 SECO Mind Srl
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,22 +18,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-defmodule Edgehog.Containers.Release.Deployment.Changes.AppendEvent do
-  @moduledoc """
-  Appends an event with the given argument details.
-  """
+defmodule Edgehog.Containers.Types.RelayId do
+  @moduledoc false
+  use Ash.Type.NewType, subtype_of: :string
+  use AshGraphql.Type
 
-  use Ash.Resource.Change
-
-  @impl Ash.Resource.Change
-  def change(changeset, _opts, _context) do
-    deployment = changeset.data
-
-    event =
-      changeset
-      |> Ash.Changeset.get_argument(:event)
-      |> Map.put(:deployment_id, deployment.id)
-
-    Ash.Changeset.manage_relationship(changeset, :events, event, type: :create)
-  end
+  @impl AshGraphql.Type
+  def graphql_type(_), do: :id
 end

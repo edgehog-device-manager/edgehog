@@ -25,6 +25,7 @@ defmodule Edgehog.Containers.Release.Deployment do
     extensions: [AshGraphql.Resource],
     notifiers: [Ash.Notifier.PubSub]
 
+  alias Edgehog.Containers.Calculations.ResourceEvents
   alias Edgehog.Containers.ManualActions
   alias Edgehog.Containers.Release
   alias Edgehog.Containers.Release.Deployment
@@ -32,6 +33,7 @@ defmodule Edgehog.Containers.Release.Deployment do
   alias Edgehog.Containers.Release.Deployment.Changes
   alias Edgehog.Containers.Release.Deployment.Types.DeploymentContext
   alias Edgehog.Containers.Release.Deployment.Types.DeploymentState
+  alias Edgehog.Containers.Release.Deployment.Types.Event
   alias Edgehog.Containers.Release.Deployment.Validations
   alias Edgehog.Containers.Types
   alias Edgehog.Containers.Validations.IsUpgrade
@@ -60,7 +62,7 @@ defmodule Edgehog.Containers.Release.Deployment do
       end
     end
 
-    paginate_relationship_with container_deployments: :relay, events: :relay
+    paginate_relationship_with container_deployments: :relay
   end
 
   actions do
@@ -233,51 +235,6 @@ defmodule Edgehog.Containers.Release.Deployment do
       change set_attribute(:timed_out, true)
     end
 
-    update :append_event do
-      require_atomic? false
-
-      argument :event, :map do
-        allow_nil? false
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment could not be started."} do
-        where [
-          data_one_of(:context, [:start_message_sent]),
-          {Validations.Event, type: "Error"}
-        ]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment could not be stopped."} do
-        where [
-          data_one_of(:context, [:stop_message_sent]),
-          {Validations.Event, type: "Error"}
-        ]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment successfully upgraded."} do
-        where [
-          data_one_of(:context, [:upgrade_message_sent]),
-          {Validations.Event, type: "Info"}
-        ]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment deletion failed."} do
-        where [
-          data_one_of(:context, [:delete_message_sent]),
-          {Validations.Event, type: "Error"}
-        ]
-      end
-
-      change {Edgehog.Changes.Log, message: "Deployment upgrade failed."} do
-        where [
-          data_one_of(:context, [:upgrade_message_sent]),
-          {Validations.Event, type: "Error"}
-        ]
-      end
-
-      change Changes.AppendEvent
-    end
-
     read :filter_by_release do
       argument :release_id, :uuid
 
@@ -362,10 +319,6 @@ defmodule Edgehog.Containers.Release.Deployment do
       public? true
     end
 
-    has_many :events, Edgehog.Containers.Release.Deployment.Event do
-      public? true
-    end
-
     has_one :campaign_target, Edgehog.Campaigns.CampaignTarget do
       description """
       The deployment target of a deployment campaign that created this deployment.
@@ -382,6 +335,16 @@ defmodule Edgehog.Containers.Release.Deployment do
 
   calculations do
     calculate :is_ready, :boolean, Calculations.Ready do
+      public? true
+    end
+
+    calculate :events,
+              {:array, Event},
+              {ResourceEvents,
+               interface: "io.edgehog.devicemanager.apps.DeploymentEvent",
+               resource_id_key: :id,
+               event_type: Event} do
+      description "Lifecycle events reported by the device for this deployment."
       public? true
     end
   end
@@ -409,7 +372,6 @@ defmodule Edgehog.Containers.Release.Deployment do
     publish :mark_as_started, [[:state, nil], [:id, "*"]]
     publish :mark_as_stopped, [[:state, nil], [:id, "*"]]
     publish :mark_as_timed_out, [["timeout", nil], [:id, "*"]]
-    publish :append_event, [["events", nil], [:id, "*"]]
     publish :destroy_and_gc, [[:id, "*"]]
   end
 

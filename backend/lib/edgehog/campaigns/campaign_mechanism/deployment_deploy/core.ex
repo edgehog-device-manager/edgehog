@@ -285,11 +285,19 @@ defimpl Edgehog.Campaigns.CampaignMechanism.Core,
   end
 
   defp get_latest_error_for_deployment!(tenant_id, deployment_id) do
-    Deployment.Event
-    |> Ash.Query.filter(deployment_id == ^deployment_id)
-    |> Ash.Query.filter(type == :error)
-    |> Ash.Query.sort(inserted_at: :desc)
-    |> Ash.read_first!(tenant: tenant_id)
+    case Deployment
+         |> Ash.Query.filter(id == ^deployment_id)
+         |> Ash.Query.load(:events)
+         |> Ash.read_one(tenant: tenant_id) do
+      {:ok, %Deployment{events: events}} when is_list(events) ->
+        events
+        |> Enum.filter(&(&1.status == :error))
+        |> Enum.sort_by(& &1.timestamp, {:desc, DateTime})
+        |> List.first()
+
+      _ ->
+        nil
+    end
   end
 
   # Delegate common functions to Any implementation

@@ -28,6 +28,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeleteExecutorTest do
 
   alias Ecto.Adapters.SQL
   alias Edgehog.Astarte.Device.DeploymentCommand
+  alias Edgehog.Astarte.Device.ResourceEvent
   alias Edgehog.Campaigns
   alias Edgehog.Campaigns.Campaign
   alias Edgehog.Campaigns.CampaignMechanism.Core, as: MechanismCore
@@ -39,6 +40,10 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeleteExecutorTest do
   setup do
     stub(DeploymentCommand, :send_deployment_command, fn _client, _device_id, _data ->
       :ok
+    end)
+
+    stub(ResourceEvent, :get, fn _client, _device_id, _interface, _resource_id, _query ->
+      {:ok, []}
     end)
 
     %{tenant: tenant_fixture()}
@@ -711,6 +716,7 @@ defmodule Edgehog.Campaigns.Executors.DeploymentDeleteExecutorTest do
 
   @executor_allowed_mocks [
     Edgehog.Astarte.Device.DeviceStatus,
+    ResourceEvent,
     DeploymentCommand
   ]
 
