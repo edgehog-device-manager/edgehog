@@ -88,7 +88,8 @@ defmodule Edgehog.PromEx do
       # Plugins.Broadway,
 
       Edgehog.Containers.PromExPlugin,
-      Edgehog.Files.PromExPlugin
+      Edgehog.Files.PromExPlugin,
+      Edgehog.Devices.PromExPlugin
     ]
   end
 
