@@ -52,7 +52,7 @@ jobs:
       - name: Set up Python (for reuse tool)
         uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
         with:
-          python-version: "3.14.9"
+          python-version: "3.14.10"
 
       - name: Install pipx
         run: |
