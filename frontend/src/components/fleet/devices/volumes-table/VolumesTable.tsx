@@ -19,18 +19,23 @@
  */
 
 import compact from "lodash/compact";
-import { useMemo } from "react";
-import { FormattedMessage } from "react-intl";
-import { graphql, usePaginationFragment } from "react-relay/hooks";
+import { useCallback, useMemo, useState } from "react";
+import { FormattedMessage, useIntl, type IntlShape } from "react-intl";
+import { graphql, useMutation, usePaginationFragment } from "react-relay/hooks";
 
 import type { VolumesTable_PaginationQuery } from "@/api/__generated__/VolumesTable_PaginationQuery.graphql";
 import type {
   VolumesTable_volumeDeployments$data,
   VolumesTable_volumeDeployments$key,
 } from "@/api/__generated__/VolumesTable_volumeDeployments.graphql";
+import type { VolumesTable_sendVolumeCommand_Mutation } from "@/api/__generated__/VolumesTable_sendVolumeCommand_Mutation.graphql";
 
 import { Link, Route } from "@/Navigation";
 import ResourceState from "@/components/apps/resource-state/ResourceState";
+import Alert from "@/components/ui/alert/Alert";
+import Button from "@/components/ui/button/Button";
+import DeleteModal from "@/components/ui/delete-modal/DeleteModal";
+import Icon from "@/components/ui/icon/Icon";
 import Result from "@/components/ui/result/Result";
 import Table, { createColumnHelper } from "@/components/ui/table/Table";
 
@@ -40,6 +45,8 @@ const VOLUMES_TABLE_FRAGMENT = graphql`
   fragment VolumesTable_volumeDeployments on Device
   @refetchable(queryName: "VolumesTable_PaginationQuery")
   @argumentDefinitions(first: { type: "Int" }, after: { type: "String" }) {
+    id
+    online
     volumeDeployments(first: $first, after: $after)
       @connection(key: "VolumesTable_volumeDeployments") {
       edges {
@@ -51,6 +58,7 @@ const VOLUMES_TABLE_FRAGMENT = graphql`
             id
             label
             driver
+            reclaimPolicy
             containerVolumes {
               edges {
                 node {
@@ -70,12 +78,33 @@ const VOLUMES_TABLE_FRAGMENT = graphql`
   }
 `;
 
+const SEND_VOLUME_COMMAND_MUTATION = graphql`
+  mutation VolumesTable_sendVolumeCommand_Mutation(
+    $id: ID!
+    $command: VolumeCommand!
+  ) {
+    sendVolumeCommand(id: $id, command: $command) {
+      result {
+        id
+        state
+      }
+      errors {
+        message
+      }
+    }
+  }
+`;
+
 type VolumeDeploymentNode = NonNullable<
   NonNullable<VolumesTable_volumeDeployments$data["volumeDeployments"]>["edges"]
 >[number]["node"];
 
 const columnHelper = createColumnHelper<VolumeDeploymentNode>();
-const columns = [
+const getColumnsDefinition = (
+  onDeleteClick: (volumeDeployment: VolumeDeploymentNode) => void,
+  isOnline: boolean,
+  intl: IntlShape,
+) => [
   columnHelper.accessor((row) => row.volume?.label, {
     id: "label",
     header: () => (
@@ -144,6 +173,17 @@ const columns = [
       );
     },
   }),
+  columnHelper.accessor((row) => row.volume?.reclaimPolicy, {
+    id: "reclaimPolicy",
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.devices.volumes-table.VolumesTable.reclaimPolicyTitle"
+        defaultMessage="Reclaim Policy"
+        description="Title for the Reclaim Policy column of the device volumes table"
+      />
+    ),
+    cell: ({ getValue }) => getValue() ?? "",
+  }),
   columnHelper.accessor("state", {
     header: () => (
       <FormattedMessage
@@ -159,6 +199,51 @@ const columns = [
       />
     ),
   }),
+  columnHelper.accessor((row) => row, {
+    id: "actions",
+    enableSorting: false,
+    header: () => (
+      <FormattedMessage
+        id="components.fleet.devices.volumes-table.VolumesTable.actionsTitle"
+        defaultMessage="Actions"
+        description="Title for the Actions column of the device volumes table"
+      />
+    ),
+    meta: {
+      label: "Actions",
+    },
+    cell: ({ row }) => {
+      const volumeDeployment = row.original;
+      return (
+        <Button
+          className="btn p-0 border-0 bg-transparent icon-click"
+          disabled={!isOnline}
+          aria-label={intl.formatMessage({
+            id: "components.fleet.devices.volumes-table.VolumesTable.deleteButtonTitle",
+            defaultMessage: "Delete Volume on Device",
+          })}
+          title={
+            !isOnline
+              ? intl.formatMessage({
+                  id: "components.fleet.devices.volumes-table.VolumesTable.deviceOfflineTooltip",
+                  defaultMessage:
+                    "The device is offline. You cannot delete volumes while it is disconnected.",
+                })
+              : intl.formatMessage({
+                  id: "components.fleet.devices.volumes-table.VolumesTable.deleteButtonTitle",
+                  defaultMessage: "Delete Volume on Device",
+                })
+          }
+          onClick={() => onDeleteClick(volumeDeployment)}
+        >
+          <Icon
+            className={isOnline ? "text-danger" : "text-muted"}
+            icon="delete"
+          />
+        </Button>
+      );
+    },
+  }),
 ];
 
 type Props = {
@@ -167,12 +252,72 @@ type Props = {
 };
 
 const VolumesTable = ({ className, deviceRef }: Props) => {
+  const intl = useIntl();
   const { data } = usePaginationFragment<
     VolumesTable_PaginationQuery,
     VolumesTable_volumeDeployments$key
   >(VOLUMES_TABLE_FRAGMENT, deviceRef);
 
-  const { volumeDeployments } = data;
+  const { online, volumeDeployments } = data;
+  const isOnline = Boolean(online);
+
+  const [volumeToDelete, setVolumeToDelete] =
+    useState<VolumeDeploymentNode | null>(null);
+  const [errorFeedback, setErrorFeedback] = useState<React.ReactNode>(null);
+
+  const [sendCommand, isSendingCommand] =
+    useMutation<VolumesTable_sendVolumeCommand_Mutation>(
+      SEND_VOLUME_COMMAND_MUTATION,
+    );
+
+  const handleDeleteVolume = useCallback(
+    (deploymentId: string) => {
+      sendCommand({
+        variables: {
+          id: deploymentId,
+          command: "DELETE",
+        },
+        onCompleted(data, errors) {
+          if (errors && errors.length > 0) {
+            const errorMsg = errors
+              .map(({ fields, message }) =>
+                fields && fields.length
+                  ? `${fields.join(" ")} ${message}`
+                  : message,
+              )
+              .join(". \n");
+            setErrorFeedback(errorMsg);
+          } else if (
+            data.sendVolumeCommand?.errors &&
+            data.sendVolumeCommand.errors.length > 0
+          ) {
+            const errorMsg = data.sendVolumeCommand.errors
+              .map(({ message }) => message)
+              .join(". \n");
+            setErrorFeedback(errorMsg);
+          } else {
+            setErrorFeedback(null);
+          }
+          setVolumeToDelete(null);
+        },
+        onError() {
+          setErrorFeedback(
+            <FormattedMessage
+              id="components.fleet.devices.volumes-table.VolumesTable.deleteErrorFeedback"
+              defaultMessage="Could not delete the Volume, please try again."
+            />,
+          );
+          setVolumeToDelete(null);
+        },
+      });
+    },
+    [sendCommand],
+  );
+
+  const columns = useMemo(
+    () => getColumnsDefinition(setVolumeToDelete, isOnline, intl),
+    [isOnline, intl],
+  );
 
   const volumes = useMemo<VolumeDeploymentNode[]>(
     () => compact(volumeDeployments?.edges?.map((edge) => edge?.node)) ?? [],
@@ -198,13 +343,53 @@ const VolumesTable = ({ className, deviceRef }: Props) => {
   }
 
   return (
-    <Table
-      className={className}
-      columns={columns}
-      data={volumes}
-      hideSearch
-      columnVisibilityKey="device-volumes-table"
-    />
+    <>
+      <Alert
+        className="mb-3"
+        show={!!errorFeedback}
+        variant="danger"
+        onClose={() => setErrorFeedback(null)}
+        dismissible
+      >
+        {errorFeedback}
+      </Alert>
+      <Table
+        className={className}
+        columns={columns}
+        data={volumes}
+        hideSearch
+        columnVisibilityKey="device-volumes-table"
+      />
+      {volumeToDelete && (
+        <DeleteModal
+          confirmText={volumeToDelete.volume?.label || ""}
+          onCancel={() => setVolumeToDelete(null)}
+          onConfirm={() => {
+            if (volumeToDelete?.id) {
+              handleDeleteVolume(volumeToDelete.id);
+            }
+          }}
+          isDeleting={isSendingCommand}
+          title={
+            <FormattedMessage
+              id="components.fleet.devices.volumes-table.VolumesTable.deleteModal.title"
+              defaultMessage="Delete Volume on Device"
+            />
+          }
+        >
+          <p>
+            <FormattedMessage
+              id="components.fleet.devices.volumes-table.VolumesTable.deleteModal.description"
+              defaultMessage="This action cannot be undone. This will permanently delete and wipe the volume <bold>{volume}</bold> from this device."
+              values={{
+                volume: volumeToDelete.volume?.label,
+                bold: (chunks) => <strong>{chunks}</strong>,
+              }}
+            />
+          </p>
+        </DeleteModal>
+      )}
+    </>
   );
 };
 

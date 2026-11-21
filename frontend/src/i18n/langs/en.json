@@ -326,6 +326,9 @@
   "components.apps.containers.container-details.ContainerDetails.volumeLabelLabel": {
     "defaultMessage": "Label"
   },
+  "components.apps.containers.container-details.ContainerDetails.volumeReclaimPolicyLabel": {
+    "defaultMessage": "Reclaim Policy"
+  },
   "components.apps.containers.container-details.ContainerDetails.volumesLabel": {
     "defaultMessage": "Volumes"
   },
@@ -546,6 +549,10 @@
   "components.apps.containers.volumes-table.VolumesTable.label": {
     "defaultMessage": "Label",
     "description": "Title for the Label column of the volumes table"
+  },
+  "components.apps.containers.volumes-table.VolumesTable.reclaimPolicyTitle": {
+    "defaultMessage": "Reclaim Policy",
+    "description": "Title for the Reclaim Policy column of the volumes table"
   },
   "components.apps.deployments.deployment-action-buttons.DeploymentActionButtons.deleteButtonTitle": {
     "defaultMessage": "Delete Deployment"
@@ -2002,6 +2009,25 @@
   "components.fleet.devices.tabs.wifi-scan-results-tab.WiFiScanResultsTab.title": {
     "defaultMessage": "WiFi APs"
   },
+  "components.fleet.devices.volumes-table.VolumesTable.actionsTitle": {
+    "defaultMessage": "Actions",
+    "description": "Title for the Actions column of the device volumes table"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.deleteButtonTitle": {
+    "defaultMessage": "Delete Volume on Device"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.deleteErrorFeedback": {
+    "defaultMessage": "Could not delete the Volume, please try again."
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.deleteModal.description": {
+    "defaultMessage": "This action cannot be undone. This will permanently delete and wipe the volume <bold>{volume}</bold> from this device."
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.deleteModal.title": {
+    "defaultMessage": "Delete Volume on Device"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.deviceOfflineTooltip": {
+    "defaultMessage": "The device is offline. You cannot delete volumes while it is disconnected."
+  },
   "components.fleet.devices.volumes-table.VolumesTable.driverTitle": {
     "defaultMessage": "Driver",
     "description": "Title for the Driver column of the device volumes table"
@@ -2019,6 +2045,10 @@
   },
   "components.fleet.devices.volumes-table.VolumesTable.noVolumes.title": {
     "defaultMessage": "No volumes"
+  },
+  "components.fleet.devices.volumes-table.VolumesTable.reclaimPolicyTitle": {
+    "defaultMessage": "Reclaim Policy",
+    "description": "Title for the Reclaim Policy column of the device volumes table"
   },
   "components.fleet.devices.volumes-table.VolumesTable.stateTitle": {
     "defaultMessage": "State",
@@ -3303,6 +3333,18 @@
   },
   "forms.CreateVolume.optionsLabel": {
     "defaultMessage": "Options"
+  },
+  "forms.CreateVolume.reclaimPolicyDelete": {
+    "defaultMessage": "Delete"
+  },
+  "forms.CreateVolume.reclaimPolicyHelp": {
+    "defaultMessage": "Determines whether the volume is deleted or retained on the device when its deployment is deleted."
+  },
+  "forms.CreateVolume.reclaimPolicyLabel": {
+    "defaultMessage": "Reclaim Policy"
+  },
+  "forms.CreateVolume.reclaimPolicyRetain": {
+    "defaultMessage": "Retain"
   },
   "forms.CreateVolume.resetButton": {
     "defaultMessage": "Reset"

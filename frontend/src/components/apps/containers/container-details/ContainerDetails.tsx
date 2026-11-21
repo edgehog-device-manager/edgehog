@@ -388,6 +388,10 @@ const messages = defineMessages({
     id: "components.apps.containers.container-details.ContainerDetails.volumeDriverLabel",
     defaultMessage: "Driver",
   },
+  volumeReclaimPolicyLabel: {
+    id: "components.apps.containers.container-details.ContainerDetails.volumeReclaimPolicyLabel",
+    defaultMessage: "Reclaim Policy",
+  },
   options: {
     id: "components.apps.containers.container-details.ContainerDetails.options",
     defaultMessage: "Options",
@@ -594,6 +598,7 @@ const CONTAINER_DETAILS_FRAGMENT = graphql`
             label
             driver
             options
+            reclaimPolicy
           }
         }
       }
@@ -916,6 +921,12 @@ const VolumeDetails = ({
                 id={`volume-${index}-driver`}
                 label={messages.volumeDriverLabel}
                 value={mount?.volume.driver}
+              />
+
+              <PrimitiveField
+                id={`volume-${index}-reclaim-policy`}
+                label={messages.volumeReclaimPolicyLabel}
+                value={mount?.volume.reclaimPolicy}
               />
 
               <JsonEditorField
