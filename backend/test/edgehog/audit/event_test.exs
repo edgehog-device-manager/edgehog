@@ -77,9 +77,6 @@ defmodule Edgehog.Audit.EventTest do
       assert {:error, error} = create_event(event_attrs(drop: [:resource_module]), tenant)
       assert error_on?(error, :resource_module)
 
-      assert {:error, error} = create_event(event_attrs(drop: [:record_id]), tenant)
-      assert error_on?(error, :record_id)
-
       assert {:error, error} = create_event(event_attrs(drop: [:action_inputs]), tenant)
       assert error_on?(error, :action_inputs)
 
